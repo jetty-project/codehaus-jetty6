@@ -25,27 +25,23 @@ import java.io.Serializable;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 
 import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
-import javax.security.auth.message.callback.CallerPrincipalCallback;
-import javax.security.auth.message.callback.GroupPrincipalCallback;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
-import org.mortbay.jetty.JettyMessageInfo;
 import org.mortbay.jetty.LoginCallback;
 import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.ServerAuthException;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
 import org.mortbay.log.Log;
@@ -55,8 +51,7 @@ import org.mortbay.util.URIUtil;
 /**
  * @version $Rev$ $Date$
  */
-public class FormAuthModule extends BaseAuthModule
-{
+public class FormAuthModule extends BaseAuthModule {
     /* ------------------------------------------------------------ */
     public final static String __J_URI = "org.mortbay.jetty.URI";
     public final static String __J_AUTHENTICATED = "org.mortbay.jetty.Auth";
@@ -76,38 +71,32 @@ public class FormAuthModule extends BaseAuthModule
 
     private CrossContextPsuedoSession<UserInfo> ssoSource;
 
-    public FormAuthModule()
-    {
+    public FormAuthModule() {
     }
 
-    public FormAuthModule(CallbackHandler callbackHandler, LoginService loginService, String loginPage, String errorPage)
-    {
-        super(callbackHandler, loginService);
+    public FormAuthModule(CallbackHandler callbackHandler, String loginPage, String errorPage) {
+        super(callbackHandler);
         setLoginPage(loginPage);
         setErrorPage(errorPage);
     }
 
-    public FormAuthModule(CallbackHandler callbackHandler, LoginService loginService, CrossContextPsuedoSession<UserInfo> ssoSource, String loginPage, String errorPage)
-    {
-        super(callbackHandler, loginService);
+    public FormAuthModule(CallbackHandler callbackHandler, CrossContextPsuedoSession<UserInfo> ssoSource, String loginPage, String errorPage) {
+        super(callbackHandler);
         this.ssoSource = ssoSource;
         setLoginPage(loginPage);
         setErrorPage(errorPage);
     }
 
     @Override
-    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler, Map options) throws AuthException
-    {
+    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler, Map options) throws AuthException {
         super.initialize(requestPolicy, responsePolicy, handler, options);
         setLoginPage((String) options.get(LOGIN_PAGE_KEY));
         setErrorPage((String) options.get(ERROR_PAGE_KEY));
         ssoSource = (CrossContextPsuedoSession<UserInfo>) options.get(SSO_SOURCE_KEY);
     }
 
-    private void setLoginPage(String path)
-    {
-        if (!path.startsWith("/"))
-        {
+    private void setLoginPage(String path) {
+        if (!path.startsWith("/")) {
             Log.warn("form-login-page must start with /");
             path = "/" + path;
         }
@@ -118,17 +107,12 @@ public class FormAuthModule extends BaseAuthModule
     }
 
     /* ------------------------------------------------------------ */
-    private void setErrorPage(String path)
-    {
-        if (path == null || path.trim().length() == 0)
-        {
+    private void setErrorPage(String path) {
+        if (path == null || path.trim().length() == 0) {
             _formErrorPath = null;
             _formErrorPage = null;
-        }
-        else
-        {
-            if (!path.startsWith("/"))
-            {
+        } else {
+            if (!path.startsWith("/")) {
                 Log.warn("form-error-page must start with /");
                 path = "/" + path;
             }
@@ -141,8 +125,7 @@ public class FormAuthModule extends BaseAuthModule
     }
 
     @Override
-    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) throws AuthException
-    {
+    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) throws AuthException {
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
         HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
         HttpSession session = request.getSession(isMandatory(messageInfo));
@@ -151,22 +134,18 @@ public class FormAuthModule extends BaseAuthModule
         if (session == null || isLoginOrErrorPage(uri))
             return AuthStatus.SUCCESS;
 
-        try
-        {
+        try {
             // Handle a request for authentication.
             // TODO perhaps j_securitycheck can be uri suffix?
-            if (uri.endsWith(__J_SECURITY_CHECK))
-            {
+            if (uri.endsWith(__J_SECURITY_CHECK)) {
 
                 final String username = request.getParameter(__J_USERNAME);
                 final char[] password = request.getParameter(__J_PASSWORD).toCharArray();
                 boolean success = tryLogin(messageInfo, clientSubject, response, session, username, password);
-                if (success)
-                {
+                if (success) {
                     // Redirect to original request
                     String nuri = (String) session.getAttribute(__J_URI);
-                    if (nuri == null || nuri.length() == 0)
-                    {
+                    if (nuri == null || nuri.length() == 0) {
                         nuri = request.getContextPath();
                         if (nuri.length() == 0)
                             nuri = URIUtil.SLASH;
@@ -179,14 +158,11 @@ public class FormAuthModule extends BaseAuthModule
                 }
                 //not authenticated
                 if (Log.isDebugEnabled()) Log.debug("Form authentication FAILED for " + StringUtil.printable(username));
-                if (_formErrorPage == null)
-                {
+                if (_formErrorPage == null) {
                     if (response != null)
                         response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                }
-                else
-                {
-                        response.setContentLength(0);
+                } else {
+                    response.setContentLength(0);
                     response.sendRedirect(response.encodeRedirectURL
                             (URIUtil.addPaths(request.getContextPath(),
                                     _formErrorPage)));
@@ -197,11 +173,9 @@ public class FormAuthModule extends BaseAuthModule
             // Check if the session is already authenticated.
             FormCredential form_cred = (FormCredential) session.getAttribute(__J_AUTHENTICATED);
 
-            if (form_cred != null)
-            {
+            if (form_cred != null) {
                 boolean success = tryLogin(messageInfo, clientSubject, response, session, form_cred._jUserName, form_cred._jPassword);
-                if (success)
-                {
+                if (success) {
                     return AuthStatus.SUCCESS;
                 }
 //                CallbackHandler loginCallbackHandler = new UserPasswordCallbackHandler(form_cred._jUserName, form_cred._jPassword);
@@ -223,7 +197,6 @@ public class FormAuthModule extends BaseAuthModule
 //                    messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__FORM_AUTH);
 //                    return AuthStatus.SUCCESS;
 //                }
-
 
 //                // We have a form credential. Has it been distributed?
 //                if (form_cred._userPrincipal==null)
@@ -270,15 +243,11 @@ public class FormAuthModule extends BaseAuthModule
 //                    session.setAttribute(__J_AUTHENTICATED,form_cred);
 //                    return form_cred._userPrincipal;
 //                }
-            }
-            else if (ssoSource != null)
-            {
+            } else if (ssoSource != null) {
                 UserInfo userInfo = ssoSource.fetch(request);
-                if (userInfo != null)
-                {
+                if (userInfo != null) {
                     boolean success = tryLogin(messageInfo, clientSubject, response, session, userInfo.getUserName(), userInfo.getPassword());
-                    if (success)
-                    {
+                    if (success) {
                         return AuthStatus.SUCCESS;
                     }
                 }
@@ -302,48 +271,57 @@ public class FormAuthModule extends BaseAuthModule
                     _formLoginPage)));
             return AuthStatus.SEND_CONTINUE;
         }
-        catch (IOException e)
-        {
+        catch (IOException e) {
             throw new AuthException(e.getMessage());
         }
-        catch (UnsupportedCallbackException e)
-        {
+        catch (UnsupportedCallbackException e) {
             throw new AuthException(e.getMessage());
         }
 
     }
 
     private boolean tryLogin(MessageInfo messageInfo, Subject clientSubject, HttpServletResponse response, HttpSession session, String username, char[] password)
-            throws AuthException, IOException, UnsupportedCallbackException
-    {
-        try {
-            LoginCallback loginCallback = new LoginCallback(clientSubject, username, password);
-            loginService.login(loginCallback);
-            if (loginCallback.isSuccess())
-            {
-                CallerPrincipalCallback callerPrincipalCallback = new CallerPrincipalCallback(clientSubject, loginCallback.getUserPrincipal());
-                GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject,  loginCallback.getGroups().toArray(new String[loginCallback.getGroups().size()]));
-                callbackHandler.handle(new Callback[] {callerPrincipalCallback, groupPrincipalCallback});
-                messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__FORM_AUTH);
+            throws AuthException, IOException, UnsupportedCallbackException {
+        if (login(clientSubject, username, password, Constraint.__FORM_AUTH, messageInfo)) {
+            Set<LoginCallback> loginCallbacks = clientSubject.getPrivateCredentials(LoginCallback.class);
+            if (!loginCallbacks.isEmpty()) {
+                LoginCallback loginCallback = loginCallbacks.iterator().next();
                 FormCredential form_cred = new FormCredential(username, password, loginCallback.getUserPrincipal());
 
                 session.setAttribute(__J_AUTHENTICATED, form_cred);
-                // Sign-on to SSO mechanism
-                if (ssoSource != null)
-                {
-                    UserInfo userInfo = new UserInfo(username, password);
-                    ssoSource.store(userInfo,  response);
-                }
             }
-            return loginCallback.isSuccess();
-        } catch (ServerAuthException e) {
-            throw new AuthException(e.getMessage());
+
+            // Sign-on to SSO mechanism
+            if (ssoSource != null) {
+                UserInfo userInfo = new UserInfo(username, password);
+                ssoSource.store(userInfo, response);
+            }
+            return true;
         }
+        return false;
+//            LoginCallback loginCallback = new LoginCallback(clientSubject, username, password);
+//            loginService.login(loginCallback);
+//            if (loginCallback.isSuccess())
+//            {
+//                CallerPrincipalCallback callerPrincipalCallback = new CallerPrincipalCallback(clientSubject, loginCallback.getUserPrincipal());
+//                GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject,  loginCallback.getGroups().toArray(new String[loginCallback.getGroups().size()]));
+//                callbackHandler.handle(new Callback[] {callerPrincipalCallback, groupPrincipalCallback});
+//                messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__FORM_AUTH);
+//                FormCredential form_cred = new FormCredential(username, password, loginCallback.getUserPrincipal());
+//
+//                session.setAttribute(__J_AUTHENTICATED, form_cred);
+//                // Sign-on to SSO mechanism
+//                if (ssoSource != null)
+//                {
+//                    UserInfo userInfo = new UserInfo(username, password);
+//                    ssoSource.store(userInfo,  response);
+//                }
+//            }
+//            return loginCallback.isSuccess();
     }
 
 
-    public boolean isLoginOrErrorPage(String pathInContext)
-    {
+    public boolean isLoginOrErrorPage(String pathInContext) {
         return pathInContext != null &&
                 (pathInContext.equals(_formErrorPath) || pathInContext.equals(_formLoginPath));
     }
@@ -352,26 +330,22 @@ public class FormAuthModule extends BaseAuthModule
     /**
      * FORM Authentication credential holder.
      */
-    private static class FormCredential implements Serializable, HttpSessionBindingListener
-    {
+    private static class FormCredential implements Serializable, HttpSessionBindingListener {
         String _jUserName;
         char[] _jPassword;
         transient Principal _userPrincipal;
 
-        private FormCredential(String _jUserName, char[] _jPassword, Principal _userPrincipal)
-        {
+        private FormCredential(String _jUserName, char[] _jPassword, Principal _userPrincipal) {
             this._jUserName = _jUserName;
             this._jPassword = _jPassword;
             this._userPrincipal = _userPrincipal;
         }
 
 
-        public void valueBound(HttpSessionBindingEvent event)
-        {
+        public void valueBound(HttpSessionBindingEvent event) {
         }
 
-        public void valueUnbound(HttpSessionBindingEvent event)
-        {
+        public void valueUnbound(HttpSessionBindingEvent event) {
             if (Log.isDebugEnabled()) Log.debug("Logout " + _jUserName);
 
             //TODO jaspi call cleanSubject()
@@ -382,13 +356,11 @@ public class FormAuthModule extends BaseAuthModule
 //                _realm.logout(_userPrincipal);
         }
 
-        public int hashCode()
-        {
+        public int hashCode() {
             return _jUserName.hashCode() + _jPassword.hashCode();
         }
 
-        public boolean equals(Object o)
-        {
+        public boolean equals(Object o) {
             if (!(o instanceof FormCredential))
                 return false;
             FormCredential fc = (FormCredential) o;
@@ -397,8 +369,7 @@ public class FormAuthModule extends BaseAuthModule
                             Arrays.equals(_jPassword, fc._jPassword);
         }
 
-        public String toString()
-        {
+        public String toString() {
             return "Cred[" + _jUserName + "]";
         }
 

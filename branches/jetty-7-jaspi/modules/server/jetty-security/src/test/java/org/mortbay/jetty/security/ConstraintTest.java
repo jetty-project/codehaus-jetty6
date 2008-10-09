@@ -119,7 +119,7 @@ public class ConstraintTest extends TestCase
     public void testBasic()
             throws Exception
     {
-        ServerAuthContext authModule = new BasicAuthModule(callbackHandler, loginService, TEST_REALM);
+        ServerAuthContext authModule = new BasicAuthModule(callbackHandler, TEST_REALM);
         ServerAuthentication serverAuthentication = new JaspiServerAuthentication(APP_CONTEXT,
                 new SimpleAuthConfig(APP_CONTEXT, authModule),
                 null,
@@ -160,7 +160,7 @@ public class ConstraintTest extends TestCase
     public void testForm()
             throws Exception
     {
-        ServerAuthContext authModule = new FormAuthModule(callbackHandler, loginService, "/testLoginPage", "/testErrorPage");
+        ServerAuthContext authModule = new FormAuthModule(callbackHandler, "/testLoginPage", "/testErrorPage");
         ServerAuthentication serverAuthentication = new JaspiServerAuthentication(APP_CONTEXT,
                 new SimpleAuthConfig(APP_CONTEXT, authModule),
                 null,
