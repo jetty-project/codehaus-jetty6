@@ -20,23 +20,25 @@
 
 package org.mortbay.jetty;
 
-import java.security.Principal;
-import java.util.List;
-
-import javax.security.auth.message.AuthStatus;
-import javax.security.auth.Subject;
+import java.security.GeneralSecurityException;
 
 /**
- * This can evaluate results lazily.
- *
- * @version $Rev$ $Date$
+ * @version $Rev:$ $Date:$
  */
-public interface AuthResult {
+public class ServerAuthException extends GeneralSecurityException {
 
-    AuthStatus getAuthStatus();
-    Subject getClientSubject();
-    Principal getUserPrincipal();
-    List<String> getGroups();
-    String getAuthMethod();
-    
+    public ServerAuthException() {
+    }
+
+    public ServerAuthException(String s) {
+        super(s);
+    }
+
+    public ServerAuthException(String s, Throwable throwable) {
+        super(s, throwable);
+    }
+
+    public ServerAuthException(Throwable throwable) {
+        super(throwable);
+    }
 }

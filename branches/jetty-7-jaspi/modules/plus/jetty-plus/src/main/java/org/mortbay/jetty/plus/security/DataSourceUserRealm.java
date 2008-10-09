@@ -34,6 +34,8 @@ import org.mortbay.log.Log;
 
 
 /**
+ *
+ * //TODO JASPI cf JDBCLoginService
  * DataSourceUserRealm
  *
  * Obtain user/password/role information from a database

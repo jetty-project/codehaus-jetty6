@@ -20,14 +20,22 @@
 
 package org.mortbay.jetty;
 
+import java.security.Principal;
+import java.util.List;
+
+import javax.security.auth.Subject;
+
 /**
- * This is like the JASPI ServerAuthContext but is intended to be easier to use and allow lazy auth.
+ * This can evaluate results lazily.
  *
  * @version $Rev$ $Date$
  */
-public interface ServerAuthentication {
+public interface ServerAuthResult {
 
-    ServerAuthResult validateRequest(JettyMessageInfo messageInfo, boolean authRequired) throws ServerAuthException;
-
-    ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException;
+    ServerAuthStatus getAuthStatus();
+    Subject getClientSubject();
+    Principal getUserPrincipal();
+    List<String> getGroups();
+    String getAuthMethod();
+    
 }

@@ -26,14 +26,13 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.security.auth.Subject;
-import javax.security.auth.message.AuthException;
 
 import org.mortbay.component.AbstractLifeCycle;
+import org.mortbay.jetty.LoginCallback;
+import org.mortbay.jetty.LoginService;
+import org.mortbay.jetty.ServerAuthException;
 import org.mortbay.jetty.security.Credential;
 import org.mortbay.jetty.security.Password;
-import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.LoginCredentials;
-import org.mortbay.jetty.LoginResult;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Scanner;
@@ -307,19 +306,20 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
     }
 
     /* ------------------------------------------------------------ */
-    public LoginResult login(Subject subject, LoginCredentials loginCredentials) throws AuthException
+    public void login(LoginCallback loginCallback) throws ServerAuthException
     {
         KnownUser user;
         synchronized (this)
         {
-            user = getKnownUser(((UserPasswordLoginCredentials)loginCredentials).getUsername());
+            user = getKnownUser(loginCallback.getUserName());
         }
-        if (user != null && user.authenticate(((UserPasswordLoginCredentials)loginCredentials).getPassword()))
+        if (user != null && user.authenticate(loginCallback.getPassword()))
         {
-            subject.getPrincipals().add(user);
-            return new LoginResult(true, user, user.roles, subject);
+            loginCallback.getSubject().getPrincipals().add(user);
+            loginCallback.setUserPrincipal(user);
+            loginCallback.setGroups(user.roles);
+            loginCallback.setSuccess(true);
         }
-        return new LoginResult(false, null, null, null);
     }
 
     protected KnownUser getKnownUser(String userName)
@@ -327,7 +327,7 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
         return (KnownUser)_users.get(userName);
     }
 
-    public void logout(Subject subject) throws AuthException
+    public void logout(Subject subject) throws ServerAuthException
     {
         subject.getPrincipals(KnownUser.class).clear();
     }

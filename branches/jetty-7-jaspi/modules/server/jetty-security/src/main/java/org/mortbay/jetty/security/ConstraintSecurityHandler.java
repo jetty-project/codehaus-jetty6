@@ -25,7 +25,7 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.RunAsToken;
 import org.mortbay.jetty.UserIdentity;
-import org.mortbay.jetty.AuthResult;
+import org.mortbay.jetty.ServerAuthResult;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.util.LazyList;
 
@@ -93,7 +93,7 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
         }
     }
 
-    protected UserIdentity newUserIdentity(AuthResult authResult)
+    protected UserIdentity newUserIdentity(ServerAuthResult authResult)
     {
         return new ConstraintUserIdentity(authResult);
     }

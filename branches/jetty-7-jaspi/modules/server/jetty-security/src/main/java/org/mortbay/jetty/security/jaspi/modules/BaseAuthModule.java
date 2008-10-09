@@ -33,8 +33,9 @@ import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.security.JettyMessageInfo;
+import org.mortbay.jetty.JettyMessageInfo;
 import org.mortbay.jetty.LoginService;
+import org.mortbay.jetty.ServerAuthException;
 
 /**
  * @version $Rev$ $Date$
@@ -71,7 +72,11 @@ public class BaseAuthModule implements ServerAuthModule, ServerAuthContext
 
     public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException
     {
-        loginService.logout(subject);
+        try {
+            loginService.logout(subject);
+        } catch (ServerAuthException e) {
+            throw new AuthException(e.getMessage());
+        }
     }
 
     public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) throws AuthException

@@ -31,12 +31,10 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import javax.security.auth.message.AuthException;
 
-import org.mortbay.jetty.LoginCredentials;
-import org.mortbay.jetty.LoginResult;
+import org.mortbay.jetty.LoginCallback;
 import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.security.jaspi.modules.UserPasswordLoginCredentials;
+import org.mortbay.jetty.ServerAuthException;
 
 
 /* ---------------------------------------------------- */
@@ -148,7 +146,7 @@ public class JAASLoginService implements LoginService
         return roleClassNames;
     }
 
-    public LoginResult login(Subject subject, final LoginCredentials loginCredentials) throws AuthException
+    public void login(final LoginCallback loginCallback) throws ServerAuthException
     {
         try
         {
@@ -161,37 +159,37 @@ public class JAASLoginService implements LoginService
                     {
                         if (callback instanceof NameCallback)
                         {
-                            ((NameCallback)callback).setName(((UserPasswordLoginCredentials)loginCredentials).getUsername());
+                            ((NameCallback)callback).setName(loginCallback.getUserName());
                         }
                         else if (callback instanceof PasswordCallback)
                         {
-                            ((PasswordCallback)callback).setPassword(((UserPasswordLoginCredentials)loginCredentials).getPassword());
+                            ((PasswordCallback)callback).setPassword(loginCallback.getPassword());
                         }
                     }
                 }
             };
             //set up the login context
             //TODO jaspi requires we provide the Configuration parameter
+            Subject subject = loginCallback.getSubject();
             LoginContext loginContext = new LoginContext(loginModuleName, subject, callbackHandler);
 
             loginContext.login();
 
             //login success
-            JAASUserPrincipal userPrincipal = new JAASUserPrincipal(getUserName(callbackHandler), subject, loginContext);
+            JAASUserPrincipal userPrincipal = new JAASUserPrincipal(getUserName(callbackHandler), loginCallback.getSubject(), loginContext);
             subject.getPrincipals().add(userPrincipal);
-            return new LoginResult(true,userPrincipal, getGroups(subject), subject);
+            loginCallback.setUserPrincipal(userPrincipal);
+            loginCallback.setGroups(getGroups(subject));
+            loginCallback.setSuccess(true);
         }
         catch (LoginException e)
         {
-            return new LoginResult(false,null,null,null);
         }
         catch (IOException e)
         {
-            return new LoginResult(false,null,null,null);
         }
         catch (UnsupportedCallbackException e)
         {
-            return new LoginResult(false,null,null,null);
         }
     }
 
@@ -202,12 +200,13 @@ public class JAASLoginService implements LoginService
         return nameCallback.getName();
     }
 
-    public void logout(Subject subject) throws AuthException
+    public void logout(Subject subject) throws ServerAuthException
     {
+//        loginCallback.clearPassword();
         Set<JAASUserPrincipal> userPrincipals = subject.getPrincipals(JAASUserPrincipal.class);
         if (userPrincipals.size() != 1)
         {
-            throw new AuthException("logout implausible, wrong number of user principals: " + userPrincipals);
+            throw new ServerAuthException("logout implausible, wrong number of user principals: " + userPrincipals);
         }
         LoginContext loginContext = userPrincipals.iterator().next().getLoginContext();
         try
@@ -216,7 +215,7 @@ public class JAASLoginService implements LoginService
         }
         catch (LoginException e)
         {
-            throw new AuthException("Failed to log out: "+e.getMessage());
+            throw new ServerAuthException("Failed to log out: "+e.getMessage());
         }
     }
 

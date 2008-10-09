@@ -21,13 +21,10 @@
 package org.mortbay.jetty;
 
 /**
- * This is like the JASPI ServerAuthContext but is intended to be easier to use and allow lazy auth.
- *
- * @version $Rev$ $Date$
+ * @version $Rev:$ $Date:$
  */
-public interface ServerAuthentication {
+public enum ServerAuthStatus {
 
-    ServerAuthResult validateRequest(JettyMessageInfo messageInfo, boolean authRequired) throws ServerAuthException;
+    SEND_FAILURE, SEND_SUCCESS, SEND_CONTINUE, SUCCESS
 
-    ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException;
 }

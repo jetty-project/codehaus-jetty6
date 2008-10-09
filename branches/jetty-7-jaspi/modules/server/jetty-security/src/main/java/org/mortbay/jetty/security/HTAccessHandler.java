@@ -28,6 +28,8 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
+import javax.security.auth.message.callback.CallerPrincipalCallback;
+import javax.security.auth.message.callback.GroupPrincipalCallback;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
@@ -35,15 +37,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpHeaders;
+import org.mortbay.jetty.JettyMessageInfo;
+import org.mortbay.jetty.LoginCallback;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.RunAsToken;
+import org.mortbay.jetty.ServerAuthResult;
 import org.mortbay.jetty.UserIdentity;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.security.jaspi.modules.BaseAuthModule;
-import org.mortbay.jetty.LoginResult;
-import org.mortbay.jetty.security.jaspi.modules.UserPasswordLoginCredentials;
-import org.mortbay.jetty.AuthResult;
 import org.mortbay.log.Log;
 import org.mortbay.log.Logger;
 import org.mortbay.resource.Resource;
@@ -238,7 +240,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
         }
     }
 */
-    protected UserIdentity newUserIdentity(AuthResult authResult)
+    protected UserIdentity newUserIdentity(ServerAuthResult authResult)
     {
         return new ConstraintUserIdentity(authResult);
     }
@@ -601,12 +603,12 @@ public class HTAccessHandler extends AbstractSecurityHandler
         }
 
         /* ------------------------------------------------------------ */
-        public LoginResult checkAuth(UserPasswordLoginCredentials credentials, Subject subject)
+        public void checkAuth(LoginCallback loginCallback)
         {
             Boolean success = null;
-            String pass = new String(credentials.getPassword());
+            String pass = new String(loginCallback.getPassword());
             // Have to authenticate the user with the password file
-            String user = credentials.getUsername();
+            String user = loginCallback.getUserName();
             String code = getUserCode(user);
             String salt = code != null ? code.substring(0, 2) : user;
             String cred = (user != null) ? UnixCrypt.crypt(pass, salt) : null;
@@ -633,13 +635,13 @@ public class HTAccessHandler extends AbstractSecurityHandler
 
             if (success != null && success)
             {
+                Subject subject = loginCallback.getSubject();
                 Principal userPrincipal = new HTAccessPrincipal(user);
                 subject.getPrincipals().add(userPrincipal);
-                String[] groups = gps.toArray(new String[gps.size()]);
-                return new LoginResult(true,  userPrincipal, groups, subject);
+                loginCallback.setUserPrincipal(userPrincipal);
+                loginCallback.setGroups(gps);
+                loginCallback.setSuccess(true);
             }
-            else
-              return new LoginResult(false, null, null, subject);
         }
 
         /* ------------------------------------------------------------ */
@@ -1008,10 +1010,13 @@ public class HTAccessHandler extends AbstractSecurityHandler
             {
                 if (credentials != null)
                 {
-                    LoginResult loginResult = ht.checkAuth(new UserPasswordLoginCredentials(credentials), clientSubject);
-                    if (loginResult.isSuccess())
+                    LoginCallback loginCallback = new LoginCallback(clientSubject, credentials);
+                    ht.checkAuth(loginCallback);
+                    if (loginCallback.isSuccess())
                     {
-                        callbackHandler.handle(new Callback[] {loginResult.getCallerPrincipalCallback(), loginResult.getGroupPrincipalCallback()});
+                        CallerPrincipalCallback callerPrincipalCallback = new CallerPrincipalCallback(clientSubject, loginCallback.getUserPrincipal());
+                        GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject,  loginCallback.getGroups().toArray(new String[loginCallback.getGroups().size()]));
+                        callbackHandler.handle(new Callback[] {callerPrincipalCallback, groupPrincipalCallback});
                         messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__BASIC_AUTH);
                         return AuthStatus.SUCCESS;
 
