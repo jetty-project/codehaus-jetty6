@@ -36,6 +36,8 @@ import org.mortbay.jetty.ServerAuthStatus;
  */
 public class SimpleAuthResult implements ServerAuthResult {
 
+    public static final ServerAuthResult NO_AUTH_RESULTS = new SimpleAuthResult(null, null, null, Collections.<String>emptyList(), null);
+
     private final ServerAuthStatus authStatus;
     private final Subject clientSubject;
     private final Principal userPrincipal;

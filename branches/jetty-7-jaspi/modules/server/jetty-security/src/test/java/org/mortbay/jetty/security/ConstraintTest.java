@@ -124,7 +124,7 @@ public class ConstraintTest extends TestCase
                 new SimpleAuthConfig(APP_CONTEXT, authModule),
                 null,
                 callbackHandler,
-                null);
+                null, true);
         _security.setServerAuthentication(serverAuthentication);
         _server.start();
 
@@ -165,7 +165,8 @@ public class ConstraintTest extends TestCase
                 new SimpleAuthConfig(APP_CONTEXT, authModule),
                 null,
                 callbackHandler,
-                null);
+                null,
+                false);
         _security.setServerAuthentication(serverAuthentication);
         _server.start();
 

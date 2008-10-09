@@ -287,7 +287,7 @@ public class SecurityListenerTest extends TestCase
                  new SimpleAuthConfig(APP_CONTEXT, authModule),
                  null,
                  callbackHandler,
-                 null);
+                 null, true);
          sh.setServerAuthentication(serverAuthentication);
          _server.setHandler(sh);
 

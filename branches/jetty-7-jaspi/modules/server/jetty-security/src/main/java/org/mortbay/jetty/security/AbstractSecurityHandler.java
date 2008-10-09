@@ -56,6 +56,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
 
     private ServerAuthentication serverAuthentication;
 
+
     public static Principal __NO_USER = new Principal()
     {
         public String getName()
@@ -93,7 +94,6 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
             return getName();
         }
     };
-
     /* ------------------------------------------------------------ */
     /**
      * @return True if forwards to welcome files are authenticated
@@ -157,7 +157,6 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                 //JASPI 3.8.1
                 boolean isAuthMandatory = isAuthMandatory(base_request, base_response, constraintInfo);
                 //TODO check with greg about whether requirement that these be the request/response passed to the resource(servlet) is realistic (i.e. this requires no wrapping between here and invocation)
-                //TODO we have to get the auth context from the authconfig on each call.
                 JettyMessageInfo messageInfo = new JettyMessageInfo(request, response, isAuthMandatory);
 //                String authContextID = authConfig.getAuthContextID(messageInfo);
 //                ServerAuthContext authContext = authConfig.getAuthContext(authContextID, serviceSubject, authProperties);
@@ -167,7 +166,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
 
                 try
                 {
-                    ServerAuthResult authResult = serverAuthentication.validateRequest(messageInfo, isAuthMandatory);
+                    ServerAuthResult authResult = serverAuthentication.validateRequest(messageInfo);
 //                    AuthStatus authStatus = authContext.validateRequest(messageInfo, clientSubject, serviceSubject);
                     if (!isAuthMandatory || authResult.getAuthStatus() == ServerAuthStatus.SUCCESS)
                     {
@@ -184,7 +183,8 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
 //                            //NOTE! we assume jaspi is configured to always provide correct authMethod values
 //                            base_request.setAuthType((String) messageInfo.getMap().get(JettyMessageInfo.AUTH_METHOD_KEY));
 //                        }
-                        if (!isAuthMandatory && !checkWebResourcePermissions(pathInContext, base_request, base_response, constraintInfo, userIdentity))
+                        //isAuthMandatory == false means that request is ok without any roles assigned.... no need to check now that we know the roles.
+                        if (isAuthMandatory && !checkWebResourcePermissions(pathInContext, base_request, base_response, constraintInfo, userIdentity))
                         {
                             response.sendError(Response.SC_FORBIDDEN,"User not in required role");
                             base_request.setHandled(true);
