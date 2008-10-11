@@ -218,6 +218,14 @@
                   <resourceBundle>org.mortbay.jetty:jetty-build-resources:1.0.1</resourceBundle>
                 </resourceBundles>
               </configuration>
+            <executions>
+              <execution>
+                <phase>validate</phase>
+                <goals>
+                  <goal>process</goal>
+                </goals>
+              </execution>
+            </executions>
         </plugin>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -248,6 +256,14 @@
           <configuration>
             <aggregate>true</aggregate>
           </configuration>
+          <executions>
+						<execution>
+							<phase>generate-resources</phase>
+							<goals>
+								<goal>jxr</goal>
+							</goals>
+						</execution>
+          </executions>
         </plugin>
       </plugins>
       </build>
