@@ -1,4 +1,4 @@
-jetty-6.1-SNAPSHOT
+jetty-6.1.12.rc3 10 October 2008
  + JETTY-241 Support for web application overlays in rapid application development (jetty:run)
  + JETTY-686 LifeCycle.Listener
  + JETTY-715 AJP key size
