@@ -16,7 +16,6 @@ package org.mortbay.jetty.client;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,28 +32,25 @@ import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.log.Log;
 
 /**
-*
 * @author Greg Wilkins
 * @author Guillaume Nodet
 */
 public class HttpDestination
 {
     private ByteArrayBuffer _hostHeader;
-    private InetSocketAddress _address;
-    private LinkedList<HttpConnection> _connections=new LinkedList<HttpConnection>();
-    private ArrayList<HttpConnection> _idle=new ArrayList<HttpConnection>();
-    private HttpClient _client;
-    private boolean _ssl;
+    private final Address _address;
+    private final LinkedList<HttpConnection> _connections = new LinkedList<HttpConnection>();
+    private final ArrayList<HttpConnection> _idle = new ArrayList<HttpConnection>();
+    private final HttpClient _client;
+    private final boolean _ssl;
     private int _maxConnections;
     private int _pendingConnections=0;
     private ArrayBlockingQueue<Object> _newQueue = new ArrayBlockingQueue<Object>(10,true);
     private int _newConnection=0;
-    private InetSocketAddress _proxy;
+    private Address _proxy;
     private Authorization _proxyAuthentication;
     private PathMap _authorizations;
     private List<Cookie> _cookies;
-    
-
 
     public void dump() throws IOException
     {
@@ -76,21 +72,19 @@ public class HttpDestination
     private LinkedList<HttpExchange> _queue=new LinkedList<HttpExchange>();
 
     /* ------------------------------------------------------------ */
-    HttpDestination(HttpClient pool, InetSocketAddress address, boolean ssl, int maxConnections)
+    HttpDestination(HttpClient pool, Address address, boolean ssl, int maxConnections)
     {
         _client=pool;
         _address=address;
         _ssl=ssl;
         _maxConnections=maxConnections;
-        String host = address.getHostName();
-        if (address.getPort() != (_ssl ? 443 : 80)) {
-            host += ":" + address.getPort();
-        }
-        _hostHeader = new ByteArrayBuffer (host);
+        String addressString = address.getHost();
+        if (address.getPort() != (_ssl ? 443 : 80)) addressString += ":" + address.getPort();
+        _hostHeader = new ByteArrayBuffer(addressString);
     }
 
     /* ------------------------------------------------------------ */
-    public InetSocketAddress getAddress()
+    public Address getAddress()
     {
         return _address;
     }
@@ -436,7 +430,7 @@ public class HttpDestination
     /* ------------------------------------------------------------ */
     public synchronized String toString()
     {
-        return "HttpDestination@"+hashCode()+"//"+_address.getHostName()+":"+_address.getPort()+"("+_connections.size()+","+_idle.size()+","+_queue.size()+")";
+        return "HttpDestination@" + hashCode() + "//" + _address.getHost() + ":" + _address.getPort() + "(" + _connections.size() + "," + _idle.size() + "," + _queue.size() + ")";
     }
     
     /* ------------------------------------------------------------ */
@@ -465,13 +459,13 @@ public class HttpDestination
     }
 
     /* ------------------------------------------------------------ */
-    public void setProxy(InetSocketAddress proxy)
+    public void setProxy(Address proxy)
     {
         _proxy=proxy;
     }
 
     /* ------------------------------------------------------------ */
-    public InetSocketAddress getProxy()
+    public Address getProxy()
     {
         return _proxy;
     }

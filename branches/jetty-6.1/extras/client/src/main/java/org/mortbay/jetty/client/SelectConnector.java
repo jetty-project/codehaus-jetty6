@@ -65,7 +65,8 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
         throws IOException
     {
         SocketChannel channel = SocketChannel.open();
-        channel.connect( destination.isProxied() ? destination.getProxy() : destination.getAddress() );
+        Address address = destination.isProxied() ? destination.getProxy() : destination.getAddress();
+        channel.connect(address.toSocketAddress());
         channel.configureBlocking( false );
         channel.socket().setSoTimeout( _httpClient._soTimeout );
         _selectorManager.register( channel, destination );
