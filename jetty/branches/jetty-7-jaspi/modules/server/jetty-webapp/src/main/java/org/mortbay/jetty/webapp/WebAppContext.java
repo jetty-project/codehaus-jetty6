@@ -54,7 +54,7 @@ import org.mortbay.util.URIUtil;
 /** Web Application Context Handler.
  * The WebAppContext handler is an extension of ContextHandler that
  * coordinates the construction and configuration of nested handlers:
- * {@link org.mortbay.jetty.security.ConstraintsSecurityHandler}, {@link org.mortbay.jetty.servlet.SessionHandler}
+ * {@link org.mortbay.jetty.security.ConstraintSecurityHandler}, {@link org.mortbay.jetty.servlet.SessionHandler}
  * and {@link org.mortbay.jetty.servlet.ServletHandler}.
  * The handlers are configured by pluggable configuration classes, with
  * the default being  {@link org.mortbay.jetty.webapp.WebXmlConfiguration} and 

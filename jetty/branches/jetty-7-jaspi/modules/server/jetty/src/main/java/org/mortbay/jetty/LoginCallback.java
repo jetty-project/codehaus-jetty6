@@ -33,7 +33,7 @@ import org.mortbay.util.B64Code;
 
 /**
  * This is similar to the jaspi PasswordValidationCallback but includes user principal and group info as well.
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class LoginCallback {
 
@@ -46,7 +46,7 @@ public class LoginCallback {
 
     private boolean success;
     private Principal userPrincipal;
-    private List<String> groups;
+    private List<String> groups = NO_GROUPS;
 
     public LoginCallback(Subject subject, String userName, char[] password) {
         this.subject = subject;
