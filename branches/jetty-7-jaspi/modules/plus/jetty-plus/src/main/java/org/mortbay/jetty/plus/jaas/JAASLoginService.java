@@ -84,6 +84,7 @@ public class JAASLoginService implements LoginService
     {
         this();
         realmName = name;
+        loginModuleName = name;
     }
 
 
