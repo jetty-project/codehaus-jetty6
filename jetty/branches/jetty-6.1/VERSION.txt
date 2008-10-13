@@ -1,3 +1,7 @@
+jetty-6.1.12
+ + JETTY-744 Backport of JETTY-741: HttpClient connects slowly due to reverse address lookup by InetAddress.getHostName()
+
+
 jetty-6.1.12.rc3 10 October 2008
  + JETTY-241 Support for web application overlays in rapid application development (jetty:run)
  + JETTY-686 LifeCycle.Listener
@@ -20,7 +24,7 @@ jetty-6.1.12.rc3 10 October 2008
 jetty-6.1.12rc2 12 September 2008
  + JETTY-282 Support manually-triggered reloading
  + JETTY-331 SecureRandom hangs on systems with low entropy (connectors slow to startup)
- + JETTY-591 No server classes for jetty-web.xml 
+ + JETTY-591 No server classes for jetty-web.xml
  + JETTY-670 $JETTY_HOME/bin/jetty.sh not worked in Solaris, because of /usr/bin/which has no error-code
  + JETTY-671 Configure DTD does not allow <Property> children
  + JETTY-672 Utf8StringBuffer doesn't properly handle null characters (char with byte value 0)
@@ -38,7 +42,6 @@ jetty-6.1.12rc2 12 September 2008
  + JETTY-709 Jetty plugin's WebAppConfig configured properties gets overridden by AbstractJettyRunMojo even when already set
  + JETTY-710 Worked around poor implementation of File.toURL()
  + JETTY-712 HttpClient does not handle request complete after response complete
-
 
 jetty-6.1.12rc1 1 August 2008 + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
  + JETTY-319 Get unavailable exception and added startWithUnavailable option

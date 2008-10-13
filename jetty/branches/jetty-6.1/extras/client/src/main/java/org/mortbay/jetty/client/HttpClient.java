@@ -16,12 +16,9 @@ package org.mortbay.jetty.client;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -52,20 +49,20 @@ import org.mortbay.thread.Timeout;
 
 /**
  * Http Client.
- * 
+ * <p/>
  * HttpClient is the main active component of the client API implementation.
  * It is the opposite of the Connectors in standard Jetty, in that it listens 
  * for responses rather than requests.   Just like the connectors, there is a
  * blocking socket version and a non-blocking NIO version (implemented as nested classes
  * selected by {@link #setConnectorType(int)}).
- * 
+ * <p/>
  * The an instance of {@link HttpExchange} is passed to the {@link #send(HttpExchange)} method 
  * to send a request.  The exchange contains both the headers and content (source) of the request
  * plus the callbacks to handle responses.   A HttpClient can have many exchanges outstanding
  * and they may be queued on the {@link HttpDestination} waiting for a {@link HttpConnection},
  * queued in the {@link HttpConnection} waiting to be transmitted or pipelined on the actual
  * TCP/IP connection waiting for a response.
- * 
+ * <p/>
  * The {@link HttpDestination} class is an aggregation of {@link HttpConnection}s for the 
  * same host, port and protocol.   A destination may limit the number of connections 
  * open and they provide a pool of open connections that may be reused.   Connections may also 
@@ -86,16 +83,16 @@ public class HttpClient extends AbstractBuffers
     private int _connectorType=CONNECTOR_SELECT_CHANNEL;
     private boolean _useDirectBuffers=true;
     private int _maxConnectionsPerAddress=32;
-    private Map<InetSocketAddress, HttpDestination> _destinations=new HashMap<InetSocketAddress, HttpDestination>();
+    private Map<Address, HttpDestination> _destinations = new HashMap<Address, HttpDestination>();
     ThreadPool _threadPool;
     Connector _connector;
     private long _idleTimeout=20000;
     private long _timeout=320000;
     int _soTimeout = 10000;
     private Timeout _timeoutQ = new Timeout();
-    private InetSocketAddress _proxy;
+    private Address _proxy;
     private Authorization _proxyAuthentication;
-    private Set<InetAddress> _noProxy;
+    private Set<String> _noProxy;
     private int _maxRetries = 3;
     private LinkedList<String> _registeredListeners;
 
@@ -116,10 +113,9 @@ public class HttpClient extends AbstractBuffers
 
     private RealmResolver _realmResolver;    
 
-    
     public void dump() throws IOException
     {
-        for (Map.Entry<InetSocketAddress, HttpDestination> entry: _destinations.entrySet())
+        for (Map.Entry<Address, HttpDestination> entry : _destinations.entrySet())
         {
             System.err.println("\n"+entry.getKey()+":");
             entry.getValue().dump();
@@ -154,7 +150,7 @@ public class HttpClient extends AbstractBuffers
     }
 
     /* ------------------------------------------------------------------------------- */
-    public HttpDestination getDestination(InetSocketAddress remote, boolean ssl) throws UnknownHostException, IOException
+    public HttpDestination getDestination(Address remote, boolean ssl) throws UnknownHostException, IOException
     {
         if (remote==null)
             throw new UnknownHostException("Remote socket address cannot be null.");
@@ -165,7 +161,7 @@ public class HttpClient extends AbstractBuffers
             if (destination==null)
             {
                 destination=new HttpDestination(this,remote,ssl,_maxConnectionsPerAddress);
-                if (_proxy!=null && (_noProxy==null || !_noProxy.contains(remote.getAddress())))
+                if (_proxy != null && (_noProxy == null || !_noProxy.contains(remote.getHost())))
                 {
                     destination.setProxy(_proxy);
                     if (_proxyAuthentication!=null)
@@ -176,6 +172,7 @@ public class HttpClient extends AbstractBuffers
             return destination;
         }
     }
+
     /* ------------------------------------------------------------ */
     public void schedule(Timeout.Task task)
     {
@@ -225,7 +222,7 @@ public class HttpClient extends AbstractBuffers
      * Registers a listener that can listen to the stream of execution between the client and the
      * server and influence events.  Sequential calls to the method wrapper sequentially wrap the preceeding
      * listener in a delegation model.
-     *
+     * <p/>
      * NOTE: the SecurityListener is a special listener which doesn't need to be added via this
      * mechanic, if you register security realms then it will automatically be added as the top listener of the
      * delegation stack.
@@ -345,7 +342,8 @@ public class HttpClient extends AbstractBuffers
         }
         _connector.start();
         
-        _threadPool.dispatch(new Runnable(){
+        _threadPool.dispatch(new Runnable()
+        {
             public void run()
             {
                 while (isStarted())
@@ -547,13 +545,13 @@ public class HttpClient extends AbstractBuffers
     }
 
     /* ------------------------------------------------------------ */
-    public InetSocketAddress getProxy()
+    public Address getProxy()
     {
         return _proxy;
     }
 
     /* ------------------------------------------------------------ */
-    public void setProxy(InetSocketAddress proxy)
+    public void setProxy(Address proxy)
     {
         this._proxy = proxy;
     }
@@ -577,13 +575,13 @@ public class HttpClient extends AbstractBuffers
     }
 
     /* ------------------------------------------------------------ */
-    public Set<InetAddress> getNoProxy()
+    public Set<String> getNoProxy()
     {
         return _noProxy;
     }
 
     /* ------------------------------------------------------------ */
-    public void setNoProxy(Set<InetAddress> noProxyAddresses)
+    public void setNoProxy(Set<String> noProxyAddresses)
     {
         _noProxy = noProxyAddresses;
     }
