@@ -18,11 +18,8 @@ package org.mortbay.proxy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.HashSet;
 
@@ -39,16 +36,14 @@ import org.mortbay.io.Buffer;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpSchemes;
-import org.mortbay.jetty.HttpVersions;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
+import org.mortbay.jetty.client.Address;
 import org.mortbay.jetty.client.HttpClient;
 import org.mortbay.jetty.client.HttpExchange;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.handler.RequestLogHandler;
-import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
@@ -66,7 +61,7 @@ import org.mortbay.util.ajax.ContinuationSupport;
 public class AsyncProxyServlet implements Servlet
 {
     HttpClient _client;
-    
+
     protected HashSet<String> _DontProxyHeaders = new HashSet<String>();
     {
         _DontProxyHeaders.add("proxy-connection");
@@ -79,10 +74,10 @@ public class AsyncProxyServlet implements Servlet
         _DontProxyHeaders.add("proxy-authenticate");
         _DontProxyHeaders.add("upgrade");
     }
-    
+
     private ServletConfig config;
     private ServletContext context;
-    
+
     /* (non-Javadoc)
      * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
      */
@@ -130,7 +125,7 @@ public class AsyncProxyServlet implements Servlet
             final OutputStream out=response.getOutputStream();
             final Continuation continuation = ContinuationSupport.getContinuation(request,request);
 
-            
+
             if (!continuation.isPending())
             {
                 final byte[] buffer = new byte[4096]; // TODO avoid this!
@@ -181,7 +176,7 @@ public class AsyncProxyServlet implements Servlet
                             response.setStatus(status,reason.toString());
                         else
                             response.setStatus(status);
-                            
+
                     }
 
                     protected void onResponseHeader(Buffer name, Buffer value) throws IOException
@@ -197,12 +192,12 @@ public class AsyncProxyServlet implements Servlet
                 exchange.setScheme(HttpSchemes.HTTPS.equals(request.getScheme())?HttpSchemes.HTTPS_BUFFER:HttpSchemes.HTTP_BUFFER);
                 exchange.setMethod(request.getMethod());
                 exchange.setURI(uri);
-                
+
                 exchange.setVersion(request.getProtocol());
-                InetSocketAddress address=new InetSocketAddress(request.getServerName(),request.getServerPort());
+                Address address=new Address(request.getServerName(),request.getServerPort());
                 exchange.setAddress(address);
-                
-                System.err.println("PROXY TO http://"+address.getHostName()+":"+address.getPort()+uri);
+
+                System.err.println("PROXY TO http://"+address.getHost()+":"+address.getPort()+uri);
 
 
                 // check connection header
@@ -258,13 +253,13 @@ public class AsyncProxyServlet implements Servlet
                     exchange.setRequestContentSource(in);
 
                 _client.send(exchange);
-                
+
                 continuation.suspend(30000);
             }
         }
 
-            
-            
+
+
     }
 
 
@@ -274,12 +269,12 @@ public class AsyncProxyServlet implements Servlet
         throws IOException
     {
         String uri = request.getRequestURI();
-        
+
         context.log("CONNECT: "+uri);
-        
+
         String port = "";
         String host = "";
-        
+
         int c = uri.indexOf(':');
         if (c>=0)
         {
@@ -289,11 +284,11 @@ public class AsyncProxyServlet implements Servlet
                 host = host.substring(host.indexOf('/')+1);
         }
 
-        
-       
+
+
 
         InetSocketAddress inetAddress = new InetSocketAddress (host, Integer.parseInt(port));
-        
+
         //if (isForbidden(HttpMessage.__SSL_SCHEME,addrPort.getHost(),addrPort.getPort(),false))
         //{
         //    sendForbid(request,response,uri);
@@ -302,15 +297,15 @@ public class AsyncProxyServlet implements Servlet
         {
             InputStream in=request.getInputStream();
             OutputStream out=response.getOutputStream();
-            
+
             Socket socket = new Socket(inetAddress.getAddress(),inetAddress.getPort());
             context.log("Socket: "+socket);
-            
+
             response.setStatus(200);
             response.setHeader("Connection","close");
             response.flushBuffer();
-            
-            
+
+
 
             context.log("out<-in");
             IO.copyThread(socket.getInputStream(),out);
@@ -318,10 +313,10 @@ public class AsyncProxyServlet implements Servlet
             IO.copy(in,socket.getOutputStream());
         }
     }
-    
-    
-    
-    
+
+
+
+
     /* (non-Javadoc)
      * @see javax.servlet.Servlet#getServletInfo()
      */
@@ -337,7 +332,7 @@ public class AsyncProxyServlet implements Servlet
     {
 
     }
-    
+
 
     public static void main(String[] args)
         throws Exception
@@ -352,7 +347,7 @@ public class AsyncProxyServlet implements Servlet
         webapp.setResourceBase("../../webapps/test");
         contexts.addHandler(webapp);
         server.start();
-        
+
         Server proxy = new Server();
         //SelectChannelConnector connector = new SelectChannelConnector();
         Connector connector = new SocketConnector();
@@ -360,7 +355,7 @@ public class AsyncProxyServlet implements Servlet
         proxy.addConnector(connector);
         Context context = new Context(proxy,"/",0);
         context.addServlet(new ServletHolder(new AsyncProxyServlet()), "/");
-        
+
         proxy.start();
         proxy.join();
     }

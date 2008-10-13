@@ -365,7 +365,7 @@ public class HttpConnection implements Connection
             {
                 // TODO suppress port 80 or 443
                 uri=(_destination.isSecure()?HttpSchemes.HTTPS:HttpSchemes.HTTP)+"://"+
-                _destination.getAddress().getHostName()+":"+_destination.getAddress().getPort()+uri;
+                _destination.getAddress().getHost()+":"+_destination.getAddress().getPort()+uri;
                 Authorization auth = _destination.getProxyAuthentication();
                 if (auth!=null)
                     auth.setCredentials(_exchange);
@@ -487,7 +487,7 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "HttpConnection@"+hashCode()+"//"+_destination.getAddress().getHostName()+":"+_destination.getAddress().getPort();
+        return "HttpConnection@"+hashCode()+"//"+_destination.getAddress().getHost()+":"+_destination.getAddress().getPort();
     }
 
     /* ------------------------------------------------------------ */
