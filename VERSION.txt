@@ -1,4 +1,4 @@
-jetty-7.0-SNAPSHOT
+jetty-7.0.0.pre4 14 October 2008
  + JETTY-241 Support for web application overlays in rapid application development (jetty:run)
  + JETTY-331 SecureRandom hangs on systems with low entropy (connectors slow to start)
  + JETTY-591 No server classes for jetty-web.xml
