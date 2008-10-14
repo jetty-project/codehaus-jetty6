@@ -193,7 +193,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                         if (getHandler() != null)
                         {
                             //jaspi 3.8.3 auth processing may wrap messages, use the modified versions
-                            getHandler().handle(pathInContext, (HttpServletRequest) messageInfo.getRequestMessage(), (HttpServletResponse) messageInfo.getResponseMessage(), dispatch);
+                            getHandler().handle(pathInContext, messageInfo.getRequestMessage(), messageInfo.getResponseMessage(), dispatch);
                             //TODO set secureResponse = false on error thrown by servlet to jetty
                             boolean secureResponse = true;
                             if (secureResponse)
