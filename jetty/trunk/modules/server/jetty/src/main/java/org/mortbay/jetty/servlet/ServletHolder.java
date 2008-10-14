@@ -462,8 +462,7 @@ public class ServletHolder extends Holder
     /* ------------------------------------------------------------ */
     /** Service a request with this servlet.
      */
-    public void handle(Request baseRequest,
-                       ServletRequest request,
+    public void handle(ServletRequest request,
                        ServletResponse response)
         throws ServletException,
                UnavailableException,
@@ -484,7 +483,7 @@ public class ServletHolder extends Holder
         // Service the request
         boolean servlet_error=true;
         Principal user=null;
-        boolean suspendable = baseRequest.isSuspendSupported();
+        Request base_request=null;
         try
         {
             // Handle aliased path
@@ -495,12 +494,10 @@ public class ServletHolder extends Holder
             // Handle run as
             if (_runAs!=null && _realm!=null)
             {
-                user=_realm.pushRole(baseRequest.getUserPrincipal(),_runAs);
-                baseRequest.setUserPrincipal(user);
+                base_request=HttpConnection.getCurrentConnection().getRequest();
+                user=_realm.pushRole(base_request.getUserPrincipal(),_runAs);
+                base_request.setUserPrincipal(user);
             }
-            
-            if (!isSuspendSupported())
-                baseRequest.setSuspendSupported(false);
             
             servlet.service(request,response);
             servlet_error=false;
@@ -512,13 +509,11 @@ public class ServletHolder extends Holder
         }
         finally
         {
-            baseRequest.setSuspendSupported(suspendable);
-            
             // pop run-as role
-            if (_runAs!=null && _realm!=null && user!=null)
+            if (_runAs!=null && _realm!=null && user!=null && base_request!=null)
             {
                 user=_realm.popRole(user);
-                baseRequest.setUserPrincipal(user);
+                base_request.setUserPrincipal(user);
             }
 
             // Handle error params.
