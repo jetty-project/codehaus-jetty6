@@ -3,15 +3,10 @@
     <groupId>org.mortbay.jetty.example</groupId>
     <artifactId>jetty-examples-parent</artifactId>
     <version>7.0-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty-embedded</artifactId>
   <name>Jetty Example :: Embedded</name>
-  <url>http://jetty.mortbay.org</url>
-  <build>
-    <defaultGoal>install</defaultGoal>
-  </build>
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
@@ -46,35 +41,34 @@
           <property><name>runEmbedded</name></property>
       </activation>
       <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>run</id>
-            <phase>test</phase>
-            <configuration>
-              <tasks>
-                <echo>-------------------------------------------------------------</echo>
-                <echo>***                Running Embedded Tests                 ***</echo>
-                <echo>-------------------------------------------------------------</echo>
-                <java classname="RunEmbedded">
-                  <classpath>
-                   <path refid="maven.compile.classpath" />
-                   <path refid="maven.test.classpath" />
-                   <path refid="maven.dependency.classpath" />
-                  </classpath>
-                </java>
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-
+		<plugins>
+		  <plugin>
+			<artifactId>maven-antrun-plugin</artifactId>
+			<executions>
+			  <execution>
+				<id>run</id>
+				<phase>test</phase>
+				<configuration>
+				  <tasks>
+					<echo>-------------------------------------------------------------</echo>
+					<echo>***                Running Embedded Tests                 ***</echo>
+					<echo>-------------------------------------------------------------</echo>
+					<java classname="RunEmbedded">
+					  <classpath>
+					   <path refid="maven.compile.classpath" />
+					   <path refid="maven.test.classpath" />
+					   <path refid="maven.dependency.classpath" />
+					  </classpath>
+					</java>
+				  </tasks>
+				</configuration>
+				<goals>
+				  <goal>run</goal>
+				</goals>
+			  </execution>
+			</executions>
+		  </plugin>
+		</plugins>
       </build>
     </profile>
   </profiles>

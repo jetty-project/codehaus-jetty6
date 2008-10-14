@@ -23,7 +23,7 @@ public class TestDataSourceUserRealm extends TestCase
     public void setUp () throws Exception
     { 
       
-        System.setProperty("derby.system.home", System.getProperty("java.io.tmpdir"));
+        System.setProperty("derby.system.home", System.getProperty("basedir") + "/target/test-db");
         InitialContext ic = new InitialContext();
         ds = new EmbeddedDataSource();
         ds.setDatabaseName("testDataSourceUserRealm");

@@ -19,8 +19,8 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.BufferCache.CachedBuffer;
+import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.HttpFields;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpMethods;
@@ -32,33 +32,33 @@ import org.mortbay.log.Log;
 
 /**
  * An HTTP client API that encapsulates Exchange with a HTTP server.
- * 
+ *
  * This object encapsulates:<ul>
  * <li>The HTTP server. (see {@link #setAddress(InetSocketAddress)} or {@link #setURL(String)})
  * <li>The HTTP request method, URI and HTTP version (see {@link #setMethod(String)}, {@link #setURI(String)}, and {@link #setVersion(int)}
  * <li>The Request headers (see {@link #addRequestHeader(String, String)} or {@link #setRequestHeader(String, String)})
  * <li>The Request content (see {@link #setRequestContent(Buffer)} or {@link #setRequestContentSource(InputStream)})
  * <li>The status of the exchange (see {@link #getStatus()})
- * <li>Callbacks to handle state changes (see the onXxx methods such as {@link #onRequestComplete()} or {@link #onResponseComplete()}) 
+ * <li>Callbacks to handle state changes (see the onXxx methods such as {@link #onRequestComplete()} or {@link #onResponseComplete()})
  * <li>The ability to intercept callbacks (see {@link #setEventListener(HttpEventListener)}
  * </ul>
- * 
- * The HttpExchange class is intended to be used by a developer wishing to have close asynchronous 
+ *
+ * The HttpExchange class is intended to be used by a developer wishing to have close asynchronous
  * interaction with the the exchange.  Typically a developer will extend the HttpExchange class with a derived
  * class that implements some or all of the onXxx callbacks.  There are also some predefined HttpExchange subtypes
  * that can be used as a basis (see {@link ContentExchange} and {@link CachedExchange}.
- * 
- * <p>Typically the HttpExchange is passed to a the {@link HttpClient#send(HttpExchange)} method, which in 
- * turn selects a {@link HttpDestination} and calls it's {@link HttpDestination#send(HttpExchange), which 
+ *
+ * <p>Typically the HttpExchange is passed to a the {@link HttpClient#send(HttpExchange)} method, which in
+ * turn selects a {@link HttpDestination} and calls it's {@link HttpDestination#send(HttpExchange), which
  * then creates or selects a {@link HttpConnection} and calls its {@link HttpConnection#send(HttpExchange).
- * A developer may wish to directly call send on the destination or connection if they wish to bypass 
+ * A developer may wish to directly call send on the destination or connection if they wish to bypass
  * some handling provided (eg Cookie handling in the HttpDestination).
- * 
- * <p>In some circumstances, the HttpClient or HttpDestination may wish to retry a HttpExchange (eg. failed 
+ *
+ * <p>In some circumstances, the HttpClient or HttpDestination may wish to retry a HttpExchange (eg. failed
  * pipeline request, authentication retry or redirection).  In such cases, the HttpClient and/or HttpDestination
  * may insert their own HttpExchangeListener to intercept and filter the call backs intended for the
  * HttpExchange.
- * 
+ *
  * @author gregw
  * @author Guillaume Nodet
  */
@@ -72,10 +72,10 @@ public class HttpExchange
     public static final int STATUS_PARSING_HEADERS = 5;
     public static final int STATUS_PARSING_CONTENT = 6;
     public static final int STATUS_COMPLETED = 7;
-    public static final int STATUS_EXPIRED = 8; 
+    public static final int STATUS_EXPIRED = 8;
     public static final int STATUS_EXCEPTED = 9;
 
-    InetSocketAddress _address;
+    Address _address;
     String _method = HttpMethods.GET;
     Buffer _scheme = HttpSchemes.HTTP_BUFFER;
     int _version = HttpVersions.HTTP_1_1_ORDINAL;
@@ -86,17 +86,17 @@ public class HttpExchange
     InputStream _requestContentSource;
     Buffer _requestContentChunk;
     boolean _retryStatus = false;
-    
-    
+
+
     /**
      * boolean controlling if the exchange will have listeners autoconfigured by
      * the destination
      */
     boolean _configureListeners = true;
-    
-    
+
+
     private HttpEventListener _listener = new Listener();
-    
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -109,7 +109,7 @@ public class HttpExchange
     }
 
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @deprecated
      */
     public void waitForStatus(int status) throws InterruptedException
@@ -122,8 +122,8 @@ public class HttpExchange
             }
         }
     }
-    
-    
+
+
     public int waitForDone () throws InterruptedException
     {
         synchronized (this)
@@ -133,16 +133,16 @@ public class HttpExchange
         }
         return _status;
     }
-    
-    
-    
+
+
+
 
     /* ------------------------------------------------------------ */
-    public void reset() 
+    public void reset()
     {
         setStatus(STATUS_START);
     }
-    
+
     /* ------------------------------------------------------------ */
     void setStatus(int status)
     {
@@ -191,25 +191,25 @@ public class HttpExchange
             }
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     public boolean isDone (int status)
     {
         return ((status == STATUS_COMPLETED) || (status == STATUS_EXPIRED) || (status == STATUS_EXCEPTED));
     }
-    
+
     /* ------------------------------------------------------------ */
     public HttpEventListener getEventListener()
     {
         return _listener;
     }
-    
+
     /* ------------------------------------------------------------ */
     public void setEventListener(HttpEventListener listener)
     {
         _listener=listener;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param url Including protocol, host and port
@@ -232,8 +232,8 @@ public class HttpExchange
         if (port <= 0)
             port = "https".equalsIgnoreCase(scheme)?443:80;
 
-        setAddress(new InetSocketAddress(uri.getHost(),port));
-        
+        setAddress(new Address(uri.getHost(),port));
+
         String completePath = uri.getCompletePath();
         if (completePath != null)
             setURI(completePath);
@@ -243,7 +243,7 @@ public class HttpExchange
     /**
      * @param address
      */
-    public void setAddress(InetSocketAddress address)
+    public void setAddress(Address address)
     {
         _address = address;
     }
@@ -252,7 +252,7 @@ public class HttpExchange
     /**
      * @return
      */
-    public InetSocketAddress getAddress()
+    public Address getAddress()
     {
         return _address;
     }
@@ -457,32 +457,32 @@ public class HttpExchange
         return _requestContent;
     }
 
-    public boolean getRetryStatus() 
+    public boolean getRetryStatus()
     {
         return _retryStatus;
     }
-    
-    public void setRetryStatus( boolean retryStatus ) 
+
+    public void setRetryStatus( boolean retryStatus )
     {
         _retryStatus = retryStatus;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Cancel this exchange
      * Currently this implementation does nothing.
      */
     public void cancel()
     {
-        
+
     }
 
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "HttpExchange@" + hashCode() + "=" + _method + "//" + _address.getHostName() + ":" + _address.getPort() + _uri + "#" + _status;
+        return "HttpExchange@" + hashCode() + "=" + _method + "//" + _address.getHost() + ":" + _address.getPort() + _uri + "#" + _status;
     }
 
-    
+
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -513,7 +513,7 @@ public class HttpExchange
     }
 
     protected void onResponseComplete() throws IOException
-    {   
+    {
     }
 
     protected void onConnectionFailed(Throwable ex)
@@ -523,7 +523,7 @@ public class HttpExchange
 
     protected void onException(Throwable ex)
     {
-        
+
         Log.warn("EXCEPTION on " + this,ex);
     }
 
@@ -539,7 +539,7 @@ public class HttpExchange
      * true of the exchange should have listeners configured for it by the destination
      *
      * false if this is being managed elsewhere
-     * 
+     *
      * @return
      */
     public boolean configureListeners()
@@ -617,7 +617,7 @@ public class HttpExchange
             }
         }
     }
-    
+
     /**
      * @deprecated use {@link org.mortbay.jetty.client.CachedExchange}
      *
@@ -636,9 +636,9 @@ public class HttpExchange
      */
     public static class ContentExchange extends org.mortbay.jetty.client.ContentExchange
     {
-        
+
     }
-    
+
 
 
 }

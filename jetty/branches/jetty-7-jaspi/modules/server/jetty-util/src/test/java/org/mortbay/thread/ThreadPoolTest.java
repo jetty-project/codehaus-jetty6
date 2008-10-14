@@ -14,6 +14,9 @@
 
 package org.mortbay.thread;
 
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import junit.framework.TestCase;
 
 public class ThreadPoolTest extends TestCase
@@ -86,5 +89,69 @@ public class ThreadPoolTest extends TestCase
         assertTrue(threads>5);
         Thread.sleep(1500);
         assertTrue(tp.getThreads()<threads);
+    }
+    
+    public void testStress() throws Exception
+    {
+        QueuedThreadPool tp= new QueuedThreadPool();
+        tp.setMinThreads(5);
+        tp.setMaxThreads(100);
+        tp.setMaxIdleTimeMs(10);
+        tp.start();
+        
+        final AtomicInteger count = new AtomicInteger();
+        
+        final Random random = new Random(System.currentTimeMillis());
+        int loops = 2400;
+
+        try
+        {
+            for (int i=0;i<loops;i++)
+            {
+                if (i%10==0)
+                    System.err.print('.');
+                if (i%800==799)
+                    System.err.println();
+                
+                Thread.sleep(random.nextInt(20));
+                
+                tp.dispatch(new Runnable()
+                {
+                    public void run()
+                    {
+                        int r = random.nextInt(5);
+                        int s=0;
+                        for (int j=0;j<r;j++)
+                            s+=random.nextInt(10);
+                        try
+                        {
+                            Thread.sleep(s);
+                        }
+                        catch (InterruptedException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        finally
+                        {
+                            count.incrementAndGet();
+                        }
+                    }
+                });
+
+            }
+            
+            Thread.sleep(1000);
+            tp.stop();
+            
+            assertEquals(loops,count.get());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            assertTrue(false);
+        }
+
+        
+        
     }
 }

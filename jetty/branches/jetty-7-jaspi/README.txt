@@ -1,5 +1,5 @@
 
-This is the Jetty 6 HTTP server and servlet container.
+This is the Jetty 7 HTTP server and servlet container.
 
 For more information about Jetty, please see the Jetty wiki: 
 
