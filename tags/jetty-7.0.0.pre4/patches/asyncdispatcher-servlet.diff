@@ -1,0 +1,205 @@
+Index: src/main/java/javax/servlet/AsyncDispatcher.java
+===================================================================
+--- src/main/java/javax/servlet/AsyncDispatcher.java	(revision 0)
++++ src/main/java/javax/servlet/AsyncDispatcher.java	(revision 0)
+@@ -0,0 +1,11 @@
++package javax.servlet;
++
++public interface AsyncDispatcher
++{
++    /**
++     * Schedule the request/response to be dispatched to the resource
++     * represented by this dispatcher.
++     * @throws IllegalStateException if the response is already committed
++     */
++    void forward(ServletRequest request, ServletResponse response);
++}
+
+Property changes on: src/main/java/javax/servlet/AsyncDispatcher.java
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+Index: src/main/java/javax/servlet/ServletContext.java
+===================================================================
+--- src/main/java/javax/servlet/ServletContext.java	(revision 3258)
++++ src/main/java/javax/servlet/ServletContext.java	(working copy)
+@@ -286,7 +286,35 @@
+     public RequestDispatcher getRequestDispatcher(String path);
+ 
+ 
++    /**
++     * 
++     * Returns an {@link AsyncDispatcher} object that acts
++     * as a wrapper for the resource located at the given path.
++     * An <code>AsyncDispatcher</code> object can be used to forward 
++     * a suspended request to the resource from an asynchronous handler.
++     *
++     * <p>The pathname must begin with a "/" and is interpreted as relative
++     * to the current context root.  Use <code>getContext</code> to obtain
++     * a <code>RequestDispatcher</code> for resources in foreign contexts.
++     * This method returns <code>null</code> if the <code>ServletContext</code>
++     * cannot return a <code>RequestDispatcher</code>.
++     *
++     * @param path      a <code>String</code> specifying the pathname
++     *                  to the resource
++     *
++     * @return          a <code>AsyncDispatcher</code> object
++     *                  that acts as a wrapper for the resource
++     *                  at the specified path, or <code>null</code> if 
++     *                  the <code>ServletContext</code> cannot return
++     *                  a <code>RequestDispatcher</code>
++     *
++     * @see             AsyncDispatcher
++     * @see             ServletContext#getContext
++     *
++     */
+ 
++    public AsyncDispatcher getAsyncDispatcher(String path);
++
+     /**
+      * Returns a {@link RequestDispatcher} object that acts
+      * as a wrapper for the named servlet.
+Index: src/main/java/javax/servlet/ServletRequest.java
+===================================================================
+--- src/main/java/javax/servlet/ServletRequest.java	(revision 3258)
++++ src/main/java/javax/servlet/ServletRequest.java	(working copy)
+@@ -21,6 +21,8 @@
+ 
+ import java.io.BufferedReader;
+ import java.io.IOException;
++import java.io.OutputStream;
++import java.io.Writer;
+ import java.util.Enumeration;
+ import java.util.Locale;
+ import java.util.Map;
+@@ -675,6 +677,7 @@
+      * @see {@link #suspend()}
+      * @since 3.0
+      * @exception IllegalStateException if the request is not suspended.
++     * @deprecated
+      * 
+      */
+      void resume();
+@@ -690,16 +693,20 @@
+      * (ie the thread that called {@link #suspend(long)} is still within the filter
+      * chain and/or servlet service method), then the complete does not take effect until
+      * the call to the filter chain and/or servlet returns to the container. In this 
+-     * case both {@link #isSuspended()} and {@link isResumed()} return true.</p>
++     * case {@link #isSuspended()} continues to returns true.</p>
+      * 
++     * <p>Closing the {@link OutputStream} or {@link Writer} of the associated
++     * {@link ServletResponse} is equivalent to calling complete.</p>
++     * 
+      * <p>Once complete has been called and any thread calling the filter chain and/or 
+      * servlet chain has returned to the container, the request lifecycle is complete.
+-     * The container is able to recycle request objects, so it is not valid hold a request
++     * The container is able to recycle request objects, so it is not valid to hold a request
+      * reference after the end of the life cycle or to call any request methods.
+      * 
+      * @see {@link #suspend()}
+      * @since 3.0
+      * @exception IllegalStateException if the request is not suspended.
++     * @deprecated
+      * 
+      */
+      void complete() throws IOException;
+@@ -714,6 +721,7 @@
+     /**
+      * @return true if the request has been redispatched by a call to {@link #resume()}.   Returns false after any subsequent call to suspend
+      * @since 3.0
++     * @deprecated
+      */
+      boolean isResumed();
+ 
+@@ -721,6 +729,7 @@
+      * @return true after a request has been redispatched as the result of a timeout. 
+      * Returns false after any subsequent call to suspend.
+      * @since 3.0
++     * @deprecated
+      */
+      boolean isTimeout();
+ 
+@@ -729,6 +738,7 @@
+      * and/or servlet. Will return false once the calling thread has returned to the
+      * container after suspend has been called and during any subsequent redispatch.
+      * @since 3.0
++     * @deprecated
+      */
+      boolean isInitial();
+ 
+Index: src/main/resources/javax/servlet/resources/web-app_3_0.xsd
+===================================================================
+--- src/main/resources/javax/servlet/resources/web-app_3_0.xsd	(revision 3258)
++++ src/main/resources/javax/servlet/resources/web-app_3_0.xsd	(working copy)
+@@ -286,26 +286,6 @@
+         </xsd:simpleContent>
+     </xsd:complexType>
+     <!-- **************************************************** -->
+-    <xsd:complexType name="lifecycleType">
+-        <xsd:annotation>
+-            <xsd:documentation>
+-		The lifecycle has two legal values: INITIAL and REDISPATCH. A value 
+-		of INITIAL means the Filter will be applied to initial dispatches of
+-		unsuspended requests.  A value of REDISPATCH means the Filter will be applied 
+-		to the dispatch of suspended requests after a resume, timeout or IO activity.
+-		The absence of any lifecycle elements in a
+-		filter-mapping indicates a default of applying filters to both initiale and
+-		redispatched requests
+-            </xsd:documentation>
+-        </xsd:annotation>
+-        <xsd:simpleContent>
+-            <xsd:restriction base="javaee:string">
+-                <xsd:enumeration value="INITIAL" />
+-                <xsd:enumeration value="REDISPATCH" />
+-            </xsd:restriction>
+-        </xsd:simpleContent>
+-    </xsd:complexType>
+-    <!-- **************************************************** -->
+     <xsd:simpleType name="encodingType">
+         <xsd:annotation>
+             <xsd:documentation>
+@@ -400,8 +380,6 @@
+             </xsd:choice>
+             <xsd:element name="dispatcher" type="javaee:dispatcherType"
+                 minOccurs="0" maxOccurs="4" />
+-            <xsd:element name="life-cycle" type="javaee:lifecycleType"
+-                minOccurs="0" maxOccurs="2" />
+         </xsd:sequence>
+         <xsd:attribute name="id" type="xsd:ID" />
+     </xsd:complexType>
+@@ -454,6 +432,7 @@
+                     </xsd:documentation>
+                 </xsd:annotation>
+             </xsd:element>
++            <xsd:element name="suspendable" type="javaee:emptyType" />
+         </xsd:sequence>
+         <xsd:attribute name="id" type="xsd:ID" />
+     </xsd:complexType>
+@@ -747,6 +726,7 @@
+             <xsd:element name="security-role-ref"
+                 type="javaee:security-role-refType" minOccurs="0"
+                 maxOccurs="unbounded" />
++            <xsd:element name="suspendable" type="javaee:emptyType" />
+         </xsd:sequence>
+         <xsd:attribute name="id" type="xsd:ID" />
+     </xsd:complexType>
+Index: pom.xml
+===================================================================
+--- pom.xml	(revision 3262)
++++ pom.xml	(working copy)
+@@ -2,12 +2,12 @@
+   <parent>
+     <groupId>org.mortbay.jetty</groupId>
+     <artifactId>jetty-parent</artifactId>
+-    <version>3</version>
++    <version>5</version>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>org.mortbay.jetty</groupId>
+   <artifactId>servlet-api</artifactId>
+-  <version>3.0.pre2-SNAPSHOT</version>
++  <version>3.0.ad0-SNAPSHOT</version>
+   <name>Servlet API</name>
+   <description>Servlet API</description>
+   <packaging>jar</packaging>
