@@ -439,7 +439,7 @@ public class ServletHolder extends Holder
         }
         catch (ServletException e)
         {
-            makeUnavailable(e.getCause());
+            makeUnavailable(e.getCause()==null?e:e.getCause());
             _servlet=null;
             _config=null;
             throw e;
