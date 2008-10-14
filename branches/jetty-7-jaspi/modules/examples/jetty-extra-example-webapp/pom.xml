@@ -3,23 +3,10 @@
     <groupId>org.mortbay.jetty.example</groupId>
     <artifactId>jetty-examples-parent</artifactId>
     <version>7.0-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty-extra-example-webapp</artifactId>
   <name>Jetty Example :: Extra Webapp tests</name>
-  <url>http://jetty.mortbay.org</url>
-  <licenses>
-    <license>
-      <name>Apache License Version 2</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-    </license>
-  </licenses>
-  <build>
-    <defaultGoal>install</defaultGoal>
-    <plugins>
-    </plugins>
-  </build>
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>

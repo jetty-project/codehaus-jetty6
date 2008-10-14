@@ -3,31 +3,11 @@
     <groupId>org.mortbay.jetty.example</groupId>
     <artifactId>jetty-examples-parent</artifactId>
     <version>7.0-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>spring-ejb3-example-webapp</artifactId>
   <packaging>war</packaging>
   <name>Jetty Example :: spring ejb3 demo webapp</name>
-  <url>http://jetty.mortbay.org</url>
-  <licenses>
-    <license>
-      <name>Apache License Version 2</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-    </license>
-  </licenses>
-  <build>
-    <defaultGoal>install</defaultGoal>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <includes>
-          <includes>spring-ejb-jar.xml</includes>
-        </includes>
-        <targetPath>META-INF</targetPath>
-      </resource>
-    </resources>
-  </build>
   <dependencies>
    <dependency>
      <groupId>org.apache.geronimo.specs</groupId>

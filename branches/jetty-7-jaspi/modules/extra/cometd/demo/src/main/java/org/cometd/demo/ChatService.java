@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
-//You may obtain a copy of the License at 
+//You may obtain a copy of the License at
 //http://www.apache.org/licenses/LICENSE-2.0
 //Unless required by applicable law or agreed to in writing, software
 //distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,15 +13,14 @@
 //========================================================================
 
 /**
- * 
+ *
  */
 package org.cometd.demo;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.cometd.Bayeux;
 import org.cometd.Channel;
@@ -32,45 +31,76 @@ import org.mortbay.log.Log;
 
 public class ChatService extends BayeuxService
 {
-    ConcurrentMap<String,Set<String>> _members = new ConcurrentHashMap<String,Set<String>>();
-    
+    /**
+     * A map(channel, map(userName, clientId))
+     */
+    private final ConcurrentMap<String, Map<String, String>> _members = new ConcurrentHashMap<String, Map<String, String>>();
+
     public ChatService(Bayeux bayeux)
     {
-        super(bayeux,"chat");
-        subscribe("/chat/**","trackMembers");
+        super(bayeux, "chat");
+        subscribe("/chat/**", "trackMembers");
+        subscribe("/service/privatechat", "privateChat");
     }
-    
-    public void trackMembers(Client joiner,String channel,Map<String,Object> data,String id)
+
+    public void trackMembers(final Client joiner, final String channelName, Map<String, Object> data, final String messageId)
     {
         if (Boolean.TRUE.equals(data.get("join")))
         {
-            Set<String> m = _members.get(channel);
-            if (m==null)
+            Map<String, String> membersMap = _members.get(channelName);
+            if (membersMap == null)
             {
-                Set<String> new_list=new CopyOnWriteArraySet<String>();
-                m=_members.putIfAbsent(channel,new_list);
-                if (m==null)
-                    m=new_list;
+                Map<String, String> newMembersMap = new ConcurrentHashMap<String, String>();
+                membersMap = _members.putIfAbsent(channelName, newMembersMap);
+                if (membersMap == null) membersMap = newMembersMap;
             }
-            
-            final Set<String> members=m;
-            final String username=(String)data.get("user");
-            
-            members.add(username);
-            final String channel_=channel;
-            final String id_=id;
-            joiner.addListener(new RemoveListener(){
+
+            final Map<String, String> members = membersMap;
+            final String userName = (String)data.get("user");
+            members.put(userName, joiner.getId());
+            joiner.addListener(new RemoveListener()
+            {
                 public void removed(String clientId, boolean timeout)
                 {
-                    members.remove(username);
-                    Log.info("members: "+members);
-                    Channel ch=getBayeux().getChannel(channel_,false);
-                    if (ch!=null)
-                        ch.publish(getClient(),members,id_);
+                    members.values().remove(clientId);
+                    Log.info("members: " + members);
+                    // Broadcast the members to all existing members
+                    Channel channel = getBayeux().getChannel(channelName, false);
+                    if (channel != null) channel.publish(getClient(), members.keySet(), messageId);
                 }
             });
-            Log.info("Members: "+members);
-            getBayeux().getChannel(channel,false).publish(getClient(),members,id);
+
+            Log.info("Members: " + members);
+            // Broadcast the members to all existing members
+            getBayeux().getChannel(channelName, false).publish(getClient(), members.keySet(), messageId);
         }
     }
+
+    public void privateChat(Client source, String channel, Map<String, Object> data, String messageId)
+    {
+        String roomName = (String)data.get("room");
+        Map<String, String> membersMap = _members.get(roomName);
+        String peerName = (String)data.get("peer");
+        String peerId = membersMap.get(peerName);
+	if (peerId!=null)
+        {
+            Client peer = getBayeux().getClient(peerId);
+	    if (peer!=null)
+	    {
+		Map<String, Object> message = new HashMap<String, Object>();
+		message.put("chat", data.get("chat"));
+		message.put("user", data.get("user"));
+		message.put("scope", "private");
+		peer.deliver(getClient(), roomName, message, messageId);
+		source.deliver(getClient(), roomName, message, messageId);
+		return;
+            }
+	}
+	Map<String, Object> message = new HashMap<String, Object>();
+	message.put("chat", "Unknown user: "+peerName);
+	message.put("user", "SERVER");
+	message.put("scope", "error");
+	source.deliver(source, roomName, message, messageId);
+    }
 }
+

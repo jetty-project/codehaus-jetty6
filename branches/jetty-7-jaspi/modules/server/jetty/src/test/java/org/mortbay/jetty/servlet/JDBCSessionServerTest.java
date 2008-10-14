@@ -30,7 +30,7 @@ public class JDBCSessionServerTest extends AbstractSessionTest
 
         public void configureEnvironment()
         {
-           System.setProperty("derby.system.home", System.getProperty("java.io.tmpdir"));
+           System.setProperty("derby.system.home", System.getProperty("basedir") + "/target/test-db");
         }
 
         public void configureIdManager()
