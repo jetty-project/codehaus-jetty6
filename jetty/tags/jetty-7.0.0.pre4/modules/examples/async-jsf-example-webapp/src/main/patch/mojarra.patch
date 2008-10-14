@@ -1,0 +1,103 @@
+diff -ur mojarra-1.2_08-b06-FCS-sources.orig/jsf-api/src/javax/faces/webapp/FacesServlet.java mojarra-1.2_08-b06-FCS-sources/jsf-api/src/javax/faces/webapp/FacesServlet.java
+--- mojarra-1.2_08-b06-FCS-sources.orig/jsf-api/src/javax/faces/webapp/FacesServlet.java	2008-07-14 09:18:14.000000000 +1000
++++ mojarra-1.2_08-b06-FCS-sources/jsf-api/src/javax/faces/webapp/FacesServlet.java	2008-07-14 21:59:21.000000000 +1000
+@@ -257,13 +257,17 @@
+         }    
+         
+         // Acquire the FacesContext instance for this request
+-        FacesContext context = facesContextFactory.getFacesContext
++        FacesContext context = (FacesContext)request.getAttribute("com.sun.jsf.context");
++        
++        if (context==null)
++            context=facesContextFactory.getFacesContext
+             (servletConfig.getServletContext(), request, response, lifecycle);
+ 
+         // Execute the request processing lifecycle for this request
+         try {
+             lifecycle.execute(context);
+-            lifecycle.render(context);
++            if (!request.isSuspended())
++                lifecycle.render(context);
+         } catch (FacesException e) {
+             Throwable t = e.getCause();
+             if (t == null) {
+@@ -279,8 +283,11 @@
+             }
+         }
+         finally {
+-            // Release the FacesContext instance for this request
+-            context.release();
++            // Save/Release the FacesContext instance for this request
++            if (request.isSuspended())
++                request.setAttribute("com.sun.jsf.context",context);
++            else
++                context.release();
+         }
+ 
+     }
+diff -ur mojarra-1.2_08-b06-FCS-sources.orig/jsf-ri/src/com/sun/faces/config/ConfigureListener.java mojarra-1.2_08-b06-FCS-sources/jsf-ri/src/com/sun/faces/config/ConfigureListener.java
+--- mojarra-1.2_08-b06-FCS-sources.orig/jsf-ri/src/com/sun/faces/config/ConfigureListener.java	2008-07-14 09:18:14.000000000 +1000
++++ mojarra-1.2_08-b06-FCS-sources/jsf-ri/src/com/sun/faces/config/ConfigureListener.java	2008-07-14 10:44:25.000000000 +1000
+@@ -582,5 +582,25 @@
+ 
+     } // END WebXmlProcessor
+ 
++    public void requestCompleted(ServletRequestEvent arg0)
++    {
++        // TODO Auto-generated method stub
++        
++    }
++
++
++    public void requestResumed(ServletRequestEvent arg0)
++    {
++        // TODO Auto-generated method stub
++        
++    }
++
++
++    public void requestSuspended(ServletRequestEvent arg0)
++    {
++        // TODO Auto-generated method stub
++        
++    }
++
+ }
+ 
+diff -ur mojarra-1.2_08-b06-FCS-sources.orig/jsf-ri/src/com/sun/faces/lifecycle/LifecycleImpl.java mojarra-1.2_08-b06-FCS-sources/jsf-ri/src/com/sun/faces/lifecycle/LifecycleImpl.java
+--- mojarra-1.2_08-b06-FCS-sources.orig/jsf-ri/src/com/sun/faces/lifecycle/LifecycleImpl.java	2008-07-14 09:18:14.000000000 +1000
++++ mojarra-1.2_08-b06-FCS-sources/jsf-ri/src/com/sun/faces/lifecycle/LifecycleImpl.java	2008-07-14 16:20:08.000000000 +1000
+@@ -49,6 +49,7 @@
+ import javax.faces.context.FacesContext;
+ import javax.faces.event.PhaseListener;
+ import javax.faces.lifecycle.Lifecycle;
++import javax.servlet.ServletRequest;
+ 
+ import com.sun.faces.util.FacesLogger;
+ import com.sun.faces.util.MessageUtils;
+@@ -108,7 +109,12 @@
+             LOGGER.fine("execute(" + context + ")");
+         }
+ 
+-        for (int i = 1, len = phases.length -1 ; i < len; i++) { // Skip ANY_PHASE placeholder
++
++        ServletRequest request = (ServletRequest)context.getExternalContext().getRequest(); 
++
++        Integer start=(Integer)request.getAttribute("com.sun.jsf.phase");
++        int i=start==null?1:start.intValue();
++        for (int len = phases.length -1 ; i < len; i++) { // Skip ANY_PHASE placeholder
+ 
+             if (context.getRenderResponse() ||
+                 context.getResponseComplete()) {
+@@ -117,8 +123,11 @@
+ 
+             phases[i].doPhase(context, this, listeners.listIterator());
+ 
++            if (request.isSuspended())
++                break;
+         }
+ 
++        request.setAttribute("com.sun.jsf.phase",new Integer(i));
+     }
+ 
+ 
