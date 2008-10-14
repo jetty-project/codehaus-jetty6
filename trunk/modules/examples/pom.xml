@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-project</artifactId>
-    <version>7.0.0.pre4</version>
+    <version>7.0-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -11,6 +11,8 @@
   <name>Jetty Example :: Parent</name>
   <packaging>pom</packaging>
   <modules>
+    <module>async-jsf-example-webapp</module>
+    <module>async-webservices-example-webapp</module>
     <module>async-rest-example-webapp</module>
     <module>jaas-example-webapp</module>
     <module>jetty-annotation-example-webapp</module>
