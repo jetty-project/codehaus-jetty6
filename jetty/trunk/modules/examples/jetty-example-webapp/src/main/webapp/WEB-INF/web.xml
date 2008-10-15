@@ -12,20 +12,18 @@
     <listener-class>com.acme.TestListener</listener-class>
   </listener>
 
-  <!--
   <filter>
     <filter-name>QoSFilter</filter-name>
     <filter-class>org.mortbay.servlet.QoSFilter</filter-class>
     <init-param>
       <param-name>maxRequests</param-name>
-      <param-value>0</param-value>
+      <param-value>20</param-value>
     </init-param>
   </filter>
   <filter-mapping>
     <filter-name>QoSFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
-  -->
 
   <filter>
     <filter-name>MultiPart</filter-name>
@@ -70,31 +68,12 @@
   </filter-mapping>
   
   
-  <filter>
-    <filter-name>Chat</filter-name>
-    <filter-class>com.acme.ChatFilter</filter-class>
-  </filter>
-  <filter-mapping>
-    <filter-name>Chat</filter-name>
-    <url-pattern>/chat/*</url-pattern>
-    <dispatcher>REQUEST</dispatcher>
-    <dispatcher>FORWARD</dispatcher>
-  </filter-mapping>
-  
-  <filter>
-    <filter-name>Throttle</filter-name>
-    <filter-class>org.mortbay.servlet.ThrottlingFilter</filter-class>
-  </filter>
-  
-  <filter-mapping>
-    <filter-name>Throttle</filter-name>
-    <url-pattern>/dump/throttle/*</url-pattern>
-  </filter-mapping>
 
   <!-- Comment out to support PUT and DELETE
   <filter>
     <filter-name>RestFilter</filter-name>
     <filter-class>org.mortbay.servlet.RestFilter</filter-class>
+    <suspend-supported/>
     <init-param>
       <param-name>maxPutSize</param-name><param-value>1024</param-value>
     </init-param>
@@ -188,20 +167,16 @@
   </servlet-mapping>
   
   <servlet>
-    <servlet-name>Concat</servlet-name>
-    <servlet-class>org.mortbay.servlet.ConcatServlet</servlet-class>
-    <init-param>
-      <param-name>development</param-name>
-      <param-value>true</param-value>
-    </init-param>
-    
+    <servlet-name>Chat</servlet-name>
+    <servlet-class>com.acme.ChatServlet</servlet-class>
     <load-on-startup>1</load-on-startup>
   </servlet>
-  
+
   <servlet-mapping>
-    <servlet-name>Concat</servlet-name>
-    <url-pattern>/concat</url-pattern>
+    <servlet-name>Chat</servlet-name>
+    <url-pattern>/chat/*</url-pattern>
   </servlet-mapping>
+  
   
   <error-page>
     <error-code>404</error-code>
