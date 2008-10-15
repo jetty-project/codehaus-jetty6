@@ -52,13 +52,24 @@
             </goals>
             <configuration>
               <instructions>
-                <Bundle-RequiredExcutionEnvironment>J2SE-1.5</Bundle-RequiredExcutionEnvironment>
-                <Bundle-SymbolicName>org.mortbay.jetty.plus</Bundle-SymbolicName>
+                <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
                 <Import-Package>!org.mortbay.jetty.plus.*,*</Import-Package>
               </instructions>
             </configuration>
            </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <!--
+        Required for OSGI
+        -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>               
+            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+          </archive>
+        </configuration>
       </plugin>
       <!-- always include sources since jetty-xbean makes use of them -->
       <plugin>

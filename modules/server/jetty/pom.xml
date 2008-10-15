@@ -77,7 +77,7 @@
             <configuration>
               <instructions>
                 <Bundle-SymbolicName>org.mortbay.jetty.server</Bundle-SymbolicName>
-                <Bundle-RequiredExcutionEnvironment>J2SE-1.5</Bundle-RequiredExcutionEnvironment>
+                <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
                 <Bundle-DocURL>http://jetty.mortbay.org</Bundle-DocURL>
                 <Import-Package>!org.mortbay.jetty.*,!org.mortbay.xml.*,!org.mortbay.resource.*,!org.mortbay.io.*,!org.mortbay.servlet.jetty.*,javax.servlet.resources;resolution:=optional,javax.servlet.jsp;resolution:=optional,org.apache.jasper.servlet;resolution:=optional,org.mortbay.jetty.handler.management;resolution:=optional,*</Import-Package>
               </instructions>
@@ -103,7 +103,7 @@
           </execution>
         </executions>
         <configuration>
-          <archive>
+          <archive>               
             <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
           </archive>
         </configuration>
