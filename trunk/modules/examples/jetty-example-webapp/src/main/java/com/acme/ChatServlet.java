@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 
 import javax.servlet.ServletException;
@@ -26,7 +27,7 @@ public class ChatServlet extends HttpServlet
         Queue<String> _queue = new LinkedList<String>();
     }
 
-    HashMap<String,Member> _members = new HashMap<String, Member>();
+    Map<String,Map<String,Member>> _rooms = new HashMap<String,Map<String, Member>>();
     
     
     // Handle Ajax calls from browser
@@ -50,7 +51,13 @@ public class ChatServlet extends HttpServlet
     {
         Member member = new Member();
         member._name=username;
-        _members.put(username,member); 
+        Map<String,Member> room=_rooms.get(request.getPathInfo());
+        if (room==null)
+        {
+            room=new HashMap<String,Member>();
+            _rooms.put(request.getPathInfo(),room);
+        }
+        room.put(username,member); 
         response.setContentType("text/json;charset=utf-8");
         PrintWriter out=response.getWriter();
         out.print("{action:'join'}");
@@ -59,7 +66,8 @@ public class ChatServlet extends HttpServlet
     private synchronized void poll(HttpServletRequest request,HttpServletResponse response,String username)
     throws IOException
     {
-        Member member = _members.get(username);
+        Map<String,Member> room=_rooms.get(request.getPathInfo());
+        Member member = room.get(username);
 
         if (member._queue.size()>0)
         {
@@ -89,8 +97,9 @@ public class ChatServlet extends HttpServlet
     private synchronized void chat(HttpServletRequest request,HttpServletResponse response,String username,String message)
     throws IOException
     {
+        Map<String,Member> room=_rooms.get(request.getPathInfo());
         // Post chat to all members
-        for (Member m:_members.values())
+        for (Member m:room.values())
         {
             m._queue.add(username); // from
             m._queue.add(message);  // chat
@@ -113,7 +122,12 @@ public class ChatServlet extends HttpServlet
     // This should be static content and should use real JS libraries.
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        request.getSession(true);
+        if (!request.getRequestURI().endsWith("/"))
+        {
+            response.sendRedirect(request.getRequestURI()+"/");
+            return;
+        }
+        
         response.setContentType("text/html");
         PrintWriter out=response.getWriter();
         out.println("<html><head>");
