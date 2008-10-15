@@ -1,5 +1,6 @@
 jetty-7.0.0.pre4 14 October 2008
  + JETTY-241 Support for web application overlays in rapid application development (jetty:run)
+ + JETTY-319 improved passing of exception when webapp unavailable
  + JETTY-331 SecureRandom hangs on systems with low entropy (connectors slow to start)
  + JETTY-591 No server classes for jetty-web.xml
  + JETTY-604 AbstractSession.setSessionURL
@@ -43,6 +44,24 @@ jetty-7.0.0.pre4 14 October 2008
  + JETTY-741 HttpClient connects slowly due to reverse address lookup by InetAddress.getHostName()
  + JETTY-742 Private messages in cometd chat demo
 
+jetty-6.1.12.rc3 10 October 2008
+ + JETTY-241 Support for web application overlays in rapid application development (jetty:run)
+ + JETTY-686 LifeCycle.Listener
+ + JETTY-715 AJP key size
+ + JETTY-716 NPE for empty cometd message
+ + JETTY-718 during ssl unwrap, return true if some bytes were read, even if underflow
+ + JETTY-720 fix HttpExchange.waitForStatus
+ + JETTY-721 Support wildcard in VirtualHosts configuration
+ + JETTY-722 jndi related threadlocal not cleared after deploying webapp
+ + JETTY-723 jetty.sh does not check if TMP already is set
+ + JETTY-725 port JETTY-708 (jndi scoping) to jetty-6
+ + JETTY-730 set SAX parser features to defaults
+ + JETTY-731 DeliverListener for cometd
+ + JETTY-732 Case Sensitive Basic Authentication Response Header Implementations
+ + JETTY-736 Client Specific cometd advice
+ + JETTY-738 If jetty.sh finds a pid file is does not check to see if a process with that pid is still running
+ + JETTY-739 Race in QueuedThreadPool
+ + JETTY-742 Private messages in cometd chat demo
 
 jetty-6.1.12rc2 12 September 2008
  + JETTY-282 Support manually-triggered reloading
