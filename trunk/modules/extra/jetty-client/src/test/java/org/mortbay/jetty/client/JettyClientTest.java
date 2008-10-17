@@ -248,7 +248,7 @@ public class JettyClientTest extends TestCase {
         // The bug causes the exchange above to be stuck in an infinite loop.
         // This means that the connection won't be reused, and so (as we set
         // max connections per host to 1) that the second exchange (below)
-        // won't get to run.  We'll give it some time (100ms should be more than enough),
+        // won't get to run.  We'll give it some time (500ms should be more than enough),
         // after which we get an InterruptedException which will cause the test to fail.
         final Thread t = Thread.currentThread();
         ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
@@ -257,7 +257,7 @@ public class JettyClientTest extends TestCase {
             public void run() {
                 t.interrupt();
             }
-        }, 100, TimeUnit.MILLISECONDS);
+        }, 500, TimeUnit.MILLISECONDS);
 
         ((StdErrLog)Log.getLog()).setHideStacks(false);
         Log.info("EXPECTED 1 EoFException warning");
