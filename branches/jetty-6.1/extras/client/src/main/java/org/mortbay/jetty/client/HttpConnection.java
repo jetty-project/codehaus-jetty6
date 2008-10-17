@@ -171,6 +171,7 @@ public class HttpConnection implements Connection
         int no_progress = 0;
         long flushed = 0;
 
+        boolean failed = false;
         while (_endp.isBufferingInput() || _endp.isOpen())
         {
             synchronized (this)
@@ -261,11 +262,7 @@ public class HttpConnection implements Connection
 
                 if (io > 0)
                     no_progress = 0;
-                else if (no_progress++ >= 2 && !_endp.isBlocking()) // TODO
-                                                                    // maybe no
-                                                                    // retries
-                                                                    // is best
-                                                                    // here?
+                else if (no_progress++ >= 2 && !_endp.isBlocking()) // TODO maybe no retries is best here?
                     return;
             }
             catch (IOException e)
@@ -278,56 +275,68 @@ public class HttpConnection implements Connection
                         _exchange.setStatus(HttpExchange.STATUS_EXCEPTED);
                     }
                 }
+                failed = true;
+                throw e;
             }
             finally
             {
-                if (_generator.isComplete())
+                boolean complete = false;
+                boolean close = failed; // always close the connection on error
+                if (!failed)
                 {
-                    if (!_requestComplete)
+                    // are we complete?
+                    if (_generator.isComplete())
                     {
-                        _requestComplete = true;
-                        _exchange.getEventListener().onRequestComplete();
-                    }
-
-                    // we need to return the HttpConnection to a state that it
-                    // can be reused
-                    // or closed out
-                    if (_parser.isComplete())
-                    {
-                        _destination.getHttpClient().cancel(_timeout);
-
-                        synchronized (this)
+                        if (!_requestComplete)
                         {
-                            boolean close = shouldClose();
+                            _requestComplete = true;
+                            _exchange.getEventListener().onRequestComplete();
+                        }
 
-                            reset(true);
-                            no_progress = 0;
-                            flushed = -1;
-                            if (_exchange != null)
+                        // we need to return the HttpConnection to a state that
+                        // it can be reused or closed out
+                        if (_parser.isComplete())
+                        {
+                            _destination.getHttpClient().cancel(_timeout);
+                            complete = true;
+                        }
+                    }
+                }
+
+                if (complete || failed)
+                {
+                    synchronized (this)
+                    {
+                        if (!close)
+                            close = shouldClose();
+                            
+                        reset(true);
+                        no_progress = 0;
+                        flushed = -1;
+                        if (_exchange != null)
+                        {
+                            _exchange = null;
+
+                            if (_pipeline == null)
                             {
-                                _exchange = null;
-
-                                if (_pipeline == null)
+                                _destination.returnConnection(this,close);
+                                if (close)
+                                    return;
+                            }
+                            else
+                            {
+                                if (close)
                                 {
                                     _destination.returnConnection(this,close);
-                                    if (close)
-                                        return;
-                                }
-                                else
-                                {
-                                    if (close)
-                                    {
-                                        _destination.returnConnection(this,close);
-                                        _destination.send(_pipeline);
-                                        _pipeline = null;
-                                        return;
-                                    }
-
-                                    HttpExchange ex = _pipeline;
+                                    _destination.send(_pipeline);
                                     _pipeline = null;
-
-                                    send(ex);
+                                    return;
                                 }
+
+                                HttpExchange ex = _pipeline;
+                                _pipeline = null;
+
+                                send(ex);
                             }
                         }
                     }
@@ -404,11 +413,11 @@ public class HttpConnection implements Connection
             else
             {
                 _exchange._requestFields.remove(HttpHeaders.CONTENT_LENGTH); // TODO
-                                                                             // :
-                                                                             // should
-                                                                             // not
-                                                                             // be
-                                                                             // needed
+                // :
+                // should
+                // not
+                // be
+                // needed
                 _generator.completeHeader(_exchange._requestFields,true);
             }
 
