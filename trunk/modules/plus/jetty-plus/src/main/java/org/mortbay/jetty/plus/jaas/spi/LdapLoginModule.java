@@ -564,8 +564,35 @@ public class LdapLoginModule extends AbstractLoginModule
             throw new IllegalStateException("Unable to establish root context", ex);
         }
     }
+      
+	public boolean commit() throws LoginException {
+		
+		try 
+		{
+			_rootContext.close();
+		} 
+		catch (NamingException e) 
+		{
+			throw new LoginException( "error closing root context: " + e.getMessage() );
+		}
+		
+		return super.commit();
+	}
+	
+	public boolean abort() throws LoginException {
+		try 
+		{
+			_rootContext.close();
+		} 
+		catch (NamingException e) 
+		{
+			throw new LoginException( "error closing root context: " + e.getMessage() );
+		}
+		
+		return super.abort();
+	}
 
-    private String getOption(Map options, String key, String defaultValue)
+	private String getOption(Map options, String key, String defaultValue)
     {
         Object value = options.get(key);
 
