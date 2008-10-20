@@ -30,8 +30,9 @@ public class JettyClientTest extends TestCase {
     
     private HttpClient client;
     
-    private static final int PORT = 3456;
-    private static final String url = String.format("http://localhost:%d/ping", PORT);
+    
+    private static int _PORT = 0;
+    private static String _url;
     
     // Restart the Jetty server
     public void restartServer() throws Exception {
@@ -44,7 +45,16 @@ public class JettyClientTest extends TestCase {
         server = new Server();
         SocketConnector connector = new SocketConnector();
         connector.setHost("127.0.0.1");
-        connector.setPort(PORT);
+       
+        if (_PORT == 0)
+        {
+        	connector.setPort( 0 );
+        }
+        else
+        {
+        	connector.setPort( _PORT );
+        }
+        
         server.addConnector(connector);
         Context context = new Context(server, "", Context.NO_SECURITY | Context.NO_SESSIONS);
         ServletHolder h = new ServletHolder(new HttpServlet() {
@@ -69,6 +79,9 @@ public class JettyClientTest extends TestCase {
         });
         context.addServlet(h, "/ping");
         server.start();
+        
+        _PORT = connector.getLocalPort();
+        _url = String.format("http://localhost:%d/ping", _PORT);
     }
     
     // Restart the Jetty client
@@ -218,7 +231,7 @@ public class JettyClientTest extends TestCase {
     }
     
     public Status runExchange(SimpleExchange exchange) throws Exception {
-        exchange.setup(url);
+        exchange.setup(_url);
         client.send(exchange);
         return exchange.waitForCompletion();
     }
