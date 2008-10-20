@@ -47,6 +47,8 @@ import javax.servlet.http.HttpSession;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.EndPoint;
+import org.mortbay.io.nio.DirectNIOBuffer;
+import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.handler.CompleteHandler;
 import org.mortbay.jetty.handler.ContextHandler;
@@ -1105,7 +1107,9 @@ public class Request extends Suspendable implements HttpServletRequest
                 ByteBuffer byteBuffer=(ByteBuffer)value;
                 synchronized (byteBuffer)
                 {
-                    NIOBuffer buffer = new NIOBuffer(byteBuffer,true);
+                    NIOBuffer buffer = byteBuffer.isDirect()
+                        ?(NIOBuffer)new DirectNIOBuffer(byteBuffer,true)
+                        :(NIOBuffer)new IndirectNIOBuffer(byteBuffer,true);
                     ((HttpConnection.Output)getServletResponse().getOutputStream()).sendResponse(buffer);
                 }
             } 

@@ -19,6 +19,7 @@ import java.nio.channels.SocketChannel;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.View;
+import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
@@ -43,9 +44,9 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
                 {
                     int write;
                     int read;
-                    NIOBuffer one = new NIOBuffer(1,false);
-                    NIOBuffer two = new NIOBuffer(2,false);
-                    NIOBuffer three = new NIOBuffer(3,false);
+                    NIOBuffer one = new IndirectNIOBuffer(1);
+                    NIOBuffer two = new IndirectNIOBuffer(2);
+                    NIOBuffer three = new IndirectNIOBuffer(3);
                     
                     /* ------------------------------------------------------------ */
                     /* (non-Javadoc)
