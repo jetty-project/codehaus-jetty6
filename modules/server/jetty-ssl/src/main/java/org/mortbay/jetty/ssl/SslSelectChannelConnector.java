@@ -44,6 +44,8 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.bio.SocketEndPoint;
+import org.mortbay.io.nio.DirectNIOBuffer;
+import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
@@ -129,13 +131,15 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         {   
             buffer = _applicationBuffers.poll();
             if (buffer==null)
-                buffer=new NIOBuffer(size,false); 
+                buffer=new IndirectNIOBuffer(size);
         }
         else if (size==_packetBufferSize)
         {   
             buffer = _packetBuffers.poll();
             if (buffer==null)
-                buffer=new NIOBuffer(size,getUseDirectBuffers()); 
+                buffer=getUseDirectBuffers()
+                    ?(NIOBuffer)new DirectNIOBuffer(size)
+                    :(NIOBuffer)new IndirectNIOBuffer(size);
         }
         else 
             buffer=super.getBuffer(size);
