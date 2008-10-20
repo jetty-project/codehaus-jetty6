@@ -33,6 +33,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.WriterOutputStream;
+import org.mortbay.io.nio.DirectNIOBuffer;
+import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
@@ -919,7 +921,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             {    
                 File file = resource.getFile();
                 if (file != null) 
-                    buffer = new NIOBuffer(file);
+                    buffer = new DirectNIOBuffer(file);
             } 
             else 
             {
@@ -927,13 +929,16 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 try
                 {
                     Connector connector = HttpConnection.getCurrentConnection().getConnector();
-                    buffer = new NIOBuffer((int) length, ((NIOConnector)connector).getUseDirectBuffers()?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
+                    buffer = ((NIOConnector)connector).getUseDirectBuffers()?
+                            (NIOBuffer)new DirectNIOBuffer((int)length):
+                            (NIOBuffer)new IndirectNIOBuffer((int)length);
+                                
                 }
                 catch(OutOfMemoryError e)
                 {
                     Log.warn(e.toString());
                     Log.debug(e);
-                    buffer = new NIOBuffer((int) length, NIOBuffer.INDIRECT);
+                    buffer = new IndirectNIOBuffer((int) length);
                 }
                 buffer.readFrom(is,(int)length);
                 is.close();
