@@ -131,9 +131,9 @@ public class View extends AbstractBuffer
      * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
-    public boolean equals(Object arg0)
+    public boolean equals(Object obj)
     {
-        return  this==arg0 || super.equals(arg0);
+        return  this==obj ||((obj instanceof Buffer)&&((Buffer)obj).equals(this)) || super.equals(obj);
     }
 
     /**
@@ -227,6 +227,11 @@ public class View extends AbstractBuffer
         public CaseInsensitive(Buffer buffer)
         {
             super(buffer);
+        }
+        
+        public boolean equals(Object obj)
+        {
+            return  this==obj ||((obj instanceof Buffer)&&((Buffer)obj).equalsIgnoreCase(this)) || super.equals(obj);
         }
     }
 }
