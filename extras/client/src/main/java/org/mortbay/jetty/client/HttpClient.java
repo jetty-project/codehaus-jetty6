@@ -36,6 +36,8 @@ import javax.net.ssl.X509TrustManager;
 import org.mortbay.component.LifeCycle;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.io.nio.DirectNIOBuffer;
+import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpSchemes;
@@ -285,9 +287,11 @@ public class HttpClient extends AbstractBuffers
         {
             Buffer buf=null;
             if (size==getHeaderBufferSize())
-                buf=new NIOBuffer(size,NIOBuffer.INDIRECT);
+                buf=new IndirectNIOBuffer(size);
+            else if (_useDirectBuffers)
+                buf=new DirectNIOBuffer(size);
             else
-                buf=new NIOBuffer(size,_useDirectBuffers?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
+                buf=new IndirectNIOBuffer(size);
             return buf;
         }
         else

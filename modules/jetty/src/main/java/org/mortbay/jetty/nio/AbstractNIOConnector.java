@@ -18,6 +18,8 @@
 package org.mortbay.jetty.nio;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.io.nio.DirectNIOBuffer;
+import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
 
@@ -64,9 +66,11 @@ public abstract class AbstractNIOConnector extends AbstractConnector implements 
         // 
         Buffer buf = null;
         if (size==getHeaderBufferSize())
-            buf= new NIOBuffer(size, NIOBuffer.INDIRECT);
+            buf= new IndirectNIOBuffer(size);
         else
-            buf = new NIOBuffer(size, _useDirectBuffers?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
+            buf = _useDirectBuffers
+                ?(NIOBuffer)new DirectNIOBuffer(size)
+                :(NIOBuffer)new IndirectNIOBuffer(size);
         return buf;
     }
     

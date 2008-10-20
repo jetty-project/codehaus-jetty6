@@ -438,18 +438,14 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     private boolean shouldClose()
     {
-        if (HttpHeaderValues.CLOSE_BUFFER.equals(_connectionHeader))
+        if (_connectionHeader!=null)
         {
-            return true;
+            if (HttpHeaderValues.CLOSE_BUFFER.equals(_connectionHeader))
+                return true;
+            if (HttpHeaderValues.KEEP_ALIVE_BUFFER.equals(_connectionHeader))
+                return false;
         }
-        else if (HttpHeaderValues.KEEP_ALIVE_BUFFER.equals(_connectionHeader))
-        {
-            return false;
-        }
-        else
-        {
-            return !_http11;
-        }
+        return !_http11;
     }
 
     /* ------------------------------------------------------------ */
