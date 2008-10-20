@@ -102,6 +102,7 @@ public class WebAppContext extends Context
     private String[] _serverClasses = {
             "-org.mortbay.naming.",       // don't hide naming classes
             "-org.mortbay.util.ajax.",    // don't hide continuation classes
+            "-org.mortbay.jetty.plus.jaas.", //don't hide jaas modules
             "org.mortbay.",               // hide rest of mortbay classes
             "org.slf4j."                  // hide slf4j
             }; 
