@@ -1059,7 +1059,9 @@ public class JSON
                 case 'e':
                 case 'E':
                     buffer=new StringBuffer(16);
-                    buffer.append(minus?-1*number:number);
+                    if(minus) 
+                        buffer.append('-');
+                    buffer.append(number);
                     buffer.append(c);
                     source.next();
                     break longLoop;
