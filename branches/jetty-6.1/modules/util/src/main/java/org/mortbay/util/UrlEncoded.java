@@ -242,9 +242,17 @@ public class UrlEncoded extends MultiMap
      */
     public static void decodeUtf8To(byte[] raw,int offset, int length, MultiMap map)
     {
+        decodeUtf8To(raw,offset,length,map,new Utf8StringBuffer());
+    }
+
+    /* -------------------------------------------------------------- */
+    /** Decoded parameters to Map.
+     * @param data the byte[] containing the encoded parameters
+     */
+    public static void decodeUtf8To(byte[] raw,int offset, int length, MultiMap map,Utf8StringBuffer buffer)
+    {
         synchronized(map)
         {
-            Utf8StringBuffer buffer = new Utf8StringBuffer();
             String key = null;
             String value = null;
             

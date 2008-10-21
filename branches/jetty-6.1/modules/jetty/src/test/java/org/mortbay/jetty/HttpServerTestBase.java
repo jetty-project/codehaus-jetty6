@@ -382,7 +382,6 @@ public class HttpServerTestBase extends TestCase
         {   
             String[] encoding = {"NONE","UTF-8","ISO-8859-1","ISO-8859-2"};
 
-
             for (int e =0; e<encoding.length;e++)
             {
                 for (int b=1;b<=128;b=b==1?2:b==2?32:b==32?128:129)
@@ -401,8 +400,6 @@ public class HttpServerTestBase extends TestCase
                     }
                 }
             }
-
-
         }
         finally
         {
@@ -410,7 +407,6 @@ public class HttpServerTestBase extends TestCase
             server.stop();
             Thread.yield();
         }
-
     }
 
     /**

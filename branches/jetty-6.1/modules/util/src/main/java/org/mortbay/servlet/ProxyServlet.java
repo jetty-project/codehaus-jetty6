@@ -46,7 +46,6 @@ import org.mortbay.util.IO;
  */
 public class ProxyServlet implements Servlet
 {
-    private int _tunnelTimeoutMs=300000;
     
     protected HashSet _DontProxyHeaders = new HashSet();
     {
