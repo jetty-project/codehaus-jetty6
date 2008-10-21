@@ -69,7 +69,11 @@ public class ContextHandlerTest extends TestCase
 
     private File setupTestDirectory() throws IOException
     {
-        File root = new File(System.getProperty("basedir","modules/jetty"),"target/" + getClass().getName());
+        File tmp = File.createTempFile("cht",null);
+        tmp.delete();
+        tmp.mkdir();
+        tmp.deleteOnExit();
+        File root = new File(tmp,getClass().getName());
         root.mkdir();
 
         File webInf = new File(root,"WEB-INF");

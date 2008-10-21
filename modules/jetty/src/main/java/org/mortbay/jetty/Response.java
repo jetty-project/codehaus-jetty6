@@ -618,8 +618,6 @@ public class Response implements HttpServletResponse
     {
     	if (_connection.isIncluding())
     		return;
-    	
-        // TODO throw unsupported encoding exception ???
         
         if (this._outputState==0 && !isCommitted())
         {
