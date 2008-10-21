@@ -1,52 +1,10 @@
-jetty-7.0.0.pre4 14 October 2008
- + JETTY-241 Support for web application overlays in rapid application development (jetty:run)
+jetty-6.1.12
  + JETTY-319 improved passing of exception when webapp unavailable
- + JETTY-331 SecureRandom hangs on systems with low entropy (connectors slow to start)
- + JETTY-591 No server classes for jetty-web.xml
- + JETTY-604 AbstractSession.setSessionURL
- + JETTY-670 $JETTY_HOME/bin/jetty.sh not worked in Solaris, because of /usr/bin/which has no error-code
- + JETTY-676 ResourceHandler doesn't support HTTP HEAD requests
- + JETTY-677 GWT serialization issue
- + JETTY-680 Can't configure the ResourceCollection with maven
- + JETTY-681 JETTY-692 MultiPartFilter is slow for file uploads
- + JETTY-682 Added listeners and queue methods to cometd
- + JETTY-686 LifeCycle.Listener
- + JETTY-687 Issue with servlet-mapping in dynamic servlet invoker
- + JETTY-688 Cookie causes NumberFormatException
- + JETTY-689 processing of non-servlet related annotations
- + JETTY-690 Updated XBean dependencies to XBean version 3.4.3 and Spring 2.0.5.
- + JETTY-696 jetty.sh restart not working
- + JETTY-698 org.mortbay.resource.JarResource.extract does not close JarInputStream jin
- + JETTY-699 Optimized cometd sending of 1 message to many many clients
- + JETTY-700 unit test for unread request data
- + JETTY-708 allow 3 scopes for jndi resources: jvm, server or webapp
- + JETTY-709 Jetty plugin's WebAppConfig configured properties gets overridden by AbstractJettyRunMojo even when already set
- + JETTY-710 Worked around poor implementation of File.toURL()
- + JETTY-711 DataSourceUserRealm implementation
- + JETTY-712 HttpClient does not handle request complete after response complete
- + JETTY-715 AJP Key size as Integer
- + JETTY-716 Fixed NPE on empty cometd message
- + JETTY-718 during ssl unwrap, return true if some bytes were read, even if underflow
- + JETTY-720 fix HttpExchange.waitForStatus
- + JETTY-721 Support wildcard in VirtualHosts configuration
- + JETTY-723 jetty.sh does not check if TMP already is set
- + JETTY-724 better handle EBCDIC default JVM encoding
- + JETTY-728 Improve Terracotta integration and performances
- + JETTY-730 Set SAX parse features to defaults
- + JETTY-731 DeliverListener for cometd
- + JETTY-732 Case Sensitive Basic Authentication Response Header Implementations
- + JETTY-733 Expose ssl connectors with xbean
- + JETTY-735 Wrong default jndi name on DataSourceUserRealm
- + JETTY-736 Client Specific cometd advice
- + JETTY-737 refactored jetty.jar into jetty, xml, security, ssl, webapp and deploy jars
- + JETTY-738 If jetty.sh finds a pid file is does not check to see if a process with that pid is still running
- + JETTY-739 Race in QueuedThreadPool
- + JETTY-741 HttpClient connects slowly due to reverse address lookup by InetAddress.getHostName()
- + JETTY-742 Private messages in cometd chat demo
- + JETTY-747 Handle HttpClient exceptions better
+ + JETTY-729 Backport Terracotta integration to Jetty6.1 branch
+ + JETTY-744 Backport of JETTY-741: HttpClient connects slowly due to reverse address lookup by InetAddress.getHostName()
+ + JETTY-747 Handle exceptions better in HttpClient
  + JETTY-755 Optimized HttpParser and buffers for few busy connections
- + JETTY-757 Unhide JAAS classes 
- + JETTY-758 Update JSP to glassfish tag SJSAS-9_1_1-B51-18_Sept_2008
+ + JETTY-758 Update JSP 2.1 to glassfish tag SJSAS-9_1_1-B51-18_Sept_2008
  + JETTY-759 Fixed JSON small negative real numbers
  + JETTY-760 Handle wildcard VirtualHost and normalize hostname in ContextHandlerCollection
 
@@ -84,6 +42,7 @@ jetty-6.1.12rc2 12 September 2008
  + JETTY-683 ResourceCollection works for jsp files but does not work for static resources under DefaultServlet
  + JETTY-687 Issue with servlet-mapping in dynamic servlet invoker
  + JETTY-688 Cookie causes NumberFormatException
+ + JETTY-692 JETTY-681 MultiPartFilter is slow for file uploads
  + JETTY-696 ./jetty.sh restart not working
  + JETTY-698 org.mortbay.resource.JarResource.extract does not close JarInputStream jin
  + JETTY-699 Optimize cometd sending of 1 message to many many clients
@@ -91,53 +50,7 @@ jetty-6.1.12rc2 12 September 2008
  + JETTY-710 Worked around poor implementation of File.toURL()
  + JETTY-712 HttpClient does not handle request complete after response complete
 
-
-jetty-7.0.0pre3 - 6 August 2008
- + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
- + JETTY-30  Externalize servlet-api to own project
- + JETTY-182 Support setting explicit system classpath for jasper Jsr199JavaCompiler
- + JETTY-319 Get unavailable exception and added startWithUnavailable option
- + JETTY-381 JETTY-622 Multiple Web Application Source Directory
- + JETTY-442 Accessors for mimeType on ResourceHandler
- + JETTY-502 forward of an include should hide include attributes
- + JETTY-562 RewriteHandler support for virtual hosts
- + JETTY-563 JETTY-482 OpenRemoteServiceServlet for GWT1.5M2+
- + JETTY-564 Consider optionally importing org.apache.jasper.servlet
- + JETTY-571 SelectChannelConnector throws Exception on close on Windows
- + JETTY-608 Suspend/Resume/Complete request listeners
- + JETTY-621 Improved LazyList javadoc
- + JETTY-626 Null protect reading the dtd resource from classloader
- + JETTY-628 Rewrite rule for rewriting scheme
- + JETTY-629 Don't hold timeout lock during expiry call.
- + JETTY-632 OSGi tags for Jetty client
- + JETTY-633 Default form encoding 8859_1 rather than utf-8
- + JETTY-635 Correctly merge request parameters when doing forward
- + JETTY-636 Separate lifeycle of jsp build
- + JETTY-637 empty date headers throw IllegalArgumentException
- + JETTY-641 JDBC Realm purge cache problem
- + JETTY-642 NPE in LdapLoginModule
- + JETTY-644 LdapLoginModule uses proper filters when searching
- + JETTY-645 Do not provide jetty-util to the webapps
- + JETTY-646 Should set Cache-Control header when sending errors to avoid caching
- + JETTY-647 suspended POSTs with binary data do too many resumes
- + JETTY-650 Parse "*" URI for HTTP OPTIONS request
- + JETTY-651 Release resources during destroy
- + JETTY-653 Upgrade jta api specs to more recent version
- + JETTY-654 Allow Cometd Bayeux object to be JMX manageable
- + JETTY-655 Support parsing application/x-www-form-urlencoded parameters via http PUT
- + JETTY-656 HttpClient defaults to async mode
- + JETTY-659 ContentExchange and missing headers in HttpClient
- + JETTY-663 AbstractDatabaseLoginModule handle not found UserInfo and userName
- + JETTY-665 Support merging class directories
- + JETTY-666 scanTargetPatterns override the values already being set by scanTarget
- + JETTY-667 HttpClient handles chunked content
- + JETTY-669 Http methods other than GET and POST should not have error page content
- + JETTY-671 Configure DTD does not allow <Property> children
- + JETTY-672 Utf8StringBuffer doesn't properly handle null characters (char with byte value 0)
- + JETTY-675 ServletContext.getRealPath("") returns null instead of returning the root dir of the webapp
-
-jetty-6.1.12rc1 1 August 2008
- + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
+jetty-6.1.12rc1 1 August 2008 + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
  + JETTY-319 Get unavailable exception and added startWithUnavailable option
  + JETTY-381 JETTY-622 Multiple Web Application Source Directory
  + JETTY-442 Accessors for mimeType on ResourceHandler
@@ -183,41 +96,6 @@ jetty-6.1.12rc1 1 August 2008
  + JETTY-667 HttpClient handles chunked content
  + JETTY-669 Http methods other than GET and POST should not have error page content
 
-jetty-7.0.0pre2 - 30 June 2008
- + JETTY-336 413 error for header buffer full
- + JETTY-425 race in stopping SelectManager
- + JETTY-568 Avoid freeing DirectBuffers. New locking NIO ResourceCache.
- + JETTY-569 Stats for suspending requests
- + JETTY-576 servlet dtds and xsds not being loaded locally
- + JETTY-572 Unique cometd client ID
- + JETTY-578 OSGI Bundle-RequiredExcutionEnvironment set to J2SE-1.5
- + JETTY-579 OSGI resolved management and servlet.resources import error
- + JETTY-580 Fixed SSL shutdown
- + JETTY-581 ContextPath constructor
- + JETTY-582 final ISO_8859_1
- + JETTY-584 handle null contextPath
- + JETTY-587 persist sessions to database
- + JETTY-588 handle Retry in ServletException
- + JETTY-589 Added Statistics Servlet
- + JETTY-590 Digest auth domain for root context
- + JETTY-592 expired timeout callback without synchronization
- + JETTY-595 SessionHandler only deals with base request session
- + JETTY-596 proxy support in HttpClient
- + JETTY-598 Added more reliable cometd message flush option
- + JETTY-599 handle buffers consistently handle invalid index for poke
- + JETTY-603 Handle IPv6 in HttpURI
- + JETTY-605 Added optional threadpool to BayeuxService
- + JETTY-606 better writeTo impl for BIO
- + JETTY-607 Add GigaSpaces session clustering
- + JETTY-609 jetty-client improvements for http conversations
- + JETTY-610 jetty.class.path not being interpreted
- + JETTY-611 make general purpose jar scanning mechanism
- + JETTY-612 scan for web.xml fragments
- + JETTY-613 various distribution related changes
- + JETTY-614 scanner allocates hashmap on every iteration
- + JETTY-615 Replaced CDDL servlet.jar with Apache-2.0 licensed version
- + JETTY-623 ServletContext.getServerInfo() non compliant
-
 jetty-6.1.11 6 June 2008
  + JETTY-336 413 error for full header buffer
  + JETTY-425 race in stopping SelectManager
@@ -246,68 +124,6 @@ jetty-6.1.10 20 May 2008
  + JETTY-566 allow for non-blocking behavior in jetty maven plugin
  + JETTY-572 unique cometd client ID
  + JETTY-579 osgi fixes with management and servlet resources
-
-jetty-7.0.0pre1 - 3 May 2008
- + Allow annotations example to be built regularly, copy to contexts-available
- + Make annotations example consistent with servlet 3.0
- + Refactor JNDI impl to simplify
- + Improved suspend examples
- + address osgi bundling issue relating to build resources
- + JETTY-529 CNFE when deserializing Array from session resolved
- + JETTY-558 optional handling of X-Forwarded-For/Host/Server
- + JETTY-559 ignore unsupported shutdownOutput
- + JETTY-566 allow for non-blocking behavior in jetty maven plugin
- + JETTY-440 allow file name patterns for jsp compilation for jspc plugin
-
-jetty-7.0.0pre0 - 21 April 2008
- + Jetty-6.1.8 Changes
- + Refactor of Continuation towards servlet 3.0 proposal
- + JETTY-282 Support manually-triggered reloading by maven plugin
- + QueuedThreadPool default
- + RetryRequest exception now extends ThreadDeath
- + Added option to dispatch to suspended requests.
- + Delay 100 continues until getInputStream
- + HttpClient supports pipelined request
- + BayeuxClient use a single connection for polling
- + Make javax.servlet.jsp optional osgi import for jetty module
- + Ensure Jotm tx mgr can be found in jetty-env.xml
- + Renamed modules management and naming to jmx and jndi.
- + JETTY-282 Support manually-triggered reloading by maven plugin
- + JETTY-341 100-Continues sent only after getInputStream called.
- + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean)
- + JETTY-399 update OpenRemoteServiceServlet to gwt 1.4
- + JETTY-467 allow URL rewriting to be disabled.
- + JETTY-468 unique holder names for addServletWithMapping
- + JETTY-471 LDAP JAAS Realm
- + JETTY-474 Fixed case sensitivity issue with HttpFields
- + JETTY-475 AJP connector in RPMs
- + JETTY-486 Improved jetty.sh script
- + JETTY-487 Handle empty chunked request
- + JETTY-494 Client side session replication
- + JETTY-519 HttpClient does not recycle closed connection.
- + JETTY-522 Add build profile for macos for setuid
- + JETTY-523 Default servlet uses ServletContext.getResource
- + JETTY-524 Don't synchronize session event listener calls
- + JETTY-525 Fixed decoding for long strings
- + JETTY-526 Fixed MMBean fields on JMX MBeans
- + JETTY-528 Factor our cookie parsing to CookieCutter
- + JETTY-530 Improved JMX MBeanContainer lifecycle
- + JETTY-531 Optional expires on MovedContextHandler
- + JETTY-532 MBean properties for QueuedThreadPool
- + JETTY-535 Fixed Bayeux server side client memory leak
- + JETTY-537 JSON handles Locales
- + JETTY-538 test harness fix for windows
- + JETTY-540 Servlet-3.0 & java5 support (work in progress)
- + JETTY-543 Atomic batch get and put of files.
- + JETTY-545 Rewrite handler
- + JETTY-546 Webapp runner. All in one jar to run a webapps
- + JETTY-547 Shutdown SocketEndpoint output before close
- + JETTY-550 Reading 0 bytes corrupts ServletInputStream
- + JETTY-551 Wadi 2.0-M10
- + JETTY-553 Fixed customize override
- + JETTY-556 Encode all URI fragments
- + JETTY-557 Allow ServletContext.setAttribute before start
- + JETTY-560 Allow decoupling of jndi names in web.xml
 
 jetty-6.1.9 26 March 2008
  + Make javax.servlet.jsp optional osgi import for jetty module
@@ -365,7 +181,6 @@ jetty-6.1.8 28 February 2008
  + JETTY-513 Terracotta session replication does not work when the initial page on each server does not set any attributes
  + JETTY-515 Timer is missing scavenging Task in HashSessionManager
 
-
 jetty-6.1.7 - 22 December 2007
  + Added BayeuxService
  + Added JSON.Convertor and non static JSON instances
@@ -376,7 +191,7 @@ jetty-6.1.7 - 22 December 2007
  + jetty-6.1 branch created from 6.1.6 and r593 of jetty-contrib trunk
  + Optimizations and improvements of Cometd, more pooled objects
  + Update java5 patch
- + JETTY-386 CERT-553235. backout fix and replaced with ContextHandler.setCompactPath(boolean)
+ + JETTY-386 CERT-553235 backout fix and replaced with ContextHandler.setCompactPath(boolean)
  + JETTY-467 allow URL rewriting to be disabled.
  + JETTY-468 unique holder names for addServletWithMapping
  + JETTY-474 Fixed case sensitivity issue with HttpFields
@@ -439,7 +254,7 @@ jetty-6.1.6rc0 - 3 October 2007
  + Removal of unneeded dependencies from management, maven-plugin, naming &  plus poms
  + Adding setUsername,setGroupname to setuid and mavenizing native build
  + UTF-8 for bayeux client
- + CVE-2007-5615 CERT21284 Added protection for response splitting with bad headers.
+ + CVE-2007-5615 Added protection for response splitting with bad headers.
  + Cached user agents strings in the /org/mortbay/jetty/useragents resource
  + Make default time format for RequestLog match NCSA default
  + Use terracotta repo for build; make jetty a terracotta module
@@ -473,7 +288,7 @@ jetty-6.1.5 - 19 Jul 2007
  + Fixed reset of reason
  + JETTY-392 - updated LikeJettyXml example
 
-jetty-6.1.5rc0 - 15 Jul 2007
+jetty-6.1.5rc0 - 15 Jul 200
  + update terracotta session clustering to terracotta 2.4
  + SetUID option to only open connectors before setUID.
  + Protect SslSelectChannelConnector from exceptions during close
