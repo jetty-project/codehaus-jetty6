@@ -69,7 +69,9 @@ public class ContextHandlerTest extends TestCase
 
     private File setupTestDirectory() throws IOException
     {
-        File tmp = File.createTempFile("cht",null);
+    	File tmpDir = new File( System.getProperty( "basedir" ) + "/target/tmp/ContextHandlerTest" );
+    	tmpDir.mkdirs();
+        File tmp = File.createTempFile("cht",null, tmpDir );
         tmp.delete();
         tmp.mkdir();
         tmp.deleteOnExit();
