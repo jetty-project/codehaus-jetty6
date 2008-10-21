@@ -44,6 +44,7 @@ jetty-7.0.0.pre4 14 October 2008
  + JETTY-741 HttpClient connects slowly due to reverse address lookup by InetAddress.getHostName()
  + JETTY-742 Private messages in cometd chat demo
  + JETTY-747 Handle HttpClient exceptions better
+ + JETTY-755 Optimized HttpParser and buffers for few busy connections
  + JETTY-757 Unhide JAAS classes 
  + JETTY-758 Update JSP to glassfish tag SJSAS-9_1_1-B51-18_Sept_2008
 

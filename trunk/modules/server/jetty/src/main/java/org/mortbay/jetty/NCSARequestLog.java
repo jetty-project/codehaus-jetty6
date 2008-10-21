@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -30,6 +31,7 @@ import org.mortbay.util.DateCache;
 import org.mortbay.util.RolloverFileOutputStream;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
+import org.mortbay.util.Utf8StringBuilder;
 
 /**
  * This {@link RequestLog} implementation outputs logs in the pseudo-standard
@@ -66,6 +68,8 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
     private transient DateCache _logDateCache;
     private transient PathMap _ignorePathMap;
     private transient Writer _writer;
+    private transient ArrayList _buffers;
+    private transient char[] _copy;
 
     public NCSARequestLog()
     {
@@ -218,6 +222,7 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
         _preferProxiedForAddress = preferProxiedForAddress;
     }
 
+    /* ------------------------------------------------------------ */
     public void log(Request request, Response response)
     {
         if (!isStarted())
@@ -231,8 +236,15 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
             if (_fileOut == null)
                 return;
 
-            StringBuilder buf = new StringBuilder(160);
-            String log = null;
+            Utf8StringBuilder u8buf;
+            StringBuilder buf;
+            synchronized(_writer)
+            {
+                int size=_buffers.size();
+                u8buf = size==0?new Utf8StringBuilder(160):(Utf8StringBuilder)_buffers.remove(size-1);
+                buf = u8buf.getStringBuilder();
+            }
+            
             if (_logServer)
             {
                 buf.append(request.getServerName());
@@ -261,6 +273,7 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
             buf.append("] \"");
             buf.append(request.getMethod());
             buf.append(' ');
+            request.getUri().writeTo(u8buf);
             buf.append(request.getUri());
             buf.append(' ');
             buf.append(request.getProtocol());
@@ -300,43 +313,67 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
             else
                 buf.append(" - ");
 
-            log = buf.toString();
-
-            synchronized (_writer)
+            if (!_extended && !_logCookies && !_logLatency)
+	    {
+                synchronized(_writer)
+		{
+                    int l=buf.length();
+                    if (l>_copy.length)
+                        l=_copy.length;  
+                    buf.append(StringUtil.__LINE_SEPARATOR);
+                    buf.getChars(0,l,_copy,0); 
+                    _writer.write(_copy,0,l);
+                    _writer.flush();
+                    u8buf.reset();
+                    _buffers.add(u8buf); 
+                }
+            }
+            else
             {
-                _writer.write(log);
-                if (_extended)
-                    logExtended(request,response,_writer);
-
-                if (_logCookies)
+                synchronized(_writer)
                 {
-                    Cookie[] cookies = request.getCookies();
-                    if (cookies == null || cookies.length == 0)
-                        _writer.write(" -");
-                    else
+                    int l=buf.length();
+                    if (l>_copy.length)
+                        l=_copy.length;  
+                    buf.getChars(0,l,_copy,0); 
+                    _writer.write(_copy,0,l);
+                    u8buf.reset();
+                    _buffers.add(u8buf); 
+
+                    // TODO do outside synchronized scope
+                    if (_extended)
+                        logExtended(request, response, _writer);
+
+                    // TODO do outside synchronized scope
+                    if (_logCookies)
                     {
-                        _writer.write(" \"");
-                        for (int i = 0; i < cookies.length; i++)
+                        Cookie[] cookies = request.getCookies(); 
+                        if (cookies == null || cookies.length == 0)
+                            _writer.write(" -");
+                        else
                         {
-                            if (i != 0)
-                                _writer.write(';');
-                            _writer.write(cookies[i].getName());
-                            _writer.write('=');
-                            _writer.write(cookies[i].getValue());
+                            _writer.write(" \"");
+                            for (int i = 0; i < cookies.length; i++) 
+                            {
+                                if (i != 0)
+                                    _writer.write(';');
+                                _writer.write(cookies[i].getName());
+                                _writer.write('=');
+                                _writer.write(cookies[i].getValue());
+                            }
+                            _writer.write('\"');
                         }
-                        _writer.write("\"");
                     }
+
+                    if (_logLatency)
+                    {
+                        _writer.write(' ');
+                        _writer.write(TypeUtil.toString(System.currentTimeMillis() - request.getTimeStamp()));
+                    }
+
+                    _writer.write(StringUtil.__LINE_SEPARATOR);
+                    _writer.flush();
                 }
-
-                if (_logLatency)
-                {
-                    _writer.write(" ");
-                    _writer.write(TypeUtil.toString(System.currentTimeMillis() - request.getTimeStamp()));
-                }
-
-                _writer.write(StringUtil.__LINE_SEPARATOR);
-                _writer.flush();
-
             }
         }
         catch (IOException e)
@@ -346,7 +383,10 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
 
     }
 
-    protected void logExtended(Request request, Response response, Writer writer) throws IOException
+    /* ------------------------------------------------------------ */
+    protected void logExtended(Request request, 
+                               Response response, 
+                               Writer writer) throws IOException 
     {
         String referer = request.getHeader(HttpHeaders.REFERER);
         if (referer == null)
@@ -369,6 +409,7 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
         }
     }
 
+    /* ------------------------------------------------------------ */
     protected void doStart() throws Exception
     {
         if (_logDateFormat != null)
@@ -398,9 +439,12 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
             _ignorePathMap = null;
 
         _writer = new OutputStreamWriter(_out);
+        _buffers = new ArrayList();
+        _copy = new char[1024];
         super.doStart();
     }
 
+    /* ------------------------------------------------------------ */
     protected void doStop() throws Exception
     {
         super.doStop();
@@ -428,6 +472,8 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
         _closeOut = false;
         _logDateCache = null;
         _writer = null;
+        _buffers = null;
+        _copy = null;
     }
 
     /* ------------------------------------------------------------ */
