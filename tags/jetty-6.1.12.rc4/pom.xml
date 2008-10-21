@@ -239,6 +239,8 @@
                   <link>http://java.sun.com/javaee/5/docs/api</link>
                   <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
                 </links>
+                <reportOutputDirectory>${basedir}/javadoc</reportOutputDirectory
+>
             </configuration>
             <executions>
               <execution>
@@ -255,6 +257,8 @@
           <version>2.1</version>
           <configuration>
             <aggregate>true</aggregate>
+            <javadocDir>${basedir}/javadoc</javadocDir>
+            <destDir>${basedir}/jxr</destDir>
           </configuration>
           <executions>
 						<execution>
