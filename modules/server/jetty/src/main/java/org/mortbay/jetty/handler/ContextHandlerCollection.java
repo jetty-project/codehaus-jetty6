@@ -168,20 +168,30 @@ public class ContextHandlerCollection extends HandlerCollection
 	    return;
 
 	Request base_request = HttpConnection.getCurrentConnection().getRequest();
+	
+	// data structure which maps a request to a context; first-best match wins
+	// { context path => 
+	//     { virtual host => context } 
+	// }
 	PathMap map = _contextMap;
 	if (map!=null && target!=null && target.startsWith("/"))
 	{
+	    // first, get all contexts matched by context path
 	    Object contexts = map.getLazyMatches(target);
 
             for (int i=0; i<LazyList.size(contexts); i++)
             {
+                // then, match against the virtualhost of each context
                 Map.Entry entry = (Map.Entry)LazyList.get(contexts, i);
                 Object list = entry.getValue();
 
                 if (list instanceof Map)
                 {
                     Map hosts = (Map)list;
-                    list=hosts.get(request.getServerName());
+                    String host = normalizeHostname(request.getServerName());
+           
+                    // explicitly-defined virtual hosts, most specific
+                    list=hosts.get(host);
                     for (int j=0; j<LazyList.size(list); j++)
                     {
                         Handler handler = (Handler)LazyList.get(list,j);
@@ -189,6 +199,19 @@ public class ContextHandlerCollection extends HandlerCollection
                         if (base_request.isHandled())
                             return;
                     }
+                    
+                    // wildcard for one level of names 
+                    list=hosts.get("*."+host.substring(host.indexOf(".")+1));
+                    for (int j=0; j<LazyList.size(list); j++)
+                    {
+                        Handler handler = (Handler)LazyList.get(list,j);
+                        handler.handle(target,request, response, dispatch);
+                        if (base_request.isHandled())
+                            return;
+                    }
+                    
+                    // no virtualhosts defined for the context, least specific
+                    // will handle any request that does not match to a specific virtual host above
                     list=hosts.get("*");
                     for (int j=0; j<LazyList.size(list); j++)
                     {
@@ -270,5 +293,16 @@ public class ContextHandlerCollection extends HandlerCollection
         _contextClass = contextClass;
     }
     
+    /* ------------------------------------------------------------ */
+    private String normalizeHostname( String host )
+    {
+        if ( host == null )
+            return null;
+        
+        if ( host.endsWith( "." ) )
+            return host.substring( 0, host.length() -1);
+      
+        return host;
+    }
     
 }
