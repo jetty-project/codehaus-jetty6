@@ -31,6 +31,7 @@ import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.thread.Timeout;
+import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 
 /**
@@ -60,20 +61,19 @@ public class HttpConnection implements Connection
     private boolean _handling;
     private boolean _destroy;
     
-    protected Connector _connector;
-    protected EndPoint _endp;
-    protected Server _server;
+    protected final Connector _connector;
+    protected final EndPoint _endp;
+    protected final Server _server;
+    protected final HttpURI _uri;
 
-    protected HttpURI _uri=new HttpURI();
-
-    protected Parser _parser;
-    protected HttpFields _requestFields;
-    protected Request _request;
+    protected final Parser _parser;
+    protected final HttpFields _requestFields;
+    protected final Request _request;
     protected ServletInputStream _in;
 
-    protected Generator _generator;
-    protected HttpFields _responseFields;
-    protected Response _response;
+    protected final Generator _generator;
+    protected final HttpFields _responseFields;
+    protected final Response _response;
     protected Output _out;
     protected OutputWriter _writer;
     protected PrintWriter _printWriter;
@@ -106,6 +106,7 @@ public class HttpConnection implements Connection
      */
     public HttpConnection(Connector connector, EndPoint endpoint, Server server)
     {
+        _uri = URIUtil.__CHARSET==StringUtil.__UTF8?new HttpURI():new EncodedHttpURI(URIUtil.__CHARSET);
         _connector = connector;
         _endp = endpoint;
         _parser = new HttpParser(_connector, endpoint, new RequestHandler(), _connector.getHeaderBufferSize(), _connector.getRequestBufferSize());
@@ -114,6 +115,22 @@ public class HttpConnection implements Connection
         _request = new Request(this);
         _response = new Response(this);
         _generator = new HttpGenerator(_connector, _endp, _connector.getHeaderBufferSize(), _connector.getResponseBufferSize());
+        _generator.setSendServerVersion(server.getSendServerVersion());
+        _server = server;
+    }
+    
+    protected HttpConnection(Connector connector, EndPoint endpoint, Server server,
+            Parser parser, Generator generator, Request request)
+    {
+        _uri = URIUtil.__CHARSET==StringUtil.__UTF8?new HttpURI():new EncodedHttpURI(URIUtil.__CHARSET);
+        _connector = connector;
+        _endp = endpoint;
+        _parser = parser;
+        _requestFields = new HttpFields();
+        _responseFields = new HttpFields();
+        _request = request;
+        _response = new Response(this);
+        _generator = generator;
         _generator.setSendServerVersion(server.getSendServerVersion());
         _server = server;
     }
@@ -138,7 +155,6 @@ public class HttpConnection implements Connection
                 if (_responseFields!=null)
                     _responseFields.destroy();
 
-                _server=null;
             }
         }
     }
@@ -502,7 +518,7 @@ public class HttpConnection implements Connection
     protected void handleRequest() throws IOException
     {
         _request.handling();
-        boolean handling=true;
+        boolean handling=_server.isRunning();
         
         while (handling)
         {

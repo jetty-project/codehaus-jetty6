@@ -15,7 +15,7 @@
 package org.mortbay.util;
 
 /* ------------------------------------------------------------ */
-/** UTF-8 StringBuffer.
+/** UTF-8 StringBuilder.
  *
  * This class wraps a standard {@link java.lang.StringBuffer} and provides methods to append 
  * UTF-8 encoded bytes, that are converted into characters.
@@ -26,22 +26,21 @@ package org.mortbay.util;
  * The UTF-8 decoding is done by this class and no additional buffers or Readers are used.
  * The UTF-8 code was inspired by http://javolution.org
  * 
- * This class is not synchronised and should probably be called Utf8StringBuilder
  */
-public class Utf8StringBuffer 
+public class Utf8StringBuilder 
 {
-    StringBuffer _buffer;
+    StringBuilder _buffer;
     int _more;
     int _bits;
     
-    public Utf8StringBuffer()
+    public Utf8StringBuilder()
     {
-        _buffer=new StringBuffer();
+        _buffer=new StringBuilder();
     }
     
-    public Utf8StringBuffer(int capacity)
+    public Utf8StringBuilder(int capacity)
     {
-        _buffer=new StringBuffer(capacity);
+        _buffer=new StringBuilder(capacity);
     }
 
     public void append(byte[] b,int offset, int length)
@@ -146,7 +145,7 @@ public class Utf8StringBuffer
         _bits=0;
     }
     
-    public StringBuffer getStringBuffer()
+    public StringBuilder getStringBuilder()
     {
         if (_more!=0)
             throw new IllegalStateException();

@@ -14,18 +14,8 @@
 
 package org.mortbay.io.nio;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 
-import org.mortbay.io.AbstractBuffer;
 import org.mortbay.io.Buffer;
 
 /* ------------------------------------------------------------------------------- */
