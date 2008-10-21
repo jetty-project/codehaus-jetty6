@@ -483,7 +483,7 @@ public class HttpURI
             {
                 bytes=new byte[length];
                 for (int j=0;j<n;j++)
-                    bytes[j]=_raw[j];
+                    bytes[j]=_raw[_path+j];
             }
             
             bytes[n++]=b;
