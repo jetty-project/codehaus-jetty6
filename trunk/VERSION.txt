@@ -45,6 +45,7 @@ jetty-7.0.0.pre4 14 October 2008
  + JETTY-742 Private messages in cometd chat demo
  + JETTY-747 Handle HttpClient exceptions better
  + JETTY-757 Unhide JAAS classes 
+ + JETTY-758 Update JSP to glassfish tag SJSAS-9_1_1-B51-18_Sept_2008
 
 jetty-6.1.12.rc3 10 October 2008
  + JETTY-241 Support for web application overlays in rapid application development (jetty:run)
