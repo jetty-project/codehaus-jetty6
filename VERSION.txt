@@ -1,5 +1,6 @@
 jetty-6.1.12
  + JETTY-319 improved passing of exception when webapp unavailable
+ + JETTY-729 Backport Terracotta integration to Jetty6.1 branch
  + JETTY-744 Backport of JETTY-741: HttpClient connects slowly due to reverse address lookup by InetAddress.getHostName()
  + JETTY-747 Handle exceptions better in HttpClient
  + JETTY-755 Optimized HttpParser and buffers for few busy connections
