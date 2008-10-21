@@ -47,6 +47,7 @@ jetty-7.0.0.pre4 14 October 2008
  + JETTY-755 Optimized HttpParser and buffers for few busy connections
  + JETTY-757 Unhide JAAS classes 
  + JETTY-758 Update JSP to glassfish tag SJSAS-9_1_1-B51-18_Sept_2008
+ + JETTY-759 Fixed JSON small negative real numbers
 
 jetty-6.1.12.rc3 10 October 2008
  + JETTY-241 Support for web application overlays in rapid application development (jetty:run)

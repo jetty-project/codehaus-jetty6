@@ -38,6 +38,7 @@ public class JSONTest extends TestCase
     "*/" +
     "{ "+
     "\"onehundred\" : 100  ,"+
+    "\"small\":-0.2,"+
     "\"name\" : \"fred\"  ," +
     "\"empty\" : {}  ," +
     "\"map\" : {\"a\":-1.0e2}  ," +
@@ -118,6 +119,7 @@ public class JSONTest extends TestCase
         Map map = (Map)JSON.parse(test);
         assertEquals(new Long(100),map.get("onehundred"));
         assertEquals("fred",map.get("name"));
+        assertEquals(-0.2,map.get("small"));
         assertTrue(map.get("array").getClass().isArray());
         assertTrue(map.get("w0") instanceof Woggle);
         assertTrue(((Woggle)map.get("w0")).nested instanceof Woggle);
