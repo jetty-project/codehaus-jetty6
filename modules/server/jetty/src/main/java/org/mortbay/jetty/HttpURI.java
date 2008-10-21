@@ -21,6 +21,7 @@ import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.UrlEncoded;
+import org.mortbay.util.Utf8StringBuilder;
 
 
 /* ------------------------------------------------------------ */
@@ -67,6 +68,8 @@ public class HttpURI
     int _fragment;
     int _end;
     boolean _encoded=false;
+    
+    Utf8StringBuilder _utf8b = new Utf8StringBuilder(64);
     
     public HttpURI()
     {
@@ -401,6 +404,12 @@ public class HttpURI
         }
     }
     
+    private String toUtf8String(int offset,int length)
+    {
+        _utf8b.reset();
+        _utf8b.append(_raw,offset,length);
+        return _utf8b.toString();
+    }
     
     public String getScheme()
     {
@@ -420,21 +429,22 @@ public class HttpURI
             _raw[_scheme+3]=='p' && 
             _raw[_scheme+4]=='s' )
             return HttpSchemes.HTTPS;
-        return StringUtil.toString(_raw,_scheme,_authority-_scheme-1,URIUtil.__CHARSET);
+        
+        return toUtf8String(_scheme,_authority-_scheme-1);
     }
     
     public String getAuthority()
     {
         if (_authority==_path)
             return null;
-        return StringUtil.toString(_raw,_authority,_path-_authority,URIUtil.__CHARSET);
+        return toUtf8String(_authority,_path-_authority);
     }
     
     public String getHost()
     {
         if (_host==_port)
             return null;
-        return StringUtil.toString(_raw,_host,_port-_host,URIUtil.__CHARSET);
+        return toUtf8String(_host,_port-_host);
     }
     
     public int getPort()
@@ -448,57 +458,104 @@ public class HttpURI
     {
         if (_path==_param)
             return null;
-        return StringUtil.toString(_raw,_path,_param-_path,URIUtil.__CHARSET);
+        return toUtf8String(_path,_param-_path);
     }
     
     public String getDecodedPath()
     {
         if (_path==_param)
             return null;
-        
-        return _encoded?URIUtil.decodePath(_raw,_path,_param-_path):StringUtil.toString(_raw,_path,_param-_path,URIUtil.__CHARSET);
+
+        int length = _param-_path;
+        byte[] bytes=null;
+        int n=0;
+
+        for (int i=_path;i<_param;i++)
+        {
+            byte b = _raw[i];
+            
+            if (b=='%' && (i+2)<_param)
+            {
+                b=(byte)(0xff&TypeUtil.parseInt(_raw,i+1,2,16));
+                i+=2;
+            }
+            else if (bytes==null)
+            {
+                n++;
+                continue;
+            }
+            
+            if (bytes==null)
+            {
+                bytes=new byte[length];
+                for (int j=0;j<n;j++)
+                    bytes[j]=_raw[_path+j];
+            }
+            
+            bytes[n++]=b;
+        }
+
+        if (bytes==null)
+            return toUtf8String(_path,length);
+
+        _utf8b.reset();
+        _utf8b.append(bytes,0,n);
+        return _utf8b.toString();
     }
     
     public String getPathAndParam()
     {
         if (_path==_query)
             return null;
-        return StringUtil.toString(_raw,_path,_query-_path,URIUtil.__CHARSET);
+        return toUtf8String(_path,_query-_path);
     }
     
     public String getCompletePath()
     {
         if (_path==_end)
             return null;
-        return StringUtil.toString(_raw,_path,_end-_path,URIUtil.__CHARSET);
+        return toUtf8String(_path,_end-_path);
     }
     
     public String getParam()
     {
         if (_param==_query)
             return null;
-        return StringUtil.toString(_raw,_param+1,_query-_param-1,URIUtil.__CHARSET);
+        return toUtf8String(_param+1,_query-_param-1);
     }
     
     public String getQuery()
     {
         if (_query==_fragment)
             return null;
-        return StringUtil.toString(_raw,_query+1,_fragment-_query-1,URIUtil.__CHARSET);
+        return toUtf8String(_query+1,_fragment-_query-1);
     }
     
     public String getQuery(String encoding)
     {
         if (_query==_fragment)
             return null;
-        return StringUtil.toString(_raw,_query+1,_fragment-_query-1,encoding==null?URIUtil.__CHARSET:encoding);
+        return StringUtil.toString(_raw,_query+1,_fragment-_query-1,encoding);
+    }
+    
+    public boolean hasQuery()
+    {
+        return (_fragment>_query);
     }
     
     public String getFragment()
     {
         if (_fragment==_end)
             return null;
-        return StringUtil.toString(_raw,_fragment+1,_end-_fragment-1,URIUtil.__CHARSET);
+        return toUtf8String(_fragment+1,_end-_fragment-1);
+    }
+
+    public void decodeQueryTo(MultiMap parameters) 
+    {
+        if (_query==_fragment)
+            return;
+        _utf8b.reset();
+        UrlEncoded.decodeUtf8To(_raw,_query+1,_fragment-_query-1,parameters,_utf8b);
     }
 
     public void decodeQueryTo(MultiMap parameters, String encoding) 
@@ -507,13 +564,10 @@ public class HttpURI
         if (_query==_fragment)
             return;
        
-        if (encoding==null)
-            encoding=URIUtil.__CHARSET;
-        
-        if (StringUtil.isUTF8(encoding))
+        if (encoding==null || StringUtil.isUTF8(encoding))
             UrlEncoded.decodeUtf8To(_raw,_query+1,_fragment-_query-1,parameters);
         else
-            UrlEncoded.decodeTo(StringUtil.toString(_raw,_query+1,_fragment-_query-1,encoding),parameters,encoding);
+            UrlEncoded.decodeTo(toUtf8String(_query+1,_fragment-_query-1),parameters,encoding);
     }
 
     public void clear()
@@ -527,8 +581,13 @@ public class HttpURI
     public String toString()
     {
         if (_rawString==null)
-            _rawString= StringUtil.toString(_raw,_scheme,_end-_scheme,URIUtil.__CHARSET);
+            _rawString=toUtf8String(_scheme,_end-_scheme);
         return _rawString;
+    }
+    
+    public void writeTo(Utf8StringBuilder buf)
+    {
+        buf.append(_raw,_scheme,_end-_scheme);
     }
     
 }

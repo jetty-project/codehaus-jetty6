@@ -985,7 +985,12 @@ public class Request extends Suspendable implements HttpServletRequest
     public String getQueryString()
     {
         if (_queryString==null && _uri!=null)
-            _queryString=_uri.getQuery(_queryEncoding);
+        {
+            if (_queryEncoding==null)
+                _queryString=_uri.getQuery();
+            else
+                _queryString=_uri.getQuery(_queryEncoding);
+        }
         return _queryString;
     }
     
@@ -1152,9 +1157,10 @@ public class Request extends Suspendable implements HttpServletRequest
             return;
 
         _characterEncoding=encoding;
-        
+
         // check encoding is supported
-        "".getBytes(encoding);
+        if (!StringUtil.isUTF8(encoding))
+            "".getBytes(encoding);
     }
 
     /* ------------------------------------------------------------ */
@@ -1186,19 +1192,26 @@ public class Request extends Suspendable implements HttpServletRequest
         _paramsExtracted = true;
 
         // Handle query string
-        if (_uri!=null && _uri.getQuery()!=null)
+        if (_uri!=null && _uri.hasQuery())
         {
-            try
+            if (_queryEncoding==null)
+                _uri.decodeQueryTo(_baseParameters);
+            else
             {
-                _uri.decodeQueryTo(_baseParameters,_queryEncoding);
+                try
+                {
+                    _uri.decodeQueryTo(_baseParameters,_queryEncoding);
+
+                }
+                catch (UnsupportedEncodingException e)
+                {
+                    if (Log.isDebugEnabled())
+                        Log.warn(e);
+                    else
+                        Log.warn(e.toString());
+                }
             }
-            catch (UnsupportedEncodingException e)
-            {
-                if (Log.isDebugEnabled())
-                    Log.warn(e);
-                else
-                    Log.warn(e.toString());
-            }
+
         }
 
         // handle any _content.

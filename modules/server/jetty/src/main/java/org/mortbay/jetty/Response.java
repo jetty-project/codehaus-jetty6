@@ -645,8 +645,6 @@ public class Response implements HttpServletResponse
     	if (_connection.isIncluding() || _disabled)
     		return;
 
-        // TODO throw unsupported encoding exception ???
-
         if (this._outputState==0 && !isCommitted())
         {
             _explicitEncoding=true;
