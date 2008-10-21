@@ -218,14 +218,6 @@
                   <resourceBundle>org.mortbay.jetty:jetty-build-resources:1.0.1</resourceBundle>
                 </resourceBundles>
               </configuration>
-            <executions>
-              <execution>
-                <phase>validate</phase>
-                <goals>
-                  <goal>process</goal>
-                </goals>
-              </execution>
-            </executions>
         </plugin>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -239,17 +231,9 @@
                   <link>http://java.sun.com/javaee/5/docs/api</link>
                   <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
                 </links>
-                <reportOutputDirectory>${basedir}/javadoc</reportOutputDirectory
->
+                <reportOutputDirectory>${basedir}</reportOutputDirectory>
+                <destDir>javadoc</destDir>
             </configuration>
-            <executions>
-              <execution>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>javadoc</goal>
-                </goals>
-              </execution>
-            </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -260,14 +244,6 @@
             <javadocDir>${basedir}/javadoc</javadocDir>
             <destDir>${basedir}/jxr</destDir>
           </configuration>
-          <executions>
-						<execution>
-							<phase>generate-resources</phase>
-							<goals>
-								<goal>jxr</goal>
-							</goals>
-						</execution>
-          </executions>
         </plugin>
       </plugins>
       </build>
