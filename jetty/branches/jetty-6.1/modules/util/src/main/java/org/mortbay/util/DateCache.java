@@ -43,7 +43,6 @@ public class DateCache
 {
     public static String DEFAULT_FORMAT="EEE MMM dd HH:mm:ss zzz yyyy";
     private static long __hitWindow=60*60;
-    private static long __MaxMisses=10;
     
     private String _formatString;
     private String _tzFormatString;

@@ -39,7 +39,9 @@ public class TestAjpParser extends TestCase
         
         EndPoint endp = new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
         
-        Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+        Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+        parser.setEventHandler(new EH());
+        parser.setGenerator(new Ajp13Generator(buffers,endp,0,0));
         
         parser.parseAvailable();
         
@@ -54,7 +56,9 @@ public class TestAjpParser extends TestCase
         SimpleBuffers buffers=new SimpleBuffers(new Buffer[]
         { buffer });
         EndPoint endp=new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
-        Ajp13Parser parser=new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+        Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+        parser.setEventHandler(new EH());
+        parser.setGenerator(new Ajp13Generator(buffers,endp,0,0));
         parser.parse();
         assertTrue(true);
     }    
@@ -67,7 +71,9 @@ public class TestAjpParser extends TestCase
         SimpleBuffers buffers=new SimpleBuffers(new Buffer[]
         { buffer });
         EndPoint endp=new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
-        Ajp13Parser parser=new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+        Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+        parser.setEventHandler(new EH());
+        parser.setGenerator(new Ajp13Generator(buffers,endp,0,0));
         parser.parse();
         assertTrue(true);
     }
@@ -83,7 +89,9 @@ public class TestAjpParser extends TestCase
         
         EndPoint endp = new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
         
-        Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+        Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+        parser.setEventHandler(new EH());
+        parser.setGenerator(new Ajp13Generator(buffers,endp,0,0));
         
         parser.parseAvailable();
         
@@ -100,7 +108,9 @@ public class TestAjpParser extends TestCase
         
         EndPoint endp = new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
         
-        Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+        Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+        parser.setEventHandler(new EH());
+        parser.setGenerator(new Ajp13Generator(buffers,endp,0,0));
         
         parser.parseAvailable();
         
@@ -127,7 +137,9 @@ public class TestAjpParser extends TestCase
             ByteArrayEndPoint endp = new ByteArrayEndPoint(frag0,Ajp13Packet.MAX_PACKET_SIZE);
             endp.setNonBlocking(true);
         
-            Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+            Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+            parser.setEventHandler(new EH());
+            parser.setGenerator(new Ajp13Generator(buffers,endp,0,0));
             parser.parseNext();
             
             endp.setIn(new ByteArrayBuffer(frag1));
@@ -158,7 +170,9 @@ public class TestAjpParser extends TestCase
                 super.getBodyChunk();
             }
         };
-        Ajp13Parser parser=new Ajp13Parser(buffers,endp,new EH(),gen);
+        Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+        parser.setEventHandler(new EH());
+        parser.setGenerator(gen);
         
         parser.parseNext();
         assertEquals(1,parser.getState());
@@ -201,7 +215,9 @@ public class TestAjpParser extends TestCase
                 super.getBodyChunk();
             }
         };
-        Ajp13Parser parser=new Ajp13Parser(buffers,endp,new EH(),gen);
+        Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+        parser.setEventHandler(new EH());
+        parser.setGenerator(gen);
         
         parser.parseNext();
         assertEquals(1,parser.getState());
@@ -250,7 +266,9 @@ public class TestAjpParser extends TestCase
             ByteArrayEndPoint endp = new ByteArrayEndPoint(frag0,Ajp13Packet.MAX_PACKET_SIZE);
             endp.setNonBlocking(true);
         
-            Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+            Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+            parser.setEventHandler(new EH());
+            parser.setGenerator(new Ajp13Generator(buffers,endp,0,0));
             parser.parseNext();
             
             endp.setIn(new ByteArrayBuffer(frag1));
@@ -280,8 +298,10 @@ public class TestAjpParser extends TestCase
         
             ByteArrayEndPoint endp = new ByteArrayEndPoint(frag0,Ajp13Packet.MAX_PACKET_SIZE);
             endp.setNonBlocking(true);
-        
-            Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+            
+            Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+            parser.setEventHandler(new EH());
+            parser.setGenerator(new Ajp13Generator(buffers,endp,0,0));
             parser.parseNext();
             
             endp.setIn(new ByteArrayBuffer(frag1));
