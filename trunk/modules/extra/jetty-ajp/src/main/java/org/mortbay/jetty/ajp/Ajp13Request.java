@@ -22,24 +22,29 @@ public class Ajp13Request extends Request
     protected String _remoteAddr;
     protected String _remoteHost;
     protected String _remoteUser;
-    protected HttpConnection _connection;
 
-
-
-    public Ajp13Request(HttpConnection connection)
+    /* ------------------------------------------------------------ */
+    public Ajp13Request()
     {
-        super(connection);
+        super();
         _remoteAddr = null;
         _remoteHost = null;
-        _remoteUser = null;
-        
+        _remoteUser = null;        
     }
 
+    /* ------------------------------------------------------------ */
+    protected void setConnection(HttpConnection connection)
+    {
+        super.setConnection(connection);
+    }
+
+    /* ------------------------------------------------------------ */
     public void setRemoteUser(String remoteUser)
     {
         _remoteUser = remoteUser;
     }
 
+    /* ------------------------------------------------------------ */
     public String getRemoteUser()
     {
         if(_remoteUser != null)
@@ -47,6 +52,7 @@ public class Ajp13Request extends Request
         return super.getRemoteUser();
     }
 
+    /* ------------------------------------------------------------ */
     public String getRemoteAddr()
     {
         if (_remoteAddr != null)
@@ -58,11 +64,13 @@ public class Ajp13Request extends Request
 
 
 
+    /* ------------------------------------------------------------ */
     public void setRemoteAddr(String remoteAddr)
     {
         _remoteAddr = remoteAddr;
     }
 
+    /* ------------------------------------------------------------ */
     public String getRemoteHost()
     {
         if (_remoteHost != null)
@@ -72,11 +80,13 @@ public class Ajp13Request extends Request
         return super.getRemoteHost();
     }
 
+    /* ------------------------------------------------------------ */
     public void setRemoteHost(String remoteHost)
     {
         _remoteHost = remoteHost;
     }
 
+    /* ------------------------------------------------------------ */
     protected void recycle()
     {
         super.recycle();

@@ -50,13 +50,12 @@ public class Ajp13Connection extends HttpConnection
         super(connector, endPoint, server,
                 new Ajp13Parser(connector, endPoint),
                 new Ajp13Generator(connector, endPoint, connector.getHeaderBufferSize(), connector.getResponseBufferSize()),
-                new Ajp13Request(null)
+                new Ajp13Request()
                 );
         
         ((Ajp13Parser)_parser).setEventHandler(new RequestHandler());
-        
         ((Ajp13Parser)_parser).setGenerator((Ajp13Generator)_generator);
-   
+        ((Ajp13Request)_request).setConnection(this);
     }
 
     public boolean isConfidential(Request request)

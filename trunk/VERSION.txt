@@ -1,4 +1,4 @@
-jetty-7.0.0.pre4 14 October 2008
+jetty-7.0.0 SNAPSHOT
  + JETTY-241 Support for web application overlays in rapid application development (jetty:run)
  + JETTY-319 improved passing of exception when webapp unavailable
  + JETTY-331 SecureRandom hangs on systems with low entropy (connectors slow to start)
@@ -47,6 +47,17 @@ jetty-7.0.0.pre4 14 October 2008
  + JETTY-755 Optimized HttpParser and buffers for few busy connections
  + JETTY-757 Unhide JAAS classes 
  + JETTY-758 Update JSP to glassfish tag SJSAS-9_1_1-B51-18_Sept_2008
+ + JETTY-759 Fixed JSON small negative real numbers
+ + JETTY-760 Handle wildcard VirtualHost and normalize hostname in ContextHandlerCollection
+ + JETTY-763 Fixed AJP13 constructor
+
+jetty-6.1.12.rc4 21 October 2008
+ + JETTY-319 improved passing of exception when webapp unavailable
+ + JETTY-729 Backport Terracotta integration to Jetty6.1 branch
+ + JETTY-744 Backport of JETTY-741: HttpClient connects slowly due to reverse address lookup by InetAddress.getHostName()
+ + JETTY-747 Handle exceptions better in HttpClient
+ + JETTY-755 Optimized HttpParser and buffers for few busy connections
+ + JETTY-758 Update JSP 2.1 to glassfish tag SJSAS-9_1_1-B51-18_Sept_2008
  + JETTY-759 Fixed JSON small negative real numbers
  + JETTY-760 Handle wildcard VirtualHost and normalize hostname in ContextHandlerCollection
 
