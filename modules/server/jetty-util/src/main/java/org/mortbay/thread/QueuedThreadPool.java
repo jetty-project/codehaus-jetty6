@@ -93,7 +93,6 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
         if (!isRunning() || job==null)
             return false;
 
-
         PoolThread thread=null;
         boolean spawn=false;
             
@@ -119,11 +118,9 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
             }
         }
         
-        if (thread!=null)
-        {
-            thread.dispatch(job);
-        }
-        else
+        boolean dispatched=(thread!=null)&&thread.dispatch(job);
+        
+        if(!dispatched)
         {
             synchronized(_jobsLock)
             {
@@ -154,7 +151,6 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                 newThread();
         }
         
-
         return true;
     }
 
@@ -535,7 +531,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                             Log.ignore(e);
                         }
                     }
-                    else
+                    else // just finished a job
                     {
                         // Look for a queued job
                         synchronized (_jobsLock)
@@ -574,7 +570,6 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                 {
                     _threads.remove(this);
                 }
-                
                 synchronized (this)
                 {
                     job=_job;
@@ -587,7 +582,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
         }
         
         /* ------------------------------------------------------------ */
-        void dispatch(Runnable job)
+        boolean dispatch(Runnable job)
         {
             synchronized (this)
             {
@@ -595,11 +590,10 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                 {
                     _job=job;
                     this.notify();
+                    return true;
                 }
-                else
-                    // thread died while dispatching so reschedule it
-                    QueuedThreadPool.this.dispatch(job);
             }
+            return false;
         }
     }
 
