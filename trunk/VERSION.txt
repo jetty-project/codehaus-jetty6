@@ -49,6 +49,7 @@ jetty-7.0.0 SNAPSHOT
  + JETTY-758 Update JSP to glassfish tag SJSAS-9_1_1-B51-18_Sept_2008
  + JETTY-759 Fixed JSON small negative real numbers
  + JETTY-760 Handle wildcard VirtualHost and normalize hostname in ContextHandlerCollection
+ + JETTY-762 Improved QueuedThreadPool idle death
  + JETTY-763 Fixed AJP13 constructor
 
 jetty-6.1.12.rc4 21 October 2008
