@@ -1,3 +1,5 @@
+ + JETTY-762 improved QueuedThreadPool idle death handling
+ 
 jetty-6.1.12.rc4 21 October 2008
  + JETTY-319 improved passing of exception when webapp unavailable
  + JETTY-729 Backport Terracotta integration to Jetty6.1 branch
