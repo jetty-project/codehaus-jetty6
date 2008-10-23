@@ -121,7 +121,7 @@ public class ThreadPoolTest extends TestCase
                     
                     if (i==10000)
                     {
-                        assertEquals(0,tp.getMaxQueued());
+                        assertTrue(tp.getMaxQueued()<10);
                         tp.setMaxThreads(20);
                     }
                     
@@ -130,10 +130,7 @@ public class ThreadPoolTest extends TestCase
                     {
                         public void run()
                         {
-                            int r = random.nextInt(5);
-                            int s=0;
-                            for (int j=0;j<r;j++)
-                                s+=random.nextInt(10);
+                            int s=random.nextInt(50);
                             try
                             {
                                 Thread.sleep(s);
