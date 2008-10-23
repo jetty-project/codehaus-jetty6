@@ -18,7 +18,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -41,6 +40,7 @@ import org.mortbay.log.Log;
 public class QueuedThreadPool extends AbstractLifeCycle implements Serializable, ThreadPool
 {
     private static int __id;
+    private static Runnable __DEATH = new Runnable(){public void run(){}};
     
     private String _name;
     private Set _threads;
@@ -49,6 +49,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
     private int _nextJob;
     private int _nextJobSlot;
     private int _queued;
+    private int _maxQueued;
     
     private boolean _daemon;
     private int _id;
@@ -67,6 +68,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
     private int _priority= Thread.NORM_PRIORITY;
     private int _spawnOrShrinkAt=0;
 
+    
     /* ------------------------------------------------------------------- */
     /* Construct
      */
@@ -128,6 +130,9 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
             synchronized(_jobsLock)
             {
                 _queued++;
+                if (_queued>_maxQueued)
+                    _maxQueued=_queued;
+                
                 _jobs[_nextJobSlot++]=job;
                 if (_nextJobSlot==_jobs.length)
                     _nextJobSlot=0;
@@ -151,7 +156,10 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
             }
             
             if (spawn)
+            {
                 newThread();
+                Thread.yield();
+            }
         }
         
 
@@ -175,6 +183,15 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
     public int getLowThreads()
     {
         return _lowThreads;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return maximum queue size
+     */
+    public int getMaxQueued()
+    {
+        return _maxQueued;
     }
     
     /* ------------------------------------------------------------ */
@@ -470,7 +487,6 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
     public class PoolThread extends Thread 
     {
         Runnable _job=null;
-        boolean _alive=true;
 
         /* ------------------------------------------------------------ */
         PoolThread()
@@ -500,7 +516,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                     }
                     else if (idle)
                     {
-                        // should this idle thread exit?
+                        // should an idle thread exit?
                         synchronized(_idleLock)
                         {
                             _warned=false;
@@ -511,10 +527,11 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                                 _threads.size()>_minThreads))       // AND are there more than min threads?
                             {
                                 long now = System.currentTimeMillis();
-                                if ((now-_lastShrink)>getMaxIdleTimeMs() && _idle.remove(this))
+                                if ((now-_lastShrink)>getMaxIdleTimeMs())
                                 {
                                     _lastShrink=now;
-                                    return;
+                                    PoolThread to_die=(PoolThread)_idle.remove(0);
+                                    to_die.dispatch(__DEATH);
                                 }
                             }
                         }
@@ -528,6 +545,8 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                                     this.wait(getMaxIdleTimeMs());
                                 job=_job;
                                 _job=null;
+                                if (job==__DEATH)
+                                    return;
                             }
                         }
                         catch (InterruptedException e)
@@ -578,11 +597,12 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                 synchronized (this)
                 {
                     job=_job;
-                    _alive=false;
                 }
                 // we died with a job! reschedule it
                 if (job!=null)
+                {
                     QueuedThreadPool.this.dispatch(job);
+                }
             }
         }
         
@@ -591,14 +611,8 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
         {
             synchronized (this)
             {
-                if (_alive)
-                {
-                    _job=job;
-                    this.notify();
-                }
-                else
-                    // thread died while dispatching so reschedule it
-                    QueuedThreadPool.this.dispatch(job);
+                _job=job;
+                this.notify();
             }
         }
     }
