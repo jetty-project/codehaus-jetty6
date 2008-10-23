@@ -164,6 +164,14 @@ public class Request extends Suspendable implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
+    protected void setConnection(HttpConnection connection)
+    {
+        _connection=connection;
+        _endp=connection.getEndPoint();
+        _dns=connection.getResolveNames();
+    }
+    
+    /* ------------------------------------------------------------ */
     protected void recycle()
     {
         super.reset();

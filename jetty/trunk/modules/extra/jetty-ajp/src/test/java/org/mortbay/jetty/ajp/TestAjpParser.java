@@ -17,7 +17,6 @@ package org.mortbay.jetty.ajp;
 import java.io.IOException;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.ByteArrayEndPoint;
 import org.mortbay.io.EndPoint;
