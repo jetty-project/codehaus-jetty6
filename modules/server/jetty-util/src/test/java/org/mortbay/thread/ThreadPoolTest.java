@@ -94,53 +94,68 @@ public class ThreadPoolTest extends TestCase
     public void testStress() throws Exception
     {
         QueuedThreadPool tp= new QueuedThreadPool();
-        tp.setMinThreads(5);
-        tp.setMaxThreads(100);
-        tp.setMaxIdleTimeMs(10);
+        tp.setMinThreads(240);
+        tp.setMaxThreads(250);
+        tp.setMaxIdleTimeMs(100);
         tp.start();
-        
+
+        tp.setMinThreads(90);
         final AtomicInteger count = new AtomicInteger();
         
         final Random random = new Random(System.currentTimeMillis());
-        int loops = 2400;
+        int loops = 16000;
 
         try
         {
-            for (int i=0;i<loops;i++)
+            for (int i=0;i<loops;)
             {
-                if (i%10==0)
-                    System.err.print('.');
-                if (i%800==799)
-                    System.err.println();
-                
-                Thread.sleep(random.nextInt(20));
-                
-                tp.dispatch(new Runnable()
+                int burst=random.nextInt(100);
+                for (int b=0;b<burst && i<loops; b++)
                 {
-                    public void run()
+                    if (i%20==0)
+                        System.err.print('.');
+                    if (i%1600==1599)
+                        System.err.println();
+                    if (i==1000)
+                        tp.setMinThreads(10);
+                    
+                    if (i==10000)
                     {
-                        int r = random.nextInt(5);
-                        int s=0;
-                        for (int j=0;j<r;j++)
-                            s+=random.nextInt(10);
-                        try
-                        {
-                            Thread.sleep(s);
-                        }
-                        catch (InterruptedException e)
-                        {
-                            e.printStackTrace();
-                        }
-                        finally
-                        {
-                            count.incrementAndGet();
-                        }
+                        assertEquals(0,tp.getMaxQueued());
+                        tp.setMaxThreads(20);
                     }
-                });
+                    
+                    i++;
+                    tp.dispatch(new Runnable()
+                    {
+                        public void run()
+                        {
+                            int r = random.nextInt(5);
+                            int s=0;
+                            for (int j=0;j<r;j++)
+                                s+=random.nextInt(10);
+                            try
+                            {
+                                Thread.sleep(s);
+                            }
+                            catch (InterruptedException e)
+                            {
+                                e.printStackTrace();
+                            }
+                            finally
+                            {
+                                count.incrementAndGet();
+                            }
+                        }
+                    });
+                }
+
+                Thread.sleep(random.nextInt(100));
 
             }
             
             Thread.sleep(1000);
+            assertTrue(tp.getMaxQueued()>10);
             tp.stop();
             
             assertEquals(loops,count.get());
