@@ -176,6 +176,14 @@ public class Request implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
+    protected void setConnection(HttpConnection connection)
+    {
+        _connection=connection;
+        _endp=connection.getEndPoint();
+        _dns=connection.getResolveNames();
+    }
+    
+    /* ------------------------------------------------------------ */
     protected void recycle()
     {
         _handled=false;
