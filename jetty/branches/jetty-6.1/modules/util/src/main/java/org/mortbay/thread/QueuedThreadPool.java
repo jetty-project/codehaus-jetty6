@@ -41,6 +41,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
 {
     private static int __id;
     private static Runnable __DEATH = new Runnable(){public void run(){}};
+    private static Runnable __WAKEUP = new Runnable(){public void run(){}};
     
     private String _name;
     private Set _threads;
@@ -159,6 +160,19 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
             {
                 newThread();
                 Thread.yield();
+            }
+            else
+            {
+                // wake up a threads if one became idle while queueing job
+                synchronized(_idleLock)
+                {
+                    int idle=_idle.size();
+                    if (idle>0)
+                    {
+                        thread=(PoolThread)_idle.remove(idle-1);
+                        thread.dispatch(__WAKEUP);
+                    }
+                }
             }
         }
         
@@ -598,6 +612,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                 {
                     job=_job;
                 }
+                
                 // we died with a job! reschedule it
                 if (job!=null)
                 {
