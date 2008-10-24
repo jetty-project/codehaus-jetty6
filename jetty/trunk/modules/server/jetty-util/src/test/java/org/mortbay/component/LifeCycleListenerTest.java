@@ -20,7 +20,6 @@ public class LifeCycleListenerTest extends TestCase
     public static void main(String[] args)
     {
         TestRunner.run(suite());
-        ((StdErrLog)Log.getLog()).setHideStacks(true);
     }
 
     public static Test suite()
@@ -34,6 +33,7 @@ public class LifeCycleListenerTest extends TestCase
         TestLifeCycle lifecycle = new TestLifeCycle();
         TestListener listener = new TestListener();
         lifecycle.addLifeCycleListener(listener);
+        ((StdErrLog)Log.getLog()).setHideStacks(true);
         lifecycle.setCause(cause);
         
         try
@@ -47,6 +47,7 @@ public class LifeCycleListenerTest extends TestCase
             assertEquals(cause,listener.getCause());
         }
         lifecycle.setCause(null);
+        ((StdErrLog)Log.getLog()).setHideStacks(false);
         
         
         lifecycle.start();
@@ -77,6 +78,7 @@ public class LifeCycleListenerTest extends TestCase
 
         lifecycle.start();
 
+        ((StdErrLog)Log.getLog()).setHideStacks(true);
         lifecycle.setCause(cause);
         
         try
@@ -92,6 +94,7 @@ public class LifeCycleListenerTest extends TestCase
 
         
         lifecycle.setCause(null);
+        ((StdErrLog)Log.getLog()).setHideStacks(false);
         
         lifecycle.stop();
 

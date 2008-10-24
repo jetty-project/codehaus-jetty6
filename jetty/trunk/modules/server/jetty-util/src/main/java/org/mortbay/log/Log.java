@@ -91,6 +91,7 @@ public class Log
     
     public static Logger getLog()
     {
+        initialized();
         return __log;
     }
 
