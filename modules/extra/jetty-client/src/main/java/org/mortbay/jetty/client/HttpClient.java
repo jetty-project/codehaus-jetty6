@@ -109,6 +109,8 @@ public class HttpClient extends AbstractBuffers
     private String _trustStorePassword;
     private String _trustManagerAlgorithm = "SunX509";
 
+    private SSLContext _sslContext;
+    
     private String _protocol = "TLS";
     private String _provider;
     private String _secureRandomAlgorithm;
@@ -400,14 +402,18 @@ public class HttpClient extends AbstractBuffers
      */
     protected SSLContext getSSLContext() throws IOException
     {
-        if (_keyStoreLocation == null)
-        {
-            return getLooseSSLContext();
-        }
-        else
-        {
-            return getStrictSSLContext();
-        }
+    	if (_sslContext == null) 
+    	{
+			if (_keyStoreLocation == null) 
+			{
+				_sslContext = getLooseSSLContext();
+			} 
+			else 
+			{
+				_sslContext = getStrictSSLContext();
+			}
+		}   	
+    	return _sslContext;    	
     }
 
     protected SSLContext getStrictSSLContext() throws IOException
