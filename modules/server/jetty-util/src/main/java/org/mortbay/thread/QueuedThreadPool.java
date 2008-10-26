@@ -35,13 +35,10 @@ import org.mortbay.log.Log;
  * and terminate until the minimum number of threads are running.
  * <p>
  * @author Greg Wilkins <gregw@mortbay.com>
- * @author Juancarlo Anez <juancarlo@modelistica.com>
  */
 public class QueuedThreadPool extends AbstractLifeCycle implements Serializable, ThreadPool
 {
     private static int __id;
-    private static Runnable __DEATH = new Runnable(){public void run(){}};
-    private static Runnable __WAKEUP = new Runnable(){public void run(){}};
     
     private String _name;
     private Set _threads;
@@ -55,9 +52,8 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
     private boolean _daemon;
     private int _id;
 
-    private final Object _threadLock = new Lock();
-    private final Object _idleLock = new Lock();
-    private final Object _jobsLock = new Lock();
+    private final Object _lock = new Lock();
+    private final Object _threadsLock = new Lock();
     private final Object _joinLock = new Lock();
 
     private long _lastShrink;
@@ -96,44 +92,21 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
         if (!isRunning() || job==null)
             return false;
 
-
         PoolThread thread=null;
         boolean spawn=false;
             
-        // Look for an idle thread
-        synchronized(_idleLock)
+        synchronized(_lock)
         {
+            // Look for an idle thread
             int idle=_idle.size();
             if (idle>0)
                 thread=(PoolThread)_idle.remove(idle-1);
             else
             {
-                // Are we at max size?
-                if (_threads.size()<_maxThreads)
-                    spawn=true;
-                else 
-                {
-                    if (!_warned)    
-                    {
-                        _warned=true;
-                        Log.debug("Max threads for {}",this);
-                    }
-                }
-            }
-        }
-        
-        if (thread!=null)
-        {
-            thread.dispatch(job);
-        }
-        else
-        {
-            synchronized(_jobsLock)
-            {
+                // queue the job
                 _queued++;
                 if (_queued>_maxQueued)
                     _maxQueued=_queued;
-                
                 _jobs[_nextJobSlot++]=job;
                 if (_nextJobSlot==_jobs.length)
                     _nextJobSlot=0;
@@ -151,32 +124,19 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                     _nextJob=0;
                     _nextJobSlot=_queued;
                 }
-                
-                if (spawn && _queued<=_spawnOrShrinkAt)
-                    spawn=false;
-            }
-            
-            if (spawn)
-            {
-                newThread();
-                Thread.yield();
-            }
-            else
-            {
-                // wake up a threads if one became idle while queueing job
-                synchronized(_idleLock)
-                {
-                    int idle=_idle.size();
-                    if (idle>0)
-                    {
-                        thread=(PoolThread)_idle.remove(idle-1);
-                        thread.dispatch(__WAKEUP);
-                    }
-                }
+                  
+                spawn=_queued>_spawnOrShrinkAt;
             }
         }
         
-
+        if (thread!=null)
+        {
+            thread.dispatch(job);
+        }
+        else if (spawn)
+        {
+            newThread();
+        }
         return true;
     }
 
@@ -379,7 +339,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
         if (isStarted() && (minThreads<=0 || minThreads>_maxThreads))
             throw new IllegalArgumentException("!0<=minThreads<maxThreads");
         _minThreads=minThreads;
-        synchronized (_threadLock)
+        synchronized (_threadsLock)
         {
             while (isStarted() && _threads.size()<_minThreads)
             {
@@ -439,7 +399,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
         
         for (int i=0;i<100;i++)
         {
-            synchronized (_threadLock)
+            synchronized (_threadsLock)
             {
                 Iterator iter = _threads.iterator();
                 while (iter.hasNext())
@@ -470,12 +430,20 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
     /* ------------------------------------------------------------ */
     protected void newThread()
     {
-        synchronized(_threadLock)
+        synchronized (_threadsLock)
         {
-            PoolThread thread =new PoolThread();
-            _threads.add(thread);
-            thread.setName(_name+"-"+_id++);
-            thread.start(); 
+            if (_threads.size()<_maxThreads)
+            {
+                PoolThread thread =new PoolThread();
+                _threads.add(thread);
+                thread.setName(_name+"-"+_id++);
+                thread.start(); 
+            }
+            else if (!_warned)    
+            {
+                _warned=true;
+                Log.debug("Max threads for {}",this);
+            }
         }
     }
 
@@ -521,6 +489,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
             {
                 while (isRunning())
                 {   
+                    // Run any job that we have.
                     if (job!=null)
                     {
                         final Runnable todo=job;
@@ -528,86 +497,67 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                         idle=false;
                         todo.run();
                     }
-                    else if (idle)
+                    
+                    synchronized(_lock)
                     {
-                        // should an idle thread exit?
-                        synchronized(_idleLock)
+                        // is there a queued job?
+                        if (_queued>0)
                         {
-                            _warned=false;
-                            
-                            // consider shrinking the thread pool
-                            if ((_threads.size()>_maxThreads ||     // we have too many threads  OR
-                                 _idle.size()>_spawnOrShrinkAt &&        // are there idle threads?
-                                _threads.size()>_minThreads))       // AND are there more than min threads?
+                            _queued--;
+                            job=_jobs[_nextJob++];
+                            if (_nextJob==_jobs.length)
+                                _nextJob=0;
+                            continue;
+                        }
+
+                        // Should we shrink?
+                        final int threads=_threads.size();
+                        if (threads>_minThreads && 
+                            (threads>_maxThreads || 
+                             _idle.size()>_spawnOrShrinkAt))   
+                        {
+                            long now = System.currentTimeMillis();
+                            if ((now-_lastShrink)>getMaxIdleTimeMs())
                             {
-                                long now = System.currentTimeMillis();
-                                if ((now-_lastShrink)>getMaxIdleTimeMs())
-                                {
-                                    _lastShrink=now;
-                                    PoolThread to_die=(PoolThread)_idle.remove(0);
-                                    to_die.dispatch(__DEATH);
-                                }
+                                _lastShrink=now;
+                                _idle.remove(this);
+                                return;
                             }
                         }
 
-                        // still idle, so wait for a dispatched job
-                        try
-                        {
-                            synchronized (this)
-                            {
-                                if (_job==null)
-                                    this.wait(getMaxIdleTimeMs());
-                                job=_job;
-                                _job=null;
-                                if (job==__DEATH)
-                                    return;
-                            }
-                        }
-                        catch (InterruptedException e)
-                        {
-                            Log.ignore(e);
+                        if (!idle)
+                        {   
+                            // Add ourselves to the idle set.
+                            _idle.add(this);
+                            idle=true;
                         }
                     }
-                    else
+
+                    // We are idle
+                    // wait for a dispatched job
+                    synchronized (this)
                     {
-                        // Look for a queued job
-                        synchronized (_jobsLock)
-                        {
-                            // is there a queued job?
-                            if (_queued>0)
-                            {
-                                _queued--;
-                                job=_jobs[_nextJob++];
-                                if (_nextJob==_jobs.length)
-                                    _nextJob=0;
-                                continue;
-                            }
-                        }
-                        
-                        // if no job found
-                        if (job==null)
-                        {
-                            // go idle
-                            synchronized (_idleLock)
-                            {
-                                _idle.add(this);
-                                idle=true;
-                            }
-                        }
+                        if (_job==null)
+                            this.wait(getMaxIdleTimeMs());
+                        job=_job;
+                        _job=null;
                     }
                 }
             }
+            catch (InterruptedException e)
+            {
+                Log.ignore(e);
+            }
             finally
             {
-                synchronized (_idleLock)
+                synchronized (_lock)
                 {
                     _idle.remove(this);
                 }
-                synchronized (_threadLock)
+                synchronized (_threadsLock)
                 {
                     _threads.remove(this);
                 }
-                
                 synchronized (this)
                 {
                     job=_job;
