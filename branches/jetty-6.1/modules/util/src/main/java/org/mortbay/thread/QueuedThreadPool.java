@@ -511,9 +511,10 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                         }
 
                         // Should we shrink?
-                        if ((_threads.size()>_maxThreads ||     // we have too many threads  OR
-                                _idle.size()>_spawnOrShrinkAt &&   // are there idle threads?
-                                _threads.size()>_minThreads))   
+                        final int threads=_threads.size();
+                        if (threads>_minThreads && 
+                            (threads>_maxThreads || 
+                             _idle.size()>_spawnOrShrinkAt))   
                         {
                             long now = System.currentTimeMillis();
                             if ((now-_lastShrink)>getMaxIdleTimeMs())
