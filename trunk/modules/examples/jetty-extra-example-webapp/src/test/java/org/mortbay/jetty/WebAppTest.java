@@ -37,6 +37,8 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.HashUserRealm;
 import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.log.Log;
+import org.mortbay.log.StdErrLog;
 import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.util.IO;
 
@@ -270,7 +272,9 @@ public class WebAppTest extends TestCase
     public void testUnavailable() throws Exception
     {
         URL url = null;
+        ((StdErrLog)context.getLogger()).setHideStacks(true);
         
+        ((StdErrLog)Log.getLogger("/test")).setHideStacks(true);
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?query=foo");
         assertTrue(IO.toString(url.openStream()).startsWith("<html>"));
         assertTrue(context.getServletHandler().isAvailable());
@@ -278,6 +282,7 @@ public class WebAppTest extends TestCase
         try{IO.toString(url.openStream());} catch(IOException e){}
         assertFalse(context.getServletHandler().isAvailable());
         Thread.sleep(5000);
+        ((StdErrLog)context.getLogger()).setHideStacks(false);
         assertTrue(context.getServletHandler().isAvailable());
     }
     
