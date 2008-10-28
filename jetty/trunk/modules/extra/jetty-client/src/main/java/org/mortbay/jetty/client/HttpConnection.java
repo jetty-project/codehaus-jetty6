@@ -262,7 +262,7 @@ public class HttpConnection implements Connection
 
                 if (io > 0)
                     no_progress = 0;
-                else if (no_progress++ >= 2 && !_endp.isBlocking()) // TODO maybe no retries is best here?
+                else if (no_progress++ >= 100 && !_endp.isBlocking()) // TODO maybe no retries is best here?
                     return;
             }
             catch (IOException e)
