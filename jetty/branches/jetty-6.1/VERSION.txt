@@ -1,5 +1,7 @@
+jetty-6.1-SNAPSHOT
  + JETTY-762 improved QueuedThreadPool idle death handling
  + JETTY-763 Fixed AJP13 constructor
+ + JETTY-766 Ensure SystemProperties set early on jetty-maven-plugin
  
 jetty-6.1.12.rc4 21 October 2008
  + JETTY-319 improved passing of exception when webapp unavailable
