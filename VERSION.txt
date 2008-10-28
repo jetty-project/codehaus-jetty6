@@ -19,6 +19,7 @@ jetty-7.0.0 SNAPSHOT
  + JETTY-698 org.mortbay.resource.JarResource.extract does not close JarInputStream jin
  + JETTY-699 Optimized cometd sending of 1 message to many many clients
  + JETTY-700 unit test for unread request data
+ + JETTY-703 maxStopTimeMs added to QueuedThreadPool
  + JETTY-708 allow 3 scopes for jndi resources: jvm, server or webapp
  + JETTY-709 Jetty plugin's WebAppConfig configured properties gets overridden by AbstractJettyRunMojo even when already set
  + JETTY-710 Worked around poor implementation of File.toURL()
@@ -49,7 +50,7 @@ jetty-7.0.0 SNAPSHOT
  + JETTY-758 Update JSP to glassfish tag SJSAS-9_1_1-B51-18_Sept_2008
  + JETTY-759 Fixed JSON small negative real numbers
  + JETTY-760 Handle wildcard VirtualHost and normalize hostname in ContextHandlerCollection
- + JETTY-762 Improved QueuedThreadPool idle death
+ + JETTY-762 improved QueuedThreadPool idle death handling
  + JETTY-763 Fixed AJP13 constructor
  + JETTY-766 Ensure SystemProperties set early on jetty-maven-plugin
 
