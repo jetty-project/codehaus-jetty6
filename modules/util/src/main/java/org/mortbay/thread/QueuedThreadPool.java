@@ -64,6 +64,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
     private int _lowThreads=0;
     private int _priority= Thread.NORM_PRIORITY;
     private int _spawnOrShrinkAt=0;
+    private int _maxStopTimeMs;
 
     
     /* ------------------------------------------------------------------- */
@@ -256,6 +257,24 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * @return maximum total time that stop() will wait for threads to die.
+     */
+    public int getMaxStopTimeMs()
+    {
+        return _maxStopTimeMs;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param stopTimeMs maximum total time that stop() will wait for threads to die.
+     */
+    public void setMaxStopTimeMs(int stopTimeMs)
+    {
+        _maxStopTimeMs = stopTimeMs;
+    }
+
+    /* ------------------------------------------------------------ */
     /** 
      * Delegated to the named or anonymous Pool.
      */
@@ -397,6 +416,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
     {   
         super.doStop();
         
+        long start=System.currentTimeMillis();
         for (int i=0;i<100;i++)
         {
             synchronized (_threadsLock)
@@ -407,7 +427,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
             }
             
             Thread.yield();
-            if (_threads.size()==0)
+            if (_threads.size()==0 || _maxStopTimeMs < (System.currentTimeMillis()-start))
                break;
             
             try
@@ -415,6 +435,8 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                 Thread.sleep(i*100);
             }
             catch(InterruptedException e){}
+            
+            
         }
 
         // TODO perhaps force stops
