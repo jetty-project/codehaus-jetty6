@@ -51,8 +51,8 @@ public class Ajp13SocketConnector extends SocketConnector
 
     protected void doStart() throws Exception
     {
-        Log.info("AJP13 is not a secure protocol. Please protect port {}",Integer.toString(getPort()));
         super.doStart();
+        Log.info("AJP13 is not a secure protocol. Please protect port {}",Integer.toString(getLocalPort()));
     }
     
     
