@@ -51,6 +51,7 @@ jetty-7.0.0 SNAPSHOT
  + JETTY-760 Handle wildcard VirtualHost and normalize hostname in ContextHandlerCollection
  + JETTY-762 Improved QueuedThreadPool idle death
  + JETTY-763 Fixed AJP13 constructor
+ + JETTY-766 Ensure SystemProperties set early on jetty-maven-plugin
 
 jetty-6.1.12.rc4 21 October 2008
  + JETTY-319 improved passing of exception when webapp unavailable
