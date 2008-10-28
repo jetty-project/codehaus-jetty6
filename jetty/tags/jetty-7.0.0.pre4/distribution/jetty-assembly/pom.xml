@@ -99,9 +99,6 @@
     </plugins>
   </build>
   <properties>
-  <!--
     <jetty.scm>scm:svn:http://svn.codehaus.org/jetty/jetty/tags/jetty-${project.version}</jetty.scm>
-    -->
-    <jetty.scm>scm:svn:http://svn.codehaus.org/jetty/jetty/trunk</jetty.scm>
   </properties>
 </project>
