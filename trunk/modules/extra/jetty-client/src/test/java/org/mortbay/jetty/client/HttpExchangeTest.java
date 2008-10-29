@@ -70,12 +70,14 @@ public class HttpExchangeTest extends TestCase
 
     public void testPerf() throws Exception
     {
-        //sender(1,true);
-        //sender(1,false);
+        sender(1,true);
+        sender(1,false);
         sender(10,true);
-        //sender(10,false);
-        //sender(1000,true);
-        //sender(100,false);
+        sender(10,false);
+        sender(100,true);
+        sender(100,false);
+        sender(1000,true);
+        sender(1000,false);
     }
 
     /**
@@ -176,7 +178,9 @@ public class HttpExchangeTest extends TestCase
 
         latch.await(100,TimeUnit.MILLISECONDS);
         if (latch.getCount()>0)
-            latch.await(2,TimeUnit.SECONDS);
+            latch.await(1,TimeUnit.SECONDS);
+        if (latch.getCount()>0)
+            latch.await(5,TimeUnit.SECONDS);
         long last=latch.getCount();
         if (last>0)
         {
