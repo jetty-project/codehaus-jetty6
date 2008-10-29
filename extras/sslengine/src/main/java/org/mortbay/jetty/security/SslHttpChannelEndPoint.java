@@ -57,6 +57,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
 
     private boolean _closing=false;
     private SSLEngineResult _result;
+    private String _last;
     
     // ssl
     protected SSLSession _session;
@@ -203,6 +204,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                             int put=_outNIOBuffer.putIndex();
                             _outBuffer.position(put);
                             _result=null;
+                            _last="close wrap";
                             _result=_engine.wrap(__NO_BUFFERS,_outBuffer);
                             _outNIOBuffer.setPutIndex(put+_result.bytesProduced());
                         }
@@ -304,6 +306,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                                     int put=_outNIOBuffer.putIndex();
                                     _outBuffer.position();
                                     _result=null;
+                                    _last="fill wrap";
                                     _result=_engine.wrap(__NO_BUFFERS,_outBuffer);
                                     switch(_result.getStatus())
                                     {
@@ -443,6 +446,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                             int put=_outNIOBuffer.putIndex();
                             _outBuffer.position();
                             _result=null;
+                            _last="flush wrap";
                             _result=_engine.wrap(__NO_BUFFERS,_outBuffer);
                             switch(_result.getStatus())
                             {
@@ -539,6 +543,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             _inBuffer.position(_inNIOBuffer.getIndex());
             _inBuffer.limit(_inNIOBuffer.putIndex());
             _result=null;
+            _last="unwrap";
             _result=_engine.unwrap(_inBuffer,buffer);
             // h.append("unwrap=").append(result).append('\n');
             _inNIOBuffer.skip(_result.bytesConsumed());
@@ -617,6 +622,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                         _outBuffer.limit(_outBuffer.capacity());
 
                         _result=null;
+                        _last="wrap wrap";
                         _result=_engine.wrap(_gather,_outBuffer);
                         // h.append("wrap2=").append(result).append('\n');
                         _outNIOBuffer.setGetIndex(0);
@@ -686,6 +692,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                     _outBuffer.position(0);
                     _outBuffer.limit(_outBuffer.capacity());
                     _result=null;
+                    _last="wrap wrap";
                     _result=_engine.wrap(_gather[0],_outBuffer);
                     // h.append("wrap1=").append(result).append('\n');
                     _outNIOBuffer.setGetIndex(0);
@@ -749,5 +756,10 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     {
         return _engine;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return super.toString()+","+_engine.getHandshakeStatus()+", in/out="+_inNIOBuffer.length()+"/"+_outNIOBuffer.length()+" last "+_last+" "+_result;
+    }
 }

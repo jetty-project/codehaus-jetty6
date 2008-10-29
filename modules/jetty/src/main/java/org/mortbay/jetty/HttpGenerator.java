@@ -900,6 +900,13 @@ public class HttpGenerator extends AbstractGenerator
         (_buffer==null?0:_buffer.length())+
         (_content==null?0:_content.length());
     }
+
+    public boolean isEmpty()
+    {
+        return (_header==null||_header.length()==0) &&
+        (_buffer==null||_buffer.length()==0) &&
+        (_content==null||_content.length()==0);
+    }
     
     public String toString()
     {
