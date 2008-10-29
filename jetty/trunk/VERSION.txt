@@ -1,4 +1,4 @@
-jetty-7.0.0-SNAPSHOT
+jetty-7.0.0.pre5 29 Oct 2008
  + JETTY-767 Fixed SSL Client no progress handshake bug
  + JETTY-769 jquery example error
  
