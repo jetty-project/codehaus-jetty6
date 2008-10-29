@@ -357,12 +357,15 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
                         SelectableChannel sc = (SelectableChannel)getChannel();
                         if (sc.isRegistered())
                         {
+                            // wake up again?
+                            System.err.println("registered but no key? "+this);
                             updateKey();   
                         }
                         else
                         {
                             try
                             {
+                                System.err.println("re-register "+this);
                                 _key=((SelectableChannel)getChannel()).register(_selectSet.getSelector(),_interestOps,this);
                             }
                             catch (Exception e)
@@ -382,11 +385,15 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
                     }
                     else
                     {
+                        if ((_interestOps&SelectionKey.OP_READ)==0)
+                            System.err.println("Not readable "+this);
+                            
                         _key.interestOps(_interestOps);
                     }
                 }
                 else
                 {
+                    System.err.println("Not Interested! "+this);
                     if (_key.isValid())
                         _key.interestOps(0);
                     else

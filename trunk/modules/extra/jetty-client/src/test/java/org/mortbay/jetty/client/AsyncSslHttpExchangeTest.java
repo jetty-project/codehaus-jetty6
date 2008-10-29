@@ -26,5 +26,10 @@ public class AsyncSslHttpExchangeTest extends SslHttpExchangeTest
         _httpClient.setMaxConnectionsPerAddress(2);
         _httpClient.start();
     }
+    
+    public void testPerf() throws Exception
+    {
+        super.testPerf();
+    }
 
 }
