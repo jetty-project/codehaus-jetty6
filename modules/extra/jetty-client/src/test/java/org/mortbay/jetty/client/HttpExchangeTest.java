@@ -72,9 +72,9 @@ public class HttpExchangeTest extends TestCase
     {
         //sender(1,true);
         //sender(1,false);
-        //sender(10,true);
+        sender(10,true);
         //sender(10,false);
-        sender(1000,true);
+        //sender(1000,true);
         //sender(100,false);
     }
 
