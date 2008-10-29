@@ -215,6 +215,7 @@ public class NamingEntryUtil
     {
         if (scope==null)
             return "";
+
         String str = scope.toString();
         str=str.replace('/', '_').replace(' ', '_');
         return str;
