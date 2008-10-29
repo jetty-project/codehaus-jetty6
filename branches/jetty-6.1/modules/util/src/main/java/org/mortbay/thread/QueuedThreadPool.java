@@ -427,7 +427,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
             }
             
             Thread.yield();
-            if (_threads.size()==0 || _maxStopTimeMs < (System.currentTimeMillis()-start))
+            if (_threads.size()==0 || (_maxStopTimeMs>0 && _maxStopTimeMs < (System.currentTimeMillis()-start)))
                break;
             
             try
