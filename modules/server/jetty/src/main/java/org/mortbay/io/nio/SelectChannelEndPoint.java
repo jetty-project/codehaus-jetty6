@@ -202,7 +202,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
     public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
     {
         int l = super.flush(header, buffer, trailer);
-        _writable = l > 0;
+        _writable = l!=0;
         return l;
     }
 
@@ -212,7 +212,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
     public int flush(Buffer buffer) throws IOException
     {
         int l = super.flush(buffer);
-        _writable = l > 0;
+        _writable = l!=0;
         return l;
     }
 
