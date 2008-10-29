@@ -165,8 +165,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
             }
             _dispatched = false;
             updateKey();
-            if ((_interestOps&SelectionKey.OP_READ)==0)
-                System.err.println("!D!R "+this);
         }
         return true;
     }
