@@ -109,7 +109,8 @@
 				{
 					if($.comet._advice.reconnect == 'none')
 						return;
-						+					if($.comet._advice.interval > 0)
+			
+                        		if($.comet._advice.interval > 0)
 					{
 						setTimeout($.comet._oTransport._connect, $.comet._advice.interval);
 					}
