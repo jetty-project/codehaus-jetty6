@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 
+import javax.net.ssl.SSLEngineResult.HandshakeStatus;
+
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
@@ -213,6 +215,7 @@ public class HttpConnection implements Connection
             try
             {
                 long io = 0;
+                _endp.flush();
 
                 if (_generator.isComplete())
                 {
@@ -252,6 +255,7 @@ public class HttpConnection implements Connection
                             _generator.complete();
                     }
                 }
+                
 
                 // If we are not ended then parse available
                 if (!_parser.isComplete() && _generator.isCommitted())
@@ -262,8 +266,16 @@ public class HttpConnection implements Connection
 
                 if (io > 0)
                     no_progress = 0;
-                else if (no_progress++ >= 2 && !_endp.isBlocking()) // TODO maybe no retries is best here?
+                else if (no_progress++ >= 2 && !_endp.isBlocking())
+                {
+                    // SSL may need an extra flush as it may have made "no progress" while actually doing a handshake.
+                    if (_endp instanceof SslSelectChannelEndPoint && !_generator.isComplete() && !_generator.isEmpty())
+                    {
+                        if (_generator.flush()>0)
+                            continue;
+                    }
                     return;
+                }
             }
             catch (IOException e)
             {
