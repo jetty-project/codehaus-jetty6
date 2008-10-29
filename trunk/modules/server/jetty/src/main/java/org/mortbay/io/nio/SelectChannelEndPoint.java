@@ -387,7 +387,8 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
                     {
                         if ((_interestOps&SelectionKey.OP_READ)==0)
                             System.err.println("Not readable "+this);
-                            
+
+                        // System.err.println("Interested! "+this);
                         _key.interestOps(_interestOps);
                     }
                 }
@@ -480,7 +481,12 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "SCEP@" + hashCode() + "[d=" + _dispatched + ",io=" + _interestOps + ",w=" + _writable + ",b=" + _readBlocked + "|" + _writeBlocked + "]";
+        return "SCEP@" + hashCode() + "[d=" + _dispatched + ",io=" + 
+        ((SelectionKey.OP_ACCEPT&_interestOps)!=0?"A":"")+
+        ((SelectionKey.OP_CONNECT&_interestOps)!=0?"C":"")+
+        ((SelectionKey.OP_READ&_interestOps)!=0?"R":"")+
+        ((SelectionKey.OP_WRITE&_interestOps)!=0?"W":"")+
+        ",w=" + _writable + ",b=" + _readBlocked + "|" + _writeBlocked + "]";
     }
 
     /* ------------------------------------------------------------ */
