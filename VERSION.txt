@@ -1,3 +1,6 @@
+jetty-7.0.0-SNAPSHOT
+ + JETTY-767 work in progress
+
 jetty-7.0.0.pre4 28 Oct 2008
  + JETTY-241 Support for web application overlays in rapid application development (jetty:run)
  + JETTY-319 improved passing of exception when webapp unavailable
