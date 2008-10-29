@@ -760,4 +760,9 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
         return _engine;
     }
     
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return super.toString()+","+_engine.getHandshakeStatus()+", in/out="+_inNIOBuffer.length()+"/"+_outNIOBuffer.length()+" last="+_result;
+    }
 }
