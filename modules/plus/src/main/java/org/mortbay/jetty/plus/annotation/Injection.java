@@ -187,7 +187,7 @@ public class Injection
         }
         catch (Exception e)
         {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException(e.getMessage());
         }
     }
     
@@ -208,7 +208,7 @@ public class Injection
         }
         catch (Exception e)
         {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException(e.getMessage());
         }
     }
     
