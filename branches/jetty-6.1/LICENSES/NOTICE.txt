@@ -30,5 +30,7 @@ Some portions of the code are Copyright:
 
 The jboss integration module contains some LGPL code.
 
-The Java Service Wrapper (v3.2.3) is Copyright (c) 1999, 2006 Tanuki Software, Inc.
-See ../extras/win32service/LICENSE.txt
+The win32 Java Service Wrapper (v3.2.3) is Copyright (c) 1999, 2006 
+Tanuki Software, Inc.  and 2001 Silver Egg Technology.  It is 
+covered by an open license which is viewable at
+http://svn.codehaus.org/jetty/jetty/branches/jetty-6.1/extras/win32service/LICENSE.txt
