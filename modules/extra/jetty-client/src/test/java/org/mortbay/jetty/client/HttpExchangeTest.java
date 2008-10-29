@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -37,6 +38,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.client.security.ProxyAuthorization;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.thread.QueuedThreadPool;
 
 /**
  * Functional testing for HttpExchange.
@@ -51,6 +53,7 @@ public class HttpExchangeTest extends TestCase
     protected int _port;
     protected HttpClient _httpClient;
     protected Connector _connector;
+    protected AtomicInteger _count = new AtomicInteger();
 
     protected void setUp() throws Exception
     {
@@ -70,14 +73,14 @@ public class HttpExchangeTest extends TestCase
 
     public void testPerf() throws Exception
     {
-        sender(1,true);
         sender(1,false);
-        sender(10,true);
+        sender(1,true);
         sender(10,false);
-        sender(100,true);
+        sender(10,true);
         sender(100,false);
-        sender(1000,true);
+        sender(100,true);
         sender(1000,false);
+        sender(1000,true);
     }
 
     /**
@@ -87,8 +90,10 @@ public class HttpExchangeTest extends TestCase
      */
     public void sender(final int nb,final boolean close) throws Exception
     {
+        _count.set(0);
         final CountDownLatch latch=new CountDownLatch(nb);
         HttpExchange[] httpExchange = new HttpExchange[nb];
+        long start=System.currentTimeMillis();
         for (int i=0; i<nb; i++)
         {
             final int n=i;
@@ -187,7 +192,7 @@ public class HttpExchangeTest extends TestCase
             while(last>0)
             {
                 System.err.println("waiting for "+last);
-                latch.await(5,TimeUnit.SECONDS);
+                latch.await(10,TimeUnit.SECONDS);
                 long next=latch.getCount();
                 if (last==next)
                     break;
@@ -198,11 +203,16 @@ public class HttpExchangeTest extends TestCase
             {
                 _httpClient.dump();
                 System.err.println("--");
-                for (Object o : httpExchange)
-                    System.err.println(o);
+                for (HttpExchange o : httpExchange)
+                    if (o.getStatus()!=HttpExchange.STATUS_COMPLETED)
+                        System.err.println(o);
 
             }
         }
+        
+        long elapsed=System.currentTimeMillis()-start;
+        System.err.println(nb+"/"+_count+" c="+close+" rate="+(nb*1000/elapsed));
+        
         assertEquals("nb="+nb+" close="+close,0,latch.getCount());
     }
 
@@ -313,6 +323,8 @@ public class HttpExchangeTest extends TestCase
                     Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
                     base_request.setHandled(true);
                     response.setStatus(200);
+                    _count.incrementAndGet();
+                    
                     if (request.getServerName().equals("jetty.mortbay.org"))
                     {
                         // System.err.println("HANDLING Proxy");
