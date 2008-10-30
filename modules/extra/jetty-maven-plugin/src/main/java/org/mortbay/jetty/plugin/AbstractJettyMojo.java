@@ -498,11 +498,14 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         // print out which system properties were set up
         if (getLog().isDebugEnabled())
         {
-            Iterator itor = systemProperties.getSystemProperties().iterator();
-            while (itor.hasNext())
+            if (systemProperties != null)
             {
-                SystemProperty prop = (SystemProperty)itor.next();
-                getLog().debug("Property "+prop.getName()+"="+prop.getValue()+" was "+ (prop.isSet() ? "set" : "skipped"));
+                Iterator itor = systemProperties.getSystemProperties().iterator();
+                while (itor.hasNext())
+                {
+                    SystemProperty prop = (SystemProperty)itor.next();
+                    getLog().debug("Property "+prop.getName()+"="+prop.getValue()+" was "+ (prop.isSet() ? "set" : "skipped"));
+                }
             }
         }
     }
