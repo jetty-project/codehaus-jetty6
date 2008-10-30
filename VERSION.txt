@@ -4,6 +4,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-763 Fixed AJP13 constructor
  + JETTY-766 Ensure SystemProperties set early on jetty-maven-plugin
  + JETTY-767 Fixed SSL Client no progress handshake bug
+ + JETTY-768 Remove EnvEntry overloaded constructors
  + JETTY-771 Ensure NamingEntryUtil jdk1.4 compliant
  
 jetty-6.1.12.rc4 21 October 2008
