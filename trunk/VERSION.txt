@@ -1,5 +1,6 @@
 jetty-7.0-SNAPSHOT
  + JETTY-766 Fix npe
+ + JETTY-768 Remove EnvEntry overloaded constructors
  + JETTY-771 Ensure NamingEntryUtil is jdk1.4 compliant
 
 jetty-7.0.0.pre5 29 Oct 2008
