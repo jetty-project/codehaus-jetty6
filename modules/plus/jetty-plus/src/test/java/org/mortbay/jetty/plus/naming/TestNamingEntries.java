@@ -17,6 +17,7 @@ package org.mortbay.jetty.plus.naming;
 
 
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -158,6 +159,19 @@ public class TestNamingEntries extends TestCase
         this.someObject = new SomeObject(4);
     }
 
+    public void testEnvEntryNoScope ()
+    throws Exception
+    {
+        EnvEntry ee = new EnvEntry("nameZ", "zstring", true);
+        List list = NamingEntryUtil.lookupNamingEntries(null, EnvEntry.class);
+        assertNotNull(list);
+        assertFalse(list.isEmpty());
+        assertEquals(1, list.size());
+        Object o = list.get(0);
+        assertTrue (o instanceof EnvEntry);
+        EnvEntry eo = (EnvEntry)o;
+        assertEquals ("nameZ", eo.getJndiName());
+    }
  
     public void testEnvEntryOverride ()
     throws Exception
