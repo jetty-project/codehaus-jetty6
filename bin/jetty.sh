@@ -221,8 +221,10 @@ if [ -z "$JETTY_HOME" ] ; then
     echo "** ERROR: JETTY_HOME not set, you need to set it or install in a standard location" 
     exit 1
 fi
+
 cd $JETTY_HOME
 JETTY_HOME=`pwd`
+
 
 #####################################################
 # Check that jetty is where we think it is
@@ -514,7 +516,7 @@ case "$ACTION" in
 	else
 
           if [ -f $JETTY_PID ]
-          then
+          then            
             if running $JETTY_PID
             then
               echo "Already Running!!"
@@ -652,5 +654,6 @@ case "$ACTION" in
 esac
 
 exit 0
+
 
 
