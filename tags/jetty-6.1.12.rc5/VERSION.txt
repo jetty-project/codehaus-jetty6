@@ -1,4 +1,4 @@
-jetty-6.1-SNAPSHOT
+jetty-6.1.12.rc5 30 Oct 2008
  + JETTY-703 maxStopTimeMs added to QueuedThreadPool
  + JETTY-762 improved QueuedThreadPool idle death handling
  + JETTY-763 Fixed AJP13 constructor
