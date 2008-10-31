@@ -201,73 +201,69 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
         }
         return new ConstraintInfo(dataConstraint, (List<String>)roles);
     }
-    
+
 
     protected boolean checkUserDataPermissions(String pathInContext, Request request, Response response, Object constraintInfo) throws IOException
     {
-        int dataConstraint = ((ConstraintInfo)constraintInfo).getDataConstraint();
+        int dataConstraint = ((ConstraintInfo) constraintInfo).getDataConstraint();
         if (dataConstraint == Constraint.DC_FORBIDDEN)
         {
             return false;
         }
-        if (dataConstraint > Constraint.DC_NONE)
+        if (dataConstraint == Constraint.DC_NONE || dataConstraint == Constraint.DC_UNSET) 
         {
-            HttpConnection connection = HttpConnection.getCurrentConnection();
-            Connector connector = connection.getConnector();
+            return true;
+        }
+        HttpConnection connection = HttpConnection.getCurrentConnection();
+        Connector connector = connection.getConnector();
 
-            switch (dataConstraint)
+        if (dataConstraint == Constraint.DC_INTEGRAL)
+        {
+            if (connector.isIntegral(request))
+                return true;
+            if (connector.getConfidentialPort() > 0)
             {
-                case Constraint.DC_INTEGRAL :
-                    if (connector.isIntegral(request))
-                        return true;
-                    if (connector.getConfidentialPort() > 0)
-                    {
-                        String url=
-                            connector.getIntegralScheme()
+                String url =
+                        connector.getIntegralScheme()
                                 + "://"
                                 + request.getServerName()
                                 + ":"
                                 + connector.getIntegralPort()
                                 + request.getRequestURI();
-                        if (request.getQueryString() != null)
-                            url += "?" + request.getQueryString();
-                        response.setContentLength(0);
-                        response.sendRedirect(url);
-                        request.setHandled(true);
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                case Constraint.DC_CONFIDENTIAL :
-                    if (connector.isConfidential(request))
-                        return true;
+                if (request.getQueryString() != null)
+                    url += "?" + request.getQueryString();
+                response.setContentLength(0);
+                response.sendRedirect(url);
+                request.setHandled(true);
+            }
+            return false;
+        }
+        else if (dataConstraint == Constraint.DC_CONFIDENTIAL)
+        {
+            if (connector.isConfidential(request))
+                return true;
 
-                    if (connector.getConfidentialPort() > 0)
-                    {
-                        String url=
-                            connector.getConfidentialScheme()
+            if (connector.getConfidentialPort() > 0)
+            {
+                String url =
+                        connector.getConfidentialScheme()
                                 + "://"
                                 + request.getServerName()
                                 + ":"
                                 + connector.getConfidentialPort()
                                 + request.getRequestURI();
-                        if (request.getQueryString() != null)
-                            url += "?" + request.getQueryString();
+                if (request.getQueryString() != null)
+                    url += "?" + request.getQueryString();
 
-                        response.setContentLength(0);
-                        response.sendRedirect(url);
-                        request.setHandled(true);
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                default :
-                    return false;
+                response.setContentLength(0);
+                response.sendRedirect(url);
+                request.setHandled(true);
             }
+            return false;
+        } else {
+            throw new IllegalArgumentException("Invalid dataConstraint value: " + dataConstraint);
         }
-        return true;
+
     }
 
     protected boolean isAuthMandatory(Request base_request, Response base_response, Object constraintInfo)
