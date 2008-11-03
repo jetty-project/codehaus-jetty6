@@ -58,7 +58,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
 
     private long _lastShrink;
     private int _maxIdleTimeMs=60000;
-    private int _maxThreads=25;
+    private int _maxThreads=250;
     private int _minThreads=2;
     private boolean _warned=false;
     private int _lowThreads=0;

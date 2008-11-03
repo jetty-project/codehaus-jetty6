@@ -1,9 +1,19 @@
 jetty-7.0.0.pre5 30 Oct 2008
  + JETTY-766 Fix npe
- + JETTY-768 Remove EnvEntry overloaded constructors
- + JETTY-771 Ensure NamingEntryUtil is jdk1.4 compliant
  + JETTY-767 Fixed SSL Client no progress handshake bug
+ + JETTY-768 Remove EnvEntry overloaded constructors
  + JETTY-769 jquery example error
+ + JETTY-771 Ensure NamingEntryUtil is jdk1.4 compliant
+ + JETTY-772 Increased default threadpool size to 250
+
+jetty-6.1.12.rc5 30 October 2008
+ + JETTY-703 maxStopTimeMs added to QueuedThreadPool
+ + JETTY-762 improved QueuedThreadPool idle death handling
+ + JETTY-763 Fixed AJP13 constructor
+ + JETTY-766 Ensure SystemProperties set early on jetty-maven-plugin
+ + JETTY-767 Fixed SSL Client no progress handshake bug
+ + JETTY-768 Remove EnvEntry overloaded constructors
+ + JETTY-771 Ensure NamingEntryUtil jdk1.4 compliant
  
 jetty-7.0.0.pre4 28 Oct 2008
  + JETTY-241 Support for web application overlays in rapid application development (jetty:run)
