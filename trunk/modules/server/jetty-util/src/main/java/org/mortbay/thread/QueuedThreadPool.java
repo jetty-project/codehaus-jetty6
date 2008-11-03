@@ -30,9 +30,10 @@ import org.mortbay.log.Log;
  * Avoids the expense of thread creation by pooling threads after
  * their run methods exit for reuse.
  * <p>
- * If the maximum pool size is reached, jobs wait for a free thread.
- * By default there is no maximum pool size.  Idle threads timeout
- * and terminate until the minimum number of threads are running.
+ * If an idle thread is available a job is directly dispatched,
+ * otherwise the job is queued.  After queuing a job, if the total
+ * number of threads is less than the maximum pool size, a new thread 
+ * is spawned.
  * <p>
  * @author Greg Wilkins <gregw@mortbay.com>
  */
