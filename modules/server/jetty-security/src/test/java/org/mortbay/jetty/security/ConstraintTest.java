@@ -161,7 +161,8 @@ public class ConstraintTest extends TestCase
         
         _connector.reopen();
         response=_connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n\r\n");
-        assertTrue(response.startsWith("HTTP/1.1 302 Found"));
+        System.err.println(response);
+        assertTrue(response.startsWith("HTTP/1.1 302 "));
         assertTrue(response.indexOf("Location")>0);
         assertTrue(response.indexOf("testLoginPage")>0);
         String session=response.substring(response.indexOf("JSESSIONID=")+11,response.indexOf(";Path=/ctx"));
@@ -173,7 +174,7 @@ public class ConstraintTest extends TestCase
             "Content-Length: 31\r\n"+
             "\r\n"+
             "j_username=user&j_password=wrong\r\n");
-        assertTrue(response.startsWith("HTTP/1.1 302 Found"));
+        assertTrue(response.startsWith("HTTP/1.1 302 "));
         assertTrue(response.indexOf("Location")>0);
         assertTrue(response.indexOf("testErrorPage")>0);
         
@@ -185,7 +186,7 @@ public class ConstraintTest extends TestCase
             "Content-Length: 31\r\n"+
             "\r\n"+
             "j_username=user&j_password=pass\r\n");
-        assertTrue(response.startsWith("HTTP/1.1 302 Found"));
+        assertTrue(response.startsWith("HTTP/1.1 302 "));
         assertTrue(response.indexOf("Location")>0);
         assertTrue(response.indexOf("/ctx/auth/info")>0);
         

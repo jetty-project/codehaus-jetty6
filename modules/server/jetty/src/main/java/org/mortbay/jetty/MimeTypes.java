@@ -38,32 +38,50 @@ public class MimeTypes
       FORM_ENCODED="application/x-www-form-urlencoded",
       MESSAGE_HTTP="message/http",
       MULTIPART_BYTERANGES="multipart/byteranges",
+      
       TEXT_HTML="text/html",
       TEXT_PLAIN="text/plain",
       TEXT_XML="text/xml",
-      TEXT_HTML_8859_1="text/html; charset=iso-8859-1",
-      TEXT_PLAIN_8859_1="text/plain; charset=iso-8859-1",
-      TEXT_XML_8859_1="text/xml; charset=iso-8859-1",
-      TEXT_HTML_UTF_8="text/html; charset=utf-8",
-      TEXT_PLAIN_UTF_8="text/plain; charset=utf-8",
-      TEXT_XML_UTF_8="text/xml; charset=utf-8";
-    
+      TEXT_JSON="text/json",
+      
+      TEXT_HTML_8859_1="text/html;charset=ISO-8859-1",
+      TEXT_PLAIN_8859_1="text/plain;charset=ISO-8859-1",
+      TEXT_XML_8859_1="text/xml;charset=ISO-8859-1",
+      
+      TEXT_HTML_UTF_8="text/html;charset=UTF-8",
+      TEXT_PLAIN_UTF_8="text/plain;charset=UTF-8",
+      TEXT_XML_UTF_8="text/xml;charset=UTF-8",
+      TEXT_JSON_UTF_8="text/json;charset=UTF-8";
+
+    private final static String
+      TEXT_HTML__8859_1="text/html; charset=ISO-8859-1",
+      TEXT_PLAIN__8859_1="text/plain; charset=ISO-8859-1",
+      TEXT_XML__8859_1="text/xml; charset=ISO-8859-1",
+      TEXT_HTML__UTF_8="text/html; charset=UTF-8",
+      TEXT_PLAIN__UTF_8="text/plain; charset=UTF-8",
+      TEXT_XML__UTF_8="text/xml; charset=UTF-8",
+      TEXT_JSON__UTF_8="text/json; charset=UTF-8";
 
     private final static int
 	FORM_ENCODED_ORDINAL=1,
     	MESSAGE_HTTP_ORDINAL=2,
     	MULTIPART_BYTERANGES_ORDINAL=3,
+    	
     	TEXT_HTML_ORDINAL=4,
 	TEXT_PLAIN_ORDINAL=5,
 	TEXT_XML_ORDINAL=6,
-        TEXT_HTML_8859_1_ORDINAL=7,
-        TEXT_PLAIN_8859_1_ORDINAL=8,
-        TEXT_XML_8859_1_ORDINAL=9,
-        TEXT_HTML_UTF_8_ORDINAL=10,
-        TEXT_PLAIN_UTF_8_ORDINAL=11,
-        TEXT_XML_UTF_8_ORDINAL=12;
+        TEXT_JSON_ORDINAL=7,
+	
+        TEXT_HTML_8859_1_ORDINAL=8,
+        TEXT_PLAIN_8859_1_ORDINAL=9,
+        TEXT_XML_8859_1_ORDINAL=10,
+        
+        TEXT_HTML_UTF_8_ORDINAL=11,
+        TEXT_PLAIN_UTF_8_ORDINAL=12,
+        TEXT_XML_UTF_8_ORDINAL=13,
+        TEXT_JSON_UTF_8_ORDINAL=14;
     
-    private static int __index=13;
+    private static int __index=15;
     
     public final static BufferCache CACHE = new BufferCache(); 
 
@@ -75,14 +93,26 @@ public class MimeTypes
         TEXT_HTML_BUFFER=CACHE.add(TEXT_HTML,TEXT_HTML_ORDINAL),
         TEXT_PLAIN_BUFFER=CACHE.add(TEXT_PLAIN,TEXT_PLAIN_ORDINAL),
         TEXT_XML_BUFFER=CACHE.add(TEXT_XML,TEXT_XML_ORDINAL),
+        TEXT_JSON_BUFFER=CACHE.add(TEXT_JSON,TEXT_JSON_ORDINAL),
+
+        TEXT_HTML_8859_1_BUFFER=CACHE.add(TEXT_HTML_8859_1,TEXT_HTML_8859_1_ORDINAL),
+        TEXT_PLAIN_8859_1_BUFFER=CACHE.add(TEXT_PLAIN_8859_1,TEXT_PLAIN_8859_1_ORDINAL),
+        TEXT_XML_8859_1_BUFFER=CACHE.add(TEXT_XML_8859_1,TEXT_XML_8859_1_ORDINAL),
         
-    	TEXT_HTML_8859_1_BUFFER=new CachedBuffer(TEXT_HTML_8859_1,TEXT_HTML_8859_1_ORDINAL),
-    	TEXT_PLAIN_8859_1_BUFFER=new CachedBuffer(TEXT_PLAIN_8859_1,TEXT_PLAIN_8859_1_ORDINAL),
-    	TEXT_XML_8859_1_BUFFER=new CachedBuffer(TEXT_XML_8859_1,TEXT_XML_8859_1_ORDINAL),
-        TEXT_HTML_UTF_8_BUFFER=new CachedBuffer(TEXT_HTML_UTF_8,TEXT_HTML_UTF_8_ORDINAL),
-        TEXT_PLAIN_UTF_8_BUFFER=new CachedBuffer(TEXT_PLAIN_UTF_8,TEXT_PLAIN_UTF_8_ORDINAL),
-        TEXT_XML_UTF_8_BUFFER=new CachedBuffer(TEXT_XML_UTF_8,TEXT_XML_UTF_8_ORDINAL);
-    
+        TEXT_HTML_UTF_8_BUFFER=CACHE.add(TEXT_HTML_UTF_8,TEXT_HTML_UTF_8_ORDINAL),
+        TEXT_PLAIN_UTF_8_BUFFER=CACHE.add(TEXT_PLAIN_UTF_8,TEXT_PLAIN_UTF_8_ORDINAL),
+        TEXT_XML_UTF_8_BUFFER=CACHE.add(TEXT_XML_UTF_8,TEXT_XML_UTF_8_ORDINAL),
+        TEXT_JSON_UTF_8_BUFFER=CACHE.add(TEXT_JSON_UTF_8,TEXT_JSON_UTF_8_ORDINAL),
+
+        TEXT_HTML__8859_1_BUFFER=CACHE.add(TEXT_HTML__8859_1,TEXT_HTML_8859_1_ORDINAL),
+        TEXT_PLAIN__8859_1_BUFFER=CACHE.add(TEXT_PLAIN__8859_1,TEXT_PLAIN_8859_1_ORDINAL),
+        TEXT_XML__8859_1_BUFFER=CACHE.add(TEXT_XML__8859_1,TEXT_XML_8859_1_ORDINAL),
+        
+        TEXT_HTML__UTF_8_BUFFER=CACHE.add(TEXT_HTML__UTF_8,TEXT_HTML_UTF_8_ORDINAL),
+        TEXT_PLAIN__UTF_8_BUFFER=CACHE.add(TEXT_PLAIN__UTF_8,TEXT_PLAIN_UTF_8_ORDINAL),
+        TEXT_XML__UTF_8_BUFFER=CACHE.add(TEXT_XML__UTF_8,TEXT_XML_UTF_8_ORDINAL),
+        TEXT_JSON__UTF_8_BUFFER=CACHE.add(TEXT_JSON__UTF_8,TEXT_JSON_UTF_8_ORDINAL);
+
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -140,11 +170,16 @@ public class MimeTypes
         TEXT_HTML_BUFFER.setAssociate("utf-8",TEXT_HTML_UTF_8_BUFFER);
         TEXT_PLAIN_BUFFER.setAssociate("UTF-8",TEXT_PLAIN_UTF_8_BUFFER);
         TEXT_PLAIN_BUFFER.setAssociate("UTF8",TEXT_PLAIN_UTF_8_BUFFER);
+        TEXT_PLAIN_BUFFER.setAssociate("utf8",TEXT_PLAIN_UTF_8_BUFFER);
         TEXT_PLAIN_BUFFER.setAssociate("utf-8",TEXT_PLAIN_UTF_8_BUFFER);
         TEXT_XML_BUFFER.setAssociate("UTF-8",TEXT_XML_UTF_8_BUFFER);
-        TEXT_XML_BUFFER.setAssociate("utf8",TEXT_XML_UTF_8_BUFFER);
         TEXT_XML_BUFFER.setAssociate("UTF8",TEXT_XML_UTF_8_BUFFER);
+        TEXT_XML_BUFFER.setAssociate("utf8",TEXT_XML_UTF_8_BUFFER);
         TEXT_XML_BUFFER.setAssociate("utf-8",TEXT_XML_UTF_8_BUFFER);
+        TEXT_JSON_BUFFER.setAssociate("UTF-8",TEXT_JSON_UTF_8_BUFFER);
+        TEXT_JSON_BUFFER.setAssociate("UTF8",TEXT_JSON_UTF_8_BUFFER);
+        TEXT_JSON_BUFFER.setAssociate("utf8",TEXT_JSON_UTF_8_BUFFER);
+        TEXT_JSON_BUFFER.setAssociate("utf-8",TEXT_JSON_UTF_8_BUFFER);
     }
 
 
@@ -258,10 +293,12 @@ public class MimeTypes
                 case TEXT_PLAIN_8859_1_ORDINAL:
                 case TEXT_XML_8859_1_ORDINAL:
                     return StringUtil.__ISO_8859_1;
-                    
+
+                case TEXT_JSON_ORDINAL:
                 case TEXT_HTML_UTF_8_ORDINAL:
                 case TEXT_PLAIN_UTF_8_ORDINAL:
                 case TEXT_XML_UTF_8_ORDINAL:
+                case TEXT_JSON_UTF_8_ORDINAL:
                     return StringUtil.__UTF8;
             }
         }
@@ -328,8 +365,5 @@ public class MimeTypes
         if (state==10)
             return CACHE.lookup(value.peek(start,i-start)).toString();
         return null;
-        
     }
-
-
 }

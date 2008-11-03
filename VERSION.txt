@@ -1,3 +1,5 @@
+ + JETTY-774 Improved caching of mime types with charsets
+
 jetty-7.0.0.pre5 30 Oct 2008
  + JETTY-766 Fix npe
  + JETTY-767 Fixed SSL Client no progress handshake bug
