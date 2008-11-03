@@ -1,5 +1,6 @@
 
  + JETTY-772 Increased default threadpool size to 250
+ + JETTY-774 Cached text/json content type
 
 jetty-6.1.12.rc5 30 October 2008
  + JETTY-703 maxStopTimeMs added to QueuedThreadPool

@@ -46,7 +46,11 @@ public class MimeTypes
       TEXT_XML_8859_1="text/xml; charset=iso-8859-1",
       TEXT_HTML_UTF_8="text/html; charset=utf-8",
       TEXT_PLAIN_UTF_8="text/plain; charset=utf-8",
-      TEXT_XML_UTF_8="text/xml; charset=utf-8";
+      TEXT_XML_UTF_8="text/xml; charset=utf-8",
+    
+      // minimal changes for 6.1.12
+      TEXT_JSON="text/json",
+      TEXT_JSON_UTF_8="text/json;charset=UTF-8";
     
 
     private final static int
@@ -61,9 +65,13 @@ public class MimeTypes
         TEXT_XML_8859_1_ORDINAL=9,
         TEXT_HTML_UTF_8_ORDINAL=10,
         TEXT_PLAIN_UTF_8_ORDINAL=11,
-        TEXT_XML_UTF_8_ORDINAL=12;
+        TEXT_XML_UTF_8_ORDINAL=12,
+        TEXT_JSON_ORDINAL=13,
+        TEXT_JSON_UTF_8_ORDINAL=14;
+        
+        
     
-    private static int __index=13;
+    private static int __index=15;
     
     public final static BufferCache CACHE = new BufferCache(); 
 
@@ -81,7 +89,10 @@ public class MimeTypes
     	TEXT_XML_8859_1_BUFFER=new CachedBuffer(TEXT_XML_8859_1,TEXT_XML_8859_1_ORDINAL),
         TEXT_HTML_UTF_8_BUFFER=new CachedBuffer(TEXT_HTML_UTF_8,TEXT_HTML_UTF_8_ORDINAL),
         TEXT_PLAIN_UTF_8_BUFFER=new CachedBuffer(TEXT_PLAIN_UTF_8,TEXT_PLAIN_UTF_8_ORDINAL),
-        TEXT_XML_UTF_8_BUFFER=new CachedBuffer(TEXT_XML_UTF_8,TEXT_XML_UTF_8_ORDINAL);
+        TEXT_XML_UTF_8_BUFFER=new CachedBuffer(TEXT_XML_UTF_8,TEXT_XML_UTF_8_ORDINAL),
+    
+        TEXT_JSON_BUFFER=CACHE.add(TEXT_JSON,TEXT_JSON_ORDINAL),
+        TEXT_JSON_UTF_8_BUFFER=CACHE.add(TEXT_JSON_UTF_8,TEXT_JSON_UTF_8_ORDINAL);
     
     
     /* ------------------------------------------------------------ */
@@ -145,6 +156,11 @@ public class MimeTypes
         TEXT_XML_BUFFER.setAssociate("utf8",TEXT_XML_UTF_8_BUFFER);
         TEXT_XML_BUFFER.setAssociate("UTF8",TEXT_XML_UTF_8_BUFFER);
         TEXT_XML_BUFFER.setAssociate("utf-8",TEXT_XML_UTF_8_BUFFER);
+        
+        TEXT_JSON_BUFFER.setAssociate("UTF-8",TEXT_JSON_UTF_8_BUFFER);
+        TEXT_JSON_BUFFER.setAssociate("utf8",TEXT_JSON_UTF_8_BUFFER);
+        TEXT_JSON_BUFFER.setAssociate("UTF8",TEXT_JSON_UTF_8_BUFFER);
+        TEXT_JSON_BUFFER.setAssociate("utf-8",TEXT_JSON_UTF_8_BUFFER);
     }
 
 
@@ -262,6 +278,8 @@ public class MimeTypes
                 case TEXT_HTML_UTF_8_ORDINAL:
                 case TEXT_PLAIN_UTF_8_ORDINAL:
                 case TEXT_XML_UTF_8_ORDINAL:
+                case TEXT_JSON_ORDINAL:
+                case TEXT_JSON_UTF_8_ORDINAL:
                     return StringUtil.__UTF8;
             }
         }
