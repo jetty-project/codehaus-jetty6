@@ -169,7 +169,7 @@ public class HttpConnectionTest extends TestCase
                                            "0;\015\012\015\012");
             offset = checkContains(response,offset,"HTTP/1.1 200");
             offset = checkContains(response,offset,"/R1");
-            offset = checkContains(response,offset,"encoding=utf-8");
+            offset = checkContains(response,offset,"encoding=UTF-8");
             offset = checkContains(response,offset,"12345");
 
             offset=0; connector.reopen();
@@ -352,10 +352,6 @@ public class HttpConnectionTest extends TestCase
             assertTrue(false);
         }
     }
-
-
-    
-
 }
 
 

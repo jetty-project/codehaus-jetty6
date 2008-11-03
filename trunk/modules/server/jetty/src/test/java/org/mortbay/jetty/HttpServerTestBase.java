@@ -38,6 +38,7 @@ import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.util.IO;
+import org.mortbay.util.StringUtil;
 
 /**
  * HttpServer Tester.
@@ -64,12 +65,22 @@ public class HttpServerTestBase extends TestCase
     private static final String FRAGMENT3=REQUEST1.substring(34);
 
     /** Second test request. */
-    private static final String REQUEST2_HEADER="POST / HTTP/1.0\n"+"Host: localhost\n"+"Content-Type: text/xml\n"+"Content-Length: ";
+    private static final String REQUEST2_HEADER=
+        "POST / HTTP/1.0\n"+
+        "Host: localhost\n"+
+        "Content-Type: text/xml\n"+
+        "Content-Length: ";
 
-    private static final String REQUEST2_CONTENT="<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"
-            +"<nimbus xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"+"        xsi:noNamespaceSchemaLocation=\"nimbus.xsd\" version=\"1.0\">\n"
-            +"    <request requestId=\"1\">\n"+"        <getJobDetails>\n"+"            <jobId>73</jobId>\n"+"        </getJobDetails>\n"+"    </request>\n"
-            +"</nimbus>";
+    private static final String REQUEST2_CONTENT=
+        "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"+
+        "<nimbus xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"+
+        "        xsi:noNamespaceSchemaLocation=\"nimbus.xsd\" version=\"1.0\">\n"+
+        "    <request requestId=\"1\">\n"+
+        "        <getJobDetails>\n"+
+        "            <jobId>73</jobId>\n"+
+        "        </getJobDetails>\n"+
+        "    </request>\n"+
+        "</nimbus>";
 
     private static final String REQUEST2=REQUEST2_HEADER+REQUEST2_CONTENT.getBytes().length+"\n\n"+REQUEST2_CONTENT;
 
@@ -85,7 +96,7 @@ public class HttpServerTestBase extends TestCase
             +"</nimbus>\n";
     private static final String RESPONSE2=
         "HTTP/1.1 200 OK\n"+
-        "Content-Type: text/xml; charset=iso-8859-1\n"+
+        "Content-Type: text/xml;charset=ISO-8859-1\n"+
         "Content-Length: "+RESPONSE2_CONTENT.getBytes().length+"\n"+
         "Server: Jetty(7.0.x)\n"+
         "\n"+
@@ -581,7 +592,7 @@ public class HttpServerTestBase extends TestCase
             ).getBytes("iso-8859-1"));
 
             os.write((
-                    "abcdefghi\n"
+                    "abcdefghZ\n"
             ).getBytes("utf-8"));
 
             String content="Wibble";
@@ -601,14 +612,37 @@ public class HttpServerTestBase extends TestCase
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             IO.copy(is,bout);
             byte[] b=bout.toByteArray();
-            String in = new String(b,0,b.length,"utf-8");
+
+            int i=0;
+            while (b[i]!='Z')
+                i++;
+            int state=0;
+            while(state!=4)
+            {
+                switch(b[i++])
+                {
+                    case '\r':
+                        if (state==0||state==2)
+                            state++;
+                        continue;
+                    case '\n':
+                        if (state==1||state==3)
+                            state++;
+                        continue;
+                        
+                    default:
+                        state=0;
+                }
+            }
+            
+            
+            String in = new String(b,0,i,"utf-8");
             assertTrue(in.indexOf("123456789")>=0);
-            assertTrue(in.indexOf("abcdefghi")>=0);
+            assertTrue(in.indexOf("abcdefghZ")>=0);
             assertTrue(in.indexOf("Wibble")<0);
-            in = new String(b,0,b.length,"utf-16");
-            assertTrue(in.indexOf("123456789")<0);
-            assertTrue(in.indexOf("abcdefghi")<0);
-            assertTrue(in.indexOf("Wibble")>=0);
+            
+            in = new String(b,i,b.length-i,"utf-16");
+            assertEquals("Wibble\n",in);
             
         }
         finally
