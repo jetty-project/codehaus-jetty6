@@ -1,4 +1,5 @@
  + JETTY-774 Improved caching of mime types with charsets
+ + JETTY-775 AbstractSessionTest remove timing related test
 
 jetty-7.0.0.pre5 30 Oct 2008
  + JETTY-766 Fix npe
