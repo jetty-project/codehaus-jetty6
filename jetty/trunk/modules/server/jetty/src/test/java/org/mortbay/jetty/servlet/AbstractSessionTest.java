@@ -103,9 +103,6 @@ public abstract class AbstractSessionTest extends TestCase
         // confirm that session on contextA has been deleted
         assertFalse(client1.send("/contextA", cookie1));
         
-        // session will reflect after 10s, so node2 still would not be deleted.
-        assertTrue(client2.send("/contextA", cookie1));
-        
         // Session invalidate on contextB
         assertTrue(client1.invalidate("/contextB/action", cookie1)); 
         
