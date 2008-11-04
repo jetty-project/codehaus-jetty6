@@ -1,3 +1,4 @@
+ + JETTY-731 Completed DeliverListener for cometd
  + JETTY-774 Improved caching of mime types with charsets
  + JETTY-775 AbstractSessionTest remove timing related test
 
