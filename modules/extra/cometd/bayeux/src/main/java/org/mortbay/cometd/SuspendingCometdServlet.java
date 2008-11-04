@@ -178,6 +178,7 @@ public class SuspendingCometdServlet extends AbstractCometdServlet
         {
             synchronized(client)
             {
+                client.doDeliverListeners();
                 ArrayQueue<Message> messages= (ArrayQueue)client.getQueue();
                 int size=messages.size();
                 boolean flushed=false;
