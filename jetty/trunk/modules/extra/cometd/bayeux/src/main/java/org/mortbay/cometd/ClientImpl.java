@@ -414,22 +414,25 @@ public class ClientImpl implements Client
     /* ------------------------------------------------------------ */
     public void addListener(ClientListener listener)
     {
-    	synchronized(this)
-    	{
-    		if (listener instanceof MessageListener)
-    		{
-    			if (listener instanceof MessageListener.Synchronous)
-    				_syncMListeners=(MessageListener[])LazyList.addToArray(_syncMListeners,listener,MessageListener.class);
-    			else
-    				_asyncMListeners=(MessageListener[])LazyList.addToArray(_asyncMListeners,listener,MessageListener.class);
-    		}
+        synchronized(this)
+        {
+            if (listener instanceof MessageListener)
+            {
+                if (listener instanceof MessageListener.Synchronous)
+                    _syncMListeners=(MessageListener[])LazyList.addToArray(_syncMListeners,listener,MessageListener.class);
+                else
+                    _asyncMListeners=(MessageListener[])LazyList.addToArray(_asyncMListeners,listener,MessageListener.class);
+            }
 
-    		if (listener instanceof RemoveListener)
-    			_rListeners=(RemoveListener[])LazyList.addToArray(_rListeners,listener,RemoveListener.class);
-    		
-    		if (listener instanceof QueueListener)
-    		    _qListeners=(QueueListener[])LazyList.addToArray(_qListeners,listener,QueueListener.class);
-    	}
+            if (listener instanceof RemoveListener)
+                _rListeners=(RemoveListener[])LazyList.addToArray(_rListeners,listener,RemoveListener.class);
+
+            if (listener instanceof QueueListener)
+                _qListeners=(QueueListener[])LazyList.addToArray(_qListeners,listener,QueueListener.class);
+            
+            if (listener instanceof DeliverListener)
+                _dListeners=(DeliverListener[])LazyList.addToArray(_dListeners,listener,DeliverListener.class);
+        }
     }
 
     /* ------------------------------------------------------------ */
