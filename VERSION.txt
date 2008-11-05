@@ -1,4 +1,5 @@
  + JETTY-777 include util5 on the jetty debs
+ + JETTY-779 Fixed line feed in request log
 
 jetty-6.1.12 4 November 2008
  + JETTY-731 Completed DeliverListener for cometd
