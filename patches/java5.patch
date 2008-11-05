@@ -939,9 +939,9 @@ Index: modules/util/src/main/java/org/mortbay/util/RolloverFileOutputStream.java
  
 Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(revision 2256)
+--- modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(revision 3990)
 +++ modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(working copy)
-@@ -988,7 +988,7 @@
+@@ -1026,7 +1026,7 @@
      {
          boolean minus=false;
          long number=0;
@@ -950,31 +950,29 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
  
          longLoop: while (source.hasNext())
          {
-@@ -1019,7 +1019,7 @@
+@@ -1058,7 +1058,7 @@
                  case '.':
                  case 'e':
                  case 'E':
 -                    buffer=new StringBuffer(16);
 +                    buffer=new StringBuilder(16);
-                     buffer.append(minus?-1*number:number);
-                     buffer.append(c);
-                     source.next();
-@@ -1033,8 +1033,7 @@
+                     if(minus) 
+                         buffer.append('-');
+                     buffer.append(number);
+@@ -1074,8 +1074,6 @@
          if (buffer==null)
-             return TypeUtil.newLong(number);
+             return TypeUtil.newLong(minus?-1*number:number);
  
 -        synchronized (buffer)
 -        {
-+
              doubleLoop: while (source.hasNext())
              {
                  char c=source.peek();
-@@ -1063,7 +1062,7 @@
+@@ -1105,7 +1103,6 @@
                  }
              }
              return new Double(buffer.toString());
 -        }
-+
      }
  
      protected void seekTo(char seek, Source source)
