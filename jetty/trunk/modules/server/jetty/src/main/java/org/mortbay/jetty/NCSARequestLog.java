@@ -317,10 +317,10 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
 	    {
                 synchronized(_writer)
 		{
+                    buf.append(StringUtil.__LINE_SEPARATOR);
                     int l=buf.length();
                     if (l>_copy.length)
                         l=_copy.length;  
-                    buf.append(StringUtil.__LINE_SEPARATOR);
                     buf.getChars(0,l,_copy,0); 
                     _writer.write(_copy,0,l);
                     _writer.flush();
