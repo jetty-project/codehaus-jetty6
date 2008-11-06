@@ -41,37 +41,38 @@ import org.mortbay.jetty.Server;
  */
 public class Monitor extends Thread
 {
-    private int _port;
     private String _key;
     private Server[] _servers;
 
-    ServerSocket _socket;
+    ServerSocket _serverSocket;
     boolean _kill;
 
     public Monitor(int port, String key, Server[] servers, boolean kill) 
     throws UnknownHostException, IOException
     {
-        if(port <= 0)
+        if (port <= 0)
             throw new IllegalStateException ("Bad stop port");
         if (key==null)
             throw new IllegalStateException("Bad stop key");
-        _port = port;
+
         _key = key;
         _servers = servers;
         _kill = kill;
         setDaemon(true);
         setName("StopJettyPluginMonitor");
-        _socket=new ServerSocket(port,1,InetAddress.getByName("127.0.0.1"));   
+        _serverSocket=new ServerSocket(port,1,InetAddress.getByName("127.0.0.1")); 
+        _serverSocket.setReuseAddress(true);
     }
     
     public void run()
     {
-        while (true)
+        while (_serverSocket != null)
         {
             Socket socket = null;
             try
             {
-                socket = _socket.accept();
+                socket = _serverSocket.accept();
+                socket.setSoLinger(false, 0);
                 LineNumberReader lin = new LineNumberReader(new InputStreamReader(socket.getInputStream()));
                 
                 String key = lin.readLine();
@@ -79,8 +80,12 @@ public class Monitor extends Thread
                 String cmd = lin.readLine();
                 if ("stop".equals(cmd))
                 {
-                    try{socket.close();}catch (Exception e){e.printStackTrace();}
-                    try{socket.close();}catch (Exception e){e.printStackTrace();}
+                    try{socket.close();}catch (Exception e){PluginLog.getLog().debug(e);}
+                    try{socket.close();}catch (Exception e){PluginLog.getLog().debug(e);}
+                    try{_serverSocket.close();}catch (Exception e){PluginLog.getLog().debug(e);}
+                
+                    _serverSocket = null;
+                    
                     if (_kill)
                     {
                         PluginLog.getLog().info("Killing Jetty");
@@ -102,6 +107,8 @@ public class Monitor extends Thread
                         }
                     }
                 }
+                else
+                    PluginLog.getLog().info("Unsupported monitor operation");
             }
             catch (Exception e)
             {
