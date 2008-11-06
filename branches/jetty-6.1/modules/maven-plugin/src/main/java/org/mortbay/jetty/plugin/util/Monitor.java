@@ -60,7 +60,8 @@ public class Monitor extends Thread
         _kill = kill;
         setDaemon(true);
         setName("StopJettyPluginMonitor");
-        _serverSocket=new ServerSocket(port,1,InetAddress.getByName("127.0.0.1"));   
+        _serverSocket=new ServerSocket(port,1,InetAddress.getByName("127.0.0.1")); 
+        _serverSocket.setReuseAddress(true);
     }
     
     public void run()
@@ -71,6 +72,7 @@ public class Monitor extends Thread
             try
             {
                 socket = _serverSocket.accept();
+                socket.setSoLinger(false, 0);
                 LineNumberReader lin = new LineNumberReader(new InputStreamReader(socket.getInputStream()));
                 
                 String key = lin.readLine();

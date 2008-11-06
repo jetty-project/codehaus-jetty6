@@ -60,6 +60,8 @@ public class JettyStopMojo extends AbstractMojo
         try
         {        
             Socket s=new Socket(InetAddress.getByName("127.0.0.1"),stopPort);
+            s.setSoLinger(false, 0);
+            
             OutputStream out=s.getOutputStream();
             out.write((stopKey+"\r\nstop\r\n").getBytes());
             out.flush();
