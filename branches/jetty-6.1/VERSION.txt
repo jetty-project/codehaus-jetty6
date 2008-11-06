@@ -1,3 +1,4 @@
+ + JETTY-630 jetty6-plus rpm is missing the jetty6-plus jar
  + JETTY-765 ensure stop mojo works for all execution phases
  + JETTY-777 include util5 on the jetty debs
  + JETTY-779 Fixed line feed in request log
