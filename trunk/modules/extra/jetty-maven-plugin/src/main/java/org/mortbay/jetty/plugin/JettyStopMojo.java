@@ -15,6 +15,11 @@
 
 package org.mortbay.jetty.plugin;
 
+import java.io.OutputStream;
+import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.Socket;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -24,17 +29,14 @@ import org.apache.maven.plugin.MojoFailureException;
  * @author David Yu
  * 
  * @goal stop
- * @requiresDependencyResolution runtime
- * @execute phase="process-sources"
- * @description Stops jetty6 that is configured with &lt;stopKey&gt; and &lt;stopPort&gt;.
+ * @description Stops jetty that is configured with &lt;stopKey&gt; and &lt;stopPort&gt;.
  */
 
 public class JettyStopMojo extends AbstractMojo
 {
     
     /**
-     * Port to listen to stop jetty on executing -DSTOP.PORT=&lt;stopPort&gt; 
-     * -DSTOP.KEY=&lt;stopKey&gt; -jar start.jar --stop
+     * Port to listen to stop jetty on sending stop command
      * @parameter
      * @required
      */
@@ -50,11 +52,27 @@ public class JettyStopMojo extends AbstractMojo
 
     public void execute() throws MojoExecutionException, MojoFailureException 
     {
-        if(stopPort<1)
-            throw new MojoExecutionException("Please specify a valid port");        
-        System.setProperty("STOP.PORT", String.valueOf(stopPort));
-        System.setProperty("STOP.KEY", stopKey);
-        new org.mortbay.start.Main().stop();        
+        if (stopPort <= 0)
+            throw new MojoExecutionException("Please specify a valid port"); 
+        if (stopKey == null)
+            throw new MojoExecutionException("Please specify a valid stopKey");  
+
+        try
+        {        
+            Socket s=new Socket(InetAddress.getByName("127.0.0.1"),stopPort);
+            OutputStream out=s.getOutputStream();
+            out.write((stopKey+"\r\nstop\r\n").getBytes());
+            out.flush();
+            s.close();
+        }
+        catch (ConnectException e)
+        {
+            getLog().info("Jetty not running!");
+        }
+        catch (Exception e)
+        {
+            getLog().error(e);
+        }
     }
 
 }

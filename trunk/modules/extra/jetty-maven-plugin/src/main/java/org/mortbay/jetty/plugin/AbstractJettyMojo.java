@@ -26,6 +26,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.mortbay.jetty.Server;
 import org.mortbay.jetty.plugin.util.ConsoleScanner;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.PluginLog;
@@ -374,16 +375,16 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             //particular Jetty version
             finishConfigurationBeforeStart();
 
-            if(stopPort>0 && stopKey!=null)
-            {
-                System.setProperty("STOP.PORT", String.valueOf(stopPort));
-                System.setProperty("STOP.KEY", stopKey);
-                org.mortbay.start.Monitor.monitor();
-            }
             // start Jetty
             server.start();
 
             getLog().info("Started Jetty Server");
+            
+            if(stopPort>0 && stopKey!=null)
+            {
+                org.mortbay.jetty.plugin.util.Monitor monitor = new org.mortbay.jetty.plugin.util.Monitor(stopPort, stopKey, new Server[]{(Server)server.getProxiedObject()}, !daemon);
+                monitor.start();
+            }
             
             // start the scanner thread (if necessary) on the main webapp
             configureScanner ();
