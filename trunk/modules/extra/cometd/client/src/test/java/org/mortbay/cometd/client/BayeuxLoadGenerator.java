@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.cometd.Bayeux;
@@ -47,6 +48,7 @@ public class BayeuxLoadGenerator
     long _got;
     long _over;
     AtomicInteger _subscribed = new AtomicInteger();
+    Timer timer = new Timer("SharedBayeuxClientTimer", true);
 
     public BayeuxLoadGenerator() throws Exception
     {
@@ -150,7 +152,7 @@ public class BayeuxLoadGenerator
             while (clients.size()<nclients)
             {
                 int u=clients.size();
-                BayeuxClient client = new BayeuxClient(http,address,uri)
+                BayeuxClient client = new BayeuxClient(http,address,uri,timer)
                 {
                     public void deliver(Client from, Message message)
                     {
