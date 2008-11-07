@@ -4,6 +4,7 @@
  + JETTY-775 AbstractSessionTest remove timing related test
  + JETTY-779 Fixed line feed in request log
  + JETTY-782 Implement interval advice for BayeuxClient
+ + JETTY-783 Update jetty self-signed certificate
 
 jetty-6.1.12 4 November 2008
  + JETTY-731 Completed DeliverListener for cometd
