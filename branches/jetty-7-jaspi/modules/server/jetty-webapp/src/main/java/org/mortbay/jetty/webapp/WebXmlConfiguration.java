@@ -40,13 +40,18 @@ import org.mortbay.jetty.security.ConstraintSecurityHandler;
 import org.mortbay.jetty.handler.SecurityHandler;
 import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.LoginService;
+import org.mortbay.jetty.ServerAuthResult;
 import org.mortbay.jetty.security.ServletCallbackHandler;
-import org.mortbay.jetty.security.jaspi.JaspiServerAuthentication;
+import org.mortbay.jetty.security.CrossContextPsuedoSession;
 import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
-import org.mortbay.jetty.security.jaspi.modules.BasicAuthModule;
-import org.mortbay.jetty.security.jaspi.modules.ClientCertAuthModule;
-import org.mortbay.jetty.security.jaspi.modules.DigestAuthModule;
-import org.mortbay.jetty.security.jaspi.modules.FormAuthModule;
+import org.mortbay.jetty.security.jaspi.JaspiServerAuthentication;
+import org.mortbay.jetty.security.authentication.FormServerAuthentication;
+import org.mortbay.jetty.security.authentication.XCPSCachingServerAuthentication;
+import org.mortbay.jetty.security.authentication.SessionCachingServerAuthentication;
+import org.mortbay.jetty.security.authentication.BasicServerAuthentication;
+import org.mortbay.jetty.security.authentication.DigestServerAuthentication;
+import org.mortbay.jetty.security.authentication.ClientCertServerAuthentication;
+import org.mortbay.jetty.security.authentication.LazyServerAuthentication;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.FilterMapping;
@@ -1038,10 +1043,10 @@ public class WebXmlConfiguration implements Configuration
                 return;
             }
 
-            ServerAuthContext serverAuthContext=null;
-            ServletCallbackHandler callbackHandler=new ServletCallbackHandler(loginService);
+            ServerAuthentication serverAuthentication;
             String m=method.toString(false, true);
             boolean allowLazyAuthentication = true;
+            boolean useSSO = false;
             if (Constraint.__FORM_AUTH.equals(m))
             {
                 XmlParser.Node formConfig=node.get("form-login-config");
@@ -1057,35 +1062,50 @@ public class WebXmlConfiguration implements Configuration
                     {
                         errorPageName=errorPage.toString(false, true);
                     }
-                    serverAuthContext=new FormAuthModule(callbackHandler, loginPageName, errorPageName);
-                    allowLazyAuthentication = false;
+                    serverAuthentication=new FormServerAuthentication(loginPageName, errorPageName, loginService);
+                    if (useSSO)
+                    {
+                        CrossContextPsuedoSession<ServerAuthResult> xcps = null;
+                        serverAuthentication = new XCPSCachingServerAuthentication(serverAuthentication, xcps);
+                    }
+                    else
+                    {
+                        serverAuthentication = new SessionCachingServerAuthentication(serverAuthentication);
+                    }
                 } else
                 {
-//                    ??
+                    //TODO ?????
+                    throw new IllegalArgumentException("No forme config given for form auth");
                 }
             } else if (Constraint.__BASIC_AUTH.equals(m))
             {
-                serverAuthContext=new BasicAuthModule(callbackHandler, realmName);
+                serverAuthentication=new LazyServerAuthentication(new BasicServerAuthentication(loginService, realmName));
             } else if (Constraint.__DIGEST_AUTH.equals(m))
             {
-                serverAuthContext=new DigestAuthModule(callbackHandler, realmName);
+                serverAuthentication=new LazyServerAuthentication(new DigestServerAuthentication(loginService, realmName));
             } else if (Constraint.__CERT_AUTH.equals(m) ||
                     Constraint.__CERT_AUTH2.equals(m))
             {
                 //TODO figure out how to configure max handshake?
-                serverAuthContext=new ClientCertAuthModule(callbackHandler);
+                //TODO lazy?
+                serverAuthentication=new LazyServerAuthentication(new ClientCertServerAuthentication(loginService));
             } else
+            {
+                //TODO this should be first and rely on explicit jaspi configuration
                 Log.warn("UNKNOWN AUTH METHOD: " + m);
-            //TODO set this to host-name<space>context-root
-            String appContext=null;
-            ServerAuthConfig serverAuthConfig=new SimpleAuthConfig(appContext, serverAuthContext);
-            ServerAuthentication serverAuthentication=new JaspiServerAuthentication(appContext,
-                    serverAuthConfig,
-                    null,
-                    callbackHandler,
-                    //TODO??
-                    null,
-                    allowLazyAuthentication);
+                ServerAuthContext serverAuthContext = null;
+                ServletCallbackHandler callbackHandler = new ServletCallbackHandler(loginService);
+                //TODO set this to host-name<space>context-root
+                String appContext = null;
+                ServerAuthConfig serverAuthConfig = new SimpleAuthConfig(appContext, serverAuthContext);
+                serverAuthentication = new JaspiServerAuthentication(appContext,
+                        serverAuthConfig,
+                        null,
+                        callbackHandler,
+                        //TODO??
+                        null,
+                        allowLazyAuthentication);
+            }
             _securityHandler.setServerAuthentication(serverAuthentication);
         }
 
