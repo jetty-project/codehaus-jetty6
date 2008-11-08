@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Collections;
 import java.util.Arrays;
 
-import javax.security.auth.message.AuthStatus;
 import javax.security.auth.Subject;
 
 import org.mortbay.jetty.ServerAuthResult;
@@ -57,6 +56,10 @@ public class SimpleAuthResult implements ServerAuthResult {
         this.userPrincipal = userPrincipal;
         this.groups = groups == null? Collections.<String>emptyList(): Arrays.asList(groups);
         this.authMethod = userPrincipal == null? null: authMethod;
+    }
+
+    public SimpleAuthResult(ServerAuthStatus authStatus) {
+        this(authStatus, null, null, (String[])null, null);
     }
 
     public ServerAuthStatus getAuthStatus() {
