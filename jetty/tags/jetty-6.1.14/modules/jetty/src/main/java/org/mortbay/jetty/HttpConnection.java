@@ -413,7 +413,7 @@ public class HttpConnection implements Connection
                         io += written;
                         if (written <= 0)
                             break;
-                        else if (_endp.isBufferingOutput())
+                        if (_endp.isBufferingOutput())
                             _endp.flush();
                     }
 
