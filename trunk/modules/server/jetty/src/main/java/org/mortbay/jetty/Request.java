@@ -1113,6 +1113,17 @@ public class Request extends Suspendable implements HttpServletRequest
         
         if ("org.mortbay.jetty.Request.queryEncoding".equals(name))
             setQueryEncoding(value==null?null:value.toString());
+        else if("org.mortbay.jetty.sendContent".equals(name))
+        {
+            try 
+            {
+                ((HttpConnection.Output)getServletResponse().getOutputStream()).sendContent(value); 
+            } 
+            catch (IOException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
         else if("org.mortbay.jetty.ResponseBuffer".equals(name))
         {
             try 
