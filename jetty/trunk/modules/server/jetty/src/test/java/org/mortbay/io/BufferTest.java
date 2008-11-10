@@ -15,11 +15,14 @@
 
 package org.mortbay.io;
 
+import java.io.File;
+
 import junit.framework.TestCase;
 
 import org.mortbay.io.nio.DirectNIOBuffer;
 import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
+import org.mortbay.io.nio.RandomAccessFileBuffer;
 import org.mortbay.util.StringUtil;
 
 /**
@@ -42,7 +45,12 @@ public class BufferTest extends TestCase
     protected void setUp() throws Exception
     {
         super.setUp();
+        File file = File.createTempFile("test",".buf");
+        file.deleteOnExit();
+        file.createNewFile();
+        
         buffer=new Buffer[]{
+          new RandomAccessFileBuffer(file,10),
           new ByteArrayBuffer(10),
           new IndirectNIOBuffer(10),
           new DirectNIOBuffer(10)

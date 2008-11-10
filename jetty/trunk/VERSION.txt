@@ -1,4 +1,5 @@
  + JETTY-731 Completed DeliverListener for cometd
+ + JETTY-748 RandomAccessFileBuffer for hadoop optimization
  + JETTY-765 ensure stop mojo works for all execution phases
  + JETTY-774 Improved caching of mime types with charsets
  + JETTY-775 AbstractSessionTest remove timing related test
