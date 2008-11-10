@@ -405,7 +405,7 @@ public abstract class AbstractGenerator implements Generator
     {
         // Should we flush the buffers?
         boolean full =  
-            (_buffer != null && _buffer.space() == 0) ||
+            (_buffer !=null && _buffer.length()>0 && _buffer.space()==0) ||
             (_content!=null && _content.length()>0);
              
         return full;
