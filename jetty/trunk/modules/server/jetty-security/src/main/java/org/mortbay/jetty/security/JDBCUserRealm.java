@@ -54,9 +54,11 @@ import org.mortbay.util.Loader;
  * @author Ben Alex
  */
 
-public class JDBCUserRealm extends HashUserRealm implements UserRealm
+public class JDBCUserRealm extends AbstractUserRealm
 {
-
+    private String _config;
+    private Resource _configResource;
+    
     private String _jdbcDriver;
     private String _url;
     private String _userName;
@@ -114,6 +116,36 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
         connectDatabase();
     }    
 
+    
+    
+    public String getConfig()
+    {
+        return _config;
+    }
+    
+    public Resource getConfigResource()
+    {
+        return _configResource;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Load realm users from properties file.
+     * The property file maps usernames to password specs followed by
+     * an optional comma separated list of role names.
+     *
+     * @param config Filename or url of user properties file.
+     * @exception IOException 
+     */
+    public void setConfig(String config)
+        throws IOException
+    {
+        _config=config;
+        _configResource=Resource.newResource(_config);
+       loadConfig();
+ 
+    }
+    
+    
     /* ------------------------------------------------------------ */
     /** Load JDBC connection configuration from properties file.
      *     
@@ -167,9 +199,6 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
             + _userRoleTableRoleKey;
     }
 
-    /* ------------------------------------------------------------ */
-    public void logout(Principal user)
-    {}
     
     /* ------------------------------------------------------------ */
     /** (re)Connect to database with parameters setup by loadConfig()
@@ -230,8 +259,6 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
         return super.isUserInRole(user, roleName);
     }
     
-
-
     
     /* ------------------------------------------------------------ */
     private void loadUser(String username)
@@ -251,7 +278,7 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
             if (rs.next())
             {
                 int key = rs.getInt(_userTableKey);
-                put(username, rs.getString(_userTablePasswordField));
+                putUser(username, rs.getString(_userTablePasswordField));
                 stat.close();
                 
                 stat = _con.prepareStatement(_roleSql);
@@ -259,7 +286,7 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
                 rs = stat.executeQuery();
 
                 while (rs.next())
-                    addUserToRole(username, rs.getString(_roleTableRoleField));
+                    putUserRole(username, rs.getString(_roleTableRoleField));
                 
                 stat.close();
             }

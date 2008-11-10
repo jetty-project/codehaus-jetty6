@@ -6,6 +6,7 @@
  + JETTY-782 Implement interval advice for BayeuxClient
  + JETTY-783 Update jetty self-signed certificate
  + JETTY-784 TerracottaSessionManager leaks sessions scavenged in other nodes 
+ + JETTY-786 Allow DataSourceUserRealm to create tables
 
 jetty-6.1.12 4 November 2008
  + JETTY-731 Completed DeliverListener for cometd
