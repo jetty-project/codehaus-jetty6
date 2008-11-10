@@ -770,10 +770,10 @@ public class HttpGenerator extends AbstractGenerator
                 }
                 
                 
-                // If we failed to flush anything twice in a row break
+                // break If we failed to flush
                 if (len > 0)
                     total+=len;
-                else if (last_len <= 0) 
+                else 
                     break Flushing;
           
                 last_len = len;
