@@ -16,13 +16,12 @@
 
 package org.mortbay.jetty.plus.security;
 
-import java.io.IOException;
 import java.security.Principal;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Properties;
 
 import javax.naming.InitialContext;
 import javax.naming.NameNotFoundException;
@@ -32,7 +31,7 @@ import javax.sql.DataSource;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.plus.naming.NamingEntryUtil;
-import org.mortbay.jetty.security.HashUserRealm;
+import org.mortbay.jetty.security.AbstractUserRealm;
 import org.mortbay.log.Log;
 
 
@@ -43,7 +42,7 @@ import org.mortbay.log.Log;
  * Obtain user/password/role information from a database
  * via jndi DataSource.
  */
-public class DataSourceUserRealm extends HashUserRealm
+public class DataSourceUserRealm extends AbstractUserRealm
 {
     private String _jndiName = "javax.sql.DataSource/default";
     private DataSource _datasource;
@@ -62,19 +61,30 @@ public class DataSourceUserRealm extends HashUserRealm
     private long _lastHashPurge = 0;
     private String _userSql;
     private String _roleSql;
+    private boolean _createTables = false;
     
 
 
-    public DataSourceUserRealm (String jndiName)
+    public DataSourceUserRealm (String realmName)
     {
-        _jndiName=jndiName;
+        super(realmName);
     }
     
     
     public DataSourceUserRealm()
     {
+        super();
     }
     
+    public void setJndiName (String jndi)
+    {
+        _jndiName = jndi;
+    }
+    
+    public String getJndiName ()
+    {
+        return _jndiName;
+    }
     
     public void setServer (Server server)
     {
@@ -84,6 +94,16 @@ public class DataSourceUserRealm extends HashUserRealm
     public Server getServer()
     {
         return _server;
+    }
+    
+    public void setCreateTables(boolean createTables)
+    {
+        _createTables = createTables;
+    }
+    
+    public boolean getCreateTables()
+    {
+        return _createTables;
     }
     
     public void setUserTableName (String name)
@@ -255,42 +275,6 @@ public class DataSourceUserRealm extends HashUserRealm
         return super.isUserInRole(user, roleName);
     }
 
-    /* ------------------------------------------------------------ */
-    /** Load database configuration from properties file.
-     * This is really here to satisfy the HashUserRealm interface.
-     * Setters should be used instead.
-     *     
-     * @exception IOException 
-     */
-    protected void loadConfig()
-    throws IOException
-    {        
-        Properties properties = new Properties();
-
-        properties.load(getConfigResource().getInputStream());
-
-        _jndiName = properties.getProperty("jndiname");
-        setUserTableName(properties.getProperty("usertable"));
-        setUserTableKey(properties.getProperty("usertablekey"));
-        setUserTableUserField(properties.getProperty("usertableuserfield"));
-        setUserTablePasswordField(properties.getProperty("usertablepasswordfield"));
-        setRoleTableName(properties.getProperty("roletable"));
-        setRoleTableKey(properties.getProperty("roletablekey"));
-        setRoleTableRoleField(properties.getProperty("roletablerolefield"));
-        setUserRoleTableName(properties.getProperty("userroletable"));
-        setUserRoleTableUserKey(properties.getProperty("userroletableuserkey"));
-        setUserRoleTableRoleKey(properties.getProperty("userroletablerolekey"));
-        // default cachetime = 30s
-        String cacheSec = properties.getProperty("cachetime");
-        if (cacheSec != null)
-            setCacheMs(new Integer(cacheSec).intValue() * 1000);
-
-        if (_jndiName == null || _cacheMs < 0)
-        {
-            if(Log.isDebugEnabled())Log.debug("UserRealm " + getName()
-                    + " has not been properly configured");
-        }
-    }
 
     /* ------------------------------------------------------------ */
     /** Load user's info from database.
@@ -312,7 +296,7 @@ public class DataSourceUserRealm extends HashUserRealm
             if (rs.next())
             {
                 int key = rs.getInt(_userTableKey);
-                put(user, rs.getString(_userTablePasswordField));
+                putUser(user, rs.getString(_userTablePasswordField));
                 statement.close();
                 
                 statement = connection.prepareStatement(_roleSql);
@@ -320,7 +304,7 @@ public class DataSourceUserRealm extends HashUserRealm
                 rs = statement.executeQuery();
 
                 while (rs.next())
-                    addUserToRole(user, rs.getString(_roleTableRoleField));
+                    putUserRole(user, rs.getString(_roleTableRoleField));
                 
                 statement.close();
             }
@@ -361,21 +345,28 @@ public class DataSourceUserRealm extends HashUserRealm
      * 
      * @throws NamingException
      */
-    private void initDb() throws NamingException
+    public void initDb() throws NamingException, SQLException
     {
         if (_datasource != null)
             return;
         
         InitialContext ic = new InitialContext();
+        
+        //TODO webapp scope?
+        
         //try finding the datasource in the Server scope
-        try
+        if (_server != null)
         {
-           _datasource = (DataSource)NamingEntryUtil.lookup(_server, _jndiName);
+            try
+            {
+                _datasource = (DataSource)NamingEntryUtil.lookup(_server, _jndiName);
+            }
+            catch (NameNotFoundException e)
+            {
+                //next try the jvm scope
+            }
         }
-        catch (NameNotFoundException e)
-        {
-            //next try the jvm scope
-        }
+        
 
         //try finding the datasource in the jvm scope
         if (_datasource==null)
@@ -383,6 +374,7 @@ public class DataSourceUserRealm extends HashUserRealm
             _datasource = (DataSource)NamingEntryUtil.lookup(null, _jndiName);
         }
 
+        // set up the select statements based on the table and column names configured
         _userSql = "select " + _userTableKey + "," + _userTablePasswordField 
                   + " from " + _userTableName 
                   + " where "+ _userTableUserField + " = ?";
@@ -391,7 +383,106 @@ public class DataSourceUserRealm extends HashUserRealm
                   + " from " + _roleTableName + " r, " + _userRoleTableName 
                   + " u where u."+ _userRoleTableUserKey + " = ?"
                   + " and r." + _roleTableKey + " = u." + _userRoleTableRoleKey;
+        
+        prepareTables();
     }
+    
+    
+    
+    private void prepareTables()
+    throws NamingException, SQLException
+    {
+        Connection connection = null;
+        
+        if (_createTables)
+        {
+            try
+            {
+                connection = getConnection();
+                DatabaseMetaData metaData = connection.getMetaData();
+                
+                //check if tables exist
+                String tableName = (metaData.storesLowerCaseIdentifiers()? _userTableName.toLowerCase(): (metaData.storesUpperCaseIdentifiers()?_userTableName.toUpperCase(): _userTableName));
+                ResultSet result = metaData.getTables(null, null, tableName, null);
+                if (!result.next())
+                {                
+                    //user table default
+                    /*
+                     * create table _userTableName (_userTableKey integer,
+                     * _userTableUserField varchar(100) not null unique,
+                     * _userTablePasswordField varchar(20) not null, primary key(_userTableKey));
+                     */
+                    connection.createStatement().executeUpdate("create table "+_userTableName+ "("+_userTableKey+" integer,"+
+                            _userTableUserField+" varchar(100) not null unique,"+
+                            _userTablePasswordField+" varchar(20) not null, primary key("+_userTableKey+"))");
+                    if (Log.isDebugEnabled()) Log.debug("Created table "+_userTableName);
+                }
+                connection.commit();
+                result.close();
+
+                tableName = (metaData.storesLowerCaseIdentifiers()? _roleTableName.toLowerCase(): (metaData.storesUpperCaseIdentifiers()?_roleTableName.toUpperCase(): _roleTableName));
+                result = metaData.getTables(null, null, tableName, null);
+                if (!result.next())
+                {
+                    //role table default
+                    /*
+                     * create table _roleTableName (_roleTableKey integer,
+                     * _roleTableRoleField varchar(100) not null unique, primary key(_roleTableKey));
+                     */
+                    String str = "create table "+_roleTableName+" ("+_roleTableKey+" integer, "+
+                    _roleTableRoleField+" varchar(100) not null unique, primary key("+_roleTableKey+"))";
+                    connection.createStatement().executeUpdate(str);
+                    if (Log.isDebugEnabled()) Log.debug("Created table "+_roleTableName);
+                }
+                connection.commit();
+                result.close();
+
+                tableName = (metaData.storesLowerCaseIdentifiers()? _userRoleTableName.toLowerCase(): (metaData.storesUpperCaseIdentifiers()?_userRoleTableName.toUpperCase(): _userRoleTableName));
+                result = metaData.getTables(null, null, tableName, null);
+                if (!result.next())
+                {
+                    //user-role table
+                    /*
+                     * create table _userRoleTableName (_userRoleTableUserKey integer,
+                     * _userRoleTableRoleKey integer,
+                     * primary key (_userRoleTableUserKey, _userRoleTableRoleKey));
+                     * 
+                     * create index idx_user_role on _userRoleTableName (_userRoleTableUserKey);
+                     */
+                    connection.createStatement().executeUpdate("create table "+_userRoleTableName+" ("+_userRoleTableUserKey+" integer, "+
+                            _userRoleTableRoleKey+" integer, "+
+                            "primary key ("+_userRoleTableUserKey+", "+_userRoleTableRoleKey+"))");                   
+                    connection.createStatement().executeUpdate("create index indx_user_role on "+_userRoleTableName+"("+_userRoleTableUserKey+")");
+                    if (Log.isDebugEnabled()) Log.debug("Created table "+_userRoleTableName +" and index");
+                }
+                connection.commit();
+                result.close();                
+            }
+            finally
+            {
+                if (connection != null)
+                {
+                    try
+                    {
+                        connection.close();
+                    }
+                    catch (SQLException e)
+                    {
+                        if (Log.isDebugEnabled()) Log.debug("Prepare tables", e);
+                    }
+                    finally
+                    {
+                        connection = null;
+                    }
+                }
+            }
+        }
+        else if (Log.isDebugEnabled())
+        {
+            Log.debug("createTables false");
+        }
+    }
+    
     
     private Connection getConnection () 
     throws NamingException, SQLException
