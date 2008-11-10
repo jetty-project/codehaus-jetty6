@@ -59,7 +59,7 @@ public class LifeCycleListenerTest extends TestCase
         assertTrue("The started event didn't occur",listener.started);
 
         // check that the starting event occurs before the started event
-        assertTrue("The starting event must occur before the started event",listener.startingTime < listener.startedTime);
+        assertTrue("The starting event must occur before the started event",listener.startingTime <= listener.startedTime);
 
         // check that the lifecycle's state is started
         assertTrue("The lifecycle state is not started",lifecycle.isStarted());
@@ -105,7 +105,7 @@ public class LifeCycleListenerTest extends TestCase
         assertTrue("The stopped event didn't occur",listener.stopped);
 
         // check that the stopping event occurs before the stopped event
-        assertTrue("The stopping event must occur before the stopped event",listener.stoppingTime < listener.stoppedTime);
+        assertTrue("The stopping event must occur before the stopped event",listener.stoppingTime <= listener.stoppedTime);
         // System.out.println("STOPING TIME : " + listener.stoppingTime + " : " + listener.stoppedTime);
 
         // check that the lifecycle's state is stopped
