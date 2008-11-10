@@ -2,6 +2,7 @@
  + JETTY-765 ensure stop mojo works for all execution phases
  + JETTY-774 Improved caching of mime types with charsets
  + JETTY-775 AbstractSessionTest remove timing related test
+ + JETTY-778 handle granular windows timer in lifecycle test
  + JETTY-779 Fixed line feed in request log
  + JETTY-782 Implement interval advice for BayeuxClient
  + JETTY-783 Update jetty self-signed certificate
