@@ -135,6 +135,7 @@ public abstract class NamingEntry
     
     /**
      * Get the unique name of the object
+     * relative to the scope
      * @return
      */
     public String getJndiName ()
@@ -153,6 +154,15 @@ public abstract class NamingEntry
     }
     
 
+    /**
+     * Get the name of the object, fully
+     * qualified with the scope
+     * @return
+     */
+    public String getJndiNameInScope ()
+    {
+        return objectNameString;
+    }
  
  
     
