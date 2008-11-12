@@ -16,6 +16,7 @@
 
 package org.mortbay.jetty.plus.security;
 
+import java.io.File;
 import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -39,12 +40,15 @@ public class TestDataSourceUserRealm extends TestCase
  
     public void setUp () throws Exception
     { 
-      
-        System.setProperty("derby.system.home", System.getProperty("basedir") + "/target/test-db");
+        File dbDir = new File (System.getProperty("basedir") + "/target/test-db");
+        if (!dbDir.exists())
+            dbDir.mkdirs();
+        
+        System.setProperty("derby.system.home", dbDir.getAbsolutePath());
         InitialContext ic = new InitialContext();
         ds = new EmbeddedDataSource();
         ds.setDatabaseName("testDataSourceUserRealm");
-        ds.setCreateDatabase("create");
+        ds.setCreateDatabase("jdbc:derby:"+dbDir.getAbsolutePath() + ";create");
  
 
         Resource res = new Resource("javax.sql.DataSource/default",ds);
