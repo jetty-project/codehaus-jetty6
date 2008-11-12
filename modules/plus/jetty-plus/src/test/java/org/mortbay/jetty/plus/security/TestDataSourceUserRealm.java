@@ -40,23 +40,15 @@ public class TestDataSourceUserRealm extends TestCase
  
     public void setUp () throws Exception
     { 
-        File dbDir = new File (System.getProperty("basedir") + "/target/test-db");
-        if (!dbDir.exists())
-            dbDir.mkdirs();
-        
+        File dbDir = new File (System.getProperty("basedir") + "/target/db");
         System.setProperty("derby.system.home", dbDir.getAbsolutePath());
         InitialContext ic = new InitialContext();
         ds = new EmbeddedDataSource();
-        ds.setDatabaseName("testDataSourceUserRealm");
-        ds.setCreateDatabase("jdbc:derby:"+dbDir.getAbsolutePath() + ";create");
+        ds.setDatabaseName(dbDir.getAbsolutePath()+"/testDataSourceUserRealm");
+        ds.setCreateDatabase("create");
  
-
-        Resource res = new Resource("javax.sql.DataSource/default",ds);
-             
-        
+        Resource res = new Resource("javax.sql.DataSource/default",ds);           
         createTables();
-  
-        
     }
     
     public void tearDown ()
