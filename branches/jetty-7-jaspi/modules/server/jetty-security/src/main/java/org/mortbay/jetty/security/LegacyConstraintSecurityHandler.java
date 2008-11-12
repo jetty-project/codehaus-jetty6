@@ -17,25 +17,26 @@ package org.mortbay.jetty.security;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.RunAsToken;
-import org.mortbay.jetty.ServerAuthResult;
 import org.mortbay.jetty.UserIdentity;
+import org.mortbay.jetty.ServerAuthResult;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.util.LazyList;
 
 
 /* ------------------------------------------------------------ */
 /** Handler to enforce SecurityConstraints.
- * This implementation is servlet spec 2.4 compliant.
+ * Legacy implementation that is not servlet 2.4 spec compliant.
  *
  * @author Greg Wilkins (gregw)
  */
-public class ConstraintSecurityHandler extends AbstractSecurityHandler
+public class LegacyConstraintSecurityHandler extends AbstractSecurityHandler
 {
     private ConstraintMapping[] _constraintMappings;
     private PathMap _constraintMap=new PathMap();
@@ -49,7 +50,7 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
     {
         return _constraintMappings;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param constraintMappings The contraintMappings to set.
@@ -112,69 +113,90 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
             String pathInContext,
             Request request)
     {
-        Object mappings= _constraintMap.match(pathInContext);
+        Object mapping_entries= _constraintMap.getLazyMatches(pathInContext);
+        String pattern=null;
+        Object constraints= null;
 
-        int dataConstraint= Constraint.DC_UNSET;
+        int dataConstraint= Constraint.DC_NONE;
         Object roles= null;
         boolean unchecked= false;
-        // for each constraint in the matched path
+        boolean forbidden= false;
+        // for each path match
         // Add only constraints that have the correct method
-        if (mappings!=null)
+        // break if the matching pattern changes.  This allows only
+        // constraints with matching pattern and method to be combined.
+        if (mapping_entries!=null)
         {
-            for (int c=0;c<LazyList.size(mappings);c++)
+            loop: for (int m=0;m<LazyList.size(mapping_entries); m++)
             {
-                ConstraintMapping mapping=(ConstraintMapping)LazyList.get(mappings,c);
-                if (mapping.getMethod()==null || mapping.getMethod().equalsIgnoreCase(request.getMethod()))
-                {
+                Map.Entry entry= (Map.Entry)LazyList.get(mapping_entries,m);
+                Object mappings= entry.getValue();
+                String path_spec=(String)entry.getKey();
 
+                for (int c=0;c<LazyList.size(mappings);c++)
+                {
+                    ConstraintMapping mapping=(ConstraintMapping)LazyList.get(mappings,c);
+                    if (mapping.getMethod()!=null && !mapping.getMethod().equalsIgnoreCase(request.getMethod()))
+                        continue;
+
+                    if (pattern!=null && !pattern.equals(path_spec))
+                        break loop;
+
+                    pattern=path_spec;
+                    constraints= LazyList.add(constraints, mapping.getConstraint());
                     Constraint sc = mapping.getConstraint();
-                    //section 13.7.1, combination of security constraints.
-                    //Union of connection types allowed... i.e most permissive wins.
-                    if (sc.hasDataConstraint())
+                    if (dataConstraint > Constraint.DC_UNSET && sc.hasDataConstraint())
                     {
-                        if (sc.getDataConstraint() < dataConstraint)
+                        if (sc.getDataConstraint() > dataConstraint)
                             dataConstraint= sc.getDataConstraint();
                     }
                     else
-                    {
-                        //no constraint implies all connection types allowed.
-                        dataConstraint= Constraint.DC_NONE;
-                    }
+                        dataConstraint= Constraint.DC_UNSET; // ignore all other data constraints
+
                     // Combine auth constraints.
-                    if (sc.getAuthenticate())
+                    if (!unchecked && !forbidden)
                     {
-                        String[] scr= sc.getRoles();
-                        if (scr == null || scr.length == 0)
+                        if (sc.getAuthenticate())
                         {
-                            dataConstraint = Constraint.DC_FORBIDDEN;
-                            roles = null;
-                            //once forbidden, no need to look at any other constraints
-                            break;
+                            if (sc.isAnyRole())
+                            {
+                                roles= Constraint.ANY_ROLE;
+                            }
+                            else
+                            {
+                                String[] scr= sc.getRoles();
+                                if (scr == null || scr.length == 0)
+                                {
+                                    forbidden= true;
+                                    break;
+                                }
+                                else
+                                {
+                                    // TODO - this looks inefficient!
+                                    if (roles != Constraint.ANY_ROLE)
+                                    {
+                                        for (int r=scr.length;r-->0;)
+                                            roles= LazyList.add(roles, scr[r]);
+                                    }
+                                }
+                            }
                         }
-                        if (sc.isAnyRole())
-                        {
-                            //TODO consider using actual list of roles as per spec.
-                            roles= Constraint.ANY_ROLE;
-                            continue;
-                        }
-                        // TODO - this looks inefficient!
-                        if (roles != Constraint.ANY_ROLE)
-                        {
-                            for (int r=scr.length;r-->0;)
-                                roles= LazyList.add(roles, scr[r]);
-                        }
-                    }
-                    else
-                    {
-                        unchecked = true;
+                        else
+                            unchecked= true;
                     }
                 }
+
             }
+        }
+        if (forbidden)
+        {
+            dataConstraint = Constraint.DC_FORBIDDEN;
+            roles = null;
         }
         else if (unchecked) {
             roles = null;
         }
-        if (roles instanceof String)
+        else if (roles instanceof String)
         {
             roles = Collections.singletonList((String)roles);
         }
@@ -189,7 +211,7 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
         {
             return false;
         }
-        if (dataConstraint == Constraint.DC_NONE || dataConstraint == Constraint.DC_UNSET) 
+        if (dataConstraint == Constraint.DC_NONE || dataConstraint == Constraint.DC_UNSET)
         {
             return true;
         }
@@ -269,4 +291,3 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
     }
 
 }
-
