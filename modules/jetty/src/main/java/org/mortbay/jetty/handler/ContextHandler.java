@@ -1184,7 +1184,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         {
             Log.ignore(e);
         }
-        return Collections.emptySet();
+        return Collections.EMPTY_SET;
     }
 
     
