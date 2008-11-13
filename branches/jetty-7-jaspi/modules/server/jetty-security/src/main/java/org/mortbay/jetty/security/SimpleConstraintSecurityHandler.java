@@ -15,8 +15,8 @@
 package org.mortbay.jetty.security;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
+import java.util.Collections;
+import java.util.List;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
@@ -26,16 +26,16 @@ import org.mortbay.jetty.RunAsToken;
 import org.mortbay.jetty.ServerAuthResult;
 import org.mortbay.jetty.UserIdentity;
 import org.mortbay.jetty.servlet.PathMap;
-import org.mortbay.util.StringMap;
+import org.mortbay.util.LazyList;
 
 
 /* ------------------------------------------------------------ */
 /** Handler to enforce SecurityConstraints.
- * This implementation is servlet spec 2.4 compliant and precomputes the constraint combinations for runtime efficiency.
+ * This implementation is servlet spec 2.4 compliant.
  *
  * @author Greg Wilkins (gregw)
  */
-public class ConstraintSecurityHandler extends AbstractSecurityHandler
+public class SimpleConstraintSecurityHandler extends AbstractSecurityHandler
 {
     private ConstraintMapping[] _constraintMappings;
     private PathMap _constraintMap=new PathMap();
@@ -49,12 +49,9 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
     {
         return _constraintMappings;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
-     * Process the constraints following the combining rules in Servlet 3.0 EA spec section 13.7.1
-     * Note that much of the logic is in the RoleInfo class.
-     *
      * @param constraintMappings The contraintMappings to set.
      */
     public void setConstraintMappings(ConstraintMapping[] constraintMappings)
@@ -66,65 +63,33 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
             _constraintMap.clear();
 
             for (ConstraintMapping _constraintMapping : _constraintMappings) {
-                Map<String, RoleInfo> mappings = (Map<String, RoleInfo>) _constraintMap.get(_constraintMapping.getPathSpec());
-                if (mappings == null)
-                {
-                    mappings = new StringMap();
-                    _constraintMap.put(_constraintMapping.getPathSpec(), mappings);
-                }
-                RoleInfo allMethodsRoleInfo = mappings.get(null);
-                if (allMethodsRoleInfo != null && allMethodsRoleInfo.isForbidden())
-                {
-                    continue;
-                }
-                String httpMethod = _constraintMapping.getMethod();
-                RoleInfo roleInfo = mappings.get(httpMethod);
-                if (roleInfo == null)
-                {
-                    roleInfo = new RoleInfo();
-                    mappings.put(httpMethod, roleInfo);
-                    if (allMethodsRoleInfo != null)
-                    {
-                        roleInfo.combine(allMethodsRoleInfo);
-                    }
-                }
-                if (roleInfo.isForbidden()) {
-                    continue;
-                }
-                Constraint constraint = _constraintMapping.getConstraint();
-                boolean forbidden = constraint.isForbidden();
-                roleInfo.setForbidden(forbidden);
-                if (forbidden)
-                {
-                    if (httpMethod == null)
-                    {
-                        mappings.clear();
-                        mappings.put(null, roleInfo);
-                    }
-                    continue;
-                }
-                UserDataConstraint userDataConstraint = UserDataConstraint.get(constraint.getDataConstraint());
-                roleInfo.setUserDataConstraint(userDataConstraint);
-
-                //TODO check this is correct meaning
-                boolean unchecked = !constraint.getAuthenticate();
-                roleInfo.setUnchecked(unchecked);
-                if (!roleInfo.isUnchecked())
-                {
-                    roleInfo.addRoles(constraint.getRoles());
-                }
-                if (httpMethod == null)
-                {
-                    for (Map.Entry<String, RoleInfo> entry: mappings.entrySet())
-                    {
-                        if (entry.getKey() != null) {
-                            RoleInfo specific = entry.getValue();
-                            specific.combine(roleInfo);
-                        }
-                    }
-                }
-
+                Object mappings = _constraintMap.get(_constraintMapping.getPathSpec());
+                mappings = LazyList.add(mappings, _constraintMapping);
+                _constraintMap.put(_constraintMapping.getPathSpec(), mappings);
             }
+        }
+    }
+
+
+    private static class ConstraintInfo
+    {
+        private final int _dataConstraint;
+        private final List<String> _allowedRoles;
+
+        private ConstraintInfo(int dataConstraint, List<String> allowedRoles)
+        {
+            this._dataConstraint = dataConstraint;
+            this._allowedRoles = allowedRoles;
+        }
+
+        public int getDataConstraint()
+        {
+            return _dataConstraint;
+        }
+
+        public List<String> getAllowedRoles()
+        {
+            return _allowedRoles;
         }
     }
 
@@ -147,45 +112,91 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
             String pathInContext,
             Request request)
     {
-        Map<String, RoleInfo> mappings= (Map<String, RoleInfo>) _constraintMap.match(pathInContext);
+        Object mappings= _constraintMap.match(pathInContext);
 
+        int dataConstraint= Constraint.DC_UNSET;
+        Object roles= null;
+        boolean unchecked= false;
+        // for each constraint in the matched path
+        // Add only constraints that have the correct method
         if (mappings!=null)
         {
-            String httpMethod = request.getMethod();
-            RoleInfo roleInfo = mappings.get(httpMethod);
-            if (roleInfo == null)
+            for (int c=0;c<LazyList.size(mappings);c++)
             {
-                roleInfo = mappings.get(null);
-                if (roleInfo != null)
+                ConstraintMapping mapping=(ConstraintMapping)LazyList.get(mappings,c);
+                if (mapping.getMethod()==null || mapping.getMethod().equalsIgnoreCase(request.getMethod()))
                 {
-                    return roleInfo;
+
+                    Constraint sc = mapping.getConstraint();
+                    //section 13.7.1, combination of security constraints.
+                    //Union of connection types allowed... i.e most permissive wins.
+                    if (sc.hasDataConstraint())
+                    {
+                        if (sc.getDataConstraint() < dataConstraint)
+                            dataConstraint= sc.getDataConstraint();
+                    }
+                    else
+                    {
+                        //no constraint implies all connection types allowed.
+                        dataConstraint= Constraint.DC_NONE;
+                    }
+                    // Combine auth constraints.
+                    if (sc.getAuthenticate())
+                    {
+                        String[] scr= sc.getRoles();
+                        if (scr == null || scr.length == 0)
+                        {
+                            dataConstraint = Constraint.DC_FORBIDDEN;
+                            roles = null;
+                            //once forbidden, no need to look at any other constraints
+                            break;
+                        }
+                        if (sc.isAnyRole())
+                        {
+                            //TODO consider using actual list of roles as per spec.
+                            roles= Constraint.ANY_ROLE;
+                            continue;
+                        }
+                        // TODO - this looks inefficient!
+                        if (roles != Constraint.ANY_ROLE)
+                        {
+                            for (int r=scr.length;r-->0;)
+                                roles= LazyList.add(roles, scr[r]);
+                        }
+                    }
+                    else
+                    {
+                        unchecked = true;
+                    }
                 }
             }
         }
-        return null;
+        else if (unchecked) {
+            roles = null;
+        }
+        if (roles instanceof String)
+        {
+            roles = Collections.singletonList((String)roles);
+        }
+        return new ConstraintInfo(dataConstraint, (List<String>)roles);
     }
 
 
     protected boolean checkUserDataPermissions(String pathInContext, Request request, Response response, Object constraintInfo) throws IOException
     {
-        if (constraintInfo == null)
-        {
-            return true;
-        }
-        RoleInfo roleInfo = (RoleInfo) constraintInfo;
-        if (roleInfo.isForbidden())
+        int dataConstraint = ((ConstraintInfo) constraintInfo).getDataConstraint();
+        if (dataConstraint == Constraint.DC_FORBIDDEN)
         {
             return false;
         }
-        UserDataConstraint dataConstraint = roleInfo.getUserDataConstraint();
-        if (dataConstraint == null || dataConstraint == UserDataConstraint.None)
+        if (dataConstraint == Constraint.DC_NONE || dataConstraint == Constraint.DC_UNSET)
         {
             return true;
         }
         HttpConnection connection = HttpConnection.getCurrentConnection();
         Connector connector = connection.getConnector();
 
-        if (dataConstraint == UserDataConstraint.Integral)
+        if (dataConstraint == Constraint.DC_INTEGRAL)
         {
             if (connector.isIntegral(request))
                 return true;
@@ -206,7 +217,7 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
             }
             return false;
         }
-        else if (dataConstraint == UserDataConstraint.Confidential)
+        else if (dataConstraint == Constraint.DC_CONFIDENTIAL)
         {
             if (connector.isConfidential(request))
                 return true;
@@ -236,30 +247,20 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
 
     protected boolean isAuthMandatory(Request base_request, Response base_response, Object constraintInfo)
     {
-        if (constraintInfo == null)
-        {
-            return false;
-        }
-        return !((RoleInfo)constraintInfo).isUnchecked();
+        //unchecked?
+        return ((ConstraintInfo)constraintInfo).getAllowedRoles() != null;
     }
 
     protected boolean checkWebResourcePermissions(String pathInContext, Request request, Response response, Object constraintInfo, UserIdentity userIdentity) throws IOException
     {
-        if (constraintInfo == null)
-        {
-            return true;
-        }
-        RoleInfo roleInfo = (RoleInfo) constraintInfo;
-        if (roleInfo.isUnchecked())
-        {
-            return true;
-        }
-        if (roleInfo.isAllRoles())
-        {
-            return userIdentity.getUserPrincipal() != null;
-        }
-        Set<String> roles = roleInfo.getRoles();
+        List<String> roles = ((ConstraintInfo)constraintInfo).getAllowedRoles();
+        //unchecked
+        if (roles == null)
+        return true;
         for (String role: roles) {
+            if (role.equals(Constraint.ANY_ROLE)) {
+                return true;
+            }
             if (userIdentity.isUserInRole(role)) {
                 return true;
             }
@@ -268,4 +269,3 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
     }
 
 }
-
