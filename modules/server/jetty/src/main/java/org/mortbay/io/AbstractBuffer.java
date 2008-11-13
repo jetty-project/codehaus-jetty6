@@ -564,7 +564,7 @@ public abstract class AbstractBuffer implements Buffer
         buf.append("[");
         buf.append(super.hashCode());
         buf.append(",");
-        buf.append(this.array().hashCode());
+        buf.append(this.buffer().hashCode());
         buf.append(",m=");
         buf.append(markIndex());
         buf.append(",g=");

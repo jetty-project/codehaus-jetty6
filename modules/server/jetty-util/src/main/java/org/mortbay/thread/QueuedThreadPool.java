@@ -459,7 +459,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
             {
                 PoolThread thread =new PoolThread();
                 _threads.add(thread);
-                thread.setName(_name+"-"+_id++);
+                thread.setName(thread.getId()+"@"+_name+"-"+_id++);
                 thread.start(); 
             }
             else if (!_warned)    

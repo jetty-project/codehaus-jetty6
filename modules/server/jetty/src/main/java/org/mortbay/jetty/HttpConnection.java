@@ -375,115 +375,116 @@ public class HttpConnection implements Connection
     {
         // Loop while more in buffer
         boolean more_in_buffer =true; // assume true until proven otherwise
-        int no_progress=0;
-        
-        while (more_in_buffer)
+        boolean progress=true;
+
+        try
         {
-            try
+            synchronized(this)
             {
-                synchronized(this)
+                if (_handling)
+                    throw new IllegalStateException(); // TODO delete this check
+                _handling=true;
+            }
+            setCurrentConnection(this);
+
+            while (more_in_buffer)
+            {
+                try
                 {
-                    if (_handling)
-                        throw new IllegalStateException(); // TODO delete this check
-                    _handling=true;
+                    if (!_request.isInitial())
+                    {
+                        if (_request.isSuspended())
+                        {
+                            Log.warn("suspended dispatch");
+                        }
+                        Log.debug("resume request",_request);
+                        handleRequest();
+                    }
+                    else
+                    {
+                        // If we are not ended then parse available
+                        if (!_parser.isComplete()) 
+                            progress|=_parser.parseAvailable()>0;
+
+                        // Do we have more generating to do?
+                        // Loop here because some writes may take multiple steps and
+                        // we need to flush them all before potentially blocking in the
+                        // next loop.
+                        while (_generator.isCommitted() && !_generator.isComplete())
+                        {
+                            long written=_generator.flush();
+                            if (written<=0)
+                                break;
+                            progress=true;
+                            if (_endp.isBufferingOutput())
+                                _endp.flush();
+                        }
+
+                        // Flush buffers
+                        if (_endp.isBufferingOutput())
+                        {
+                            _endp.flush();
+                            if (!_endp.isBufferingOutput())
+                                progress=true;
+                        }
+
+                        if (!progress) 
+                            return;
+                        progress=false;
+                    }
                 }
-                
-                setCurrentConnection(this);
-                long io=0;
-                
-                if (!_request.isInitial())
+                catch (HttpException e)
                 {
+                    if (Log.isDebugEnabled())
+                    {
+                        Log.debug("uri="+_uri);
+                        Log.debug("fields="+_requestFields);
+                        Log.debug(e);
+                    }
+                    _generator.sendError(e.getStatus(), e.getReason(), null, true);
+
+                    _parser.reset(true);
+                    _endp.close();
+                    throw e;
+                }
+                finally
+                {
+                    more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();  
+
+                    if (_parser.isComplete() && _generator.isComplete() && !_endp.isBufferingOutput())
+                    {  
+                        if (!_generator.isPersistent())
+                        {
+                            _parser.reset(true);
+                            more_in_buffer=false;
+                        }
+
+                        reset(!more_in_buffer);
+                        progress=true;
+                    }
+
                     if (_request.isSuspended())
                     {
-                        Log.warn("suspended dispatch");
-                    }
-                    Log.debug("resume request",_request);
-                    handleRequest();
-                }
-                else
-                {
-                    // If we are not ended then parse available
-                    if (!_parser.isComplete()) 
-                        io=_parser.parseAvailable();
-                    
-                    // Do we have more generating to do?
-                    // Loop here because some writes may take multiple steps and
-                    // we need to flush them all before potentially blocking in the
-                    // next loop.
-                    while (_generator.isCommitted() && !_generator.isComplete())
-                    {
-                        long written=_generator.flush();
-                        io+=written;
-                        if (written<=0)
-                            break;
-                        else if (_endp.isBufferingOutput())
-                            _endp.flush();
-                    }
-                    
-                    // Flush buffers
-                    if (_endp.isBufferingOutput())
-                    {
-                        _endp.flush();
-                        if (!_endp.isBufferingOutput())
-                            no_progress=0;
-                    }
-                    
-                    if (io>0)
-                        no_progress=0;
-                    else if (no_progress++>=2) 
-                        return;
-                }
-            }
-            catch (HttpException e)
-            {
-                if (Log.isDebugEnabled())
-                {
-                    Log.debug("uri="+_uri);
-                    Log.debug("fields="+_requestFields);
-                    Log.debug(e);
-                }
-                _generator.sendError(e.getStatus(), e.getReason(), null, true);
-                
-                _parser.reset(true);
-                _endp.close();
-                throw e;
-            }
-            finally
-            {
-                setCurrentConnection(null);
-                
-                more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();  
-                
-                synchronized(this)
-                {
-                    _handling=false;
-                    
-                    if (_destroy)
-                    { 
-                        destroy();
+                        Log.debug("return with suspended request");
                         return;
                     }
+                    else if (_generator.isCommitted() && !_generator.isComplete() && _endp instanceof SelectChannelEndPoint) // TODO remove SelectChannel dependency
+                        ((SelectChannelEndPoint)_endp).setWritable(false);
                 }
-                
-                if (_parser.isComplete() && _generator.isComplete() && !_endp.isBufferingOutput())
-                {  
-                    if (!_generator.isPersistent())
-                    {
-                        _parser.reset(true);
-                        more_in_buffer=false;
-                    }
-                    
-                    reset(!more_in_buffer);
-                    no_progress=0;
+            }
+        }
+        finally
+        {
+            setCurrentConnection(null);
+
+            synchronized(this)
+            {
+                _handling=false;
+
+                if (_destroy)
+                { 
+                    destroy();
                 }
-                
-                if (_request.isSuspended())
-                {
-                    Log.debug("return with suspended request");
-                    return;
-                }
-                else if (_generator.isCommitted() && !_generator.isComplete() && _endp instanceof SelectChannelEndPoint) // TODO remove SelectChannel dependency
-                    ((SelectChannelEndPoint)_endp).setWritable(false);
             }
         }
     }
