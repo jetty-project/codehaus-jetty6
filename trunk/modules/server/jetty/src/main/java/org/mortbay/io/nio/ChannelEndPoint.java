@@ -234,7 +234,7 @@ public class ChannelEndPoint implements EndPoint
 
                             // do the gathering write.
                             length=(int)((GatheringByteChannel)_channel).write(_gather2);
-
+                            
                             int hl=header.length();
                             if (length>hl)
                             {

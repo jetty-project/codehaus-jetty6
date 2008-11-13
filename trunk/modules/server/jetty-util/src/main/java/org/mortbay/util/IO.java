@@ -178,10 +178,8 @@ public class IO
         {
             while (byteCount>0)
             {
-                if (byteCount<bufferSize)
-                    len=in.read(buffer,0,(int)byteCount);
-                else
-                    len=in.read(buffer,0,bufferSize);                   
+                int max = byteCount<bufferSize?(int)byteCount:bufferSize;
+                len=in.read(buffer,0,max);
                 
                 if (len==-1)
                     break;

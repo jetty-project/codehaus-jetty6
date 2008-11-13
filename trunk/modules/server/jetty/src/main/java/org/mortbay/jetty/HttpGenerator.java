@@ -694,91 +694,78 @@ public class HttpGenerator extends AbstractGenerator
                 _needEOC=false;
                 return 0;
             }
-            
-            // Keep flushing while there is something to flush (except break below)
+
             int total= 0;
-            long last_len = -1;
-            Flushing: while (true)
+
+            int len = -1;
+            int to_flush = ((_header != null && _header.length() > 0)?4:0) | ((_buffer != null && _buffer.length() > 0)?2:0) | ((_bypass && _content != null && _content.length() > 0)?1:0);
+            switch (to_flush)
             {
-                int len = -1;
-                int to_flush = ((_header != null && _header.length() > 0)?4:0) | ((_buffer != null && _buffer.length() > 0)?2:0) | ((_bypass && _content != null && _content.length() > 0)?1:0);
-                switch (to_flush)
+                case 7:
+                    throw new IllegalStateException(); // should never happen!
+                case 6:
+                    len = _endp.flush(_header, _buffer, null);
+                    break;
+                case 5:
+                    len = _endp.flush(_header, _content, null);
+                    break;
+                case 4:
+                    len = _endp.flush(_header);
+                    break;
+                case 3:
+                    throw new IllegalStateException(); // should never happen!
+                case 2:
+                    len = _endp.flush(_buffer);
+                    break;
+                case 1:
+                    len = _endp.flush(_content);
+                    break;
+                case 0:
                 {
-                    case 7:
-                        throw new IllegalStateException(); // should never happen!
-                    case 6:
-                        len = _endp.flush(_header, _buffer, null);
-                        break;
-                    case 5:
-                        len = _endp.flush(_header, _content, null);
-                        break;
-                    case 4:
-                        len = _endp.flush(_header);
-                        break;
-                    case 3:
-                        throw new IllegalStateException(); // should never happen!
-                    case 2:
-                        len = _endp.flush(_buffer);
-                        break;
-                    case 1:
-                        len = _endp.flush(_content);
-                        break;
-                    case 0:
+                    // Nothing more we can write now.
+                    if (_header != null) 
+                        _header.clear();
+
+                    _bypass = false;
+                    _bufferChunked = false;
+
+                    if (_buffer != null)
                     {
-                        // Nothing more we can write now.
-                        if (_header != null) 
-                            _header.clear();
-                        
-                        _bypass = false;
-                        _bufferChunked = false;
-                        
-                        if (_buffer != null)
+                        _buffer.clear();
+                        if (_contentLength == HttpTokens.CHUNKED_CONTENT)
                         {
-                            _buffer.clear();
-                            if (_contentLength == HttpTokens.CHUNKED_CONTENT)
+                            // reserve some space for the chunk header
+                            _buffer.setPutIndex(CHUNK_SPACE);
+                            _buffer.setGetIndex(CHUNK_SPACE);
+
+                            // Special case handling for small left over buffer from
+                            // an addContent that caused a buffer flush.
+                            if (_content != null && _content.length() < _buffer.space() && _state != STATE_FLUSHING)
                             {
-                                // reserve some space for the chunk header
-                                _buffer.setPutIndex(CHUNK_SPACE);
-                                _buffer.setGetIndex(CHUNK_SPACE);
-                                
-                                // Special case handling for small left over buffer from
-                                // an addContent that caused a buffer flush.
-                                if (_content != null && _content.length() < _buffer.space() && _state != STATE_FLUSHING)
-                                {
-                                    _buffer.put(_content);
-                                    _content.clear();
-                                    _content = null;
-                                    break Flushing;
-                                }
+                                _buffer.put(_content);
+                                _content.clear();
+                                _content = null;
                             }
                         }
-                        
-                        // Are we completely finished for now?
-                        if (!_needCRLF && !_needEOC && (_content == null || _content.length() == 0))
-                        {
-                            if (_state == STATE_FLUSHING)
-                                _state = STATE_END;
-                            if (_state==STATE_END && _close && _status!=100) 
-                                _endp.close();
-                            
-                            break Flushing;
-                        }
-                        
+                    }
+
+                    // Are we completely finished for now?
+                    if (!_needCRLF && !_needEOC && (_content == null || _content.length() == 0))
+                    {
+                        if (_state == STATE_FLUSHING)
+                            _state = STATE_END;
+                        if (_state==STATE_END && _close && _status!=100) 
+                            _endp.close();
+                    }
+                    else
                         // Try to prepare more to write.
                         prepareBuffers();
-                    }
                 }
-                
-                
-                // If we failed to flush anything twice in a row break
-                if (len > 0)
-                    total+=len;
-                else if (last_len <= 0) 
-                    break Flushing;
-          
-                last_len = len;
             }
-            
+
+            if (len > 0)
+                total+=len;
+
             return total;
         }
         catch (IOException e)
