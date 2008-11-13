@@ -286,42 +286,45 @@ public class DirectNIOBuffer extends AbstractBuffer implements NIOBuffer
             _outStream=out;
         }
 
-        try
+        synchronized (_buf)
         {
-            int loop=0;
-            while(hasContent() && _out.isOpen())
+            try
             {
-                _buf.position(getIndex());
-                _buf.limit(putIndex());
-                int len=_out.write(_buf);
-                if (len<0)
-                    break;
-                else if (len>0)
+                int loop=0;
+                while(hasContent() && _out.isOpen())
                 {
-                    skip(len);
-                    loop=0;
+                    _buf.position(getIndex());
+                    _buf.limit(putIndex());
+                    int len=_out.write(_buf);
+                    if (len<0)
+                        break;
+                    else if (len>0)
+                    {
+                        skip(len);
+                        loop=0;
+                    }
+                    else if (loop++>1)
+                        break;
                 }
-                else if (loop++>1)
-                    break;
+
             }
-        }
-        catch(IOException e)
-        {
-            _out=null;
-            _outStream=null;
-            throw e;
-        }
-        finally
-        {
-            if (_out!=null && !_out.isOpen())
+            catch(IOException e)
             {
                 _out=null;
                 _outStream=null;
+                throw e;
             }
-            _buf.position(0);
-            _buf.limit(_buf.capacity());
+            finally
+            {
+                if (_out!=null && !_out.isOpen())
+                {
+                    _out=null;
+                    _outStream=null;
+                }
+                _buf.position(0);
+                _buf.limit(_buf.capacity());
+            }
         }
-        
     }
 
     
