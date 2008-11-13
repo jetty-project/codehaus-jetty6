@@ -14,6 +14,7 @@
  + JETTY-788 Fix jotm for scoped jndi naming
  + JETTY-790 WaitingContinuations can change mutex if not pending
  + JETTY-792 TerracottaSessionManager does not unlock new session with requested id
+ + JETTY-793 Fixed DataCache millisecond rounding
 
 jetty-6.1.12 4 November 2008
  + JETTY-731 Completed DeliverListener for cometd
