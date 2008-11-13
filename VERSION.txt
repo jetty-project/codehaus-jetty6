@@ -9,6 +9,7 @@
  + JETTY-783 Update jetty self-signed certificate
  + JETTY-784 TerracottaSessionManager leaks sessions scavenged in other nodes 
  + JETTY-786 Allow DataSourceUserRealm to create tables
+ + JETTY-787 Handle MSIE7 mixed encoding
  + JETTY-788 Fix jotm for scoped jndi naming
  + JETTY-790 WaitingContinuations can change mutex if not pending
 
