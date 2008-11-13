@@ -316,7 +316,7 @@ public class QuotedStringTokenizer
         synchronized(buf)
         {
             buf.append('"');
-            
+            char[] chars = null;
             int i=0;
             loop:
             for (;i<s.length();i++)
@@ -325,31 +325,38 @@ public class QuotedStringTokenizer
                 switch(c)
                 {
                     case '"':
-                        buf.append(s,0,i);
+                        chars = s.toCharArray();
+                        buf.append(chars,0,i);
                         buf.append("\\\"");
                         break loop;
                     case '\\':
-                        buf.append(s,0,i);
+                        chars = s.toCharArray();
+                        buf.append(chars,0,i);
                         buf.append("\\\\");
                         break loop;
                     case '\n':
-                        buf.append(s,0,i);
+                        chars = s.toCharArray();
+                        buf.append(chars,0,i);
                         buf.append("\\n");
                         break loop;
                     case '\r':
-                        buf.append(s,0,i);
+                        chars = s.toCharArray();
+                        buf.append(chars,0,i);
                         buf.append("\\r");
                         break loop;
                     case '\t':
-                        buf.append(s,0,i);
+                        chars = s.toCharArray();
+                        buf.append(chars,0,i);
                         buf.append("\\t");
                         break loop;
                     case '\f':
-                        buf.append(s,0,i);
+                        chars = s.toCharArray();
+                        buf.append(chars,0,i);
                         buf.append("\\f");
                         break loop;
                     case '\b':
-                        buf.append(s,0,i);
+                        chars = s.toCharArray();
+                        buf.append(chars,0,i);
                         buf.append("\\b");
                         break loop;
                         
@@ -357,7 +364,7 @@ public class QuotedStringTokenizer
                         continue;
                 }
             }
-            if (i==s.length())
+            if (chars==null)
                 buf.append(s);
             else
             {
@@ -397,10 +404,7 @@ public class QuotedStringTokenizer
             }
             
             buf.append('"');
-        } 
-        
-        
-        
+        }     
     }
 
     
