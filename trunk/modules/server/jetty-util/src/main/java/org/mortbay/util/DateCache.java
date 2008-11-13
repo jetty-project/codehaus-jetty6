@@ -295,8 +295,7 @@ public class DateCache
     public String now()
     {
         long now=System.currentTimeMillis();
-        int n=0xfff&(int)now;
-        _lastMs=n%1000;
+        _lastMs=(int)(now%1000);
         return format(now);
     }
 
