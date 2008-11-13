@@ -33,18 +33,18 @@ Adding Support for a Different Transaction Manager
 --------------------------------------------------
 
 1. Edit the filter.properties file in 
-   $JETTY-HOME/modules/examples/jndi-example-webapp/src/etc/templates
+   $JETTY-HOME/modules/examples/test-jndi-webapp/src/templates
    and add a new set of token and replacement strings following the
    pattern established for ATOMIKOS and JOTM.
 
 2. Edit the jetty-env.xml file in
-   $JETTY-HOME/modules/examples/jndi-example-webapp/src/etc/templates
+   $JETTY-HOME/modules/examples/test-jndi-webapp/src/templates
    and add configuration for new transaction manager following the
    pattern established for the other transaction managers.
 
 3. Edit jetty-test-jndi.xml file in
-   $JETTY-HOME/modules/examples/jndi-example-webapp/src/etc/templates
+   $JETTY-HOME/modules/examples/test-jndi-webapp/src/templates
    and add configuration for the new transaction manager following
    the pattern established for the other transaction managers.
 
-4. Rebuild $JETTY-HOME/modules/examples/jndi-example-webapp (mvn clean install).
+4. Rebuild $JETTY-HOME/modules/examples/test-jndi-webapp (mvn clean install).
