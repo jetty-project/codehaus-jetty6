@@ -184,7 +184,8 @@ public class SslSocketConnector extends SocketConnector
             }
             catch(Exception e2)
             {
-                throw new IllegalStateException(e2);
+                Log.warn(e2);
+                throw new IllegalStateException(e2.getMessage());
             }
         }
     }
