@@ -541,7 +541,8 @@ public class URIUtil
             return path;
         
         StringBuffer buf = new StringBuffer(path.length());
-        buf.append(path,0,i);
+        char[] chars = path.toCharArray();
+        buf.append(chars,0,i);
         
         loop2:
         while (i<end)
@@ -550,7 +551,7 @@ public class URIUtil
             switch(c)
             {
                 case '?':
-                    buf.append(path,i,end);
+                    buf.append(chars,i,end-i);
                     break loop2;
                 case '/':
                     if (state++==0)
