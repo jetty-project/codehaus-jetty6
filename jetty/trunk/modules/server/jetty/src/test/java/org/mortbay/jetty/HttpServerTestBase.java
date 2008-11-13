@@ -472,10 +472,9 @@ public class HttpServerTestBase extends TestCase
                 if (len>0)
                     total+=len;
             }
-            
+
             assertTrue(total>(1024*256));
             assertTrue(30000L>(System.currentTimeMillis()-start));
-            
         }
         finally
         {
@@ -498,6 +497,7 @@ public class HttpServerTestBase extends TestCase
 
         try
         {   
+            //for (int pipeline=1;pipeline<32;pipeline++)
             for (int pipeline=1;pipeline<32;pipeline++)
             {   
                 Socket client=new Socket(HOST,port);

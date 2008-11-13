@@ -406,7 +406,7 @@ public abstract class AbstractGenerator implements Generator
     {
         // Should we flush the buffers?
         boolean full =  
-            (_buffer != null && _buffer.space() == 0) ||
+            (_buffer !=null && _buffer.length() >0 && _buffer.space()==0) ||
             (_content!=null && _content.length()>0);
              
         return full;
@@ -562,7 +562,7 @@ public abstract class AbstractGenerator implements Generator
             // block until everything is flushed
             Buffer content = _generator._content;
             Buffer buffer = _generator._buffer;
-            if (content!=null && content.length()>0 ||buffer!=null && buffer.length()>0)
+            if (content!=null && content.length()>0 ||buffer!=null && buffer.length()>0||_generator.isBufferFull())
             {
                 _generator.flush();
                 
