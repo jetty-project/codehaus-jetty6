@@ -267,7 +267,7 @@ public class Dispatcher implements RequestDispatcher
                     {
                         if ( rewrite_old_query )
                         {
-                            StringBuilder overridden_query_string = new StringBuilder();
+                            StringBuffer overridden_query_string = new StringBuffer();
                             MultiMap overridden_old_query = new MultiMap();
                             UrlEncoded.decodeTo(old_query,overridden_old_query,request.getCharacterEncoding());
     
