@@ -18,12 +18,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
-import java.util.Collections;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Arrays;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -35,22 +34,19 @@ import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpMethods;
+import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.ServerAuthentication;
-import org.mortbay.jetty.ssl.SslSocketConnector;
 import org.mortbay.jetty.client.security.HashRealmResolver;
 import org.mortbay.jetty.client.security.Realm;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
-import org.mortbay.jetty.security.ServletCallbackHandler;
-import org.mortbay.jetty.security.jaspi.modules.BasicAuthModule;
+import org.mortbay.jetty.security.authentication.BasicServerAuthentication;
 import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
-import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
-import org.mortbay.jetty.security.jaspi.JaspiServerAuthentication;
+import org.mortbay.jetty.ssl.SslSocketConnector;
 
 /**
  * Functional testing.
@@ -160,14 +156,8 @@ public class SslSecurityListenerTest extends TestCase
         cm.setPathSpec("/*");
 
         LoginService loginService = new HashLoginService("MyRealm","src/test/resources/realm.properties");
-        ServletCallbackHandler callbackHandler = new ServletCallbackHandler(loginService);
-        BasicAuthModule authModule = new BasicAuthModule(callbackHandler, "MyRealm");
         ConstraintSecurityHandler sh = new ConstraintSecurityHandler();
-        ServerAuthentication serverAuthentication = new JaspiServerAuthentication(APP_CONTEXT,
-                new SimpleAuthConfig(APP_CONTEXT, authModule),
-                null,
-                callbackHandler,
-                null, true);
+        ServerAuthentication serverAuthentication = new BasicServerAuthentication(loginService, "MyRealm");
         sh.setServerAuthentication(serverAuthentication);
         Set<String> roles = new HashSet<String>(Arrays.asList(new String[]{"user", "admin"}));
         sh.setConstraintMappings(new ConstraintMapping[] { cm }, roles);

@@ -41,7 +41,7 @@ import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class FormServerAuthentication implements ServerAuthentication {
     public final static String __J_URI = "org.mortbay.jetty.URI";
@@ -124,7 +124,7 @@ public class FormServerAuthentication implements ServerAuthentication {
                     response.setContentLength(0);
                     response.sendRedirect(response.encodeRedirectURL(nuri));
 
-                    return new SimpleAuthResult(ServerAuthStatus.SEND_CONTINUE, loginCallback.getSubject(), loginCallback.getUserPrincipal(), loginCallback.getGroups(), Constraint.__BASIC_AUTH);
+                    return new SimpleAuthResult(ServerAuthStatus.SEND_CONTINUE, loginCallback.getSubject(), loginCallback.getUserPrincipal(), loginCallback.getGroups(), Constraint.__FORM_AUTH);
                 }
                 //not authenticated
                 if (Log.isDebugEnabled()) Log.debug("Form authentication FAILED for " + StringUtil.printable(username));
