@@ -51,10 +51,8 @@ class NIOResourceCache extends ResourceCache
         long length=resource.length();
 
         if (_useFileMappedBuffer && resource.getFile()!=null) 
-        {    
-            File file = resource.getFile();
-            if (file != null) 
-	        buffer = new DirectNIOBuffer(file);
+        {            
+	        buffer = new DirectNIOBuffer(resource.getFile());
         } 
         else 
         {
