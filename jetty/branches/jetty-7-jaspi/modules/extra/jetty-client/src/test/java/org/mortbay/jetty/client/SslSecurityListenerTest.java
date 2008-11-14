@@ -20,6 +20,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
+import java.util.Collections;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Arrays;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -165,7 +169,8 @@ public class SslSecurityListenerTest extends TestCase
                 callbackHandler,
                 null, true);
         sh.setServerAuthentication(serverAuthentication);
-        sh.setConstraintMappings(new ConstraintMapping[] { cm });
+        Set<String> roles = new HashSet<String>(Arrays.asList(new String[]{"user", "admin"}));
+        sh.setConstraintMappings(new ConstraintMapping[] { cm }, roles);
         _server.setHandler(sh);
 
         Handler testHandler = new AbstractHandler()

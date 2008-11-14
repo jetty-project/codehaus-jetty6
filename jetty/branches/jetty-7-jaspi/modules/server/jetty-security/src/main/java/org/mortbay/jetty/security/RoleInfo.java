@@ -27,13 +27,12 @@ import java.util.HashSet;
  *
  * Badly named class that holds the role and user data constraint info for a path/http method combination, extracted and combined from
  * security constraints.
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class RoleInfo
 {
     private boolean unchecked;
     private boolean forbidden;
-    private boolean allRoles;
     private UserDataConstraint userDataConstraint;
     private final Set<String> roles = new HashSet<String>();
 
@@ -47,7 +46,6 @@ public class RoleInfo
             if (unchecked)
             {
                 this.unchecked = unchecked;
-                this.allRoles = false;
                 roles.clear();
             }
         }
@@ -63,7 +61,6 @@ public class RoleInfo
             this.forbidden = forbidden;
             unchecked = false;
             userDataConstraint = null;
-            allRoles = false;
             roles.clear();
         }
     }
@@ -84,36 +81,8 @@ public class RoleInfo
         }
     }
 
-    public boolean isAllRoles() {
-        return allRoles;
-    }
-
-    public void setAllRoles(boolean allRoles) {
-        if (allRoles)
-        {
-            this.allRoles = true;
-            roles.clear();
-        }
-    }
-
     public Set<String> getRoles() {
         return roles;
-    }
-
-    public void addRoles(String[] newRoles)
-    {
-        if (newRoles != null)
-        {
-            for (String role: newRoles)
-            {
-                if (role.equals("*"))
-                {
-                    setAllRoles(true);
-                    return;
-                }
-                this.roles.add(role);
-            }
-        }
     }
 
     public void combine(RoleInfo other)
@@ -123,14 +92,7 @@ public class RoleInfo
             setForbidden(true);
         }
         if (other.unchecked) setUnchecked(true);
-        if (other.allRoles)
-        {
-            setAllRoles(true);
-        }
-        else if (!allRoles)
-        {
-            roles.addAll(other.roles);
-        }
+        roles.addAll(other.roles);
 
         setUserDataConstraint(other.userDataConstraint);
     }
