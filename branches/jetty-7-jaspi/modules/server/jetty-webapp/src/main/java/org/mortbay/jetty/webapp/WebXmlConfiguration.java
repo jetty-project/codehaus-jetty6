@@ -22,6 +22,8 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.jar.JarEntry;
 import java.util.regex.Pattern;
 
@@ -41,6 +43,7 @@ import org.mortbay.jetty.handler.SecurityHandler;
 import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.ServerAuthResult;
+import org.mortbay.jetty.security.ConstraintAware;
 import org.mortbay.jetty.security.ServletCallbackHandler;
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
 import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
@@ -80,6 +83,7 @@ public class WebXmlConfiguration implements Configuration
     protected Object _servletMappings;
     protected Object _welcomeFiles;
     protected Object _constraintMappings;
+    protected Set<String> _roles = new HashSet<String>();
     protected Object _listeners;
     protected Map _errorPages;
     protected boolean _hasJSP;
@@ -362,8 +366,8 @@ public class WebXmlConfiguration implements Configuration
 
         getWebAppContext().setEventListeners(null);
         getWebAppContext().setWelcomeFiles(null);
-        if (_securityHandler instanceof ConstraintSecurityHandler)
-            ((ConstraintSecurityHandler) _securityHandler).setConstraintMappings(null);
+        if (_securityHandler instanceof ConstraintAware)
+            ((ConstraintAware) _securityHandler).setConstraintMappings(null, _roles);
 
         if (getWebAppContext().getErrorHandler() instanceof ErrorPageErrorHandler)
             ((ErrorPageErrorHandler) getWebAppContext().getErrorHandler()).setErrorPages(null);
@@ -414,9 +418,10 @@ public class WebXmlConfiguration implements Configuration
         _listeners=LazyList.array2List(getWebAppContext().getEventListeners());
         _welcomeFiles=LazyList.array2List(getWebAppContext().getWelcomeFiles());
 
-        if (_securityHandler instanceof ConstraintSecurityHandler)
+        if (_securityHandler instanceof ConstraintAware)
         {
-            _constraintMappings=LazyList.array2List(((ConstraintSecurityHandler) _securityHandler).getConstraintMappings());
+            _constraintMappings=LazyList.array2List(((ConstraintAware) _securityHandler).getConstraintMappings());
+            _roles = ((ConstraintAware) _securityHandler).getRoles();
         }
 
         _errorPages=getWebAppContext().getErrorHandler() instanceof ErrorPageErrorHandler ?
@@ -455,9 +460,9 @@ public class WebXmlConfiguration implements Configuration
         getWebAppContext().setEventListeners((EventListener[]) LazyList.toArray(_listeners, EventListener.class));
         getWebAppContext().setWelcomeFiles((String[]) LazyList.toArray(_welcomeFiles, String.class));
         //TODO jaspi check this
-        if (_securityHandler instanceof ConstraintSecurityHandler)
+        if (_securityHandler instanceof ConstraintAware)
         {
-            ((ConstraintSecurityHandler) _securityHandler).setConstraintMappings((ConstraintMapping[]) LazyList.toArray(_constraintMappings, ConstraintMapping.class));
+            ((ConstraintSecurityHandler) _securityHandler).setConstraintMappings((ConstraintMapping[]) LazyList.toArray(_constraintMappings, ConstraintMapping.class), _roles);
         }
 
         if (_errorPages != null && getWebAppContext().getErrorHandler() instanceof ErrorPageErrorHandler)
@@ -1115,6 +1120,9 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------ */
     protected void initSecurityRole(XmlParser.Node node)
     {
+        XmlParser.Node roleNode=node.get("role-name");
+        String role = roleNode.toString(false, true);
+        _roles.add(role);
     }
 
 

@@ -35,9 +35,9 @@ import org.mortbay.util.StringMap;
  *
  * @author Greg Wilkins (gregw)
  */
-public class ConstraintSecurityHandler extends AbstractSecurityHandler
-{
+public class ConstraintSecurityHandler extends AbstractSecurityHandler implements ConstraintAware {
     private ConstraintMapping[] _constraintMappings;
+    private Set<String> roles;
     private PathMap _constraintMap=new PathMap();
 
 
@@ -49,17 +49,24 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
     {
         return _constraintMappings;
     }
-    
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
     /* ------------------------------------------------------------ */
     /**
      * Process the constraints following the combining rules in Servlet 3.0 EA spec section 13.7.1
      * Note that much of the logic is in the RoleInfo class.
      *
      * @param constraintMappings The contraintMappings to set.
+     * @param roles
      */
-    public void setConstraintMappings(ConstraintMapping[] constraintMappings)
+    public void setConstraintMappings(ConstraintMapping[] constraintMappings, Set<String> roles)
     {
         _constraintMappings=constraintMappings;
+        this.roles = roles;
+
         if (_constraintMappings!=null)
         {
             this._constraintMappings = constraintMappings;
@@ -101,25 +108,36 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
                         mappings.clear();
                         mappings.put(null, roleInfo);
                     }
-                    continue;
                 }
-                UserDataConstraint userDataConstraint = UserDataConstraint.get(constraint.getDataConstraint());
-                roleInfo.setUserDataConstraint(userDataConstraint);
+                else
+                {
+                    UserDataConstraint userDataConstraint = UserDataConstraint.get(constraint.getDataConstraint());
+                    roleInfo.setUserDataConstraint(userDataConstraint);
 
-                //TODO check this is correct meaning
-                boolean unchecked = !constraint.getAuthenticate();
-                roleInfo.setUnchecked(unchecked);
-                if (!roleInfo.isUnchecked())
-                {
-                    roleInfo.addRoles(constraint.getRoles());
-                }
-                if (httpMethod == null)
-                {
-                    for (Map.Entry<String, RoleInfo> entry: mappings.entrySet())
+                    boolean unchecked = !constraint.getAuthenticate();
+                    roleInfo.setUnchecked(unchecked);
+                    if (!roleInfo.isUnchecked())
                     {
-                        if (entry.getKey() != null) {
-                            RoleInfo specific = entry.getValue();
-                            specific.combine(roleInfo);
+                        if (constraint.isAnyRole()) {
+                            roleInfo.getRoles().addAll(roles);
+                        } else
+                        {
+                            String[] newRoles = constraint.getRoles();
+                            for (String role: newRoles)
+                            {
+                                if (!roles.contains(role)) throw new IllegalArgumentException("Attempt to use undeclared role: " + role + ", known roles: " + roles);
+                                roleInfo.getRoles().add(role);
+                            }
+                        }
+                    }
+                    if (httpMethod == null)
+                    {
+                        for (Map.Entry<String, RoleInfo> entry: mappings.entrySet())
+                        {
+                            if (entry.getKey() != null) {
+                                RoleInfo specific = entry.getValue();
+                                specific.combine(roleInfo);
+                            }
                         }
                     }
                 }
@@ -253,10 +271,6 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
         if (roleInfo.isUnchecked())
         {
             return true;
-        }
-        if (roleInfo.isAllRoles())
-        {
-            return userIdentity.getUserPrincipal() != null;
         }
         Set<String> roles = roleInfo.getRoles();
         for (String role: roles) {

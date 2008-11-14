@@ -89,7 +89,8 @@ public class ConstraintTest extends TestCase
         _security.setConstraintMappings(new ConstraintMapping[]
                 {
                         mapping0, mapping1
-                });
+                },
+                Collections.singleton("user"));
     }
 
     public static void main(String[] args)

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
@@ -36,9 +37,10 @@ import org.mortbay.util.LazyList;
  *
  * @author Greg Wilkins (gregw)
  */
-public class LegacyConstraintSecurityHandler extends AbstractSecurityHandler
+public class LegacyConstraintSecurityHandler extends AbstractSecurityHandler implements ConstraintAware
 {
     private ConstraintMapping[] _constraintMappings;
+    private Set<String> _roles;
     private PathMap _constraintMap=new PathMap();
 
 
@@ -51,13 +53,18 @@ public class LegacyConstraintSecurityHandler extends AbstractSecurityHandler
         return _constraintMappings;
     }
 
+    public Set<String> getRoles() {
+        return _roles;
+    }
+
     /* ------------------------------------------------------------ */
     /**
      * @param constraintMappings The contraintMappings to set.
      */
-    public void setConstraintMappings(ConstraintMapping[] constraintMappings)
+    public void setConstraintMappings(ConstraintMapping[] constraintMappings, Set<String> roles)
     {
         _constraintMappings=constraintMappings;
+        _roles = roles;
         if (_constraintMappings!=null)
         {
             this._constraintMappings = constraintMappings;
