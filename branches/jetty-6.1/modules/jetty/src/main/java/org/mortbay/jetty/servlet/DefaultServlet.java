@@ -919,9 +919,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
 
             if (_useFileMappedBuffer && resource.getFile()!=null) 
             {    
-                File file = resource.getFile();
-                if (file != null) 
-                    buffer = new DirectNIOBuffer(file);
+                buffer = new DirectNIOBuffer(resource.getFile());
             } 
             else 
             {
