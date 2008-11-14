@@ -83,7 +83,7 @@ public class WebXmlConfiguration implements Configuration
     protected Object _servletMappings;
     protected Object _welcomeFiles;
     protected Object _constraintMappings;
-    protected Set<String> _roles = new HashSet<String>();
+    protected final Set<String> _roles = new HashSet<String>();
     protected Object _listeners;
     protected Map _errorPages;
     protected boolean _hasJSP;
@@ -421,7 +421,10 @@ public class WebXmlConfiguration implements Configuration
         if (_securityHandler instanceof ConstraintAware)
         {
             _constraintMappings=LazyList.array2List(((ConstraintAware) _securityHandler).getConstraintMappings());
-            _roles = ((ConstraintAware) _securityHandler).getRoles();
+            _roles.clear();
+            if (((ConstraintAware) _securityHandler).getRoles() != null) {
+                _roles.addAll(((ConstraintAware) _securityHandler).getRoles());
+            }
         }
 
         _errorPages=getWebAppContext().getErrorHandler() instanceof ErrorPageErrorHandler ?

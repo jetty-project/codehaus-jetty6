@@ -32,6 +32,7 @@ import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpMethods;
+import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.ServerAuthentication;
@@ -42,12 +43,8 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
-import org.mortbay.jetty.security.ServletCallbackHandler;
-import org.mortbay.jetty.security.jaspi.modules.BasicAuthModule;
+import org.mortbay.jetty.security.authentication.BasicServerAuthentication;
 import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
-import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
-import org.mortbay.jetty.security.jaspi.JaspiServerAuthentication;
 
 /**
  * Functional testing for HttpExchange.
@@ -280,14 +277,8 @@ public class SecurityListenerTest extends TestCase
          cm.setPathSpec("/*");
 
          LoginService loginService = new HashLoginService("MyRealm","src/test/resources/realm.properties");
-         ServletCallbackHandler callbackHandler = new ServletCallbackHandler(loginService);
-         BasicAuthModule authModule = new BasicAuthModule(callbackHandler, "MyRealm");
          ConstraintSecurityHandler sh = new ConstraintSecurityHandler();
-         ServerAuthentication serverAuthentication = new JaspiServerAuthentication(APP_CONTEXT,
-                 new SimpleAuthConfig(APP_CONTEXT, authModule),
-                 null,
-                 callbackHandler,
-                 null, true);
+         ServerAuthentication serverAuthentication = new BasicServerAuthentication(loginService, "MyRealm");
          sh.setServerAuthentication(serverAuthentication);
          _server.setHandler(sh);
 

@@ -19,7 +19,6 @@ package org.mortbay.jetty.security;
 import java.io.IOException;
 import java.util.Collections;
 
-import javax.security.auth.message.config.ServerAuthContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,17 +26,16 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.LocalConnector;
+import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.security.jaspi.modules.BasicAuthModule;
+import org.mortbay.jetty.security.authentication.BasicServerAuthentication;
+import org.mortbay.jetty.security.authentication.FormServerAuthentication;
+import org.mortbay.jetty.security.authentication.SessionCachingServerAuthentication;
 import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
-import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.security.jaspi.modules.FormAuthModule;
-import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
-import org.mortbay.jetty.ServerAuthentication;
-import org.mortbay.jetty.security.jaspi.JaspiServerAuthentication;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.util.B64Code;
 
@@ -120,12 +118,7 @@ public class ConstraintTest extends TestCase
     public void testBasic()
             throws Exception
     {
-        ServerAuthContext authModule = new BasicAuthModule(callbackHandler, TEST_REALM);
-        ServerAuthentication serverAuthentication = new JaspiServerAuthentication(APP_CONTEXT,
-                new SimpleAuthConfig(APP_CONTEXT, authModule),
-                null,
-                callbackHandler,
-                null, true);
+        ServerAuthentication serverAuthentication = new BasicServerAuthentication(loginService, TEST_REALM);
         _security.setServerAuthentication(serverAuthentication);
         _server.start();
 
@@ -161,13 +154,7 @@ public class ConstraintTest extends TestCase
     public void testForm()
             throws Exception
     {
-        ServerAuthContext authModule = new FormAuthModule(callbackHandler, "/testLoginPage", "/testErrorPage");
-        ServerAuthentication serverAuthentication = new JaspiServerAuthentication(APP_CONTEXT,
-                new SimpleAuthConfig(APP_CONTEXT, authModule),
-                null,
-                callbackHandler,
-                null,
-                false);
+        ServerAuthentication serverAuthentication = new SessionCachingServerAuthentication(new FormServerAuthentication("/testLoginPage", "/testErrorPage", loginService));
         _security.setServerAuthentication(serverAuthentication);
         _server.start();
 
