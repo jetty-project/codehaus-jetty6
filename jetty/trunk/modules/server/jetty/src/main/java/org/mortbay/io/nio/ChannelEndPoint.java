@@ -179,7 +179,10 @@ public class ChannelEndPoint implements EndPoint
         }
         else if (buf instanceof RandomAccessFileBuffer)
         {
+            len = buffer.length();
             ((RandomAccessFileBuffer)buf).writeTo(_channel,buffer.getIndex(),buffer.length());
+            if (len>0)
+                buffer.skip(len);
         }
         else if (buffer.array()!=null)
         {
