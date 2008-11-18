@@ -20,10 +20,7 @@ import org.jboss.jetty.security.JBossUserRealm;
 import org.jboss.logging.Logger;
 import org.jboss.web.WebApplication;
 import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
-import org.mortbay.j2ee.J2EEWebAppContext;
-import org.mortbay.j2ee.session.AbstractReplicatedStore;
-import org.mortbay.j2ee.session.Manager;
-import org.mortbay.j2ee.session.Store;
+import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.jetty.servlet.jsr77.Jsr77ServletHandler;
 import org.mortbay.jetty.webapp.WebAppClassLoader;
@@ -36,7 +33,7 @@ import org.mortbay.jetty.webapp.WebAppClassLoader;
  * Customize the jetty WebAppContext to jboss environment.
  *
  */
-public class JBossWebAppContext extends J2EEWebAppContext
+public class JBossWebAppContext extends WebAppContext
 {
     protected static Logger __log=Logger.getLogger(JBossWebAppContext.class);
 
@@ -68,8 +65,8 @@ public class JBossWebAppContext extends J2EEWebAppContext
         //very important - establish the classloader now, as it is the one
         //that is being used for the performDeploy step
         ClassLoader loader=Thread.currentThread().getContextClassLoader();
-        if(isDistributable()&&getDistributableSessionManager()!=null)
-            setUpDistributableSessionManager(loader);  
+       /* if(isDistributable()&&getDistributableSessionManager()!=null)
+            setUpDistributableSessionManager(loader);  */
         
         setClassLoader(new WebAppClassLoader(loader, this));
     }
@@ -143,7 +140,7 @@ public class JBossWebAppContext extends J2EEWebAppContext
             Thread.currentThread().setContextClassLoader(currentLoader);
         }
     }
-    
+    /*
     protected void setUpDistributableSessionManager(ClassLoader loader)
     {
         try
@@ -161,7 +158,7 @@ public class JBossWebAppContext extends J2EEWebAppContext
             __log.error("could not set up Distributable HttpSession Manager - using local one",e);
         }
     }
-
+*/
     protected void setUpENC(ClassLoader loader) throws Exception
     {
         _webApp.setClassLoader(loader);
