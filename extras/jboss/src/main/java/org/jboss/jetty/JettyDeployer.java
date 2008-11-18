@@ -22,7 +22,6 @@ import org.jboss.logging.Logger;
 import org.jboss.web.AbstractWebDeployer;
 import org.jboss.web.WebApplication;
 import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
-import org.mortbay.j2ee.session.Manager;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.util.LazyList;
@@ -92,7 +91,7 @@ public class JettyDeployer extends AbstractWebDeployer
                 _log.debug("Allowing non-trailing '/' on context path");
             app.setAllowNullPathInfo(true);
                  
-            Manager manager = (Manager) getDistributableSessionManagerPrototype();
+            SessionManager manager = getDistributableSessionManagerPrototype();
             if (manager != null)
             {
                 throw new UnsupportedOperationException("NOT IMPLEMENTED - please ask"); 
