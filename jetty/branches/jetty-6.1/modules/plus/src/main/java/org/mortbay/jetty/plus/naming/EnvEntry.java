@@ -55,6 +55,12 @@ public class EnvEntry extends NamingEntry
         this.overrideWebXml = overrideWebXml;
     }
     
+    public EnvEntry (String jndiName, Object objToBind)
+    throws NamingException
+    {
+        this(jndiName, objToBind, false);
+    }
+    
     
     public boolean isOverrideWebXml ()
     {
