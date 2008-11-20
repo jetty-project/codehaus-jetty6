@@ -16,6 +16,7 @@
  + JETTY-792 TerracottaSessionManager does not unlock new session with requested id
  + JETTY-793 Fixed DataCache millisecond rounding
  + JETTY-795 NullPointerException in SocketConnector.java
+ + JETTY-801 Bring back 2 arg EnvEntry constructor
 
 jetty-6.1.12 4 November 2008
  + JETTY-731 Completed DeliverListener for cometd
