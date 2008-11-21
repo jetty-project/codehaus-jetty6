@@ -17,6 +17,7 @@
  + JETTY-793 Fixed DataCache millisecond rounding
  + JETTY-795 NullPointerException in SocketConnector.java
  + JETTY-801 Bring back 2 arg EnvEntry constructor
+ + JETTY-805 Fix jetty-jaas.xml for new UserRealm package
 
 jetty-6.1.12 4 November 2008
  + JETTY-731 Completed DeliverListener for cometd
