@@ -351,7 +351,7 @@ public class HttpClient extends AbstractBuffers
         {
             public void run()
             {
-                while (isStarted())
+                while (isRunning())
                 {
                     _timeoutQ.setNow();
                     _timeoutQ.tick();
