@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.RunAsToken;
@@ -278,5 +279,4 @@ public class LegacyConstraintSecurityHandler extends AbstractSecurityHandler imp
         }
         return false;
     }
-
 }

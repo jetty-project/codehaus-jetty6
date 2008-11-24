@@ -17,14 +17,12 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
-public enum ServerAuthStatus {
-
+public enum ServerAuthStatus
+{
     SEND_FAILURE, SEND_SUCCESS, SEND_CONTINUE, SUCCESS
-
 }

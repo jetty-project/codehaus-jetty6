@@ -1022,21 +1022,25 @@ public class WebXmlConfiguration implements Configuration
         {
             XmlParser.Node name = node.get("realm-name");
             String realmName = name == null ? "default" : name.toString(false, true);
-            // TODO jaspi c'mon, there must be a better way to do this
             LoginService[] loginServices = ContextHandler.getCurrentContext().getContextHandler().getServer().getLoginServices();
-
-            LoginService loginService = null;
-
-            for (LoginService test : loginServices)
-            {
-                if (realmName.equals(test.getName())) loginService = test;
-            }
+            
+            //use a specific LoginService set on this WebAppContext only
+            LoginService loginService = getWebAppContext().getSecurityHandler().getLoginService();
 
             if (loginService == null)
             {
-                String msg = "Unknown realm: " + realmName;
-                Log.warn(msg);
-                return;
+                //look for one that matches from the container environment
+                for (LoginService test : loginServices)
+                {
+                    if (realmName.equals(test.getName())) loginService = test;
+                }
+                if (loginService == null)
+                {
+                    Log.warn("Unknown realm: " + realmName);
+                    return;
+                }
+                else
+                    getWebAppContext().getSecurityHandler().setLoginService(loginService);
             }
 
             ServerAuthentication serverAuthentication;
@@ -1071,7 +1075,7 @@ public class WebXmlConfiguration implements Configuration
                 else
                 {
                     // TODO ?????
-                    throw new IllegalArgumentException("No forme config given for form auth");
+                    throw new IllegalArgumentException("No form config given for form auth");
                 }
             }
             else if (Constraint.__BASIC_AUTH.equals(m))
