@@ -32,32 +32,32 @@ import org.mortbay.jetty.JettyMessageInfo;
 import org.mortbay.jetty.ServerAuthException;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class LazyAuthResult implements ServerAuthResult {
     private static final Subject unauthenticatedSubject = new Subject();
 
-    private final ServerAuthentication serverAuthentication;
-    private final JettyMessageInfo messageInfo;
+    private final ServerAuthentication _serverAuthentication;
+    private final JettyMessageInfo _messageInfo;
 
-    private ServerAuthResult delegate;
+    private ServerAuthResult _delegate;
 
     public LazyAuthResult(ServerAuthentication serverAuthentication, JettyMessageInfo messageInfo) {
         if (serverAuthentication == null) throw new NullPointerException("No ServerAuthentication");
         if (messageInfo == null) throw new NullPointerException("No JettyMessageInfo");
-        this.serverAuthentication = serverAuthentication;
-        this.messageInfo = messageInfo;
+        this._serverAuthentication = serverAuthentication;
+        this._messageInfo = messageInfo;
     }
 
     private ServerAuthResult getDelegate() {
-        if (delegate == null) {
+        if (_delegate == null) {
             try {
-                delegate = serverAuthentication.validateRequest(messageInfo);
+                _delegate = _serverAuthentication.validateRequest(_messageInfo);
             } catch (ServerAuthException e) {
-                delegate = SimpleAuthResult.NO_AUTH_RESULTS;
+                _delegate = SimpleAuthResult.NO_AUTH_RESULTS;
             }
         }
-        return delegate;
+        return _delegate;
     }
 
     public ServerAuthStatus getAuthStatus() {
@@ -66,7 +66,7 @@ public class LazyAuthResult implements ServerAuthResult {
 
     //for cleaning in secureResponse
     public Subject getClientSubject() {
-        return delegate == null? unauthenticatedSubject: delegate.getClientSubject();
+        return _delegate == null? unauthenticatedSubject: _delegate.getClientSubject();
     }
 
     public Principal getUserPrincipal() {

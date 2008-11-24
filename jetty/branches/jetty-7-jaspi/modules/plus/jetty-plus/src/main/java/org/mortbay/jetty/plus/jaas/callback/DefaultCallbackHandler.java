@@ -48,11 +48,11 @@ import org.mortbay.jetty.security.Password;
 public class DefaultCallbackHandler extends AbstractCallbackHandler
 {
      
-    private Request request;
+    private Request _request;
     
     public void setRequest (Request request)
     {
-        this.request = request;
+        this._request = request;
     }
     
     public void handle (Callback[] callbacks)
@@ -82,7 +82,7 @@ public class DefaultCallbackHandler extends AbstractCallbackHandler
             else if (callbacks[i] instanceof RequestParameterCallback)
             {
                 RequestParameterCallback callback = (RequestParameterCallback)callbacks[i];
-                callback.setParameterValues(Arrays.asList(request.getParameterValues(callback.getParameterName())));       
+                callback.setParameterValues(Arrays.asList(_request.getParameterValues(callback.getParameterName())));
             }
             else
                 throw new UnsupportedCallbackException(callbacks[i]);

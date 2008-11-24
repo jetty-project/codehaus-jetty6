@@ -48,37 +48,37 @@ import org.mortbay.jetty.security.LazyAuthResult;
  */
 public class JaspiServerAuthentication implements ServerAuthentication {
 
-    private final String authContextId;
-    private final ServerAuthConfig authConfig;
-    private final Map authProperties;
-    private final ServletCallbackHandler callbackHandler;
-    private final Subject serviceSubject;
-    private final boolean allowLazyAuthentication;
+    private final String _authContextId;
+    private final ServerAuthConfig _authConfig;
+    private final Map _authProperties;
+    private final ServletCallbackHandler _callbackHandler;
+    private final Subject _serviceSubject;
+    private final boolean _allowLazyAuthentication;
 
     public JaspiServerAuthentication(String authContextId, ServerAuthConfig authConfig, Map authProperties, ServletCallbackHandler callbackHandler, Subject serviceSubject, boolean allowLazyAuthentication) {
         if (callbackHandler == null) throw new NullPointerException("No CallbackHandler");
         if (authConfig == null) throw new NullPointerException("No AuthConfig");
-        this.authContextId = authContextId;
-        this.authConfig = authConfig;
-        this.authProperties = authProperties;
-        this.callbackHandler = callbackHandler;
-        this.serviceSubject = serviceSubject;
-        this.allowLazyAuthentication = allowLazyAuthentication;
+        this._authContextId = authContextId;
+        this._authConfig = authConfig;
+        this._authProperties = authProperties;
+        this._callbackHandler = callbackHandler;
+        this._serviceSubject = serviceSubject;
+        this._allowLazyAuthentication = allowLazyAuthentication;
     }
 
     public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException {
-        if (allowLazyAuthentication && !messageInfo.isAuthMandatory()) {
+        if (_allowLazyAuthentication && !messageInfo.isAuthMandatory()) {
             return new LazyAuthResult(this, messageInfo);
         }
         try {
-            ServerAuthContext authContext = authConfig.getAuthContext(authContextId, serviceSubject, authProperties);
+            ServerAuthContext authContext = _authConfig.getAuthContext(_authContextId, _serviceSubject, _authProperties);
             Subject clientSubject = new Subject();
 
-            AuthStatus authStatus = authContext.validateRequest(new MessageInfoAdapter(messageInfo), clientSubject, serviceSubject);
+            AuthStatus authStatus = authContext.validateRequest(new MessageInfoAdapter(messageInfo), clientSubject, _serviceSubject);
             String authMethod = (String) messageInfo.getMap().get(JettyMessageInfo.AUTH_METHOD_KEY);
-            CallerPrincipalCallback principalCallback = callbackHandler.getThreadCallerPrincipalCallback();
+            CallerPrincipalCallback principalCallback = _callbackHandler.getThreadCallerPrincipalCallback();
             Principal principal = principalCallback == null? null: principalCallback.getPrincipal();
-            GroupPrincipalCallback groupPrincipalCallback = callbackHandler.getThreadGroupPrincipalCallback();
+            GroupPrincipalCallback groupPrincipalCallback = _callbackHandler.getThreadGroupPrincipalCallback();
             String[] groups = groupPrincipalCallback == null? null: groupPrincipalCallback.getGroups();
             return new SimpleAuthResult(toServerAuthStatus(authStatus),
                     clientSubject,
@@ -92,10 +92,10 @@ public class JaspiServerAuthentication implements ServerAuthentication {
 
     public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException {
         try {
-            ServerAuthContext authContext = authConfig.getAuthContext(authContextId, serviceSubject, authProperties);
+            ServerAuthContext authContext = _authConfig.getAuthContext(_authContextId, _serviceSubject, _authProperties);
             MessageInfoAdapter adapter = new MessageInfoAdapter(messageInfo);
             authContext.cleanSubject(adapter, validatedUser.getClientSubject());
-            return toServerAuthStatus(authContext.secureResponse(adapter, serviceSubject));
+            return toServerAuthStatus(authContext.secureResponse(adapter, _serviceSubject));
         } catch (AuthException e) {
             throw new ServerAuthException(e);
         }

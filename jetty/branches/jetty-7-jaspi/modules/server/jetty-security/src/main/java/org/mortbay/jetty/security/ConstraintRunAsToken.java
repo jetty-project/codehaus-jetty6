@@ -27,16 +27,16 @@ import org.mortbay.jetty.RunAsToken;
  */
 public class ConstraintRunAsToken implements RunAsToken
 {
-    private final String runAsRole;
+    private final String _runAsRole;
 
     public ConstraintRunAsToken(String runAsRole)
     {
-        this.runAsRole = runAsRole;
+        this._runAsRole = runAsRole;
     }
 
     public String getRunAsRole()
     {
-        return runAsRole;
+        return _runAsRole;
     }
     
 }

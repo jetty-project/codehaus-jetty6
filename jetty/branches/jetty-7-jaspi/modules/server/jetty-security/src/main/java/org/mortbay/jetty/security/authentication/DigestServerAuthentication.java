@@ -45,19 +45,19 @@ import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class DigestServerAuthentication implements ServerAuthentication {
 
-    private final LoginService loginService;
-    private final String realmName;
-    protected long maxNonceAge = 0;
-    protected long nonceSecret = this.hashCode() ^ System.currentTimeMillis();
-    protected boolean useStale = false;
+    private final LoginService _loginService;
+    private final String _realmName;
+    protected long _maxNonceAge = 0;
+    protected long _nonceSecret = this.hashCode() ^ System.currentTimeMillis();
+    protected boolean _useStale = false;
 
     public DigestServerAuthentication(LoginService loginService, String realmName) {
-        this.loginService = loginService;
-        this.realmName = realmName;
+        this._loginService = loginService;
+        this._realmName = realmName;
     }
 
     public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException {
@@ -126,7 +126,7 @@ public class DigestServerAuthentication implements ServerAuthentication {
 
                 if (n > 0) {
                     LoginCallback loginCallback = new LoginCallback(new Subject(), credentials);
-                    loginService.login(loginCallback);
+                    _loginService.login(loginCallback);
                     if (loginCallback.isSuccess()) {
                         return new SimpleAuthResult(ServerAuthStatus.SUCCESS, loginCallback.getSubject(), loginCallback.getUserPrincipal(), loginCallback.getGroups(), Constraint.__BASIC_AUTH);
                     }
@@ -142,10 +142,10 @@ public class DigestServerAuthentication implements ServerAuthentication {
             String domain = request.getContextPath();
             if (domain == null)
                 domain = "/";
-            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Digest realm=\"" + realmName +
+            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Digest realm=\"" + _realmName +
                     "\", domain=\"" + domain +
                     "\", nonce=\"" + newNonce(timestamp) +
-                    "\", algorithm=MD5, qop=\"auth\"" + (useStale ? (" stale=" + stale) : ""));
+                    "\", algorithm=MD5, qop=\"auth\"" + (_useStale ? (" stale=" + stale) : ""));
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return new SimpleAuthResult(ServerAuthStatus.SEND_CONTINUE, null, null, (String[]) null, null);
         }
@@ -157,7 +157,7 @@ public class DigestServerAuthentication implements ServerAuthentication {
 
     public String newNonce(long ts) {
 //        long ts=request.getTimeStamp();
-        long sk = nonceSecret;
+        long sk = _nonceSecret;
 
         byte[] nounce = new byte[24];
         for (int i = 0; i < 8; i++) {
@@ -200,7 +200,7 @@ public class DigestServerAuthentication implements ServerAuthentication {
                 return -1;
 
             long ts = 0;
-            long sk = nonceSecret;
+            long sk = _nonceSecret;
             byte[] n2 = new byte[16];
             System.arraycopy(n, 0, n2, 0, 8);
             for (int i = 0; i < 8; i++) {
@@ -227,7 +227,7 @@ public class DigestServerAuthentication implements ServerAuthentication {
                 if (n[i + 8] != hash[i])
                     return -1;
 
-            if (maxNonceAge > 0 && (age < 0 || age > maxNonceAge))
+            if (_maxNonceAge > 0 && (age < 0 || age > _maxNonceAge))
                 return 0; // stale
 
             return 1;

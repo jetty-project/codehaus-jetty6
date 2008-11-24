@@ -51,7 +51,7 @@ public class FormServerAuthentication implements ServerAuthentication {
     public final static String __J_PASSWORD = "j_password";
 
 
-    private final LoginService loginService;
+    private final LoginService _loginService;
     private String _formErrorPage;
     private String _formErrorPath;
     private String _formLoginPage;
@@ -60,7 +60,7 @@ public class FormServerAuthentication implements ServerAuthentication {
     public FormServerAuthentication(String loginPage, String errorPage, LoginService loginService) {
         setLoginPage(loginPage);
         setErrorPage(errorPage);
-        this.loginService = loginService;
+        this._loginService = loginService;
     }
 
     private void setLoginPage(String path) {
@@ -110,7 +110,7 @@ public class FormServerAuthentication implements ServerAuthentication {
                 final String username = request.getParameter(__J_USERNAME);
                 final char[] password = request.getParameter(__J_PASSWORD).toCharArray();
                 LoginCallback loginCallback = new LoginCallback(new Subject(), username, password);
-                loginService.login(loginCallback);
+                _loginService.login(loginCallback);
                 if (loginCallback.isSuccess()) {
                     // Redirect to original request
                     String nuri = (String) session.getAttribute(__J_URI);

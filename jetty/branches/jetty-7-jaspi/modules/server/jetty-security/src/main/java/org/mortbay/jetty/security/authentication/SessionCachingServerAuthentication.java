@@ -36,10 +36,10 @@ import org.mortbay.jetty.security.SimpleAuthResult;
 public class SessionCachingServerAuthentication implements ServerAuthentication {
     public final static String __J_AUTHENTICATED = "org.mortbay.jetty.Auth";
 
-    private final ServerAuthentication delegate;
+    private final ServerAuthentication _delegate;
 
     public SessionCachingServerAuthentication(ServerAuthentication delegate) {
-        this.delegate = delegate;
+        this._delegate = delegate;
     }
 
     public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException {
@@ -53,7 +53,7 @@ public class SessionCachingServerAuthentication implements ServerAuthentication 
         if (serverAuthResult != null)
             return serverAuthResult;
 
-        serverAuthResult = delegate.validateRequest(messageInfo);
+        serverAuthResult = _delegate.validateRequest(messageInfo);
         if (serverAuthResult != null && serverAuthResult.getClientSubject()  != null)
         {
             ServerAuthResult newServerAuthResult = new SimpleAuthResult(ServerAuthStatus.SUCCESS, serverAuthResult.getClientSubject(), serverAuthResult.getUserPrincipal(), serverAuthResult.getGroups(), serverAuthResult.getAuthMethod());
@@ -63,7 +63,7 @@ public class SessionCachingServerAuthentication implements ServerAuthentication 
     }
 
     public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException {
-        return delegate.secureResponse(messageInfo, validatedUser);
+        return _delegate.secureResponse(messageInfo, validatedUser);
     }
 
 }

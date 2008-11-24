@@ -63,8 +63,9 @@ import org.mortbay.util.URIUtil;
  */
 public class HTAccessHandler extends AbstractSecurityHandler
 {
-    private Handler protegee;
-    private static Logger log = Log.getLogger(HTAccessHandler.class.getName());
+    private static final Logger log = Log.getLogger(HTAccessHandler.class.getName());
+
+    private Handler _protegee;
 
     String _default = null;
     String _accessFile = ".htaccess";
@@ -1054,7 +1055,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
      */
     protected Handler getProtegee()
     {
-        return this.protegee;
+        return this._protegee;
     }
 
     /**
@@ -1064,7 +1065,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
      */
     public void setProtegee(Handler protegee)
     {
-        this.protegee = protegee;
+        this._protegee = protegee;
     }
 
 }

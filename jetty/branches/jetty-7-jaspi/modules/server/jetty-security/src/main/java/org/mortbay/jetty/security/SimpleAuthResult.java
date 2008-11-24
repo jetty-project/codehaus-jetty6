@@ -37,25 +37,25 @@ public class SimpleAuthResult implements ServerAuthResult {
 
     public static final ServerAuthResult NO_AUTH_RESULTS = new SimpleAuthResult(null, null, null, Collections.<String>emptyList(), null);
 
-    private final ServerAuthStatus authStatus;
-    private final Subject clientSubject;
-    private final Principal userPrincipal;
-    private final List<String> groups;
-    private final String authMethod;
+    private final ServerAuthStatus _authStatus;
+    private final Subject _clientSubject;
+    private final Principal _userPrincipal;
+    private final List<String> _groups;
+    private final String _authMethod;
 
     public SimpleAuthResult(ServerAuthStatus authStatus, Subject clientSubject, Principal userPrincipal, List<String> groups, String authMethod) {
-        this.authStatus = authStatus;
-        this.clientSubject = clientSubject;
-        this.userPrincipal = userPrincipal;
-        this.groups = groups;
-        this.authMethod = userPrincipal == null? null: authMethod;
+        this._authStatus = authStatus;
+        this._clientSubject = clientSubject;
+        this._userPrincipal = userPrincipal;
+        this._groups = groups;
+        this._authMethod = userPrincipal == null? null: authMethod;
     }
     public SimpleAuthResult(ServerAuthStatus authStatus, Subject clientSubject, Principal userPrincipal, String[] groups, String authMethod) {
-        this.authStatus = authStatus;
-        this.clientSubject = clientSubject;
-        this.userPrincipal = userPrincipal;
-        this.groups = groups == null? Collections.<String>emptyList(): Arrays.asList(groups);
-        this.authMethod = userPrincipal == null? null: authMethod;
+        this._authStatus = authStatus;
+        this._clientSubject = clientSubject;
+        this._userPrincipal = userPrincipal;
+        this._groups = groups == null? Collections.<String>emptyList(): Arrays.asList(groups);
+        this._authMethod = userPrincipal == null? null: authMethod;
     }
 
     public SimpleAuthResult(ServerAuthStatus authStatus) {
@@ -63,22 +63,22 @@ public class SimpleAuthResult implements ServerAuthResult {
     }
 
     public ServerAuthStatus getAuthStatus() {
-        return authStatus;
+        return _authStatus;
     }
 
     public Subject getClientSubject() {
-        return clientSubject;
+        return _clientSubject;
     }
 
     public Principal getUserPrincipal() {
-        return userPrincipal;
+        return _userPrincipal;
     }
 
     public List<String> getGroups() {
-        return groups;
+        return _groups;
     }
 
     public String getAuthMethod() {
-        return authMethod;
+        return _authMethod;
     }
 }

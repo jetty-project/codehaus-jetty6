@@ -18,9 +18,9 @@ package org.mortbay.jetty.security;
 
 public class ConstraintMapping
 {
-    String method;
-    String pathSpec;
-    Constraint constraint;
+    String _method;
+    String _pathSpec;
+    Constraint _constraint;
     
     /* ------------------------------------------------------------ */
     /**
@@ -28,7 +28,7 @@ public class ConstraintMapping
      */
     public Constraint getConstraint()
     {
-        return constraint;
+        return _constraint;
     }
     /* ------------------------------------------------------------ */
     /**
@@ -36,7 +36,7 @@ public class ConstraintMapping
      */
     public void setConstraint(Constraint constraint)
     {
-        this.constraint = constraint;
+        this._constraint = constraint;
     }
     /* ------------------------------------------------------------ */
     /**
@@ -44,7 +44,7 @@ public class ConstraintMapping
      */
     public String getMethod()
     {
-        return method;
+        return _method;
     }
     /* ------------------------------------------------------------ */
     /**
@@ -52,7 +52,7 @@ public class ConstraintMapping
      */
     public void setMethod(String method)
     {
-        this.method = method;
+        this._method = method;
     }
     /* ------------------------------------------------------------ */
     /**
@@ -60,7 +60,7 @@ public class ConstraintMapping
      */
     public String getPathSpec()
     {
-        return pathSpec;
+        return _pathSpec;
     }
     /* ------------------------------------------------------------ */
     /**
@@ -68,6 +68,6 @@ public class ConstraintMapping
      */
     public void setPathSpec(String pathSpec)
     {
-        this.pathSpec = pathSpec;
+        this._pathSpec = pathSpec;
     }
 }

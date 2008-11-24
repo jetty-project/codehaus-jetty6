@@ -39,14 +39,14 @@ import org.mortbay.jetty.security.SimpleAuthResult;
 import org.mortbay.util.B64Code;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class ClientCertServerAuthentication implements ServerAuthentication {
 
-    private final LoginService loginService;
+    private final LoginService _loginService;
 
     public ClientCertServerAuthentication(LoginService loginService) {
-        this.loginService = loginService;
+        this._loginService = loginService;
     }
 
     /**
@@ -81,7 +81,7 @@ public class ClientCertServerAuthentication implements ServerAuthentication {
 
             //TODO is cert_auth correct?
             LoginCallback loginCallback = new LoginCallback(new Subject(), username, password);
-            loginService.login(loginCallback);
+            _loginService.login(loginCallback);
             if (loginCallback.isSuccess()) {
                 return new SimpleAuthResult(ServerAuthStatus.SUCCESS, loginCallback.getSubject(), loginCallback.getUserPrincipal(), loginCallback.getGroups(), Constraint.__CERT_AUTH2);
             }

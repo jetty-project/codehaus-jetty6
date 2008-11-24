@@ -28,24 +28,24 @@ import org.mortbay.jetty.ServerAuthStatus;
 import org.mortbay.jetty.security.LazyAuthResult;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class LazyServerAuthentication implements ServerAuthentication {
 
-    private final ServerAuthentication delegate;
+    private final ServerAuthentication _delegate;
 
     public LazyServerAuthentication(ServerAuthentication delegate) {
-        this.delegate = delegate;
+        this._delegate = delegate;
     }
 
     public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException {
         if (!messageInfo.isAuthMandatory()) {
-            return new LazyAuthResult(delegate, messageInfo);
+            return new LazyAuthResult(_delegate, messageInfo);
         }
-        return delegate.validateRequest(messageInfo);
+        return _delegate.validateRequest(messageInfo);
     }
 
     public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException {
-        return delegate.secureResponse(messageInfo, validatedUser);
+        return _delegate.secureResponse(messageInfo, validatedUser);
     }
 }

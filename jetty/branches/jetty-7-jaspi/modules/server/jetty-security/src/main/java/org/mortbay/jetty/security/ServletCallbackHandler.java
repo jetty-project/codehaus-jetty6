@@ -46,13 +46,13 @@ import org.mortbay.jetty.ServerAuthException;
 public class ServletCallbackHandler implements CallbackHandler
 {
 
-    private final LoginService loginService;
-    private final ThreadLocal<CallerPrincipalCallback> callerPrincipals = new ThreadLocal<CallerPrincipalCallback>();
-    private final ThreadLocal<GroupPrincipalCallback> groupPrincipals = new ThreadLocal<GroupPrincipalCallback>();
+    private final LoginService _loginService;
+    private final ThreadLocal<CallerPrincipalCallback> _callerPrincipals = new ThreadLocal<CallerPrincipalCallback>();
+    private final ThreadLocal<GroupPrincipalCallback> _groupPrincipals = new ThreadLocal<GroupPrincipalCallback>();
 
     public ServletCallbackHandler(LoginService loginService) {
         if (loginService == null) throw new NullPointerException("No login service provided");
-        this.loginService = loginService;
+        this._loginService = loginService;
     }
 
     public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException
@@ -62,11 +62,11 @@ public class ServletCallbackHandler implements CallbackHandler
             //jaspi to server communication
             if (callback instanceof CallerPrincipalCallback)
             {
-                callerPrincipals.set((CallerPrincipalCallback) callback);
+                _callerPrincipals.set((CallerPrincipalCallback) callback);
             }
             else if (callback instanceof GroupPrincipalCallback)
             {
-                groupPrincipals.set((GroupPrincipalCallback)callback);
+                _groupPrincipals.set((GroupPrincipalCallback)callback);
             }
             else if (callback instanceof PasswordValidationCallback)
             {
@@ -76,7 +76,7 @@ public class ServletCallbackHandler implements CallbackHandler
                         passwordValidationCallback.getUsername(),
                         passwordValidationCallback.getPassword());
                 try {
-                    loginService.login(loginCallback);
+                    _loginService.login(loginCallback);
                 } catch (ServerAuthException e) {
                     throw (IOException)new IOException("Could not login").initCause(e);
                 }
@@ -106,15 +106,15 @@ public class ServletCallbackHandler implements CallbackHandler
 
     public CallerPrincipalCallback getThreadCallerPrincipalCallback()
     {
-        CallerPrincipalCallback callerPrincipalCallback = callerPrincipals.get();
-        callerPrincipals.remove();
+        CallerPrincipalCallback callerPrincipalCallback = _callerPrincipals.get();
+        _callerPrincipals.remove();
         return callerPrincipalCallback;
     }
 
     public GroupPrincipalCallback getThreadGroupPrincipalCallback()
     {
-        GroupPrincipalCallback groupPrincipalCallback = groupPrincipals.get();
-        groupPrincipals.remove();
+        GroupPrincipalCallback groupPrincipalCallback = _groupPrincipals.get();
+        _groupPrincipals.remove();
         return groupPrincipalCallback;
     }
 }

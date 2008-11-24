@@ -31,69 +31,69 @@ import java.util.HashSet;
  */
 public class RoleInfo
 {
-    private boolean unchecked;
-    private boolean forbidden;
-    private UserDataConstraint userDataConstraint;
-    private final Set<String> roles = new HashSet<String>();
+    private boolean _unchecked;
+    private boolean _forbidden;
+    private UserDataConstraint _userDataConstraint;
+    private final Set<String> _roles = new HashSet<String>();
 
     public boolean isUnchecked() {
-        return unchecked;
+        return _unchecked;
     }
 
     public void setUnchecked(boolean unchecked) {
-        if (!forbidden)
+        if (!_forbidden)
         {
             if (unchecked)
             {
-                this.unchecked = unchecked;
-                roles.clear();
+                this._unchecked = unchecked;
+                _roles.clear();
             }
         }
     }
 
     public boolean isForbidden() {
-        return forbidden;
+        return _forbidden;
     }
 
     public void setForbidden(boolean forbidden) {
         if (forbidden)
         {
-            this.forbidden = forbidden;
-            unchecked = false;
-            userDataConstraint = null;
-            roles.clear();
+            this._forbidden = forbidden;
+            _unchecked = false;
+            _userDataConstraint = null;
+            _roles.clear();
         }
     }
 
     public UserDataConstraint getUserDataConstraint() {
-        return userDataConstraint;
+        return _userDataConstraint;
     }
 
     public void setUserDataConstraint(UserDataConstraint userDataConstraint) {
         if (userDataConstraint == null) throw new NullPointerException("Null UserDataConstraint");
-        if (this.userDataConstraint == null)
+        if (this._userDataConstraint == null)
         {
-            this.userDataConstraint = userDataConstraint;
+            this._userDataConstraint = userDataConstraint;
         }
         else
         {
-            this.userDataConstraint = this.userDataConstraint.combine(userDataConstraint);
+            this._userDataConstraint = this._userDataConstraint.combine(userDataConstraint);
         }
     }
 
     public Set<String> getRoles() {
-        return roles;
+        return _roles;
     }
 
     public void combine(RoleInfo other)
     {
-        if (other.forbidden)
+        if (other._forbidden)
         {
             setForbidden(true);
         }
-        if (other.unchecked) setUnchecked(true);
-        roles.addAll(other.roles);
+        if (other._unchecked) setUnchecked(true);
+        _roles.addAll(other._roles);
 
-        setUserDataConstraint(other.userDataConstraint);
+        setUserDataConstraint(other._userDataConstraint);
     }
 }

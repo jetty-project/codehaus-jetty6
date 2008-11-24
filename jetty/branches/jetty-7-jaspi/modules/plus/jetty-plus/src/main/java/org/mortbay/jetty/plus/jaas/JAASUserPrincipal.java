@@ -16,8 +16,6 @@
 package org.mortbay.jetty.plus.jaas;
 
 import java.security.Principal;
-import java.security.acl.Group;
-import java.util.Stack;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
@@ -34,17 +32,17 @@ import javax.security.auth.login.LoginContext;
  */
 public class JAASUserPrincipal implements Principal 
 {
-    private final String name;
-    private final Subject subject;
-    private final LoginContext loginContext;
+    private final String _name;
+    private final Subject _subject;
+    private final LoginContext _loginContext;
 
     /* ------------------------------------------------ */
 
     public JAASUserPrincipal(String name, Subject subject, LoginContext loginContext)
     {
-        this.name = name;
-        this.subject = subject;
-        this.loginContext = loginContext;
+        this._name = name;
+        this._subject = subject;
+        this._loginContext = loginContext;
     }
 
     /* ------------------------------------------------ */
@@ -52,7 +50,7 @@ public class JAASUserPrincipal implements Principal
      */
     public String getName ()
     {
-        return name;
+        return _name;
     }
     
     
@@ -62,12 +60,12 @@ public class JAASUserPrincipal implements Principal
      */
     public Subject getSubject ()
     {
-        return this.subject;
+        return this._subject;
     }
     
     LoginContext getLoginContext ()
     {
-        return this.loginContext;
+        return this._loginContext;
     }
     
     public String toString()

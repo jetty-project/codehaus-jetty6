@@ -33,7 +33,7 @@ import org.mortbay.jetty.servlet.ServletHolder;
 public class ConstraintUserIdentity extends AbstractUserIdentity
 {
 
-    private ServletHolder servletHolder;
+    private ServletHolder _servletHolder;
     private RunAsToken _runAsRole;
 
     public ConstraintUserIdentity(ServerAuthResult authResult) {
@@ -80,8 +80,8 @@ public class ConstraintUserIdentity extends AbstractUserIdentity
 
     public ServletHolder setServletHolder(ServletHolder newServletHolder)
     {
-        ServletHolder oldServletHolder = servletHolder;
-        this.servletHolder = newServletHolder;
+        ServletHolder oldServletHolder = _servletHolder;
+        this._servletHolder = newServletHolder;
         return oldServletHolder;
     }
 
@@ -93,10 +93,10 @@ public class ConstraintUserIdentity extends AbstractUserIdentity
 
     public Map<String, String> getRoleRefMap()
     {
-        if (servletHolder == null)
+        if (_servletHolder == null)
         {
             return ServletHolder.NO_MAPPED_ROLES;
         }
-        return servletHolder.getRoleMap();
+        return _servletHolder.getRoleMap();
     }
 }

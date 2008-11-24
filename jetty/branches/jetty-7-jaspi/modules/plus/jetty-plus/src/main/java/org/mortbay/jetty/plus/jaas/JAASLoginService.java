@@ -56,11 +56,11 @@ public class JAASLoginService implements LoginService
     public static String DEFAULT_ROLE_CLASS_NAME = "org.mortbay.jetty.plus.jaas.JAASRole";
     public static String[] DEFAULT_ROLE_CLASS_NAMES = {DEFAULT_ROLE_CLASS_NAME};
 	
-    protected String[] roleClassNames = DEFAULT_ROLE_CLASS_NAMES;
-    protected String callbackHandlerClass;
-    protected String realmName;
-    protected String loginModuleName;
-    protected JAASUserPrincipal defaultUser = new JAASUserPrincipal(null, null, null);
+    protected String[] _roleClassNames = DEFAULT_ROLE_CLASS_NAMES;
+    protected String _callbackHandlerClass;
+    protected String _realmName;
+    protected String _loginModuleName;
+    protected JAASUserPrincipal _defaultUser = new JAASUserPrincipal(null, null, null);
     
  
 
@@ -83,8 +83,8 @@ public class JAASLoginService implements LoginService
     public JAASLoginService(String name)
     {
         this();
-        realmName = name;
-        loginModuleName = name;
+        _realmName = name;
+        _loginModuleName = name;
     }
 
 
@@ -96,7 +96,7 @@ public class JAASLoginService implements LoginService
      */
     public String getName()
     {
-        return realmName;
+        return _realmName;
     }
 
 
@@ -108,7 +108,7 @@ public class JAASLoginService implements LoginService
      */
     public void setName (String name)
     {
-        realmName = name;
+        _realmName = name;
     }
 
 
@@ -121,13 +121,13 @@ public class JAASLoginService implements LoginService
      */
     public void setLoginModuleName (String name)
     {
-        loginModuleName = name;
+        _loginModuleName = name;
     }
 
 
     public void setCallbackHandlerClass (String classname)
     {
-        callbackHandlerClass = classname;
+        _callbackHandlerClass = classname;
     }
     
     public void setRoleClassNames (String[] classnames)
@@ -139,12 +139,12 @@ public class JAASLoginService implements LoginService
          
         if (!tmp.contains(DEFAULT_ROLE_CLASS_NAME))
             tmp.add(DEFAULT_ROLE_CLASS_NAME);
-        roleClassNames = tmp.toArray(new String[tmp.size()]);
+        _roleClassNames = tmp.toArray(new String[tmp.size()]);
     }
 
     public String[] getRoleClassNames()
     {
-        return roleClassNames;
+        return _roleClassNames;
     }
 
     public void login(final LoginCallback loginCallback) throws ServerAuthException
@@ -172,7 +172,7 @@ public class JAASLoginService implements LoginService
             //set up the login context
             //TODO jaspi requires we provide the Configuration parameter
             Subject subject = loginCallback.getSubject();
-            LoginContext loginContext = new LoginContext(loginModuleName, subject, callbackHandler);
+            LoginContext loginContext = new LoginContext(_loginModuleName, subject, callbackHandler);
 
             loginContext.login();
 
