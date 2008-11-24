@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security;
 
 import org.mortbay.jetty.handler.HandlerWrapper;
@@ -28,13 +27,16 @@ import org.mortbay.jetty.ServerAuthentication;
 /**
  * @version $Rev$ $Date$
  */
-public class NoSecurityHandler extends HandlerWrapper implements SecurityHandler {
+public class NoSecurityHandler extends HandlerWrapper implements SecurityHandler
+{
 
-    public RunAsToken newRunAsToken(String runAsRole) {
+    public RunAsToken newRunAsToken(String runAsRole)
+    {
         return null;
     }
 
-    public void setServerAuthentication(ServerAuthentication serverAuthentication) {
+    public void setServerAuthentication(ServerAuthentication serverAuthentication)
+    {
     }
 
 }

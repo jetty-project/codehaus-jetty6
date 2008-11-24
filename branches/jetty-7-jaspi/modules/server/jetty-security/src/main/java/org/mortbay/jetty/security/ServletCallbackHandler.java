@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security;
 
 import java.io.IOException;
@@ -39,52 +38,60 @@ import org.mortbay.jetty.LoginCallback;
 import org.mortbay.jetty.ServerAuthException;
 
 /**
- *
- * Idiot class required by jaspi stupidity @#*($)#@&^)$@#&*$@
+ * 
+ * Idiot class required by jaspi stupidity
+ * 
+ * @#*($)#@&^)$@#&*$@
  * @version $Rev$ $Date$
  */
 public class ServletCallbackHandler implements CallbackHandler
 {
 
     private final LoginService _loginService;
+
     private final ThreadLocal<CallerPrincipalCallback> _callerPrincipals = new ThreadLocal<CallerPrincipalCallback>();
+
     private final ThreadLocal<GroupPrincipalCallback> _groupPrincipals = new ThreadLocal<GroupPrincipalCallback>();
 
-    public ServletCallbackHandler(LoginService loginService) {
+    public ServletCallbackHandler(LoginService loginService)
+    {
         if (loginService == null) throw new NullPointerException("No login service provided");
         this._loginService = loginService;
     }
 
     public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException
     {
-        for (Callback callback: callbacks)
+        for (Callback callback : callbacks)
         {
-            //jaspi to server communication
+            // jaspi to server communication
             if (callback instanceof CallerPrincipalCallback)
             {
                 _callerPrincipals.set((CallerPrincipalCallback) callback);
             }
             else if (callback instanceof GroupPrincipalCallback)
             {
-                _groupPrincipals.set((GroupPrincipalCallback)callback);
+                _groupPrincipals.set((GroupPrincipalCallback) callback);
             }
             else if (callback instanceof PasswordValidationCallback)
             {
                 PasswordValidationCallback passwordValidationCallback = (PasswordValidationCallback) callback;
                 Subject subject = passwordValidationCallback.getSubject();
-                LoginCallback loginCallback = new LoginCallback(subject,
-                        passwordValidationCallback.getUsername(),
-                        passwordValidationCallback.getPassword());
-                try {
+                LoginCallback loginCallback = new LoginCallback(subject, 
+                                                                passwordValidationCallback.getUsername(), 
+                                                                passwordValidationCallback.getPassword());
+                try
+                {
                     _loginService.login(loginCallback);
-                } catch (ServerAuthException e) {
-                    throw (IOException)new IOException("Could not login").initCause(e);
+                }
+                catch (ServerAuthException e)
+                {
+                    throw (IOException) new IOException("Could not login").initCause(e);
                 }
                 passwordValidationCallback.setResult(loginCallback.isSuccess());
                 subject.getPrivateCredentials().add(loginCallback);
             }
-            //server to jaspi communication
-            //TODO implement these
+            // server to jaspi communication
+            // TODO implement these
             else if (callback instanceof CertStoreCallback)
             {
             }

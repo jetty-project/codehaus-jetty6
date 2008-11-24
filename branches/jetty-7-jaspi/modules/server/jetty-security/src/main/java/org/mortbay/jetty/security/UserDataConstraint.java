@@ -17,16 +17,17 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
-public enum UserDataConstraint {
+public enum UserDataConstraint
+{
     None, Integral, Confidential;
 
-    public static UserDataConstraint get(int dataConstraint) {
+    public static UserDataConstraint get(int dataConstraint)
+    {
         if (dataConstraint < -1 || dataConstraint > 2) throw new IllegalArgumentException("Expected -1, 0, 1, or 2, not: " + dataConstraint);
         if (dataConstraint == -1) return None;
         return values()[dataConstraint];

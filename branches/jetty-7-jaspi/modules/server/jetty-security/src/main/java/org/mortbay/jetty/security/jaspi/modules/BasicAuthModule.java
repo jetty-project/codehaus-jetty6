@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security.jaspi.modules;
 
 import java.io.IOException;
@@ -45,6 +44,7 @@ public class BasicAuthModule extends BaseAuthModule
 {
 
     private String realmName;
+
     private static final String REALM_KEY = "org.mortbay.jetty.security.jaspi.modules.RealmName";
 
     public BasicAuthModule()
@@ -58,14 +58,18 @@ public class BasicAuthModule extends BaseAuthModule
     }
 
     @Override
-    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler, Map options) throws AuthException
+    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, 
+                           CallbackHandler handler, Map options) 
+    throws AuthException
     {
         super.initialize(requestPolicy, responsePolicy, handler, options);
         realmName = (String) options.get(REALM_KEY);
     }
 
     @Override
-    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) throws AuthException
+    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, 
+                                      Subject serviceSubject) 
+    throws AuthException
     {
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
         HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
@@ -76,16 +80,11 @@ public class BasicAuthModule extends BaseAuthModule
             if (credentials != null)
             {
                 if (Log.isDebugEnabled()) Log.debug("Credentials: " + credentials);
-                if (login(clientSubject, credentials, Constraint.__BASIC_AUTH, messageInfo)) {
-                    return AuthStatus.SUCCESS;
-                }
+                if (login(clientSubject, credentials, Constraint.__BASIC_AUTH, messageInfo)) { return AuthStatus.SUCCESS; }
 
             }
 
-            if (!isMandatory(messageInfo))
-            {
-                return AuthStatus.SUCCESS;
-            }
+            if (!isMandatory(messageInfo)) { return AuthStatus.SUCCESS; }
             response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\"" + realmName + '"');
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return AuthStatus.SEND_CONTINUE;

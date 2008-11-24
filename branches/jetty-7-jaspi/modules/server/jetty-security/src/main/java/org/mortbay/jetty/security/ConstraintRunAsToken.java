@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security;
 
 import org.mortbay.jetty.RunAsToken;
@@ -38,5 +37,5 @@ public class ConstraintRunAsToken implements RunAsToken
     {
         return _runAsRole;
     }
-    
+
 }

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security;
 
 import java.security.Principal;
@@ -28,22 +27,27 @@ import org.mortbay.jetty.UserIdentity;
 /**
  * @version $Rev$ $Date$
  */
-public abstract class AbstractUserIdentity implements UserIdentity {
+public abstract class AbstractUserIdentity implements UserIdentity
+{
     private final ServerAuthResult _authResult;
 
-    protected AbstractUserIdentity(ServerAuthResult authResult) {
+    protected AbstractUserIdentity(ServerAuthResult authResult)
+    {
         this._authResult = authResult;
     }
 
-    public Principal getUserPrincipal() {
+    public Principal getUserPrincipal()
+    {
         return _authResult.getUserPrincipal();
     }
 
-    public String getAuthMethod() {
+    public String getAuthMethod()
+    {
         return _authResult.getAuthMethod();
     }
 
-    protected ServerAuthResult getAuthResult() {
+    protected ServerAuthResult getAuthResult()
+    {
         return _authResult;
     }
 }

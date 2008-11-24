@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security;
 
 import javax.servlet.http.HttpServletRequest;

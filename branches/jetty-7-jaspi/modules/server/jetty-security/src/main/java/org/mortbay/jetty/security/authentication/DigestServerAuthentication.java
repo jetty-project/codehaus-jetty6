@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security.authentication;
 
 import java.io.IOException;
@@ -47,48 +46,57 @@ import org.mortbay.util.TypeUtil;
 /**
  * @version $Rev$ $Date$
  */
-public class DigestServerAuthentication implements ServerAuthentication {
+public class DigestServerAuthentication implements ServerAuthentication
+{
 
     private final LoginService _loginService;
+
     private final String _realmName;
+
     protected long _maxNonceAge = 0;
+
     protected long _nonceSecret = this.hashCode() ^ System.currentTimeMillis();
+
     protected boolean _useStale = false;
 
-    public DigestServerAuthentication(LoginService loginService, String realmName) {
+    public DigestServerAuthentication(LoginService loginService, String realmName)
+    {
         this._loginService = loginService;
         this._realmName = realmName;
     }
 
-    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException {
+    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException
+    {
         return ServerAuthStatus.SUCCESS;
     }
 
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException {
+    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
+    {
         HttpServletRequest request = messageInfo.getRequestMessage();
         HttpServletResponse response = messageInfo.getResponseMessage();
         String credentials = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        try {
+        try
+        {
             boolean stale = false;
-            //TODO extract from request
+            // TODO extract from request
             long timestamp = System.currentTimeMillis();
-            if (credentials != null) {
+            if (credentials != null)
+            {
                 if (Log.isDebugEnabled()) Log.debug("Credentials: " + credentials);
                 if (Log.isDebugEnabled()) Log.debug("Credentials: " + credentials);
-                QuotedStringTokenizer tokenizer = new QuotedStringTokenizer(credentials,
-                        "=, ",
-                        true,
-                        false);
+                QuotedStringTokenizer tokenizer = new QuotedStringTokenizer(credentials, "=, ", true, false);
                 final Digest digest = new Digest(request.getMethod());
                 String last = null;
                 String name = null;
 
-                while (tokenizer.hasMoreTokens()) {
+                while (tokenizer.hasMoreTokens())
+                {
                     String tok = tokenizer.nextToken();
                     char c = (tok.length() == 1) ? tok.charAt(0) : '\0';
 
-                    switch (c) {
+                    switch (c)
+                    {
                         case '=':
                             name = last;
                             last = tok;
@@ -100,7 +108,8 @@ public class DigestServerAuthentication implements ServerAuthentication {
 
                         default:
                             last = tok;
-                            if (name != null) {
+                            if (name != null)
+                            {
                                 if ("username".equalsIgnoreCase(name))
                                     digest.username = tok;
                                 else if ("realm".equalsIgnoreCase(name))
@@ -115,8 +124,7 @@ public class DigestServerAuthentication implements ServerAuthentication {
                                     digest.qop = tok;
                                 else if ("uri".equalsIgnoreCase(name))
                                     digest.uri = tok;
-                                else if ("response".equalsIgnoreCase(name))
-                                    digest.response = tok;
+                                else if ("response".equalsIgnoreCase(name)) digest.response = tok;
                                 break;
                             }
                     }
@@ -124,43 +132,46 @@ public class DigestServerAuthentication implements ServerAuthentication {
 
                 int n = checkNonce(digest.nonce, timestamp);
 
-                if (n > 0) {
+                if (n > 0)
+                {
                     LoginCallback loginCallback = new LoginCallback(new Subject(), credentials);
                     _loginService.login(loginCallback);
-                    if (loginCallback.isSuccess()) {
-                        return new SimpleAuthResult(ServerAuthStatus.SUCCESS, loginCallback.getSubject(), loginCallback.getUserPrincipal(), loginCallback.getGroups(), Constraint.__BASIC_AUTH);
-                    }
+                    if (loginCallback.isSuccess()) { return new SimpleAuthResult(ServerAuthStatus.SUCCESS, loginCallback.getSubject(), loginCallback
+                            .getUserPrincipal(), loginCallback.getGroups(), Constraint.__BASIC_AUTH); }
 
-                } else if (n == 0)
-                    stale = true;
+                }
+                else if (n == 0) stale = true;
 
             }
 
-            if (!messageInfo.isAuthMandatory()) {
-                return SimpleAuthResult.NO_AUTH_RESULTS;
-            }
+            if (!messageInfo.isAuthMandatory()) { return SimpleAuthResult.NO_AUTH_RESULTS; }
             String domain = request.getContextPath();
-            if (domain == null)
-                domain = "/";
-            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Digest realm=\"" + _realmName +
-                    "\", domain=\"" + domain +
-                    "\", nonce=\"" + newNonce(timestamp) +
-                    "\", algorithm=MD5, qop=\"auth\"" + (_useStale ? (" stale=" + stale) : ""));
+            if (domain == null) domain = "/";
+            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Digest realm=\"" + _realmName
+                                                             + "\", domain=\""
+                                                             + domain
+                                                             + "\", nonce=\""
+                                                             + newNonce(timestamp)
+                                                             + "\", algorithm=MD5, qop=\"auth\""
+                                                             + (_useStale ? (" stale=" + stale) : ""));
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return new SimpleAuthResult(ServerAuthStatus.SEND_CONTINUE, null, null, (String[]) null, null);
         }
-        catch (IOException e) {
+        catch (IOException e)
+        {
             throw new ServerAuthException(e);
         }
 
     }
 
-    public String newNonce(long ts) {
-//        long ts=request.getTimeStamp();
+    public String newNonce(long ts)
+    {
+        // long ts=request.getTimeStamp();
         long sk = _nonceSecret;
 
         byte[] nounce = new byte[24];
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 8; i++)
+        {
             nounce[i] = (byte) (ts & 0xff);
             ts = ts >> 8;
             nounce[8 + i] = (byte) (sk & 0xff);
@@ -168,20 +179,22 @@ public class DigestServerAuthentication implements ServerAuthentication {
         }
 
         byte[] hash = null;
-        try {
+        try
+        {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.reset();
             md.update(nounce, 0, 16);
             hash = md.digest();
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             Log.warn(e);
         }
 
-        for (int i = 0; i < hash.length; i++) {
+        for (int i = 0; i < hash.length; i++)
+        {
             nounce[8 + i] = hash[i];
-            if (i == 23)
-                break;
+            if (i == 23) break;
         }
 
         return new String(B64Code.encode(nounce));
@@ -193,17 +206,19 @@ public class DigestServerAuthentication implements ServerAuthentication {
      * @return -1 for a bad nonce, 0 for a stale none, 1 for a good nonce
      */
     /* ------------------------------------------------------------ */
-    private int checkNonce(String nonce, long timestamp) {
-        try {
+    private int checkNonce(String nonce, long timestamp)
+    {
+        try
+        {
             byte[] n = B64Code.decode(nonce.toCharArray());
-            if (n.length != 24)
-                return -1;
+            if (n.length != 24) return -1;
 
             long ts = 0;
             long sk = _nonceSecret;
             byte[] n2 = new byte[16];
             System.arraycopy(n, 0, n2, 0, 8);
-            for (int i = 0; i < 8; i++) {
+            for (int i = 0; i < 8; i++)
+            {
                 n2[8 + i] = (byte) (sk & 0xff);
                 sk = sk >> 8;
                 ts = (ts << 8) + (0xff & (long) n[7 - i]);
@@ -213,62 +228,76 @@ public class DigestServerAuthentication implements ServerAuthentication {
             if (Log.isDebugEnabled()) Log.debug("age=" + age);
 
             byte[] hash = null;
-            try {
+            try
+            {
                 MessageDigest md = MessageDigest.getInstance("MD5");
                 md.reset();
                 md.update(n2, 0, 16);
                 hash = md.digest();
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 Log.warn(e);
             }
 
             for (int i = 0; i < 16; i++)
-                if (n[i + 8] != hash[i])
-                    return -1;
+                if (n[i + 8] != hash[i]) return -1;
 
-            if (_maxNonceAge > 0 && (age < 0 || age > _maxNonceAge))
-                return 0; // stale
+            if (_maxNonceAge > 0 && (age < 0 || age > _maxNonceAge)) return 0; // stale
 
             return 1;
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             Log.ignore(e);
         }
         return -1;
     }
 
-    private static class Digest extends Credential {
+    private static class Digest extends Credential
+    {
         String method = null;
+
         String username = null;
+
         String realm = null;
+
         String nonce = null;
+
         String nc = null;
+
         String cnonce = null;
+
         String qop = null;
+
         String uri = null;
+
         String response = null;
 
         /* ------------------------------------------------------------ */
-        Digest(String m) {
+        Digest(String m)
+        {
             method = m;
         }
 
         /* ------------------------------------------------------------ */
-        public boolean check(Object credentials) {
-            String password = (credentials instanceof String)
-                    ? (String) credentials
-                    : credentials.toString();
+        public boolean check(Object credentials)
+        {
+            String password = (credentials instanceof String) ? (String) credentials : credentials.toString();
 
-            try {
+            try
+            {
                 MessageDigest md = MessageDigest.getInstance("MD5");
                 byte[] ha1;
-                if (credentials instanceof Credential.MD5) {
+                if (credentials instanceof Credential.MD5)
+                {
                     // Credentials are already a MD5 digest - assume it's in
                     // form user:realm:password (we have no way to know since
                     // it's a digest, alright?)
                     ha1 = ((Credential.MD5) credentials).getDigest();
-                } else {
+                }
+                else
+                {
                     // calc A1 digest
                     md.update(username.getBytes(StringUtil.__ISO_8859_1));
                     md.update((byte) ':');
@@ -285,9 +314,11 @@ public class DigestServerAuthentication implements ServerAuthentication {
                 byte[] ha2 = md.digest();
 
                 // calc digest
-                // request-digest  = <"> < KD ( H(A1), unq(nonce-value) ":" nc-value ":" unq(cnonce-value) ":" unq(qop-value) ":" H(A2) ) <">
-                // request-digest  = <"> < KD ( H(A1), unq(nonce-value) ":" H(A2) ) > <">
-
+                // request-digest = <"> < KD ( H(A1), unq(nonce-value) ":"
+                // nc-value ":" unq(cnonce-value) ":" unq(qop-value) ":" H(A2) )
+                // <">
+                // request-digest = <"> < KD ( H(A1), unq(nonce-value) ":" H(A2)
+                // ) > <">
 
                 md.update(TypeUtil.toString(ha1, 16).getBytes(StringUtil.__ISO_8859_1));
                 md.update((byte) ':');
@@ -305,17 +336,17 @@ public class DigestServerAuthentication implements ServerAuthentication {
                 // check digest
                 return (TypeUtil.toString(digest, 16).equalsIgnoreCase(response));
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 Log.warn(e);
             }
 
             return false;
         }
 
-        public String toString() {
+        public String toString()
+        {
             return username + "," + response;
         }
-
     }
-
 }

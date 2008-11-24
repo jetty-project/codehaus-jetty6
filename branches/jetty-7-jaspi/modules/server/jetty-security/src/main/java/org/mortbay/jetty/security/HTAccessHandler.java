@@ -54,7 +54,7 @@ import org.mortbay.util.URIUtil;
 /* ------------------------------------------------------------ */
 /**
  * Handler to authenticate access using the Apache's .htaccess files.
- *
+ * 
  * @author Van den Broeke Iris
  * @author Deville Daniel
  * @author Dubois Roger
@@ -68,179 +68,108 @@ public class HTAccessHandler extends AbstractSecurityHandler
     private Handler _protegee;
 
     String _default = null;
+
     String _accessFile = ".htaccess";
 
     private final HashMap<Resource, HTAccess> _htCache = new HashMap<Resource, HTAccess>();
 
-
     /* ------------------------------------------------------------ */
     /**
      * {@inheritDoc}
-     *
+     * 
      * @see org.mortbay.jetty.Handler#handle(java.lang.String,
      *      javax.servlet.http.HttpServletRequest,
      *      javax.servlet.http.HttpServletResponse, int)
      * @param authResult
      */
     /*
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
-    {
-        Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
-        Response base_response=(response instanceof Response)?(Response)response:HttpConnection.getCurrentConnection().getResponse();
-
-        String pathInContext=target;
-
-        String user=null;
-        String password=null;
-        boolean IPValid=true;
-
-        if (log.isDebugEnabled())
-            log.debug("HTAccessHandler pathInContext="+pathInContext,null,null);
-
-        String credentials=request.getHeader(HttpHeaders.AUTHORIZATION);
-
-        if (credentials!=null)
-        {
-            credentials=credentials.substring(credentials.indexOf(' ')+1);
-            credentials=B64Code.decode(credentials,StringUtil.__ISO_8859_1);
-            int i=credentials.indexOf(':');
-            user=credentials.substring(0,i);
-            password=credentials.substring(i+1);
-
-            if (log.isDebugEnabled())
-                log.debug("User="+user+", password="+"******************************".substring(0,password.length()),null,null);
-        }
-
-        HTAccess ht=null;
-
-        try
-        {
-            Resource resource=null;
-            String directory=pathInContext.endsWith("/")?pathInContext:URIUtil.parentPath(pathInContext);
-
-            // Look for htAccess resource
-            while (directory!=null)
-            {
-                String htPath=directory+_accessFile;
-                resource=((ContextHandler)getProtegee()).getResource(htPath);
-                if (log.isDebugEnabled())
-                    log.debug("directory="+directory+" resource="+resource,null,null);
-
-                if (resource!=null&&resource.exists()&&!resource.isDirectory())
-                    break;
-                resource=null;
-                directory=URIUtil.parentPath(directory);
-            }
-
-            boolean haveHtAccess=true;
-
-            // Try default directory
-            if (resource==null&&_default!=null)
-            {
-                resource=Resource.newResource(_default);
-                if (!resource.exists()||resource.isDirectory())
-                    haveHtAccess=false;
-            }
-            if (resource==null)
-                haveHtAccess=false;
-
-//            // prevent access to htaccess files
-//            if (pathInContext.endsWith(_accessFile)
-//                // extra security
-//                ||pathInContext.endsWith(_accessFile+"~")||pathInContext.endsWith(_accessFile+".bak"))
-//            {
-//                response.sendError(HttpServletResponse.SC_FORBIDDEN);
-//                base_request.setHandled(true);
-//                return;
-//            }
-
-            if (haveHtAccess)
-            {
-                if (log.isDebugEnabled())
-                    log.debug("HTACCESS="+resource,null,null);
-
-                ht= _htCache.get(resource);
-                if (ht==null||ht.getLastModified()!=resource.lastModified())
-                {
-                    ht=new HTAccess(resource);
-                    _htCache.put(resource,ht);
-                    if (log.isDebugEnabled())
-                        log.debug("HTCache loaded "+ht,null,null);
-                }
-
-                // See if there is a config problem
-                if (ht.isForbidden())
-                {
-                    log.warn("Mis-configured htaccess: "+ht,null,null);
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                    base_request.setHandled(true);
-                    return;
-                }
-
-                // first see if we need to handle based on method type
-                Map methods=ht.getMethods();
-                if (methods.size()>0&&!methods.containsKey(request.getMethod()))
-                    return; // Nothing to check
-
-                // Check the accesss
-                int satisfy=ht.getSatisfy();
-
-                // second check IP address
-                IPValid=ht.checkAccess("",request.getRemoteAddr());
-                if (log.isDebugEnabled())
-                    log.debug("IPValid = "+IPValid,null,null);
-
-                // If IP is correct and satify is ANY then access is allowed
-                if (IPValid==true&&satisfy==HTAccess.ANY)
-                    return;
-
-                // If IP is NOT correct and satify is ALL then access is
-                // forbidden
-                if (IPValid==false&&satisfy==HTAccess.ALL)
-                {
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                    base_request.setHandled(true);
-                    return;
-                }
-
-                // set required page
-                UserRealm userRealm = null;//super.getUserRealm();
-                if (!ht.checkAuth(user,password,userRealm,base_request))
-                {
-                    log.debug("Auth Failed",null,null);
-                    response.setHeader(HttpHeaders.WWW_AUTHENTICATE,"basic realm="+ht.getName());
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                    base_response.complete();
-                    base_request.setHandled(true);
-                    return;
-                }
-
-                // set user
-                if (user!=null)
-                {
-                    base_request.setAuthType(Constraint.__BASIC_AUTH);
-                    //todo use an auth plugin
-//                    base_request.setUserPrincipal(getPrincipal(user, getUserRealm()));
-                }
-            }
-            
-            if (getHandler()!=null)
-            {
-                getHandler().handle(target,request,response,dispatch);
-            }
-
-        }
-        catch (Exception ex)
-        {
-            log.warn("Exception",ex);
-            if (ht!=null)
-            {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                base_request.setHandled(true);
-            }
-        }
-    }
-*/
+     * public void handle(String target, HttpServletRequest request,
+     * HttpServletResponse response, int dispatch) throws IOException,
+     * ServletException { Request base_request=(request instanceof
+     * Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
+     * Response base_response=(response instanceof
+     * Response)?(Response)response:HttpConnection.getCurrentConnection().getResponse();
+     * 
+     * String pathInContext=target;
+     * 
+     * String user=null; String password=null; boolean IPValid=true;
+     * 
+     * if (log.isDebugEnabled()) log.debug("HTAccessHandler
+     * pathInContext="+pathInContext,null,null);
+     * 
+     * String credentials=request.getHeader(HttpHeaders.AUTHORIZATION);
+     * 
+     * if (credentials!=null) {
+     * credentials=credentials.substring(credentials.indexOf(' ')+1);
+     * credentials=B64Code.decode(credentials,StringUtil.__ISO_8859_1); int
+     * i=credentials.indexOf(':'); user=credentials.substring(0,i);
+     * password=credentials.substring(i+1);
+     * 
+     * if (log.isDebugEnabled()) log.debug("User="+user+",
+     * password="+"******************************".substring(0,password.length()),null,null); }
+     * 
+     * HTAccess ht=null;
+     * 
+     * try { Resource resource=null; String
+     * directory=pathInContext.endsWith("/")?pathInContext:URIUtil.parentPath(pathInContext); //
+     * Look for htAccess resource while (directory!=null) { String
+     * htPath=directory+_accessFile;
+     * resource=((ContextHandler)getProtegee()).getResource(htPath); if
+     * (log.isDebugEnabled()) log.debug("directory="+directory+"
+     * resource="+resource,null,null);
+     * 
+     * if (resource!=null&&resource.exists()&&!resource.isDirectory()) break;
+     * resource=null; directory=URIUtil.parentPath(directory); }
+     * 
+     * boolean haveHtAccess=true; // Try default directory if
+     * (resource==null&&_default!=null) {
+     * resource=Resource.newResource(_default); if
+     * (!resource.exists()||resource.isDirectory()) haveHtAccess=false; } if
+     * (resource==null) haveHtAccess=false; // // prevent access to htaccess
+     * files // if (pathInContext.endsWith(_accessFile) // // extra security //
+     * ||pathInContext.endsWith(_accessFile+"~")||pathInContext.endsWith(_accessFile+".bak")) // { //
+     * response.sendError(HttpServletResponse.SC_FORBIDDEN); //
+     * base_request.setHandled(true); // return; // }
+     * 
+     * if (haveHtAccess) { if (log.isDebugEnabled())
+     * log.debug("HTACCESS="+resource,null,null);
+     * 
+     * ht= _htCache.get(resource); if
+     * (ht==null||ht.getLastModified()!=resource.lastModified()) { ht=new
+     * HTAccess(resource); _htCache.put(resource,ht); if (log.isDebugEnabled())
+     * log.debug("HTCache loaded "+ht,null,null); } // See if there is a config
+     * problem if (ht.isForbidden()) { log.warn("Mis-configured htaccess:
+     * "+ht,null,null); response.sendError(HttpServletResponse.SC_FORBIDDEN);
+     * base_request.setHandled(true); return; } // first see if we need to
+     * handle based on method type Map methods=ht.getMethods(); if
+     * (methods.size()>0&&!methods.containsKey(request.getMethod())) return; //
+     * Nothing to check // Check the accesss int satisfy=ht.getSatisfy(); //
+     * second check IP address
+     * IPValid=ht.checkAccess("",request.getRemoteAddr()); if
+     * (log.isDebugEnabled()) log.debug("IPValid = "+IPValid,null,null); // If
+     * IP is correct and satify is ANY then access is allowed if
+     * (IPValid==true&&satisfy==HTAccess.ANY) return; // If IP is NOT correct
+     * and satify is ALL then access is // forbidden if
+     * (IPValid==false&&satisfy==HTAccess.ALL) {
+     * response.sendError(HttpServletResponse.SC_FORBIDDEN);
+     * base_request.setHandled(true); return; } // set required page UserRealm
+     * userRealm = null;//super.getUserRealm(); if
+     * (!ht.checkAuth(user,password,userRealm,base_request)) { log.debug("Auth
+     * Failed",null,null);
+     * response.setHeader(HttpHeaders.WWW_AUTHENTICATE,"basic
+     * realm="+ht.getName());
+     * response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+     * base_response.complete(); base_request.setHandled(true); return; } // set
+     * user if (user!=null) { base_request.setAuthType(Constraint.__BASIC_AUTH);
+     * //todo use an auth plugin //
+     * base_request.setUserPrincipal(getPrincipal(user, getUserRealm())); } }
+     * 
+     * if (getHandler()!=null) {
+     * getHandler().handle(target,request,response,dispatch); } } catch
+     * (Exception ex) { log.warn("Exception",ex); if (ht!=null) {
+     * response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+     * base_request.setHandled(true); } } }
+     */
     protected UserIdentity newUserIdentity(ServerAuthResult authResult)
     {
         return new ConstraintUserIdentity(authResult);
@@ -270,11 +199,9 @@ public class HTAccessHandler extends AbstractSecurityHandler
             {
                 String htPath = directory + _accessFile;
                 resource = ((ContextHandler) getProtegee()).getResource(htPath);
-                if (log.isDebugEnabled())
-                    log.debug("directory=" + directory + " resource=" + resource, null, null);
+                if (log.isDebugEnabled()) log.debug("directory=" + directory + " resource=" + resource, null, null);
 
-                if (resource != null && resource.exists() && !resource.isDirectory())
-                    break;
+                if (resource != null && resource.exists() && !resource.isDirectory()) break;
                 resource = null;
                 directory = URIUtil.parentPath(directory);
             }
@@ -285,52 +212,44 @@ public class HTAccessHandler extends AbstractSecurityHandler
             if (resource == null && _default != null)
             {
                 resource = Resource.newResource(_default);
-                if (!resource.exists() || resource.isDirectory())
-                    haveHtAccess = false;
+                if (!resource.exists() || resource.isDirectory()) haveHtAccess = false;
             }
-            if (resource == null)
-                haveHtAccess = false;
+            if (resource == null) haveHtAccess = false;
 
             if (haveHtAccess)
             {
-                if (log.isDebugEnabled())
-                    log.debug("HTACCESS=" + resource, null, null);
+                if (log.isDebugEnabled()) log.debug("HTACCESS=" + resource, null, null);
 
                 ht = _htCache.get(resource);
                 if (ht == null || ht.getLastModified() != resource.lastModified())
                 {
                     ht = new HTAccess(resource);
                     _htCache.put(resource, ht);
-                    if (log.isDebugEnabled())
-                        log.debug("HTCache loaded " + ht, null, null);
+                    if (log.isDebugEnabled()) log.debug("HTCache loaded " + ht, null, null);
                 }
                 return ht;
             }
         }
         catch (MalformedURLException e)
         {
-           //ignore
+            // ignore
         }
         catch (IOException e)
         {
-            //ignore
+            // ignore
         }
         return null;
     }
 
-    protected boolean checkUserDataPermissions(String pathInContext, Request request, Response response, Object constraintInfo) throws IOException
+    protected boolean checkUserDataPermissions(String pathInContext, Request request, 
+                                               Response response, Object constraintInfo) throws IOException
     {
         // prevent access to htaccess files
         if (pathInContext.endsWith(_accessFile)
-                // extra security
-                || pathInContext.endsWith(_accessFile + "~") || pathInContext.endsWith(_accessFile + ".bak"))
-        {
-            return false;
-        }
-        if (constraintInfo == null)
-        {
-            return true;
-        }
+        // extra security
+            || pathInContext.endsWith(_accessFile + "~")
+            || pathInContext.endsWith(_accessFile + ".bak")) { return false; }
+        if (constraintInfo == null) { return true; }
         HTAccess ht = (HTAccess) constraintInfo;
         // See if there is a config problem
         if (ht.isForbidden())
@@ -341,49 +260,46 @@ public class HTAccessHandler extends AbstractSecurityHandler
 
         // first see if we need to handle based on method type
         Map methods = ht.getMethods();
-        if (methods.size() > 0 && !methods.containsKey(request.getMethod()))
-            return true; // Nothing to check
+        if (methods.size() > 0 && !methods.containsKey(request.getMethod())) return true; // Nothing
+                                                                                            // to
+                                                                                            // check
 
         // Check the accesss
         int satisfy = ht.getSatisfy();
 
         // second check IP address
         boolean IPValid = ht.checkAccess("", request.getRemoteAddr());
-        if (log.isDebugEnabled())
-            log.debug("IPValid = " + IPValid, null, null);
+        if (log.isDebugEnabled()) log.debug("IPValid = " + IPValid, null, null);
 
         // If IP is correct and satify is ANY then access is allowed
-        if (IPValid && satisfy == HTAccess.ANY)
-            return true;
+        if (IPValid && satisfy == HTAccess.ANY) return true;
 
         // If IP is NOT correct and satify is ALL then access is
         // forbidden
-        if (!IPValid == false && satisfy == HTAccess.ALL)
-        {
-            return false;
-        }
+        if (!IPValid == false && satisfy == HTAccess.ALL) { return false; }
 
         return true;
     }
 
     protected boolean isAuthMandatory(Request base_request, Response base_response, Object constraintInfo)
     {
-        return ((HTAccess)constraintInfo)._requireName != null;
+        return ((HTAccess) constraintInfo)._requireName != null;
     }
 
-    protected boolean checkWebResourcePermissions(String pathInContext, Request request, Response response, Object constraintInfo, UserIdentity userIdentity) throws IOException
+    protected boolean checkWebResourcePermissions(String pathInContext, Request request, 
+                                                  Response response, Object constraintInfo, UserIdentity userIdentity) throws IOException
     {
         return true;
     }
 
     /* ------------------------------------------------------------ */
     /**
-     * set functions for the following .xml administration statements.
-     * <p/>
+     * set functions for the following .xml administration statements. <p/>
      * <Call name="addHandler"> <Arg> <New
      * class="org.mortbay.http.handler.HTAccessHandler"> <Set
      * name="Default">./etc/htaccess</Set> <Set name="AccessFile">.htaccess</Set>
      * </New> </Arg> </Call>
+     * 
      * @param dir default directory for htaccess files
      */
     public void setDefault(String dir)
@@ -407,33 +323,53 @@ public class HTAccessHandler extends AbstractSecurityHandler
     {
         // private boolean _debug = false;
         static final int ANY = 0;
+
         static final int ALL = 1;
+
         static final String USER = "user";
+
         static final String GROUP = "group";
+
         static final String VALID_USER = "valid-user";
 
         /* ------------------------------------------------------------ */
         String _userFile;
+
         Resource _userResource;
+
         HashMap<String, String> _users = null;
+
         long _userModified;
 
         /* ------------------------------------------------------------ */
         String _groupFile;
+
         Resource _groupResource;
+
         HashMap<String, ArrayList<String>> _groups = null;
+
         long _groupModified;
 
         int _satisfy = 0;
+
         String _type;
+
         String _name;
+
         HashMap<String, Boolean> _methods = new HashMap<String, Boolean>();
+
         HashSet<String> _requireEntities = new HashSet<String>();
+
         String _requireName;
+
         int _order;
+
         ArrayList<String> _allowList = new ArrayList<String>();
+
         ArrayList<String> _denyList = new ArrayList<String>();
+
         long _lastModified;
+
         boolean _forbidden = false;
 
         /* ------------------------------------------------------------ */
@@ -454,8 +390,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
                         _forbidden = true;
                         log.warn("Could not find ht user file: " + _userFile, null, null);
                     }
-                    else if (log.isDebugEnabled())
-                        log.debug("user file: " + _userResource, null, null);
+                    else if (log.isDebugEnabled()) log.debug("user file: " + _userResource, null, null);
                 }
 
                 if (_groupFile != null)
@@ -466,8 +401,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
                         _forbidden = true;
                         log.warn("Could not find ht group file: " + _groupResource, null, null);
                     }
-                    else if (log.isDebugEnabled())
-                        log.debug("group file: " + _groupResource, null, null);
+                    else if (log.isDebugEnabled()) log.debug("group file: " + _groupResource, null, null);
                 }
             }
             catch (IOException e)
@@ -532,8 +466,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
             boolean dep = false;
 
             // if no allows and no deny defined, then return true
-            if (_allowList.size() == 0 && _denyList.size() == 0)
-                return (true);
+            if (_allowList.size() == 0 && _denyList.size() == 0) return (true);
 
             // looping for allows
             for (String elm : _allowList)
@@ -613,21 +546,17 @@ public class HTAccessHandler extends AbstractSecurityHandler
             String code = getUserCode(user);
             String salt = code != null ? code.substring(0, 2) : user;
             String cred = (user != null) ? UnixCrypt.crypt(pass, salt) : null;
-            if (code == null || (code.equals("") && !pass.equals("")) || !code.equals(cred))
-                success = false;
+            if (code == null || (code.equals("") && !pass.equals("")) || !code.equals(cred)) success = false;
 
             if (_requireName.equalsIgnoreCase(USER))
             {
-                if (_requireEntities.contains(user))
-                    success = true;
+                if (_requireEntities.contains(user)) success = true;
             }
             ArrayList<String> gps = getUserGroups(user);
-            if (success == null  && _requireName.equalsIgnoreCase(GROUP))
+            if (success == null && _requireName.equalsIgnoreCase(GROUP))
             {
-                if (gps != null)
-                    for (int g = gps.size(); g-- > 0;)
-                        if (_requireEntities.contains(gps.get(g)))
-                            success = true;
+                if (gps != null) for (int g = gps.size(); g-- > 0;)
+                    if (_requireEntities.contains(gps.get(g))) success = true;
             }
             else if (success == null && _requireName.equalsIgnoreCase(VALID_USER))
             {
@@ -660,13 +589,11 @@ public class HTAccessHandler extends AbstractSecurityHandler
         /* ------------------------------------------------------------ */
         private String getUserCode(String user)
         {
-            if (_userResource == null)
-                return null;
+            if (_userResource == null) return null;
 
             if (_users == null || _userModified != _userResource.lastModified())
             {
-                if (log.isDebugEnabled())
-                    log.debug("LOAD " + _userResource, null, null);
+                if (log.isDebugEnabled()) log.debug("LOAD " + _userResource, null, null);
                 _users = new HashMap<String, String>();
                 BufferedReader ufin = null;
                 try
@@ -677,11 +604,9 @@ public class HTAccessHandler extends AbstractSecurityHandler
                     while ((line = ufin.readLine()) != null)
                     {
                         line = line.trim();
-                        if (line.startsWith("#"))
-                            continue;
+                        if (line.startsWith("#")) continue;
                         int spos = line.indexOf(':');
-                        if (spos < 0)
-                            continue;
+                        if (spos < 0) continue;
                         String u = line.substring(0, spos).trim();
                         String p = line.substring(spos + 1).trim();
                         _users.put(u, p);
@@ -695,8 +620,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
                 {
                     try
                     {
-                        if (ufin != null)
-                            ufin.close();
+                        if (ufin != null) ufin.close();
                     }
                     catch (IOException e2)
                     {
@@ -711,13 +635,11 @@ public class HTAccessHandler extends AbstractSecurityHandler
         /* ------------------------------------------------------------ */
         private ArrayList<String> getUserGroups(String group)
         {
-            if (_groupResource == null)
-                return null;
+            if (_groupResource == null) return null;
 
             if (_groups == null || _groupModified != _groupResource.lastModified())
             {
-                if (log.isDebugEnabled())
-                    log.debug("LOAD " + _groupResource, null, null);
+                if (log.isDebugEnabled()) log.debug("LOAD " + _groupResource, null, null);
 
                 _groups = new HashMap<String, ArrayList<String>>();
                 BufferedReader ufin = null;
@@ -729,16 +651,13 @@ public class HTAccessHandler extends AbstractSecurityHandler
                     while ((line = ufin.readLine()) != null)
                     {
                         line = line.trim();
-                        if (line.startsWith("#") || line.length() == 0)
-                            continue;
+                        if (line.startsWith("#") || line.length() == 0) continue;
 
                         StringTokenizer tok = new StringTokenizer(line, ": \t");
 
-                        if (!tok.hasMoreTokens())
-                            continue;
+                        if (!tok.hasMoreTokens()) continue;
                         String g = tok.nextToken();
-                        if (!tok.hasMoreTokens())
-                            continue;
+                        if (!tok.hasMoreTokens()) continue;
                         while (tok.hasMoreTokens())
                         {
                             String u = tok.nextToken();
@@ -760,8 +679,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
                 {
                     try
                     {
-                        if (ufin != null)
-                            ufin.close();
+                        if (ufin != null) ufin.close();
                     }
                     catch (IOException e2)
                     {
@@ -841,8 +759,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
                     int endp = line.indexOf('>');
                     StringTokenizer tkns;
 
-                    if (endp < 0)
-                        endp = limit;
+                    if (endp < 0) endp = limit;
                     tkns = new StringTokenizer(line.substring(6, endp));
                     while (tkns.hasMoreTokens())
                     {
@@ -866,8 +783,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
                             String l_string = line.substring(pos1, pos2);
                             if (l_string.equals("all"))
                                 _satisfy = 1;
-                            else if (l_string.equals("any"))
-                                _satisfy = 0;
+                            else if (l_string.equals("any")) _satisfy = 0;
                         }
                         else if (line.startsWith("require"))
                         {
@@ -883,8 +799,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
                                 _requireName = USER;
                             else if (GROUP.equals(_requireName))
                                 _requireName = GROUP;
-                            else if (VALID_USER.equals(_requireName))
-                                _requireName = VALID_USER;
+                            else if (VALID_USER.equals(_requireName)) _requireName = VALID_USER;
 
                             pos1 = pos2 + 1;
                             if (pos1 < limit)
@@ -902,8 +817,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
                         }
                         else if (line.startsWith("order"))
                         {
-                            if (log.isDebugEnabled())
-                                log.debug("orderline=" + line + "order=" + _order, null, null);
+                            if (log.isDebugEnabled()) log.debug("orderline=" + line + "order=" + _order, null, null);
                             if (line.indexOf("allow,deny") > 0)
                             {
                                 log.debug("==>allow+deny", null, null);
@@ -929,8 +843,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
                             limit = line.length();
                             while ((pos1 < limit) && (line.charAt(pos1) <= ' '))
                                 pos1++;
-                            if (log.isDebugEnabled())
-                                log.debug("allow process:" + line.substring(pos1), null, null);
+                            if (log.isDebugEnabled()) log.debug("allow process:" + line.substring(pos1), null, null);
                             tkns = new StringTokenizer(line.substring(pos1));
                             while (tkns.hasMoreTokens())
                             {
@@ -943,8 +856,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
                             limit = line.length();
                             while ((pos1 < limit) && (line.charAt(pos1) <= ' '))
                                 pos1++;
-                            if (log.isDebugEnabled())
-                                log.debug("deny process:" + line.substring(pos1), null, null);
+                            if (log.isDebugEnabled()) log.debug("deny process:" + line.substring(pos1), null, null);
 
                             tkns = new StringTokenizer(line.substring(pos1));
                             while (tkns.hasMoreTokens())
@@ -952,8 +864,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
                                 _denyList.add(tkns.nextToken());
                             }
                         }
-                        else if (line.startsWith("</Limit>"))
-                            break;
+                        else if (line.startsWith("</Limit>")) break;
                     }
                 }
             }
@@ -963,6 +874,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
         {
 
             private final String name;
+
             public HTAccessPrincipal(String user)
             {
                 name = user;
@@ -975,10 +887,11 @@ public class HTAccessHandler extends AbstractSecurityHandler
         }
     }
 
-    //TODO move to jaspi.modules package and configure something to set it up.
+    // TODO move to jaspi.modules package and configure something to set it up.
     public static class HTServerAuthModule extends BaseAuthModule implements ServerAuthModule, ServerAuthContext
     {
         private static final String HT_ACCESS_KEY = "org.mortbay.jetty.security.HTAccess";
+
         private final CallbackHandler callbackHandler;
 
         public HTServerAuthModule(CallbackHandler callbackHandler)
@@ -998,14 +911,10 @@ public class HTAccessHandler extends AbstractSecurityHandler
         public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) throws AuthException
         {
             HTAccess ht = (HTAccess) messageInfo.getMap().get(HT_ACCESS_KEY);
-            if (ht == null)
-            {
-                return isMandatory(messageInfo) ? AuthStatus.SEND_FAILURE : AuthStatus.SUCCESS;
-            }
+            if (ht == null) { return isMandatory(messageInfo) ? AuthStatus.SEND_FAILURE : AuthStatus.SUCCESS; }
             HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
             HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
             String credentials = request.getHeader(HttpHeaders.AUTHORIZATION);
-
 
             try
             {
@@ -1016,18 +925,16 @@ public class HTAccessHandler extends AbstractSecurityHandler
                     if (loginCallback.isSuccess())
                     {
                         CallerPrincipalCallback callerPrincipalCallback = new CallerPrincipalCallback(clientSubject, loginCallback.getUserPrincipal());
-                        GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject,  loginCallback.getGroups().toArray(new String[loginCallback.getGroups().size()]));
-                        callbackHandler.handle(new Callback[] {callerPrincipalCallback, groupPrincipalCallback});
+                        GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject, loginCallback.getGroups()
+                                .toArray(new String[loginCallback.getGroups().size()]));
+                        callbackHandler.handle(new Callback[] { callerPrincipalCallback, groupPrincipalCallback });
                         messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__BASIC_AUTH);
                         return AuthStatus.SUCCESS;
 
                     }
                 }
-                if (!isMandatory(messageInfo))
-                {
-                    return AuthStatus.SUCCESS;
-                }
-                //TODO what is realm name?
+                if (!isMandatory(messageInfo)) { return AuthStatus.SUCCESS; }
+                // TODO what is realm name?
                 response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\"htaccess\"");
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return AuthStatus.SEND_CONTINUE;
@@ -1050,7 +957,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
 
     /**
      * Getter for property protegee.
-     *
+     * 
      * @return Returns the protegee.
      */
     protected Handler getProtegee()
@@ -1060,7 +967,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
 
     /**
      * Setter for property protegee.
-     *
+     * 
      * @param protegee The protegee to set.
      */
     public void setProtegee(Handler protegee)

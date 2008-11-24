@@ -28,18 +28,21 @@ import org.mortbay.jetty.UserIdentity;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.util.StringMap;
 
-
 /* ------------------------------------------------------------ */
-/** Handler to enforce SecurityConstraints.
- * This implementation is servlet spec 2.4 compliant and precomputes the constraint combinations for runtime efficiency.
- *
+/**
+ * Handler to enforce SecurityConstraints. This implementation is servlet spec
+ * 2.4 compliant and precomputes the constraint combinations for runtime
+ * efficiency.
+ * 
  * @author Greg Wilkins (gregw)
  */
-public class ConstraintSecurityHandler extends AbstractSecurityHandler implements ConstraintAware {
+public class ConstraintSecurityHandler extends AbstractSecurityHandler implements ConstraintAware
+{
     private ConstraintMapping[] _constraintMappings;
-    private Set<String> _roles;
-    private PathMap _constraintMap=new PathMap();
 
+    private Set<String> _roles;
+
+    private PathMap _constraintMap = new PathMap();
 
     /* ------------------------------------------------------------ */
     /**
@@ -50,29 +53,31 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler implement
         return _constraintMappings;
     }
 
-    public Set<String> getRoles() {
+    public Set<String> getRoles()
+    {
         return _roles;
     }
 
     /* ------------------------------------------------------------ */
     /**
-     * Process the constraints following the combining rules in Servlet 3.0 EA spec section 13.7.1
-     * Note that much of the logic is in the RoleInfo class.
-     *
+     * Process the constraints following the combining rules in Servlet 3.0 EA
+     * spec section 13.7.1 Note that much of the logic is in the RoleInfo class.
+     * 
      * @param constraintMappings The contraintMappings to set.
      * @param roles
      */
     public void setConstraintMappings(ConstraintMapping[] constraintMappings, Set<String> roles)
     {
-        _constraintMappings=constraintMappings;
+        _constraintMappings = constraintMappings;
         this._roles = roles;
 
-        if (_constraintMappings!=null)
+        if (_constraintMappings != null)
         {
             this._constraintMappings = constraintMappings;
             _constraintMap.clear();
 
-            for (ConstraintMapping _constraintMapping : _constraintMappings) {
+            for (ConstraintMapping _constraintMapping : _constraintMappings)
+            {
                 Map<String, RoleInfo> mappings = (Map<String, RoleInfo>) _constraintMap.get(_constraintMapping.getPathSpec());
                 if (mappings == null)
                 {
@@ -95,7 +100,8 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler implement
                         roleInfo.combine(allMethodsRoleInfo);
                     }
                 }
-                if (roleInfo.isForbidden()) {
+                if (roleInfo.isForbidden())
+                {
                     continue;
                 }
                 Constraint constraint = _constraintMapping.getConstraint();
@@ -118,23 +124,27 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler implement
                     roleInfo.setUnchecked(unchecked);
                     if (!roleInfo.isUnchecked())
                     {
-                        if (constraint.isAnyRole()) {
+                        if (constraint.isAnyRole())
+                        {
                             roleInfo.getRoles().addAll(roles);
-                        } else
+                        }
+                        else
                         {
                             String[] newRoles = constraint.getRoles();
-                            for (String role: newRoles)
+                            for (String role : newRoles)
                             {
-                                if (!roles.contains(role)) throw new IllegalArgumentException("Attempt to use undeclared role: " + role + ", known roles: " + roles);
+                                if (!roles.contains(role))
+                                    throw new IllegalArgumentException("Attempt to use undeclared role: " + role + ", known roles: " + roles);
                                 roleInfo.getRoles().add(role);
                             }
                         }
                     }
                     if (httpMethod == null)
                     {
-                        for (Map.Entry<String, RoleInfo> entry: mappings.entrySet())
+                        for (Map.Entry<String, RoleInfo> entry : mappings.entrySet())
                         {
-                            if (entry.getKey() != null) {
+                            if (entry.getKey() != null)
+                            {
                                 RoleInfo specific = entry.getValue();
                                 specific.combine(roleInfo);
                             }
@@ -161,63 +171,41 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler implement
         return new ConstraintRunAsToken(runAsRole);
     }
 
-    protected Object prepareConstraintInfo(
-            String pathInContext,
-            Request request)
+    protected Object prepareConstraintInfo(String pathInContext, Request request)
     {
-        Map<String, RoleInfo> mappings= (Map<String, RoleInfo>) _constraintMap.match(pathInContext);
+        Map<String, RoleInfo> mappings = (Map<String, RoleInfo>) _constraintMap.match(pathInContext);
 
-        if (mappings!=null)
+        if (mappings != null)
         {
             String httpMethod = request.getMethod();
             RoleInfo roleInfo = mappings.get(httpMethod);
             if (roleInfo == null)
             {
                 roleInfo = mappings.get(null);
-                if (roleInfo != null)
-                {
-                    return roleInfo;
-                }
+                if (roleInfo != null) { return roleInfo; }
             }
         }
         return null;
     }
 
-
-    protected boolean checkUserDataPermissions(String pathInContext, Request request, Response response, Object constraintInfo) throws IOException
+    protected boolean checkUserDataPermissions(String pathInContext, Request request, 
+                                               Response response, Object constraintInfo) throws IOException
     {
-        if (constraintInfo == null)
-        {
-            return true;
-        }
+        if (constraintInfo == null) { return true; }
         RoleInfo roleInfo = (RoleInfo) constraintInfo;
-        if (roleInfo.isForbidden())
-        {
-            return false;
-        }
+        if (roleInfo.isForbidden()) { return false; }
         UserDataConstraint dataConstraint = roleInfo.getUserDataConstraint();
-        if (dataConstraint == null || dataConstraint == UserDataConstraint.None)
-        {
-            return true;
-        }
+        if (dataConstraint == null || dataConstraint == UserDataConstraint.None) { return true; }
         HttpConnection connection = HttpConnection.getCurrentConnection();
         Connector connector = connection.getConnector();
 
         if (dataConstraint == UserDataConstraint.Integral)
         {
-            if (connector.isIntegral(request))
-                return true;
+            if (connector.isIntegral(request)) return true;
             if (connector.getConfidentialPort() > 0)
             {
-                String url =
-                        connector.getIntegralScheme()
-                                + "://"
-                                + request.getServerName()
-                                + ":"
-                                + connector.getIntegralPort()
-                                + request.getRequestURI();
-                if (request.getQueryString() != null)
-                    url += "?" + request.getQueryString();
+                String url = connector.getIntegralScheme() + "://" + request.getServerName() + ":" + connector.getIntegralPort() + request.getRequestURI();
+                if (request.getQueryString() != null) url += "?" + request.getQueryString();
                 response.setContentLength(0);
                 response.sendRedirect(url);
                 request.setHandled(true);
@@ -226,27 +214,25 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler implement
         }
         else if (dataConstraint == UserDataConstraint.Confidential)
         {
-            if (connector.isConfidential(request))
-                return true;
+            if (connector.isConfidential(request)) return true;
 
             if (connector.getConfidentialPort() > 0)
             {
-                String url =
-                        connector.getConfidentialScheme()
-                                + "://"
-                                + request.getServerName()
-                                + ":"
-                                + connector.getConfidentialPort()
-                                + request.getRequestURI();
-                if (request.getQueryString() != null)
-                    url += "?" + request.getQueryString();
+                String url = connector.getConfidentialScheme() + "://"
+                             + request.getServerName()
+                             + ":"
+                             + connector.getConfidentialPort()
+                             + request.getRequestURI();
+                if (request.getQueryString() != null) url += "?" + request.getQueryString();
 
                 response.setContentLength(0);
                 response.sendRedirect(url);
                 request.setHandled(true);
             }
             return false;
-        } else {
+        }
+        else
+        {
             throw new IllegalArgumentException("Invalid dataConstraint value: " + dataConstraint);
         }
 
@@ -254,32 +240,23 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler implement
 
     protected boolean isAuthMandatory(Request base_request, Response base_response, Object constraintInfo)
     {
-        if (constraintInfo == null)
-        {
-            return false;
-        }
-        return !((RoleInfo)constraintInfo).isUnchecked();
+        if (constraintInfo == null) { return false; }
+        return !((RoleInfo) constraintInfo).isUnchecked();
     }
 
-    protected boolean checkWebResourcePermissions(String pathInContext, Request request, Response response, Object constraintInfo, UserIdentity userIdentity) throws IOException
+    protected boolean checkWebResourcePermissions(String pathInContext, Request request, 
+                                                  Response response, Object constraintInfo, 
+                                                  UserIdentity userIdentity) throws IOException
     {
-        if (constraintInfo == null)
-        {
-            return true;
-        }
+        if (constraintInfo == null) { return true; }
         RoleInfo roleInfo = (RoleInfo) constraintInfo;
-        if (roleInfo.isUnchecked())
-        {
-            return true;
-        }
+        if (roleInfo.isUnchecked()) { return true; }
         Set<String> roles = roleInfo.getRoles();
-        for (String role: roles) {
-            if (userIdentity.isUserInRole(role)) {
-                return true;
-            }
+        for (String role : roles)
+        {
+            if (userIdentity.isUserInRole(role)) { return true; }
         }
         return false;
     }
 
 }
-

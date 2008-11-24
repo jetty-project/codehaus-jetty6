@@ -32,22 +32,20 @@ import org.mortbay.resource.Resource;
 import org.mortbay.util.Loader;
 
 /* ------------------------------------------------------------ */
-/** HashMapped User Realm with JDBC as data source.
- * JDBCLoginService extends HashULoginService and adds a method to fetch user
- * information from database.
- * The login() method checks the inherited Map for the user.
- * If the user is not found, it will fetch details from the database
- * and populate the inherited Map. It then calls the superclass
- * login() method to perform the actual authentication.
- * Periodically (controlled by configuration parameter), internal
- * hashes are cleared. Caching can be disabled by setting cache
- * refresh interval to zero.
- * Uses one database connection that is initialized at startup. Reconnect
- * on failures. authenticate() is 'synchronized'.
- *
+/**
+ * HashMapped User Realm with JDBC as data source. JDBCLoginService extends
+ * HashULoginService and adds a method to fetch user information from database.
+ * The login() method checks the inherited Map for the user. If the user is not
+ * found, it will fetch details from the database and populate the inherited
+ * Map. It then calls the superclass login() method to perform the actual
+ * authentication. Periodically (controlled by configuration parameter),
+ * internal hashes are cleared. Caching can be disabled by setting cache refresh
+ * interval to zero. Uses one database connection that is initialized at
+ * startup. Reconnect on failures. authenticate() is 'synchronized'.
+ * 
  * An example properties file for configuration is in
  * $JETTY_HOME/etc/jdbcRealm.properties
- *
+ * 
  * @version $Id$
  * @author Arkadi Shishlov (arkadi)
  * @author Fredrik Borgh
@@ -59,21 +57,32 @@ public class JDBCLoginService extends HashLoginService
 {
 
     private String _jdbcDriver;
+
     private String _url;
+
     private String _userName;
+
     private String _password;
+
     private String _userTableKey;
+
     private String _userTablePasswordField;
+
     private String _roleTableRoleField;
+
     private int _cacheTime;
 
     private long _lastHashPurge;
+
     private Connection _con;
+
     private String _userSql;
+
     private String _roleSql;
 
     /* ------------------------------------------------------------ */
-    /** Constructor.
+    /**
+     * Constructor.
      */
     public JDBCLoginService()
     {
@@ -81,7 +90,9 @@ public class JDBCLoginService extends HashLoginService
     }
 
     /* ------------------------------------------------------------ */
-    /** Constructor.
+    /**
+     * Constructor.
+     * 
      * @param name name of login service
      */
     public JDBCLoginService(String name)
@@ -90,7 +101,9 @@ public class JDBCLoginService extends HashLoginService
     }
 
     /* ------------------------------------------------------------ */
-    /** Constructor.
+    /**
+     * Constructor.
+     * 
      * @param name Realm name
      * @param config Filename or url of JDBC connection properties file.
      * @exception java.io.IOException problem loading configuration
@@ -98,15 +111,11 @@ public class JDBCLoginService extends HashLoginService
      * @throws IllegalAccessException problem using driver
      * @throws InstantiationException problem creating driver
      */
-    public JDBCLoginService(String name, String config)
-        throws IOException,
-               ClassNotFoundException,
-               InstantiationException,
-               IllegalAccessException
+    public JDBCLoginService(String name, String config) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException
     {
         super(name);
         setConfig(config);
-        Loader.loadClass(this.getClass(),_jdbcDriver).newInstance();
+        Loader.loadClass(this.getClass(), _jdbcDriver).newInstance();
         connectDatabase();
     }
 
@@ -119,22 +128,24 @@ public class JDBCLoginService extends HashLoginService
     {
         super.setName(name);
     }
+
     public String getConfig()
     {
         return super.getConfig();
     }
+
     /* ------------------------------------------------------------ */
-    /** Load JDBC connection configuration from properties file.
-     *
+    /**
+     * Load JDBC connection configuration from properties file.
+     * 
      * @param config Filename or url of user properties file.
      * @exception java.io.IOException
      */
-    public void setConfig(String config)
-        throws IOException
+    public void setConfig(String config) throws IOException
     {
         super.setConfig(config);
         Properties properties = new Properties();
-        Resource resource=Resource.newResource(config);
+        Resource resource = Resource.newResource(config);
         properties.load(resource.getInputStream());
 
         _jdbcDriver = properties.getProperty("jdbcdriver");
@@ -154,50 +165,52 @@ public class JDBCLoginService extends HashLoginService
         _cacheTime = new Integer(properties.getProperty("cachetime"));
 
         if (_jdbcDriver == null || _jdbcDriver.equals("")
-            || _url == null || _url.equals("")
-            || _userName == null || _userName.equals("")
+            || _url == null
+            || _url.equals("")
+            || _userName == null
+            || _userName.equals("")
             || _password == null
             || _cacheTime < 0)
         {
-            if(Log.isDebugEnabled())Log.debug("UserRealm " + getName()
-                        + " has not been properly configured");
+            if (Log.isDebugEnabled()) Log.debug("UserRealm " + getName() + " has not been properly configured");
         }
         _cacheTime *= 1000;
         _lastHashPurge = 0;
-        _userSql = "select " + _userTableKey + ","
-            + _userTablePasswordField + " from "
-            + _userTable + " where "
-            + _userTableUserField + " = ?";
+        _userSql = "select " + _userTableKey + "," + _userTablePasswordField + " from " + _userTable + " where " + _userTableUserField + " = ?";
         _roleSql = "select r." + _roleTableRoleField
-            + " from " + _roleTable + " r, "
-            + _userRoleTable + " u where u."
-            + _userRoleTableUserKey + " = ?"
-            + " and r." + _roleTableKey + " = u."
-            + _userRoleTableRoleKey;
+                   + " from "
+                   + _roleTable
+                   + " r, "
+                   + _userRoleTable
+                   + " u where u."
+                   + _userRoleTableUserKey
+                   + " = ?"
+                   + " and r."
+                   + _roleTableKey
+                   + " = u."
+                   + _userRoleTableRoleKey;
     }
 
     /* ------------------------------------------------------------ */
-    /** (re)Connect to database with parameters setup by loadConfig()
+    /**
+     * (re)Connect to database with parameters setup by loadConfig()
      */
     public void connectDatabase()
     {
         try
         {
-             Class.forName(_jdbcDriver);
+            Class.forName(_jdbcDriver);
             _con = DriverManager.getConnection(_url, _userName, _password);
         }
-        catch(SQLException e)
+        catch (SQLException e)
         {
-            Log.warn("UserRealm " + getName()
-                      + " could not connect to database; will try later", e);
+            Log.warn("UserRealm " + getName() + " could not connect to database; will try later", e);
         }
-        catch(ClassNotFoundException e)
+        catch (ClassNotFoundException e)
         {
-            Log.warn("UserRealm " + getName()
-                      + " could not connect to database; will try later", e);
+            Log.warn("UserRealm " + getName() + " could not connect to database; will try later", e);
         }
     }
-
 
     /* ------------------------------------------------------------ */
     @Override
@@ -211,7 +224,8 @@ public class JDBCLoginService extends HashLoginService
                 _users.clear();
                 _lastHashPurge = now;
             }
-            //TODO JASPI not sure if this should be in sync block.  Was not in JDBCUserRealm
+            // TODO JASPI not sure if this should be in sync block. Was not in
+            // JDBCUserRealm
             super.login(loginCallback);
         }
     }
@@ -232,11 +246,9 @@ public class JDBCLoginService extends HashLoginService
     {
         try
         {
-            if (null==_con)
-                connectDatabase();
+            if (null == _con) connectDatabase();
 
-            if (null==_con)
-                throw new SQLException("Can't connect to database");
+            if (null == _con) throw new SQLException("Can't connect to database");
 
             PreparedStatement stat = _con.prepareStatement(_userSql);
             stat.setObject(1, username);
@@ -263,8 +275,7 @@ public class JDBCLoginService extends HashLoginService
         }
         catch (SQLException e)
         {
-            Log.warn("UserRealm " + getName()
-                      + " could not load user information from database", e);
+            Log.warn("UserRealm " + getName() + " could not load user information from database", e);
             connectDatabase();
         }
         return null;

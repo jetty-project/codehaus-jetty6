@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security.authentication;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,36 +32,43 @@ import org.mortbay.jetty.security.SimpleAuthResult;
 /**
  * @version $Rev$ $Date$
  */
-public class SessionCachingServerAuthentication implements ServerAuthentication {
+public class SessionCachingServerAuthentication implements ServerAuthentication
+{
     public final static String __J_AUTHENTICATED = "org.mortbay.jetty.Auth";
 
     private final ServerAuthentication _delegate;
 
-    public SessionCachingServerAuthentication(ServerAuthentication delegate) {
+    public SessionCachingServerAuthentication(ServerAuthentication delegate)
+    {
         this._delegate = delegate;
     }
 
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException {
+    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
+    {
         HttpServletRequest request = messageInfo.getRequestMessage();
         HttpSession session = request.getSession(messageInfo.isAuthMandatory());
-        //not mandatory and not authenticated
-        if (session == null)
-            return new SimpleAuthResult(ServerAuthStatus.SUCCESS, null, null, (String[])null, null);
+        // not mandatory and not authenticated
+        if (session == null) 
+            return new SimpleAuthResult(ServerAuthStatus.SUCCESS, null, null, (String[]) null, null);
 
         ServerAuthResult serverAuthResult = (ServerAuthResult) session.getAttribute(__J_AUTHENTICATED);
-        if (serverAuthResult != null)
+        if (serverAuthResult != null) 
             return serverAuthResult;
 
         serverAuthResult = _delegate.validateRequest(messageInfo);
-        if (serverAuthResult != null && serverAuthResult.getClientSubject()  != null)
+        if (serverAuthResult != null && serverAuthResult.getClientSubject() != null)
         {
-            ServerAuthResult newServerAuthResult = new SimpleAuthResult(ServerAuthStatus.SUCCESS, serverAuthResult.getClientSubject(), serverAuthResult.getUserPrincipal(), serverAuthResult.getGroups(), serverAuthResult.getAuthMethod());
+            ServerAuthResult newServerAuthResult = new SimpleAuthResult(ServerAuthStatus.SUCCESS, serverAuthResult.getClientSubject(), 
+                                                                        serverAuthResult.getUserPrincipal(), serverAuthResult.getGroups(), 
+                                                                        serverAuthResult.getAuthMethod());
             session.setAttribute(__J_AUTHENTICATED, newServerAuthResult);
         }
         return serverAuthResult;
     }
 
-    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException {
+    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) 
+    throws ServerAuthException
+    {
         return _delegate.secureResponse(messageInfo, validatedUser);
     }
 

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security;
 
 import java.util.Random;
@@ -35,20 +34,22 @@ import javax.servlet.http.Cookie;
 public class HashCrossContextPsuedoSession<T> implements CrossContextPsuedoSession<T>
 {
     private final String _cookieName;
-    private final String _cookiePath;
-    private final Random _random = new SecureRandom();
-    private final Map<String, T> _data = new HashMap<String, T>();
 
+    private final String _cookiePath;
+
+    private final Random _random = new SecureRandom();
+
+    private final Map<String, T> _data = new HashMap<String, T>();
 
     public HashCrossContextPsuedoSession(String cookieName, String cookiePath)
     {
         this._cookieName = cookieName;
-        this._cookiePath = cookiePath == null? "/": cookiePath;
+        this._cookiePath = cookiePath == null ? "/" : cookiePath;
     }
 
     public T fetch(HttpServletRequest request)
     {
-        for (Cookie cookie: request.getCookies())
+        for (Cookie cookie : request.getCookies())
         {
             if (_cookieName.equals(cookie.getName()))
             {
@@ -63,18 +64,16 @@ public class HashCrossContextPsuedoSession<T> implements CrossContextPsuedoSessi
     {
         String key;
 
-        synchronized(_data)
+        synchronized (_data)
         {
             // Create new ID
             while (true)
             {
-                key = Long.toString(Math.abs(_random.nextLong()),
-                                      30 + (int)(System.currentTimeMillis() % 7));
-                if (!_data.containsKey(key))
-                    break;
+                key = Long.toString(Math.abs(_random.nextLong()), 30 + (int) (System.currentTimeMillis() % 7));
+                if (!_data.containsKey(key)) break;
             }
 
-            _data.put(key,datum);
+            _data.put(key, datum);
         }
 
         Cookie cookie = new Cookie(_cookieName, key);
@@ -84,7 +83,7 @@ public class HashCrossContextPsuedoSession<T> implements CrossContextPsuedoSessi
 
     public void clear(HttpServletRequest request)
     {
-        for (Cookie cookie: request.getCookies())
+        for (Cookie cookie : request.getCookies())
         {
             if (_cookieName.equals(cookie.getName()))
             {

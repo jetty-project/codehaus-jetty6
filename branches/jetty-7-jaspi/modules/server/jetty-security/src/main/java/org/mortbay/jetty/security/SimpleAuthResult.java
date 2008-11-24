@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security;
 
 import java.security.Principal;
@@ -33,52 +32,68 @@ import org.mortbay.jetty.ServerAuthStatus;
 /**
  * @version $Rev$ $Date$
  */
-public class SimpleAuthResult implements ServerAuthResult {
+public class SimpleAuthResult implements ServerAuthResult
+{
 
-    public static final ServerAuthResult NO_AUTH_RESULTS = new SimpleAuthResult(null, null, null, Collections.<String>emptyList(), null);
+    public static final ServerAuthResult NO_AUTH_RESULTS = new SimpleAuthResult(null, null, null, Collections.<String> emptyList(), null);
 
     private final ServerAuthStatus _authStatus;
+
     private final Subject _clientSubject;
+
     private final Principal _userPrincipal;
+
     private final List<String> _groups;
+
     private final String _authMethod;
 
-    public SimpleAuthResult(ServerAuthStatus authStatus, Subject clientSubject, Principal userPrincipal, List<String> groups, String authMethod) {
+    public SimpleAuthResult(ServerAuthStatus authStatus, Subject clientSubject, 
+                            Principal userPrincipal, List<String> groups, String authMethod)
+    {
         this._authStatus = authStatus;
         this._clientSubject = clientSubject;
         this._userPrincipal = userPrincipal;
         this._groups = groups;
-        this._authMethod = userPrincipal == null? null: authMethod;
+        this._authMethod = userPrincipal == null ? null : authMethod;
     }
-    public SimpleAuthResult(ServerAuthStatus authStatus, Subject clientSubject, Principal userPrincipal, String[] groups, String authMethod) {
+
+    public SimpleAuthResult(ServerAuthStatus authStatus, Subject clientSubject, 
+                            Principal userPrincipal, String[] groups, String authMethod)
+    {
         this._authStatus = authStatus;
         this._clientSubject = clientSubject;
         this._userPrincipal = userPrincipal;
-        this._groups = groups == null? Collections.<String>emptyList(): Arrays.asList(groups);
-        this._authMethod = userPrincipal == null? null: authMethod;
+        this._groups = groups == null ? Collections.<String> emptyList() : Arrays.asList(groups);
+        this._authMethod = userPrincipal == null ? null : authMethod;
     }
 
-    public SimpleAuthResult(ServerAuthStatus authStatus) {
-        this(authStatus, null, null, (String[])null, null);
+    public SimpleAuthResult(ServerAuthStatus authStatus)
+    {
+        this(authStatus, null, null, (String[]) null, null);
     }
 
-    public ServerAuthStatus getAuthStatus() {
+    public ServerAuthStatus getAuthStatus()
+    {
         return _authStatus;
     }
 
-    public Subject getClientSubject() {
+    public Subject getClientSubject()
+    {
         return _clientSubject;
     }
 
-    public Principal getUserPrincipal() {
+    public Principal getUserPrincipal()
+    {
         return _userPrincipal;
     }
 
-    public List<String> getGroups() {
+    public List<String> getGroups()
+    {
         return _groups;
     }
 
-    public String getAuthMethod() {
+    public String getAuthMethod()
+    {
         return _authMethod;
     }
 }

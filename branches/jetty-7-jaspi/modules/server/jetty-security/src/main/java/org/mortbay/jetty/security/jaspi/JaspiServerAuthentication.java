@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security.jaspi;
 
 import java.security.Principal;
@@ -46,16 +45,25 @@ import org.mortbay.jetty.security.LazyAuthResult;
 /**
  * @version $Rev$ $Date$
  */
-public class JaspiServerAuthentication implements ServerAuthentication {
+public class JaspiServerAuthentication implements ServerAuthentication
+{
 
     private final String _authContextId;
+
     private final ServerAuthConfig _authConfig;
+
     private final Map _authProperties;
+
     private final ServletCallbackHandler _callbackHandler;
+
     private final Subject _serviceSubject;
+
     private final boolean _allowLazyAuthentication;
 
-    public JaspiServerAuthentication(String authContextId, ServerAuthConfig authConfig, Map authProperties, ServletCallbackHandler callbackHandler, Subject serviceSubject, boolean allowLazyAuthentication) {
+    public JaspiServerAuthentication(String authContextId, ServerAuthConfig authConfig, 
+                                     Map authProperties, ServletCallbackHandler callbackHandler,
+                                     Subject serviceSubject, boolean allowLazyAuthentication)
+    {
         if (callbackHandler == null) throw new NullPointerException("No CallbackHandler");
         if (authConfig == null) throw new NullPointerException("No AuthConfig");
         this._authContextId = authContextId;
@@ -66,42 +74,45 @@ public class JaspiServerAuthentication implements ServerAuthentication {
         this._allowLazyAuthentication = allowLazyAuthentication;
     }
 
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException {
-        if (_allowLazyAuthentication && !messageInfo.isAuthMandatory()) {
-            return new LazyAuthResult(this, messageInfo);
-        }
-        try {
+    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
+    {
+        if (_allowLazyAuthentication && !messageInfo.isAuthMandatory()) { return new LazyAuthResult(this, messageInfo); }
+        try
+        {
             ServerAuthContext authContext = _authConfig.getAuthContext(_authContextId, _serviceSubject, _authProperties);
             Subject clientSubject = new Subject();
 
             AuthStatus authStatus = authContext.validateRequest(new MessageInfoAdapter(messageInfo), clientSubject, _serviceSubject);
             String authMethod = (String) messageInfo.getMap().get(JettyMessageInfo.AUTH_METHOD_KEY);
             CallerPrincipalCallback principalCallback = _callbackHandler.getThreadCallerPrincipalCallback();
-            Principal principal = principalCallback == null? null: principalCallback.getPrincipal();
+            Principal principal = principalCallback == null ? null : principalCallback.getPrincipal();
             GroupPrincipalCallback groupPrincipalCallback = _callbackHandler.getThreadGroupPrincipalCallback();
-            String[] groups = groupPrincipalCallback == null? null: groupPrincipalCallback.getGroups();
-            return new SimpleAuthResult(toServerAuthStatus(authStatus),
-                    clientSubject,
-                    principal,
-                    groups,
-                    authMethod);
-        } catch (AuthException e) {
+            String[] groups = groupPrincipalCallback == null ? null : groupPrincipalCallback.getGroups();
+            return new SimpleAuthResult(toServerAuthStatus(authStatus), clientSubject, principal, groups, authMethod);
+        }
+        catch (AuthException e)
+        {
             throw new ServerAuthException(e);
         }
     }
 
-    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException {
-        try {
+    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException
+    {
+        try
+        {
             ServerAuthContext authContext = _authConfig.getAuthContext(_authContextId, _serviceSubject, _authProperties);
             MessageInfoAdapter adapter = new MessageInfoAdapter(messageInfo);
             authContext.cleanSubject(adapter, validatedUser.getClientSubject());
             return toServerAuthStatus(authContext.secureResponse(adapter, _serviceSubject));
-        } catch (AuthException e) {
+        }
+        catch (AuthException e)
+        {
             throw new ServerAuthException(e);
         }
     }
 
-    ServerAuthStatus toServerAuthStatus(AuthStatus authStatus) throws ServerAuthException {
+    ServerAuthStatus toServerAuthStatus(AuthStatus authStatus) throws ServerAuthException
+    {
         if (authStatus == AuthStatus.SEND_CONTINUE) return ServerAuthStatus.SEND_CONTINUE;
         if (authStatus == AuthStatus.SEND_FAILURE) return ServerAuthStatus.SEND_FAILURE;
         if (authStatus == AuthStatus.SEND_SUCCESS) return ServerAuthStatus.SEND_SUCCESS;
@@ -109,33 +120,39 @@ public class JaspiServerAuthentication implements ServerAuthentication {
         throw new ServerAuthException("Invalid server status: " + authStatus);
     }
 
-    private static class MessageInfoAdapter implements MessageInfo {
+    private static class MessageInfoAdapter implements MessageInfo
+    {
         private final JettyMessageInfo delegate;
 
-        private MessageInfoAdapter(JettyMessageInfo delegate) {
+        private MessageInfoAdapter(JettyMessageInfo delegate)
+        {
             this.delegate = delegate;
         }
 
-
-        public Map getMap() {
+        public Map getMap()
+        {
             return delegate.getMap();
         }
 
-        public Object getRequestMessage() {
+        public Object getRequestMessage()
+        {
             return delegate.getRequestMessage();
         }
 
-        public Object getResponseMessage() {
+        public Object getResponseMessage()
+        {
             return delegate.getResponseMessage();
         }
 
-        public void setRequestMessage(Object request) {
-            if (! (request instanceof HttpServletRequest)) throw new IllegalStateException("Not a HttpServletRequest: " + request);
+        public void setRequestMessage(Object request)
+        {
+            if (!(request instanceof HttpServletRequest)) throw new IllegalStateException("Not a HttpServletRequest: " + request);
             delegate.setRequestMessage((HttpServletRequest) request);
         }
 
-        public void setResponseMessage(Object response) {
-            if (! (response instanceof HttpServletResponse)) throw new IllegalStateException("Not a HttpServletResponse: " + response);
+        public void setResponseMessage(Object response)
+        {
+            if (!(response instanceof HttpServletResponse)) throw new IllegalStateException("Not a HttpServletResponse: " + response);
             delegate.setResponseMessage((HttpServletResponse) response);
         }
     }

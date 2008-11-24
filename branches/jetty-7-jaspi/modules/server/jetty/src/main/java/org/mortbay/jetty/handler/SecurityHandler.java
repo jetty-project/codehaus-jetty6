@@ -29,8 +29,8 @@ import org.mortbay.jetty.ServerAuthentication;
 /**
  * @version $Rev$ $Date$
  */
-public interface SecurityHandler extends LifeCycle, Handler, HandlerContainer {
-
+public interface SecurityHandler extends LifeCycle, Handler, HandlerContainer
+{
     void setHandler(Handler handler);
 
     Handler getHandler();
@@ -38,5 +38,4 @@ public interface SecurityHandler extends LifeCycle, Handler, HandlerContainer {
     RunAsToken newRunAsToken(String runAsRole);
 
     void setServerAuthentication(ServerAuthentication serverAuthentication);
-
 }
