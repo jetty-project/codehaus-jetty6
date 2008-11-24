@@ -72,7 +72,7 @@ public class HttpConnection implements Connection
 
     Timeout.Task _timeout = new Timeout.Task()
     {
-        public void expire()
+        public void expired()
         {
             HttpExchange ex = null;
             try
