@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security.jaspi.modules;
 
 import java.util.Arrays;
@@ -28,6 +27,7 @@ import java.util.Arrays;
 public class UserInfo
 {
     private final String userName;
+
     private char[] password;
 
     public UserInfo(String userName, char[] password)
@@ -48,7 +48,7 @@ public class UserInfo
 
     public void clearPassword()
     {
-        Arrays.fill(password, (char)0);
+        Arrays.fill(password, (char) 0);
         password = null;
     }
 }

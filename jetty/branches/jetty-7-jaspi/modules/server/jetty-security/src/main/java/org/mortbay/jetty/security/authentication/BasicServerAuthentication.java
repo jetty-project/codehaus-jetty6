@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security.authentication;
 
 import java.io.IOException;
@@ -40,17 +39,21 @@ import org.mortbay.jetty.security.SimpleAuthResult;
 /**
  * @version $Rev$ $Date$
  */
-public class BasicServerAuthentication implements ServerAuthentication {
+public class BasicServerAuthentication implements ServerAuthentication
+{
 
     private final LoginService _loginService;
+
     private final String _realmName;
 
-    public BasicServerAuthentication(LoginService loginService, String realmName) {
+    public BasicServerAuthentication(LoginService loginService, String realmName)
+    {
         this._loginService = loginService;
         this._realmName = realmName;
     }
 
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException {
+    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
+    {
         HttpServletRequest request = messageInfo.getRequestMessage();
         HttpServletResponse response = messageInfo.getResponseMessage();
         String credentials = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -61,19 +64,15 @@ public class BasicServerAuthentication implements ServerAuthentication {
             {
                 LoginCallback loginCallback = new LoginCallback(new Subject(), credentials);
                 _loginService.login(loginCallback);
-                if (loginCallback.isSuccess()) {
-                    return new SimpleAuthResult(ServerAuthStatus.SUCCESS, loginCallback.getSubject(), loginCallback.getUserPrincipal(), loginCallback.getGroups(), Constraint.__BASIC_AUTH);
-                }
+                if (loginCallback.isSuccess()) { return new SimpleAuthResult(ServerAuthStatus.SUCCESS, loginCallback.getSubject(), loginCallback
+                        .getUserPrincipal(), loginCallback.getGroups(), Constraint.__BASIC_AUTH); }
 
             }
 
-            if (!messageInfo.isAuthMandatory())
-            {
-                return SimpleAuthResult.NO_AUTH_RESULTS;
-            }
+            if (!messageInfo.isAuthMandatory()) { return SimpleAuthResult.NO_AUTH_RESULTS; }
             response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\"" + _realmName + '"');
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return new SimpleAuthResult(ServerAuthStatus.SEND_CONTINUE, null, null, (String[])null,null);
+            return new SimpleAuthResult(ServerAuthStatus.SEND_CONTINUE, null, null, (String[]) null, null);
         }
         catch (IOException e)
         {
@@ -81,10 +80,11 @@ public class BasicServerAuthentication implements ServerAuthentication {
         }
     }
 
-    //most likely validatedUser is not needed here.
+    // most likely validatedUser is not needed here.
 
-    //corrct?
-    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException {
+    // corrct?
+    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException
+    {
         return ServerAuthStatus.SUCCESS;
     }
 

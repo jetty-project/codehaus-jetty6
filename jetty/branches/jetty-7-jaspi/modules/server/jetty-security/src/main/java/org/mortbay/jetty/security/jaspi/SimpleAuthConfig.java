@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security.jaspi;
 
 import java.util.Map;
@@ -36,6 +35,7 @@ public class SimpleAuthConfig implements ServerAuthConfig
     public static final String HTTP_SERVLET = "HttpServlet";
 
     private final String _appContext;
+
     private final ServerAuthContext _serverAuthContext;
 
     public SimpleAuthConfig(String appContext, ServerAuthContext serverAuthContext)
@@ -49,13 +49,13 @@ public class SimpleAuthConfig implements ServerAuthConfig
         return _serverAuthContext;
     }
 
-    //supposed to be of form host-name<space>context-path
+    // supposed to be of form host-name<space>context-path
     public String getAppContext()
     {
         return _appContext;
     }
 
-    //not used yet
+    // not used yet
     public String getAuthContextID(MessageInfo messageInfo) throws IllegalArgumentException
     {
         return null;

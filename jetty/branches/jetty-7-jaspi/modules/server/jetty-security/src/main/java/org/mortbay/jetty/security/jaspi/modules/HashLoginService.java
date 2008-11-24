@@ -39,23 +39,26 @@ import org.mortbay.util.Scanner;
 import org.mortbay.util.Scanner.BulkListener;
 
 /* ------------------------------------------------------------ */
-/** HashMapped User Realm.
- *
+/**
+ * HashMapped User Realm.
+ * 
  * An implementation of UserRealm that stores users and roles in-memory in
  * HashMaps.
  * <P>
- * Typically these maps are populated by calling the load() method or passing
- * a properties resource to the constructor. The format of the properties
- * file is: <PRE>
+ * Typically these maps are populated by calling the load() method or passing a
+ * properties resource to the constructor. The format of the properties file is:
+ * 
+ * <PRE>
  *  username: password [,rolename ...]
  * </PRE>
- * Passwords may be clear text, obfuscated or checksummed.  The class
- * com.mortbay.Util.Password should be used to generate obfuscated
- * passwords or password checksums.
- *
+ * 
+ * Passwords may be clear text, obfuscated or checksummed. The class
+ * com.mortbay.Util.Password should be used to generate obfuscated passwords or
+ * password checksums.
+ * 
  * If DIGEST Authentication is used, the password must be in a recoverable
  * format, either plain text or OBF:.
- *
+ * 
  * @see org.mortbay.jetty.security.Password
  * @author Greg Wilkins (gregw)
  */
@@ -63,32 +66,41 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
 {
     private static final String[] NO_ROLES = new String[0];
 
-    /** HttpContext Attribute to set to activate SSO.
+    /**
+     * HttpContext Attribute to set to activate SSO.
      */
     public static final String __SSO = "org.mortbay.http.SSO";
 
     /* ------------------------------------------------------------ */
     private String _realmName;
-    private String _config;
-    private Resource _configResource;
-    protected Map<String, User> _users=new HashMap<String, User>();
-    private Scanner _scanner;
-    private int _refreshInterval=0;//default is not to reload
 
+    private String _config;
+
+    private Resource _configResource;
+
+    protected Map<String, User> _users = new HashMap<String, User>();
+
+    private Scanner _scanner;
+
+    private int _refreshInterval = 0;// default is not to reload
 
     /* ------------------------------------------------------------ */
-    /** Constructor.
+    /**
+     * Constructor.
      */
     public HashLoginService()
-    {}
+    {
+    }
 
     /* ------------------------------------------------------------ */
-    /** Constructor.
+    /**
+     * Constructor.
+     * 
      * @param name Realm Name
      */
     public HashLoginService(String name)
     {
-        _realmName=name;
+        _realmName = name;
     }
 
     public HashLoginService(String _realmName, Map<String, User> _users)
@@ -96,15 +108,17 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
         this._realmName = _realmName;
         this._users = _users;
     }/* ------------------------------------------------------------ */
-    /** Constructor.
+
+    /**
+     * Constructor.
+     * 
      * @param name Realm name
      * @param config Filename or url of user properties file.
      * @throws java.io.IOException if user properties file could not be loaded
      */
-    public HashLoginService(String name, String config)
-        throws IOException
+    public HashLoginService(String name, String config) throws IOException
     {
-        _realmName=name;
+        _realmName = name;
         setConfig(config);
     }
 
@@ -119,26 +133,26 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
     }
 
     /* ------------------------------------------------------------ */
-    /** Load realm users from properties file.
-     * The property file maps usernames to password specs followed by
-     * an optional comma separated list of role names.
-     *
+    /**
+     * Load realm users from properties file. The property file maps usernames
+     * to password specs followed by an optional comma separated list of role
+     * names.
+     * 
      * @param config Filename or url of user properties file.
-     * @exception java.io.IOException if user properties file could not be loaded
+     * @exception java.io.IOException if user properties file could not be
+     *                    loaded
      */
-    public void setConfig(String config)
-        throws IOException
+    public void setConfig(String config) throws IOException
     {
-        _config=config;
-        _configResource=Resource.newResource(_config);
-       loadConfig();
+        _config = config;
+        _configResource = Resource.newResource(_config);
+        loadConfig();
 
     }
 
-
-    public void setRefreshInterval (int msec)
+    public void setRefreshInterval(int msec)
     {
-        _refreshInterval=msec;
+        _refreshInterval = msec;
     }
 
     public int getRefreshInterval()
@@ -146,14 +160,13 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
         return _refreshInterval;
     }
 
-    public void loadConfig ()
-    throws IOException
+    public void loadConfig() throws IOException
     {
         synchronized (this)
         {
             _users.clear();
 
-            if(Log.isDebugEnabled())Log.debug("Load "+this+" from "+_config);
+            if (Log.isDebugEnabled()) Log.debug("Load " + this + " from " + _config);
             Properties properties = new Properties();
             properties.load(_configResource.getInputStream());
 
@@ -169,8 +182,7 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
                     credentials = credentials.substring(0, c).trim();
                 }
 
-                if (username != null && username.length() > 0 &&
-                        credentials != null && credentials.length() > 0)
+                if (username != null && username.length() > 0 && credentials != null && credentials.length() > 0)
                 {
 
                     String[] roleArray = NO_ROLES;
@@ -190,7 +202,7 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
      */
     public void setName(String name)
     {
-        _realmName=name;
+        _realmName = name;
     }
 
     /* ------------------------------------------------------------ */
@@ -202,37 +214,33 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
         return _realmName;
     }
 
-
     /* ------------------------------------------------------------ */
-    /** Put user into realm.
+    /**
+     * Put user into realm.
+     * 
      * @param name User name
-     * @param credentials String password, Password or UserPrinciple
-     *                    instance.
+     * @param credentials String password, Password or UserPrinciple instance.
      * @return Old UserPrinciple value or null
      */
     public synchronized Object put(String name, Object credentials)
     {
-        if (credentials instanceof User)
-            return _users.put(name, (User) credentials);
+        if (credentials instanceof User) return _users.put(name, (User) credentials);
 
-        if (credentials instanceof Password)
-            return _users.put(name,new KnownUser(name,(Password)credentials));
-        if (credentials != null)
-            return _users.put(name,new KnownUser(name,Credential.getCredential(credentials.toString())));
+        if (credentials instanceof Password) return _users.put(name, new KnownUser(name, (Password) credentials));
+        if (credentials != null) return _users.put(name, new KnownUser(name, Credential.getCredential(credentials.toString())));
         return null;
     }
-
 
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "Realm["+_realmName+"]=="+_users.keySet();
+        return "Realm[" + _realmName + "]==" + _users.keySet();
     }
 
     /* ------------------------------------------------------------ */
     public void dump(PrintStream out)
     {
-        out.println(this+":");
+        out.println(this + ":");
         out.println(super.toString());
     }
 
@@ -242,8 +250,7 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
     protected void doStart() throws Exception
     {
         super.doStart();
-        if (_scanner!=null)
-            _scanner.stop();
+        if (_scanner != null) _scanner.stop();
 
         if (getRefreshInterval() > 0)
         {
@@ -252,15 +259,14 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
             List<File> dirList = new ArrayList<File>(1);
             dirList.add(_configResource.getFile());
             _scanner.setScanDirs(dirList);
-            _scanner.setFilenameFilter(new FilenameFilter ()
+            _scanner.setFilenameFilter(new FilenameFilter()
             {
                 public boolean accept(File dir, String name)
                 {
-                    File f = new File(dir,name);
+                    File f = new File(dir, name);
                     try
                     {
-                        if (f.compareTo(_configResource.getFile())==0)
-                            return true;
+                        if (f.compareTo(_configResource.getFile()) == 0) return true;
                     }
                     catch (IOException e)
                     {
@@ -275,13 +281,11 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
             {
                 public void filesChanged(List filenames) throws Exception
                 {
-                    if (filenames==null)
-                        return;
-                    if (filenames.isEmpty())
-                        return;
-                    if (filenames.size()==1 && filenames.get(0).equals(_config))
-                        loadConfig();
+                    if (filenames == null) return;
+                    if (filenames.isEmpty()) return;
+                    if (filenames.size() == 1 && filenames.get(0).equals(_config)) loadConfig();
                 }
+
                 public String toString()
                 {
                     return "HashLoginService$Scanner";
@@ -300,9 +304,8 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
     protected void doStop() throws Exception
     {
         super.doStop();
-        if (_scanner!=null)
-            _scanner.stop();
-        _scanner=null;
+        if (_scanner != null) _scanner.stop();
+        _scanner = null;
     }
 
     /* ------------------------------------------------------------ */
@@ -324,7 +327,7 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
 
     protected KnownUser getKnownUser(String userName)
     {
-        return (KnownUser)_users.get(userName);
+        return (KnownUser) _users.get(userName);
     }
 
     public void logout(Subject subject) throws ServerAuthException
@@ -332,13 +335,12 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
         subject.getPrincipals(KnownUser.class).clear();
     }
 
-
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     public static class User implements Principal
     {
-        String[] roles= NO_ROLES;
+        String[] roles = NO_ROLES;
 
         public String getName()
         {
@@ -362,25 +364,26 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
     public static class KnownUser extends User
     {
         private String _userName;
+
         private Credential _cred;
 
         /* -------------------------------------------------------- */
-        KnownUser(String name,Credential credential)
+        KnownUser(String name, Credential credential)
         {
-            _userName=name;
-            _cred=credential;
+            _userName = name;
+            _cred = credential;
         }
 
-        public KnownUser(String name,Credential credential,String[] roles)
+        public KnownUser(String name, Credential credential, String[] roles)
         {
-            this(name,credential);
+            this(name, credential);
             this.roles = roles;
         }
 
         /* -------------------------------------------------------- */
         boolean authenticate(Object credentials)
         {
-            return _cred!=null && _cred.check(credentials);
+            return _cred != null && _cred.check(credentials);
         }
 
         /* ------------------------------------------------------------ */

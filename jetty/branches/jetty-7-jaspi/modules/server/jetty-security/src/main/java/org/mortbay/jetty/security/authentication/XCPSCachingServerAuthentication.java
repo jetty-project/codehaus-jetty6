@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security.authentication;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,34 +30,38 @@ import org.mortbay.jetty.security.CrossContextPsuedoSession;
 
 /**
  * Cross-context psuedo-session caching ServerAuthentication
+ * 
  * @version $Rev$ $Date$
  */
-public class XCPSCachingServerAuthentication implements ServerAuthentication {
+public class XCPSCachingServerAuthentication implements ServerAuthentication
+{
     public final static String __J_AUTHENTICATED = "org.mortbay.jetty.Auth";
 
     private final ServerAuthentication _delegate;
+
     private final CrossContextPsuedoSession<ServerAuthResult> _xcps;
 
-    public XCPSCachingServerAuthentication(ServerAuthentication delegate, CrossContextPsuedoSession<ServerAuthResult> xcps) {
+    public XCPSCachingServerAuthentication(ServerAuthentication delegate, CrossContextPsuedoSession<ServerAuthResult> xcps)
+    {
         this._delegate = delegate;
         this._xcps = xcps;
     }
 
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException {
+    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
+    {
         HttpServletRequest request = messageInfo.getRequestMessage();
 
         ServerAuthResult serverAuthResult = _xcps.fetch(request);
-        if (serverAuthResult != null)
-            return serverAuthResult;
+        if (serverAuthResult != null) return serverAuthResult;
 
         serverAuthResult = _delegate.validateRequest(messageInfo);
-        if (serverAuthResult != null)
-            _xcps.store(serverAuthResult, messageInfo.getResponseMessage());
+        if (serverAuthResult != null) _xcps.store(serverAuthResult, messageInfo.getResponseMessage());
 
         return serverAuthResult;
     }
 
-    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException {
+    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException
+    {
         return _delegate.secureResponse(messageInfo, validatedUser);
     }
 

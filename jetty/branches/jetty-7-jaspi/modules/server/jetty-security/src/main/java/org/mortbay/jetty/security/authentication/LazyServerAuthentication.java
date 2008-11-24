@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security.authentication;
 
 import org.mortbay.jetty.ServerAuthentication;
@@ -30,22 +29,30 @@ import org.mortbay.jetty.security.LazyAuthResult;
 /**
  * @version $Rev$ $Date$
  */
-public class LazyServerAuthentication implements ServerAuthentication {
+public class LazyServerAuthentication implements ServerAuthentication
+{
 
     private final ServerAuthentication _delegate;
 
-    public LazyServerAuthentication(ServerAuthentication delegate) {
+    public LazyServerAuthentication(ServerAuthentication delegate)
+    {
         this._delegate = delegate;
     }
 
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException {
-        if (!messageInfo.isAuthMandatory()) {
+    /** 
+     * @see org.mortbay.jetty.ServerAuthentication#validateRequest(org.mortbay.jetty.JettyMessageInfo)
+     */
+    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
+    {
+        if (!messageInfo.isAuthMandatory())
+        { 
             return new LazyAuthResult(_delegate, messageInfo);
         }
         return _delegate.validateRequest(messageInfo);
     }
 
-    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException {
+    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException
+    {
         return _delegate.secureResponse(messageInfo, validatedUser);
     }
 }

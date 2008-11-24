@@ -17,16 +17,18 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security;
 
 import java.util.Set;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
-public interface ConstraintAware {
+public interface ConstraintAware
+{
     ConstraintMapping[] getConstraintMappings();
+
     Set<String> getRoles();
+
     void setConstraintMappings(ConstraintMapping[] constraintMappings, Set<String> roles);
 }

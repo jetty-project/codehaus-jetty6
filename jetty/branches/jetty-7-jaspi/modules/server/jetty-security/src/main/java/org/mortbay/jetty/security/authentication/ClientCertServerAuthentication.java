@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security.authentication;
 
 import java.io.IOException;
@@ -41,27 +40,30 @@ import org.mortbay.util.B64Code;
 /**
  * @version $Rev$ $Date$
  */
-public class ClientCertServerAuthentication implements ServerAuthentication {
+public class ClientCertServerAuthentication implements ServerAuthentication
+{
 
     private final LoginService _loginService;
 
-    public ClientCertServerAuthentication(LoginService loginService) {
+    public ClientCertServerAuthentication(LoginService loginService)
+    {
         this._loginService = loginService;
     }
 
     /**
-     * TODO what should happen if an insecure page is accessed without a client cert?  Current code
-     * requires a client cert always but allows access to insecure pages if it is not recognized.
+     * TODO what should happen if an insecure page is accessed without a client
+     * cert? Current code requires a client cert always but allows access to
+     * insecure pages if it is not recognized.
+     * 
      * @param messageInfo
      * @return
      * @throws ServerAuthException
      */
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException {
+    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
+    {
         HttpServletRequest request = messageInfo.getRequestMessage();
         HttpServletResponse response = messageInfo.getResponseMessage();
-        java.security.cert.X509Certificate[] certs =
-            (java.security.cert.X509Certificate[])
-            request.getAttribute("javax.servlet.request.X509Certificate");
+        java.security.cert.X509Certificate[] certs = (java.security.cert.X509Certificate[]) request.getAttribute("javax.servlet.request.X509Certificate");
 
         try
         {
@@ -69,29 +71,30 @@ public class ClientCertServerAuthentication implements ServerAuthentication {
             if (certs == null || certs.length == 0 || certs[0] == null)
             {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                        "A client certificate is required for accessing this web application but the server's listener is not configured for mutual authentication (or the client did not provide a certificate).");
+                                   "A client certificate is required for accessing this web application but the server's listener is not configured for mutual authentication (or the client did not provide a certificate).");
                 return new SimpleAuthResult(ServerAuthStatus.SEND_FAILURE, null, null, (String[]) null, null);
             }
             Principal principal = certs[0].getSubjectDN();
-            if (principal==null)
-                principal=certs[0].getIssuerDN();
-            final String username=principal==null?"clientcert":principal.getName();
-            //TODO no idea if this is correct
+            if (principal == null) principal = certs[0].getIssuerDN();
+            final String username = principal == null ? "clientcert" : principal.getName();
+            // TODO no idea if this is correct
             final char[] password = B64Code.encode(certs[0].getSignature());
 
-            //TODO is cert_auth correct?
+            // TODO is cert_auth correct?
             LoginCallback loginCallback = new LoginCallback(new Subject(), username, password);
             _loginService.login(loginCallback);
-            if (loginCallback.isSuccess()) {
-                return new SimpleAuthResult(ServerAuthStatus.SUCCESS, loginCallback.getSubject(), loginCallback.getUserPrincipal(), loginCallback.getGroups(), Constraint.__CERT_AUTH2);
+            if (loginCallback.isSuccess()) 
+            { 
+                return new SimpleAuthResult(ServerAuthStatus.SUCCESS, loginCallback.getSubject(),
+                                            loginCallback.getUserPrincipal(), loginCallback.getGroups(), Constraint.__CERT_AUTH2); 
             }
 
-            if (!messageInfo.isAuthMandatory())
-            {
-                return new SimpleAuthResult(ServerAuthStatus.SEND_SUCCESS, null, null, (String[])null, null);
+            if (!messageInfo.isAuthMandatory()) 
+            { 
+                return new SimpleAuthResult(ServerAuthStatus.SEND_SUCCESS, null, null, (String[]) null, null); 
             }
-            response.sendError(HttpServletResponse.SC_FORBIDDEN,"The provided client certificate does not correspond to a trusted user.");
-            return new SimpleAuthResult(ServerAuthStatus.SEND_FAILURE, null, null, (String[])null, null);
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "The provided client certificate does not correspond to a trusted user.");
+            return new SimpleAuthResult(ServerAuthStatus.SEND_FAILURE, null, null, (String[]) null, null);
         }
         catch (IOException e)
         {
@@ -99,7 +102,8 @@ public class ClientCertServerAuthentication implements ServerAuthentication {
         }
     }
 
-    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException {
+    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException
+    {
         return ServerAuthStatus.SUCCESS;
     }
 }

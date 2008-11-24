@@ -17,30 +17,36 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty.security;
 
 import java.util.Set;
 import java.util.HashSet;
 
 /**
- *
- * Badly named class that holds the role and user data constraint info for a path/http method combination, extracted and combined from
- * security constraints.
+ * 
+ * Badly named class that holds the role and user data constraint info for a
+ * path/http method combination, extracted and combined from security
+ * constraints.
+ * 
  * @version $Rev$ $Date$
  */
 public class RoleInfo
 {
     private boolean _unchecked;
+
     private boolean _forbidden;
+
     private UserDataConstraint _userDataConstraint;
+
     private final Set<String> _roles = new HashSet<String>();
 
-    public boolean isUnchecked() {
+    public boolean isUnchecked()
+    {
         return _unchecked;
     }
 
-    public void setUnchecked(boolean unchecked) {
+    public void setUnchecked(boolean unchecked)
+    {
         if (!_forbidden)
         {
             if (unchecked)
@@ -51,11 +57,13 @@ public class RoleInfo
         }
     }
 
-    public boolean isForbidden() {
+    public boolean isForbidden()
+    {
         return _forbidden;
     }
 
-    public void setForbidden(boolean forbidden) {
+    public void setForbidden(boolean forbidden)
+    {
         if (forbidden)
         {
             this._forbidden = forbidden;
@@ -65,11 +73,13 @@ public class RoleInfo
         }
     }
 
-    public UserDataConstraint getUserDataConstraint() {
+    public UserDataConstraint getUserDataConstraint()
+    {
         return _userDataConstraint;
     }
 
-    public void setUserDataConstraint(UserDataConstraint userDataConstraint) {
+    public void setUserDataConstraint(UserDataConstraint userDataConstraint)
+    {
         if (userDataConstraint == null) throw new NullPointerException("Null UserDataConstraint");
         if (this._userDataConstraint == null)
         {
@@ -81,7 +91,8 @@ public class RoleInfo
         }
     }
 
-    public Set<String> getRoles() {
+    public Set<String> getRoles()
+    {
         return _roles;
     }
 
