@@ -27,11 +27,9 @@ import javax.security.auth.Subject;
  */
 public interface LoginService
 {
-
     void login(LoginCallback loginCallback) throws ServerAuthException;
 
     void logout(Subject subject) throws ServerAuthException;
 
-    @Deprecated
     String getName();
 }

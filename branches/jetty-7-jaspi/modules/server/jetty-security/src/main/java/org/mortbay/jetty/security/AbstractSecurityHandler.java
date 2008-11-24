@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.JettyMessageInfo;
+import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.ServerAuthException;
@@ -44,10 +45,12 @@ import org.mortbay.jetty.handler.SecurityHandler;
 public abstract class AbstractSecurityHandler extends HandlerWrapper implements SecurityHandler
 {
 
+    private LoginService _loginService;
+
     /* ------------------------------------------------------------ */
     // private UserRealm _userRealm;
     // private NotChecked _notChecked = new NotChecked();
-    private boolean _checkWelcomeFiles = false;// jaspi stuff
+    private boolean _checkWelcomeFiles = false;
 
     // private ServerAuthConfig authConfig;
     // private Subject serviceSubject;
@@ -93,6 +96,17 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
         }
     };
 
+
+    public LoginService getLoginService()
+    {
+        return _loginService;
+    }
+
+    public void setLoginService(LoginService service)
+    {
+        _loginService = service;
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @return True if forwards to welcome files are authenticated

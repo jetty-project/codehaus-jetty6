@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty;
 
 import java.security.Principal;
@@ -27,15 +26,20 @@ import javax.security.auth.Subject;
 
 /**
  * This can evaluate results lazily.
- *
+ * 
  * @version $Rev$ $Date$
  */
-public interface ServerAuthResult {
+public interface ServerAuthResult
+{
 
     ServerAuthStatus getAuthStatus();
+
     Subject getClientSubject();
+
     Principal getUserPrincipal();
+
     List<String> getGroups();
+
     String getAuthMethod();
-    
+
 }

@@ -17,18 +17,19 @@
  * under the License.
  */
 
-
 package org.mortbay.jetty;
 
 /**
- * This is like the JASPI ServerAuthContext but is intended to be easier to use and allow lazy auth.
- *
+ * This is like the JASPI ServerAuthContext but is intended to be easier to use
+ * and allow lazy auth.
+ * 
  * @version $Rev$ $Date$
  */
-public interface ServerAuthentication {
+public interface ServerAuthentication
+{
 
     ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException;
 
-    //most likely validatedUser is not needed here.
+    // most likely validatedUser is not needed here.
     ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException;
 }
