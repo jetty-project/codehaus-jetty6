@@ -52,8 +52,8 @@ public class ConstraintTest extends TestCase
     ContextHandler _context = new ContextHandler();
     SessionHandler _session = new SessionHandler();
     ConstraintSecurityHandler _security = new ConstraintSecurityHandler();
-    LoginService loginService = new HashLoginService("TestLoginService", Collections.<String, HashLoginService.User>singletonMap("user", new HashLoginService.KnownUser("user", new Password("pass"), new String[] {"user"})));
-    final ServletCallbackHandler callbackHandler = new ServletCallbackHandler(loginService);
+    LoginService _loginService = new HashLoginService("TestLoginService", Collections.<String, HashLoginService.User>singletonMap("user", new HashLoginService.KnownUser("user", new Password("pass"), new String[] {"user"})));
+    final ServletCallbackHandler _callbackHandler = new ServletCallbackHandler(_loginService);
     RequestHandler _handler = new RequestHandler();
     private static final String APP_CONTEXT = "localhost /ctx";
 
@@ -118,7 +118,7 @@ public class ConstraintTest extends TestCase
     public void testBasic()
             throws Exception
     {
-        ServerAuthentication serverAuthentication = new BasicServerAuthentication(loginService, TEST_REALM);
+        ServerAuthentication serverAuthentication = new BasicServerAuthentication(_loginService, TEST_REALM);
         _security.setServerAuthentication(serverAuthentication);
         _server.start();
 
@@ -154,7 +154,7 @@ public class ConstraintTest extends TestCase
     public void testForm()
             throws Exception
     {
-        ServerAuthentication serverAuthentication = new SessionCachingServerAuthentication(new FormServerAuthentication("/testLoginPage", "/testErrorPage", loginService));
+        ServerAuthentication serverAuthentication = new SessionCachingServerAuthentication(new FormServerAuthentication("/testLoginPage", "/testErrorPage", _loginService));
         _security.setServerAuthentication(serverAuthentication);
         _server.start();
 

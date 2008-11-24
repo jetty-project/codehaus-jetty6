@@ -54,7 +54,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
 //    private Map authProperties;
 //    private ServletCallbackHandler servletCallbackHandler;
 
-    private ServerAuthentication serverAuthentication;
+    private ServerAuthentication _serverAuthentication;
 
 
     public static Principal __NO_USER = new Principal()
@@ -115,7 +115,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
     //set jaspi components
 
     public void setServerAuthentication(ServerAuthentication serverAuthentication) {
-        this.serverAuthentication = serverAuthentication;
+        this._serverAuthentication = serverAuthentication;
     }
 
     /* ------------------------------------------------------------ */
@@ -123,7 +123,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
             throws Exception
     {
         super.doStart();
-        if (serverAuthentication == null)
+        if (_serverAuthentication == null)
             throw new NullPointerException("No auth configuration configured");
     }/* ------------------------------------------------------------ */
 
@@ -166,7 +166,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
 
                 try
                 {
-                    ServerAuthResult authResult = serverAuthentication.validateRequest(messageInfo);
+                    ServerAuthResult authResult = _serverAuthentication.validateRequest(messageInfo);
 //                    AuthStatus authStatus = authContext.validateRequest(messageInfo, clientSubject, serviceSubject);
                     if (!isAuthMandatory || authResult.getAuthStatus() == ServerAuthStatus.SUCCESS)
                     {
@@ -198,7 +198,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                             boolean secureResponse = true;
                             if (secureResponse)
                             {
-                                serverAuthentication.secureResponse(messageInfo, authResult);
+                                _serverAuthentication.secureResponse(messageInfo, authResult);
 //                                authContext.secureResponse(messageInfo, serviceSubject);
                             }
                         }

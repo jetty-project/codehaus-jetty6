@@ -34,25 +34,25 @@ import javax.security.auth.callback.Callback;
  */
 public class RequestParameterCallback implements Callback
 {
-    private String paramName;
-    private List paramValues;
+    private String _paramName;
+    private List _paramValues;
     
     public void setParameterName (String name)
     {
-        paramName = name;
+        _paramName = name;
     }
     public String getParameterName ()
     {
-        return paramName;
+        return _paramName;
     }
     
     public void setParameterValues (List values)
     {
-        paramValues = values;
+        _paramValues = values;
     }
     
     public List getParameterValues ()
     {
-        return paramValues;
+        return _paramValues;
     }
 }

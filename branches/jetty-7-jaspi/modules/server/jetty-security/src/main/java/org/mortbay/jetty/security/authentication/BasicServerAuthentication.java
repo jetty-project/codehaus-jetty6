@@ -38,16 +38,16 @@ import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.SimpleAuthResult;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class BasicServerAuthentication implements ServerAuthentication {
 
-    private final LoginService loginService;
-    private final String realmName;
+    private final LoginService _loginService;
+    private final String _realmName;
 
     public BasicServerAuthentication(LoginService loginService, String realmName) {
-        this.loginService = loginService;
-        this.realmName = realmName;
+        this._loginService = loginService;
+        this._realmName = realmName;
     }
 
     public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException {
@@ -60,7 +60,7 @@ public class BasicServerAuthentication implements ServerAuthentication {
             if (credentials != null)
             {
                 LoginCallback loginCallback = new LoginCallback(new Subject(), credentials);
-                loginService.login(loginCallback);
+                _loginService.login(loginCallback);
                 if (loginCallback.isSuccess()) {
                     return new SimpleAuthResult(ServerAuthStatus.SUCCESS, loginCallback.getSubject(), loginCallback.getUserPrincipal(), loginCallback.getGroups(), Constraint.__BASIC_AUTH);
                 }
@@ -71,7 +71,7 @@ public class BasicServerAuthentication implements ServerAuthentication {
             {
                 return SimpleAuthResult.NO_AUTH_RESULTS;
             }
-            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\"" + realmName + '"');
+            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\"" + _realmName + '"');
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return new SimpleAuthResult(ServerAuthStatus.SEND_CONTINUE, null, null, (String[])null,null);
         }

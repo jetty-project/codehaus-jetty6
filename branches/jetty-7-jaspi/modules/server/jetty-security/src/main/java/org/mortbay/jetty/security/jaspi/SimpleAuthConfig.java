@@ -35,24 +35,24 @@ public class SimpleAuthConfig implements ServerAuthConfig
 {
     public static final String HTTP_SERVLET = "HttpServlet";
 
-    private final String appContext;
-    private final ServerAuthContext serverAuthContext;
+    private final String _appContext;
+    private final ServerAuthContext _serverAuthContext;
 
     public SimpleAuthConfig(String appContext, ServerAuthContext serverAuthContext)
     {
-        this.appContext = appContext;
-        this.serverAuthContext = serverAuthContext;
+        this._appContext = appContext;
+        this._serverAuthContext = serverAuthContext;
     }
 
     public ServerAuthContext getAuthContext(String authContextID, Subject serviceSubject, Map properties) throws AuthException
     {
-        return serverAuthContext;
+        return _serverAuthContext;
     }
 
     //supposed to be of form host-name<space>context-path
     public String getAppContext()
     {
-        return appContext;
+        return _appContext;
     }
 
     //not used yet

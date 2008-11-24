@@ -34,26 +34,26 @@ import javax.servlet.http.Cookie;
  */
 public class HashCrossContextPsuedoSession<T> implements CrossContextPsuedoSession<T>
 {
-    private final String cookieName;
-    private final String cookiePath;
+    private final String _cookieName;
+    private final String _cookiePath;
     private final Random _random = new SecureRandom();
-    private final Map<String, T> data = new HashMap<String, T>();
+    private final Map<String, T> _data = new HashMap<String, T>();
 
 
     public HashCrossContextPsuedoSession(String cookieName, String cookiePath)
     {
-        this.cookieName = cookieName;
-        this.cookiePath = cookiePath == null? "/": cookiePath;
+        this._cookieName = cookieName;
+        this._cookiePath = cookiePath == null? "/": cookiePath;
     }
 
     public T fetch(HttpServletRequest request)
     {
         for (Cookie cookie: request.getCookies())
         {
-            if (cookieName.equals(cookie.getName()))
+            if (_cookieName.equals(cookie.getName()))
             {
                 String key = cookie.getValue();
-                return data.get(key);
+                return _data.get(key);
             }
         }
         return null;
@@ -63,22 +63,22 @@ public class HashCrossContextPsuedoSession<T> implements CrossContextPsuedoSessi
     {
         String key;
 
-        synchronized(data)
+        synchronized(_data)
         {
             // Create new ID
             while (true)
             {
                 key = Long.toString(Math.abs(_random.nextLong()),
                                       30 + (int)(System.currentTimeMillis() % 7));
-                if (!data.containsKey(key))
+                if (!_data.containsKey(key))
                     break;
             }
 
-            data.put(key,datum);
+            _data.put(key,datum);
         }
 
-        Cookie cookie = new Cookie(cookieName, key);
-        cookie.setPath(cookiePath);
+        Cookie cookie = new Cookie(_cookieName, key);
+        cookie.setPath(_cookiePath);
         response.addCookie(cookie);
     }
 
@@ -86,10 +86,10 @@ public class HashCrossContextPsuedoSession<T> implements CrossContextPsuedoSessi
     {
         for (Cookie cookie: request.getCookies())
         {
-            if (cookieName.equals(cookie.getName()))
+            if (_cookieName.equals(cookie.getName()))
             {
                 String key = cookie.getValue();
-                data.remove(key);
+                _data.remove(key);
                 break;
             }
         }

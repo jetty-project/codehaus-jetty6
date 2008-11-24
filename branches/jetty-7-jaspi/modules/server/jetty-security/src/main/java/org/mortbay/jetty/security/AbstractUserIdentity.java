@@ -29,21 +29,21 @@ import org.mortbay.jetty.UserIdentity;
  * @version $Rev$ $Date$
  */
 public abstract class AbstractUserIdentity implements UserIdentity {
-    private final ServerAuthResult authResult;
+    private final ServerAuthResult _authResult;
 
     protected AbstractUserIdentity(ServerAuthResult authResult) {
-        this.authResult = authResult;
+        this._authResult = authResult;
     }
 
     public Principal getUserPrincipal() {
-        return authResult.getUserPrincipal();
+        return _authResult.getUserPrincipal();
     }
 
     public String getAuthMethod() {
-        return authResult.getAuthMethod();
+        return _authResult.getAuthMethod();
     }
 
     protected ServerAuthResult getAuthResult() {
-        return authResult;
+        return _authResult;
     }
 }

@@ -26,15 +26,15 @@ public class JAASGroup implements Group
 {
     public static final String ROLES = "__roles__";
     
-    private String name = null;
-    private HashSet members = null;
+    private String _name = null;
+    private HashSet _members = null;
     
     
    
     public JAASGroup(String n)
     {
-        this.name = n;
-        this.members = new HashSet();
+        this._name = n;
+        this._members = new HashSet();
     }
    
     /* ------------------------------------------------------------ */
@@ -45,7 +45,7 @@ public class JAASGroup implements Group
      */
     public synchronized boolean addMember(Principal principal)
     {
-        return members.add(principal);
+        return _members.add(principal);
     }
 
     /**
@@ -55,7 +55,7 @@ public class JAASGroup implements Group
      */
     public synchronized boolean removeMember(Principal principal)
     {
-        return members.remove(principal);
+        return _members.remove(principal);
     }
 
     /**
@@ -65,7 +65,7 @@ public class JAASGroup implements Group
      */
     public boolean isMember(Principal principal)
     {
-        return members.contains(principal);
+        return _members.contains(principal);
     }
 
 
@@ -99,7 +99,7 @@ public class JAASGroup implements Group
             
         }
 
-        return new MembersEnumeration (members.iterator());
+        return new MembersEnumeration (_members.iterator());
     }
 
 
@@ -143,7 +143,7 @@ public class JAASGroup implements Group
     public String getName()
     {
         
-        return name;
+        return _name;
     }
 
 }

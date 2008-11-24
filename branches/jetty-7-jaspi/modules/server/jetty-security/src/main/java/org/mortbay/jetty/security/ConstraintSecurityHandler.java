@@ -37,7 +37,7 @@ import org.mortbay.util.StringMap;
  */
 public class ConstraintSecurityHandler extends AbstractSecurityHandler implements ConstraintAware {
     private ConstraintMapping[] _constraintMappings;
-    private Set<String> roles;
+    private Set<String> _roles;
     private PathMap _constraintMap=new PathMap();
 
 
@@ -51,7 +51,7 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler implement
     }
 
     public Set<String> getRoles() {
-        return roles;
+        return _roles;
     }
 
     /* ------------------------------------------------------------ */
@@ -65,7 +65,7 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler implement
     public void setConstraintMappings(ConstraintMapping[] constraintMappings, Set<String> roles)
     {
         _constraintMappings=constraintMappings;
-        this.roles = roles;
+        this._roles = roles;
 
         if (_constraintMappings!=null)
         {
