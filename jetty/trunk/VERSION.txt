@@ -19,6 +19,7 @@
  + JETTY-801 Bring back 2 arg EnvEntry constructor
  + JETTY-804 HttpClient timeout does not always work
  + JETTY-805 Fix jetty-jaas.xml for new UserRealm package
+ + JETTY-806 Timeout related Deadlocks in HTTP Client
 
 jetty-6.1.12 4 November 2008
  + JETTY-731 Completed DeliverListener for cometd
