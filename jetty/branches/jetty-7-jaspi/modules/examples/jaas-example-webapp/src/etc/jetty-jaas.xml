@@ -20,8 +20,8 @@
     <!-- For more information see the jetty wiki at               -->
     <!--   http://http://docs.codehaus.org/display/JETTY/JAAS     -->
     <!-- ======================================================== -->
-    <Set name="UserRealms">
-      <Array type="org.mortbay.jetty.security.UserRealm">
+    <Set name="loginServices">
+      <Array type="org.mortbay.jetty.LoginService">
         <Item>
           <New class="org.mortbay.jetty.plus.jaas.JAASLoginService">
            <Set name="Name">Test JAAS Realm</Set>

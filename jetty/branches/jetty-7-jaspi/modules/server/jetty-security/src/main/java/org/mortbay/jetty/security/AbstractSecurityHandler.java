@@ -26,6 +26,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.AuthenticationManager;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.JettyMessageInfo;
 import org.mortbay.jetty.LoginService;
@@ -38,6 +39,7 @@ import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.UserIdentity;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.handler.SecurityHandler;
+import org.mortbay.log.Log;
 
 /**
  * @version $Rev$ $Date$
@@ -57,7 +59,8 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
     // private Map authProperties;
     // private ServletCallbackHandler servletCallbackHandler;
 
-    private ServerAuthentication _serverAuthentication;
+    //private ServerAuthentication _serverAuthentication;
+    private AuthenticationManager _authManager = new DefaultAuthenticationManager();
 
     public static Principal __NO_USER = new Principal()
     {
@@ -126,18 +129,37 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
         _checkWelcomeFiles = authenticateWelcomeFiles;
     }
 
+    public void setAuthenticationManager (AuthenticationManager authManager)
+    {
+        _authManager = authManager;
+    }
+    
+    public AuthenticationManager getAuthenticationManager ()
+    {
+        return _authManager;
+    }
+    
     // set jaspi components
 
-    public void setServerAuthentication(ServerAuthentication serverAuthentication)
+  /*  public void setServerAuthentication(ServerAuthentication serverAuthentication)
     {
         this._serverAuthentication = serverAuthentication;
     }
-
+*/
     /* ------------------------------------------------------------ */
     public void doStart() throws Exception
     {
         super.doStart();
-        if (_serverAuthentication == null) throw new NullPointerException("No auth configuration configured");
+        if (_authManager == null)
+        {
+            _authManager = new DefaultAuthenticationManager();
+            Log.warn ("Using DefaultAuthenticationManager");
+        }
+        
+        _authManager.setSecurityHandler(this);
+        _authManager.start();
+        
+        //if (_serverAuthentication == null) throw new NullPointerException("No auth configuration configured");
     }/* ------------------------------------------------------------ */
 
     /*
@@ -187,7 +209,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
 
                 try
                 {
-                    ServerAuthResult authResult = _serverAuthentication.validateRequest(messageInfo);
+                    ServerAuthResult authResult = _authManager.validateRequest(messageInfo);
                     // AuthStatus authStatus =
                     // authContext.validateRequest(messageInfo, clientSubject,
                     // serviceSubject);
@@ -228,7 +250,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                             boolean secureResponse = true;
                             if (secureResponse)
                             {
-                                _serverAuthentication.secureResponse(messageInfo, authResult);
+                                _authManager.secureResponse(messageInfo, authResult);
                                 // authContext.secureResponse(messageInfo,
                                 // serviceSubject);
                             }

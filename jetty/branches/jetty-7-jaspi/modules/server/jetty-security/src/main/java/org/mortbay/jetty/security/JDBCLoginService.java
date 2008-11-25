@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.security.jaspi.modules;
+package org.mortbay.jetty.security;
 
 import java.io.IOException;
 import java.sql.Connection;
