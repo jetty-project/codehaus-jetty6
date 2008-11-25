@@ -424,7 +424,7 @@ public class WebXmlConfiguration implements Configuration
         if (_securityHandler instanceof ConstraintAware)
         {
             _constraintMappings = LazyList.array2List(((ConstraintAware) _securityHandler).getConstraintMappings());
-            _roles.clear();
+            
             if (((ConstraintAware) _securityHandler).getRoles() != null)
             {
                 _roles.addAll(((ConstraintAware) _securityHandler).getRoles());
