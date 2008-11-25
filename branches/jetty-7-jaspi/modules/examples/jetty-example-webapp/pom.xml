@@ -87,7 +87,7 @@
             </sessionHandler>
           </webAppConfig>
           <loginServices>
-            <loginService implementation="org.mortbay.jetty.security.jaspi.modules.HashLoginService">
+            <loginService implementation="org.mortbay.jetty.security.HashLoginService">
               <name>Test Realm</name>
               <config>../../../etc/realm.properties</config>
             </loginService>
