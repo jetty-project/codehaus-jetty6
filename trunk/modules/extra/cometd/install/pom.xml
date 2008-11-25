@@ -47,6 +47,8 @@
             <configuration>
               <tasks>
                 <copy failonerror="false" file="../bayeux/target/cometd-jetty-${project.version}.jar" todir="../../../../lib/cometd" />
+                <copy failonerror="false" file="../client/target/cometd-client-${project.version}.jar" todir="../../../../lib/cometd" />
+                <copy failonerror="false" file="../client/target/cometd-client-${project.version}-tests.jar" todir="../../../../lib/cometd" />
                 <copy failonerror="false" file="../demo/target/cometd-demo-${project.version}.war" tofile="../../../../webapps/cometd.war" />
               </tasks>
             </configuration>
