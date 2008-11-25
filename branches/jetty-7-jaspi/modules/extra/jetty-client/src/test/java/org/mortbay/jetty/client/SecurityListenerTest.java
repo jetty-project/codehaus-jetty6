@@ -43,8 +43,9 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
+import org.mortbay.jetty.security.DefaultAuthenticationManager;
 import org.mortbay.jetty.security.authentication.BasicServerAuthentication;
-import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
+import org.mortbay.jetty.security.HashLoginService;
 
 /**
  * Functional testing for HttpExchange.
@@ -278,8 +279,12 @@ public class SecurityListenerTest extends TestCase
 
          LoginService loginService = new HashLoginService("MyRealm","src/test/resources/realm.properties");
          ConstraintSecurityHandler sh = new ConstraintSecurityHandler();
-         ServerAuthentication serverAuthentication = new BasicServerAuthentication(loginService, "MyRealm");
-         sh.setServerAuthentication(serverAuthentication);
+         sh.setAuthenticationManager(new DefaultAuthenticationManager());
+         sh.getAuthenticationManager().setAuthMethod(Constraint.__BASIC_AUTH);
+         sh.setLoginService(loginService);
+         
+         //ServerAuthentication serverAuthentication = new BasicServerAuthentication(loginService, "MyRealm");
+         //sh.setServerAuthentication(serverAuthentication);
          _server.setHandler(sh);
 
          Handler testHandler = new AbstractHandler()

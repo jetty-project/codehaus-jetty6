@@ -21,11 +21,12 @@
 package org.mortbay.jetty.handler;
 
 import org.mortbay.component.LifeCycle;
+import org.mortbay.jetty.AuthenticationManager;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.RunAsToken;
-import org.mortbay.jetty.ServerAuthentication;
+
 
 /**
  * @version $Rev$ $Date$
@@ -38,7 +39,8 @@ public interface SecurityHandler extends LifeCycle, Handler, HandlerContainer
 
     RunAsToken newRunAsToken(String runAsRole);
 
-    void setServerAuthentication(ServerAuthentication serverAuthentication);
+    void setAuthenticationManager (AuthenticationManager authManager);
+    AuthenticationManager getAuthenticationManager();
     
     LoginService getLoginService ();
     void setLoginService (LoginService service);

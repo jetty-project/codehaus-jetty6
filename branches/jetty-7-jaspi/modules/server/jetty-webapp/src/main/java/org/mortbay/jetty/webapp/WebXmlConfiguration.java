@@ -1043,12 +1043,11 @@ public class WebXmlConfiguration implements Configuration
                     getWebAppContext().getSecurityHandler().setLoginService(loginService);
             }
 
-            ServerAuthentication serverAuthentication;
-            String m = method.toString(false, true);
-            boolean allowLazyAuthentication = true;
-            boolean useSSO = false;
+           
+            String m = method.toString(false, true); 
+            getWebAppContext().getSecurityHandler().getAuthenticationManager().setAuthMethod(m);
             if (Constraint.__FORM_AUTH.equals(m))
-            {
+            {  
                 XmlParser.Node formConfig = node.get("form-login-config");
                 if (formConfig != null)
                 {
@@ -1057,20 +1056,10 @@ public class WebXmlConfiguration implements Configuration
                     if (loginPage != null) loginPageName = loginPage.toString(false, true);
                     String errorPageName = null;
                     XmlParser.Node errorPage = formConfig.get("form-error-page");
-                    if (errorPage != null)
-                    {
-                        errorPageName = errorPage.toString(false, true);
-                    }
-                    serverAuthentication = new FormServerAuthentication(loginPageName, errorPageName, loginService);
-                    if (useSSO)
-                    {
-                        CrossContextPsuedoSession<ServerAuthResult> xcps = null;
-                        serverAuthentication = new XCPSCachingServerAuthentication(serverAuthentication, xcps);
-                    }
-                    else
-                    {
-                        serverAuthentication = new SessionCachingServerAuthentication(serverAuthentication);
-                    }
+                    if (errorPage != null) errorPageName = errorPage.toString(false, true);
+                    
+                    _securityHandler.getAuthenticationManager().setLoginPage(loginPageName);
+                    _securityHandler.getAuthenticationManager().setErrorPage(errorPageName);
                 }
                 else
                 {
@@ -1078,35 +1067,6 @@ public class WebXmlConfiguration implements Configuration
                     throw new IllegalArgumentException("No form config given for form auth");
                 }
             }
-            else if (Constraint.__BASIC_AUTH.equals(m))
-            {
-                serverAuthentication = new LazyServerAuthentication(new BasicServerAuthentication(loginService, realmName));
-            }
-            else if (Constraint.__DIGEST_AUTH.equals(m))
-            {
-                serverAuthentication = new LazyServerAuthentication(new DigestServerAuthentication(loginService, realmName));
-            }
-            else if (Constraint.__CERT_AUTH.equals(m) || Constraint.__CERT_AUTH2.equals(m))
-            {
-                // TODO figure out how to configure max handshake?
-                // TODO lazy?
-                serverAuthentication = new LazyServerAuthentication(new ClientCertServerAuthentication(loginService));
-            }
-            else
-            {
-                // TODO this should be first and rely on explicit jaspi
-                // configuration
-                Log.warn("UNKNOWN AUTH METHOD: " + m);
-                ServerAuthContext serverAuthContext = null;
-                ServletCallbackHandler callbackHandler = new ServletCallbackHandler(loginService);
-                // TODO set this to host-name<space>context-root
-                String appContext = null;
-                ServerAuthConfig serverAuthConfig = new SimpleAuthConfig(appContext, serverAuthContext);
-                serverAuthentication = new JaspiServerAuthentication(appContext, serverAuthConfig, null, callbackHandler,
-                // TODO??
-                                                                     null, allowLazyAuthentication);
-            }
-            _securityHandler.setServerAuthentication(serverAuthentication);
         }
 
     }

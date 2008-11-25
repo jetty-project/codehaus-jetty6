@@ -28,7 +28,7 @@ import javax.sql.DataSource;
 
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.plus.naming.NamingEntryUtil;
-import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
+import org.mortbay.jetty.security.HashLoginService;
 import org.mortbay.log.Log;
 
 

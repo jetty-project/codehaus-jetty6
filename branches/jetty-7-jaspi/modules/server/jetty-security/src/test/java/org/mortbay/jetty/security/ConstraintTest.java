@@ -35,7 +35,7 @@ import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.security.authentication.BasicServerAuthentication;
 import org.mortbay.jetty.security.authentication.FormServerAuthentication;
 import org.mortbay.jetty.security.authentication.SessionCachingServerAuthentication;
-import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
+import org.mortbay.jetty.security.HashLoginService;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.util.B64Code;
 
@@ -52,7 +52,8 @@ public class ConstraintTest extends TestCase
     ContextHandler _context = new ContextHandler();
     SessionHandler _session = new SessionHandler();
     ConstraintSecurityHandler _security = new ConstraintSecurityHandler();
-    LoginService _loginService = new HashLoginService("TestLoginService", Collections.<String, HashLoginService.User>singletonMap("user", new HashLoginService.KnownUser("user", new Password("pass"), new String[] {"user"})));
+    LoginService _loginService = new HashLoginService("TestRealm",
+                                                      Collections.<String, HashLoginService.User>singletonMap("user", new HashLoginService.KnownUser("user", new Password("pass"), new String[] {"user"})));
     final ServletCallbackHandler _callbackHandler = new ServletCallbackHandler(_loginService);
     RequestHandler _handler = new RequestHandler();
     private static final String APP_CONTEXT = "localhost /ctx";
@@ -68,6 +69,7 @@ public class ConstraintTest extends TestCase
         _context.setHandler(_session);
         _session.setHandler(_security);
         _security.setHandler(_handler);
+        _security.setAuthenticationManager(new DefaultAuthenticationManager());
 
         Constraint constraint0 = new Constraint();
         constraint0.setAuthenticate(true);
@@ -118,8 +120,10 @@ public class ConstraintTest extends TestCase
     public void testBasic()
             throws Exception
     {
-        ServerAuthentication serverAuthentication = new BasicServerAuthentication(_loginService, TEST_REALM);
-        _security.setServerAuthentication(serverAuthentication);
+        _security.getAuthenticationManager().setAuthMethod(Constraint.__BASIC_AUTH);
+        _security.setLoginService(_loginService);
+        //ServerAuthentication serverAuthentication = new BasicServerAuthentication(_loginService, TEST_REALM);
+        //_security.setServerAuthentication(serverAuthentication);
         _server.start();
 
         String response;
@@ -154,8 +158,13 @@ public class ConstraintTest extends TestCase
     public void testForm()
             throws Exception
     {
-        ServerAuthentication serverAuthentication = new SessionCachingServerAuthentication(new FormServerAuthentication("/testLoginPage", "/testErrorPage", _loginService));
-        _security.setServerAuthentication(serverAuthentication);
+        _security.getAuthenticationManager().setAuthMethod(Constraint.__FORM_AUTH);
+        _security.getAuthenticationManager().setLoginPage("/testLoginPage");
+        _security.getAuthenticationManager().setErrorPage("/testErrorPage");
+        _security.setLoginService(_loginService);
+        
+       // ServerAuthentication serverAuthentication = new SessionCachingServerAuthentication(new FormServerAuthentication("/testLoginPage", "/testErrorPage", _loginService));
+       // _security.setServerAuthentication(serverAuthentication);
         _server.start();
 
         String response;

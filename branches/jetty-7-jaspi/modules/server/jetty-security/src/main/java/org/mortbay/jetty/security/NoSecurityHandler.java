@@ -21,6 +21,7 @@ package org.mortbay.jetty.security;
 
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.handler.SecurityHandler;
+import org.mortbay.jetty.AuthenticationManager;
 import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.RunAsToken;
 import org.mortbay.jetty.ServerAuthentication;
@@ -47,6 +48,15 @@ public class NoSecurityHandler extends HandlerWrapper implements SecurityHandler
 
     public void setLoginService(LoginService service)
     {        
+    }
+
+    public AuthenticationManager getAuthenticationManager()
+    {
+        return null;
+    }
+
+    public void setAuthenticationManager(AuthenticationManager authManager)
+    {     
     }
 
 }

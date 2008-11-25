@@ -44,8 +44,9 @@ import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
+import org.mortbay.jetty.security.DefaultAuthenticationManager;
 import org.mortbay.jetty.security.authentication.BasicServerAuthentication;
-import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
+import org.mortbay.jetty.security.HashLoginService;
 import org.mortbay.jetty.ssl.SslSocketConnector;
 
 /**
@@ -157,8 +158,11 @@ public class SslSecurityListenerTest extends TestCase
 
         LoginService loginService = new HashLoginService("MyRealm","src/test/resources/realm.properties");
         ConstraintSecurityHandler sh = new ConstraintSecurityHandler();
-        ServerAuthentication serverAuthentication = new BasicServerAuthentication(loginService, "MyRealm");
-        sh.setServerAuthentication(serverAuthentication);
+        sh.setAuthenticationManager(new DefaultAuthenticationManager());
+        sh.getAuthenticationManager().setAuthMethod(Constraint.__BASIC_AUTH);
+        sh.setLoginService(loginService);
+        //ServerAuthentication serverAuthentication = new BasicServerAuthentication(loginService, "MyRealm");
+        //sh.setServerAuthentication(serverAuthentication);
         Set<String> roles = new HashSet<String>(Arrays.asList(new String[]{"user", "admin"}));
         sh.setConstraintMappings(new ConstraintMapping[] { cm }, roles);
         _server.setHandler(sh);

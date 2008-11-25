@@ -34,6 +34,20 @@ public class Constraint implements Cloneable, Serializable
     public final static String __CERT_AUTH = "CLIENT_CERT";
 
     public final static String __CERT_AUTH2 = "CLIENT-CERT";
+    
+    public static boolean validateMethod (String method)
+    {
+        if (method == null)
+            return false;
+        method = method.trim();
+        if (method.equals(__FORM_AUTH) 
+                || method.equals(__BASIC_AUTH) 
+                || method.equals (__DIGEST_AUTH) 
+                || method.equals (__CERT_AUTH) 
+                || method.equals(__CERT_AUTH2))
+            return true;
+        return false;
+    }
 
     /* ------------------------------------------------------------ */
     public final static int DC_UNSET = -1, DC_NONE = 0, DC_INTEGRAL = 1, DC_CONFIDENTIAL = 2, DC_FORBIDDEN = 3;
