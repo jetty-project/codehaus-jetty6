@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.JettyMessageInfo;
-import org.mortbay.jetty.LoginCallback;
+import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.ServerAuthException;
@@ -132,7 +132,7 @@ public class DigestServerAuthentication implements ServerAuthentication
 
                 if (n > 0)
                 {
-                    LoginCallback loginCallback = new LoginCallback(new Subject(), credentials);
+                    LoginCallbackImpl loginCallback = new LoginCallbackImpl(new Subject(), digest.username, credentials.toCharArray());
                     _loginService.login(loginCallback);
                     if (loginCallback.isSuccess()) { return new SimpleAuthResult(ServerAuthStatus.SUCCESS, loginCallback.getSubject(), loginCallback
                             .getUserPrincipal(), loginCallback.getGroups(), Constraint.__BASIC_AUTH); }

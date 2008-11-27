@@ -27,14 +27,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.JettyMessageInfo;
-import org.mortbay.jetty.LoginCallback;
+import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.ServerAuthException;
 import org.mortbay.jetty.ServerAuthResult;
 import org.mortbay.jetty.ServerAuthStatus;
 import org.mortbay.jetty.ServerAuthentication;
+import org.mortbay.jetty.security.B64Code;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.SimpleAuthResult;
+import org.mortbay.util.StringUtil;
 
 /**
  * @version $Rev$ $Date$
@@ -61,11 +63,18 @@ public class BasicServerAuthentication implements ServerAuthentication
         try
         {
             if (credentials != null)
-            {
-                LoginCallback loginCallback = new LoginCallback(new Subject(), credentials);
+            {                  
+                credentials = credentials.substring(credentials.indexOf(' ')+1);
+                credentials = B64Code.decode(credentials,StringUtil.__ISO_8859_1);
+                int i = credentials.indexOf(':');
+                String username = credentials.substring(0,i);
+                String password = credentials.substring(i+1);
+
+
+                LoginCallbackImpl loginCallback = new LoginCallbackImpl(new Subject(), username, password.toCharArray());
                 _loginService.login(loginCallback);
                 if (loginCallback.isSuccess()) { return new SimpleAuthResult(ServerAuthStatus.SUCCESS, loginCallback.getSubject(), loginCallback
-                        .getUserPrincipal(), loginCallback.getGroups(), Constraint.__BASIC_AUTH); }
+                                                                             .getUserPrincipal(), loginCallback.getGroups(), Constraint.__BASIC_AUTH); }
 
             }
 

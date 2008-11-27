@@ -38,6 +38,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.mortbay.jetty.LoginCallback;
+import org.mortbay.jetty.security.LoginCallbackImpl;
 
 
 /* ---------------------------------------------------- */
@@ -198,11 +199,11 @@ public class TestJAASUserRealm extends TestCase
             
             loginService.setLoginModuleName ("ds");
 
-            LoginCallback loginCallback = new LoginCallback(new Subject(), "me", "blah".toCharArray());
+            LoginCallback loginCallback = new LoginCallbackImpl(new Subject(), "me", "blah".toCharArray());
             loginService.login(loginCallback);
             assertFalse (loginCallback.isSuccess());
 
-            loginCallback = new LoginCallback(new Subject(), "me", "me".toCharArray());
+            loginCallback = new LoginCallbackImpl(new Subject(), "me", "me".toCharArray());
             loginService.login (loginCallback);
             
             assertTrue (loginCallback.isSuccess());
@@ -265,11 +266,11 @@ public class TestJAASUserRealm extends TestCase
         JAASLoginService loginService = new JAASLoginService("props");
         loginService.setLoginModuleName ("props");
 
-        LoginCallback loginCallback = new LoginCallback(new Subject(), "user", "wrong".toCharArray());
+        LoginCallback loginCallback = new LoginCallbackImpl(new Subject(), "user", "wrong".toCharArray());
         loginService.login(loginCallback);
         assertFalse (loginCallback.isSuccess());
 
-        loginCallback = new LoginCallback(new Subject(), "user", "user".toCharArray());
+        loginCallback = new LoginCallbackImpl(new Subject(), "user", "user".toCharArray());
         loginService.login(loginCallback);
 
         assertTrue (loginCallback.isSuccess());

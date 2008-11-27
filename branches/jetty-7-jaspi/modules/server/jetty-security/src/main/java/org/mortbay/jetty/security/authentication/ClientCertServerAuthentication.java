@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.JettyMessageInfo;
-import org.mortbay.jetty.LoginCallback;
+import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.ServerAuthException;
 import org.mortbay.jetty.ServerAuthResult;
@@ -81,7 +81,7 @@ public class ClientCertServerAuthentication implements ServerAuthentication
             final char[] password = B64Code.encode(certs[0].getSignature());
 
             // TODO is cert_auth correct?
-            LoginCallback loginCallback = new LoginCallback(new Subject(), username, password);
+            LoginCallbackImpl loginCallback = new LoginCallbackImpl(new Subject(), username, password);
             _loginService.login(loginCallback);
             if (loginCallback.isSuccess()) 
             { 
