@@ -43,7 +43,6 @@ public class DateCache
 {
     public static String DEFAULT_FORMAT="EEE MMM dd HH:mm:ss zzz yyyy";
     private static long __hitWindow=60*60;
-    private static long __MaxMisses=10;
     
     private String _formatString;
     private String _tzFormatString;
@@ -296,8 +295,7 @@ public class DateCache
     public String now()
     {
         long now=System.currentTimeMillis();
-        int n=0xfff&(int)now;
-        _lastMs=n%1000;
+        _lastMs=(int)(now%1000);
         return format(now);
     }
 

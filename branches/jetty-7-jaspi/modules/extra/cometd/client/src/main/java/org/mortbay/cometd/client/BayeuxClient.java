@@ -1,5 +1,5 @@
 // ========================================================================
-// Copyright 2006-2007 Mort Bay Consulting Pty. Ltd.
+// Copyright 2006-20078 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.Cookie;
@@ -78,9 +80,11 @@ public class BayeuxClient extends MessagePool implements Client
     private int _batch;
     private boolean _formEncoded;
     private Map<String, Cookie> _cookies=new ConcurrentHashMap<String, Cookie>();
+    private Advice _advice;
+    private Timer _timer;
 
     /* ------------------------------------------------------------ */
-    public BayeuxClient(HttpClient client, Address address, String uri) throws IOException
+    public BayeuxClient(HttpClient client, Address address, String uri, Timer timer) throws IOException
     {
         _client=client;
         _address=address;
@@ -88,6 +92,15 @@ public class BayeuxClient extends MessagePool implements Client
 
         _inQ=new ArrayQueue<Message>();
         _outQ=new ArrayQueue<Message>();
+        
+        _timer = timer;
+        if (_timer == null)
+            _timer = new Timer("DefaultBayeuxClientTimer", true);
+    }
+    
+    public BayeuxClient(HttpClient client, Address address, String uri) throws IOException
+    {
+        this (client, address, uri, new Timer("DefaultBayeuxClientTimer", true));
     }
 
     /* ------------------------------------------------------------ */
@@ -650,7 +663,25 @@ public class BayeuxClient extends MessagePool implements Client
                                     }
                                 }
 
-                                _pull=new Connect();
+                                Map adviceField = (Map)msg.get(Bayeux.ADVICE_FIELD);
+                                if (adviceField != null)
+                                    _advice = new Advice(adviceField);
+                                
+                                //if interval in advice, set up callback to expire at the interval value
+                                //else  just send the connect
+                                if (_advice != null && _advice.getInterval() > 0)
+                                {
+                                    TimerTask task = new TimerTask()
+                                    {
+                                        public void run()
+                                        {
+                                            _pull=new Connect();
+                                        }
+                                    };
+                                    _timer.schedule(task, _advice.getInterval());
+                                }
+                                else
+                                    _pull=new Connect();
                             }
                             else
                                 throw new IOException("Connect failed:"+_responses[0]);

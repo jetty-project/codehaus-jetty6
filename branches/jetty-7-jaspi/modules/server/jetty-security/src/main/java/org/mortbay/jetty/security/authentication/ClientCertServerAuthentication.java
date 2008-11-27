@@ -33,9 +33,9 @@ import org.mortbay.jetty.ServerAuthException;
 import org.mortbay.jetty.ServerAuthResult;
 import org.mortbay.jetty.ServerAuthStatus;
 import org.mortbay.jetty.ServerAuthentication;
+import org.mortbay.jetty.security.B64Code;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.SimpleAuthResult;
-import org.mortbay.util.B64Code;
 
 /**
  * @version $Rev$ $Date$

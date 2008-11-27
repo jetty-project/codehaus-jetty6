@@ -26,9 +26,11 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.mortbay.jetty.Server;
 import org.mortbay.jetty.plugin.util.ConsoleScanner;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.PluginLog;
+import org.mortbay.jetty.plugin.util.SystemProperties;
 import org.mortbay.jetty.plugin.util.SystemProperty;
 import org.mortbay.util.Scanner;
 
@@ -133,7 +135,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * that have been set on the command line or by the JVM. Optional.
      * @parameter 
      */
-    protected SystemProperty[] systemProperties;
+    protected SystemProperties systemProperties;
     
     
     
@@ -268,11 +270,6 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     }
 
 
-    public SystemProperty[] getSystemProperties()
-    {
-        return this.systemProperties;
-    }
-
     public File getJettyXmlFile ()
     {
         return this.jettyConfig;
@@ -331,7 +328,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         {
             getLog().debug("Starting Jetty Server ...");
 
-            configureSystemProperties();
+            printSystemProperties();
             setServer(createServer());
 
             //apply any config from a jetty.xml file first which is able to
@@ -378,16 +375,16 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             //particular Jetty version
             finishConfigurationBeforeStart();
 
-            if(stopPort>0 && stopKey!=null)
-            {
-                System.setProperty("STOP.PORT", String.valueOf(stopPort));
-                System.setProperty("STOP.KEY", stopKey);
-                org.mortbay.start.Monitor.monitor();
-            }
             // start Jetty
             server.start();
 
             getLog().info("Started Jetty Server");
+            
+            if(stopPort>0 && stopKey!=null)
+            {
+                org.mortbay.jetty.plugin.util.Monitor monitor = new org.mortbay.jetty.plugin.util.Monitor(stopPort, stopKey, new Server[]{(Server)server.getProxiedObject()}, !daemon);
+                monitor.start();
+            }
             
             // start the scanner thread (if necessary) on the main webapp
             configureScanner ();
@@ -497,15 +494,20 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         
     }
 
-    private void configureSystemProperties ()
+    private void printSystemProperties ()
     {
-        // get the system properties set up
-        for (int i = 0; (getSystemProperties() != null) && i < getSystemProperties().length; i++)
+        // print out which system properties were set up
+        if (getLog().isDebugEnabled())
         {
-            boolean result = getSystemProperties()[i].setIfNotSetAlready();
-            getLog().info("Property " + getSystemProperties()[i].getName() + "="
-                    + getSystemProperties()[i].getValue() + " was "
-                    + (result ? "set" : "skipped"));
+            if (systemProperties != null)
+            {
+                Iterator itor = systemProperties.getSystemProperties().iterator();
+                while (itor.hasNext())
+                {
+                    SystemProperty prop = (SystemProperty)itor.next();
+                    getLog().debug("Property "+prop.getName()+"="+prop.getValue()+" was "+ (prop.isSet() ? "set" : "skipped"));
+                }
+            }
         }
     }
 

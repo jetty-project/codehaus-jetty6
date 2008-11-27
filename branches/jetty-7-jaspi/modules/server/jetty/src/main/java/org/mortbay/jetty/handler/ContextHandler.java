@@ -496,6 +496,18 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     {
         _shutdown = shutdown;
     }
+
+    /* ------------------------------------------------------------ */
+    public Logger getLogger()
+    {
+        return _logger;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setLogger(Logger logger)
+    {
+        _logger=logger;
+    }
     
     /* ------------------------------------------------------------ */
     /* 

@@ -36,6 +36,8 @@ import javax.net.ssl.X509TrustManager;
 import org.mortbay.component.LifeCycle;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.io.nio.DirectNIOBuffer;
+import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpSchemes;
@@ -107,6 +109,8 @@ public class HttpClient extends AbstractBuffers
     private String _trustStorePassword;
     private String _trustManagerAlgorithm = "SunX509";
 
+    private SSLContext _sslContext;
+    
     private String _protocol = "TLS";
     private String _provider;
     private String _secureRandomAlgorithm;
@@ -283,10 +287,12 @@ public class HttpClient extends AbstractBuffers
         if (_connectorType != CONNECTOR_SOCKET)
         {
             Buffer buf = null;
-            if (size == getHeaderBufferSize())
-                buf = new NIOBuffer(size, NIOBuffer.INDIRECT);
+            if (size==getHeaderBufferSize())
+                buf=new IndirectNIOBuffer(size);
+            else if (_useDirectBuffers)
+                buf=new DirectNIOBuffer(size);
             else
-                buf = new NIOBuffer(size, _useDirectBuffers ? NIOBuffer.DIRECT : NIOBuffer.INDIRECT);
+                buf=new IndirectNIOBuffer(size);
             return buf;
         }
         else
@@ -345,7 +351,7 @@ public class HttpClient extends AbstractBuffers
         {
             public void run()
             {
-                while (isStarted())
+                while (isRunning())
                 {
                     _timeoutQ.setNow();
                     _timeoutQ.tick();
@@ -396,14 +402,18 @@ public class HttpClient extends AbstractBuffers
      */
     protected SSLContext getSSLContext() throws IOException
     {
-        if (_keyStoreLocation == null)
-        {
-            return getLooseSSLContext();
-        }
-        else
-        {
-            return getStrictSSLContext();
-        }
+    	if (_sslContext == null) 
+    	{
+			if (_keyStoreLocation == null) 
+			{
+				_sslContext = getLooseSSLContext();
+			} 
+			else 
+			{
+				_sslContext = getStrictSSLContext();
+			}
+		}   	
+    	return _sslContext;    	
     }
 
     protected SSLContext getStrictSSLContext() throws IOException

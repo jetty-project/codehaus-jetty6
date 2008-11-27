@@ -70,13 +70,13 @@ public class ServletTest extends TestCase
 
         String expected=
             "HTTP/1.1 200 OK\r\n"+
-            "Content-Type: text/html; charset=iso-8859-1\r\n"+
+            "Content-Type: text/html;charset=ISO-8859-1\r\n"+
             "Content-Length: 21\r\n"+
             "\r\n"+
             "<h1>Test Servlet</h1>" +
 
             "HTTP/1.1 200 OK\r\n"+
-            "Content-Type: text/html; charset=iso-8859-1\r\n"+
+            "Content-Type: text/html;charset=ISO-8859-1\r\n"+
             "Content-Length: 22\r\n"+
             "\r\n"+
             "<h1>Hello Servlet</h1>";
@@ -217,17 +217,17 @@ public class ServletTest extends TestCase
         
         String expected=
             "HTTP/1.1 200 OK\r\n"+
-            "Content-Type: text/html; charset=iso-8859-1\r\n"+
+            "Content-Type: text/html;charset=ISO-8859-1\r\n"+
             "Content-Length: 21\r\n"+
             "\r\n"+
             "<h1>Test Servlet</h1>"+
             "HTTP/1.1 200 OK\r\n"+
-            "Content-Type: text/html; charset=iso-8859-1\r\n"+
+            "Content-Type: text/html;charset=ISO-8859-1\r\n"+
             "Content-Length: 21\r\n"+
             "\r\n"+
             "<h1>Test Servlet</h1>"+
             "HTTP/1.1 200 OK\r\n"+
-            "Content-Type: text/html; charset=iso-8859-1\r\n"+
+            "Content-Type: text/html;charset=ISO-8859-1\r\n"+
             "Connection: close\r\n"+
             "\r\n"+
             "<h1>Test Servlet</h1>";

@@ -193,8 +193,8 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
                 client.doDeliverListeners();
                 ArrayQueue<Message> messages= (ArrayQueue)client.getQueue();
                 int size=messages.size();
-
                 boolean flushed=false;
+                
                 try
                 {
                     if (pollReply!=null)

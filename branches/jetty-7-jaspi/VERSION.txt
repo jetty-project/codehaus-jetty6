@@ -1,5 +1,53 @@
-jetty-7.0-SNAPSHOT
+ + JETTY-731 Completed DeliverListener for cometd
+ + JETTY-748 RandomAccessFileBuffer for hadoop optimization
+ + JETTY-748 Reduced retries on async writes
+ + JETTY-765 ensure stop mojo works for all execution phases
+ + JETTY-774 Improved caching of mime types with charsets
+ + JETTY-775 AbstractSessionTest remove timing related test
+ + JETTY-778 handle granular windows timer in lifecycle test
+ + JETTY-779 Fixed line feed in request log
+ + JETTY-782 Implement interval advice for BayeuxClient
+ + JETTY-783 Update jetty self-signed certificate
+ + JETTY-784 TerracottaSessionManager leaks sessions scavenged in other nodes
+ + JETTY-786 Allow DataSourceUserRealm to create tables
+ + JETTY-787 Handle MSIE7 mixed encoding
+ + JETTY-788 Fix jotm for scoped jndi naming
+ + JETTY-790 WaitingContinuations can change mutex if not pending
+ + JETTY-792 TerracottaSessionManager does not unlock new session with requested id
+ + JETTY-793 Fixed DataCache millisecond rounding
+ + JETTY-795 NullPointerException in SocketConnector.java
+ + JETTY-801 Bring back 2 arg EnvEntry constructor
+ + JETTY-804 HttpClient timeout does not always work
+ + JETTY-805 Fix jetty-jaas.xml for new UserRealm package
+ + JETTY-806 Timeout related Deadlocks in HTTP Client
+ + JETTY-808 cometd client demo run.sh
+
+jetty-6.1.12 4 November 2008
+ + JETTY-731 Completed DeliverListener for cometd
+ + JETTY-772 Increased default threadpool size to 250
+ + JETTY-774 Cached text/json content type
+ + JETTY-775 fix port of openspaces to jetty-6
+
+jetty-7.0.0.pre5 30 Oct 2008
+ + JETTY-766 Fix npe
+ + JETTY-767 Fixed SSL Client no progress handshake bug
+ + JETTY-768 Remove EnvEntry overloaded constructors
+ + JETTY-769 jquery example error
+ + JETTY-771 Ensure NamingEntryUtil is jdk1.4 compliant
+ + JETTY-772 Increased default threadpool size to 250
+
+jetty-6.1.12.rc5 30 October 2008
+ + JETTY-703 maxStopTimeMs added to QueuedThreadPool
+ + JETTY-762 improved QueuedThreadPool idle death handling
+ + JETTY-763 Fixed AJP13 constructor
+ + JETTY-766 Ensure SystemProperties set early on jetty-maven-plugin
+ + JETTY-767 Fixed SSL Client no progress handshake bug
+ + JETTY-768 Remove EnvEntry overloaded constructors
+ + JETTY-771 Ensure NamingEntryUtil jdk1.4 compliant
+
+jetty-7.0.0.pre4 28 Oct 2008
  + JETTY-241 Support for web application overlays in rapid application development (jetty:run)
+ + JETTY-319 improved passing of exception when webapp unavailable
  + JETTY-331 SecureRandom hangs on systems with low entropy (connectors slow to start)
  + JETTY-591 No server classes for jetty-web.xml
  + JETTY-604 AbstractSession.setSessionURL
@@ -18,6 +66,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-698 org.mortbay.resource.JarResource.extract does not close JarInputStream jin
  + JETTY-699 Optimized cometd sending of 1 message to many many clients
  + JETTY-700 unit test for unread request data
+ + JETTY-703 maxStopTimeMs added to QueuedThreadPool
  + JETTY-708 allow 3 scopes for jndi resources: jvm, server or webapp
  + JETTY-709 Jetty plugin's WebAppConfig configured properties gets overridden by AbstractJettyRunMojo even when already set
  + JETTY-710 Worked around poor implementation of File.toURL()
@@ -42,7 +91,44 @@ jetty-7.0-SNAPSHOT
  + JETTY-739 Race in QueuedThreadPool
  + JETTY-741 HttpClient connects slowly due to reverse address lookup by InetAddress.getHostName()
  + JETTY-742 Private messages in cometd chat demo
+ + JETTY-747 Handle HttpClient exceptions better
+ + JETTY-755 Optimized HttpParser and buffers for few busy connections
+ + JETTY-757 Unhide JAAS classes
+ + JETTY-758 Update JSP to glassfish tag SJSAS-9_1_1-B51-18_Sept_2008
+ + JETTY-759 Fixed JSON small negative real numbers
+ + JETTY-760 Handle wildcard VirtualHost and normalize hostname in ContextHandlerCollection
+ + JETTY-762 improved QueuedThreadPool idle death handling
+ + JETTY-763 Fixed AJP13 constructor
+ + JETTY-766 Ensure SystemProperties set early on jetty-maven-plugin
 
+jetty-6.1.12.rc4 21 October 2008
+ + JETTY-319 improved passing of exception when webapp unavailable
+ + JETTY-729 Backport Terracotta integration to Jetty6.1 branch
+ + JETTY-744 Backport of JETTY-741: HttpClient connects slowly due to reverse address lookup by InetAddress.getHostName()
+ + JETTY-747 Handle exceptions better in HttpClient
+ + JETTY-755 Optimized HttpParser and buffers for few busy connections
+ + JETTY-758 Update JSP 2.1 to glassfish tag SJSAS-9_1_1-B51-18_Sept_2008
+ + JETTY-759 Fixed JSON small negative real numbers
+ + JETTY-760 Handle wildcard VirtualHost and normalize hostname in ContextHandlerCollection
+
+jetty-6.1.12.rc3 10 October 2008
+ + JETTY-241 Support for web application overlays in rapid application development (jetty:run)
+ + JETTY-686 LifeCycle.Listener
+ + JETTY-715 AJP key size
+ + JETTY-716 NPE for empty cometd message
+ + JETTY-718 during ssl unwrap, return true if some bytes were read, even if underflow
+ + JETTY-720 fix HttpExchange.waitForStatus
+ + JETTY-721 Support wildcard in VirtualHosts configuration
+ + JETTY-722 jndi related threadlocal not cleared after deploying webapp
+ + JETTY-723 jetty.sh does not check if TMP already is set
+ + JETTY-725 port JETTY-708 (jndi scoping) to jetty-6
+ + JETTY-730 set SAX parser features to defaults
+ + JETTY-731 DeliverListener for cometd
+ + JETTY-732 Case Sensitive Basic Authentication Response Header Implementations
+ + JETTY-736 Client Specific cometd advice
+ + JETTY-738 If jetty.sh finds a pid file is does not check to see if a process with that pid is still running
+ + JETTY-739 Race in QueuedThreadPool
+ + JETTY-742 Private messages in cometd chat demo
 
 jetty-6.1.12rc2 12 September 2008
  + JETTY-282 Support manually-triggered reloading

@@ -28,7 +28,7 @@ public class StdErrLog implements Logger
     private static DateCache _dateCache;
     private static boolean _debug = System.getProperty("DEBUG",null)!=null;
     private String _name;
-    private boolean _hideStacks=true;
+    private boolean _hideStacks=false;
     
     static
     {

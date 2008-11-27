@@ -28,7 +28,7 @@ import java.io.UnsupportedEncodingException;
 import javax.security.auth.Subject;
 
 import org.mortbay.util.StringUtil;
-import org.mortbay.util.B64Code;
+import org.mortbay.jetty.security.B64Code;
 
 /**
  * This is similar to the jaspi PasswordValidationCallback but includes user

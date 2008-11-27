@@ -94,53 +94,61 @@ public class ThreadPoolTest extends TestCase
     public void testStress() throws Exception
     {
         QueuedThreadPool tp= new QueuedThreadPool();
-        tp.setMinThreads(5);
-        tp.setMaxThreads(100);
-        tp.setMaxIdleTimeMs(10);
+        tp.setMinThreads(240);
+        tp.setMaxThreads(250);
+        tp.setMaxIdleTimeMs(100);
         tp.start();
-        
+
+        tp.setMinThreads(90);
         final AtomicInteger count = new AtomicInteger();
         
         final Random random = new Random(System.currentTimeMillis());
-        int loops = 2400;
+        int loops = 16000;
 
         try
         {
-            for (int i=0;i<loops;i++)
+            for (int i=0;i<loops;)
             {
-                if (i%10==0)
-                    System.err.print('.');
-                if (i%800==799)
-                    System.err.println();
-                
-                Thread.sleep(random.nextInt(20));
-                
-                tp.dispatch(new Runnable()
+                int burst=random.nextInt(100);
+                for (int b=0;b<burst && i<loops; b++)
                 {
-                    public void run()
+                    if (i%20==0)
+                        System.err.print('.');
+                    if (i%1600==1599)
+                        System.err.println();
+                    if (i==1000)
+                        tp.setMinThreads(10);
+                    
+                    if (i==10000)
+                        tp.setMaxThreads(20);
+                    
+                    i++;
+                    tp.dispatch(new Runnable()
                     {
-                        int r = random.nextInt(5);
-                        int s=0;
-                        for (int j=0;j<r;j++)
-                            s+=random.nextInt(10);
-                        try
+                        public void run()
                         {
-                            Thread.sleep(s);
+                            int s=random.nextInt(50);
+                            try
+                            {
+                                Thread.sleep(s);
+                            }
+                            catch (InterruptedException e)
+                            {
+                                e.printStackTrace();
+                            }
+                            finally
+                            {
+                                count.incrementAndGet();
+                            }
                         }
-                        catch (InterruptedException e)
-                        {
-                            e.printStackTrace();
-                        }
-                        finally
-                        {
-                            count.incrementAndGet();
-                        }
-                    }
-                });
+                    });
+                }
 
+                Thread.sleep(random.nextInt(100));
             }
             
             Thread.sleep(1000);
+                
             tp.stop();
             
             assertEquals(loops,count.get());
@@ -150,8 +158,28 @@ public class ThreadPoolTest extends TestCase
             e.printStackTrace();
             assertTrue(false);
         }
-
-        
-        
     }
+
+    public void testMaxStopTime() throws Exception
+    {
+        QueuedThreadPool tp= new QueuedThreadPool();
+        tp.setMaxStopTimeMs(500);
+        tp.start();
+        tp.dispatch(new Runnable(){
+            public void run () {
+                while (true) {
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException ie) {}
+                }
+            }
+        });
+
+        long beforeStop = System.currentTimeMillis();
+        tp.stop();
+        long afterStop = System.currentTimeMillis();
+        assertTrue(tp.isStopped());
+        assertTrue(afterStop - beforeStop < 1000);
+    }
+
 }

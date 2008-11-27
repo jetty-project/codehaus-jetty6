@@ -27,10 +27,12 @@ import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.MovedContextHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.ssl.SslSocketConnector;
+import org.mortbay.jetty.ssl.SslSelectChannelConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceCollection;
+import org.mortbay.thread.QueuedThreadPool;
 
 import org.cometd.Message;
 
@@ -59,14 +61,21 @@ public class CometdDemo
         
         // Manually contruct context to avoid hassles with webapp classloaders for now.
         Server server = new Server();
+        QueuedThreadPool qtp = new QueuedThreadPool();
+        qtp.setMinThreads(5);
+        qtp.setMaxThreads(200);
+        server.setThreadPool(qtp);
+        
         SelectChannelConnector connector=new SelectChannelConnector();
+        // SocketConnector connector=new SocketConnector();
         connector.setPort(port);
         server.addConnector(connector);
         SocketConnector bconnector=new SocketConnector();
         bconnector.setPort(port+1);
         server.addConnector(bconnector);
         
-        SslSocketConnector connector2=new SslSocketConnector();
+        SslSelectChannelConnector connector2=new SslSelectChannelConnector();
+        // SslSocketConnector connector2=new SslSocketConnector();
         connector2.setPort(port-80+443);
         connector2.setKeystore(base+"/etc/keystore");
         connector2.setPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
@@ -99,8 +108,8 @@ public class CometdDemo
         ServletHolder cometd_holder = new ServletHolder(cometd_servlet);
         cometd_holder.setInitParameter("filters","/WEB-INF/filters.json");
         cometd_holder.setInitParameter("timeout","180000");
-        cometd_holder.setInitParameter("interval","0");
-        cometd_holder.setInitParameter("maxInterval","10000");
+        cometd_holder.setInitParameter("interval","100");
+        cometd_holder.setInitParameter("maxInterval","60000");
         cometd_holder.setInitParameter("multiFrameInterval","1500");
         cometd_holder.setInitParameter("directDeliver","true");
         cometd_holder.setInitParameter("logLevel","1");

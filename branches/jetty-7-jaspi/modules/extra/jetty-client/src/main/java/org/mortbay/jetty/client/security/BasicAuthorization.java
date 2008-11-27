@@ -21,7 +21,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.client.HttpExchange;
-import org.mortbay.util.B64Code;
+import org.mortbay.jetty.security.B64Code;
 import org.mortbay.util.StringUtil;
 
 /**

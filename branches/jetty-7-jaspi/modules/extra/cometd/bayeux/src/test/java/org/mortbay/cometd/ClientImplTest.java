@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -13,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import junit.framework.TestCase;
 
 import org.cometd.Client;
+import org.cometd.DeliverListener;
 import org.cometd.Message;
 import org.cometd.MessageListener;
 import org.cometd.QueueListener;
@@ -140,6 +142,27 @@ public class ClientImplTest extends TestCase
     public void testRemoveListener() throws Exception
     {
         // TODO
+    }
+    
+
+    public void testDeliverListener() throws Exception
+    {
+        final boolean[] called = {false};
+        _client.addListener(new DeliverListener()
+        {
+            public void deliver(Client client, Queue<Message> queue)
+            {
+                called[0]=true;
+            }
+        });
+
+        Message ping = m("ping", "hello");
+        _client.deliver(ping);
+        assertFalse(called[0]);
+        
+        _client.doDeliverListeners();
+
+        assertTrue(called[0]);
     }
 
 /*  // TODO: make sure this works properly. I think there's a chance of a deadlock

@@ -15,10 +15,10 @@
 package org.mortbay.jetty.example;
 
 import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.NCSARequestLog;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.deployer.ContextDeployer;
 import org.mortbay.jetty.deployer.WebAppDeployer;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
@@ -27,6 +27,8 @@ import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.HashLoginService;
+import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.QueuedThreadPool;
 
 public class LikeJettyXml
@@ -69,10 +71,10 @@ public class LikeJettyXml
         deployer1.setDefaultsDescriptor(jetty_home+"/etc/webdefault.xml");
         server.addLifeCycle(deployer1);
           
-        HashLoginService loginService = new HashLoginService();
-        loginService.setName("Test Realm");
-        loginService.setConfig(jetty_home+"/etc/realm.properties");
-        server.setLoginServices(new LoginService[]{loginService});
+        HashLoginService userRealm = new HashLoginService();
+        userRealm.setName("Test Realm");
+        userRealm.setConfig(jetty_home+"/etc/realm.properties");
+        server.setLoginServices(new LoginService[]{userRealm});
         
         NCSARequestLog requestLog = new NCSARequestLog(jetty_home+"/logs/jetty-yyyy_mm_dd.log");
         requestLog.setExtended(false);

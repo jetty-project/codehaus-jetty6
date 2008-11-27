@@ -53,31 +53,21 @@ import org.mortbay.util.Loader;
  * @author Ben Alex
  */
 
-public class JDBCLoginService extends HashLoginService
+public class JDBCLoginService extends AbstractLoginService
 {
-
+    private String _config;
+    private Resource _configResource;
     private String _jdbcDriver;
-
     private String _url;
-
     private String _userName;
-
     private String _password;
-
     private String _userTableKey;
-
     private String _userTablePasswordField;
-
     private String _roleTableRoleField;
-
     private int _cacheTime;
-
     private long _lastHashPurge;
-
     private Connection _con;
-
     private String _userSql;
-
     private String _roleSql;
 
     /* ------------------------------------------------------------ */
@@ -111,7 +101,8 @@ public class JDBCLoginService extends HashLoginService
      * @throws IllegalAccessException problem using driver
      * @throws InstantiationException problem creating driver
      */
-    public JDBCLoginService(String name, String config) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException
+    public JDBCLoginService(String name, String config) 
+    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException
     {
         super(name);
         setConfig(config);
@@ -119,19 +110,10 @@ public class JDBCLoginService extends HashLoginService
         connectDatabase();
     }
 
-    public String getName()
-    {
-        return super.getName();
-    }
-
-    public void setName(String name)
-    {
-        super.setName(name);
-    }
 
     public String getConfig()
     {
-        return super.getConfig();
+        return _config;
     }
 
     /* ------------------------------------------------------------ */
@@ -142,8 +124,10 @@ public class JDBCLoginService extends HashLoginService
      * @exception java.io.IOException
      */
     public void setConfig(String config) throws IOException
-    {
-        super.setConfig(config);
+    {        
+        _config=config;
+        _configResource=Resource.newResource(_config);
+
         Properties properties = new Properties();
         Resource resource = Resource.newResource(config);
         properties.load(resource.getInputStream());
@@ -269,7 +253,7 @@ public class JDBCLoginService extends HashLoginService
 
                 stat.close();
                 KnownUser user = new KnownUser(username, new Password(credentials), roles.toArray(new String[roles.size()]));
-                put(username, user);
+                putUser(username, user);
                 return user;
             }
         }

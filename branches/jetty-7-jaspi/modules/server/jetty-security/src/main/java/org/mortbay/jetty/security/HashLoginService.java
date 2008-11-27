@@ -62,23 +62,11 @@ import org.mortbay.util.Scanner.BulkListener;
  * @see org.mortbay.jetty.security.Password
  * @author Greg Wilkins (gregw)
  */
-public class HashLoginService extends AbstractLifeCycle implements LoginService
+public class HashLoginService extends AbstractLoginService implements LoginService
 {
-    private static final String[] NO_ROLES = new String[0];
-
-    /**
-     * HttpContext Attribute to set to activate SSO.
-     */
-    public static final String __SSO = "org.mortbay.http.SSO";
-
-    /* ------------------------------------------------------------ */
-    private String _realmName;
-
     private String _config;
 
     private Resource _configResource;
-
-    protected Map<String, User> _users = new HashMap<String, User>();
 
     private Scanner _scanner;
 
@@ -100,12 +88,13 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
      */
     public HashLoginService(String name)
     {
-        _realmName = name;
+        super(name);
     }
 
-    public HashLoginService(String _realmName, Map<String, User> _users)
+    public HashLoginService(String realmName, Map<String, User> _users)
     {
-        this._realmName = _realmName;
+        super(realmName);
+
         this._users = _users;
     }/* ------------------------------------------------------------ */
 
@@ -118,7 +107,7 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
      */
     public HashLoginService(String name, String config) throws IOException
     {
-        _realmName = name;
+        super(name);
         setConfig(config);
     }
 
@@ -190,59 +179,12 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
                     {
                         roleArray = roles.split(",");
                     }
-                    put(username, new KnownUser(username, new Password(credentials), roleArray));
+                    putUser(username, new KnownUser(username, new Password(credentials), roleArray));
                 }
             }
         }
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @param name The realm name
-     */
-    public void setName(String name)
-    {
-        _realmName = name;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The realm name.
-     */
-    public String getName()
-    {
-        return _realmName;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Put user into realm.
-     * 
-     * @param name User name
-     * @param credentials String password, Password or UserPrinciple instance.
-     * @return Old UserPrinciple value or null
-     */
-    public synchronized Object put(String name, Object credentials)
-    {
-        if (credentials instanceof User) return _users.put(name, (User) credentials);
-
-        if (credentials instanceof Password) return _users.put(name, new KnownUser(name, (Password) credentials));
-        if (credentials != null) return _users.put(name, new KnownUser(name, Credential.getCredential(credentials.toString())));
-        return null;
-    }
-
-    /* ------------------------------------------------------------ */
-    public String toString()
-    {
-        return "Realm[" + _realmName + "]==" + _users.keySet();
-    }
-
-    /* ------------------------------------------------------------ */
-    public void dump(PrintStream out)
-    {
-        out.println(this + ":");
-        out.println(super.toString());
-    }
 
     /**
      * @see org.mortbay.component.AbstractLifeCycle#doStart()
@@ -307,96 +249,4 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
         if (_scanner != null) _scanner.stop();
         _scanner = null;
     }
-
-    /* ------------------------------------------------------------ */
-    public void login(LoginCallback loginCallback) throws ServerAuthException
-    {
-        KnownUser user;
-        synchronized (this)
-        {
-            user = getKnownUser(loginCallback.getUserName());
-        }
-        if (user != null && user.authenticate(loginCallback.getPassword()))
-        {
-            loginCallback.getSubject().getPrincipals().add(user);
-            loginCallback.setUserPrincipal(user);
-            loginCallback.setGroups(user.roles);
-            loginCallback.setSuccess(true);
-        }
-    }
-
-    protected KnownUser getKnownUser(String userName)
-    {
-        return (KnownUser) _users.get(userName);
-    }
-
-    public void logout(Subject subject) throws ServerAuthException
-    {
-        subject.getPrincipals(KnownUser.class).clear();
-    }
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    public static class User implements Principal
-    {
-        String[] roles = NO_ROLES;
-
-        public String getName()
-        {
-            return "Anonymous";
-        }
-
-        public boolean isAuthenticated()
-        {
-            return false;
-        }
-
-        public String toString()
-        {
-            return getName();
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    public static class KnownUser extends User
-    {
-        private String _userName;
-
-        private Credential _cred;
-
-        /* -------------------------------------------------------- */
-        KnownUser(String name, Credential credential)
-        {
-            _userName = name;
-            _cred = credential;
-        }
-
-        public KnownUser(String name, Credential credential, String[] roles)
-        {
-            this(name, credential);
-            this.roles = roles;
-        }
-
-        /* -------------------------------------------------------- */
-        boolean authenticate(Object credentials)
-        {
-            return _cred != null && _cred.check(credentials);
-        }
-
-        /* ------------------------------------------------------------ */
-        public String getName()
-        {
-            return _userName;
-        }
-
-        /* -------------------------------------------------------- */
-        public boolean isAuthenticated()
-        {
-            return true;
-        }
-    }
-
 }

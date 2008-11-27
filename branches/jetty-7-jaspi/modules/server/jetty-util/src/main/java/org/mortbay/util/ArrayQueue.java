@@ -35,12 +35,12 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
 {
     public final int DEFAULT_CAPACITY=64;
     public final int DEFAULT_GROWTH=32;
-    private Object _lock=this;
-    private Object[] _elements;
-    private int _nextE;
-    private int _nextSlot;
-    private int _size;
-    private int _growCapacity;
+    protected Object _lock=this;
+    protected Object[] _elements;
+    protected int _nextE;
+    protected int _nextSlot;
+    protected int _size;
+    protected int _growCapacity;
 
     /* ------------------------------------------------------------ */
     public ArrayQueue()

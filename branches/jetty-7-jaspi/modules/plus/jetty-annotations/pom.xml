@@ -18,7 +18,7 @@
             <phase>clean</phase>
             <goals>
               <goal>run</goal>
-            </goals>
+            </goals> 
             <configuration>
               <tasks>
                 <delete failonerror="false" includeemptydirs="true">
@@ -54,14 +54,25 @@
             </goals>
             <configuration>
               <instructions>
-                <Bundle-SymbolicName>org.mortbay.jetty.annotations</Bundle-SymbolicName>
-                <Bundle-RequiredExcutionEnvironment>J2SE-1.5</Bundle-RequiredExcutionEnvironment>
+                <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
                 <Bundle-DocURL>http://jetty.mortbay.org</Bundle-DocURL>
                 <Import-Package>!org.mortbay.jetty.annotations.*,*</Import-Package>
               </instructions>
             </configuration>
            </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <!--
+        Required for OSGI
+        -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>               
+            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+          </archive>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>

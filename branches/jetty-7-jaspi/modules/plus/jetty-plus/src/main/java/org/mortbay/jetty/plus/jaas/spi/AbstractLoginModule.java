@@ -51,16 +51,12 @@ public abstract class AbstractLoginModule implements LoginModule
     private JAASUserInfo currentUser;
     private Subject subject;
     
-    
-    
     public class JAASUserInfo
     {
         private UserInfo user;
         private Principal principal;
         private List roles;
-        
-      
-        
+              
         public JAASUserInfo (UserInfo u)
         {
             setUserInfo(u);
@@ -88,8 +84,7 @@ public abstract class AbstractLoginModule implements LoginModule
                     this.roles.add(new JAASRole((String)itor.next()));
             }
         }
-        
-        
+               
         public void setJAASInfo (Subject subject)
         {
             subject.getPrincipals().add(this.principal);

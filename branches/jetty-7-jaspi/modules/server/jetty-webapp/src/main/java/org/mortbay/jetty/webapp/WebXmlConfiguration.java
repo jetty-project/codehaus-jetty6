@@ -467,8 +467,9 @@ public class WebXmlConfiguration implements Configuration
         // TODO jaspi check this
         if (_securityHandler instanceof ConstraintAware)
         {
-            ((ConstraintSecurityHandler) _securityHandler).setConstraintMappings((ConstraintMapping[]) LazyList.toArray(_constraintMappings,
-                                                                                                                        ConstraintMapping.class), _roles);
+            ((ConstraintAware) _securityHandler).setConstraintMappings((ConstraintMapping[]) LazyList.toArray(_constraintMappings,
+                                                                                                              ConstraintMapping.class),
+                                                                                                               _roles);
         }
 
         if (_errorPages != null && getWebAppContext().getErrorHandler() instanceof ErrorPageErrorHandler)
