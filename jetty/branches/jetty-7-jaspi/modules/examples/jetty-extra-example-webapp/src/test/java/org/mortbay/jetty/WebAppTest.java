@@ -22,14 +22,23 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import junit.framework.TestCase;
+
+import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HttpHeaders;
+import org.mortbay.jetty.MimeTypes;
+import org.mortbay.jetty.NCSARequestLog;
+import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.HashLoginService;
-import org.mortbay.jetty.LoginService;
+import org.mortbay.jetty.security.HashUserRealm;
+import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.log.Log;
+import org.mortbay.log.StdErrLog;
 import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.util.IO;
 
@@ -40,6 +49,7 @@ public class WebAppTest extends TestCase
     Connector connector=new SelectChannelConnector();
     HandlerCollection handlers = new HandlerCollection();
     ContextHandlerCollection contexts = new ContextHandlerCollection();
+    HashUserRealm userRealm = new HashUserRealm();
     RequestLogHandler requestLogHandler = new RequestLogHandler();
     WebAppContext context;
     
@@ -61,11 +71,10 @@ public class WebAppTest extends TestCase
         
         context=new WebAppContext(contexts,dir.getAbsolutePath()+"/webapps/test","/test");
         
-        HashLoginService loginService = new HashLoginService();
-        loginService.setName("Test Realm");
-        loginService.setConfig(dir.getAbsolutePath()+"/etc/realm.properties");
-        server.setLoginServices(new LoginService[]{loginService});
-
+        userRealm.setName("Test Realm");
+        userRealm.setConfig(dir.getAbsolutePath()+"/etc/realm.properties");
+        server.setUserRealms(new UserRealm[]{userRealm});
+        
 	File file = File.createTempFile("test",".log");
         NCSARequestLog requestLog = new NCSARequestLog(file.getAbsolutePath());
         
@@ -263,7 +272,9 @@ public class WebAppTest extends TestCase
     public void testUnavailable() throws Exception
     {
         URL url = null;
+        ((StdErrLog)context.getLogger()).setHideStacks(true);
         
+        ((StdErrLog)Log.getLogger("/test")).setHideStacks(true);
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?query=foo");
         assertTrue(IO.toString(url.openStream()).startsWith("<html>"));
         assertTrue(context.getServletHandler().isAvailable());
@@ -271,6 +282,7 @@ public class WebAppTest extends TestCase
         try{IO.toString(url.openStream());} catch(IOException e){}
         assertFalse(context.getServletHandler().isAvailable());
         Thread.sleep(5000);
+        ((StdErrLog)context.getLogger()).setHideStacks(false);
         assertTrue(context.getServletHandler().isAvailable());
     }
     

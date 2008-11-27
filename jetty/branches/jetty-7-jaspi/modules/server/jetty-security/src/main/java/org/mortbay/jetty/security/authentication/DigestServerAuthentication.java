@@ -30,15 +30,16 @@ import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.JettyMessageInfo;
 import org.mortbay.jetty.LoginCallback;
 import org.mortbay.jetty.LoginService;
+import org.mortbay.jetty.Request;
 import org.mortbay.jetty.ServerAuthException;
 import org.mortbay.jetty.ServerAuthResult;
 import org.mortbay.jetty.ServerAuthStatus;
 import org.mortbay.jetty.ServerAuthentication;
+import org.mortbay.jetty.security.B64Code;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.Credential;
 import org.mortbay.jetty.security.SimpleAuthResult;
 import org.mortbay.log.Log;
-import org.mortbay.util.B64Code;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
@@ -79,11 +80,8 @@ public class DigestServerAuthentication implements ServerAuthentication
         try
         {
             boolean stale = false;
-            // TODO extract from request
-            long timestamp = System.currentTimeMillis();
             if (credentials != null)
             {
-                if (Log.isDebugEnabled()) Log.debug("Credentials: " + credentials);
                 if (Log.isDebugEnabled()) Log.debug("Credentials: " + credentials);
                 QuotedStringTokenizer tokenizer = new QuotedStringTokenizer(credentials, "=, ", true, false);
                 final Digest digest = new Digest(request.getMethod());
@@ -130,7 +128,7 @@ public class DigestServerAuthentication implements ServerAuthentication
                     }
                 }
 
-                int n = checkNonce(digest.nonce, timestamp);
+                int n = checkNonce(digest.nonce, (Request)request);
 
                 if (n > 0)
                 {
@@ -151,7 +149,7 @@ public class DigestServerAuthentication implements ServerAuthentication
                                                              + "\", domain=\""
                                                              + domain
                                                              + "\", nonce=\""
-                                                             + newNonce(timestamp)
+                                                             + newNonce((Request)request)
                                                              + "\", algorithm=MD5, qop=\"auth\""
                                                              + (_useStale ? (" stale=" + stale) : ""));
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
@@ -164,9 +162,9 @@ public class DigestServerAuthentication implements ServerAuthentication
 
     }
 
-    public String newNonce(long ts)
+    public String newNonce(Request request)
     {
-        // long ts=request.getTimeStamp();
+        long ts=request.getTimeStamp();
         long sk = _nonceSecret;
 
         byte[] nounce = new byte[24];
@@ -202,11 +200,11 @@ public class DigestServerAuthentication implements ServerAuthentication
 
     /**
      * @param nonce nonce to check
-     * @param timestamp should be timestamp of request.
+     * @param request
      * @return -1 for a bad nonce, 0 for a stale none, 1 for a good nonce
      */
     /* ------------------------------------------------------------ */
-    private int checkNonce(String nonce, long timestamp)
+    private int checkNonce(String nonce, Request request)
     {
         try
         {
@@ -224,7 +222,7 @@ public class DigestServerAuthentication implements ServerAuthentication
                 ts = (ts << 8) + (0xff & (long) n[7 - i]);
             }
 
-            long age = timestamp - ts;
+            long age = request.getTimeStamp() - ts;
             if (Log.isDebugEnabled()) Log.debug("age=" + age);
 
             byte[] hash = null;
@@ -257,21 +255,13 @@ public class DigestServerAuthentication implements ServerAuthentication
     private static class Digest extends Credential
     {
         String method = null;
-
         String username = null;
-
         String realm = null;
-
         String nonce = null;
-
         String nc = null;
-
         String cnonce = null;
-
         String qop = null;
-
         String uri = null;
-
         String response = null;
 
         /* ------------------------------------------------------------ */

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 import org.mortbay.util.StringUtil;
 
@@ -27,8 +28,13 @@ import org.mortbay.util.StringUtil;
  */
 public class ByteArrayBuffer extends AbstractBuffer
 {
-    private byte[] _bytes;
+    protected byte[] _bytes;
 
+    protected ByteArrayBuffer(int access, boolean isVolatile)
+    {
+        super(access, isVolatile);
+    }
+    
     public ByteArrayBuffer(byte[] bytes)
     {
         this(bytes, 0, bytes.length, READWRITE);
@@ -92,17 +98,147 @@ public class ByteArrayBuffer extends AbstractBuffer
     {
         return _bytes.length;
     }
+    
+    public void compact()
+    {
+        if (isReadOnly()) 
+            throw new IllegalStateException(__READONLY);
+        int s = markIndex() >= 0 ? markIndex() : getIndex();
+        if (s > 0)
+        {
+            int length = putIndex() - s;
+            if (length > 0)
+            {
+                System.arraycopy(_bytes, s,_bytes, 0, length);
+            }
+            if (markIndex() > 0) setMarkIndex(markIndex() - s);
+            setGetIndex(getIndex() - s);
+            setPutIndex(putIndex() - s);
+        }
+    }
+
+
+    public boolean equals(Object obj)
+    {
+        if (obj==this)
+            return true;
+
+        if (obj == null || !(obj instanceof Buffer)) 
+            return false;
+        
+        if (obj instanceof Buffer.CaseInsensitve)
+            return equalsIgnoreCase((Buffer)obj);
+        
+
+        Buffer b = (Buffer) obj;
+        
+        // reject different lengths
+        if (b.length() != length()) 
+            return false;
+
+        // reject AbstractBuffer with different hash value
+        if (_hash != 0 && obj instanceof AbstractBuffer)
+        {
+            AbstractBuffer ab = (AbstractBuffer) obj;
+            if (ab._hash != 0 && _hash != ab._hash) 
+                return false;
+        }
+
+        // Nothing for it but to do the hard grind.
+        int get=getIndex();
+        int bi=b.putIndex();
+        for (int i = putIndex(); i-->get;)
+        {
+            byte b1 = _bytes[i];
+            byte b2 = b.peek(--bi);
+            if (b1 != b2) return false;
+        }
+        return true;
+    }
+
+
+    public boolean equalsIgnoreCase(Buffer b)
+    {
+        if (b==this)
+            return true;
+        
+        // reject different lengths
+        if (b==null || b.length() != length()) 
+            return false;
+
+        // reject AbstractBuffer with different hash value
+        if (_hash != 0 && b instanceof AbstractBuffer)
+        {
+            AbstractBuffer ab = (AbstractBuffer) b;
+            if (ab._hash != 0 && _hash != ab._hash) return false;
+        }
+
+        // Nothing for it but to do the hard grind.
+        int get=getIndex();
+        int bi=b.putIndex();
+        byte[] barray=b.array();
+        if (barray==null)
+        {
+            for (int i = putIndex(); i-->get;)
+            {
+                byte b1 = _bytes[i];
+                byte b2 = b.peek(--bi);
+                if (b1 != b2)
+                {
+                    if ('a' <= b1 && b1 <= 'z') b1 = (byte) (b1 - 'a' + 'A');
+                    if ('a' <= b2 && b2 <= 'z') b2 = (byte) (b2 - 'a' + 'A');
+                    if (b1 != b2) return false;
+                }
+            }
+        }
+        else
+        {
+            for (int i = putIndex(); i-->get;)
+            {
+                byte b1 = _bytes[i];
+                byte b2 = barray[--bi];
+                if (b1 != b2)
+                {
+                    if ('a' <= b1 && b1 <= 'z') b1 = (byte) (b1 - 'a' + 'A');
+                    if ('a' <= b2 && b2 <= 'z') b2 = (byte) (b2 - 'a' + 'A');
+                    if (b1 != b2) return false;
+                }
+            }
+        }
+        return true;
+    }
 
     public byte get()
     {
         return _bytes[_get++];
     }
+
+    public int hashCode()
+    {
+        if (_hash == 0 || _hashGet!=_get || _hashPut!=_put) 
+        {
+            int get=getIndex();
+            for (int i = putIndex(); i-- >get;)
+            {
+                byte b = _bytes[i];
+                if ('a' <= b && b <= 'z') 
+                    b = (byte) (b - 'a' + 'A');
+                _hash = 31 * _hash + b;
+            }
+            if (_hash == 0) 
+                _hash = -1;
+            _hashGet=_get;
+            _hashPut=_put;
+        }
+        return _hash;
+    }
+    
     
     public byte peek(int index)
     {
         return _bytes[index];
     }
-
+    
     public int peek(int index, byte[] b, int offset, int length)
     {
         int l = length;
@@ -122,26 +258,81 @@ public class ByteArrayBuffer extends AbstractBuffer
 
     public void poke(int index, byte b)
     {
-        if (isReadOnly()) throw new IllegalStateException(__READONLY);
-        if (index < 0) throw new IllegalArgumentException("index<0: " + index + "<0");
+        /* 
+        if (isReadOnly()) 
+            throw new IllegalStateException(__READONLY);
+        
+        if (index < 0) 
+            throw new IllegalArgumentException("index<0: " + index + "<0");
         if (index > capacity())
                 throw new IllegalArgumentException("index>capacity(): " + index + ">" + capacity());
+        */
         _bytes[index] = b;
     }
     
-    public static class CaseInsensitive extends ByteArrayBuffer implements Buffer.CaseInsensitve
+    public int poke(int index, Buffer src)
     {
-        public CaseInsensitive(String s)
+        _hash=0;
+        
+        /* 
+        if (isReadOnly()) 
+            throw new IllegalStateException(__READONLY);
+        if (index < 0) 
+            throw new IllegalArgumentException("index<0: " + index + "<0");
+        */
+        
+        int length=src.length();
+        if (index + length > capacity())
         {
-            super(s);
+            length=capacity()-index;
+            /*
+            if (length<0)
+                throw new IllegalArgumentException("index>capacity(): " + index + ">" + capacity());
+            */
         }
-
-        public CaseInsensitive(byte[] b, int o, int l, int rw)
+        
+        byte[] src_array = src.array();
+        if (src_array != null)
+            System.arraycopy(src_array, src.getIndex(), _bytes, index, length);
+        else if (src_array != null)
         {
-            super(b,o,l,rw);
+            int s=src.getIndex();
+            for (int i=0;i<length;i++)
+                poke(index++,src_array[s++]);
         }
+        else 
+        {
+            int s=src.getIndex();
+            for (int i=0;i<length;i++)
+                _bytes[index++]=src.peek(s++);
+        }
+        
+        return length;
     }
+    
 
+    public int poke(int index, byte[] b, int offset, int length)
+    {
+        _hash=0;
+        /*
+        if (isReadOnly()) 
+            throw new IllegalStateException(__READONLY);
+        if (index < 0) 
+            throw new IllegalArgumentException("index<0: " + index + "<0");
+        */
+        
+        if (index + length > capacity())
+        {
+            length=capacity()-index;
+            /* if (length<0)
+                throw new IllegalArgumentException("index>capacity(): " + index + ">" + capacity());
+            */
+        }
+        
+        System.arraycopy(b, offset, _bytes, index, length);
+        
+        return length;
+    }
 
     /* ------------------------------------------------------------ */
     /** Wrap a byte array.
@@ -206,5 +397,34 @@ public class ByteArrayBuffer extends AbstractBuffer
         if (len<0 && total==0)
             return -1;
         return total;
+    }
+
+    /* ------------------------------------------------------------ */
+    public int space()
+    {
+        return _bytes.length - _put;
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public static class CaseInsensitive extends ByteArrayBuffer implements Buffer.CaseInsensitve
+    {
+        public CaseInsensitive(String s)
+        {
+            super(s);
+        }
+
+        public CaseInsensitive(byte[] b, int o, int l, int rw)
+        {
+            super(b,o,l,rw);
+        }
+
+        public boolean equals(Object obj)
+        {
+            return equalsIgnoreCase((Buffer)obj);
+        }
+        
     }
 }

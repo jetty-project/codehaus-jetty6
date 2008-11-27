@@ -15,18 +15,22 @@
 package org.mortbay.jetty;
 
 import java.io.InputStream;
-import java.io.File;
 import java.net.URL;
 
-import junit.framework.TestCase;
+import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.SessionIdManager;
+import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.handler.DefaultHandler;           
+import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.RequestLogHandler;
-import org.mortbay.jetty.security.HashLoginService;
-import org.mortbay.jetty.LoginService;
+import org.mortbay.jetty.security.HashUserRealm;
+import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.util.IO;
+
+import junit.framework.TestCase;
 
 /**
  * @version $Revision$
@@ -43,13 +47,7 @@ public class SessionTest extends TestCase
 
     protected void setUp() throws Exception
     {
-        File dir = new File(".").getAbsoluteFile();
-        while (!new File(dir,"webapps").exists())
-        {
-            dir=dir.getParentFile();
-        }
-
-         server = new Server(0);
+        server = new Server(0);
              
         HandlerCollection handlers = new HandlerCollection();
         ContextHandlerCollection contexts = new ContextHandlerCollection();
@@ -57,13 +55,13 @@ public class SessionTest extends TestCase
         handlers.setHandlers(new Handler[]{contexts,new DefaultHandler(),requestLogHandler});
         server.setHandler(handlers);
         
-        test0 = new WebAppContext(contexts,dir.getAbsolutePath()+"/webapps/test","/test0");
-        test1 = new WebAppContext(contexts,dir.getAbsolutePath()+"/webapps/test","/test1");
+        test0 = new WebAppContext(contexts,"../../../webapps/test","/test0");
+        test1 = new WebAppContext(contexts,"../../../webapps/test","/test1");
 
-        HashLoginService loginService = new HashLoginService();
-        loginService.setName("Test Realm");
-        loginService.setConfig(dir.getAbsolutePath()+"/etc/realm.properties");
-        server.setLoginServices(new LoginService[]{loginService});
+        HashUserRealm userRealm = new HashUserRealm();
+        userRealm.setName("Test Realm");
+        userRealm.setConfig("../../../etc/realm.properties");
+        server.setUserRealms(new UserRealm[]{userRealm});
         
         server.start();
         
@@ -82,7 +80,6 @@ public class SessionTest extends TestCase
     
     public void testSession() throws Exception
     {
-        //TODO jaspi fix the tests -- sessions are not getting invalidated
         // no sessions to start with.
         testContains("/test0/session","No Session");
         testContains("/test1/session","No Session");

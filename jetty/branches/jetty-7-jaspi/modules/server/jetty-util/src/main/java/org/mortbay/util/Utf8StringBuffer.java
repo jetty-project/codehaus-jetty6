@@ -34,12 +34,12 @@ public class Utf8StringBuffer
     int _more;
     int _bits;
     
-    Utf8StringBuffer()
+    public Utf8StringBuffer()
     {
         _buffer=new StringBuffer();
     }
     
-    Utf8StringBuffer(int capacity)
+    public Utf8StringBuffer(int capacity)
     {
         _buffer=new StringBuffer(capacity);
     }

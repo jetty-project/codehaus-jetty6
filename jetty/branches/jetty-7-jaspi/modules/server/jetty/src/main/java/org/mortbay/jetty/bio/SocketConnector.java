@@ -186,7 +186,7 @@ public class SocketConnector extends AbstractConnector
         
         public void dispatch() throws InterruptedException, IOException
         {
-            if (!getThreadPool().dispatch(this))
+            if (getThreadPool()==null || !getThreadPool().dispatch(this))
             {
                 Log.warn("dispatch failed for {}",_connection);
                 close();

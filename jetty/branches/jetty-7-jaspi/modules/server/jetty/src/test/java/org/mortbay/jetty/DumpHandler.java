@@ -184,7 +184,7 @@ public class DumpHandler extends AbstractHandler
         }
         catch(IOException e)
         {   
-            e.printStackTrace();
+            Log.warn(e);
             writer.write(e.toString());
         }
         

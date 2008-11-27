@@ -60,13 +60,22 @@ public class Ajp13Parser implements Parser
     
 
     /* ------------------------------------------------------------------------------- */
-    public Ajp13Parser(Buffers buffers, EndPoint endPoint, EventHandler handler, Ajp13Generator generator)
+    public Ajp13Parser(Buffers buffers, EndPoint endPoint)
     {
         _buffers = buffers;
         _endp = endPoint;
-        _handler = handler;
-        _generator = generator;
-
+    }
+    
+    /* ------------------------------------------------------------------------------- */
+    public void setEventHandler(EventHandler handler)
+    {
+        _handler=handler;
+    }
+    
+    /* ------------------------------------------------------------------------------- */
+    public void setGenerator(Ajp13Generator generator)
+    {
+        _generator=generator;
     }
 
     /* ------------------------------------------------------------------------------- */

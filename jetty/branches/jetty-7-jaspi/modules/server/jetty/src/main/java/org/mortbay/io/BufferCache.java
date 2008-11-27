@@ -41,9 +41,10 @@ public class BufferCache
         CachedBuffer buffer= new CachedBuffer(value, ordinal);
         _bufferMap.put(buffer, buffer);
         _stringMap.put(value, buffer);
-        while ((ordinal - _index.size()) > 0)
+        while ((ordinal - _index.size()) >= 0)
             _index.add(null);
-        _index.add(ordinal, buffer);
+        if (_index.get(ordinal)==null)
+            _index.add(ordinal, buffer);
         return buffer;
     }
 

@@ -187,7 +187,8 @@ public class Injection
         }
         catch (Exception e)
         {
-            throw new IllegalStateException(e);
+            Log.warn(e);
+            throw new IllegalStateException("Inject failed for field "+field.getName());
         }
     }
     
@@ -208,7 +209,8 @@ public class Injection
         }
         catch (Exception e)
         {
-            throw new IllegalStateException(e);
+            Log.warn(e);
+            throw new IllegalStateException("Inject failed for method "+method.getName());
         }
     }
     

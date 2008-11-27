@@ -11,6 +11,10 @@
   <name>Jetty Example :: Parent</name>
   <packaging>pom</packaging>
   <modules>
+<!--
+    <module>async-jsf-example-webapp</module>
+    <module>async-webservices-example-webapp</module>
+-->    
     <module>async-rest-example-webapp</module>
     <module>jaas-example-webapp</module>
     <module>jetty-annotation-example-webapp</module>

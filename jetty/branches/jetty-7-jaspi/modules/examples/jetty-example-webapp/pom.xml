@@ -76,6 +76,12 @@
           <stopKey>foo</stopKey>
           <scanIntervalSeconds>1</scanIntervalSeconds>
           <!-- contextPath>/test</contextPath -->
+          <systemProperties>
+            <systemProperty>
+              <name>fooprop</name>
+              <value>222</value>
+            </systemProperty>
+          </systemProperties>
           <webAppConfig>
             <contextPath>/test</contextPath>
             <tempDirectory>${project.build.directory}/work</tempDirectory>
@@ -86,12 +92,12 @@
               </sessionManager>
             </sessionHandler>
           </webAppConfig>
-          <loginServices>
-            <loginService implementation="org.mortbay.jetty.security.HashLoginService">
+          <userRealms>
+            <userRealm implementation="org.mortbay.jetty.security.HashUserRealm">
               <name>Test Realm</name>
               <config>../../../etc/realm.properties</config>
-            </loginService>
-          </loginServices>
+            </userRealm>
+          </userRealms>
         </configuration>
       </plugin>
       <!-- uncomment to precompile jsps -->

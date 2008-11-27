@@ -200,7 +200,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
     public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
     {
         int l = super.flush(header, buffer, trailer);
-        _writable = l > 0;
+        _writable = l!=0;
         return l;
     }
 
@@ -210,7 +210,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
     public int flush(Buffer buffer) throws IOException
     {
         int l = super.flush(buffer);
-        _writable = l > 0;
+        _writable = l!=0;
         return l;
     }
 
@@ -473,7 +473,12 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "SCEP@" + hashCode() + "[d=" + _dispatched + ",io=" + _interestOps + ",w=" + _writable + ",b=" + _readBlocked + "|" + _writeBlocked + "]";
+        return "SCEP@" + hashCode() + "[d=" + _dispatched + ",io=" + 
+        ((SelectionKey.OP_ACCEPT&_interestOps)!=0?"A":"")+
+        ((SelectionKey.OP_CONNECT&_interestOps)!=0?"C":"")+
+        ((SelectionKey.OP_READ&_interestOps)!=0?"R":"")+
+        ((SelectionKey.OP_WRITE&_interestOps)!=0?"W":"")+
+        ",w=" + _writable + ",b=" + _readBlocked + "|" + _writeBlocked + "]";
     }
 
     /* ------------------------------------------------------------ */

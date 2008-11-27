@@ -1,5 +1,5 @@
 //========================================================================
-//$Id$
+//$Id: MockDataSource.java 3317 2008-07-19 08:08:24Z gregw $
 //Copyright 2006 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");

@@ -25,6 +25,7 @@ import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.Connection;
+import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
@@ -161,7 +162,7 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
                 {
                     protected Buffer newBuffer( int size )
                     {
-                        return new NIOBuffer( size, NIOBuffer.INDIRECT );
+                        return new IndirectNIOBuffer( size);
                     }
                 };
 

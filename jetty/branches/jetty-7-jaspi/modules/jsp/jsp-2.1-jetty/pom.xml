@@ -149,10 +149,13 @@
         </executions>
       </plugin>
       <plugin>
+        <!--
+        Required for OSGI
+        -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
-          <archive>
+          <archive>               
             <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
           </archive>
         </configuration>
@@ -198,8 +201,8 @@
     </dependency>
   </dependencies>
   <properties>
-     <!-- matches glassfish version SJSAS-9_1_02-B04-11_Apr_2008 -->
-     <glassfish-version-tag>9.1.02.B04.p0</glassfish-version-tag>
+     <!-- matches glassfish version SJSAS-9_1_1-B51-18_Sept_2008 -->
+     <glassfish-version-tag>9.1.1.B51.p0</glassfish-version-tag>
      <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
   </properties>
 </project>

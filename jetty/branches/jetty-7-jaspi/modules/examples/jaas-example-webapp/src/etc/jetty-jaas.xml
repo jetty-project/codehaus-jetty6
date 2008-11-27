@@ -20,10 +20,10 @@
     <!-- For more information see the jetty wiki at               -->
     <!--   http://http://docs.codehaus.org/display/JETTY/JAAS     -->
     <!-- ======================================================== -->
-    <Set name="loginServices">
-      <Array type="org.mortbay.jetty.LoginService">
+    <Set name="UserRealms">
+      <Array type="org.mortbay.jetty.UserRealm">
         <Item>
-          <New class="org.mortbay.jetty.plus.jaas.JAASLoginService">
+          <New class="org.mortbay.jetty.plus.jaas.JAASUserRealm">
            <Set name="Name">Test JAAS Realm</Set>
            <Set name="LoginModuleName">xyz</Set>
           </New>

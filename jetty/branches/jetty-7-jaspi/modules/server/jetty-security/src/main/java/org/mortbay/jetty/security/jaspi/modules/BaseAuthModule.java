@@ -43,7 +43,7 @@ import org.mortbay.jetty.JettyMessageInfo;
 import org.mortbay.jetty.LoginCallback;
 import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.security.Constraint;
-import org.mortbay.util.B64Code;
+import org.mortbay.jetty.security.B64Code;
 import org.mortbay.util.StringUtil;
 
 /**

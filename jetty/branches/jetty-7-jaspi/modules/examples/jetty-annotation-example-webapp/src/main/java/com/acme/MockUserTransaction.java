@@ -1,5 +1,5 @@
 //========================================================================
-//$Id$
+//$Id: MockUserTransaction.java 1692 2007-03-23 04:33:07Z janb $
 //Copyright 2006 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");

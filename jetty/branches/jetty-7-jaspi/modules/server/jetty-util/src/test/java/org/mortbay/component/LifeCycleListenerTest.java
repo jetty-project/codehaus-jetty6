@@ -20,7 +20,6 @@ public class LifeCycleListenerTest extends TestCase
     public static void main(String[] args)
     {
         TestRunner.run(suite());
-        ((StdErrLog)Log.getLog()).setHideStacks(true);
     }
 
     public static Test suite()
@@ -34,6 +33,7 @@ public class LifeCycleListenerTest extends TestCase
         TestLifeCycle lifecycle = new TestLifeCycle();
         TestListener listener = new TestListener();
         lifecycle.addLifeCycleListener(listener);
+        ((StdErrLog)Log.getLog()).setHideStacks(true);
         lifecycle.setCause(cause);
         
         try
@@ -47,6 +47,7 @@ public class LifeCycleListenerTest extends TestCase
             assertEquals(cause,listener.getCause());
         }
         lifecycle.setCause(null);
+        ((StdErrLog)Log.getLog()).setHideStacks(false);
         
         
         lifecycle.start();
@@ -58,7 +59,7 @@ public class LifeCycleListenerTest extends TestCase
         assertTrue("The started event didn't occur",listener.started);
 
         // check that the starting event occurs before the started event
-        assertTrue("The starting event must occur before the started event",listener.startingTime < listener.startedTime);
+        assertTrue("The starting event must occur before the started event",listener.startingTime <= listener.startedTime);
 
         // check that the lifecycle's state is started
         assertTrue("The lifecycle state is not started",lifecycle.isStarted());
@@ -77,6 +78,7 @@ public class LifeCycleListenerTest extends TestCase
 
         lifecycle.start();
 
+        ((StdErrLog)Log.getLog()).setHideStacks(true);
         lifecycle.setCause(cause);
         
         try
@@ -92,6 +94,7 @@ public class LifeCycleListenerTest extends TestCase
 
         
         lifecycle.setCause(null);
+        ((StdErrLog)Log.getLog()).setHideStacks(false);
         
         lifecycle.stop();
 
@@ -102,7 +105,7 @@ public class LifeCycleListenerTest extends TestCase
         assertTrue("The stopped event didn't occur",listener.stopped);
 
         // check that the stopping event occurs before the stopped event
-        assertTrue("The stopping event must occur before the stopped event",listener.stoppingTime < listener.stoppedTime);
+        assertTrue("The stopping event must occur before the stopped event",listener.stoppingTime <= listener.stoppedTime);
         // System.out.println("STOPING TIME : " + listener.stoppingTime + " : " + listener.stoppedTime);
 
         // check that the lifecycle's state is stopped

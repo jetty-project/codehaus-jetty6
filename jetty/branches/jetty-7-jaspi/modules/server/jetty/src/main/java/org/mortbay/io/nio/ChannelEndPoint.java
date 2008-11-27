@@ -177,6 +177,13 @@ public class ChannelEndPoint implements EndPoint
                 }
             }
         }
+        else if (buf instanceof RandomAccessFileBuffer)
+        {
+            len = buffer.length();
+            ((RandomAccessFileBuffer)buf).writeTo(_channel,buffer.getIndex(),buffer.length());
+            if (len>0)
+                buffer.skip(len);
+        }
         else if (buffer.array()!=null)
         {
             ByteBuffer b = ByteBuffer.wrap(buffer.array(), buffer.getIndex(), buffer.length());
@@ -202,8 +209,8 @@ public class ChannelEndPoint implements EndPoint
         Buffer buf1 = buffer==null?null:buffer.buffer();
         
         if (_channel instanceof GatheringByteChannel &&
-            header!=null && header.length()!=0 && header instanceof NIOBuffer && 
-            buffer!=null && buffer.length()!=0 && buffer instanceof NIOBuffer)
+            header!=null && header.length()!=0 && buf0 instanceof NIOBuffer && 
+            buffer!=null && buffer.length()!=0 && buf1 instanceof NIOBuffer)
         {
             NIOBuffer nbuf0 = (NIOBuffer)buf0;
             ByteBuffer bbuf0=nbuf0.getByteBuffer();
@@ -230,7 +237,7 @@ public class ChannelEndPoint implements EndPoint
 
                             // do the gathering write.
                             length=(int)((GatheringByteChannel)_channel).write(_gather2);
-
+                            
                             int hl=header.length();
                             if (length>hl)
                             {

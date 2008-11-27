@@ -55,6 +55,7 @@ public class StringUtil
     
     
     public final static String __UTF8="UTF-8";
+    public final static String __UTF8Alt="UTF8";
     public final static String __UTF16="UTF-16";
     
     
@@ -336,7 +337,7 @@ public class StringUtil
     /* ------------------------------------------------------------ */
     public static boolean isUTF8(String charset)
     {
-        return charset==__UTF8 || __UTF8.equalsIgnoreCase(charset);
+        return charset==__UTF8||__UTF8.equalsIgnoreCase(charset)||__UTF8Alt.equalsIgnoreCase(charset);
     }
 
 

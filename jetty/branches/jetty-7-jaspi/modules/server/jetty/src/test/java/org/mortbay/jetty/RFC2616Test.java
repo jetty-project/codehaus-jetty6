@@ -28,6 +28,8 @@ import junit.framework.TestCase;
 
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.log.Log;
+import org.mortbay.log.StdErrLog;
 
 /**
  * @author gregw
@@ -387,6 +389,7 @@ public class RFC2616Test extends TestCase
             offset=checkContains(response,offset,"HTTP/1.1 200 OK","8.2.3 expect with body")+1;
 
             // Expect 100
+            ((StdErrLog)Log.getLog()).setHideStacks(true);
             offset=0;
             connector.reopen();
             response=connector.getResponses("GET /R1 HTTP/1.1\n"+
@@ -404,6 +407,7 @@ public class RFC2616Test extends TestCase
             offset=checkContains(response,offset,"654321","8.2.3 expect 100")+1;
             */
 
+            ((StdErrLog)Log.getLog()).setHideStacks(false);
         }
         catch (Exception e)
         {

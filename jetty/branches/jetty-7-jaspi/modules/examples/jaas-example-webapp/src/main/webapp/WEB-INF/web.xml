@@ -36,6 +36,6 @@
   </login-config>
 
   <security-role>
-   <role-name>roleA</role-name>
+    <role-name>roleA</role-name>
   </security-role>
 </web-app>
