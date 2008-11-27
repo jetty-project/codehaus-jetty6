@@ -94,7 +94,6 @@ public class DigestAuthModule extends BaseAuthModule
             if (credentials != null)
             {
                 if (Log.isDebugEnabled()) Log.debug("Credentials: " + credentials);
-                if (Log.isDebugEnabled()) Log.debug("Credentials: " + credentials);
                 QuotedStringTokenizer tokenizer = new QuotedStringTokenizer(credentials, "=, ", true, false);
                 final Digest digest = new Digest(request.getMethod());
                 String last = null;
@@ -144,7 +143,7 @@ public class DigestAuthModule extends BaseAuthModule
 
                 if (n > 0)
                 {
-                    if (login(clientSubject, digest.username, digest.toString().toCharArray(), Constraint.__DIGEST_AUTH, messageInfo)) { return AuthStatus.SUCCESS; }
+                    if (login(clientSubject, digest.username, digest, Constraint.__DIGEST_AUTH, messageInfo)) { return AuthStatus.SUCCESS; }
                 }
                 else if (n == 0) stale = true;
 

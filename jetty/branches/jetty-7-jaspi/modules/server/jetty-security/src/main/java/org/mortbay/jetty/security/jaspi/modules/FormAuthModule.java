@@ -43,6 +43,7 @@ import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
+import org.mortbay.jetty.security.Password;
 import org.mortbay.log.Log;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
@@ -163,8 +164,8 @@ public class FormAuthModule extends BaseAuthModule
             {
 
                 final String username = request.getParameter(__J_USERNAME);
-                final char[] password = request.getParameter(__J_PASSWORD).toCharArray();
-                boolean success = tryLogin(messageInfo, clientSubject, response, session, username, password);
+                final String password = request.getParameter(__J_PASSWORD);
+                boolean success = tryLogin(messageInfo, clientSubject, response, session, username, new Password(password));
                 if (success)
                 {
                     // Redirect to original request
@@ -201,7 +202,7 @@ public class FormAuthModule extends BaseAuthModule
 
             if (form_cred != null)
             {
-                boolean success = tryLogin(messageInfo, clientSubject, response, session, form_cred._jUserName, form_cred._jPassword);
+                boolean success = tryLogin(messageInfo, clientSubject, response, session, form_cred._jUserName, new Password(new String(form_cred._jPassword)));
                 if (success) { return AuthStatus.SUCCESS; }
                 // CallbackHandler loginCallbackHandler = new
                 // UserPasswordCallbackHandler(form_cred._jUserName,
@@ -291,7 +292,7 @@ public class FormAuthModule extends BaseAuthModule
                 UserInfo userInfo = ssoSource.fetch(request);
                 if (userInfo != null)
                 {
-                    boolean success = tryLogin(messageInfo, clientSubject, response, session, userInfo.getUserName(), userInfo.getPassword());
+                    boolean success = tryLogin(messageInfo, clientSubject, response, session, userInfo.getUserName(), new Password(new String(userInfo.getPassword())));
                     if (success) { return AuthStatus.SUCCESS; }
                 }
             }
@@ -325,16 +326,17 @@ public class FormAuthModule extends BaseAuthModule
 
     private boolean tryLogin(MessageInfo messageInfo, Subject clientSubject, 
                              HttpServletResponse response, HttpSession session, 
-                             String username, char[] password) 
+                             String username, Password password) 
     throws AuthException, IOException, UnsupportedCallbackException
     {
         if (login(clientSubject, username, password, Constraint.__FORM_AUTH, messageInfo))
         {
+            char[] pwdChars = password.toString().toCharArray();
             Set<LoginCallbackImpl> loginCallbacks = clientSubject.getPrivateCredentials(LoginCallbackImpl.class);
             if (!loginCallbacks.isEmpty())
             {
                 LoginCallbackImpl loginCallback = loginCallbacks.iterator().next();
-                FormCredential form_cred = new FormCredential(username, password, loginCallback.getUserPrincipal());
+                FormCredential form_cred = new FormCredential(username, pwdChars, loginCallback.getUserPrincipal());
 
                 session.setAttribute(__J_AUTHENTICATED, form_cred);
             }
@@ -342,7 +344,7 @@ public class FormAuthModule extends BaseAuthModule
             // Sign-on to SSO mechanism
             if (ssoSource != null)
             {
-                UserInfo userInfo = new UserInfo(username, password);
+                UserInfo userInfo = new UserInfo(username, pwdChars);
                 ssoSource.store(userInfo, response);
             }
             return true;

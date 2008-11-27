@@ -38,12 +38,12 @@ import org.mortbay.util.StringUtil;
  */
 public interface LoginCallback
 {
-
     public Subject getSubject();
 
     public String getUserName();
 
-    public char[] getPassword();
+    //TODO could return Credential type?
+    public Object getCredential();
  
 
     public boolean isSuccess();

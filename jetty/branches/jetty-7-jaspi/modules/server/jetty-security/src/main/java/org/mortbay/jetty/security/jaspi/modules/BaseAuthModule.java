@@ -41,7 +41,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.JettyMessageInfo;
 import org.mortbay.jetty.security.B64Code;
+import org.mortbay.jetty.security.Credential;
 import org.mortbay.jetty.security.LoginCallbackImpl;
+import org.mortbay.jetty.security.Password;
+import org.mortbay.jetty.security.jaspi.callback.CredentialValidationCallback;
 import org.mortbay.util.StringUtil;
 
 /**
@@ -116,22 +119,22 @@ public class BaseAuthModule implements ServerAuthModule, ServerAuthContext
                             String authMethod, MessageInfo messageInfo) 
     throws IOException, UnsupportedCallbackException
     {
-        credentials = credentials.substring(credentials.indexOf(' ') + 1);
-        credentials = B64Code.decode(credentials, StringUtil.__ISO_8859_1);
+        credentials = credentials.substring(credentials.indexOf(' ')+1);
+        credentials = B64Code.decode(credentials,StringUtil.__ISO_8859_1);
         int i = credentials.indexOf(':');
-        String userName = credentials.substring(0, i);
-        char[] password = new char[credentials.length() - (i + 1)];
-        credentials.getChars(i + 1, credentials.length(), password, 0);// substring(i+1);
-        return login(clientSubject, userName, password, authMethod, messageInfo);
+        String userName = credentials.substring(0,i);
+        String password = credentials.substring(i+1);
+        return login(clientSubject, userName, new Password(password), authMethod, messageInfo);
     }
 
     protected boolean login(Subject clientSubject, String username, 
-                            char[] password, String authMethod, MessageInfo messageInfo) 
+                            Credential credential, String authMethod, 
+                            MessageInfo messageInfo) 
     throws IOException, UnsupportedCallbackException
     {
-        PasswordValidationCallback passwordValidationCallback = new PasswordValidationCallback(clientSubject, username, password);
-        callbackHandler.handle(new Callback[] { passwordValidationCallback });
-        if (passwordValidationCallback.getResult())
+        CredentialValidationCallback credValidationCallback = new CredentialValidationCallback(clientSubject, username, credential);
+        callbackHandler.handle(new Callback[] { credValidationCallback });
+        if (credValidationCallback.getResult())
         {
             Set<LoginCallbackImpl> loginCallbacks = clientSubject.getPrivateCredentials(LoginCallbackImpl.class);
             if (!loginCallbacks.isEmpty())
@@ -144,7 +147,7 @@ public class BaseAuthModule implements ServerAuthModule, ServerAuthContext
             }
             messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, authMethod);
         }
-        return passwordValidationCallback.getResult();
+        return credValidationCallback.getResult();
 
     }
 }

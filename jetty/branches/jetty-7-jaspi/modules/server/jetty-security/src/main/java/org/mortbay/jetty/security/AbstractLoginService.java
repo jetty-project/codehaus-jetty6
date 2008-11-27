@@ -19,7 +19,6 @@ package org.mortbay.jetty.security;
 import java.io.PrintStream;
 import java.security.Principal;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.security.auth.Subject;
@@ -67,7 +66,7 @@ public abstract class AbstractLoginService extends AbstractLifeCycle implements 
         {
             user = getKnownUser(loginCallback.getUserName());
         }
-        if (user != null && user.authenticate(loginCallback.getPassword()))
+        if (user != null && user.authenticate(loginCallback.getCredential()))
         {
             loginCallback.getSubject().getPrincipals().add(user);
             loginCallback.setUserPrincipal(user);
