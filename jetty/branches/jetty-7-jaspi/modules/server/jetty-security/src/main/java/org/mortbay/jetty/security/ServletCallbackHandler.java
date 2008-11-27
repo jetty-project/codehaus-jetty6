@@ -33,8 +33,9 @@ import javax.security.auth.message.callback.SecretKeyCallback;
 import javax.security.auth.message.callback.TrustStoreCallback;
 import javax.security.auth.Subject;
 
-import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.LoginCallback;
+import org.mortbay.jetty.LoginService;
+import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.ServerAuthException;
 
 /**
@@ -76,7 +77,7 @@ public class ServletCallbackHandler implements CallbackHandler
             {
                 PasswordValidationCallback passwordValidationCallback = (PasswordValidationCallback) callback;
                 Subject subject = passwordValidationCallback.getSubject();
-                LoginCallback loginCallback = new LoginCallback(subject, 
+                LoginCallback loginCallback = new LoginCallbackImpl(subject, 
                                                                 passwordValidationCallback.getUsername(), 
                                                                 passwordValidationCallback.getPassword());
                 try

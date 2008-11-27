@@ -17,22 +17,12 @@ package org.mortbay.jetty.security;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.security.Principal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.security.auth.Subject;
-
-import org.mortbay.component.AbstractLifeCycle;
-import org.mortbay.jetty.LoginCallback;
 import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.ServerAuthException;
-import org.mortbay.jetty.security.Credential;
-import org.mortbay.jetty.security.Password;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Scanner;

@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.JettyMessageInfo;
+import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.LoginCallback;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
@@ -49,6 +50,7 @@ import org.mortbay.jetty.security.jaspi.modules.BaseAuthModule;
 import org.mortbay.log.Log;
 import org.mortbay.log.Logger;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 
 /* ------------------------------------------------------------ */
@@ -919,8 +921,15 @@ public class HTAccessHandler extends AbstractSecurityHandler
             try
             {
                 if (credentials != null)
-                {
-                    LoginCallback loginCallback = new LoginCallback(clientSubject, credentials);
+                {   
+                    credentials=credentials.substring(credentials.indexOf(' ')+1);
+                credentials=B64Code.decode(credentials,StringUtil.__ISO_8859_1);
+                int i=credentials.indexOf(':');
+                String user=credentials.substring(0,i);
+                String password=credentials.substring(i+1);
+
+                    
+                    LoginCallbackImpl loginCallback = new LoginCallbackImpl(clientSubject, user, credentials.toCharArray());
                     ht.checkAuth(loginCallback);
                     if (loginCallback.isSuccess())
                     {

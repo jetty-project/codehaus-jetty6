@@ -39,7 +39,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
-import org.mortbay.jetty.LoginCallback;
+import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
@@ -330,10 +330,10 @@ public class FormAuthModule extends BaseAuthModule
     {
         if (login(clientSubject, username, password, Constraint.__FORM_AUTH, messageInfo))
         {
-            Set<LoginCallback> loginCallbacks = clientSubject.getPrivateCredentials(LoginCallback.class);
+            Set<LoginCallbackImpl> loginCallbacks = clientSubject.getPrivateCredentials(LoginCallbackImpl.class);
             if (!loginCallbacks.isEmpty())
             {
-                LoginCallback loginCallback = loginCallbacks.iterator().next();
+                LoginCallbackImpl loginCallback = loginCallbacks.iterator().next();
                 FormCredential form_cred = new FormCredential(username, password, loginCallback.getUserPrincipal());
 
                 session.setAttribute(__J_AUTHENTICATED, form_cred);

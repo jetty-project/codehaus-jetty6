@@ -40,10 +40,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.JettyMessageInfo;
-import org.mortbay.jetty.LoginCallback;
-import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.B64Code;
+import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.util.StringUtil;
 
 /**
@@ -135,10 +133,10 @@ public class BaseAuthModule implements ServerAuthModule, ServerAuthContext
         callbackHandler.handle(new Callback[] { passwordValidationCallback });
         if (passwordValidationCallback.getResult())
         {
-            Set<LoginCallback> loginCallbacks = clientSubject.getPrivateCredentials(LoginCallback.class);
+            Set<LoginCallbackImpl> loginCallbacks = clientSubject.getPrivateCredentials(LoginCallbackImpl.class);
             if (!loginCallbacks.isEmpty())
             {
-                LoginCallback loginCallback = loginCallbacks.iterator().next();
+                LoginCallbackImpl loginCallback = loginCallbacks.iterator().next();
                 CallerPrincipalCallback callerPrincipalCallback = new CallerPrincipalCallback(clientSubject, loginCallback.getUserPrincipal());
                 GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject, loginCallback.getGroups()
                         .toArray(new String[loginCallback.getGroups().size()]));
