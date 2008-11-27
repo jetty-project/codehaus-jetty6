@@ -27,7 +27,6 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
@@ -192,7 +191,7 @@ public abstract class AbstractLoginModule implements LoginModule
      
         Callback[] callbacks = new Callback[2];
         callbacks[0] = new NameCallback("Enter user name");
-        callbacks[1] = new PasswordCallback("pw", false);
+        callbacks[1] = new ObjectCallback();
         return callbacks;
     }
     
@@ -218,7 +217,7 @@ public abstract class AbstractLoginModule implements LoginModule
             callbackHandler.handle(callbacks);
 
             String webUserName = ((NameCallback)callbacks[0]).getName();
-            char[] webCredential = ((PasswordCallback)callbacks[1]).getPassword();
+            Object webCredential = ((ObjectCallback)callbacks[1]).getObject();
 
             if ((webUserName == null) || (webCredential == null))
             {

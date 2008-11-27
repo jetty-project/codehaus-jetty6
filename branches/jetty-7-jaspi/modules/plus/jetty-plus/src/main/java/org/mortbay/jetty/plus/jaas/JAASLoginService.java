@@ -27,7 +27,6 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
@@ -35,6 +34,7 @@ import javax.security.auth.login.LoginException;
 import org.mortbay.jetty.LoginCallback;
 import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.ServerAuthException;
+import org.mortbay.jetty.plus.jaas.callback.ObjectCallback;
 
 
 /* ---------------------------------------------------- */
@@ -162,9 +162,10 @@ public class JAASLoginService implements LoginService
                         {
                             ((NameCallback)callback).setName(loginCallback.getUserName());
                         }
-                        else if (callback instanceof PasswordCallback)
+                        else if (callback instanceof ObjectCallback)
                         {
-                            ((PasswordCallback)callback).setPassword(loginCallback.getPassword());
+                            //TODO will credential always be a String
+                            ((ObjectCallback)callback).setObject(loginCallback.getCredential());
                         }
                     }
                 }

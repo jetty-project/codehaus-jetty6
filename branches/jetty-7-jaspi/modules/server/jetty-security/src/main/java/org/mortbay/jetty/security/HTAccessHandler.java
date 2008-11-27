@@ -542,7 +542,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
         public void checkAuth(LoginCallback loginCallback)
         {
             Boolean success = null;
-            String pass = new String(loginCallback.getPassword());
+            String pass = new String((String)loginCallback.getCredential());
             // Have to authenticate the user with the password file
             String user = loginCallback.getUserName();
             String code = getUserCode(user);

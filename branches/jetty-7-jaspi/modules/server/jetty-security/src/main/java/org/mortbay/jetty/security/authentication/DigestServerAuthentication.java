@@ -132,7 +132,7 @@ public class DigestServerAuthentication implements ServerAuthentication
 
                 if (n > 0)
                 {
-                    LoginCallbackImpl loginCallback = new LoginCallbackImpl(new Subject(), digest.username, credentials.toCharArray());
+                    LoginCallbackImpl loginCallback = new LoginCallbackImpl(new Subject(), digest.username, digest);
                     _loginService.login(loginCallback);
                     if (loginCallback.isSuccess()) { return new SimpleAuthResult(ServerAuthStatus.SUCCESS, loginCallback.getSubject(), loginCallback
                             .getUserPrincipal(), loginCallback.getGroups(), Constraint.__BASIC_AUTH); }

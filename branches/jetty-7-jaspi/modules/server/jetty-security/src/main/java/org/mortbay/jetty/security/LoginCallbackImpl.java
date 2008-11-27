@@ -44,7 +44,7 @@ public class LoginCallbackImpl implements LoginCallback
 
     private final String userName;
 
-    private final char[] password;
+    private Object credential;
 
     private boolean success;
 
@@ -52,11 +52,12 @@ public class LoginCallbackImpl implements LoginCallback
 
     private List<String> groups = NO_GROUPS;
 
-    public LoginCallbackImpl (Subject subject, String userName, char[] password)
+    //TODO could use Credential instance instead of Object if Basic/Form create a Password object
+    public LoginCallbackImpl (Subject subject, String userName, Object credential)
     {
         this.subject = subject;
         this.userName = userName;
-        this.password = password;
+        this.credential = credential;
     }
 
     public Subject getSubject()
@@ -69,9 +70,9 @@ public class LoginCallbackImpl implements LoginCallback
         return userName;
     }
 
-    public char[] getPassword()
+    public Object getCredential()
     {
-        return password;
+        return credential;
     }
 
     public boolean isSuccess()
@@ -111,9 +112,9 @@ public class LoginCallbackImpl implements LoginCallback
 
     public void clearPassword()
     {
-        if (password != null)
+        if (credential != null)
         {
-            Arrays.fill(password, (char) 0);
+            credential = null;
         }
     }
 

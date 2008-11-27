@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.security.B64Code;
 import org.mortbay.jetty.security.Constraint;
+import org.mortbay.jetty.security.Password;
 
 /**
  * @version $Rev$ $Date$
@@ -71,10 +72,10 @@ public class ClientCertAuthModule extends BaseAuthModule
             if (principal == null) principal = certs[0].getIssuerDN();
             final String username = principal == null ? "clientcert" : principal.getName();
             // TODO no idea if this is correct
-            final char[] password = B64Code.encode(certs[0].getSignature());
+            final String password = new String(B64Code.encode(certs[0].getSignature()));
 
             // TODO is cert_auth correct?
-            if (login(clientSubject, username, password, Constraint.__CERT_AUTH, messageInfo)) { return AuthStatus.SUCCESS; }
+            if (login(clientSubject, username, new Password(password), Constraint.__CERT_AUTH, messageInfo)) { return AuthStatus.SUCCESS; }
 
             if (!isMandatory(messageInfo)) { return AuthStatus.SUCCESS; }
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "The provided client certificate does not correspond to a trusted user.");
