@@ -26,15 +26,15 @@ import javax.security.auth.Subject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.JettyMessageInfo;
+import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.LoginCallbackImpl;
-import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.ServerAuthException;
-import org.mortbay.jetty.ServerAuthResult;
-import org.mortbay.jetty.ServerAuthStatus;
-import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.security.B64Code;
 import org.mortbay.jetty.security.Constraint;
+import org.mortbay.jetty.security.LoginService;
+import org.mortbay.jetty.security.ServerAuthException;
+import org.mortbay.jetty.security.ServerAuthResult;
+import org.mortbay.jetty.security.ServerAuthStatus;
+import org.mortbay.jetty.security.ServerAuthentication;
 import org.mortbay.jetty.security.SimpleAuthResult;
 
 /**

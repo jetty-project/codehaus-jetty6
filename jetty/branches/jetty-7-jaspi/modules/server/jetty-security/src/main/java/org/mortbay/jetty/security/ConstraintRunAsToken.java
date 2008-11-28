@@ -21,6 +21,7 @@ package org.mortbay.jetty.security;
 
 import org.mortbay.jetty.RunAsToken;
 
+
 /**
  * @version $Rev$ $Date$
  */

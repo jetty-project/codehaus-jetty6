@@ -4,15 +4,15 @@ import javax.security.auth.message.ServerAuth;
 import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.config.ServerAuthContext;
 
-import org.mortbay.jetty.JettyMessageInfo;
-import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.ServerAuthException;
-import org.mortbay.jetty.ServerAuthResult;
-import org.mortbay.jetty.ServerAuthStatus;
-import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.handler.SecurityHandler;
 import org.mortbay.jetty.security.AbstractAuthenticationManager;
 import org.mortbay.jetty.security.Constraint;
+import org.mortbay.jetty.security.JettyMessageInfo;
+import org.mortbay.jetty.security.LoginService;
+import org.mortbay.jetty.security.ServerAuthException;
+import org.mortbay.jetty.security.ServerAuthResult;
+import org.mortbay.jetty.security.ServerAuthStatus;
+import org.mortbay.jetty.security.ServerAuthentication;
 import org.mortbay.jetty.security.ServletCallbackHandler;
 import org.mortbay.jetty.security.jaspi.modules.BasicAuthModule;
 import org.mortbay.jetty.security.jaspi.modules.ClientCertAuthModule;
@@ -41,7 +41,7 @@ public class JaspiAuthenticationManager extends AbstractAuthenticationManager
 
         if (getAuthMethod() != null && !"".equals(getAuthMethod()))
         {
-            LoginService loginService = getSecurityHandler().getLoginService();
+            LoginService loginService = (LoginService)getSecurityHandler().getUserRealm();
 
             ServletCallbackHandler callbackHandler=new ServletCallbackHandler(loginService);
 

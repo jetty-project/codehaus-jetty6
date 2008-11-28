@@ -14,12 +14,6 @@
 
 package org.mortbay.jetty.security;
 
-import org.mortbay.jetty.JettyMessageInfo;
-import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.ServerAuthException;
-import org.mortbay.jetty.ServerAuthResult;
-import org.mortbay.jetty.ServerAuthStatus;
-import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.security.authentication.BasicServerAuthentication;
 import org.mortbay.jetty.security.authentication.ClientCertServerAuthentication;
 import org.mortbay.jetty.security.authentication.DigestServerAuthentication;
@@ -48,7 +42,7 @@ public class DefaultAuthenticationManager extends AbstractAuthenticationManager
        
         if (getAuthMethod() != null && !"".equals(getAuthMethod()))
         {
-            LoginService loginService = getSecurityHandler().getLoginService();
+            LoginService loginService = (LoginService)getSecurityHandler().getUserRealm();
             if (Constraint.__FORM_AUTH.equals(getAuthMethod()))
             {
                 _serverAuthentication = new SessionCachingServerAuthentication(new FormServerAuthentication(getLoginPage(), getErrorPage(), loginService));

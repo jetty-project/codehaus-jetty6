@@ -21,7 +21,7 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.RequestLog;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.LoginService;
+import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerCollection;
@@ -82,7 +82,7 @@ public class Jetty6RunMojo extends AbstractJettyRunMojo
      * List of security realms to set up. Optional.
      * @parameter
      */
-    private LoginService[] loginServices;
+    private UserRealm[] loginServices;
     
 
 
@@ -116,9 +116,9 @@ public class Jetty6RunMojo extends AbstractJettyRunMojo
     /**
      * 
      * 
-     * @see AbstractJettyMojo#getConfiguredLoginServices()
+     * @see AbstractJettyMojo#getConfiguredUserRealms()
      */
-    public Object[] getConfiguredLoginServices()
+    public Object[] getConfiguredUserRealms()
     {
         return loginServices;
     }

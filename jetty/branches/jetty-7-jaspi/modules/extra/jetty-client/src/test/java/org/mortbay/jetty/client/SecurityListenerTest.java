@@ -26,16 +26,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
+
 import org.mortbay.io.Buffer;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpMethods;
-import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.client.security.Realm;
 import org.mortbay.jetty.client.security.SimpleRealmResolver;
 import org.mortbay.jetty.handler.AbstractHandler;
@@ -44,8 +43,8 @@ import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
 import org.mortbay.jetty.security.DefaultAuthenticationManager;
-import org.mortbay.jetty.security.authentication.BasicServerAuthentication;
 import org.mortbay.jetty.security.HashLoginService;
+import org.mortbay.jetty.security.LoginService;
 
 /**
  * Functional testing for HttpExchange.
@@ -281,7 +280,7 @@ public class SecurityListenerTest extends TestCase
          ConstraintSecurityHandler sh = new ConstraintSecurityHandler();
          sh.setAuthenticationManager(new DefaultAuthenticationManager());
          sh.getAuthenticationManager().setAuthMethod(Constraint.__BASIC_AUTH);
-         sh.setLoginService(loginService);
+         sh.setUserRealm(loginService);
          
          //ServerAuthentication serverAuthentication = new BasicServerAuthentication(loginService, "MyRealm");
          //sh.setServerAuthentication(serverAuthentication);

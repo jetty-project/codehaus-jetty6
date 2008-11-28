@@ -31,11 +31,12 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import org.mortbay.jetty.LoginCallback;
-import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.ServerAuthException;
-import org.mortbay.jetty.plus.jaas.callback.ObjectCallback;
 
+import org.mortbay.jetty.LoginCallback;
+import org.mortbay.jetty.plus.jaas.callback.ObjectCallback;
+import org.mortbay.jetty.security.LoginService;
+import org.mortbay.jetty.security.ServerAuthException;
+import org.mortbay.log.Log;
 
 /* ---------------------------------------------------- */
 /** JAASLoginService
@@ -164,7 +165,6 @@ public class JAASLoginService implements LoginService
                         }
                         else if (callback instanceof ObjectCallback)
                         {
-                            //TODO will credential always be a String
                             ((ObjectCallback)callback).setObject(loginCallback.getCredential());
                         }
                     }
@@ -186,13 +186,20 @@ public class JAASLoginService implements LoginService
         }
         catch (LoginException e)
         {
+            Log.warn(e);
+            loginCallback.setSuccess(false);
         }
         catch (IOException e)
         {
+            Log.warn(e);
+            loginCallback.setSuccess(false);
         }
         catch (UnsupportedCallbackException e)
         {
+           Log.warn(e);
+           loginCallback.setSuccess(false);
         }
+       
     }
 
     private String getUserName(CallbackHandler callbackHandler) throws IOException, UnsupportedCallbackException

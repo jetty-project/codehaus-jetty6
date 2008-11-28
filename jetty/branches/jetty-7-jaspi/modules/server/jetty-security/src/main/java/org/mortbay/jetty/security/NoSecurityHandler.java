@@ -22,15 +22,23 @@ package org.mortbay.jetty.security;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.handler.SecurityHandler;
 import org.mortbay.jetty.AuthenticationManager;
-import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.RunAsToken;
-import org.mortbay.jetty.ServerAuthentication;
+import org.mortbay.jetty.UserRealm;
 
 /**
  * @version $Rev$ $Date$
  */
 public class NoSecurityHandler extends HandlerWrapper implements SecurityHandler
 {
+
+    public UserRealm getUserRealm()
+    {
+        return null;
+    }
+
+    public void setUserRealm(UserRealm realm)
+    {        
+    }
 
     public RunAsToken newRunAsToken(String runAsRole)
     {
@@ -39,15 +47,6 @@ public class NoSecurityHandler extends HandlerWrapper implements SecurityHandler
 
     public void setServerAuthentication(ServerAuthentication serverAuthentication)
     {
-    }
-
-    public LoginService getLoginService()
-    {
-        return null;
-    }
-
-    public void setLoginService(LoginService service)
-    {        
     }
 
     public AuthenticationManager getAuthenticationManager()

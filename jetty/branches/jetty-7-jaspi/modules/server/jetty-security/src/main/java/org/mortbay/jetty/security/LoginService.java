@@ -18,27 +18,21 @@
  */
 
 
-package org.mortbay.jetty;
+package org.mortbay.jetty.security;
 
-import java.security.GeneralSecurityException;
+import javax.security.auth.Subject;
+
+import org.mortbay.jetty.LoginCallback;
+import org.mortbay.jetty.UserRealm;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
-public class ServerAuthException extends GeneralSecurityException {
+public interface LoginService extends UserRealm
+{
+    void login(LoginCallback loginCallback) throws ServerAuthException;
 
-    public ServerAuthException() {
-    }
+    void logout(Subject subject) throws ServerAuthException;
 
-    public ServerAuthException(String s) {
-        super(s);
-    }
-
-    public ServerAuthException(String s, Throwable throwable) {
-        super(s, throwable);
-    }
-
-    public ServerAuthException(Throwable throwable) {
-        super(throwable);
-    }
+    String getName();
 }

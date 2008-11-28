@@ -25,8 +25,6 @@ import javax.security.auth.Subject;
 
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.LoginCallback;
-import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.ServerAuthException;
 
 
 public abstract class AbstractLoginService extends AbstractLifeCycle implements LoginService

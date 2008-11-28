@@ -26,15 +26,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.jetty.JettyMessageInfo;
+import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.LoginCallbackImpl;
-import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.ServerAuthException;
-import org.mortbay.jetty.ServerAuthResult;
-import org.mortbay.jetty.ServerAuthStatus;
-import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.security.B64Code;
 import org.mortbay.jetty.security.Constraint;
+import org.mortbay.jetty.security.LoginService;
+import org.mortbay.jetty.security.ServerAuthException;
+import org.mortbay.jetty.security.ServerAuthResult;
+import org.mortbay.jetty.security.ServerAuthStatus;
+import org.mortbay.jetty.security.ServerAuthentication;
 import org.mortbay.jetty.security.SimpleAuthResult;
 import org.mortbay.util.StringUtil;
 
@@ -73,12 +73,20 @@ public class BasicServerAuthentication implements ServerAuthentication
 
                 LoginCallbackImpl loginCallback = new LoginCallbackImpl(new Subject(), username, password.toCharArray());
                 _loginService.login(loginCallback);
-                if (loginCallback.isSuccess()) { return new SimpleAuthResult(ServerAuthStatus.SUCCESS, loginCallback.getSubject(), loginCallback
-                                                                             .getUserPrincipal(), loginCallback.getGroups(), Constraint.__BASIC_AUTH); }
-
+                if (loginCallback.isSuccess())
+                { 
+                    return new SimpleAuthResult(ServerAuthStatus.SUCCESS, 
+                                                loginCallback.getSubject(), 
+                                                loginCallback.getUserPrincipal(), 
+                                                loginCallback.getGroups(), 
+                                                Constraint.__BASIC_AUTH); 
+                }
             }
 
-            if (!messageInfo.isAuthMandatory()) { return SimpleAuthResult.NO_AUTH_RESULTS; }
+            if (!messageInfo.isAuthMandatory()) 
+            {
+                return SimpleAuthResult.NO_AUTH_RESULTS;
+            }
             response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\"" + _realmName + '"');
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return new SimpleAuthResult(ServerAuthStatus.SEND_CONTINUE, null, null, (String[]) null, null);

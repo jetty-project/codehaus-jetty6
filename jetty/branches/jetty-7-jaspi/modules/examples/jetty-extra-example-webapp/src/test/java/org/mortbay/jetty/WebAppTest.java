@@ -35,6 +35,7 @@ import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.HashLoginService;
+import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
 import org.mortbay.log.StdErrLog;
@@ -72,7 +73,7 @@ public class WebAppTest extends TestCase
         
         userRealm.setName("Test Realm");
         userRealm.setConfig(dir.getAbsolutePath()+"/etc/realm.properties");
-        server.setLoginServices(new LoginService[]{userRealm});
+        server.setUserRealms(new LoginService[]{userRealm});
         
 	File file = File.createTempFile("test",".log");
         NCSARequestLog requestLog = new NCSARequestLog(file.getAbsolutePath());

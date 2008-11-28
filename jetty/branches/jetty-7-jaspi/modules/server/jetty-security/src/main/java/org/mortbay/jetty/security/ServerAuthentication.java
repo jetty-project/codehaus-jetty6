@@ -17,19 +17,19 @@
  * under the License.
  */
 
-
-package org.mortbay.jetty;
-
-import javax.security.auth.Subject;
+package org.mortbay.jetty.security;
 
 /**
+ * This is like the JASPI ServerAuthContext but is intended to be easier to use
+ * and allow lazy auth.
+ * 
  * @version $Rev$ $Date$
  */
-public interface LoginService
+public interface ServerAuthentication
 {
-    void login(LoginCallback loginCallback) throws ServerAuthException;
 
-    void logout(Subject subject) throws ServerAuthException;
+    ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException;
 
-    String getName();
+    // most likely validatedUser is not needed here.
+    ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException;
 }

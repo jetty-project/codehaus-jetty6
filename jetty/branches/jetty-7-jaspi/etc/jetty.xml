@@ -142,8 +142,8 @@
     <!-- configuration (see $(jetty.home)/contexts/test.xml for an   -->
     <!-- example).                                                   -->
     <!-- =========================================================== -->
-    <Set name="LoginServices">
-      <Array type="org.mortbay.jetty.LoginService">
+    <Set name="UserRealms">
+      <Array type="org.mortbay.jetty.UserRealm">
         <Item>
           <New class="org.mortbay.jetty.security.HashLoginService">
             <Set name="name">Test Realm</Set>

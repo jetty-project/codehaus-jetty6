@@ -20,7 +20,7 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.RequestLog;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.LoginService;
+import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
@@ -94,22 +94,22 @@ public class Jetty6PluginServer implements JettyPluginServer
      * 
      * @see org.mortbay.jetty.plugin.JettyPluginServer#setLoginServices(java.Object[])
      */
-    public void setLoginServices(Object[] realms) throws Exception
+    public void setUserRealms(Object[] realms) throws Exception
     {
         if (realms == null)
             return;
  
          for (int i=0; i<realms.length;i++)
-             this.server.addLoginService((LoginService)realms[i]);
+             this.server.addLoginService((UserRealm)realms[i]);
     }
 
     /**
      * 
      * @see org.mortbay.jetty.plugin.util.JettyPluginServer#getLoginServices()
      */
-    public Object[] getLoginServices()
+    public Object[] getUserRealms()
     {
-        return this.server.getLoginServices();
+        return this.server.getUserRealms();
     }
 
     
@@ -205,4 +205,5 @@ public class Jetty6PluginServer implements JettyPluginServer
     {
         this.server.getThreadPool().join();
     }
+
 }

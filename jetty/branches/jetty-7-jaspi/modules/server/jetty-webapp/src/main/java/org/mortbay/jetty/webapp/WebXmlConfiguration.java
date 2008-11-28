@@ -34,15 +34,15 @@ import javax.servlet.UnavailableException;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Dispatcher;
-import org.mortbay.jetty.RunAsToken;
+import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
+import org.mortbay.jetty.security.ServerAuthResult;
+import org.mortbay.jetty.security.ServerAuthentication;
 import org.mortbay.jetty.handler.SecurityHandler;
-import org.mortbay.jetty.ServerAuthentication;
-import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.ServerAuthResult;
+import org.mortbay.jetty.RunAsToken;
 import org.mortbay.jetty.security.ConstraintAware;
 import org.mortbay.jetty.security.ServletCallbackHandler;
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
@@ -1023,15 +1023,15 @@ public class WebXmlConfiguration implements Configuration
         {
             XmlParser.Node name = node.get("realm-name");
             String realmName = name == null ? "default" : name.toString(false, true);
-            LoginService[] loginServices = ContextHandler.getCurrentContext().getContextHandler().getServer().getLoginServices();
+            UserRealm[] loginServices = ContextHandler.getCurrentContext().getContextHandler().getServer().getUserRealms();
             
             //use a specific LoginService set on this WebAppContext only
-            LoginService loginService = getWebAppContext().getSecurityHandler().getLoginService();
+            UserRealm loginService = getWebAppContext().getSecurityHandler().getUserRealm();
 
             if (loginService == null)
             {
                 //look for one that matches from the container environment
-                for (LoginService test : loginServices)
+                for (UserRealm test : loginServices)
                 {
                     if (realmName.equals(test.getName())) loginService = test;
                 }
@@ -1041,7 +1041,7 @@ public class WebXmlConfiguration implements Configuration
                     return;
                 }
                 else
-                    getWebAppContext().getSecurityHandler().setLoginService(loginService);
+                    getWebAppContext().getSecurityHandler().setUserRealm(loginService);
             }
 
            

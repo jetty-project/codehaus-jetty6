@@ -28,15 +28,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.AuthenticationManager;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.JettyMessageInfo;
-import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
-import org.mortbay.jetty.ServerAuthException;
-import org.mortbay.jetty.ServerAuthResult;
-import org.mortbay.jetty.ServerAuthStatus;
-import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.UserIdentity;
+import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.handler.SecurityHandler;
 import org.mortbay.log.Log;
@@ -46,8 +41,18 @@ import org.mortbay.log.Log;
  */
 public abstract class AbstractSecurityHandler extends HandlerWrapper implements SecurityHandler
 {
+    private UserRealm _realm;
 
-    private LoginService _loginService;
+    public UserRealm getUserRealm()
+    {
+        return _realm;
+    }
+
+    public void setUserRealm(UserRealm realm)
+    {
+        _realm = realm;
+    }
+
 
     /* ------------------------------------------------------------ */
     // private UserRealm _userRealm;
@@ -100,15 +105,6 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
     };
 
 
-    public LoginService getLoginService()
-    {
-        return _loginService;
-    }
-
-    public void setLoginService(LoginService service)
-    {
-        _loginService = service;
-    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -206,14 +202,14 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
 
                 // JASPI 3.8.2
                 // Subject clientSubject = new Subject();
-
                 try
                 {
-                    ServerAuthResult authResult = _authManager.validateRequest(messageInfo);
+                    ServerAuthResult authResult = ((AbstractAuthenticationManager)_authManager).validateRequest(messageInfo);
                     // AuthStatus authStatus =
                     // authContext.validateRequest(messageInfo, clientSubject,
                     // serviceSubject);
-                    if (!isAuthMandatory || authResult.getAuthStatus() == ServerAuthStatus.SUCCESS)
+                    
+                    if (authResult.getAuthStatus() == ServerAuthStatus.SUCCESS)
                     {
                         // JASPI 3.8. Supply the UserPrincipal and ClientSubject
                         // to the web resource permission check
@@ -250,11 +246,12 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                             boolean secureResponse = true;
                             if (secureResponse)
                             {
-                                _authManager.secureResponse(messageInfo, authResult);
+                                ((AbstractAuthenticationManager)_authManager).secureResponse(messageInfo, authResult);
                                 // authContext.secureResponse(messageInfo,
                                 // serviceSubject);
                             }
                         }
+                      
                         // TODO is this a sufficient dissociate call?
                         base_request.setUserIdentity(UserIdentity.UNAUTHENTICATED_IDENTITY);
                     }
@@ -287,7 +284,6 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                     // jaspi clean up subject
                     // authContext.cleanSubject(messageInfo, clientSubject);
                 }
-
             }
             else
             {

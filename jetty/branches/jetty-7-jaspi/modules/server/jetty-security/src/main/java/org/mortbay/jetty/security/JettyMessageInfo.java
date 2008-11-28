@@ -18,7 +18,7 @@
  */
 
 
-package org.mortbay.jetty;
+package org.mortbay.jetty.security;
 
 import java.util.HashMap;
 import java.util.Map;

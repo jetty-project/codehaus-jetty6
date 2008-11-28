@@ -22,11 +22,11 @@ package org.mortbay.jetty.security.authentication;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.mortbay.jetty.JettyMessageInfo;
-import org.mortbay.jetty.ServerAuthException;
-import org.mortbay.jetty.ServerAuthResult;
-import org.mortbay.jetty.ServerAuthStatus;
-import org.mortbay.jetty.ServerAuthentication;
+import org.mortbay.jetty.security.JettyMessageInfo;
+import org.mortbay.jetty.security.ServerAuthException;
+import org.mortbay.jetty.security.ServerAuthResult;
+import org.mortbay.jetty.security.ServerAuthStatus;
+import org.mortbay.jetty.security.ServerAuthentication;
 import org.mortbay.jetty.security.SimpleAuthResult;
 
 /**
