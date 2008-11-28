@@ -26,10 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.LocalConnector;
-import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.security.authentication.BasicServerAuthentication;
@@ -62,9 +60,7 @@ public class ConstraintTest extends TestCase
     {
         super(arg0);
         _server.setConnectors(new Connector[]{_connector});
-
         _context.setContextPath("/ctx");
-
         _server.setHandler(_context);
         _context.setHandler(_session);
         _session.setHandler(_security);
@@ -121,7 +117,7 @@ public class ConstraintTest extends TestCase
             throws Exception
     {
         _security.getAuthenticationManager().setAuthMethod(Constraint.__BASIC_AUTH);
-        _security.setLoginService(_loginService);
+        _security.setUserRealm(_loginService);
         //ServerAuthentication serverAuthentication = new BasicServerAuthentication(_loginService, TEST_REALM);
         //_security.setServerAuthentication(serverAuthentication);
         _server.start();
@@ -161,7 +157,7 @@ public class ConstraintTest extends TestCase
         _security.getAuthenticationManager().setAuthMethod(Constraint.__FORM_AUTH);
         _security.getAuthenticationManager().setLoginPage("/testLoginPage");
         _security.getAuthenticationManager().setErrorPage("/testErrorPage");
-        _security.setLoginService(_loginService);
+        _security.setUserRealm(_loginService);
         
        // ServerAuthentication serverAuthentication = new SessionCachingServerAuthentication(new FormServerAuthentication("/testLoginPage", "/testErrorPage", _loginService));
        // _security.setServerAuthentication(serverAuthentication);

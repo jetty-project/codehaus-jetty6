@@ -34,9 +34,7 @@ import javax.security.auth.message.callback.TrustStoreCallback;
 import javax.security.auth.Subject;
 
 import org.mortbay.jetty.LoginCallback;
-import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.security.LoginCallbackImpl;
-import org.mortbay.jetty.ServerAuthException;
 
 /**
  * 

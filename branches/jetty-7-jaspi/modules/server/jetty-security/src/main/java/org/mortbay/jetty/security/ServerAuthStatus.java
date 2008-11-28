@@ -17,29 +17,12 @@
  * under the License.
  */
 
-package org.mortbay.jetty;
-
-import java.security.Principal;
-import java.util.List;
-
-import javax.security.auth.Subject;
+package org.mortbay.jetty.security;
 
 /**
- * This can evaluate results lazily.
- * 
  * @version $Rev$ $Date$
  */
-public interface ServerAuthResult
+public enum ServerAuthStatus
 {
-
-    ServerAuthStatus getAuthStatus();
-
-    Subject getClientSubject();
-
-    Principal getUserPrincipal();
-
-    List<String> getGroups();
-
-    String getAuthMethod();
-
+    SEND_FAILURE, SEND_SUCCESS, SEND_CONTINUE, SUCCESS
 }

@@ -21,7 +21,6 @@ package org.mortbay.jetty.security;
 
 import java.security.Principal;
 
-import org.mortbay.jetty.ServerAuthResult;
 import org.mortbay.jetty.UserIdentity;
 
 /**

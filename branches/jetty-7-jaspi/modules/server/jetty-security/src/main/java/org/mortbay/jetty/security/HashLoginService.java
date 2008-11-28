@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.mortbay.jetty.LoginService;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Scanner;

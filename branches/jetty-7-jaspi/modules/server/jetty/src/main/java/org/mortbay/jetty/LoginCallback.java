@@ -21,13 +21,8 @@ package org.mortbay.jetty;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.Collections;
-import java.util.Arrays;
-import java.io.UnsupportedEncodingException;
 
 import javax.security.auth.Subject;
-
-import org.mortbay.util.StringUtil;
 
 
 /**

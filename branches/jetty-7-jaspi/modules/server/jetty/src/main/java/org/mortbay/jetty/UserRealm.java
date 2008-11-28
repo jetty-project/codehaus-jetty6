@@ -12,25 +12,10 @@
 // limitations under the License.
 // ========================================================================
 
+
 package org.mortbay.jetty;
 
-import org.mortbay.component.LifeCycle;
-import org.mortbay.jetty.handler.SecurityHandler;
-
-public interface AuthenticationManager extends LifeCycle
+public interface UserRealm
 {
-    void setAuthMethod (String method);
-    String getAuthMethod ();
-    
-    void setAllowLazyAuth (boolean lazy);
-    boolean getAllowLazyAuth ();
-    
-    void setLoginPage (String loginPage);
-    String getLoginPage ();
-    
-    void setErrorPage (String errorPage);
-    String getErrorPage ();
-    
-    void setSecurityHandler (SecurityHandler handler);
-    SecurityHandler getSecurityHandler ();
+    String getName();
 }

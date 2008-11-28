@@ -24,11 +24,6 @@ import java.util.List;
 
 import javax.security.auth.Subject;
 
-import org.mortbay.jetty.ServerAuthResult;
-import org.mortbay.jetty.ServerAuthStatus;
-import org.mortbay.jetty.ServerAuthentication;
-import org.mortbay.jetty.JettyMessageInfo;
-import org.mortbay.jetty.ServerAuthException;
 
 /**
  * @version $Rev$ $Date$

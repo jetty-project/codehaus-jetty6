@@ -17,19 +17,33 @@
  * under the License.
  */
 
-package org.mortbay.jetty;
+
+package org.mortbay.jetty.security;
+
+import java.security.GeneralSecurityException;
 
 /**
- * This is like the JASPI ServerAuthContext but is intended to be easier to use
- * and allow lazy auth.
- * 
  * @version $Rev$ $Date$
  */
-public interface ServerAuthentication
+public class ServerAuthException extends GeneralSecurityException
 {
 
-    ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException;
+    public ServerAuthException()
+    {
+    }
 
-    // most likely validatedUser is not needed here.
-    ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException;
+    public ServerAuthException(String s)
+    {
+        super(s);
+    }
+
+    public ServerAuthException(String s, Throwable throwable)
+    {
+        super(s, throwable);
+    }
+
+    public ServerAuthException(Throwable throwable)
+    {
+        super(throwable);
+    }
 }

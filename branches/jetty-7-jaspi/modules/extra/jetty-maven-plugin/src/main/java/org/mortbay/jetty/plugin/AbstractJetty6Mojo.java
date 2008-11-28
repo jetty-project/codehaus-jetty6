@@ -18,7 +18,7 @@ package org.mortbay.jetty.plugin;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.RequestLog;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
-import org.mortbay.jetty.LoginService;
+import org.mortbay.jetty.UserRealm;
 import org.mortbay.xml.XmlConfiguration;                         
 
 /**
@@ -43,7 +43,7 @@ public abstract class AbstractJetty6Mojo extends AbstractJettyMojo
      * List of security realms to set up. Optional.
      * @parameter
      */
-    private LoginService[] loginServices;
+    private UserRealm[] loginServices;
     
     
 
@@ -57,9 +57,9 @@ public abstract class AbstractJetty6Mojo extends AbstractJettyMojo
     
     
     /**
-     * @see AbstractJettyMojo#getConfiguredLoginServices()
+     * @see AbstractJettyMojo#getConfiguredUserRealms()
      */
-    public Object[] getConfiguredLoginServices()
+    public Object[] getConfiguredUserRealms()
     {
         return this.loginServices;
     }

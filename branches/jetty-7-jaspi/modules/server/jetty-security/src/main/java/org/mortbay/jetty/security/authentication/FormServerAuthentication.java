@@ -26,14 +26,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.mortbay.jetty.JettyMessageInfo;
+import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.LoginCallbackImpl;
-import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.ServerAuthException;
-import org.mortbay.jetty.ServerAuthResult;
-import org.mortbay.jetty.ServerAuthStatus;
-import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.security.Constraint;
+import org.mortbay.jetty.security.LoginService;
+import org.mortbay.jetty.security.ServerAuthException;
+import org.mortbay.jetty.security.ServerAuthResult;
+import org.mortbay.jetty.security.ServerAuthStatus;
+import org.mortbay.jetty.security.ServerAuthentication;
 import org.mortbay.jetty.security.SimpleAuthResult;
 import org.mortbay.log.Log;
 import org.mortbay.util.StringUtil;
@@ -45,23 +45,14 @@ import org.mortbay.util.URIUtil;
 public class FormServerAuthentication implements ServerAuthentication
 {
     public final static String __J_URI = "org.mortbay.jetty.URI";
-
     public final static String __J_AUTHENTICATED = "org.mortbay.jetty.Auth";
-
     public final static String __J_SECURITY_CHECK = "/j_security_check";
-
     public final static String __J_USERNAME = "j_username";
-
     public final static String __J_PASSWORD = "j_password";
-
     private final LoginService _loginService;
-
     private String _formErrorPage;
-
     private String _formErrorPath;
-
     private String _formLoginPage;
-
     private String _formLoginPath;
 
     public FormServerAuthentication(String loginPage, String errorPage, LoginService loginService)
@@ -115,7 +106,10 @@ public class FormServerAuthentication implements ServerAuthentication
         String uri = request.getPathInfo();
         // not mandatory and not authenticated
         if (session == null || isLoginOrErrorPage(uri)) 
+        {
             return new SimpleAuthResult(ServerAuthStatus.SUCCESS);
+        }
+            
 
         try
         {
@@ -138,11 +132,9 @@ public class FormServerAuthentication implements ServerAuthentication
                         if (nuri.length() == 0) nuri = URIUtil.SLASH;
                     }
                     // TODO shouldn't we forward to original URI instead?
-                    session.removeAttribute(__J_URI); // Remove popped return
-                                                        // URI.
-                    response.setContentLength(0);
+                    session.removeAttribute(__J_URI); // Remove popped return URI.
+                    response.setContentLength(0);   
                     response.sendRedirect(response.encodeRedirectURL(nuri));
-
                     return new SimpleAuthResult(ServerAuthStatus.SEND_CONTINUE, loginCallback.getSubject(), loginCallback.getUserPrincipal(), loginCallback
                             .getGroups(), Constraint.__FORM_AUTH);
                 }

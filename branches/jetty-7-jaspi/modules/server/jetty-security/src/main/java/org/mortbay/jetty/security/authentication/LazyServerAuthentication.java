@@ -19,12 +19,12 @@
 
 package org.mortbay.jetty.security.authentication;
 
-import org.mortbay.jetty.ServerAuthentication;
-import org.mortbay.jetty.ServerAuthResult;
-import org.mortbay.jetty.JettyMessageInfo;
-import org.mortbay.jetty.ServerAuthException;
-import org.mortbay.jetty.ServerAuthStatus;
+import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.LazyAuthResult;
+import org.mortbay.jetty.security.ServerAuthException;
+import org.mortbay.jetty.security.ServerAuthResult;
+import org.mortbay.jetty.security.ServerAuthStatus;
+import org.mortbay.jetty.security.ServerAuthentication;
 
 /**
  * @version $Rev$ $Date$
@@ -40,7 +40,7 @@ public class LazyServerAuthentication implements ServerAuthentication
     }
 
     /** 
-     * @see org.mortbay.jetty.ServerAuthentication#validateRequest(org.mortbay.jetty.JettyMessageInfo)
+     * @see org.mortbay.jetty.security.ServerAuthentication#validateRequest(org.mortbay.jetty.security.JettyMessageInfo)
      */
     public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
     {

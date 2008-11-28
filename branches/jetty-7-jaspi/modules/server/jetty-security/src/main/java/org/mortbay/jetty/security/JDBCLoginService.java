@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Properties;
 
 import org.mortbay.jetty.LoginCallback;
-import org.mortbay.jetty.ServerAuthException;
 import org.mortbay.jetty.security.Password;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;

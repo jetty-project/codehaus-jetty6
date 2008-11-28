@@ -19,8 +19,8 @@ import org.mortbay.component.LifeCycle;
 import org.mortbay.jetty.AuthenticationManager;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
-import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.RunAsToken;
+import org.mortbay.jetty.UserRealm;
 
 
 /**
@@ -37,6 +37,6 @@ public interface SecurityHandler extends LifeCycle, Handler, HandlerContainer
     void setAuthenticationManager (AuthenticationManager authManager);
     AuthenticationManager getAuthenticationManager();
     
-    LoginService getLoginService ();
-    void setLoginService (LoginService service);
+    UserRealm getUserRealm ();
+    void setUserRealm (UserRealm realm);
 }

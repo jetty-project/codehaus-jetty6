@@ -26,8 +26,6 @@ import java.util.Arrays;
 
 import javax.security.auth.Subject;
 
-import org.mortbay.jetty.ServerAuthResult;
-import org.mortbay.jetty.ServerAuthStatus;
 
 /**
  * @version $Rev$ $Date$

@@ -15,8 +15,8 @@
 package org.mortbay.jetty;
 import java.security.Principal;
 
-import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.RunAsToken;
+import org.mortbay.jetty.servlet.ServletHolder;
 
 /* ------------------------------------------------------------ */
 /** User object that encapsulates user identity and operations such as run-as-role actions, checking isUserInRole and getUserPrincipal.

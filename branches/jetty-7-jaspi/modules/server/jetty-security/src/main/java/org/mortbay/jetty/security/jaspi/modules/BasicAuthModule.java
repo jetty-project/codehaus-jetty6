@@ -33,8 +33,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.security.Constraint;
+import org.mortbay.jetty.security.LoginService;
 import org.mortbay.log.Log;
 
 /**

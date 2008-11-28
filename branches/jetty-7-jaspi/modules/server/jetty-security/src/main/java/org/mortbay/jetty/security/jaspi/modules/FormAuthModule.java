@@ -40,9 +40,9 @@ import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
 import org.mortbay.jetty.security.LoginCallbackImpl;
-import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
+import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.Password;
 import org.mortbay.log.Log;
 import org.mortbay.util.StringUtil;
