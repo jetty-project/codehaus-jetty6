@@ -20,6 +20,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.AsyncContextState;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
@@ -91,15 +92,25 @@ public class StatisticsHandler extends HandlerWrapper implements CompleteHandler
         {
             synchronized(this)
             {
-                if(base_request.isInitial())
+                AsyncContextState asyncContextState=base_request.getAsyncContextState();
+
+                if(asyncContextState==null)
+                {
                     _requests++;
+                }
                 else
-                    timestamp1=System.currentTimeMillis();
-                
-                if(base_request.isTimeout())
-                    _requestsTimedout++;
-                if(base_request.isResumed())
-                    _requestsResumed++;
+                {
+                    if(asyncContextState.isInitial())
+                        _requests++;
+                    else
+                    {
+                        timestamp1=System.currentTimeMillis();
+                        if (asyncContextState.isTimeout())
+                            _requestsTimedout++;
+                        if(asyncContextState.isResumed())
+                            _requestsResumed++;
+                    }
+                }
 
                 _requestsActive++;
                 if (_requestsActive>_requestsActiveMax)
@@ -126,7 +137,7 @@ public class StatisticsHandler extends HandlerWrapper implements CompleteHandler
                     _requestsActiveDurationMax=duration;
 
                 
-                if(base_request.isSuspended())
+                if(request.isAsyncStarted())
                 {
                     Object list = base_request.getAttribute(COMPLETE_HANDLER_ATTR);
                     base_request.setAttribute(COMPLETE_HANDLER_ATTR, LazyList.add(list, this));

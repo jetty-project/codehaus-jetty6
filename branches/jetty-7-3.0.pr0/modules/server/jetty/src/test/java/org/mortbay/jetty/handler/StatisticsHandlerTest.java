@@ -200,7 +200,7 @@ public class StatisticsHandlerTest extends TestCase
 
         public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
-            if (request.isInitial())
+            if (!request.isAsyncStarted())
             {
                 try
                 {
@@ -233,10 +233,10 @@ public class StatisticsHandlerTest extends TestCase
 
         public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
-            Request base_request = (request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
-            if (base_request.isInitial())
+            if (!request.isAsyncStarted())
             {
-                base_request.suspend(_suspendFor);
+                request.setAsyncTimeout(_suspendFor);
+                request.startAsync();
             }
         }
 
@@ -244,13 +244,12 @@ public class StatisticsHandlerTest extends TestCase
 
     private static class ResumeHandler extends HandlerWrapper
     {
-
         public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
-            if (request.isInitial())
+            if (!request.isAsyncStarted())
             {
-                request.suspend(100000);
-                request.resume();
+                request.setAsyncTimeout(100000);
+                request.startAsync().forward();
             }
         }
 
@@ -267,7 +266,7 @@ public class StatisticsHandlerTest extends TestCase
 
         public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
-            if (request.isInitial())
+            if (!request.isAsyncStarted())
             {
                 try
                 {
@@ -302,7 +301,8 @@ public class StatisticsHandlerTest extends TestCase
 
             if (i < _suspendFor.length)
             {
-                request.suspend(_suspendFor[i]);
+                request.setAsyncTimeout(_suspendFor[i]);
+                request.startAsync();
                 request.setAttribute("i",i + 1);
                 return;
             }
@@ -334,11 +334,11 @@ public class StatisticsHandlerTest extends TestCase
             _lock = lock;
         }
         
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, final HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
             final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
             
-            if(base_request.isInitial())
+            if(!request.isAsyncStarted())
             {
                 try
                 {
@@ -347,7 +347,8 @@ public class StatisticsHandlerTest extends TestCase
                 {
                 }
                 
-                base_request.suspend(_completeDuration * 10);
+                request.setAsyncTimeout(_completeDuration*10);
+                request.startAsync();
                 
                 (new Thread() {
                     public void run()
@@ -355,15 +356,12 @@ public class StatisticsHandlerTest extends TestCase
                         try
                         {
                             Thread.sleep(_completeDuration);
-                            base_request.complete();
+                            request.getAsyncContext().complete();
                             
                             synchronized(_lock)
                             {
                                 _lock.notify();
                             }
-                        }
-                        catch(IOException e)
-                        {
                         }
                         catch(InterruptedException e)
                         {

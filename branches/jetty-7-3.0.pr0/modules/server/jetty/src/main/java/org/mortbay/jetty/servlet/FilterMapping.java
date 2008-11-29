@@ -27,9 +27,6 @@ public class FilterMapping
     private transient FilterHolder _holder;
     private String[] _pathSpecs;
     private String[] _servletNames;
-    private boolean _redispatch;
-    private boolean _initial;
-    
 
     /* ------------------------------------------------------------ */
     public FilterMapping()
@@ -41,17 +38,15 @@ public class FilterMapping
      * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
      * @return True if this filter applies
      */
-    boolean appliesTo(String path, int type,boolean initial)
+    boolean appliesTo(String path, int type)
     {
-        if (_initial==_redispatch || _initial&&initial || _redispatch&&!initial)
+        if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)) && _pathSpecs!=null )
         {
-            if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)) && _pathSpecs!=null )
-            {
-                for (int i=0;i<_pathSpecs.length;i++)
-                    if (_pathSpecs[i]!=null &&  PathMap.match(_pathSpecs[i], path,true))
-                        return true;
-            }
+            for (int i=0;i<_pathSpecs.length;i++)
+                if (_pathSpecs[i]!=null &&  PathMap.match(_pathSpecs[i], path,true))
+                    return true;
         }
+
         return false;
     }
     
@@ -61,16 +56,10 @@ public class FilterMapping
      *      {@link Handler#REQUEST}, {@link Handler#FORWARD}, {@link Handler#INCLUDE} or {@link Handler#ERROR}.
      * @return <code>true</code> if this filter applies
      */
-    boolean appliesTo(int type, boolean initial)
+    boolean appliesTo(int type)
     {
-        if (_initial==_redispatch || _initial&&initial || _redispatch&&!initial)
-        {
-            if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)))
-                return true;
-        }
-        return false;
+        return ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)));
     }
-
     
     /* ------------------------------------------------------------ */
     /**
@@ -193,39 +182,4 @@ public class FilterMapping
         return "(F="+_filterName+","+(_pathSpecs==null?"[]":Arrays.asList(_pathSpecs).toString())+","+(_servletNames==null?"[]":Arrays.asList(_servletNames).toString())+","+_dispatches+")"; 
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @return the redispatch
-     */
-    public boolean isRedispatchLifeCycle()
-    {
-        return _redispatch;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param redispatch the redispatch to set
-     */
-    public void setRedispatchLifeCycle(boolean redispatch)
-    {
-        _redispatch = redispatch;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return the initial
-     */
-    public boolean isInitialLifeCycle()
-    {
-        return _initial;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param initial the initial to set
-     */
-    public void setInitialLifeCycle(boolean initial)
-    {
-        _initial = initial;
-    }
 }

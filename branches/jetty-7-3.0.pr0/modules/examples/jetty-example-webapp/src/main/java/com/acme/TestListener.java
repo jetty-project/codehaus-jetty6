@@ -71,12 +71,10 @@ public class TestListener implements HttpSessionListener,  HttpSessionAttributeL
     	
     	context.addFilter("TestFilter", null, TestFilter.class.getName(), null);
     	
-    	context.addFilterMapping(
-    			"TestFilter", 
-    			new String[]{"/dump/*","/dispatch/*","*.dump"}, new String[]{"*"}, 
-    			EnumSet.of(DispatcherType.ERROR,DispatcherType.FORWARD,DispatcherType.INCLUDE,DispatcherType.REQUEST), 
-    			true);
-    
+    	context.addFilterMappingForUrlPatterns("TestFilter",
+    	        EnumSet.of(DispatcherType.ERROR,DispatcherType.FORWARD,DispatcherType.INCLUDE,DispatcherType.REQUEST),
+    	        true, 
+    	        new String[]{"/dump/*","/dispatch/*","*.dump"});
     }
 
     public void contextDestroyed(ServletContextEvent sce)

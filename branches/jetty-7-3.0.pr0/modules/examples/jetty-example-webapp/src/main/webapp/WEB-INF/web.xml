@@ -15,19 +15,24 @@
   <filter>
     <filter-name>QoSFilter</filter-name>
     <filter-class>org.mortbay.servlet.QoSFilter</filter-class>
+    <async-support>true</async-support>
     <init-param>
       <param-name>maxRequests</param-name>
       <param-value>20</param-value>
     </init-param>
   </filter>
+  
   <filter-mapping>
     <filter-name>QoSFilter</filter-name>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 
   <filter>
     <filter-name>MultiPart</filter-name>
     <filter-class>org.mortbay.servlet.MultiPartFilter</filter-class>
+    <async-support>true</async-support>
     <init-param>
       <param-name>deleteFiles</param-name>
       <param-value>true</param-value>
@@ -41,6 +46,7 @@
   <filter>
     <filter-name>GzipFilter</filter-name>
     <filter-class>org.mortbay.servlet.jetty.IncludableGzipFilter</filter-class>
+    <async-support>true</async-support>
     <init-param>
       <param-name>bufferSize</param-name>
       <param-value>8192</param-value>
@@ -64,6 +70,8 @@
   </filter>
   <filter-mapping>
     <filter-name>GzipFilter</filter-name>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
   
@@ -73,7 +81,7 @@
   <filter>
     <filter-name>RestFilter</filter-name>
     <filter-class>org.mortbay.servlet.RestFilter</filter-class>
-    <suspend-supported/>
+    <async-support>true</async-support>
     <init-param>
       <param-name>maxPutSize</param-name><param-value>1024</param-value>
     </init-param>
@@ -101,6 +109,7 @@
   <servlet>
     <servlet-name>Dump</servlet-name>
     <servlet-class>com.acme.Dump</servlet-class>
+    <async-support>true</async-support>
     <load-on-startup>1</load-on-startup>
     <run-as><role-name>admin</role-name></run-as>
   </servlet>
@@ -136,6 +145,7 @@
   <servlet>
     <servlet-name>Dispatch</servlet-name>
     <servlet-class>com.acme.DispatchServlet</servlet-class>
+    <async-support>true</async-support>
     <load-on-startup>1</load-on-startup>
   </servlet>
   
@@ -169,6 +179,7 @@
   <servlet>
     <servlet-name>Chat</servlet-name>
     <servlet-class>com.acme.ChatServlet</servlet-class>
+    <async-support>true</async-support>
     <load-on-startup>1</load-on-startup>
   </servlet>
 
@@ -176,7 +187,6 @@
     <servlet-name>Chat</servlet-name>
     <url-pattern>/chat/*</url-pattern>
   </servlet-mapping>
-  
   
   <error-page>
     <error-code>404</error-code>

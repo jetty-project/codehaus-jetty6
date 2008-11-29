@@ -391,12 +391,8 @@ public class HttpConnection implements Connection
             {
                 try
                 {
-                    if (!_request.isInitial())
+                    if (_request.isAsyncStarted())
                     {
-                        if (_request.isSuspended())
-                        {
-                            Log.warn("suspended dispatch");
-                        }
                         Log.debug("resume request",_request);
                         handleRequest();
                     }
@@ -463,7 +459,7 @@ public class HttpConnection implements Connection
                         progress=true;
                     }
 
-                    if (_request.isSuspended())
+                    if (_request.isAsyncStarted())
                     {
                         Log.debug("return with suspended request");
                         return;
@@ -518,13 +514,12 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     protected void handleRequest() throws IOException
     {
-        _request.handling();
+        _request.dispatch();
         boolean handling=_server.isRunning();
         
         while (handling)
         {
             _request.setHandled(false);
-            _response.enable();
             boolean error = false;
             String threadName=null;
             try
@@ -537,7 +532,7 @@ public class HttpConnection implements Connection
                 if (_out!=null)
                     _out.reopen();
                 
-                if (_request.isInitial())
+                if (!_request.isAsyncStarted())
                     _connector.customize(_endp, _request);
                   
                 if (Log.isDebugEnabled())
@@ -546,14 +541,10 @@ public class HttpConnection implements Connection
                     Thread.currentThread().setName(threadName+" - "+_uri);
                 }
 
-                if (_request.shouldHandleRequest())
-                {
-                    _server.handle(this);
-                }
-                else
-                {
+                if (_request.getAsyncContextState()!=null && _request.getAsyncContextState().isCompleting())
                     _request.setHandled(true);
-                }
+                else
+                    _server.handle(this);
             }
             catch (RetryRequest r)
             {
@@ -587,7 +578,7 @@ public class HttpConnection implements Connection
             }
             finally
             {   
-                handling = !_request.unhandling() && _server != null;
+                handling = !_request.undispatch() && _server != null;
                 if (handling)
                     continue;
                 
@@ -595,7 +586,7 @@ public class HttpConnection implements Connection
                     Thread.currentThread().setName(threadName);
                 
                 
-                if (_request.shouldComplete() )
+                if (_request.getAsyncContextState()==null || _request.getAsyncContextState().shouldComplete())
                 {
                     if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
                     {

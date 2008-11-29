@@ -116,179 +116,171 @@ public class AsyncProxyServlet implements Servlet
             final InputStream in=request.getInputStream();
             final OutputStream out=response.getOutputStream();
 
-            if (request.isInitial())
+            if (request.getAttribute("javax.servlet.timeout")==Boolean.TRUE)
             {
-                String uri=request.getRequestURI();
-                if (request.getQueryString()!=null)
-                    uri+="?"+request.getQueryString();
+                response.sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT);
+                return;
+            }
 
-                HttpExchange exchange = new HttpExchange()
+            String uri=request.getRequestURI();
+            if (request.getQueryString()!=null)
+                uri+="?"+request.getQueryString();
+
+            HttpExchange exchange = new HttpExchange()
+            {
+                protected void onResponseComplete() throws IOException
                 {
-                    protected void onRequestCommitted() throws IOException
+                    out.close();
+                    request.complete();
+                }
+
+                protected void onResponseContent(Buffer content) throws IOException
+                {
+                    content.writeTo(out);
+                }
+
+                protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
+                {
+                    if (reason!=null && reason.length()>0)
+                        response.setStatus(status,reason.toString());
+                    else
+                        response.setStatus(status);
+                }
+
+                protected void onResponseHeader(Buffer name, Buffer value) throws IOException
+                {
+                    String s = name.toString().toLowerCase();
+                    if (!_DontProxyHeaders.contains(s))
+                        response.addHeader(name.toString(),value.toString());
+                }
+
+                protected void onConnectionFailed(Throwable ex)
+                {
+                    onException(ex);
+                }
+
+                protected void onException(Throwable ex)
+                {
+                    if (ex instanceof EofException)
                     {
+                        Log.ignore(ex);
+                        return;
                     }
 
-                    protected void onRequestComplete() throws IOException
+                    try
                     {
-                    }
-
-                    protected void onResponseComplete() throws IOException
-                    {
+                        Log.warn(ex.toString());
+                        Log.debug(ex);
+                        if (!response.isCommitted())
+                            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         request.complete();
                     }
-
-                    protected void onResponseContent(Buffer content) throws IOException
+                    catch(EofException e)
                     {
-                        content.writeTo(out);
+                        Log.ignore(e);
                     }
-
-                    protected void onResponseHeaderComplete() throws IOException
+                    catch(IOException e)
                     {
-                    }
-
-                    protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
-                    {
-                        if (reason!=null && reason.length()>0)
-                            response.setStatus(status,reason.toString());
-                        else
-                            response.setStatus(status);
-                    }
-
-                    protected void onResponseHeader(Buffer name, Buffer value) throws IOException
-                    {
-                        String s = name.toString().toLowerCase();
-                        if (!_DontProxyHeaders.contains(s))
-                            response.addHeader(name.toString(),value.toString());
-                    }
-
-                    protected void onConnectionFailed(Throwable ex)
-                    {
-                        onException(ex);
-                    }
-
-                    protected void onException(Throwable ex)
-                    {
-                        if (ex instanceof EofException)
-                        {
-                            Log.ignore(ex);
-                            return;
-                        }
-
-                        try
-                        {
-                            Log.warn(ex.toString());
-                            Log.debug(ex);
-                            if (!response.isCommitted())
-                                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                            request.complete();
-                        }
-                        catch(EofException e)
-                        {
-                            Log.ignore(e);
-                        }
-                        catch(IOException e)
-                        {
-                            Log.warn(e.toString());
-                            Log.debug(e);
-                        }
-                    }
-
-                    protected void onExpire()
-                    {
-                        try
-                        {
-                            if (!response.isCommitted())
-                                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                            request.complete();
-                        }
-                        catch(EofException e)
-                        {
-                            Log.ignore(e);
-                        }
-                        catch(IOException e)
-                        {
-                            Log.warn(e.toString());
-                            Log.debug(e);
-                        }
-                    }
-
-                };
-
-                exchange.setScheme(HttpSchemes.HTTPS.equals(request.getScheme())?HttpSchemes.HTTPS_BUFFER:HttpSchemes.HTTP_BUFFER);
-                exchange.setMethod(request.getMethod());
-                exchange.setURI(uri);
-
-                exchange.setVersion(request.getProtocol());
-                Address address=new Address(request.getServerName(),request.getServerPort());
-                exchange.setAddress(address);
-
-                if (Log.isDebugEnabled())
-                    Log.debug("PROXY TO http://"+address.getHost()+":"+address.getPort()+uri);
-
-
-                // check connection header
-                String connectionHdr = request.getHeader("Connection");
-                if (connectionHdr!=null)
-                {
-                    connectionHdr=connectionHdr.toLowerCase();
-                    if (connectionHdr.indexOf("keep-alive")<0  &&
-                            connectionHdr.indexOf("close")<0)
-                        connectionHdr=null;
-                }
-
-                // copy headers
-                boolean xForwardedFor=false;
-                boolean hasContent=false;
-                long contentLength=-1;
-                Enumeration<?> enm = request.getHeaderNames();
-                while (enm.hasMoreElements())
-                {
-                    // TODO could be better than this!
-                    String hdr=(String)enm.nextElement();
-                    String lhdr=hdr.toLowerCase();
-
-                    if (_DontProxyHeaders.contains(lhdr))
-                        continue;
-                    if (connectionHdr!=null && connectionHdr.indexOf(lhdr)>=0)
-                        continue;
-
-                    if ("content-type".equals(lhdr))
-                        hasContent=true;
-                    if ("content-length".equals(lhdr))
-                    {
-                        contentLength=request.getContentLength();
-                        exchange.setRequestHeader(HttpHeaders.CONTENT_LENGTH,TypeUtil.toString(contentLength));
-                        if (contentLength>0)
-                            hasContent=true;
-                    }
-
-                    Enumeration<?> vals = request.getHeaders(hdr);
-                    while (vals.hasMoreElements())
-                    {
-                        String val = (String)vals.nextElement();
-                        if (val!=null)
-                        {
-                            exchange.setRequestHeader(lhdr,val);
-                            xForwardedFor|="X-Forwarded-For".equalsIgnoreCase(hdr);
-                        }
+                        Log.warn(e.toString());
+                        Log.debug(e);
                     }
                 }
 
-                // Proxy headers
-                exchange.setRequestHeader("Via","1.1 (jetty)");
-                if (!xForwardedFor)
-                    exchange.addRequestHeader("X-Forwarded-For",
-                            request.getRemoteAddr());
+                protected void onExpire()
+                {
+                    try
+                    {
+                        if (!response.isCommitted())
+                            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        request.complete();
+                    }
+                    catch(EofException e)
+                    {
+                        Log.ignore(e);
+                    }
+                    catch(IOException e)
+                    {
+                        Log.warn(e.toString());
+                        Log.debug(e);
+                    }
+                }
 
-                if (hasContent)
-                    exchange.setRequestContentSource(in);
+            };
 
-                request.suspend();
-                _client.send(exchange);
+            exchange.setScheme(HttpSchemes.HTTPS.equals(request.getScheme())?HttpSchemes.HTTPS_BUFFER:HttpSchemes.HTTP_BUFFER);
+            exchange.setMethod(request.getMethod());
+            exchange.setURI(uri);
 
+            exchange.setVersion(request.getProtocol());
+            Address address=new Address(request.getServerName(),request.getServerPort());
+            exchange.setAddress(address);
+
+            if (Log.isDebugEnabled())
+                Log.debug("PROXY TO http://"+address.getHost()+":"+address.getPort()+uri);
+
+
+            // check connection header
+            String connectionHdr = request.getHeader("Connection");
+            if (connectionHdr!=null)
+            {
+                connectionHdr=connectionHdr.toLowerCase();
+                if (connectionHdr.indexOf("keep-alive")<0  &&
+                        connectionHdr.indexOf("close")<0)
+                    connectionHdr=null;
             }
+
+            // copy headers
+            boolean xForwardedFor=false;
+            boolean hasContent=false;
+            long contentLength=-1;
+            Enumeration<?> enm = request.getHeaderNames();
+            while (enm.hasMoreElements())
+            {
+                // TODO could be better than this!
+                String hdr=(String)enm.nextElement();
+                String lhdr=hdr.toLowerCase();
+
+                if (_DontProxyHeaders.contains(lhdr))
+                    continue;
+                if (connectionHdr!=null && connectionHdr.indexOf(lhdr)>=0)
+                    continue;
+
+                if ("content-type".equals(lhdr))
+                    hasContent=true;
+                if ("content-length".equals(lhdr))
+                {
+                    contentLength=request.getContentLength();
+                    exchange.setRequestHeader(HttpHeaders.CONTENT_LENGTH,TypeUtil.toString(contentLength));
+                    if (contentLength>0)
+                        hasContent=true;
+                }
+
+                Enumeration<?> vals = request.getHeaders(hdr);
+                while (vals.hasMoreElements())
+                {
+                    String val = (String)vals.nextElement();
+                    if (val!=null)
+                    {
+                        exchange.setRequestHeader(lhdr,val);
+                        xForwardedFor|="X-Forwarded-For".equalsIgnoreCase(hdr);
+                    }
+                }
+            }
+
+            // Proxy headers
+            exchange.setRequestHeader("Via","1.1 (jetty)");
+            if (!xForwardedFor)
+                exchange.addRequestHeader("X-Forwarded-For",request.getRemoteAddr());
+
+            if (hasContent)
+                exchange.setRequestContentSource(in);
+
+            request.suspend();
+            _client.send(exchange);
+
         }
     }
+    
 
 
     /* ------------------------------------------------------------ */

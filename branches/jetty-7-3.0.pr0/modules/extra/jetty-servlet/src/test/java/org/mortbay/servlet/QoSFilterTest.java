@@ -87,6 +87,7 @@ public class QoSFilterTest extends TestCase
     public void testBlockingQosFilter() throws Exception
     {
         FilterHolder holder = new FilterHolder(QoSFilter2.class);
+        holder.setAsyncSupported(true);
         holder.setInitParameter(QoSFilter.MAX_REQUESTS_INIT_PARAM, ""+MAX_QOS);
         _tester.getContext().getServletHandler().addFilterWithMapping(holder,"/*",Handler.REQUEST);
 
@@ -103,6 +104,7 @@ public class QoSFilterTest extends TestCase
     public void testQosFilter() throws Exception
     {    
         FilterHolder holder = new FilterHolder(QoSFilter2.class);
+        holder.setAsyncSupported(true);
         holder.setInitParameter(QoSFilter.MAX_REQUESTS_INIT_PARAM, ""+MAX_QOS);
         _tester.getContext().getServletHandler().addFilterWithMapping(holder,"/*",Handler.REQUEST);
         
@@ -189,6 +191,7 @@ public class QoSFilterTest extends TestCase
     
     public static class TestServlet extends HttpServlet implements Servlet
     {
+        private int _count;
         private static int __sleepers;
         private static int __maxSleepers;
          
@@ -207,6 +210,7 @@ public class QoSFilterTest extends TestCase
 
                 synchronized(TestServlet.class)
                 {
+                    System.err.println(_count++);
                     __sleepers--;
                     if(__sleepers > __maxSleepers)
                         __maxSleepers = __sleepers;
