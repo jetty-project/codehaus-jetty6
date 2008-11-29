@@ -26,11 +26,11 @@ import org.mortbay.thread.Timeout.Task;
 
 /* ------------------------------------------------------------ */
 /**
- * Extension of Bayeux that uses {@link SuspendingClient}s.
+ * Extension of Bayeux that uses {@link AsyncClient}s.
  * @author gregw
  *
  */
-public class SuspendingBayeux extends AbstractBayeux
+public class AsyncBayeux extends AbstractBayeux
 {
     private static int __id;
     private transient Timer _tick;
@@ -44,7 +44,7 @@ public class SuspendingBayeux extends AbstractBayeux
      */
     public ClientImpl newRemoteClient()
     {
-        return new SuspendingClient(this);
+        return new AsyncClient(this);
     }
 
     /* ------------------------------------------------------------ */

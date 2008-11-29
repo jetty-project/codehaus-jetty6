@@ -26,26 +26,26 @@ import org.cometd.Message;
 import org.mortbay.util.ArrayQueue;
 import org.mortbay.util.StringUtil;
 
-public class SuspendingCometdServlet extends AbstractCometdServlet
+public class AsyncCometdServlet extends AbstractCometdServlet
 {
     /* ------------------------------------------------------------ */
     protected AbstractBayeux newBayeux()
     {
-        return new SuspendingBayeux();
+        return new AsyncBayeux();
     }
 
     /* ------------------------------------------------------------ */
     public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         // Look for an existing client and protect from context restarts
-        SuspendingClient client=null;
+        AsyncClient client=null;
         Transport transport=null;
         boolean connect=false;
         int received=-1;
         
         // Have we seen this request before
         boolean initial=false;
-        if (request.isInitial() || request.getAttribute(CLIENT_ATTR)==null)
+        if (request.getAttribute(CLIENT_ATTR)==null)
         {
             initial=true;
             
@@ -66,7 +66,7 @@ public class SuspendingCometdServlet extends AbstractCometdServlet
 
                     if (client==null)
                     {   
-                        client=(SuspendingClient)_bayeux.getClient((String)message.get(AbstractBayeux.CLIENT_FIELD));
+                        client=(AsyncClient)_bayeux.getClient((String)message.get(AbstractBayeux.CLIENT_FIELD));
 
                         // If no client,  SHOULD be a handshake, so force a transport and handle
                         if (client==null)
@@ -126,9 +126,9 @@ public class SuspendingCometdServlet extends AbstractCometdServlet
             transport=(Transport)request.getAttribute(TRANSPORT_ATTR);
             transport.setResponse(response);
             Object clientObj=request.getAttribute(CLIENT_ATTR); 
-            client=(clientObj instanceof ClientImpl)?(SuspendingClient)clientObj:null;
+            client=(clientObj instanceof ClientImpl)?(AsyncClient)clientObj:null;
             if (client!=null)
-                client.setPollRequest(null);
+                client.setAsyncContext(null);
         }
 
         Message pollReply=null;
@@ -150,8 +150,8 @@ public class SuspendingCometdServlet extends AbstractCometdServlet
                     if (!client.hasMessages() && initial && received<=1)
                     {
                         // suspend and save state 
-                        request.suspend(timeout);
-                        client.setPollRequest(request);
+                    	request.setAsyncTimeout(timeout);
+                    	client.setAsyncContext(request.startAsync());
                         request.setAttribute(CLIENT_ATTR,client);
                         request.setAttribute(TRANSPORT_ATTR,transport);
                         return;

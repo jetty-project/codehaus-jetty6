@@ -28,7 +28,7 @@ import org.mortbay.thread.Timeout.Task;
 /**
  * Extension of Bayeux that uses {@link ContinuationClient}s.
  * @author gregw
- * @deprecated use {@link org.mortbay.cometd.SuspendingBayeux}
+ * @deprecated use {@link org.mortbay.cometd.AsyncBayeux}
  *
  */
 public class ContinuationBayeux extends AbstractBayeux
