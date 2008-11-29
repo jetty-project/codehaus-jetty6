@@ -23,6 +23,7 @@ import java.net.Socket;
 import java.util.Enumeration;
 import java.util.HashSet;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -125,13 +126,16 @@ public class AsyncProxyServlet implements Servlet
             String uri=request.getRequestURI();
             if (request.getQueryString()!=null)
                 uri+="?"+request.getQueryString();
+            
+
+            final AsyncContext asyncContext = request.startAsync(req,res);
 
             HttpExchange exchange = new HttpExchange()
             {
                 protected void onResponseComplete() throws IOException
                 {
                     out.close();
-                    request.complete();
+                    asyncContext.complete();
                 }
 
                 protected void onResponseContent(Buffer content) throws IOException
@@ -167,42 +171,18 @@ public class AsyncProxyServlet implements Servlet
                         return;
                     }
 
-                    try
-                    {
-                        Log.warn(ex.toString());
-                        Log.debug(ex);
-                        if (!response.isCommitted())
-                            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        request.complete();
-                    }
-                    catch(EofException e)
-                    {
-                        Log.ignore(e);
-                    }
-                    catch(IOException e)
-                    {
-                        Log.warn(e.toString());
-                        Log.debug(e);
-                    }
+                    Log.warn(ex.toString());
+                    Log.debug(ex);
+                    if (!response.isCommitted())
+                    	response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    asyncContext.complete();
                 }
 
                 protected void onExpire()
                 {
-                    try
-                    {
-                        if (!response.isCommitted())
-                            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        request.complete();
-                    }
-                    catch(EofException e)
-                    {
-                        Log.ignore(e);
-                    }
-                    catch(IOException e)
-                    {
-                        Log.warn(e.toString());
-                        Log.debug(e);
-                    }
+                	if (!response.isCommitted())
+                		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                	asyncContext.complete();
                 }
 
             };
@@ -275,7 +255,6 @@ public class AsyncProxyServlet implements Servlet
             if (hasContent)
                 exchange.setRequestContentSource(in);
 
-            request.suspend();
             _client.send(exchange);
 
         }

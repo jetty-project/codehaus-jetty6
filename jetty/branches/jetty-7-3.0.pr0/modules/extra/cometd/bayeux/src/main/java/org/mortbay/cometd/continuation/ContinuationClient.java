@@ -26,7 +26,7 @@ import org.mortbay.util.ajax.Continuation;
  * an idle timeout (@link {@link ContinuationBayeux#_clientTimer}).
  * 
  * @author gregw
- * @deprecated use {@link org.mortbay.cometd.SuspendingClient}
+ * @deprecated use {@link org.mortbay.cometd.AsyncClient}
  *
  */
 public class ContinuationClient extends ClientImpl
