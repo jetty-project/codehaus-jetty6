@@ -17,6 +17,9 @@ package org.mortbay.jetty;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -190,7 +193,7 @@ public class SuspendableTest extends TestCase
         {
             final Request base_request = (request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
             
-            if (request.isInitial())
+            if (!request.isAsyncStarted())
             {
                 response.setStatus(200);
                 if (_read>0)
@@ -207,14 +210,9 @@ public class SuspendableTest extends TestCase
                 }
 
                 if (_suspendFor>0)
-                {
-                    request.suspend(_suspendFor);
-                }
-                else if (_suspendFor==0)
-                {
-                    request.suspend();
-                }
-
+                    request.setAsyncTimeout(_suspendFor);
+                request.addAsyncListener(__asyncListener);
+                final AsyncContext asyncContext = request.startAsync();
                 
                 if (_completeAfter>0)
                 {
@@ -226,7 +224,7 @@ public class SuspendableTest extends TestCase
                                 Thread.sleep(_completeAfter);
                                 response.getOutputStream().print("COMPLETED");
                                 base_request.setHandled(true);
-                                request.complete();
+                                asyncContext.complete();
                             }
                             catch(Exception e)
                             {
@@ -239,7 +237,7 @@ public class SuspendableTest extends TestCase
                 {
                     response.getOutputStream().print("COMPLETED");
                     base_request.setHandled(true);
-                    request.complete();
+                    asyncContext.complete();
                 }
                 
                 if (_resumeAfter>0)
@@ -250,7 +248,7 @@ public class SuspendableTest extends TestCase
                             try
                             {
                                 Thread.sleep(_resumeAfter);
-                                request.resume();
+                                asyncContext.forward();
                             }
                             catch(Exception e)
                             {
@@ -261,19 +259,35 @@ public class SuspendableTest extends TestCase
                 }
                 else if (_resumeAfter==0)
                 {
-                    request.resume();
+                    asyncContext.forward();
                 }
             }
-            else if (request.isResumed())
-            {
-                response.getOutputStream().print("RESUMED");
-                base_request.setHandled(true);
-            }
-            else
+            else if (request.getAttribute("TIMEOUT")!=null)
             {
                 response.getOutputStream().print("TIMEOUT");
                 base_request.setHandled(true);
             }
+            else
+            {
+                response.getOutputStream().print("RESUMED");
+                base_request.setHandled(true);
+            }
         }
     }
+    
+    
+    private static AsyncListener __asyncListener = 
+        new AsyncListener()
+    {
+        public void onComplete(AsyncEvent event) throws IOException
+        {
+        }
+
+        public void onTimeout(AsyncEvent event) throws IOException
+        {
+            event.getRequest().setAttribute("TIMEOUT",Boolean.TRUE);
+            event.getRequest().getAsyncContext().forward();
+        }
+        
+    };
 }

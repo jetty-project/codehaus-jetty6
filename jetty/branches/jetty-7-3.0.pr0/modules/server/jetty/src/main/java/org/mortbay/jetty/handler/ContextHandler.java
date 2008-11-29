@@ -44,6 +44,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
+import javax.servlet.SessionCookieConfig;
+import javax.servlet.SessionTrackingMode;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -126,6 +128,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     private Object _contextListeners;
     private Object _contextAttributeListeners;
     private Object _requestListeners;
+    private Object _asyncListeners;
     private Object _requestAttributeListeners;
     private Set<String> _managedAttributes;
     
@@ -790,25 +793,11 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 {
                     event = new ServletRequestEvent(_scontext,request);
                     for(int i=0;i<LazyList.size(_requestListeners);i++)
-                    {
-                        if(request.isInitial())
-                            ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestInitialized(event);
-                        else if(request.isResumed())
-                        {
-                            try
-                            {
-                                ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestResumed(event); 
-                            }
-                            catch(AbstractMethodError e)
-                            {
-                                Log.warn(LazyList.get(_requestListeners,i)+": "+e);
-                                Log.debug(e);
-                            }
-                        }
-                    }
+                        ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestInitialized(event);
                 }
-                for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
-                    base_request.addEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
+                if (_requestAttributeListeners!=null)
+                    for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+                        base_request.addEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
             }
             
             // Handle the request
@@ -831,29 +820,13 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 // Handle more REALLY SILLY request events!
                 if (new_context)
                 {
-                    for(int i=LazyList.size(_requestListeners);i-->0;)
-                    {
-                        if(request.isSuspended())
-                        {
-                            try
-                            {
-                                ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestSuspended(event);
-
-                                Object list = request.getAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR);
-                                request.setAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR, LazyList.add(list, this));
-                            }
-                            catch(AbstractMethodError e)
-                            {
-                                Log.warn(LazyList.get(_requestListeners,i)+": "+e);
-                                Log.debug(e);
-                            }
-                        }
-                        else 
+                    if (_requestListeners!=null)
+                        for(int i=LazyList.size(_requestListeners);i-->0;)
                             ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestDestroyed(event);
-                    }
                     
-                    for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
-                        base_request.removeEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
+                    if(_requestAttributeListeners!=null)
+                        for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+                            base_request.removeEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
                 }
             }
         }
@@ -1305,6 +1278,25 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         return Collections.emptySet();
     }
 
+
+
+    /* ------------------------------------------------------------ */
+    private String normalizeHostname( String host )
+    {
+        if ( host == null )
+            return null;
+        
+        if ( host.endsWith( "." ) )
+            return host.substring( 0, host.length() -1);
+      
+            return host;
+    }
+
+    public void complete(Request request)
+    {
+        // TODO Auto-generated method stub
+        
+    }
     
     /* ------------------------------------------------------------ */
     /** Context.
@@ -1750,30 +1742,47 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         public void addServletMapping(String servletName, String[] urlPatterns)
         {
         }
-        
-    }
 
-    /* ------------------------------------------------------------ */
-    private String normalizeHostname( String host )
-    {
-        if ( host == null )
-            return null;
-        
-        if ( host.endsWith( "." ) )
-            return host.substring( 0, host.length() -1);
-      
-            return host;
-    }
-
-    public void complete(Request request)
-    {
-        if (_requestListeners!=null)
+        public void addFilterMappingForServletNames(String filterName, EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... servletNames)
         {
-            ServletRequestEvent event = new ServletRequestEvent(_scontext,request);
-            for(int i=0;i<LazyList.size(_requestListeners);i++)
-            {
-                ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestCompleted(event);
-            }
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void addFilterMappingForUrlPatterns(String filterName, EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... urlPatterns)
+        {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public EnumSet<SessionTrackingMode> getDefaultSessionTrackingModes()
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public EnumSet<SessionTrackingMode> getEffectiveSessionTrackingModes()
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public SessionCookieConfig getSessionCookieConfig()
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public void setSessionCookieConfig(SessionCookieConfig sessionCookieConfig)
+        {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void setSessionTrackingModes(EnumSet<SessionTrackingMode> sessionTrackingModes)
+        {
+            // TODO Auto-generated method stub
+            
         }
         
     }

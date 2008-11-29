@@ -14,7 +14,6 @@
 
 package org.mortbay.jetty.servlet;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -335,7 +334,7 @@ public class ServletHandler extends AbstractHandler
                     }
                     
                     if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
-                        chain=getFilterChain(type, target, servlet_holder,request.isInitial());
+                        chain=getFilterChain(base_request,type, target, servlet_holder);
                 }      
             }
             else
@@ -345,7 +344,7 @@ public class ServletHandler extends AbstractHandler
                 if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
                 {
                     base_request.setServletName(servlet_holder.getName());
-                    chain=getFilterChain(type, null,servlet_holder,request.isInitial());
+                    chain=getFilterChain(base_request,type, null,servlet_holder);
                 }
             }
 
@@ -362,7 +361,7 @@ public class ServletHandler extends AbstractHandler
                 if (chain!=null)
                     chain.doFilter(request, response);
                 else 
-                    servlet_holder.handle(request,response);
+                    servlet_holder.handle(base_request,request,response);
             }
             else
                 notFound(request, response);
@@ -474,12 +473,9 @@ public class ServletHandler extends AbstractHandler
     }
 
     /* ------------------------------------------------------------ */
-    private FilterChain getFilterChain(int requestType, String pathInContext, ServletHolder servletHolder, boolean initial) 
+    private FilterChain getFilterChain(Request baseRequest,int requestType, String pathInContext, ServletHolder servletHolder) 
     {
         String key=pathInContext==null?servletHolder.getName():pathInContext;
-        if (!initial)
-            key="!"+key;
-            
         
         if (_filterChainsCached && _chainCache!=null)
         {
@@ -497,7 +493,7 @@ public class ServletHandler extends AbstractHandler
             for (int i= 0; i < _filterPathMappings.size(); i++)
             {
                 FilterMapping mapping = (FilterMapping)_filterPathMappings.get(i);
-                if (mapping.appliesTo(pathInContext, requestType,initial))
+                if (mapping.appliesTo(pathInContext, requestType))
                     filters= LazyList.add(filters, mapping.getFilterHolder());
             }
         }
@@ -512,7 +508,7 @@ public class ServletHandler extends AbstractHandler
                 for (int i=0; i<LazyList.size(o);i++)
                 {
                     FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
-                    if (mapping.appliesTo(requestType,initial))
+                    if (mapping.appliesTo(requestType))
                         filters=LazyList.add(filters,mapping.getFilterHolder());
                 }
                 
@@ -520,7 +516,7 @@ public class ServletHandler extends AbstractHandler
                 for (int i=0; i<LazyList.size(o);i++)
                 {
                     FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
-                    if (mapping.appliesTo(requestType,initial))
+                    if (mapping.appliesTo(requestType))
                         filters=LazyList.add(filters,mapping.getFilterHolder());
                 }
             }
@@ -539,7 +535,7 @@ public class ServletHandler extends AbstractHandler
 	    _chainCache[requestType].put(key,chain);
         }
         else if (LazyList.size(filters) > 0)
-            chain = new Chain(filters, servletHolder);
+            chain = new Chain(baseRequest,filters, servletHolder);
     
         return chain;
     }
@@ -1109,7 +1105,27 @@ public class ServletHandler extends AbstractHandler
                 if (Log.isDebugEnabled())
                     Log.debug("call filter " + _filterHolder);
                 Filter filter= _filterHolder.getFilter();
-                filter.doFilter(request, response, _next);
+                if (_filterHolder.isAsyncSupported())
+                    filter.doFilter(request, response, _next);
+                else
+                {
+                    final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
+                    final boolean suspendable=base_request.isAsyncSupported();
+                    if (suspendable)
+                    {
+                        try
+                        {
+                            base_request.setAsyncSupported(false);
+                            filter.doFilter(request, response, _next);
+                        }
+                        finally
+                        {
+                            base_request.setAsyncSupported(true);
+                        }
+                    }
+                    else
+                        filter.doFilter(request, response, _next);
+                }
                 return;
             }
 
@@ -1118,7 +1134,8 @@ public class ServletHandler extends AbstractHandler
             {
                 if (Log.isDebugEnabled())
                     Log.debug("call servlet " + _servletHolder);
-                _servletHolder.handle(request, response);
+                final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
+                _servletHolder.handle(base_request,request, response);
             }
             else // Not found
                 notFound((HttpServletRequest)request, (HttpServletResponse)response);
@@ -1138,13 +1155,15 @@ public class ServletHandler extends AbstractHandler
     /* ------------------------------------------------------------ */
     private class Chain implements FilterChain
     {
+        final Request _baseRequest;
+        final Object _chain;
+        final ServletHolder _servletHolder;
         int _filter= 0;
-        Object _chain;
-        ServletHolder _servletHolder;
 
         /* ------------------------------------------------------------ */
-        Chain(Object filters, ServletHolder servletHolder)
+        Chain(Request baseRequest, Object filters, ServletHolder servletHolder)
         {
+            _baseRequest=baseRequest;
             _chain= filters;
             _servletHolder= servletHolder;
         }
@@ -1161,7 +1180,24 @@ public class ServletHandler extends AbstractHandler
                 FilterHolder holder= (FilterHolder)LazyList.get(_chain, _filter++);
                 if (Log.isDebugEnabled()) Log.debug("call filter " + holder);
                 Filter filter= holder.getFilter();
-                filter.doFilter(request, response, this);
+                
+                if (holder.isAsyncSupported() || !_baseRequest.isAsyncSupported())
+                {
+                    filter.doFilter(request, response, this);
+                }
+                else
+                {
+                    try
+                    {
+                        _baseRequest.setAsyncSupported(false);
+                        filter.doFilter(request, response, this);
+                    }
+                    finally
+                    {
+                        _baseRequest.setAsyncSupported(true);
+                    }
+                }
+                    
                 return;
             }
 
@@ -1169,7 +1205,7 @@ public class ServletHandler extends AbstractHandler
             if (_servletHolder != null)
             {
                 if (Log.isDebugEnabled()) Log.debug("call servlet " + _servletHolder);
-                _servletHolder.handle(request, response);
+                _servletHolder.handle(_baseRequest,request, response);
             }
             else // Not found
                 notFound((HttpServletRequest)request, (HttpServletResponse)response);

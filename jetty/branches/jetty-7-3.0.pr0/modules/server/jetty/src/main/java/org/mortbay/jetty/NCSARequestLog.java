@@ -278,8 +278,8 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
             buf.append(' ');
             buf.append(request.getProtocol());
             buf.append("\" ");
-            if (request.isSuspended())
-                buf.append("SUS");
+            if (request.isAsyncStarted())
+                buf.append("Async");
             else
             {
                 int status = response.getStatus();

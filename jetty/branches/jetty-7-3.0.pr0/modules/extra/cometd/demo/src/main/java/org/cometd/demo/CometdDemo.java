@@ -29,6 +29,7 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.ssl.SslSocketConnector;
 import org.mortbay.jetty.ssl.SslSelectChannelConnector;
 import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceCollection;
@@ -95,7 +96,7 @@ public class CometdDemo
 	context.setBaseResource(new ResourceCollection(new Resource[]
 	{
 	    Resource.newResource("./src/main/webapp/"),
-            Resource.newResource("./target/cometd-demo-7.0-SNAPSHOT/"),
+            Resource.newResource("./target/cometd-demo-7.1-SNAPSHOT/"),
 	}));
 	
         // Demo bayeux session manager
@@ -103,6 +104,9 @@ public class CometdDemo
         // context.addServlet(com.acme.SessionDump.class,"/session");
         // context.addServlet(com.acme.Dump.class,"/dump");
         
+	FilterHolder filter_holder = context.addFilter("org.mortbay.servlet.GzipFilter","/*",0);
+	filter_holder.setSuspendSupported(true);
+	
         // Cometd servlet
         SuspendingCometdServlet cometd_servlet=new SuspendingCometdServlet();
         ServletHolder cometd_holder = new ServletHolder(cometd_servlet);
@@ -113,6 +117,7 @@ public class CometdDemo
         cometd_holder.setInitParameter("multiFrameInterval","1500");
         cometd_holder.setInitParameter("directDeliver","true");
         cometd_holder.setInitParameter("logLevel","1");
+        cometd_holder.setSuspendSupported(true);
         
         context.addServlet(cometd_holder, "/cometd/*");
         context.addServlet("org.mortbay.jetty.servlet.DefaultServlet", "/");

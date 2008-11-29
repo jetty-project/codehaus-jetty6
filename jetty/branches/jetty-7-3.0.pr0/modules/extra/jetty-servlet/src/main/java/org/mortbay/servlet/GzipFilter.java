@@ -22,15 +22,18 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPOutputStream;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import javax.swing.text.WrappedPlainView;
 
 import org.mortbay.util.ByteArrayOutputStream2;
 import org.mortbay.util.StringUtil;
@@ -64,7 +67,7 @@ public class GzipFilter extends UserAgentFilter
 {
     protected Set _mimeTypes;
     protected int _bufferSize=8192;
-    protected int _minGzipSize=0;
+    protected int _minGzipSize=1;
     protected Set _excluded;
     
     public void init(FilterConfig filterConfig) throws ServletException
@@ -131,7 +134,11 @@ public class GzipFilter extends UserAgentFilter
             }
             finally
             {
-                if (exceptional && !response.isCommitted())
+                if (request.isAsyncStarted())
+                {
+                    // TODO should reset suspending requests, but can't tell which these are?
+                }
+                else if (exceptional && !response.isCommitted())
                 {
                     wrappedResponse.resetBuffer();
                     wrappedResponse.noGzip();
@@ -150,7 +157,6 @@ public class GzipFilter extends UserAgentFilter
     {
         return new GZIPResponseWrapper(request,response);
     }
-
 
     public class GZIPResponseWrapper extends HttpServletResponseWrapper
     {
@@ -203,6 +209,30 @@ public class GzipFilter extends UserAgentFilter
                 _gzStream.setContentLength(length);
         }
         
+        public void addHeader(String name, String value)
+        {
+            if ("content-length".equalsIgnoreCase(name))
+            {
+                _contentLength=Long.parseLong(value);
+                if (_gzStream!=null)
+                    _gzStream.setContentLength(_contentLength);
+            }
+            else if ("content-type".equalsIgnoreCase(name))
+            {   
+                setContentType(value);
+            }
+            else if ("content-encoding".equalsIgnoreCase(name))
+            {   
+                super.addHeader(name,value);
+                if (!isCommitted())
+                {
+                    noGzip();
+                }
+            }
+            else
+                super.addHeader(name,value);
+        }
+
         public void setHeader(String name, String value)
         {
             if ("content-length".equalsIgnoreCase(name))

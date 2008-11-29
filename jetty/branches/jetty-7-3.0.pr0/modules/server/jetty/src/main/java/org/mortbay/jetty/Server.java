@@ -317,11 +317,11 @@ public class Server extends HandlerWrapper implements Attributes
         if (Log.isDebugEnabled())
         {
             Log.debug("REQUEST "+target+" on "+connection);
-            handle(target, connection.getRequest(), connection.getResponse(), Handler.REQUEST);
+            handle(target, connection.getRequest(), connection.getResponse(), connection.getRequest().isAsyncStarted()?Handler.FORWARD:Handler.REQUEST);
             Log.debug("RESPONSE "+target+"  "+connection.getResponse().getStatus());
         }
         else
-            handle(target, connection.getRequest(), connection.getResponse(), Handler.REQUEST);
+            handle(target, connection.getRequest(), connection.getResponse(), connection.getRequest().isAsyncStarted()?Handler.FORWARD:Handler.REQUEST);
     }
 
     /* ------------------------------------------------------------ */
