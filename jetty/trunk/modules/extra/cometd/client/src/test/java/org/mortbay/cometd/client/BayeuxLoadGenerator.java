@@ -56,7 +56,7 @@ public class BayeuxLoadGenerator
 
         http.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
         // http.setConnectorType(HttpClient.CONNECTOR_SOCKET);
-        http.setMaxConnectionsPerAddress(20000);
+        http.setMaxConnectionsPerAddress(40000);
 
         QueuedThreadPool pool = new QueuedThreadPool();
         pool.setMaxThreads(500);
@@ -330,7 +330,10 @@ public class BayeuxLoadGenerator
 
             }
 
-            Thread.sleep(_maxLatency);
+            if (_got>0)
+                Thread.sleep(_totalLatency/_got);
+	    else
+	        Thread.sleep(100);
 
             for (BayeuxClient c : clients)
             {
