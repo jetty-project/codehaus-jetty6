@@ -64,4 +64,10 @@ public class Address
     {
         return new InetSocketAddress(getHost(), getPort());
     }
+
+    @Override
+    public String toString()
+    {
+        return host + ":" + port;
+    }
 }
