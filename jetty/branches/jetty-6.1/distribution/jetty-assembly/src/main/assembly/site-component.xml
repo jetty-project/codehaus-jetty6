@@ -8,7 +8,7 @@
       <directory>../../</directory>
       <outputDirectory>${artifactId}-${version}</outputDirectory>
       <includes>
-        <include>javadoc/apidocs/**</include>
+        <include>javadoc/**</include>
         <include>jxr/**</include>
       </includes>
     </fileSet>
