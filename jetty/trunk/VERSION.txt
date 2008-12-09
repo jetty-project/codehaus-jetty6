@@ -22,6 +22,7 @@
  + JETTY-806 Timeout related Deadlocks in HTTP Client
  + JETTY-808 cometd client demo run.sh
  + JETTY-809 Need a way to customize WEB-INF/lib file extensions that are added to the classpath
+ + JETTY-813 Simplify NCSARequestLog.java
  + JETTY-814 Add org.mortbay.jetty.client.Address.toString()
  + JETTY-822 Commit when autocommit=true causes error with mysql
 
