@@ -26,6 +26,7 @@
  + JETTY-814 Add org.mortbay.jetty.client.Address.toString()
  + JETTY-817 Aborted SSL connections may cause jetty to hang with full cpu
  + JETTY-822 Commit when autocommit=true causes error with mysql
+ + JETTY-823 Extend start.config profiles
 
 jetty-6.1.12 4 November 2008
  + JETTY-731 Completed DeliverListener for cometd
