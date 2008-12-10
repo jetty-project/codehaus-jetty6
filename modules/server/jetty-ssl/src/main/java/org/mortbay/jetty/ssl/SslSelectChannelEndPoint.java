@@ -283,7 +283,7 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
                     {
                         case FINISHED:
                         case NOT_HANDSHAKING:
-                            if (_closing)
+                            if (_closing || !isOpen())
                                 return -1;
                             break loop;
 
