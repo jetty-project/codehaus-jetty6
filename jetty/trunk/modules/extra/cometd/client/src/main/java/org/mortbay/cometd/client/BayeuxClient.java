@@ -61,16 +61,16 @@ import org.mortbay.util.ajax.JSON;
  * @author gregw
  *
  */
-public class BayeuxClient extends MessagePool implements Client
+public class BayeuxClient extends MessagePool implements Client, MetaEvent
 {
     private HttpClient _client;
-    private HttpConnection _clientConnection;
     private Address _address;
     private HttpExchange _pull;
     private HttpExchange _push;
     private String _uri="/cometd";
     private boolean _initialized=false;
     private boolean _disconnecting=false;
+    private boolean _handshook=false;
     private String _clientId;
     private Listener _listener;
     private List<RemoveListener> _rListeners;
@@ -82,6 +82,9 @@ public class BayeuxClient extends MessagePool implements Client
     private Map<String, Cookie> _cookies=new ConcurrentHashMap<String, Cookie>();
     private Advice _advice;
     private Timer _timer;
+    private int _backoffInterval = 1000;
+    private int _backoffMaxRetries = 60; //equivalent to 60 seconds
+   
 
     /* ------------------------------------------------------------ */
     public BayeuxClient(HttpClient client, Address address, String uri, Timer timer) throws IOException
@@ -103,6 +106,33 @@ public class BayeuxClient extends MessagePool implements Client
         this (client, address, uri, new Timer("DefaultBayeuxClientTimer", true));
     }
 
+    /**
+     * If unable to connect/handshake etc, even if following the
+     * interval in the advice, wait for this interval and try
+     * again, up to a maximum of _backoffRetries
+     * @param interval
+     */
+    public void setBackOffInterval (int interval)
+    {
+        _backoffInterval = interval;
+    }
+    
+    public int getBackoffInterval ()
+    {
+        return _backoffInterval;
+    }
+    
+    public void setBackoffMaxRetries (int retries)
+    {
+        _backoffMaxRetries = retries;
+    }
+    
+    public int getBackoffMaxRetries ()
+    {
+        return _backoffMaxRetries;
+    }
+    
+    
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
      * Returns the clientId
@@ -119,24 +149,14 @@ public class BayeuxClient extends MessagePool implements Client
         synchronized (_outQ)
         {
             if (!_initialized && _pull==null)
-                _pull=new Handshake();
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    private void checkConnection() throws UnknownHostException, IOException
-    {
-        synchronized (_outQ)
-        {
-            if (_clientConnection==null)
             {
-                HttpDestination destination = _client.getDestination(_address,false);
-                _clientConnection=destination.getConnection();
-                if (_clientConnection==null)
-                    throw new IOException("unable to open connection to "+_address);
+                _pull=new Handshake();
+                send((Exchange)_pull, false);
             }
         }
     }
+
+   
 
     /* ------------------------------------------------------------ */
     public boolean isPolling()
@@ -230,13 +250,24 @@ public class BayeuxClient extends MessagePool implements Client
      * @see dojox.cometd.Client#subscribe(java.lang.String)
      */
     private void publish(Message msg)
-    {
+    {   
         synchronized (_outQ)
         {
             _outQ.add(msg);
 
             if (_batch==0&&_initialized&&_push==null)
+            {
                 _push=new Publish();
+                try
+                {
+                    send((Exchange)_push, false);
+                }
+                catch (Exception e)
+                {
+                    Log.warn("Publish: ", e);
+                    metaPublishFail(((Publish)_push).getOutboundMessages());
+                }
+            }
         }
     }
 
@@ -294,9 +325,12 @@ public class BayeuxClient extends MessagePool implements Client
             _initialized=false;
             _disconnecting=true;
 
+            metaDisconnect();
             if (_batch==0&&_initialized&&_push==null)
+            {
                 _push=new Publish();
-
+                send((Exchange)_push, false);
+            }
         }
     }
 
@@ -344,7 +378,10 @@ public class BayeuxClient extends MessagePool implements Client
             {
                 _batch=0;
                 if ((_initialized||_disconnecting)&&_push==null&&_outQ.size()>0)
+                {
                     _push=new Publish();
+                    send((Exchange)_push, false);
+                }
             }
         }
     }
@@ -389,23 +426,37 @@ public class BayeuxClient extends MessagePool implements Client
     {
         _cookies.put(cookie.getName(),cookie);
     }
+    
+   
 
     /* ------------------------------------------------------------ */
     /** The base class for all bayeux exchanges.
      */
-    private class Exchange extends HttpExchange.ContentExchange
+    protected class Exchange extends HttpExchange.ContentExchange
     {
         Object[] _responses;
         int _connectFailures;
-
+        int _backoffRetries  = 0;
+        String _jsonOutboundMessages;
+        
+        
         Exchange(String info)
-        {
+        { 
             setMethod("POST");
             setScheme(HttpSchemes.HTTP_BUFFER);
             setAddress(_address);
             setURI(_uri+"/"+info);
+            setRequestContentType(_formEncoded?"application/x-www-form-urlencoded;charset=utf-8":"text/json;charset=utf-8");     
+        }
+        
+        public int getBackoffRetries ()
+        {
+            return _backoffRetries;
+        }
 
-            setRequestContentType(_formEncoded?"application/x-www-form-urlencoded;charset=utf-8":"text/json;charset=utf-8");
+        public void incBackoffRetries ()
+        {
+            ++_backoffRetries;
         }
 
         protected void setMessage(String message)
@@ -431,19 +482,18 @@ public class BayeuxClient extends MessagePool implements Client
                 {
                     msg.put(Bayeux.CLIENT_FIELD,_clientId);
                 }
-                String json=JSON.toString(messages);
+                _jsonOutboundMessages=JSON.toString(messages);
 
                 if (_formEncoded)
-                    setRequestContent(new ByteArrayBuffer("message="+URLEncoder.encode(json,"utf-8")));
+                    setRequestContent(new ByteArrayBuffer("message="+URLEncoder.encode(_jsonOutboundMessages,"utf-8")));
                 else
-                    setRequestContent(new ByteArrayBuffer(json,"utf-8"));
+                    setRequestContent(new ByteArrayBuffer(_jsonOutboundMessages,"utf-8"));
 
             }
             catch (Exception e)
             {
                 Log.warn(e);
-            }
-
+            } 
         }
 
         /* ------------------------------------------------------------ */
@@ -508,6 +558,7 @@ public class BayeuxClient extends MessagePool implements Client
             if (getResponseStatus()==200)
             {
                 String content = getResponseContent();
+                //TODO
                 if (content==null || content.length()==0)
                     throw new IllegalStateException();
                 _responses=parse(content);
@@ -518,31 +569,26 @@ public class BayeuxClient extends MessagePool implements Client
         protected void onExpire()
         {
             super.onExpire();
+            if (!send (this, true))
+                Log.warn("Retries exhausted"); //giving up
         }
 
         /* ------------------------------------------------------------ */
         protected void onConnectionFailed(Throwable ex)
         {
             super.onConnectionFailed(ex);
-            if (++_connectFailures<5)
-            {
-                try
-                {
-                    _client.send(this);
-                }
-                catch (IOException e)
-                {
-                    Log.warn(e);
-                }
-            }
+
+            if (!send (this, true))
+                Log.warn("Retries exhausted", ex);
         }
 
         /* ------------------------------------------------------------ */
         protected void onException(Throwable ex)
         {
             super.onException(ex);
+            if (!send (this, true))
+                Log.warn("Retries exhausted", ex);
         }
-
     }
 
     /* ------------------------------------------------------------ */
@@ -550,7 +596,7 @@ public class BayeuxClient extends MessagePool implements Client
      * Negotiates a client Id and initializes the protocol.
      *
      */
-    private class Handshake extends Exchange
+    protected class Handshake extends Exchange
     {
         final static String __HANDSHAKE="[{"+"\"channel\":\"/meta/handshake\","+"\"version\":\"0.9\","+"\"minimumVersion\":\"0.9\""+"}]";
 
@@ -558,29 +604,6 @@ public class BayeuxClient extends MessagePool implements Client
         {
             super("handshake");
             setMessage(__HANDSHAKE);
-
-            try
-            {
-                customize(this);
-                checkConnection();
-                _clientConnection.send(this);
-                //_client.send(this);
-            }
-            catch (IOException e)
-            {
-                _clientConnection=null;
-                Log.warn(e);
-            }
-        }
-
-        /* ------------------------------------------------------------ */
-        /* (non-Javadoc)
-         * @see org.mortbay.jetty.client.HttpExchange#onException(java.lang.Throwable)
-         */
-        protected void onException(Throwable ex)
-        {
-            Log.warn("Handshake:"+ex);
-            Log.debug(ex);
         }
 
         /* ------------------------------------------------------------ */
@@ -594,45 +617,88 @@ public class BayeuxClient extends MessagePool implements Client
             {
                 Map<?,?> response=(Map<?,?>)_responses[0];
                 Boolean successful=(Boolean)response.get(Bayeux.SUCCESSFUL_FIELD);
+
+                //Get advice if there is any
+                Map adviceField = (Map)response.get(Bayeux.ADVICE_FIELD);
+                if (adviceField != null)
+                    _advice = new Advice(adviceField);   
+
                 if (successful!=null&&successful.booleanValue())
                 {
+                    if (Log.isDebugEnabled()) Log.debug("Successful handshake, sending connect");
                     _clientId=(String)response.get(Bayeux.CLIENT_FIELD);
                     _pull=new Connect();
+                    send((Exchange)_pull, false);
                 }
                 else
-                    throw new IOException("Handshake failed:"+_responses[0]);
+                {  
+                    if (_advice != null && _advice.isReconnectNone())
+                        throw new IOException("Handshake failed with advice reconnect=none :"+_responses[0]);
+                    else if (_advice != null && _advice.isReconnectHandshake())
+                    {
+                        _pull = new Handshake();
+                        if (!send ((Exchange)_pull, true))
+                            throw new IOException("Handshake, retries exhausted");
+                    }
+                    else //assume retry = reconnect?
+                    {
+                        _pull = new Connect();
+                        if (!send((Exchange)_pull, true))
+                            throw new IOException("Connect after handshake, retries exhausted");
+                    }
+                }
+
+                metaHandshake(successful.booleanValue(), successful.booleanValue() && _handshook);
+                if (successful.booleanValue())
+                    _handshook = true;
             }
             else
             {
-                throw new IOException("Handshake failed: "+getResponseStatus());
+                setMessage(__HANDSHAKE);
+                this.reset();
+                if (!send (this, true))
+                    throw new IOException("Handshake, retries exhausted");
             }
         }
+
+
+         /* ------------------------------------------------------------ */
+         protected void onExpire()
+         {
+             if (Log.isDebugEnabled()) Log.debug("HANDSHAKE: Connection timed out, retrying "+this);
+             setMessage(__HANDSHAKE);
+             super.onExpire(); 
+         }
+ 
+         /* ------------------------------------------------------------ */
+         protected void onConnectionFailed(Throwable ex)
+         {
+             if (Log.isDebugEnabled()) Log.debug("HANDSHAKE: Got connection fail, retrying "+this);
+             setMessage(__HANDSHAKE);
+             super.onConnectionFailed(ex); 
+         }
+ 
+         /* ------------------------------------------------------------ */
+         protected void onException(Throwable ex)
+         { 
+             if (Log.isDebugEnabled()) Log.debug("HANDSHAKE: Got exception, retrying "+this);
+             setMessage(__HANDSHAKE);
+             super.onException(ex);
+         }
     }
 
     /* ------------------------------------------------------------ */
     /** The Bayeux Connect exchange.
      * Connect exchanges implement the long poll for Bayeux.
      */
-    private class Connect extends Exchange
+    protected class Connect extends Exchange
     {
+        String _connectString;
         Connect()
         {
             super("connect");
-            String connect="{"+"\"channel\":\"/meta/connect\","+"\"clientId\":\""+_clientId+"\","+"\"connectionType\":\"long-polling\""+"}";
-            setMessage(connect);
-
-            try
-            {
-                customize(this);
-                checkConnection();
-                _clientConnection.send(this);
-                // _client.send(this);
-            }
-            catch (IOException e)
-            {
-                _clientConnection=null;
-                Log.warn(e);
-            }
+            _connectString = "{"+"\"channel\":\"/meta/connect\","+"\"clientId\":\""+_clientId+"\","+"\"connectionType\":\"long-polling\""+"}";
+            setMessage(_connectString);
         }
 
         protected void onResponseComplete() throws IOException
@@ -647,46 +713,60 @@ public class BayeuxClient extends MessagePool implements Client
                     for (int i=0; i<_responses.length; i++)
                     {
                         Message msg=(Message)_responses[i];
-
+                        
+                        //get advice if there is any
+                        Map adviceField = (Map)msg.get(Bayeux.ADVICE_FIELD);
+                        if (adviceField != null)
+                            _advice = new Advice(adviceField);
+                        
                         if (Bayeux.META_CONNECT.equals(msg.get(Bayeux.CHANNEL_FIELD)))
                         {
                             Boolean successful=(Boolean)msg.get(Bayeux.SUCCESSFUL_FIELD);
                             if (successful!=null&&successful.booleanValue())
                             {
-                                if (!_initialized)
+                                if (!isInitialized())
                                 {
-                                    _initialized=true;
+                                    setInitialized(true);
                                     synchronized (_outQ)
                                     {
                                         if (_outQ.size()>0)
+                                        {
                                             _push=new Publish();
+                                            send((Exchange)_push, false);
+                                        }
                                     }
                                 }
-
-                                Map adviceField = (Map)msg.get(Bayeux.ADVICE_FIELD);
-                                if (adviceField != null)
-                                    _advice = new Advice(adviceField);
-                                
-                                //if interval in advice, set up callback to expire at the interval value
-                                //else  just send the connect
-                                if (_advice != null && _advice.getInterval() > 0)
-                                {
-                                    TimerTask task = new TimerTask()
-                                    {
-                                        public void run()
-                                        {
-                                            _pull=new Connect();
-                                        }
-                                    };
-                                    _timer.schedule(task, _advice.getInterval());
-                                }
-                                else
-                                    _pull=new Connect();
+                                //send a Connect (ie longpoll) possibly with delay according to interval advice
+                                _pull = new Connect();
+                                send((Exchange)_pull, true);
+                                metaConnect(true);
                             }
                             else
-                                throw new IOException("Connect failed:"+_responses[0]);
+                            {
+                                //received a failure to our connect message, check the advice to see what to do:
+                                //reconnect: none = hard error
+                                //reconnect: handshake = send a handshake message
+                                //reconnect: retry = send another connect, possibly using interval
+                                
+                                setInitialized(false);
+                                if (_advice != null && _advice.isReconnectNone())
+                                    throw new IOException("Connect failed, advice reconnect=none");                      
+                                else if (_advice != null && _advice.isReconnectHandshake())
+                                {
+                                    if (Log.isDebugEnabled()) Log.debug("connect received success=false, advice is to rehandshake");
+                                    _pull=new Handshake();
+                                    send((Exchange)_pull, true);
+                                }
+                                else // assume retry = reconnect
+                                {
+                                    if (Log.isDebugEnabled()) Log.debug("Assuming retry=reconnect");
+                                    setMessage(_connectString);
+                                    if (!send (this, true))
+                                        throw new IOException("Connect, retries exhausted");
+                                }
+                                metaConnect(false);
+                            }
                         }
-
                         deliver(null,msg);
                     }
                 }
@@ -694,12 +774,44 @@ public class BayeuxClient extends MessagePool implements Client
                 {
                     endBatch();
                 }
-
             }
             else
             {
-                throw new IOException("Connect failed: "+getResponseStatus());
+                Log.warn("Connect, error="+getResponseStatus());
+                setMessage(_connectString);
+                if (!send(this, true))
+                    throw new IOException("Connect, retries exhausted");
             }
+        }   
+        
+      
+        
+        
+        /* ------------------------------------------------------------ */
+        protected void onExpire()
+        {
+            if (Log.isDebugEnabled()) Log.debug("CONNECT: Connection timed out, retrying "+this);
+            setInitialized(false);
+            setMessage(_connectString);
+            super.onExpire();
+        }
+
+        /* ------------------------------------------------------------ */
+        protected void onConnectionFailed(Throwable ex)
+        {
+            if (Log.isDebugEnabled()) Log.debug("CONNECT: Got connection fail, retrying "+this);
+            setInitialized(false);
+            setMessage(_connectString);
+            super.onConnectionFailed(ex);
+        }
+
+        /* ------------------------------------------------------------ */
+        protected void onException(Throwable ex)
+        { 
+            if (Log.isDebugEnabled()) Log.debug("CONNECT: Got exception, retrying "+this);
+            setInitialized(false);
+            setMessage(_connectString);
+            super.onException(ex);
         }
     }
 
@@ -708,7 +820,7 @@ public class BayeuxClient extends MessagePool implements Client
      * Publish message exchange.
      * Sends messages to bayeux server and handles any messages received as a result.
      */
-    private class Publish extends Exchange
+    protected class Publish extends Exchange
     {
         Publish()
         {
@@ -720,14 +832,19 @@ public class BayeuxClient extends MessagePool implements Client
                 setMessages(_outQ);
                 _outQ.clear();
             }
+        }
+        
+        protected Message[] getOutboundMessages ()
+        {
             try
             {
-                customize(this);
-                _client.send(this);
+                return parse(_jsonOutboundMessages);
             }
             catch (IOException e)
             {
-                Log.warn(e);
+                Log.warn("Error converting outbound messages");
+                if (Log.isDebugEnabled()) Log.debug(e);
+                return null;
             }
         }
 
@@ -749,7 +866,6 @@ public class BayeuxClient extends MessagePool implements Client
 
                 if (getResponseStatus()==200&&_responses!=null&&_responses.length>0)
                 {
-
                     for (int i=0; i<_responses.length; i++)
                     {
                         Message msg=(Message)_responses[i];
@@ -758,13 +874,34 @@ public class BayeuxClient extends MessagePool implements Client
                 }
                 else
                 {
-                    throw new IOException("Reconnect failed: "+getResponseStatus());
+                    Log.warn("Publish, error="+getResponseStatus());
                 }
             }
             finally
             {
                 endBatch();
             }
+        }
+        
+        /* ------------------------------------------------------------ */
+        protected void onExpire()
+        {
+            Log.warn("Publish: Connection timed out");
+            metaPublishFail(this.getOutboundMessages());
+        }
+
+        /* ------------------------------------------------------------ */
+        protected void onConnectionFailed(Throwable ex)
+        {
+            Log.warn("Publish: Got connection fail ", ex);
+            metaPublishFail(this.getOutboundMessages());
+        }
+
+        /* ------------------------------------------------------------ */
+        protected void onException(Throwable ex)
+        { 
+            Log.warn("Publish: Got exception ",ex);
+            metaPublishFail(this.getOutboundMessages());
         }
     }
 
@@ -819,5 +956,135 @@ public class BayeuxClient extends MessagePool implements Client
         if (max!=-1)
             throw new UnsupportedOperationException();
     }
+    
 
+    
+    /**
+     * Send the exchange, possibly using a backoff.
+     * 
+     * @param exchange
+     * @param backoff if true, use backoff algorithm to send
+     * @return
+     */
+    protected boolean send (final Exchange exchange, boolean backoff)
+    {
+        if (backoff)
+        {
+            int retries = exchange.getBackoffRetries();
+            if (Log.isDebugEnabled()) Log.debug("Send with backoff, retries="+retries+" for "+exchange);
+            if (retries < _backoffMaxRetries)
+            {
+                exchange.incBackoffRetries();
+                long interval = (_advice != null ? _advice.getInterval() : 0) + (retries * _backoffInterval);
+
+                if (interval > 0)
+                {
+                    TimerTask task = new TimerTask()
+                    {
+                        public void run()
+                        {
+                            try
+                            {
+                                send(exchange);           
+                            }
+                            catch (IOException e)
+                            {
+                                Log.warn("Delayed send, retry: ", e);
+                                send(exchange, true); //start backing off
+                            }
+                        }
+                    };
+                    if (Log.isDebugEnabled()) Log.debug("Delayed send: "+interval);
+                    _timer.schedule(task, interval);
+                }
+                else
+                {
+                    try
+                    {  
+                        send (exchange);
+                    }
+                    catch (IOException e)
+                    {
+                        Log.warn("Send, retry on fail: ", e);
+                        return send (exchange, true); //start backing off
+                    }
+                }
+                return true;
+            }
+            else
+                return false;
+        }
+        else
+        {
+            try
+            {
+                send(exchange);
+                return true;
+            } 
+            catch (IOException e)
+            {
+                Log.warn("Send, retry on fail: ", e);
+                return send (exchange, true); //start backing off
+            }
+        }
+    }
+     
+     
+     
+     /**
+      * Send the exchange.
+      * 
+      * @param exchange
+      * @throws IOException
+      */
+    protected void send (HttpExchange exchange)
+    throws IOException
+    {
+        exchange.reset(); //ensure at start state
+        customize(exchange);
+
+        try
+        {
+            if (Log.isDebugEnabled()) Log.debug("Send: using any connection="+exchange);
+            _client.send(exchange); //use any connection
+        }
+        catch (IOException e)
+        {
+            Log.warn("Send", e);
+            throw e;
+        }
+    }
+     
+     /**
+      * False when we have received a success=false message in response to a Connect,
+      * or we have had an exception when sending or receiving a Connect.
+      * 
+      * True when handshake and then connect has happened.
+      * @param b
+      */
+     protected void setInitialized (boolean b)
+     {
+         _initialized = b;
+     }
+     
+     protected boolean isInitialized ()
+     {
+         return _initialized;
+     }
+     
+     public void metaConnect(boolean success)
+     {        
+     }
+ 
+     public void metaDisconnect()
+     {        
+     }
+ 
+     public void metaHandshake(boolean success, boolean reestablish)
+     {        
+     }
+ 
+     public void metaPublishFail(Message[] messages)
+     {
+     }
 }
