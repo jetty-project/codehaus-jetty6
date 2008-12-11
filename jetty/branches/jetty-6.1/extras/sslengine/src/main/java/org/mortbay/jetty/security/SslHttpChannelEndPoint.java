@@ -273,7 +273,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                     {
                         case FINISHED:
                         case NOT_HANDSHAKING:
-                            if (_closing || !isOpen())
+                            if (_closing)
                                 return -1;
                             break loop;
 
