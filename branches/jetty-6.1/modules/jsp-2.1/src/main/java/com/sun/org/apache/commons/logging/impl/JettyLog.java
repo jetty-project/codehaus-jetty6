@@ -13,8 +13,9 @@
 //limitations under the License.
 //========================================================================
 
-package com.sun.org.apache.commons.logging;
+package com.sun.org.apache.commons.logging.impl;
 
+import com.sun.org.apache.commons.logging.Log;
 
 /**
  * Log

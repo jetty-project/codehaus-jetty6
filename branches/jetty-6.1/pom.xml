@@ -107,11 +107,9 @@
     </pluginManagement>
   </build>
   <modules>
-    <module>modules/servlet-api-2.5</module>
     <module>modules/util</module>
     <module>modules/util5</module>
     <module>modules/jetty</module>
-    <module>modules/jsp-api-2.1</module>
     <module>modules/jsp-2.1</module>
     <module>modules/jsp-api-2.0</module>
     <module>modules/jsp-2.0</module>
@@ -196,6 +194,9 @@
     </dependencies>
   </dependencyManagement>
   <properties>
+    <servlet-version>2.5-SNAPSHOT</servlet-version>
+     <!-- matches glassfish version SJSAS-9_1_1-B51-18_Sept_2008 -->
+    <jsp21-version>9.1.1.B51.25.p1-SNAPSHOT</jsp21-version>
     <activation-version>1.1</activation-version>
     <ant-version>1.6.5</ant-version>
     <jta-spec-version>1.0.1B-rc4</jta-spec-version>
