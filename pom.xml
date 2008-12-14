@@ -194,9 +194,9 @@
     </dependencies>
   </dependencyManagement>
   <properties>
-    <servlet-version>2.5-SNAPSHOT</servlet-version>
+    <servlet-version>2.5-20081211</servlet-version>
      <!-- matches glassfish version SJSAS-9_1_1-B51-18_Sept_2008 -->
-    <jsp21-version>9.1.1.B51.25.p1-SNAPSHOT</jsp21-version>
+    <jsp21-version>9.1.1.B51.25.p1</jsp21-version>
     <activation-version>1.1</activation-version>
     <ant-version>1.6.5</ant-version>
     <jta-spec-version>1.0.1B-rc4</jta-spec-version>
