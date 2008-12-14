@@ -39,12 +39,15 @@ import org.mortbay.xml.XmlParser;
  * or *.tld files withing jars found in WEB-INF/lib of the webapp.   Any listeners defined in these
  * tld's are added to the context.
  * 
- * &lt;bile&gt;This is total rubbish special case for JSPs! If there was a general use-case for web app
+ * The "org.mortbay.jetty.webapp.NoTLDJarPattern" context init parameter, if set, is used as a 
+ * regular expression to match commonly known jar files known not to contain TLD files (and 
+ * thus not needed to be scanned).
+ * 
+ * &lt;bile&gt;Scanning for TLDs is total rubbish special case for JSPs! If there was a general use-case for web app
  * frameworks to register listeners directly, then a generic mechanism could have been added to the servlet
  * spec.  Instead some special purpose JSP support is required that breaks all sorts of encapsualtion rules as
  * the servlet container must go searching for and then parsing the descriptors for one particular framework.
- * It only appears to be used by JSF, which is being developed by the same developer who implemented this
- * feature in the first place!
+ * It only appears to be used by JSF.
  * &lt;/bile&gt;
  * 
  * @author gregw
