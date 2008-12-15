@@ -112,8 +112,18 @@ public class URLEncodedTest extends junit.framework.TestCase
         assertEquals("encoded param size",1, url_encoded.size());
         assertEquals("encoded encode","Name8=xx%2C++yy++%2Czz", url_encoded.encode());
         assertEquals("encoded get", url_encoded.getString("Name8"),"xx,  yy  ,zz");
+        
+        url_encoded.clear();
+        url_encoded.decode("Name11=xxVerdi+%C6+og+2zz", "ISO-8859-1");
+        assertEquals("encoded param size",1, url_encoded.size());
+        assertEquals("encoded get", url_encoded.getString("Name11"),"xxVerdi \u00c6 og 2zz");
+        
+        url_encoded.clear();
+        url_encoded.decode("Name12=xxVerdi+%2F+og+2zz", "UTF-8");
+        assertEquals("encoded param size",1, url_encoded.size());
+        assertEquals("encoded get", url_encoded.getString("Name12"),"xxVerdi / og 2zz");
 
-       /* Not every jvm supports this encoding */
+        /* Not every jvm supports this encoding */
         
         if (java.nio.charset.Charset.isSupported("SJIS"))
         {
