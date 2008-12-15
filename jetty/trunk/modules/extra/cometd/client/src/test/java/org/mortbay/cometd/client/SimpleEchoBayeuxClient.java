@@ -120,14 +120,24 @@ public class SimpleEchoBayeuxClient
             }
         });
         
-        _client.start();  
-        
+       
+      
+    }
+    
+    public void start () throws Exception
+    {
+        _client.start(); 
         _client.subscribe("/foo/alpha"); 
         Object msg=new JSON.Literal("{\"user\":\""+_who+"\",\"chat\":\"Has joined\"}");
         _client.publish("/foo/alpha", msg, String.valueOf(_id++));
         _connected = true;
     }
     
+    public void stop () throws Exception
+    { 
+        _client.stop();
+        _connected = false;
+    }
     
     public void publish (String say)
     {
@@ -150,12 +160,29 @@ public class SimpleEchoBayeuxClient
             String user = (args.length >= 3 ? args[2] : "anonymous");
             
             SimpleEchoBayeuxClient sbc = new SimpleEchoBayeuxClient("localhost", serverPort, serverCometdUrl, user);
+            sbc.start();
             LineNumberReader in = new LineNumberReader(new InputStreamReader(System.in));
             while (true)
             {
-                System.err.print("Enter something to say > ");
-                String say = in.readLine().trim();
-                sbc.publish (say);
+                try
+                {
+                    System.err.print("Enter something to say > ");
+                    String say = in.readLine().trim();
+
+                    /*
+                     * Only here for testing
+                     */
+                    if (say.equalsIgnoreCase("stop"))
+                        sbc.stop();
+                    else if (say.equalsIgnoreCase("start"))
+                        sbc.start();
+                    else
+                        sbc.publish (say);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
             }
             
         }
