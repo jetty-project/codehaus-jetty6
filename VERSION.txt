@@ -29,7 +29,8 @@
  + JETTY-822 Commit when autocommit=true causes error with mysql
  + JETTY-823 Extend start.config profiles
  + JETTY-825 URL decoding of spaces (+) fails for encoding not utf8
-
+ + Jetty-834 Configure DTD does not allow <Map> children
+ 
 jetty-6.1.12 4 November 2008
  + JETTY-731 Completed DeliverListener for cometd
  + JETTY-772 Increased default threadpool size to 250
