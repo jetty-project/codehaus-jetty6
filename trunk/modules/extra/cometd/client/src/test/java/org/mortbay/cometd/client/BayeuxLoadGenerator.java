@@ -224,7 +224,7 @@ public class BayeuxLoadGenerator
             while (clients.size()>nclients)
             {
                 BayeuxClient client=clients.remove(0);
-                client.remove(false);
+                client.remove();
                 _subscribed.addAndGet(-rooms_per_client);
                 if (clients.size()%10==0)
                 {

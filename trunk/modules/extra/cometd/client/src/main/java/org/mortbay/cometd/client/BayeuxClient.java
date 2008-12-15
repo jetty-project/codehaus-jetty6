@@ -37,6 +37,7 @@ import org.cometd.MessageListener;
 import org.cometd.RemoveListener;
 import org.mortbay.cometd.MessageImpl;
 import org.mortbay.cometd.MessagePool;
+import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.HttpHeaders;
@@ -61,9 +62,12 @@ import org.mortbay.util.ajax.JSON;
  * @author gregw
  *
  */
-public class BayeuxClient extends MessagePool implements Client, MetaEvent
+public class BayeuxClient extends AbstractLifeCycle implements Client, MetaEvent
 {
+   
+
     private HttpClient _client;
+    private MessagePool _msgPool;
     private Address _address;
     private HttpExchange _pull;
     private HttpExchange _push;
@@ -72,7 +76,7 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
     private boolean _disconnecting=false;
     private boolean _handshook=false;
     private String _clientId;
-    private Listener _listener;
+    private org.cometd.Listener _listener;
     private List<RemoveListener> _rListeners;
     private List<MessageListener> _mListeners;
     private Queue<Message> _inQ;  // queue of incoming messages used if no listener available. Used as the lock object for all incoming operations.
@@ -93,6 +97,7 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
         _address=address;
         _uri=uri;
 
+        _msgPool = new MessagePool();
         _inQ=new ArrayQueue<Message>();
         _outQ=new ArrayQueue<Message>();
         
@@ -143,9 +148,11 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
         return _clientId;
     }
 
-    /* ------------------------------------------------------------ */
-    public void start() throws UnknownHostException, IOException
+    
+
+    protected void doStart() throws Exception
     {
+        super.doStart();
         synchronized (_outQ)
         {
             if (!_initialized && _pull==null)
@@ -156,6 +163,13 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
         }
     }
 
+
+    protected void doStop() throws Exception
+    {
+        super.doStop();
+    }
+
+
    
 
     /* ------------------------------------------------------------ */
@@ -163,7 +177,7 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
     {
         synchronized (_outQ)
         {
-            return _pull!=null;
+            return isRunning() && (_pull!=null);
         }
     }
 
@@ -174,6 +188,9 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
      */
     public void deliver(Client from, Message message)
     {
+        if (!isRunning())
+            throw new IllegalStateException("Not running");
+        
         synchronized (_inQ)
         {
             if (_mListeners==null)
@@ -192,6 +209,9 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
      */
     public void deliver(Client from, String toChannel, Object data, String id)
     {
+        if (!isRunning())
+            throw new IllegalStateException("Not running");
+        
         Message message = new MessageImpl();
 
         message.put(Bayeux.CHANNEL_FIELD,toChannel);
@@ -215,7 +235,7 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
     /**
      * @deprecated
      */
-    public Listener getListener()
+    public org.cometd.Listener getListener()
     {
         synchronized (_inQ)
         {
@@ -251,6 +271,9 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
      */
     private void publish(Message msg)
     {   
+        if (!isRunning())
+            throw new IllegalStateException("Not running");
+
         synchronized (_outQ)
         {
             _outQ.add(msg);
@@ -277,6 +300,9 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
      */
     public void publish(String toChannel, Object data, String msgId)
     {
+        if (!isRunning())
+            throw new IllegalStateException("Not running");
+
         Message msg=new MessageImpl();
         msg.put(Bayeux.CHANNEL_FIELD,toChannel);
         msg.put(Bayeux.DATA_FIELD,data);
@@ -291,6 +317,9 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
      */
     public void subscribe(String toChannel)
     {
+        if (!isRunning())
+            throw new IllegalStateException("Not running");
+
         Message msg=new MessageImpl();
         msg.put(Bayeux.CHANNEL_FIELD,Bayeux.META_SUBSCRIBE);
         msg.put(Bayeux.SUBSCRIPTION_FIELD,toChannel);
@@ -303,18 +332,25 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
      */
     public void unsubscribe(String toChannel)
     {
+        if (!isRunning())
+            throw new IllegalStateException("Not running");
+
         Message msg=new MessageImpl();
         msg.put(Bayeux.CHANNEL_FIELD,Bayeux.META_UNSUBSCRIBE);
         msg.put(Bayeux.SUBSCRIPTION_FIELD,toChannel);
         publish(msg);
     }
 
+    
     /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @see dojox.cometd.Client#remove(boolean)
+    /**
+     *  Disconnect this client.
      */
-    public void remove(boolean timeout)
+    public void remove()
     {
+        if (!isRunning())
+            throw new IllegalStateException("Not running");
+
         Message msg=new MessageImpl();
         msg.put(Bayeux.CHANNEL_FIELD,Bayeux.META_DISCONNECT);
 
@@ -338,7 +374,7 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
     /**
      * @deprecated
      */
-    public void setListener(Listener listener)
+    public void setListener(org.cometd.Listener listener)
     {
         synchronized (_inQ)
         {
@@ -372,6 +408,8 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
      */
     public void endBatch()
     {
+        if (!isRunning())
+            throw new IllegalStateException("Not running");
         synchronized (_outQ)
         {
             if (--_batch<=0)
@@ -392,6 +430,9 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
      */
     public void startBatch()
     {
+        if (!isRunning())
+            throw new IllegalStateException("Not running");
+        
         synchronized (_outQ)
         {
             _batch++;
@@ -506,6 +547,13 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
         protected void onResponseHeader(Buffer name, Buffer value) throws IOException
         {
             super.onResponseHeader(name,value);
+            
+            if (!isRunning())
+            {
+                Log.warn("Not running");
+                return;
+            }
+            
             if (HttpHeaders.CACHE.getOrdinal(name)==HttpHeaders.SET_COOKIE_ORDINAL)
             {
                 String cname=null;
@@ -552,7 +600,12 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
 
         /* ------------------------------------------------------------ */
         protected void onResponseComplete() throws IOException
-        {
+        {            
+            if (!isRunning())
+            {
+                Log.warn("Not running");
+                return;
+            }
             super.onResponseComplete();
 
             if (getResponseStatus()==200)
@@ -561,13 +614,19 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
                 //TODO
                 if (content==null || content.length()==0)
                     throw new IllegalStateException();
-                _responses=parse(content);
+                _responses=_msgPool.parse(content);
             }
         }
 
         /* ------------------------------------------------------------ */
         protected void onExpire()
         {
+            if (!isRunning())
+            {
+                Log.warn("Not running");
+                return;
+            }
+            
             super.onExpire();
             if (!send (this, true))
                 Log.warn("Retries exhausted"); //giving up
@@ -576,6 +635,12 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
         /* ------------------------------------------------------------ */
         protected void onConnectionFailed(Throwable ex)
         {
+            if (!isRunning())
+            {
+                Log.warn("Not running");
+                return;
+            }
+            
             super.onConnectionFailed(ex);
 
             if (!send (this, true))
@@ -585,6 +650,12 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
         /* ------------------------------------------------------------ */
         protected void onException(Throwable ex)
         {
+            if (!isRunning())
+            {
+                Log.warn("Not running");
+                return;
+            }
+            
             super.onException(ex);
             if (!send (this, true))
                 Log.warn("Retries exhausted", ex);
@@ -665,7 +736,7 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
          /* ------------------------------------------------------------ */
          protected void onExpire()
          {
-             if (Log.isDebugEnabled()) Log.debug("HANDSHAKE: Connection timed out, retrying "+this);
+             if (Log.isDebugEnabled()) Log.debug("HANDSHAKE: Connection timed out "+this);
              setMessage(__HANDSHAKE);
              super.onExpire(); 
          }
@@ -673,7 +744,7 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
          /* ------------------------------------------------------------ */
          protected void onConnectionFailed(Throwable ex)
          {
-             if (Log.isDebugEnabled()) Log.debug("HANDSHAKE: Got connection fail, retrying "+this);
+             if (Log.isDebugEnabled()) Log.debug("HANDSHAKE: Got connection fail "+this);
              setMessage(__HANDSHAKE);
              super.onConnectionFailed(ex); 
          }
@@ -681,7 +752,7 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
          /* ------------------------------------------------------------ */
          protected void onException(Throwable ex)
          { 
-             if (Log.isDebugEnabled()) Log.debug("HANDSHAKE: Got exception, retrying "+this);
+             if (Log.isDebugEnabled()) Log.debug("HANDSHAKE: Got exception "+this);
              setMessage(__HANDSHAKE);
              super.onException(ex);
          }
@@ -790,7 +861,7 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
         /* ------------------------------------------------------------ */
         protected void onExpire()
         {
-            if (Log.isDebugEnabled()) Log.debug("CONNECT: Connection timed out, retrying "+this);
+            if (Log.isDebugEnabled()) Log.debug("CONNECT: Connection timed out "+this);
             setInitialized(false);
             setMessage(_connectString);
             super.onExpire();
@@ -799,7 +870,7 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
         /* ------------------------------------------------------------ */
         protected void onConnectionFailed(Throwable ex)
         {
-            if (Log.isDebugEnabled()) Log.debug("CONNECT: Got connection fail, retrying "+this);
+            if (Log.isDebugEnabled()) Log.debug("CONNECT: Got connection fail "+this);
             setInitialized(false);
             setMessage(_connectString);
             super.onConnectionFailed(ex);
@@ -808,7 +879,7 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
         /* ------------------------------------------------------------ */
         protected void onException(Throwable ex)
         { 
-            if (Log.isDebugEnabled()) Log.debug("CONNECT: Got exception, retrying "+this);
+            if (Log.isDebugEnabled()) Log.debug("CONNECT: Got exception "+this);
             setInitialized(false);
             setMessage(_connectString);
             super.onException(ex);
@@ -838,7 +909,7 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
         {
             try
             {
-                return parse(_jsonOutboundMessages);
+                return _msgPool.parse(_jsonOutboundMessages);
             }
             catch (IOException e)
             {
@@ -853,9 +924,8 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
          * @see org.mortbay.cometd.client.BayeuxClient.Exchange#onResponseComplete()
          */
         protected void onResponseComplete() throws IOException
-        {
+        {         
             super.onResponseComplete();
-
             try
             {
                 synchronized (_outQ)
@@ -886,6 +956,12 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
         /* ------------------------------------------------------------ */
         protected void onExpire()
         {
+            if (!isRunning())
+            {
+                Log.warn("Not running");
+                return;
+            }
+
             Log.warn("Publish: Connection timed out");
             metaPublishFail(this.getOutboundMessages());
         }
@@ -893,6 +969,12 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
         /* ------------------------------------------------------------ */
         protected void onConnectionFailed(Throwable ex)
         {
+            if (!isRunning())
+            {
+                Log.warn("Not running");
+                return;
+            }
+            
             Log.warn("Publish: Got connection fail ", ex);
             metaPublishFail(this.getOutboundMessages());
         }
@@ -900,6 +982,12 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
         /* ------------------------------------------------------------ */
         protected void onException(Throwable ex)
         { 
+            if (!isRunning())
+            {
+                Log.warn("Not running");
+                return;
+            }
+            
             Log.warn("Publish: Got exception ",ex);
             metaPublishFail(this.getOutboundMessages());
         }
@@ -968,65 +1056,74 @@ public class BayeuxClient extends MessagePool implements Client, MetaEvent
      */
     protected boolean send (final Exchange exchange, boolean backoff)
     {
-        if (backoff)
+        if (isRunning())
         {
-            int retries = exchange.getBackoffRetries();
-            if (Log.isDebugEnabled()) Log.debug("Send with backoff, retries="+retries+" for "+exchange);
-            if (retries < _backoffMaxRetries)
+            if (backoff)
             {
-                exchange.incBackoffRetries();
-                long interval = (_advice != null ? _advice.getInterval() : 0) + (retries * _backoffInterval);
-
-                if (interval > 0)
+                int retries = exchange.getBackoffRetries();
+                if (Log.isDebugEnabled()) Log.debug("Send with backoff, retries="+retries+" for "+exchange);
+                if (retries < _backoffMaxRetries)
                 {
-                    TimerTask task = new TimerTask()
+                    exchange.incBackoffRetries();
+                    long interval = (_advice != null ? _advice.getInterval() : 0) + (retries * _backoffInterval);
+
+                    if (interval > 0)
                     {
-                        public void run()
+                        TimerTask task = new TimerTask()
                         {
-                            try
+                            public void run()
                             {
-                                send(exchange);           
+                                try
+                                {
+                                    send(exchange);           
+                                }
+                                catch (IOException e)
+                                {
+                                    Log.warn("Delayed send, retry: ", e);
+                                    send(exchange, true); //start backing off
+                                }
                             }
-                            catch (IOException e)
-                            {
-                                Log.warn("Delayed send, retry: ", e);
-                                send(exchange, true); //start backing off
-                            }
+                        };
+                        if (Log.isDebugEnabled()) Log.debug("Delayed send: "+interval);
+                        _timer.schedule(task, interval);
+                    }
+                    else
+                    {
+                        try
+                        {  
+                            send (exchange);
                         }
-                    };
-                    if (Log.isDebugEnabled()) Log.debug("Delayed send: "+interval);
-                    _timer.schedule(task, interval);
+                        catch (IOException e)
+                        {
+                            Log.warn("Send, retry on fail: ", e);
+                            return send (exchange, true); //start backing off
+                        }
+                    }
+                    return true;
                 }
                 else
-                {
-                    try
-                    {  
-                        send (exchange);
-                    }
-                    catch (IOException e)
-                    {
-                        Log.warn("Send, retry on fail: ", e);
-                        return send (exchange, true); //start backing off
-                    }
-                }
-                return true;
+                    return false;
             }
             else
-                return false;
+            {
+                try
+                {
+                    send(exchange);
+                    return true;
+                } 
+                catch (IOException e)
+                {
+                    Log.warn("Send, retry on fail: ", e);
+                    return send (exchange, true); //start backing off
+                }
+            }
         }
         else
         {
-            try
-            {
-                send(exchange);
-                return true;
-            } 
-            catch (IOException e)
-            {
-                Log.warn("Send, retry on fail: ", e);
-                return send (exchange, true); //start backing off
-            }
+            Log.warn("Not running");
+            return false;
         }
+           
     }
      
      
