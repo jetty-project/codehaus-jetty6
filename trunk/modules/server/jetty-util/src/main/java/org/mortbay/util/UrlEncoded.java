@@ -707,6 +707,11 @@ public class UrlEncoded extends MultiMap
                             {    ba[n++]=(byte)TypeUtil.parseInt(encoded,offset+i+1,2,16);
                                 i+=3;
                             }
+                            else if (c=='+')
+                            {
+                                ba[n++]=(byte)' ';
+                                i++;
+                            }
                             else
                             {
                                 ba[n++]=(byte)c;
