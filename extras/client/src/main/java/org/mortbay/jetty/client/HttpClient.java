@@ -38,7 +38,6 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.nio.DirectNIOBuffer;
 import org.mortbay.io.nio.IndirectNIOBuffer;
-import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.client.security.Authorization;
@@ -53,24 +52,24 @@ import org.mortbay.thread.Timeout;
  * Http Client.
  * <p/>
  * HttpClient is the main active component of the client API implementation.
- * It is the opposite of the Connectors in standard Jetty, in that it listens 
+ * It is the opposite of the Connectors in standard Jetty, in that it listens
  * for responses rather than requests.   Just like the connectors, there is a
  * blocking socket version and a non-blocking NIO version (implemented as nested classes
  * selected by {@link #setConnectorType(int)}).
  * <p/>
- * The an instance of {@link HttpExchange} is passed to the {@link #send(HttpExchange)} method 
+ * The an instance of {@link HttpExchange} is passed to the {@link #send(HttpExchange)} method
  * to send a request.  The exchange contains both the headers and content (source) of the request
  * plus the callbacks to handle responses.   A HttpClient can have many exchanges outstanding
  * and they may be queued on the {@link HttpDestination} waiting for a {@link HttpConnection},
  * queued in the {@link HttpConnection} waiting to be transmitted or pipelined on the actual
  * TCP/IP connection waiting for a response.
  * <p/>
- * The {@link HttpDestination} class is an aggregation of {@link HttpConnection}s for the 
- * same host, port and protocol.   A destination may limit the number of connections 
- * open and they provide a pool of open connections that may be reused.   Connections may also 
+ * The {@link HttpDestination} class is an aggregation of {@link HttpConnection}s for the
+ * same host, port and protocol.   A destination may limit the number of connections
+ * open and they provide a pool of open connections that may be reused.   Connections may also
  * be allocated from a destination, so that multiple request sources are not multiplexed
  * over the same connection.
- * 
+ *
  * @see {@link HttpExchange}
  * @see {@link HttpDestination}
  * @author Greg Wilkins
@@ -90,7 +89,7 @@ public class HttpClient extends AbstractBuffers
     Connector _connector;
     private long _idleTimeout=20000;
     private long _timeout=320000;
-    int _soTimeout = 10000;
+    private int _soTimeout = 10000;
     private Timeout _timeoutQ = new Timeout();
     private Address _proxy;
     private Authorization _proxyAuthentication;
@@ -113,9 +112,9 @@ public class HttpClient extends AbstractBuffers
 
     private String _protocol="TLS";
     private String _provider;
-    private String _secureRandomAlgorithm; 
+    private String _secureRandomAlgorithm;
 
-    private RealmResolver _realmResolver;    
+    private RealmResolver _realmResolver;
 
     public void dump() throws IOException
     {
@@ -125,7 +124,7 @@ public class HttpClient extends AbstractBuffers
             entry.getValue().dump();
         }
     }
-    
+
     /* ------------------------------------------------------------------------------- */
     public void send(HttpExchange exchange) throws IOException
     {
@@ -180,7 +179,7 @@ public class HttpClient extends AbstractBuffers
     /* ------------------------------------------------------------ */
     public void schedule(Timeout.Task task)
     {
-        _timeoutQ.schedule(task); 
+        _timeoutQ.schedule(task);
     }
 
     /* ------------------------------------------------------------ */
@@ -188,7 +187,7 @@ public class HttpClient extends AbstractBuffers
     {
         task.cancel();
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Get whether the connector can use direct NIO buffers.
@@ -207,14 +206,14 @@ public class HttpClient extends AbstractBuffers
     /* ------------------------------------------------------------ */
     /**
      * returns the SecurityRealmResolver registered with the HttpClient or null
-     * 
-     * @return 
+     *
+     * @return
      */
     public RealmResolver getRealmResolver()
     {
         return _realmResolver;
     }
-    
+
     /* ------------------------------------------------------------ */
     public boolean hasRealms()
     {
@@ -251,7 +250,7 @@ public class HttpClient extends AbstractBuffers
     /* ------------------------------------------------------------ */
     /**
      * Set to use NIO direct buffers.
-     * 
+     *
      * @param direct
      *            If True (the default), the connector can use NIO direct
      *            buffers. Some JVMs have memory management issues (bugs) with
@@ -318,10 +317,10 @@ public class HttpClient extends AbstractBuffers
     protected void doStart() throws Exception
     {
         super.doStart();
-        
+
         _timeoutQ.setNow();
         _timeoutQ.setDuration(_timeout);
-        
+
         if(_threadPool==null)
         {
             QueuedThreadPool pool = new QueuedThreadPool();
@@ -330,16 +329,16 @@ public class HttpClient extends AbstractBuffers
             pool.setName("HttpClient");
             _threadPool=pool;
         }
-        
+
         if (_threadPool instanceof LifeCycle)
         {
             ((LifeCycle)_threadPool).start();
         }
 
-        
+
         if (_connectorType==CONNECTOR_SELECT_CHANNEL)
         {
-            
+
             _connector=new SelectConnector(this);
         }
         else
@@ -347,7 +346,7 @@ public class HttpClient extends AbstractBuffers
             _connector=new SocketConnector(this);
         }
         _connector.start();
-        
+
         _threadPool.dispatch(new Runnable()
         {
             public void run()
@@ -366,7 +365,7 @@ public class HttpClient extends AbstractBuffers
                 }
             }
         });
-        
+
     }
 
     /* ------------------------------------------------------------ */
@@ -382,7 +381,7 @@ public class HttpClient extends AbstractBuffers
         {
             destination.close();
         }
-        
+
         _timeoutQ.cancelAll();
         super.doStop();
     }
@@ -403,18 +402,18 @@ public class HttpClient extends AbstractBuffers
      */
     protected SSLContext getSSLContext() throws IOException
     {
-   	if (_sslContext == null) 
+   	if (_sslContext == null)
     	{
-            if (_keyStoreLocation == null) 
+            if (_keyStoreLocation == null)
             {
                 _sslContext = getLooseSSLContext();
-            } 
-            else 
+            }
+            else
             {
                 _sslContext = getStrictSSLContext();
             }
-        }   	
-    	return _sslContext;    	
+        }
+    	return _sslContext;
     }
 
     protected SSLContext getStrictSSLContext() throws IOException
@@ -438,7 +437,7 @@ public class HttpClient extends AbstractBuffers
             KeyManagerFactory keyManagerFactory=KeyManagerFactory.getInstance(_keyManagerAlgorithm);
             keyManagerFactory.init(keyStore,_keyManagerPassword==null?null:_keyManagerPassword.toString().toCharArray());
             keyManagers=keyManagerFactory.getKeyManagers();
-            
+
             TrustManager[] trustManagers=null;
             InputStream truststoreInputStream = null;
 
@@ -505,7 +504,7 @@ public class HttpClient extends AbstractBuffers
             throw new IOException( "issue ignoring certs" );
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return the period in milliseconds a {@link HttpConnection} can be idle for before it is closed.
@@ -531,7 +530,7 @@ public class HttpClient extends AbstractBuffers
     }
 
     /* ------------------------------------------------------------ */
-    public void setSoTimeout(int so) 
+    public void setSoTimeout(int so)
     {
         _soTimeout = so;
     }
@@ -601,11 +600,11 @@ public class HttpClient extends AbstractBuffers
     {
         return _maxRetries;
     }
-    
+
      /* ------------------------------------------------------------ */
     public void setMaxRetries( int retries )
     {
-        _maxRetries = retries; 
+        _maxRetries = retries;
     }
 
     public String getTrustStoreLocation()
