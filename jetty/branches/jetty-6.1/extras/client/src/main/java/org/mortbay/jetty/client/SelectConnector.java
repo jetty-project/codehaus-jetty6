@@ -26,7 +26,6 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.Connection;
 import org.mortbay.io.nio.IndirectNIOBuffer;
-import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.jetty.AbstractBuffers;
@@ -69,7 +68,7 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
         Address address = destination.isProxied() ? destination.getProxy() : destination.getAddress();
         channel.connect(address.toSocketAddress());
         channel.configureBlocking( false );
-        channel.socket().setSoTimeout( _httpClient._soTimeout );
+        channel.socket().setSoTimeout( _httpClient.getSoTimeout());
         _selectorManager.register( channel, destination );
     }
 
@@ -117,17 +116,17 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
         {
             // key should have destination at this point (will be replaced by endpoint after this call)
             HttpDestination dest=(HttpDestination)key.attachment();
-            
+
 
             SelectChannelEndPoint ep=null;
-            
+
             if (dest.isSecure())
             {
                 if (dest.isProxied())
                 {
                     String connect = HttpMethods.CONNECT+" "+dest.getAddress()+HttpVersions.HTTP_1_0+"\r\n\r\n";
                     // TODO need to send this over channel unencrypted and setup endpoint to ignore the 200 OK response.
-                   
+
                     throw new IllegalStateException("Not Implemented");
                 }
 
@@ -138,7 +137,7 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
             {
                 ep=new SelectChannelEndPoint(channel,selectSet,key);
             }
-            
+
             HttpConnection connection=(HttpConnection)ep.getConnection();
             connection.setDestination(dest);
             dest.onNewConnection(connection);
@@ -151,11 +150,11 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
             {
                 _sslContext = SelectConnector.this._httpClient.getSSLContext();
             }
-                
+
             SSLEngine sslEngine = _sslContext.createSSLEngine();
             sslEngine.setUseClientMode(true);
             sslEngine.beginHandshake();
-                
+
             if (_sslBuffers==null)
             {
                 AbstractBuffers buffers = new AbstractBuffers()
@@ -163,23 +162,23 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
                     protected Buffer newBuffer( int size )
                     {
                         return new IndirectNIOBuffer( size);
-                    }        
-                }; 
-            
+                    }
+                };
+
                 buffers.setRequestBufferSize( sslEngine.getSession().getPacketBufferSize());
                 buffers.setResponseBufferSize(sslEngine.getSession().getApplicationBufferSize());
-                
+
                 try
                 {
                     buffers.start();
                 }
                 catch(Exception e)
-                {       
+                {
                     throw new IllegalStateException(e);
                 }
                 _sslBuffers=buffers;
             }
-            
+
             return sslEngine;
         }
 
@@ -194,7 +193,7 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
             else
                 Log.warn(ex);
         }
-       
+
     }
 
 }
