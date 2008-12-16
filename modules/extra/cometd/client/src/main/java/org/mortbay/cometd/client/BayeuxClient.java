@@ -166,7 +166,10 @@ public class BayeuxClient extends AbstractLifeCycle implements Client, MetaEvent
 
     protected void doStop() throws Exception
     {
+        remove(); //disconnect
         super.doStop();
+        _pull=null;
+        _push=null;
     }
 
 
@@ -348,7 +351,7 @@ public class BayeuxClient extends AbstractLifeCycle implements Client, MetaEvent
      */
     public void remove()
     {
-        if (!isRunning())
+        if (isStopped())
             throw new IllegalStateException("Not running");
 
         Message msg=new MessageImpl();
@@ -357,16 +360,14 @@ public class BayeuxClient extends AbstractLifeCycle implements Client, MetaEvent
         synchronized (_outQ)
         {
             _outQ.add(msg);
-
-            _initialized=false;
             _disconnecting=true;
-
             metaDisconnect();
             if (_batch==0&&_initialized&&_push==null)
             {
                 _push=new Publish();
                 send((Exchange)_push, false);
             }
+            _initialized=false;
         }
     }
 
@@ -547,12 +548,8 @@ public class BayeuxClient extends AbstractLifeCycle implements Client, MetaEvent
         protected void onResponseHeader(Buffer name, Buffer value) throws IOException
         {
             super.onResponseHeader(name,value);
-            
             if (!isRunning())
-            {
-                Log.warn("Not running");
                 return;
-            }
             
             if (HttpHeaders.CACHE.getOrdinal(name)==HttpHeaders.SET_COOKIE_ORDINAL)
             {
@@ -602,10 +599,8 @@ public class BayeuxClient extends AbstractLifeCycle implements Client, MetaEvent
         protected void onResponseComplete() throws IOException
         {            
             if (!isRunning())
-            {
-                Log.warn("Not running");
                 return;
-            }
+
             super.onResponseComplete();
 
             if (getResponseStatus()==200)
@@ -622,10 +617,8 @@ public class BayeuxClient extends AbstractLifeCycle implements Client, MetaEvent
         protected void onExpire()
         {
             if (!isRunning())
-            {
-                Log.warn("Not running");
                 return;
-            }
+            
             
             super.onExpire();
             if (!send (this, true))
@@ -636,10 +629,8 @@ public class BayeuxClient extends AbstractLifeCycle implements Client, MetaEvent
         protected void onConnectionFailed(Throwable ex)
         {
             if (!isRunning())
-            {
-                Log.warn("Not running");
                 return;
-            }
+            
             
             super.onConnectionFailed(ex);
 
@@ -651,10 +642,8 @@ public class BayeuxClient extends AbstractLifeCycle implements Client, MetaEvent
         protected void onException(Throwable ex)
         {
             if (!isRunning())
-            {
-                Log.warn("Not running");
                 return;
-            }
+            
             
             super.onException(ex);
             if (!send (this, true))
@@ -684,6 +673,10 @@ public class BayeuxClient extends AbstractLifeCycle implements Client, MetaEvent
         protected void onResponseComplete() throws IOException
         {
             super.onResponseComplete();
+            
+            if (!isRunning())
+                return;
+            
             if (getResponseStatus()==200&&_responses!=null&&_responses.length>0)
             {
                 Map<?,?> response=(Map<?,?>)_responses[0];
@@ -775,6 +768,10 @@ public class BayeuxClient extends AbstractLifeCycle implements Client, MetaEvent
         protected void onResponseComplete() throws IOException
         {
             super.onResponseComplete();
+            if (!isRunning())
+                return;
+            
+            
             if (getResponseStatus()==200&&_responses!=null&&_responses.length>0)
             {
                 try
@@ -925,6 +922,9 @@ public class BayeuxClient extends AbstractLifeCycle implements Client, MetaEvent
          */
         protected void onResponseComplete() throws IOException
         {         
+            if (!isRunning())
+                return;
+            
             super.onResponseComplete();
             try
             {
@@ -957,10 +957,8 @@ public class BayeuxClient extends AbstractLifeCycle implements Client, MetaEvent
         protected void onExpire()
         {
             if (!isRunning())
-            {
-                Log.warn("Not running");
                 return;
-            }
+            
 
             Log.warn("Publish: Connection timed out");
             metaPublishFail(this.getOutboundMessages());
@@ -970,10 +968,8 @@ public class BayeuxClient extends AbstractLifeCycle implements Client, MetaEvent
         protected void onConnectionFailed(Throwable ex)
         {
             if (!isRunning())
-            {
-                Log.warn("Not running");
                 return;
-            }
+            
             
             Log.warn("Publish: Got connection fail ", ex);
             metaPublishFail(this.getOutboundMessages());
@@ -983,10 +979,8 @@ public class BayeuxClient extends AbstractLifeCycle implements Client, MetaEvent
         protected void onException(Throwable ex)
         { 
             if (!isRunning())
-            {
-                Log.warn("Not running");
                 return;
-            }
+            
             
             Log.warn("Publish: Got exception ",ex);
             metaPublishFail(this.getOutboundMessages());
@@ -1056,79 +1050,70 @@ public class BayeuxClient extends AbstractLifeCycle implements Client, MetaEvent
      */
     protected boolean send (final Exchange exchange, boolean backoff)
     {
-        if (isRunning())
+        if (backoff)
         {
-            if (backoff)
+            int retries = exchange.getBackoffRetries();
+            if (Log.isDebugEnabled()) Log.debug("Send with backoff, retries="+retries+" for "+exchange);
+            if (retries < _backoffMaxRetries)
             {
-                int retries = exchange.getBackoffRetries();
-                if (Log.isDebugEnabled()) Log.debug("Send with backoff, retries="+retries+" for "+exchange);
-                if (retries < _backoffMaxRetries)
-                {
-                    exchange.incBackoffRetries();
-                    long interval = (_advice != null ? _advice.getInterval() : 0) + (retries * _backoffInterval);
+                exchange.incBackoffRetries();
+                long interval = (_advice != null ? _advice.getInterval() : 0) + (retries * _backoffInterval);
 
-                    if (interval > 0)
+                if (interval > 0)
+                {
+                    TimerTask task = new TimerTask()
                     {
-                        TimerTask task = new TimerTask()
+                        public void run()
                         {
-                            public void run()
+                            try
                             {
-                                try
-                                {
-                                    send(exchange);           
-                                }
-                                catch (IOException e)
-                                {
-                                    Log.warn("Delayed send, retry: ", e);
-                                    send(exchange, true); //start backing off
-                                }
+                                send(exchange);           
                             }
-                        };
-                        if (Log.isDebugEnabled()) Log.debug("Delayed send: "+interval);
-                        _timer.schedule(task, interval);
-                    }
-                    else
-                    {
-                        try
-                        {  
-                            send (exchange);
+                            catch (IOException e)
+                            {
+                                Log.warn("Delayed send, retry: ", e);
+                                send(exchange, true); //start backing off
+                            }
                         }
-                        catch (IOException e)
-                        {
-                            Log.warn("Send, retry on fail: ", e);
-                            return send (exchange, true); //start backing off
-                        }
-                    }
-                    return true;
+                    };
+                    if (Log.isDebugEnabled()) Log.debug("Delayed send: "+interval);
+                    _timer.schedule(task, interval);
                 }
                 else
-                    return false;
+                {
+                    try
+                    {  
+                        send (exchange);
+                    }
+                    catch (IOException e)
+                    {
+                        Log.warn("Send, retry on fail: ", e);
+                        return send (exchange, true); //start backing off
+                    }
+                }
+                return true;
             }
             else
-            {
-                try
-                {
-                    send(exchange);
-                    return true;
-                } 
-                catch (IOException e)
-                {
-                    Log.warn("Send, retry on fail: ", e);
-                    return send (exchange, true); //start backing off
-                }
-            }
+                return false;
         }
         else
         {
-            Log.warn("Not running");
-            return false;
+            try
+            {
+                send(exchange);
+                return true;
+            } 
+            catch (IOException e)
+            {
+                Log.warn("Send, retry on fail: ", e);
+                return send (exchange, true); //start backing off
+            }
         }
-           
     }
-     
-     
-     
-     /**
+
+
+
+    /**
       * Send the exchange.
       * 
       * @param exchange
