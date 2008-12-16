@@ -122,6 +122,16 @@ public class URLEncodedTest extends junit.framework.TestCase
         url_encoded.decode("Name12=xxVerdi+%2F+og+2zz", "UTF-8");
         assertEquals("encoded param size",1, url_encoded.size());
         assertEquals("encoded get", url_encoded.getString("Name12"),"xxVerdi / og 2zz");
+        
+        url_encoded.clear();
+        url_encoded.decode("Name14=%GG%+%%+%", "ISO-8859-1");
+        assertEquals("encoded param size",1, url_encoded.size());
+        assertEquals("encoded get", url_encoded.getString("Name14"),"%GG% %% %");
+        
+        url_encoded.clear();
+        url_encoded.decode("Name14=%GG%+%%+%", "UTF-8");
+        assertEquals("encoded param size",1, url_encoded.size());
+        assertEquals("encoded get", url_encoded.getString("Name14"),"%GG% %% %");
 
         /* Not every jvm supports this encoding */
         
