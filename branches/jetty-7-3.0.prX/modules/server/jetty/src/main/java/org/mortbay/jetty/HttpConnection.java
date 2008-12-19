@@ -19,10 +19,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.io.AsyncEndPoint;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
@@ -514,108 +516,114 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     protected void handleRequest() throws IOException
     {
-        _request.dispatch();
-        boolean handling=_server.isRunning();
-        
-        while (handling)
+        boolean handling=_server.isRunning() && _request.dispatch();
+        boolean error = false;
+
+        String threadName=null;
+        try
         {
-            _request.setHandled(false);
-            boolean error = false;
-            String threadName=null;
-            try
+            if (Log.isDebugEnabled())
             {
-                String info=URIUtil.canonicalPath(_uri.getDecodedPath());
-                if (info==null)
-                    throw new HttpException(400);
-                _request.setPathInfo(info);
-                
-                if (_out!=null)
-                    _out.reopen();
-                
-                if (!_request.isAsyncStarted())
-                    _connector.customize(_endp, _request);
-                  
-                if (Log.isDebugEnabled())
+                threadName=Thread.currentThread().getName();
+                Thread.currentThread().setName(threadName+" - "+_uri);
+            }
+            
+            while (handling)
+            {
+                _request.setHandled(false);
+                try
                 {
-                    threadName=Thread.currentThread().getName();
-                    Thread.currentThread().setName(threadName+" - "+_uri);
+                    String info=URIUtil.canonicalPath(_uri.getDecodedPath());
+                    if (info==null)
+                        throw new HttpException(400);
+                    _request.setPathInfo(info);
+
+                    if (_out!=null)
+                        _out.reopen();
+
+                    DispatcherType dispatch=DispatcherType.REQUEST;
+                    if (_request.isInitial())
+                        _connector.customize(_endp, _request);
+                    else 
+                        dispatch=DispatcherType.ASYNC;
+                    _request.setDispatcherType(dispatch);
+
+                    _server.handle(this);
+                }
+                catch (RetryRequest r)
+                {
+                    Log.ignore(r);
+                }
+                catch (EofException e)
+                {
+                    Log.ignore(e);
+                    error=true;
+                }
+                catch (HttpException e)
+                {
+                    Log.debug(e);
+                    _request.setHandled(true);
+                    _response.sendError(e.getStatus(), e.getReason());
+                    error=true;
+                }
+                catch (Exception e)
+                {
+                    Log.warn(e);
+                    _request.setHandled(true);
+                    _generator.sendError(500, null, null, true);
+                    error=true;
+                }
+                catch (Error e)
+                {
+                    Log.warn(e);
+                    _request.setHandled(true);
+                    _generator.sendError(500, null, null, true);
+                    error=true;
+                }
+                finally
+                {   
+                    handling = !_request.undispatch() && _server != null;
+                }
+            }
+        }
+        finally
+        {
+            if (threadName!=null)
+                Thread.currentThread().setName(threadName);
+
+            if (_request.shouldComplete())
+            {   
+                _request.doComplete();
+                
+                if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
+                {
+                    // Continue not sent so don't parse any content 
+                    _expect = UNKNOWN;
+                    if (_parser instanceof HttpParser)
+                        ((HttpParser)_parser).setState(HttpParser.STATE_END);
                 }
 
-                if (_request.getAsyncContextState()!=null && _request.getAsyncContextState().isCompleting())
-                    _request.setHandled(true);
-                else
-                    _server.handle(this);
-            }
-            catch (RetryRequest r)
-            {
-                Log.ignore(r);
-            }
-            catch (EofException e)
-            {
-                Log.ignore(e);
-                error=true;
-            }
-            catch (HttpException e)
-            {
-                Log.debug(e);
-                _request.setHandled(true);
-                _response.sendError(e.getStatus(), e.getReason());
-                error=true;
-            }
-            catch (Exception e)
-            {
-                Log.warn(e);
-                _request.setHandled(true);
-                _generator.sendError(500, null, null, true);
-                error=true;
-            }
-            catch (Error e)
-            {
-                Log.warn(e);
-                _request.setHandled(true);
-                _generator.sendError(500, null, null, true);
-                error=true;
-            }
-            finally
-            {   
-                handling = !_request.undispatch() && _server != null;
-                if (handling)
-                    continue;
-                
-                if (threadName!=null)
-                    Thread.currentThread().setName(threadName);
-                
-                
-                if (_request.getAsyncContextState()==null || _request.getAsyncContextState().shouldComplete())
+                if(_endp.isOpen())
                 {
-                    if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
-                    {
-                        // Continue not sent so don't parse any content 
-                        _expect = UNKNOWN;
-                        if (_parser instanceof HttpParser)
-                            ((HttpParser)_parser).setState(HttpParser.STATE_END);
-                    }
-                    
-                    if(_endp.isOpen())
-                    {
-                        if (_generator.isPersistent())
-                            _connector.persist(_endp);
-                        
-                        if (error) 
-                            _endp.close();
-                        else
-                        {
-                            if (!_response.isCommitted() && !_request.isHandled())
-                                _response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                            _response.complete();
-                        }
-                    }
+                    if (_generator.isPersistent())
+                        _connector.persist(_endp);
+
+                    if (error) 
+                        _endp.close();
                     else
                     {
-                        _response.complete(); 
+                        if (!_response.isCommitted() && !_request.isHandled())
+                            _response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                        _response.complete();
                     }
                 }
-            }
+                else
+                {
+                    _response.complete(); 
+                }
+
+                _request.setHandled(true);
+            } 
         }
     }
 

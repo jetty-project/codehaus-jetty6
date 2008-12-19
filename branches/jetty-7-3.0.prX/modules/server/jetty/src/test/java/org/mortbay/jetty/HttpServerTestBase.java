@@ -812,7 +812,7 @@ public class HttpServerTestBase extends TestCase
     {
         // ~ Methods
         // ------------------------------------------------------------
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
             base_request.setHandled(true);
@@ -852,7 +852,7 @@ public class HttpServerTestBase extends TestCase
     private static class HelloWorldHandler extends AbstractHandler
     {
         // ------------------------------------------------------------
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
             base_request.setHandled(true);
@@ -865,7 +865,7 @@ public class HttpServerTestBase extends TestCase
     private static class DataHandler extends AbstractHandler
     {
         // ------------------------------------------------------------
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
             base_request.setHandled(true);

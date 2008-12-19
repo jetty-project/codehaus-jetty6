@@ -34,7 +34,9 @@ import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
@@ -100,19 +102,16 @@ import org.mortbay.util.ajax.Continuation;
  * @author gregw
  *
  */
-public class Request implements HttpServletRequest
+public class Request extends AsyncState implements HttpServletRequest
 {
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
     private static final int __NONE=0, _STREAM=1, __READER=2;
-
-    protected HttpConnection _connection;
     
     private boolean _handled =false;
     private Map _roleMap;
     private EndPoint _endp;
 
     private boolean _asyncSupported=true;
-    private AsyncContextState _asyncContextState;
     private Attributes _attributes;
     private String _authType;
     private String _characterEncoding;
@@ -152,39 +151,31 @@ public class Request implements HttpServletRequest
     private Map<Object,HttpSession> _savedNewSessions;
     private UserRealm _userRealm;
     private CookieCutter _cookies;
+    private DispatcherType _dispatcherType;
 
     /* ------------------------------------------------------------ */
     public Request()
     {
+    	super(null);
     }
     
     /* ------------------------------------------------------------ */
     public Request(HttpConnection connection)
     {
-        setConnection(connection);
+    	super(connection);
     }
 
     /* ------------------------------------------------------------ */
     protected void setConnection(HttpConnection connection)
     {
-        _connection=connection;
+    	super.setConnection(connection);
         _endp=connection.getEndPoint();
         _dns=connection.getResolveNames();
-        if (_asyncContextState!=null)
-            _asyncContextState.setConnection(connection);
     }
-
-    /* ------------------------------------------------------------ */
-    public AsyncContextState getAsyncContextState()
-    {
-        return _asyncContextState;
-    }
-    
     /* ------------------------------------------------------------ */
     protected void recycle()
     {
-        if(_asyncContextState!=null)
-            _asyncContextState.reset();
+    	super.reset();
         _asyncSupported=true;
         _handled=false;
         if (_context!=null)
@@ -276,8 +267,9 @@ public class Request implements HttpServletRequest
         if ("org.mortbay.jetty.ajax.Continuation".equals(name))
             return getContinuation(true);
         
-        if (isAsyncStarted() && !getAsyncContextState().isInitial())
+        if (DispatcherType.ASYNC.equals(_dispatcherType))
         {
+            // TODO handle forwards(path!)
             if (name.equals(Dispatcher.__FORWARD_PATH_INFO))    return getPathInfo();
             if (name.equals(Dispatcher.__FORWARD_REQUEST_URI))  return getRequestURI();
             if (name.equals(Dispatcher.__FORWARD_SERVLET_PATH)) return getServletPath();
@@ -1772,29 +1764,34 @@ public class Request implements HttpServletRequest
     /* ------------------------------------------------------------ */
     public void addAsyncListener(AsyncListener listener)
     {
-        // TODO Auto-generated method stub
-        
+        _asyncListeners=LazyList.add(_asyncListeners,listener);
     }
 
     /* ------------------------------------------------------------ */
-    public void addAsyncListener(AsyncListener listener, ServletRequest servletRequest, ServletResponse servletResponse)
+    public void addAsyncListener(final AsyncListener listener, ServletRequest servletRequest, ServletResponse servletResponse)
     {
-        // TODO Auto-generated method stub
+        final AsyncEvent event = new AsyncEvent(servletRequest,servletResponse);
         
+        _asyncListeners=LazyList.add(_asyncListeners,new AsyncListener()
+        {
+            public void onComplete(AsyncEvent ev) throws IOException
+            {
+                listener.onComplete(event);
+            }
+
+            public void onTimeout(AsyncEvent ev) throws IOException
+            {
+                listener.onComplete(event);
+            }
+        });
     }
 
     /* ------------------------------------------------------------ */
     public AsyncContext getAsyncContext()
     {
-        if (_asyncContextState!=null && _asyncContextState.isAsyncStarted())
-            return _asyncContextState;
-        throw new IllegalStateException();
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isAsyncStarted()
-    {
-        return _asyncContextState!=null && _asyncContextState.isAsyncStarted();
+        if (isInitial() && !isAsyncStarted())
+        	throw new IllegalStateException();
+        return this;
     }
 
     /* ------------------------------------------------------------ */
@@ -1804,45 +1801,21 @@ public class Request implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
-    public void setAsyncTimeout(long timeout)
-    {
-        // TODO Auto-generated method stub
-    }
-
-    /* ------------------------------------------------------------ */
     public AsyncContext startAsync() throws IllegalStateException
     {
         if (!_asyncSupported)
             throw new IllegalStateException("!asyncSupported");
-        if (_asyncContextState==null)
-        {
-            _asyncContextState=new AsyncContextState(_connection);
-            _asyncContextState.dispatch();
-        }
         
-        _asyncContextState.suspend();  
-        return _asyncContextState;
+        suspend();  
+        return this;
     }
 
     /* ------------------------------------------------------------ */
     public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException
     {
+        _wrappedEvent = new AsyncEvent(servletRequest,servletResponse);
         startAsync();
-        // TODO request/response ?
-        return _asyncContextState;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void dispatch()
-    {
-        if (_asyncContextState!=null)
-            _asyncContextState.dispatch();
-    }
-    
-    /* ------------------------------------------------------------ */
-    public boolean undispatch()
-    {
-        return _asyncContextState==null?true:_asyncContextState.undispatch();
+        return this;
     }
 
     /* ------------------------------------------------------------ */
@@ -1850,5 +1823,18 @@ public class Request implements HttpServletRequest
     {
         _asyncSupported=supported;
     }
+
+    /* ------------------------------------------------------------ */
+    public DispatcherType getDispatcherType()
+    {
+    	return _dispatcherType;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setDispatcherType(DispatcherType type)
+    {
+    	_dispatcherType=type;
+    }
+    
 }
 

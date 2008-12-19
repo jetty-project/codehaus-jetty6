@@ -525,7 +525,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
             public boolean isReadyForDispatch()
             {
                 Request request = ((HttpConnection)getConnection()).getRequest();
-                return super.isReadyForDispatch() && !(request.getAsyncContextState()!=null && request.getAsyncContextState().isSuspended());
+                return super.isReadyForDispatch() && !(request.isSuspended());
             }
         };
     }

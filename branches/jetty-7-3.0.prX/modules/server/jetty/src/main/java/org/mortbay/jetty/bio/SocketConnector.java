@@ -27,7 +27,7 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.bio.SocketEndPoint;
 import org.mortbay.jetty.AbstractConnector;
-import org.mortbay.jetty.AsyncContextState;
+import org.mortbay.jetty.AsyncState;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpException;
@@ -205,9 +205,7 @@ public class SocketConnector extends AbstractConnector
         
         public void close() throws IOException
         {
-            AsyncContextState async = _connection.getRequest().getAsyncContextState();
-            if (async!=null)
-                async.reset();
+            _connection.getRequest().reset();
             super.close();
         }
 

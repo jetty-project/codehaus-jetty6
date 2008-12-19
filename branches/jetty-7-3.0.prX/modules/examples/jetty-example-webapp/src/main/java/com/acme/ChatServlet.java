@@ -86,9 +86,12 @@ public class ChatServlet extends HttpServlet
         {
             // Send one chat message
             response.setContentType("text/json;charset=utf-8");
-            PrintWriter out=response.getWriter();
-            out.print("{action:\"poll\",");
-            out.print("from:\""+member._queue.poll()+"\",");
+            StringBuilder buf=new StringBuilder();
+            
+            buf.append("{\"action\":\"poll\",");
+            buf.append("\"from\":\"");
+            buf.append(member._queue.poll());
+            buf.append("\",");
 
             String message = member._queue.poll();
             int quote=message.indexOf('"');
@@ -97,7 +100,12 @@ public class ChatServlet extends HttpServlet
                 message=message.substring(0,quote)+'\\'+message.substring(quote);
                 quote=message.indexOf('"',quote+2);
             }
-            out.print("chat:\""+message+"\"}");
+            buf.append("\"chat\":\"");
+            buf.append(message);
+            buf.append("\"}");
+            byte[] bytes = buf.toString().getBytes("utf-8");
+            response.setContentLength(bytes.length);
+            response.getOutputStream().write(bytes);
         }
         else if (request.isAsyncStarted()) 
         {

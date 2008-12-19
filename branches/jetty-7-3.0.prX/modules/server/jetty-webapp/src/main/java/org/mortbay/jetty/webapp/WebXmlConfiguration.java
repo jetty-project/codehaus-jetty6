@@ -587,12 +587,12 @@ public class WebXmlConfiguration implements Configuration
         mapping.setServletNames((String[])names.toArray(new String[names.size()]));
 
 
-        int dispatcher=Handler.DEFAULT;
+        int dispatcher=FilterMapping.DEFAULT;
         iter=node.iterator("dispatcher");
         while(iter.hasNext())
         {
             String d=((XmlParser.Node)iter.next()).toString(false,true);
-            dispatcher|=Dispatcher.type(d);
+            dispatcher|=FilterMapping.dispatch(d);
         }
         mapping.setDispatches(dispatcher);
         

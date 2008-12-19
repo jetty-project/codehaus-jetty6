@@ -99,7 +99,7 @@ public class HandlerCollection extends AbstractHandlerContainer
     /* 
      * @see org.mortbay.jetty.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) 
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response) 
         throws IOException, ServletException
     {
         if (_handlers!=null && isStarted())
@@ -110,7 +110,7 @@ public class HandlerCollection extends AbstractHandlerContainer
             {
                 try
                 {
-                    _handlers[i].handle(target,request, response, dispatch);
+                    _handlers[i].handle(target,request, response);
                 }
                 catch(IOException e)
                 {

@@ -365,15 +365,7 @@ public class Context extends ContextHandler
             mapping.setServletNames(servletNames);
             
             int dispatches=mapping.getDispatches();
-            if (dispatcherTypes.contains(DispatcherType.ERROR)) 
-                dispatches|=ERROR;
-            if (dispatcherTypes.contains(DispatcherType.FORWARD)) 
-                dispatches|=FORWARD;
-            if (dispatcherTypes.contains(DispatcherType.INCLUDE)) 
-                dispatches|=INCLUDE;
-            if (dispatcherTypes.contains(DispatcherType.REQUEST)) 
-                dispatches|=REQUEST;
-            mapping.setDispatches(dispatches);
+            mapping.setDispatcherTypes(dispatcherTypes);
             
             handler.addFilterMapping(mapping);
         }

@@ -19,7 +19,7 @@
   
   <servlet>
     <servlet-name>cometd</servlet-name>
-    <servlet-class>org.mortbay.cometd.SuspendingCometdServlet</servlet-class>
+    <servlet-class>org.mortbay.cometd.AsyncCometdServlet</servlet-class>
     <init-param>
       <param-name>filters</param-name>
       <param-value>/WEB-INF/filters.json</param-value>
