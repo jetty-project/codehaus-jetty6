@@ -192,7 +192,8 @@ public class Dispatcher implements RequestDispatcher
     protected void forward(ServletRequest request, ServletResponse response, DispatcherType dispatch) throws ServletException, IOException
     {
         Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
-        response.resetBuffer(); 
+        Response base_response=(Response)base_request.getResponse();
+        base_response.fwdReset();
         request.removeAttribute(__JSP_FILE); // TODO remove when glassfish 1044 is fixed
         
         String old_uri=base_request.getRequestURI();

@@ -951,9 +951,12 @@ public class Response implements HttpServletResponse
      */
     public void reset()
     {
-        resetBuffer();
-
+        fwdReset();
+        _status=200;
+        _reason=null;
+        
         HttpFields response_fields=_connection.getResponseFields();
+        
         response_fields.clear();
         String connection=_connection.getRequestFields().getStringField(HttpHeaders.CONNECTION_BUFFER);
         if (connection!=null)
@@ -988,9 +991,15 @@ public class Response implements HttpServletResponse
             Request request=_connection.getRequest();
             response_fields.put(HttpHeaders.DATE_BUFFER, request.getTimeStampBuffer(),request.getTimeStamp());
         }
-
-        _status=200;
-        _reason=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /*
+     * @see javax.servlet.ServletResponse#reset()
+     */
+    public void fwdReset()
+    {
+        resetBuffer();
         _mimeType=null;
         _cachedMimeType=null;
         _contentType=null;
