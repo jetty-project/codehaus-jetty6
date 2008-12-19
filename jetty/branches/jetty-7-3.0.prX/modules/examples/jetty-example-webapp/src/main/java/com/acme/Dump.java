@@ -24,6 +24,8 @@ import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.Locale;
 
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -38,6 +40,8 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.mortbay.jetty.Dispatcher;
+import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
@@ -93,9 +97,14 @@ public class Dump extends HttpServlet
             try
             {
                 long s = Long.parseLong(request.getParameter("sleep"));
-                Thread.sleep(s/2);
-                response.sendError(102);
-                Thread.sleep(s/2);
+                if (request.getHeader(HttpHeaders.EXPECT)!=null &&request.getHeader(HttpHeaders.EXPECT).indexOf("102")>=0)
+                {
+                    Thread.sleep(s/2);
+                    response.sendError(102);
+                    Thread.sleep(s/2);
+                }
+                else
+                    Thread.sleep(s);
             }
             catch (InterruptedException e)
             {
@@ -105,6 +114,30 @@ public class Dump extends HttpServlet
             {
                 throw new ServletException(e);
             }
+        }
+
+        if (request.getAttribute("RESUME")==null && request.getParameter("resume")!=null)
+        {
+            request.setAttribute("RESUME",Boolean.TRUE);
+
+            final long resume=Long.parseLong(request.getParameter("resume"));
+            new Thread(new Runnable()
+            {
+                public void run()
+                {
+                    try
+                    {
+                        Thread.sleep(resume);
+                    }
+                    catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    Continuation continuation = ContinuationSupport.getContinuation(request, null);
+                    continuation.resume();
+                }
+                
+            }).start();
         }
         
         if (request.getParameter("continue")!=null)
@@ -120,65 +153,78 @@ public class Dump extends HttpServlet
             }
         }
 
-        if (!request.isAsyncStarted() && request.getParameter("resume")!=null)
+        if (request.getAttribute("ASYNC")==null)
         {
-            final long resume=Long.parseLong(request.getParameter("resume"));
-            new Thread(new Runnable()
+            request.setAttribute("ASYNC",Boolean.TRUE);
+
+            if (request.getParameter("forward")!=null)
             {
-                public void run()
+                final long resume=Long.parseLong(request.getParameter("forward"));
+                new Thread(new Runnable()
                 {
-                    try
+                    public void run()
                     {
-                        Thread.sleep(resume);
+                        try
+                        {
+                            Thread.sleep(resume);
+                        }
+                        catch (InterruptedException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        request.getAsyncContext().forward();
                     }
-                    catch (InterruptedException e)
-                    {
-                        e.printStackTrace();
-                    }
-                    request.getAsyncContext().forward();
-                }
-                
-            }).start();
-        }
-        
-        if (!request.isAsyncStarted() && request.getParameter("complete")!=null)
-        {
-            final long complete=Long.parseLong(request.getParameter("complete"));
-            new Thread(new Runnable()
+
+                }).start();
+            }
+
+            if (request.getParameter("complete")!=null)
             {
-                public void run()
+                final long complete=Long.parseLong(request.getParameter("complete"));
+                new Thread(new Runnable()
                 {
-                    try
+                    public void run()
                     {
-                        Thread.sleep(complete);
+                        try
+                        {
+                            Thread.sleep(complete);
+                        }
+                        catch (InterruptedException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        try
+                        {
+                            HttpServletResponse response = (HttpServletResponse) request.getAsyncContext().getResponse();
+                            response.setContentType("text/html");
+                            response.getOutputStream().println("<h1>COMPLETED</h1>"); 
+                            request.getAsyncContext().complete();
+                        }
+                        catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
                     }
-                    catch (InterruptedException e)
+
+                }).start();
+            }
+
+            if (request.getParameter("async")!=null)
+            {
+                final long async=Long.parseLong(request.getParameter("async"));
+                request.addAsyncListener(new AsyncListener(){
+                    public void onComplete(AsyncEvent event) throws IOException
                     {
-                        e.printStackTrace();
                     }
-                    try
+                    public void onTimeout(AsyncEvent event) throws IOException
                     {
-                        HttpServletResponse response = (HttpServletResponse) request.getAsyncContext().getResponse();
-                        response.setContentType("text/html");
-                        response.getOutputStream().println("<h1>COMPLETED</h1>"); 
-                        request.getAsyncContext().complete();
+                        event.getRequest().getAsyncContext().forward();
                     }
-                    catch (IOException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-                
-            }).start();
-        }
-        
-        if (request.getAttribute("Dump"+this.hashCode())==null && request.getParameter("async")!=null)
-        {
-            request.setAttribute("Dump"+this.hashCode(),Boolean.TRUE);
-            final long suspend=Long.parseLong(request.getParameter("async"));
-            request.setAsyncTimeout(suspend);
-            request.startAsync();
-            return;
+                });
+                request.setAsyncTimeout(async);
+                request.startAsync();
+                return;
+            }
         }
             
         request.setAttribute("Dump", this);

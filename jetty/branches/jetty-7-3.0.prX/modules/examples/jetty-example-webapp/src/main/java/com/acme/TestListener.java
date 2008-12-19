@@ -69,8 +69,7 @@ public class TestListener implements HttpSessionListener,  HttpSessionAttributeL
     {
     	ServletContext context=sce.getServletContext();
     	
-    	context.addFilter("TestFilter", null, TestFilter.class.getName(), null);
-    	
+    	context.addFilter("TestFilter",TestFilter.class.getName()).setAsyncSupported(true);
     	context.addFilterMappingForUrlPatterns("TestFilter",
     	        EnumSet.of(DispatcherType.ERROR,DispatcherType.ASYNC,DispatcherType.FORWARD,DispatcherType.INCLUDE,DispatcherType.REQUEST),
     	        true, 

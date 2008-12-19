@@ -51,7 +51,7 @@
     </init-param>
     <init-param>
       <param-name>minGzipSize</param-name>
-      <param-value>128</param-value>
+      <param-value>2048</param-value>
     </init-param>
     <init-param>
       <param-name>userAgent</param-name>

@@ -20,7 +20,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.AsyncState;
+import org.mortbay.jetty.AsyncRequest;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
@@ -92,7 +92,7 @@ public class StatisticsHandler extends HandlerWrapper implements CompleteHandler
         {
             synchronized(this)
             {
-                AsyncState asyncContextState=base_request;
+                AsyncRequest asyncContextState=base_request;
 
                 if(asyncContextState==null)
                 {

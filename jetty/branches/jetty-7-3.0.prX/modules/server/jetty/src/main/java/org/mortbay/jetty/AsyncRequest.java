@@ -22,13 +22,14 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletResponse;
 
+import org.apache.derby.impl.store.replication.master.AsynchronousLogShipper;
 import org.mortbay.io.AsyncEndPoint;
 import org.mortbay.io.EndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
 import org.mortbay.util.LazyList;
 
-public class AsyncState implements AsyncContext
+public class AsyncRequest implements AsyncContext
 {
     // STATES:
     private static final int __IDLE=0;         // Idle request
@@ -83,7 +84,7 @@ public class AsyncState implements AsyncContext
     protected boolean _shouldComplete;
     
     /* ------------------------------------------------------------ */
-    protected AsyncState(HttpConnection connection)
+    protected AsyncRequest(HttpConnection connection)
     {
         _state=__IDLE;
         _initial=true;
@@ -92,7 +93,7 @@ public class AsyncState implements AsyncContext
         {
             public void expired()
             {
-                AsyncState.this.expired();
+                AsyncRequest.this.expired();
             }
         };
         if (connection!=null)
@@ -183,7 +184,8 @@ public class AsyncState implements AsyncContext
                                     (_state==__COMPLETING)?"COMPLETING":
                                         (_state==__REDISPATCHED)?"REDISPATCHED":
                                             ("???"+_state))+
-            (_initial?",initial":"");
+            (_initial?",initial":"")+
+            (_shouldComplete?",shouldComplete":"");
         }
     }
 
@@ -195,6 +197,7 @@ public class AsyncState implements AsyncContext
     {
         synchronized (this)
         {
+            // DBG String S=getStatusString();try{
             switch(_state)
             {
                 case __DISPATCHED:
@@ -211,6 +214,7 @@ public class AsyncState implements AsyncContext
                     throw new IllegalStateException(this.getStatusString());
 
                 case __COMPLETING:
+                    _shouldComplete=true;
                     return false;
 
                 case __SUSPENDED:
@@ -222,6 +226,7 @@ public class AsyncState implements AsyncContext
                 default:
                     throw new IllegalStateException(""+_state);
             }
+            // DBG }finally {System.err.println(S+"--dispatch-->"+getStatusString());}
         }
     }
 
@@ -233,6 +238,7 @@ public class AsyncState implements AsyncContext
     {
         synchronized (this)
         {
+            // DBG String S=getStatusString();try{
             switch(_state)
             {
                 case __DISPATCHED:
@@ -255,6 +261,7 @@ public class AsyncState implements AsyncContext
                 default:
                     throw new IllegalStateException(""+_state);
             }
+            // DBG }finally {System.err.println(S+"--suspend-->"+getStatusString());}
         }
     }
 
@@ -267,6 +274,7 @@ public class AsyncState implements AsyncContext
     {
         synchronized (this)
         {
+            // DBG String S=getStatusString();try{
             switch(_state)
             {
                 case __REDISPATCHED:
@@ -284,7 +292,7 @@ public class AsyncState implements AsyncContext
                     scheduleTimeout(); // could block and change state.
                     if (_state==__SUSPENDED || _state==__COMPLETING)
                     {
-                        _shouldComplete=true;
+                        _shouldComplete=_state==__COMPLETING;
                         return true;
                     }
                     _initial=false;
@@ -307,6 +315,7 @@ public class AsyncState implements AsyncContext
                 default:
                     throw new IllegalStateException(this.getStatusString());
             }
+            // DBG }finally {System.err.println(S+"--undispatch-->"+getStatusString());}
 
         }
     }
@@ -317,6 +326,7 @@ public class AsyncState implements AsyncContext
         boolean dispatch=false;
         synchronized (this)
         {
+            // DBG String S=getStatusString();try{
             switch(_state)
             {
                 case __REDISPATCHED:
@@ -343,6 +353,7 @@ public class AsyncState implements AsyncContext
                 default:
                     throw new IllegalStateException(this.getStatusString());
             }
+            // DBG }finally {System.err.println(S+"--redispatch-->"+getStatusString());}
         }
         
         if (dispatch)
@@ -357,6 +368,7 @@ public class AsyncState implements AsyncContext
     {
         synchronized (this)
         {
+            // DBG String S=getStatusString();try{
             switch(_state)
             {
                 case __SUSPENDING:
@@ -365,6 +377,7 @@ public class AsyncState implements AsyncContext
                 default:
                     return;
             }
+            // DBG }finally {System.err.println(S+"--expired1-->"+getStatusString());}
         }
         
         if (_asyncListeners!=null)
@@ -380,7 +393,8 @@ public class AsyncState implements AsyncContext
             {
                 try
                 {
-                    ((AsyncListener)LazyList.get(_asyncListeners,i)).onTimeout(event);
+                    AsyncListener listener=((AsyncListener)LazyList.get(_asyncListeners,i));
+                    listener.onTimeout(event);
                 }
                 catch(Exception e)
                 {
@@ -391,6 +405,7 @@ public class AsyncState implements AsyncContext
         
         synchronized (this)
         {
+            // DBG String S=getStatusString();try{
             switch(_state)
             {
                 case __SUSPENDING:
@@ -399,6 +414,7 @@ public class AsyncState implements AsyncContext
                 default:
                     return;
             }
+            // DBG }finally {System.err.println(S+"--expired2-->"+getStatusString());}
         }
     }
     
@@ -412,6 +428,7 @@ public class AsyncState implements AsyncContext
         boolean dispatch=false;
         synchronized (this)
         {
+            // DBG String S=getStatusString();try{
             switch(_state)
             {
                 case __IDLE:
@@ -439,6 +456,7 @@ public class AsyncState implements AsyncContext
                 default:
                     throw new IllegalStateException(this.getStatusString());
             }
+            // DBG }finally {System.err.println(S+"--complete-->"+getStatusString());}
         }
         
         if (dispatch)
@@ -457,6 +475,7 @@ public class AsyncState implements AsyncContext
     {
         synchronized (this)
         {
+            // DBG String S=getStatusString();try{
             switch(_state)
             {
                 case __IDLE:
@@ -467,6 +486,7 @@ public class AsyncState implements AsyncContext
                 default:
                     throw new IllegalStateException(this.getStatusString());
             }
+            // DBG }finally {System.err.println(S+"--doComplete-->"+getStatusString());}
         }
 
         if (_asyncListeners!=null)
@@ -497,12 +517,22 @@ public class AsyncState implements AsyncContext
     {
         synchronized (this)
         {
-            _state=(_state==__SUSPENDED||_state==__IDLE)?__IDLE:__DISPATCHED;
+            // DBG String S=getStatusString();try{
+            switch(_state)
+            {
+                case __DISPATCHED:
+                case __REDISPATCHED:
+                    break;
+                default:
+                    _state=__IDLE;
+            }
             _initial = true;
             _shouldComplete=false;
             cancelTimeout();
             _wrappedEvent=null;
             _timeoutMs=60000L; // TODO configure
+            _asyncListeners=null;
+            // DBG }finally {System.err.println(S+"--reset-->"+getStatusString());}
         }
     }
 
@@ -574,14 +604,29 @@ public class AsyncState implements AsyncContext
     {
         switch(_state)
         {
-            case __REDISPATCHING:
-            case __SUSPENDED:
             case __SUSPENDING:
+            case __REDISPATCHING:
             case __UNSUSPENDING:
+            case __SUSPENDED:
                 return true;
                 
             default:
             return false;
+        }
+    }
+
+
+    /* ------------------------------------------------------------ */
+    public boolean isAsync()
+    {
+        switch(_state)
+        {
+            case __IDLE:
+            case __DISPATCHED:
+                return false;
+                
+            default:
+            return true;
         }
     }
 
@@ -590,18 +635,24 @@ public class AsyncState implements AsyncContext
     /* ------------------------------------------------------------ */
     public void forward()
     {
+        if (!hasOriginalRequestAndResponse())
+            throw new IllegalStateException("Wrappers");
         redispatch();
     }
 
     /* ------------------------------------------------------------ */
     public void forward(ServletContext context, String path)
     {
+        if (!hasOriginalRequestAndResponse())
+            throw new IllegalStateException("Wrappers");
         throw new UnsupportedOperationException();
     }
 
     /* ------------------------------------------------------------ */
     public void forward(String path)
     {
+        if (!hasOriginalRequestAndResponse())
+            throw new IllegalStateException("Wrappers");
         throw new UnsupportedOperationException();
     }
 

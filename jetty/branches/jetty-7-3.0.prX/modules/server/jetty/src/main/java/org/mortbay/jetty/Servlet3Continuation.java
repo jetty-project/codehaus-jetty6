@@ -24,7 +24,7 @@ import org.mortbay.util.ajax.Continuation;
 
 public class Servlet3Continuation implements Continuation, AsyncListener
 {
-    AsyncState _asyncContextState;
+    AsyncRequest _asyncContextState;
     Request _request;
     Object _object;
     RetryRequest _retry;
@@ -63,7 +63,8 @@ public class Servlet3Continuation implements Continuation, AsyncListener
 
     public void reset()
     {
-        _request.reset();
+        _resumed=false;
+        _timeout=false;
     }
 
     public void resume()
@@ -88,10 +89,13 @@ public class Servlet3Continuation implements Continuation, AsyncListener
         _asyncContextState=_request;
         if (!_asyncContextState.isInitial()||_resumed||_timeout)
         {
+            _resumed=false;
+            _timeout=false;
             return _resumed;
         }
 
         _request.setAsyncTimeout(timeout);
+        _request.addAsyncListener(this);
         _request.startAsync();
         _asyncContextState=_request;
         if (_retry==null)

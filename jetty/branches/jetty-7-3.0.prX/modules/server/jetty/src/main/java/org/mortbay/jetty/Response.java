@@ -588,6 +588,12 @@ public class Response implements HttpServletResponse
     }
 
     /* ------------------------------------------------------------ */
+    public boolean isOutputing()
+    {
+        return _outputState!=NONE;
+    }
+
+    /* ------------------------------------------------------------ */
     /*
      * @see javax.servlet.ServletResponse#getWriter()
      */
