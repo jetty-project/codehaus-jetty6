@@ -295,7 +295,7 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
             {
                 buf.append(' ');
                 if (responseLength > 99999)
-                    buf.append(Long.toString(responseLength));
+                    buf.append(responseLength);
                 else
                 {
                     if (responseLength > 9999)

@@ -211,7 +211,9 @@ public class HttpExchangeTest extends TestCase
         }
         
         long elapsed=System.currentTimeMillis()-start;
-        System.err.println(nb+"/"+_count+" c="+close+" rate="+(nb*1000/elapsed));
+        // make windows-friendly ... System.currentTimeMillis() on windows is dope! 
+        if(elapsed>0)
+            System.err.println(nb+"/"+_count+" c="+close+" rate="+(nb*1000/elapsed));
         
         assertEquals("nb="+nb+" close="+close,0,latch.getCount());
     }

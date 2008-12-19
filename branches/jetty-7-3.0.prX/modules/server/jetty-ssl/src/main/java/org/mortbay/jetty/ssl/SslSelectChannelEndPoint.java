@@ -546,7 +546,11 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
         // h.append("inNIOBuffer=").append(_inNIOBuffer.length()).append('\n');
         
         if (_inNIOBuffer.length()==0)
+        {
+            if(!isOpen())
+                throw new org.mortbay.jetty.EofException();
             return false;
+        }
 
         try
         {

@@ -260,6 +260,7 @@ public class Main
         if (o==null)
             o="default";
         options=Arrays.asList((o.toString()+",*").split("[ ,]")); 
+        ArrayList unsatisfiedOptions = new ArrayList(options);
         
         // Handle line by line
         String line=null;
@@ -278,7 +279,8 @@ public class Main
             
             if (section!=null && Collections.disjoint(section,options))
                 continue;
-            
+            if (section!=null)
+                unsatisfiedOptions.removeAll(section);
             try
             {
                 StringTokenizer st=new StringTokenizer(line);
@@ -470,6 +472,37 @@ public class Main
             {
                 System.err.println("on line: '"+line+"'");
                 e.printStackTrace();
+            }
+        }
+
+        if (unsatisfiedOptions!=null && unsatisfiedOptions.size()>0)
+        {
+            String home = System.getProperty("jetty.home");
+            String lib = System.getProperty("jetty.lib");
+            File libDir = null;
+            if (lib!=null)
+            {
+                libDir = new File (lib);
+            }
+            else if (home != null)
+            {
+                libDir = new File (home, "lib");
+            }
+
+            for (int i=0; i< unsatisfiedOptions.size(); i++)
+            {   
+                if (libDir != null)
+                {
+                    File dir = new File (libDir, (String)unsatisfiedOptions.get(i));
+                    if (dir.exists())
+                        addJars(dir,done,true);
+                    else
+                        if (_debug)
+                            System.err.println("Unsatisfied option:"+unsatisfiedOptions.get(i));
+                }
+                else
+                    if (_debug)
+                        System.err.println("Unsatisfied option:"+unsatisfiedOptions.get(i));
             }
         }
     }
