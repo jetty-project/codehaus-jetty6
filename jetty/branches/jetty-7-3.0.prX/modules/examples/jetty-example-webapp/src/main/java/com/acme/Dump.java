@@ -439,6 +439,10 @@ public class Dump extends HttpServlet
             pout.write("<h1>Dump Servlet</h1>\n");
             pout.write("<table width=\"95%\">");
             pout.write("<tr>\n");
+            pout.write("<th align=\"right\">getDispatcherTYpe:&nbsp;</th>");
+            pout.write("<td>" + request.getDispatcherType()+"</td>");
+            pout.write("</tr><tr>\n");
+            pout.write("<tr>\n");
             pout.write("<th align=\"right\">getMethod:&nbsp;</th>");
             pout.write("<td>" + notag(request.getMethod())+"</td>");
             pout.write("</tr><tr>\n");
