@@ -35,6 +35,7 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.LocalConnector;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.servlet.FilterHolder;
+import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.testing.HttpTester;
 import org.mortbay.jetty.testing.ServletTester;
 import org.mortbay.log.Log;
@@ -89,7 +90,7 @@ public class QoSFilterTest extends TestCase
         FilterHolder holder = new FilterHolder(QoSFilter2.class);
         holder.setAsyncSupported(true);
         holder.setInitParameter(QoSFilter.MAX_REQUESTS_INIT_PARAM, ""+MAX_QOS);
-        _tester.getContext().getServletHandler().addFilterWithMapping(holder,"/*",Handler.REQUEST);
+        _tester.getContext().getServletHandler().addFilterWithMapping(holder,"/*",FilterMapping.DEFAULT);
 
         for(int i = 0; i < NUM_CONNECTIONS; ++i )
         {
@@ -106,7 +107,7 @@ public class QoSFilterTest extends TestCase
         FilterHolder holder = new FilterHolder(QoSFilter2.class);
         holder.setAsyncSupported(true);
         holder.setInitParameter(QoSFilter.MAX_REQUESTS_INIT_PARAM, ""+MAX_QOS);
-        _tester.getContext().getServletHandler().addFilterWithMapping(holder,"/*",Handler.REQUEST);
+        _tester.getContext().getServletHandler().addFilterWithMapping(holder,"/*",FilterMapping.DEFAULT);
         
         for(int i = 0; i < NUM_CONNECTIONS; ++i )
         {

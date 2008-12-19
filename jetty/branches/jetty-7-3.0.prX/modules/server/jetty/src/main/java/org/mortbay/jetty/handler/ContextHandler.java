@@ -661,7 +661,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     /* 
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException
     {   
         boolean new_context=false;
@@ -672,9 +672,11 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         ClassLoader old_classloader=null;
         Thread current_thread=null;
         String pathInfo=null;
+
+        DispatcherType dispatch=request.getDispatcherType();
         
         Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
-        if( !isStarted() || _shutdown || (dispatch==REQUEST && base_request.isHandled()))
+        if( !isStarted() || _shutdown || (DispatcherType.REQUEST.equals(dispatch) && base_request.isHandled()))
             return;
         
         old_context=base_request.getContext();
@@ -715,7 +717,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             }
             
             // Nope - so check the target.
-            if (dispatch==REQUEST)
+            if (DispatcherType.REQUEST.equals(dispatch) || DispatcherType.ASYNC.equals(dispatch))
             {
                 if (_compactPath)
                     target=URIUtil.compactPath(target);
@@ -765,7 +767,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             
             // Update the paths
             base_request.setContext(_scontext);
-            if (dispatch!=INCLUDE && target.startsWith("/"))
+            if (!DispatcherType.INCLUDE.equals(dispatch) && target.startsWith("/"))
             {
                 if (_contextPath.length()==1)
                     base_request.setContextPath("");
@@ -803,12 +805,12 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             // Handle the request
             try
             {
-                if (dispatch==REQUEST && isProtectedTarget(target))
+                if (DispatcherType.REQUEST.equals(dispatch) && isProtectedTarget(target))
                     throw new HttpException(HttpServletResponse.SC_NOT_FOUND);
                 
                 Handler handler = getHandler();
                 if (handler!=null)
-                    handler.handle(target, request, response, dispatch);
+                    handler.handle(target, request, response);
             }
             catch(HttpException e)
             {
@@ -851,7 +853,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
 
     /* ------------------------------------------------------------ */
     /** Check the target.
-     * Called by {@link #handle(String, HttpServletRequest, HttpServletResponse, int)} when a
+     * Called by {@link #handle(String, HttpServletRequest, HttpServletResponse)} when a
      * target within a context is determined.  If the target is protected, 404 is returned.
      * The default implementation always returns false.
      * @see org.mortbay.jetty.webapp.WebAppContext#isProtectedTarget(String)

@@ -277,7 +277,7 @@ public class Response implements HttpServletResponse
                 request.setAttribute(ServletHandler.__J_S_ERROR_REQUEST_URI, request.getRequestURI());
                 request.setAttribute(ServletHandler.__J_S_ERROR_SERVLET_NAME,request.getServletName());
 
-                error_handler.handle(null,_connection.getRequest(),this, Handler.ERROR);
+                error_handler.handle(null,_connection.getRequest(),this);
             }
             else
             {
@@ -1093,7 +1093,6 @@ public class Response implements HttpServletResponse
     {
         return _reason;
     }
-
 
     /* ------------------------------------------------------------ */
     /**

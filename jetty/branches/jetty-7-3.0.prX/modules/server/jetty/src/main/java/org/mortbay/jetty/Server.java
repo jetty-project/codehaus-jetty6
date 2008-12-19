@@ -314,14 +314,15 @@ public class Server extends HandlerWrapper implements Attributes
     public void handle(HttpConnection connection) throws IOException, ServletException
     {
         String target=connection.getRequest().getPathInfo();
+        Request request=connection.getRequest();
         if (Log.isDebugEnabled())
         {
             Log.debug("REQUEST "+target+" on "+connection);
-            handle(target, connection.getRequest(), connection.getResponse(), connection.getRequest().isAsyncStarted()?Handler.FORWARD:Handler.REQUEST);
+            handle(target, request, connection.getResponse());
             Log.debug("RESPONSE "+target+"  "+connection.getResponse().getStatus());
         }
         else
-            handle(target, connection.getRequest(), connection.getResponse(), connection.getRequest().isAsyncStarted()?Handler.FORWARD:Handler.REQUEST);
+            handle(target, request, connection.getResponse());
     }
 
     /* ------------------------------------------------------------ */

@@ -15,33 +15,37 @@
 package org.mortbay.jetty;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletResponse;
 
 import org.mortbay.io.AsyncEndPoint;
 import org.mortbay.io.EndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
+import org.mortbay.util.LazyList;
 
-public class AsyncContextState implements AsyncContext
+public class AsyncState implements AsyncContext
 {
     // STATES:
     private static final int __IDLE=0;         // Idle request
     private static final int __DISPATCHED=1;   // Request dispatched to filter/servlet
     private static final int __SUSPENDING=2;   // Suspend called, but not yet returned to container
-    private static final int __RESUMING=3;     // resumed while dispatched
+    private static final int __REDISPATCHING=3;// resumed while dispatched
     private static final int __COMPLETING=4;   // completed while dispatched
     private static final int __SUSPENDED=5;    // Suspended and parked
     private static final int __UNSUSPENDING=6; // Has been scheduled
     private static final int __REDISPATCHED=7; // Request redispatched to filter/servlet
     
     // State table
-    //                       __HANDLE      __UNHANDLE       __SUSPEND        __RESUME   
+    //                       __HANDLE      __UNHANDLE       __SUSPEND    __REDISPATCH   
     // IDLE */          {  __DISPATCHED,    __Illegal,      __Illegal,      __Illegal  },    
     // DISPATCHED */    {   __Illegal,         __IDLE,   __SUSPENDING,       __Ignore  }, 
-    // SUSPENDING */    {   __Illegal,    __SUSPENDED,      __Illegal,     __RESUMING  },
-    // RESUMING */      {   __Illegal,  _REDISPATCHED,      __Ignored,       __Ignore  },
+    // SUSPENDING */    {   __Illegal,    __SUSPENDED,      __Illegal,__REDISPATCHING  },
+    // REDISPATCHING */ {   __Illegal,  _REDISPATCHED,      __Ignored,       __Ignore  },
     // COMPLETING */    {   __Illegal,         __IDLE,      __Illegal,       __Illegal },
     // SUSPENDED */     {  __REDISPATCHED,  __Illegal,      __Illegal, __UNSUSPENDING  },
     // UNSUSPENDING */  {  __REDISPATCHED,  __Illegal,      __Illegal,       __Ignore  },
@@ -60,7 +64,7 @@ public class AsyncContextState implements AsyncContext
     //   |          |     |  |             |    |     |
     //   |          |     |  |             |    |     |
     //   |          |     v  |             |    v     |
-    //   |     UNSUSPENDING  |            RESUMING    |
+    //   |     UNSUSPENDING  |         REDISPATCHING  |
     //   |                   |                |       |
     //   |                   v                v       v
     //   +---------------- COMPLETING  <--------------+
@@ -70,44 +74,55 @@ public class AsyncContextState implements AsyncContext
     
     protected int _state;
     protected boolean _initial;
-    protected boolean _resumed;
-    protected boolean _timeout;
     
     protected long _timeoutMs;
     protected final Timeout.Task _timeoutTask;
+    protected Object _asyncListeners;
+    protected AsyncEvent _event;
+    protected AsyncEvent _wrappedEvent;
+    protected boolean _shouldComplete;
     
-
     /* ------------------------------------------------------------ */
-    public AsyncContextState(HttpConnection connection)
+    protected AsyncState(HttpConnection connection)
     {
-        _connection=connection;
         _state=__IDLE;
         _initial=true;
-        _resumed=false;
             
         _timeoutTask= new Timeout.Task()
         {
             public void expired()
             {
-                AsyncContextState.this.expire();
+                AsyncState.this.expired();
             }
         };
+        if (connection!=null)
+            setConnection(connection);
     }
 
     /* ------------------------------------------------------------ */
-    public void setConnection(HttpConnection connection)
+    protected void setConnection(HttpConnection connection)
     {
         _connection=connection;
     }
 
     /* ------------------------------------------------------------ */
-    public long getTimeout()
+    boolean shouldComplete()
+    {
+        return _shouldComplete;
+    } 
+
+    /* ------------------------------------------------------------ */
+    public void setAsyncTimeout(long ms)
+    {
+        _timeoutMs=ms;
+    } 
+
+    /* ------------------------------------------------------------ */
+    public long getAsyncTimeout()
     {
         return _timeoutMs;
     } 
-
-    
-
+   
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
      * @see javax.servlet.ServletRequest#isInitial()
@@ -117,18 +132,6 @@ public class AsyncContextState implements AsyncContext
         synchronized(this)
         {
             return _initial;
-        }
-    }
-       
-    /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @see javax.servlet.ServletRequest#isResumed()
-     */
-    public boolean isResumed()
-    {
-        synchronized(this)
-        {
-            return _resumed;
         }
     }
     
@@ -146,8 +149,9 @@ public class AsyncContextState implements AsyncContext
                 case __DISPATCHED:
                 case __REDISPATCHED:
                     return false;
+                    
                 case __SUSPENDING:
-                case __RESUMING:
+                case __REDISPATCHING:
                 case __COMPLETING:
                 case __SUSPENDED:
                     return true;
@@ -156,30 +160,6 @@ public class AsyncContextState implements AsyncContext
                     return false;   
             }
         }
-    }
-
-    
-    /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @see javax.servlet.ServletRequest#isTimeout()
-     */
-    public boolean isTimeout()
-    {
-        synchronized(this)
-        {
-            return _timeout;
-        }
-    }
-    
-
-    /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @see javax.servlet.ServletRequest#suspend()
-     */
-    protected void suspend()
-    {
-        long timeout = 60000L;
-        suspend(timeout);
     }
 
     /* ------------------------------------------------------------ */
@@ -198,14 +178,12 @@ public class AsyncContextState implements AsyncContext
                 (_state==__DISPATCHED)?"DISPATCHED":
                     (_state==__SUSPENDING)?"SUSPENDING":
                         (_state==__SUSPENDED)?"SUSPENDED":
-                            (_state==__RESUMING)?"RESUMING":
+                            (_state==__REDISPATCHING)?"REDISPATCHING":
                                 (_state==__UNSUSPENDING)?"UNSUSPENDING":
                                     (_state==__COMPLETING)?"COMPLETING":
                                         (_state==__REDISPATCHED)?"REDISPATCHED":
                                             ("???"+_state))+
-            (_initial?",initial":"")+
-            (_resumed?",resumed":"")+
-            (_timeout?",timeout":"");
+            (_initial?",initial":"");
         }
     }
 
@@ -213,7 +191,7 @@ public class AsyncContextState implements AsyncContext
     /* (non-Javadoc)
      * @see javax.servlet.ServletRequest#resume()
      */
-    public void dispatch()
+    public boolean dispatch()
     {
         synchronized (this)
         {
@@ -226,20 +204,20 @@ public class AsyncContextState implements AsyncContext
                 case __IDLE:
                     _initial=true;
                     _state=__DISPATCHED;
-                    return;
+                    return true;
 
                 case __SUSPENDING:
-                case __RESUMING:
+                case __REDISPATCHING:
                     throw new IllegalStateException(this.getStatusString());
 
                 case __COMPLETING:
-                    return;
+                    return false;
 
                 case __SUSPENDED:
                     cancelTimeout();
                 case __UNSUSPENDING:
                     _state=__REDISPATCHED;
-                    return;
+                    return true;
 
                 default:
                     throw new IllegalStateException(""+_state);
@@ -251,7 +229,7 @@ public class AsyncContextState implements AsyncContext
     /* (non-Javadoc)
      * @see javax.servlet.ServletRequest#suspend(long)
      */
-    protected void suspend(long timeoutMs)
+    protected void suspend()
     {
         synchronized (this)
         {
@@ -259,19 +237,14 @@ public class AsyncContextState implements AsyncContext
             {
                 case __DISPATCHED:
                 case __REDISPATCHED:
-                    _timeout=false;
-                    _resumed=false;
                     _state=__SUSPENDING;
-                    _timeoutMs = timeoutMs;
                     return;
 
                 case __IDLE:
                     throw new IllegalStateException(this.getStatusString());
 
                 case __SUSPENDING:
-                case __RESUMING:
-                    if (timeoutMs<_timeoutMs)
-                        _timeoutMs = timeoutMs;
+                case __REDISPATCHING:
                     return;
 
                 case __COMPLETING:
@@ -282,7 +255,6 @@ public class AsyncContextState implements AsyncContext
                 default:
                     throw new IllegalStateException(""+_state);
             }
-
         }
     }
 
@@ -298,9 +270,8 @@ public class AsyncContextState implements AsyncContext
             switch(_state)
             {
                 case __REDISPATCHED:
-                    // TODO complete?
-                    
                 case __DISPATCHED:
+                    _shouldComplete=true;
                     _state=__IDLE;
                     return true;
 
@@ -312,18 +283,22 @@ public class AsyncContextState implements AsyncContext
                     _state=__SUSPENDED;
                     scheduleTimeout(); // could block and change state.
                     if (_state==__SUSPENDED || _state==__COMPLETING)
+                    {
+                        _shouldComplete=true;
                         return true;
+                    }
                     _initial=false;
                     _state=__REDISPATCHED;
                     return false; 
 
-                case __RESUMING:
+                case __REDISPATCHING:
                     _initial=false;
                     _state=__REDISPATCHED;
                     return false; 
 
                 case __COMPLETING:
                     _initial=false;
+                    _shouldComplete=true;
                     _state=__IDLE;
                     return true;
 
@@ -337,7 +312,7 @@ public class AsyncContextState implements AsyncContext
     }
 
     /* ------------------------------------------------------------ */
-    protected void resume()
+    protected void redispatch()
     {
         boolean dispatch=false;
         synchronized (this)
@@ -346,27 +321,23 @@ public class AsyncContextState implements AsyncContext
             {
                 case __REDISPATCHED:
                 case __DISPATCHED:
-                    _resumed=true;
                     return;
                     
                 case __SUSPENDING:
-                    _resumed=true;
-                    _state=__RESUMING;
+                    _state=__REDISPATCHING;
                     return;
 
                 case __IDLE:
-                case __RESUMING:
+                case __REDISPATCHING:
                 case __COMPLETING:
                     return;
                     
                 case __SUSPENDED:
                     dispatch=true;
-                    _resumed=true;
                     _state=__UNSUSPENDING;
                     break;
                     
                 case __UNSUSPENDING:
-                    _resumed=true;
                     return;
                     
                 default:
@@ -381,52 +352,53 @@ public class AsyncContextState implements AsyncContext
         }
     }
 
-
     /* ------------------------------------------------------------ */
-    protected void expire()
+    protected void expired()
     {
-        // just like resume, except don't set _resumed=true;
-        boolean dispatch=false;
         synchronized (this)
         {
             switch(_state)
             {
-                case __DISPATCHED:
-                case __REDISPATCHED:
-                    return;
-                    
-                case __IDLE:
-                    throw new IllegalStateException(this.getStatusString());
-                    
                 case __SUSPENDING:
-                    _timeout=true;
-                    _state=__RESUMING;
-                    cancelTimeout();
-                    return;
-                    
-                case __RESUMING:
-                    return;
-                    
-                case __COMPLETING:
-                    return;
-                    
                 case __SUSPENDED:
-                    dispatch=true;
-                    _timeout=true;
-                    _state=__UNSUSPENDING;
                     break;
-                    
-                case __UNSUSPENDING:
-                    _timeout=true;
-                    return;
-                    
                 default:
-                    throw new IllegalStateException(this.getStatusString());
+                    return;
             }
         }
-        if (dispatch)
+        
+        if (_asyncListeners!=null)
         {
-            scheduleDispatch();
+            AsyncEvent event=_wrappedEvent;
+            if (event==null)
+            {    
+                event=_event;
+                if (event==null)
+                    event=_event=new AsyncEvent(_connection.getRequest(),_connection.getResponse());
+            }
+            for(int i=0;i<LazyList.size(_asyncListeners);i++)
+            {
+                try
+                {
+                    ((AsyncListener)LazyList.get(_asyncListeners,i)).onTimeout(event);
+                }
+                catch(Exception e)
+                {
+                    Log.warn(e);
+                }
+            }
+        }
+        
+        synchronized (this)
+        {
+            switch(_state)
+            {
+                case __SUSPENDING:
+                case __SUSPENDED:
+                    complete();
+                default:
+                    return;
+            }
         }
     }
     
@@ -442,23 +414,17 @@ public class AsyncContextState implements AsyncContext
         {
             switch(_state)
             {
-                case __REDISPATCHED:
-                    _state=__COMPLETING;
-                    return;
-                    
-                case __DISPATCHED:
-                    throw new IllegalStateException(this.getStatusString());
-                    
                 case __IDLE:
                     return;
-                    
+                case __DISPATCHED:
+                case __REDISPATCHED:
+                    throw new IllegalStateException(this.getStatusString());
+
                 case __SUSPENDING:
                     _state=__COMPLETING;
-                    break;
+                    return;
                     
-                case __RESUMING:
-                    break;
-
+                case __REDISPATCHING:
                 case __COMPLETING:
                     return;
                     
@@ -482,6 +448,49 @@ public class AsyncContextState implements AsyncContext
         }
     }
 
+    
+    /* ------------------------------------------------------------ */
+    /* (non-Javadoc)
+     * @see javax.servlet.ServletRequest#complete()
+     */
+    protected void doComplete()
+    {
+        synchronized (this)
+        {
+            switch(_state)
+            {
+                case __IDLE:
+                case __COMPLETING:
+                    _state=__IDLE;
+                    break;
+                    
+                default:
+                    throw new IllegalStateException(this.getStatusString());
+            }
+        }
+
+        if (_asyncListeners!=null)
+        {
+            AsyncEvent event=_wrappedEvent;
+            if (event==null)
+            {    
+                event=_event;
+                if (event==null)
+                    event=_event=new AsyncEvent(_connection.getRequest(),_connection.getResponse());
+            }
+            for(int i=0;i<LazyList.size(_asyncListeners);i++)
+            {
+                try
+                {
+                    ((AsyncListener)LazyList.get(_asyncListeners,i)).onComplete(event);
+                }
+                catch(Exception e)
+                {
+                    Log.warn(e);
+                }
+            }
+        }
+    }
 
     /* ------------------------------------------------------------ */
     public void reset()
@@ -489,10 +498,11 @@ public class AsyncContextState implements AsyncContext
         synchronized (this)
         {
             _state=(_state==__SUSPENDED||_state==__IDLE)?__IDLE:__DISPATCHED;
-            _resumed = false;
             _initial = true;
-            _timeout = false;
+            _shouldComplete=false;
             cancelTimeout();
+            _wrappedEvent=null;
+            _timeoutMs=60000L; // TODO configure
         }
     }
 
@@ -530,7 +540,7 @@ public class AsyncContextState implements AsyncContext
                 }
 
                 if (_timeoutMs>0 && wait<=0)
-                    expire();
+                    expired();
             }            
         }
         else
@@ -562,57 +572,53 @@ public class AsyncContextState implements AsyncContext
     /* ------------------------------------------------------------ */
     public boolean isAsyncStarted()
     {
-        return _state!=__IDLE && _state!=__DISPATCHED;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean shouldComplete()
-    {
         switch(_state)
         {
-            case __RESUMING:
+            case __REDISPATCHING:
             case __SUSPENDED:
             case __SUSPENDING:
             case __UNSUSPENDING:
-                return false;
+                return true;
                 
             default:
-            return true;
+            return false;
         }
     }
+
+ 
 
     /* ------------------------------------------------------------ */
     public void forward()
     {
-        resume();
+        redispatch();
     }
 
     /* ------------------------------------------------------------ */
     public void forward(ServletContext context, String path)
     {
-        // TODO Auto-generated method stub
-        resume();
+        throw new UnsupportedOperationException();
     }
 
     /* ------------------------------------------------------------ */
     public void forward(String path)
     {
-        // TODO Auto-generated method stub
-        resume();
+        throw new UnsupportedOperationException();
     }
 
     /* ------------------------------------------------------------ */
     public ServletRequest getRequest()
     {
-        // TODO Auto-generated method stub
-        return null;
+        if (_wrappedEvent!=null)
+            return _wrappedEvent.getRequest();
+        return _connection.getRequest();
     }
 
     /* ------------------------------------------------------------ */
     public ServletResponse getResponse()
     {
-        // TODO Auto-generated method stub
-        return null;
+        if (_wrappedEvent!=null)
+            return _wrappedEvent.getResponse();
+        return _connection.getResponse();
     }
 
     /* ------------------------------------------------------------ */
@@ -620,5 +626,13 @@ public class AsyncContextState implements AsyncContext
     {
         // TODO Auto-generated method stub
     }
+    
+
+    /* ------------------------------------------------------------ */
+    public boolean hasOriginalRequestAndResponse()
+    {
+        return _wrappedEvent==null || (_wrappedEvent.getRequest()==this && _wrappedEvent.getResponse()==_connection.getResponse());
+    }
+    
     
 }

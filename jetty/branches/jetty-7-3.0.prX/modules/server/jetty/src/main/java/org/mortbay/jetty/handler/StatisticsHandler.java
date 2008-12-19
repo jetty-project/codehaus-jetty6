@@ -20,7 +20,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.AsyncContextState;
+import org.mortbay.jetty.AsyncState;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
@@ -81,7 +81,7 @@ public class StatisticsHandler extends HandlerWrapper implements CompleteHandler
 
 
     /* ------------------------------------------------------------ */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
     {
         final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
         final Response base_response=(response instanceof Response)?((Response)response):HttpConnection.getCurrentConnection().getResponse();
@@ -92,7 +92,7 @@ public class StatisticsHandler extends HandlerWrapper implements CompleteHandler
         {
             synchronized(this)
             {
-                AsyncContextState asyncContextState=base_request.getAsyncContextState();
+                AsyncState asyncContextState=base_request;
 
                 if(asyncContextState==null)
                 {
@@ -105,10 +105,12 @@ public class StatisticsHandler extends HandlerWrapper implements CompleteHandler
                     else
                     {
                         timestamp1=System.currentTimeMillis();
+                        /*
                         if (asyncContextState.isTimeout())
                             _requestsTimedout++;
                         if(asyncContextState.isResumed())
                             _requestsResumed++;
+                        */
                     }
                 }
 
@@ -117,7 +119,7 @@ public class StatisticsHandler extends HandlerWrapper implements CompleteHandler
                     _requestsActiveMax=_requestsActive;
             }
             
-            super.handle(target, request, response, dispatch);
+            super.handle(target, request, response);
         }
         finally
         {

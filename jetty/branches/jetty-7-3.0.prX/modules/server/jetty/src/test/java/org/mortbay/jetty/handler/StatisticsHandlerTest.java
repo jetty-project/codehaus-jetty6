@@ -206,7 +206,7 @@ public class StatisticsHandlerTest extends TestCase
             _lock = lock;
         }
 
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             if (!request.isAsyncStarted())
             {
@@ -239,7 +239,7 @@ public class StatisticsHandlerTest extends TestCase
             _suspendFor = suspendFor;
         }
 
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             if (!request.isAsyncStarted())
             {
@@ -252,7 +252,7 @@ public class StatisticsHandlerTest extends TestCase
 
     private static class ResumeHandler extends HandlerWrapper
     {
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             if (!request.isAsyncStarted())
             {
@@ -272,7 +272,7 @@ public class StatisticsHandlerTest extends TestCase
             _duration = duration;
         }
 
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             if (!request.isAsyncStarted())
             {
@@ -300,7 +300,7 @@ public class StatisticsHandlerTest extends TestCase
             _suspendFor = suspendFor;
         }
 
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
 
             Integer i = (Integer)request.getAttribute("i");
@@ -342,7 +342,7 @@ public class StatisticsHandlerTest extends TestCase
             _lock = lock;
         }
         
-        public void handle(String target, final HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, final HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
             

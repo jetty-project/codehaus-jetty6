@@ -20,6 +20,7 @@ import java.io.InputStream;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,7 +34,7 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.HandlerWrapper;
 
-public class SuspendableTest extends TestCase
+public class AsyncContextTest extends TestCase
 {
     protected Server _server = new Server();
     protected SuspendHandler _handler = new SuspendHandler();
@@ -58,6 +59,12 @@ public class SuspendableTest extends TestCase
         String response;
         
         _handler.setRead(0);
+        _handler.setSuspendFor(1000);
+
+        _handler.setResumeAfter(-1);
+        _handler.setCompleteAfter(-1);
+        check("TIMEOUT",process(null));
+
         _handler.setSuspendFor(10000);
         
         _handler.setResumeAfter(0);
@@ -73,9 +80,8 @@ public class SuspendableTest extends TestCase
         check("COMPLETED",process(null));
         
         _handler.setResumeAfter(-1);
-        _handler.setCompleteAfter(100);
-        check("COMPLETED",process(null));
-        
+        _handler.setCompleteAfter(200);
+        check("COMPLETED",process(null));   
 
         _handler.setRead(-1);
         
@@ -145,7 +151,6 @@ public class SuspendableTest extends TestCase
         public SuspendHandler()
         {}
         
-        
 
         public int getRead()
         {
@@ -189,13 +194,12 @@ public class SuspendableTest extends TestCase
 
 
 
-        public void handle(String target, final HttpServletRequest request, final HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException
         {
             final Request base_request = (request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
             
-            if (!request.isAsyncStarted())
+            if (DispatcherType.REQUEST.equals(request.getDispatcherType()))
             {
-                response.setStatus(200);
                 if (_read>0)
                 {
                     byte[] buf=new byte[_read];
@@ -223,6 +227,7 @@ public class SuspendableTest extends TestCase
                             {
                                 Thread.sleep(_completeAfter);
                                 response.getOutputStream().print("COMPLETED");
+                                response.setStatus(200);
                                 base_request.setHandled(true);
                                 asyncContext.complete();
                             }
@@ -236,6 +241,7 @@ public class SuspendableTest extends TestCase
                 else if (_completeAfter==0)
                 {
                     response.getOutputStream().print("COMPLETED");
+                    response.setStatus(200);
                     base_request.setHandled(true);
                     asyncContext.complete();
                 }
@@ -264,11 +270,13 @@ public class SuspendableTest extends TestCase
             }
             else if (request.getAttribute("TIMEOUT")!=null)
             {
+                response.setStatus(200);
                 response.getOutputStream().print("TIMEOUT");
                 base_request.setHandled(true);
             }
             else
             {
+                response.setStatus(200);
                 response.getOutputStream().print("RESUMED");
                 base_request.setHandled(true);
             }

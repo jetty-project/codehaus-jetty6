@@ -41,7 +41,7 @@ public class UnreadInputTest extends TestCase
     public class NoopHandler extends AbstractHandler
     {
         public void handle(String target, HttpServletRequest request,
-                HttpServletResponse response, int dispatch) throws IOException,
+                HttpServletResponse response) throws IOException,
                 ServletException
         {
            //don't read the input, just send something back

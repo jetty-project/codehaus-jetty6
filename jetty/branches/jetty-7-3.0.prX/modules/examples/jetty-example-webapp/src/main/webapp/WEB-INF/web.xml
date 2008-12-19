@@ -24,8 +24,6 @@
   
   <filter-mapping>
     <filter-name>QoSFilter</filter-name>
-    <dispatcher>REQUEST</dispatcher>
-    <dispatcher>FORWARD</dispatcher>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 
@@ -53,7 +51,7 @@
     </init-param>
     <init-param>
       <param-name>minGzipSize</param-name>
-      <param-value>1024</param-value>
+      <param-value>128</param-value>
     </init-param>
     <init-param>
       <param-name>userAgent</param-name>
@@ -70,8 +68,6 @@
   </filter>
   <filter-mapping>
     <filter-name>GzipFilter</filter-name>
-    <dispatcher>REQUEST</dispatcher>
-    <dispatcher>FORWARD</dispatcher>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
   

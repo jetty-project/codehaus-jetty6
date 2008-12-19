@@ -292,9 +292,9 @@ public class WebAppContext extends Context
 
     /* ------------------------------------------------------------ */
     /** 
-     * @see org.mortbay.jetty.handler.ContextHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
+     * @see org.mortbay.jetty.handler.ContextHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response)
     throws IOException, ServletException
     {   
         if (_unavailable)
@@ -302,7 +302,7 @@ public class WebAppContext extends Context
             response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         }
         else
-            super.handle(target, request, response, dispatch);
+            super.handle(target, request, response);
     }
 
     /* ------------------------------------------------------------ */

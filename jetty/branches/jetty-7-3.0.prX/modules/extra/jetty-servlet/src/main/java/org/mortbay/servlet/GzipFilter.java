@@ -23,6 +23,8 @@ import java.util.StringTokenizer;
 import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
@@ -124,7 +126,7 @@ public class GzipFilter extends UserAgentFilter
                 }
             }
 
-            GZIPResponseWrapper wrappedResponse=newGZIPResponseWrapper(request,response);
+            final GZIPResponseWrapper wrappedResponse=newGZIPResponseWrapper(request,response);
             
             boolean exceptional=true;
             try
@@ -134,9 +136,18 @@ public class GzipFilter extends UserAgentFilter
             }
             finally
             {
-                if (request.isAsyncStarted())
+                if (request.isAsyncStarted() && !req.getAsyncContext().hasOriginalRequestAndResponse())   
                 {
-                    // TODO should reset suspending requests, but can't tell which these are?
+                    request.addAsyncListener(new AsyncListener()
+                    {
+                        public void onComplete(AsyncEvent event) throws IOException
+                        {
+                            wrappedResponse.finish();
+                        }
+
+                        public void onTimeout(AsyncEvent event) throws IOException
+                        {}
+                    });
                 }
                 else if (exceptional && !response.isCommitted())
                 {
@@ -568,4 +579,5 @@ public class GzipFilter extends UserAgentFilter
             }
         }
     }
+    
 }

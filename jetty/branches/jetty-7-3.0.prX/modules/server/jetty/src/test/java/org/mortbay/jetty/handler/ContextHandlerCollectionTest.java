@@ -149,7 +149,7 @@ public class ContextHandlerCollectionTest extends TestCase
             return handled;
         }
 
-        public void handle(String s, HttpServletRequest request, HttpServletResponse response, int i) throws IOException, ServletException
+        public void handle(String s, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             Request base_request = (request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
             base_request.setHandled(true);

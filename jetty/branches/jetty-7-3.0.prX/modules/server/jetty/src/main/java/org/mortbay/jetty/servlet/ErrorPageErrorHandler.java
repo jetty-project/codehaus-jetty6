@@ -59,7 +59,7 @@ public class ErrorPageErrorHandler extends ErrorHandler
     /* 
      * @see org.mortbay.jetty.handler.ErrorHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException
     {
         String method = request.getMethod();
         if(!method.equals(HttpMethods.GET) && !method.equals(HttpMethods.POST))
@@ -145,7 +145,7 @@ public class ErrorPageErrorHandler extends ErrorHandler
             }
         }
         
-        super.handle(target, request, response, dispatch);
+        super.handle(target, request, response);
     }
 
     /* ------------------------------------------------------------ */

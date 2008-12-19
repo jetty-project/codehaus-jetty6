@@ -24,10 +24,12 @@ import org.mortbay.util.ajax.Continuation;
 
 public class Servlet3Continuation implements Continuation, AsyncListener
 {
-    AsyncContextState _asyncContextState;
+    AsyncState _asyncContextState;
     Request _request;
     Object _object;
     RetryRequest _retry;
+    boolean _resumed=false;
+    boolean _timeout=false;
     
     Servlet3Continuation(Request request)
     {
@@ -41,7 +43,7 @@ public class Servlet3Continuation implements Continuation, AsyncListener
 
     public boolean isExpired()
     {
-        return _asyncContextState!=null && _asyncContextState.isTimeout();
+        return _asyncContextState!=null && _timeout;
     }
 
     public boolean isNew()
@@ -56,18 +58,19 @@ public class Servlet3Continuation implements Continuation, AsyncListener
 
     public boolean isResumed()
     {
-        return _asyncContextState!=null && _asyncContextState.isResumed();
+        return _asyncContextState!=null && _resumed;
     }
 
     public void reset()
     {
-        _request.getAsyncContextState().reset();
+        _request.reset();
     }
 
     public void resume()
     {
         if (_asyncContextState==null)
             throw new IllegalStateException();
+        _resumed=true;
         _asyncContextState.forward();
     }
 
@@ -82,16 +85,15 @@ public class Servlet3Continuation implements Continuation, AsyncListener
 
     public boolean suspend(long timeout)
     {
-        _asyncContextState=_request.getAsyncContextState();
-        if (_asyncContextState!=null &&
-            (_asyncContextState.isInitial()||_asyncContextState.isResumed()||_asyncContextState.isTimeout()))
+        _asyncContextState=_request;
+        if (!_asyncContextState.isInitial()||_resumed||_timeout)
         {
-            return _asyncContextState.isResumed();
+            return _resumed;
         }
 
         _request.setAsyncTimeout(timeout);
         _request.startAsync();
-        _asyncContextState=_request.getAsyncContextState();
+        _asyncContextState=_request;
         if (_retry==null)
             _retry=new RetryRequest();
         throw _retry;
@@ -100,14 +102,13 @@ public class Servlet3Continuation implements Continuation, AsyncListener
 
     public void onComplete(AsyncEvent event) throws IOException
     {
-        // TODO Auto-generated method stub
         
     }
 
     public void onTimeout(AsyncEvent event) throws IOException
     {
-        // TODO Auto-generated method stub
-        
+        _timeout=true;
+        _request.forward();
     }
 
 }
