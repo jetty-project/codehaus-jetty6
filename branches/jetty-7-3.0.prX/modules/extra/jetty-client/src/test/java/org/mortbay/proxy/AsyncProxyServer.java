@@ -21,7 +21,10 @@ public class AsyncProxyServer
         server.setHandler(handler);
         
         FilterHolder gzip = handler.addFilterWithMapping("org.mortbay.servlet.GzipFilter","/*",0);
+        gzip.setAsyncSupported(true);
+        gzip.setInitParameter("minGzipSize","256");
         ServletHolder proxy = handler.addServletWithMapping("org.mortbay.proxy.AsyncProxyServlet","/");
+        proxy.setAsyncSupported(true);
         
         server.start();
         server.join();

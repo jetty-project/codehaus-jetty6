@@ -80,7 +80,17 @@ public class ChatServlet extends HttpServlet
     throws IOException
     {
         Map<String,Member> room=_rooms.get(request.getPathInfo());
+        if (room==null)
+        {
+            response.sendError(503);
+            return;
+        }
         Member member = room.get(username);
+        if (room==null)
+        {
+            response.sendError(503);
+            return;
+        }
 
         if (member._queue.size()>0)
         {

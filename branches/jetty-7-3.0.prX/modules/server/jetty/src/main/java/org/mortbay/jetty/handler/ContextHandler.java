@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
@@ -41,6 +42,7 @@ import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
@@ -1712,79 +1714,65 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             return "ServletContext@"+Integer.toHexString(hashCode())+"{"+(getContextPath().equals("")?URIUtil.SLASH:getContextPath())+","+getBaseResource()+"}";
         }
 
-        /* ------------------------------------------------------------ */
-        /* (non-Javadoc)
-         * @see javax.servlet.ServletContext#addFilter(java.lang.String, java.lang.String, java.lang.String, java.util.Map)
-         */
-        public void addFilter(String filterName, String description, String className, Map<String, String> initParameters)
-        {
-        }
 
         /* ------------------------------------------------------------ */
-        /* (non-Javadoc)
-         * @see javax.servlet.ServletContext#addFilterMapping(java.lang.String, java.lang.String[], java.lang.String[], java.util.EnumSet, boolean)
-         */
-        public void addFilterMapping(String filterName, String[] urlPatterns, String[] servletNames, EnumSet<DispatcherType> dispatcherTypes,
-                boolean isMatchAfter)
-        {
-        }
-
-        /* ------------------------------------------------------------ */
-        /* (non-Javadoc)
-         * @see javax.servlet.ServletContext#addServlet(java.lang.String, java.lang.String, java.lang.String, java.util.Map, int)
-         */
-        public void addServlet(String servletName, String description, String className, Map<String, String> initParameters, int loadOnStartup)
-        {
-        }
-
-        /* ------------------------------------------------------------ */
-        /* (non-Javadoc)
-         * @see javax.servlet.ServletContext#addServletMapping(java.lang.String, java.lang.String[])
-         */
-        public void addServletMapping(String servletName, String[] urlPatterns)
-        {
-        }
-
-        public void addFilterMappingForServletNames(String filterName, EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... servletNames)
-        {
-            // TODO Auto-generated method stub
-            
-        }
-
-        public void addFilterMappingForUrlPatterns(String filterName, EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... urlPatterns)
-        {
-            // TODO Auto-generated method stub
-            
-        }
-
         public EnumSet<SessionTrackingMode> getDefaultSessionTrackingModes()
         {
             // TODO Auto-generated method stub
             return null;
         }
 
+        /* ------------------------------------------------------------ */
         public EnumSet<SessionTrackingMode> getEffectiveSessionTrackingModes()
         {
             // TODO Auto-generated method stub
             return null;
         }
 
+        /* ------------------------------------------------------------ */
         public SessionCookieConfig getSessionCookieConfig()
         {
             // TODO Auto-generated method stub
             return null;
         }
 
+        /* ------------------------------------------------------------ */
         public void setSessionCookieConfig(SessionCookieConfig sessionCookieConfig)
         {
             // TODO Auto-generated method stub
             
         }
 
+        /* ------------------------------------------------------------ */
         public void setSessionTrackingModes(EnumSet<SessionTrackingMode> sessionTrackingModes)
+        {   
+        }
+
+        /* ------------------------------------------------------------ */
+        public FilterRegistration addFilter(String filterName, String className)
         {
-            // TODO Auto-generated method stub
-            
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        public ServletRegistration addServlet(String servletName, String className)
+        {
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        public void addFilterMappingForServletNames(String filterName, EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... servletNames)
+        {
+        }
+
+        /* ------------------------------------------------------------ */
+        public void addFilterMappingForUrlPatterns(String filterName, EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... urlPatterns)
+        {
+        }
+
+        /* ------------------------------------------------------------ */
+        public void addServletMapping(String servletName, String[] urlPatterns)
+        {
         }
         
     }

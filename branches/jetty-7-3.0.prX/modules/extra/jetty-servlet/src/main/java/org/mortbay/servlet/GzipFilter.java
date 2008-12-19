@@ -198,7 +198,6 @@ public class GzipFilter extends UserAgentFilter
             }
         }
 
-        
         public void setStatus(int sc, String sm)
         {
             super.setStatus(sc,sm);

@@ -114,8 +114,6 @@ public class AsyncProxyServlet implements Servlet
         }
         else
         {
-            final InputStream in=request.getInputStream();
-            final OutputStream out=response.getOutputStream();
 
             if (request.getAttribute("javax.servlet.timeout")==Boolean.TRUE)
             {
@@ -130,6 +128,9 @@ public class AsyncProxyServlet implements Servlet
 
             final AsyncContext asyncContext = request.startAsync(req,res);
 
+            final InputStream in=request.getInputStream();
+            final OutputStream out=response.getOutputStream();
+            
             HttpExchange exchange = new HttpExchange()
             {
                 protected void onResponseComplete() throws IOException
@@ -180,9 +181,9 @@ public class AsyncProxyServlet implements Servlet
 
                 protected void onExpire()
                 {
-                	if (!response.isCommitted())
-                		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                	asyncContext.complete();
+                    if (!response.isCommitted())
+                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    asyncContext.complete();
                 }
 
             };

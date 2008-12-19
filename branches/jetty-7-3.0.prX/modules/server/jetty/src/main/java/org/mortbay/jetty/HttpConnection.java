@@ -393,7 +393,7 @@ public class HttpConnection implements Connection
             {
                 try
                 {
-                    if (_request.isAsyncStarted())
+                    if (_request.isAsync())
                     {
                         Log.debug("resume request",_request);
                         handleRequest();
@@ -464,7 +464,7 @@ public class HttpConnection implements Connection
                     if (_request.isAsyncStarted())
                     {
                         Log.debug("return with suspended request");
-                        return;
+                        more_in_buffer=false;
                     }
                     else if (_generator.isCommitted() && !_generator.isComplete() && _endp instanceof SelectChannelEndPoint) // TODO remove SelectChannel dependency
                         ((SelectChannelEndPoint)_endp).setWritable(false);

@@ -102,7 +102,7 @@ import org.mortbay.util.ajax.Continuation;
  * @author gregw
  *
  */
-public class Request extends AsyncState implements HttpServletRequest
+public class Request extends AsyncRequest implements HttpServletRequest
 {
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
     private static final int __NONE=0, _STREAM=1, __READER=2;
@@ -1790,7 +1790,7 @@ public class Request extends AsyncState implements HttpServletRequest
     public AsyncContext getAsyncContext()
     {
         if (isInitial() && !isAsyncStarted())
-        	throw new IllegalStateException();
+            throw new IllegalStateException(super.getStatusString());
         return this;
     }
 
@@ -1805,6 +1805,8 @@ public class Request extends AsyncState implements HttpServletRequest
     {
         if (!_asyncSupported)
             throw new IllegalStateException("!asyncSupported");
+        if (_connection.getResponse().isOutputing())
+            throw new IllegalStateException("Response getOutputStream or getWriter called");
         
         suspend();  
         return this;
@@ -1813,6 +1815,10 @@ public class Request extends AsyncState implements HttpServletRequest
     /* ------------------------------------------------------------ */
     public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException
     {
+        if (!_asyncSupported)
+            throw new IllegalStateException("!asyncSupported");
+        if (_connection.getResponse().isOutputing())
+            throw new IllegalStateException("Response getOutputStream or getWriter called");
         _wrappedEvent = new AsyncEvent(servletRequest,servletResponse);
         startAsync();
         return this;
