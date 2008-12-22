@@ -92,7 +92,8 @@ public class ChatService extends BayeuxService
 		message.put("user", data.get("user"));
 		message.put("scope", "private");
 		peer.deliver(getClient(), roomName, message, messageId);
-		source.deliver(getClient(), roomName, message, messageId);
+                if (!peerId.equals(source.getId()))
+		    source.deliver(getClient(), roomName, message, messageId);
 		return;
             }
 	}

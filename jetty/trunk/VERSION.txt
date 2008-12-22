@@ -32,6 +32,7 @@
  + JETTY-831 Add ability to stop java bayeux client
  + JETTY-832 More UrlDecoded handling in relation to JETTY-825
  + Jetty-834 Configure DTD does not allow <Map> children
+ + JETTY-841 Duplicate messages when sending private message to yourself with cometd chat demo
  
 jetty-6.1.12 4 November 2008
  + JETTY-731 Completed DeliverListener for cometd
