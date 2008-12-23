@@ -302,7 +302,7 @@ public class Response implements HttpServletResponse
                 writer.write(message);
                 writer.write("</pre>\n<p>RequestURI=");
                 writer.write(uri);
-                writer.write("</p>\n<p><i><small><a href=\"http://jetty.mortbay.org\">Powered by jetty://</a></small></i></p>");
+                writer.write("</p>\n");
                 
                 for (int i= 0; i < 20; i++)
                     writer.write("\n                                                ");
