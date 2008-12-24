@@ -897,7 +897,7 @@ public class HttpConnection implements Connection
          * 
          * @see org.mortbay.jetty.HttpParser.EventHandler#messageComplete(int)
          */
-        public void messageComplete(long contextLength) throws IOException
+        public void messageComplete(long contentLength) throws IOException
         {
             if (_delayedHandling)
             {
