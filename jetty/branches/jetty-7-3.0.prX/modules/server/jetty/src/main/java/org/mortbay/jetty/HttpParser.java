@@ -1037,7 +1037,7 @@ public class HttpParser implements Parser
         {
         }
 
-        public void messageComplete(long contextLength) throws IOException
+        public void messageComplete(long contentLength) throws IOException
         {
         }
 
