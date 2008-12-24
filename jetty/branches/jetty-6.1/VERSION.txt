@@ -11,6 +11,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-817 Aborted SSL connections may cause jetty to hang with full cpu
  + JETTY-819 Jetty Plus no more jre 1.4
  + JETTY-825 URL decoding of spaces (+) fails for encoding not utf8
+ + JETTY-827 Externalize servlet api
  + JETTY-831 Add ability to stop java bayeux client
  + JETTY-832 More UrlDecoded handling in relation to JETTY-825
  + Jetty-834 Configure DTD does not allow <Map> children
