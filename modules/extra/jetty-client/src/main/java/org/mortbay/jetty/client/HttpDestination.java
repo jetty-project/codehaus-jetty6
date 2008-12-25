@@ -134,31 +134,79 @@ public class HttpDestination
     }
 
     /* ------------------------------------------------------------------------------- */
-    public HttpConnection getConnection() throws IOException
+    /**
+     * Get a connection. We either get an idle connection if one is available, or
+     * we make a new connection, if we have not yet reached maxConnections. If we
+     * have reached maxConnections, we wait until the number reduces.
+     * @param timeout max time prepared to block waiting to be able to get a connection
+     * @return
+     * @throws IOException
+     */
+    private HttpConnection getConnection(long timeout) throws IOException
     {
-        HttpConnection connection = getIdleConnection();
+        HttpConnection connection = null;
 
-        while (connection == null)
+        while ((connection == null) && (connection = getIdleConnection()) == null && timeout>0)
         {
+            System.err.println("No idle connection");
+            int totalConnections = 0;
+            boolean starting = false;
             synchronized (this)
             {
-                _newConnection++;
-                startNewConnection();
+                totalConnections = _connections.size() + _pendingConnections;
+                System.err.println("total connections: size="+_connections.size()+" pending="+_pendingConnections);
+                if (totalConnections < _maxConnections)
+                {
+                    System.err.println("Will start new connection");
+                    _newConnection++;
+                    startNewConnection();
+                    starting = true;
+                }
             }
-
-            try
+            
+            if (!starting)
             {
-                Object o = _newQueue.take();
-                if (o instanceof HttpConnection)
-                    connection = (HttpConnection)o;
-                else
-                    throw (IOException)o;
+                try
+                {
+                    System.err.println("Sleeping");
+                    Thread.currentThread().sleep(200);
+                    timeout-=200;
+                }
+                catch (InterruptedException e)
+                {
+                    Log.ignore(e);
+                }
             }
-            catch (InterruptedException e)
+            else
             {
-                Log.ignore(e);
-            }
+               try
+               {
+                   System.err.println("Waiting for new connection from queue");
+                   Object o = _newQueue.take();
+                   if (o instanceof HttpConnection)
+                   {
+                       connection = (HttpConnection)o;
+                       System.err.println("Got new connection off queue "+connection);
+                   }
+                   else
+                       throw (IOException)o;
+               }
+               catch (InterruptedException e)
+               {
+                   Log.ignore(e);
+               }
+           }
         }
+        System.err.println("Reserving connection "+connection);
+        return connection;
+    }
+    
+    
+    public HttpConnection reserveConnection(long timeout) throws IOException
+    {
+        HttpConnection connection = getConnection(timeout);
+        if (connection != null)
+            connection.setReserved(true);
         return connection;
     }
 
@@ -197,10 +245,12 @@ public class HttpDestination
             {
                 _pendingConnections++;
             }
+            System.err.println("_client="+_client+" _connector="+_client._connector);
             _client._connector.startConnection(this);
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             onConnectionFailed(e);
         }
     }
@@ -295,6 +345,12 @@ public class HttpDestination
     /* ------------------------------------------------------------------------------- */
     public void returnConnection(HttpConnection connection, boolean close) throws IOException
     {
+        System.err.println("Returning connection "+connection);
+       
+        
+        if (connection.isReserved())
+            connection.setReserved(false);
+        
         if (close)
         {
             try
@@ -316,11 +372,13 @@ public class HttpDestination
             {
                 if (_queue.size() == 0)
                 {
+                    System.err.println("Connection "+connection+" returned, adding to idle");
                     connection.setLast(System.currentTimeMillis());
                     _idle.add(connection);
                 }
                 else
                 {
+                    System.err.println("Connection "+connection+" returned, using it to send queued messages");
                     HttpExchange ex = _queue.removeFirst();
                     connection.send(ex);
                 }
@@ -331,6 +389,7 @@ public class HttpDestination
         {
             synchronized (this)
             {
+                System.err.println("Getting rid of connection "+connection+" closing="+close+" endpoint open="+connection.getEndPoint().isOpen());
                 _connections.remove(connection);
                 if (!_queue.isEmpty())
                     startNewConnection();

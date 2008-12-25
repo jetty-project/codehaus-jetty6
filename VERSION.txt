@@ -29,6 +29,7 @@
  + JETTY-822 Commit when autocommit=true causes error with mysql
  + JETTY-823 Extend start.config profiles
  + JETTY-825 URL decoding of spaces (+) fails for encoding not utf8
+ + JETTY-830 Add ability to reserve connections on http client
  + JETTY-831 Add ability to stop java bayeux client
  + JETTY-832 More UrlDecoded handling in relation to JETTY-825
  + Jetty-834 Configure DTD does not allow <Map> children
