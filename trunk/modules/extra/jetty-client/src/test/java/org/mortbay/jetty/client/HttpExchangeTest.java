@@ -26,6 +26,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
+import junit.framework.TestResult;
+
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.Connector;
@@ -48,6 +50,7 @@ import org.mortbay.thread.QueuedThreadPool;
  */
 public class HttpExchangeTest extends TestCase
 {
+    protected int _maxConnectionsPerAddress = 2;
     protected String _scheme = "http://";
     protected Server _server;
     protected int _port;
@@ -60,7 +63,7 @@ public class HttpExchangeTest extends TestCase
         startServer();
         _httpClient=new HttpClient();
         _httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
-        _httpClient.setMaxConnectionsPerAddress(2);
+        _httpClient.setMaxConnectionsPerAddress(_maxConnectionsPerAddress);
         _httpClient.start();
     }
 
@@ -281,6 +284,35 @@ public class HttpExchangeTest extends TestCase
         }
     }
 
+    
+    public void testReserveConnections () throws Exception
+    {
+       final HttpDestination destination = _httpClient.getDestination (new Address("localhost", _port), _scheme.equalsIgnoreCase("https"));
+       final org.mortbay.jetty.client.HttpConnection[] connections = new org.mortbay.jetty.client.HttpConnection[_maxConnectionsPerAddress];
+       for (int i=0; i < _maxConnectionsPerAddress; i++)
+       {
+           connections[i] = destination.reserveConnection(200);
+           assertNotNull(connections[i]);
+           HttpExchange ex = new ContentExchange();
+           ex.setURL(_scheme+"localhost:"+_port+"/?i="+i);
+           ex.setMethod(HttpMethods.GET);
+           connections[i].send(ex);
+       }
+      
+       //try to get a connection, and only wait 500ms, as we have
+       //already reserved the max, should return null
+       org.mortbay.jetty.client.HttpConnection c = destination.reserveConnection(500);
+       assertNull(c);
+       
+       //unreserve first connection
+       destination.returnConnection(connections[0], false);
+       
+       //reserving one should now work
+       c = destination.reserveConnection(500);
+       assertNotNull(c);
+       
+        
+    }
     public static void copyStream(InputStream in, OutputStream out)
     {
         try
@@ -375,4 +407,5 @@ public class HttpExchangeTest extends TestCase
     {
         _server.stop();
     }
+
 }
