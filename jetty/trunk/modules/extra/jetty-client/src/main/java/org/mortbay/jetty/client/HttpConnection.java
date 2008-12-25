@@ -55,6 +55,7 @@ public class HttpConnection implements Connection
     boolean _requestComplete;
     public String _message;
     public Throwable _throwable;
+    public boolean _reserved;
 
     /* The current exchange waiting for a response */
     HttpExchange _exchange;
@@ -117,6 +118,16 @@ public class HttpConnection implements Connection
         _parser = new HttpParser(buffers,endp,new Handler(),hbs,cbs);
     }
 
+    public void setReserved (boolean reserved)
+    {
+        _reserved = reserved;
+    }
+    
+    public boolean isReserved()
+    {
+        return _reserved;
+    }
+    
     /* ------------------------------------------------------------ */
     public HttpDestination getDestination()
     {
@@ -331,7 +342,8 @@ public class HttpConnection implements Connection
 
                             if (_pipeline == null)
                             {
-                                _destination.returnConnection(this,close);
+                                if (!isReserved())
+                                    _destination.returnConnection(this,close);
                                 if (close)
                                     return;
                             }
@@ -339,7 +351,8 @@ public class HttpConnection implements Connection
                             {
                                 if (close)
                                 {
-                                    _destination.returnConnection(this,close);
+                                    if (!isReserved())
+                                        _destination.returnConnection(this,close);
                                     _destination.send(_pipeline);
                                     _pipeline = null;
                                     return;
