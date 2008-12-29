@@ -34,6 +34,7 @@
  + JETTY-832 More UrlDecoded handling in relation to JETTY-825
  + Jetty-834 Configure DTD does not allow <Map> children
  + JETTY-841 Duplicate messages when sending private message to yourself with cometd chat demo
+ + JETTY-842 NPE in jetty client when no path component
  
 jetty-6.1.12 4 November 2008
  + JETTY-731 Completed DeliverListener for cometd
