@@ -226,7 +226,8 @@ public class HttpExchangeTest extends TestCase
         for (int i=0;i<200;i++)
         {
             ContentExchange httpExchange=new ContentExchange();
-            httpExchange.setURL(_scheme+"localhost:"+_port+"/");
+            //httpExchange.setURL(_scheme+"localhost:"+_port+"/");
+            httpExchange.setURL(_scheme+"localhost:"+_port);
             httpExchange.setMethod(HttpMethods.POST);
             httpExchange.setRequestContent(new ByteArrayBuffer("<hello />"));
             _httpClient.send(httpExchange);
