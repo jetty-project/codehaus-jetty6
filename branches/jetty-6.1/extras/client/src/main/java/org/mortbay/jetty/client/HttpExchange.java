@@ -523,13 +523,12 @@ public class HttpExchange
 
     protected void onException(Throwable ex)
     {
-
         Log.warn("EXCEPTION on " + this,ex);
     }
 
     protected void onExpire()
     {
-        Log.debug("EXPIRED " + this);
+        Log.warn("EXPIRED " + this);
     }
 
     protected void onRetry() throws IOException
