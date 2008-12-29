@@ -22,6 +22,7 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
 
 import org.mortbay.log.Log;
 import org.mortbay.util.IO;
@@ -141,7 +142,6 @@ public class JarResource extends URLResource
         while((entry=jin.getNextJarEntry())!=null)
         {
             String entryName = entry.getName();
-           
             if ((subEntryName != null) && (entryName.startsWith(subEntryName)))
             { 
                 //if there is a particular subEntry that we are looking for, only
@@ -216,6 +216,20 @@ public class JarResource extends URLResource
             }
             if (deleteOnExit)
                 file.deleteOnExit();
+        }
+        
+        if ((subEntryName == null) || (subEntryName != null && subEntryName.equalsIgnoreCase("META-INF/MANIFEST.MF")))
+        {
+            Manifest manifest = jin.getManifest();
+            if (manifest != null)
+            {
+                File metaInf = new File (directory, "META-INF");
+                metaInf.mkdir();
+                File f = new File(metaInf, "MANIFEST.MF");
+                FileOutputStream fout = new FileOutputStream(f);
+                manifest.write(fout);
+                fout.close();   
+            }
         }
         IO.close(jin);
     }
