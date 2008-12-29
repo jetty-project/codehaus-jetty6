@@ -361,6 +361,7 @@ public class HttpClient extends AbstractBuffers
                     }
                     catch (InterruptedException e)
                     {
+                        Log.ignore(e);
                     }
                 }
             }
@@ -456,7 +457,7 @@ public class HttpClient extends AbstractBuffers
         }
         catch ( Exception e )
         {
-            e.printStackTrace();
+            Log.debug(e);
             throw new IOException( "error generating ssl context for " + _keyStoreLocation  + " " + e.getMessage() );
         }
     }
@@ -501,6 +502,7 @@ public class HttpClient extends AbstractBuffers
         }
         catch ( Exception e )
         {
+            Log.debug(e);
             throw new IOException( "issue ignoring certs" );
         }
     }
