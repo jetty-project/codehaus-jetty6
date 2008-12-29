@@ -609,36 +609,43 @@ public class HttpClient extends AbstractBuffers
         _maxRetries = retries;
     }
 
+    /* ------------------------------------------------------------ */
     public String getTrustStoreLocation()
     {
         return _trustStoreLocation;
     }
 
+    /* ------------------------------------------------------------ */
     public void setTrustStoreLocation(String trustStoreLocation)
     {
         this._trustStoreLocation = trustStoreLocation;
     }
 
+    /* ------------------------------------------------------------ */
     public String getKeyStoreLocation()
     {
         return _keyStoreLocation;
     }
 
+    /* ------------------------------------------------------------ */
     public void setKeyStoreLocation(String keyStoreLocation)
     {
         this._keyStoreLocation = keyStoreLocation;
     }
 
+    /* ------------------------------------------------------------ */
     public void setKeyStorePassword(String _keyStorePassword)
     {
         this._keyStorePassword = _keyStorePassword;
     }
 
+    /* ------------------------------------------------------------ */
     public void setKeyManagerPassword(String _keyManagerPassword)
     {
         this._keyManagerPassword = _keyManagerPassword;
     }
 
+    /* ------------------------------------------------------------ */
     public void setTrustStorePassword(String _trustStorePassword)
     {
         this._trustStorePassword = _trustStorePassword;

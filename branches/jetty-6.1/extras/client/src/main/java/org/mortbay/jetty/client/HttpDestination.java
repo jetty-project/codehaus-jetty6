@@ -242,7 +242,6 @@ public class HttpDestination
         }
         catch(Exception e)
         {
-            e.printStackTrace();
             onConnectionFailed(e);
         }
     }
@@ -406,7 +405,7 @@ public class HttpDestination
                 }
                 catch (Exception e)
                 {
-                    e.printStackTrace();
+                    Log.debug(e);
                     throw new IOException("Unable to instantiate registered listener for destination: " + listenerClass );
                 }
             }
