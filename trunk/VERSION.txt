@@ -20,6 +20,7 @@
  + JETTY-804 HttpClient timeout does not always work
  + JETTY-805 Fix jetty-jaas.xml for new UserRealm package
  + JETTY-806 Timeout related Deadlocks in HTTP Client
+ + JETTY-807 HttpTester to handle charsets
  + JETTY-808 cometd client demo run.sh
  + JETTY-809 Need a way to customize WEB-INF/lib file extensions that are added to the classpath
  + JETTY-813 Simplify NCSARequestLog.java
