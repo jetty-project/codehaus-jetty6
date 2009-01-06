@@ -6,6 +6,7 @@
  + JETTY-775 AbstractSessionTest remove timing related test
  + JETTY-778 handle granular windows timer in lifecycle test
  + JETTY-779 Fixed line feed in request log
+ + JETTY-781 Add "mvn jetty:deploy-war" for deploying a pre-assembled war
  + JETTY-782 Implement interval advice for BayeuxClient
  + JETTY-783 Update jetty self-signed certificate
  + JETTY-784 TerracottaSessionManager leaks sessions scavenged in other nodes
