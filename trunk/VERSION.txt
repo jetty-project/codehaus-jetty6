@@ -28,6 +28,7 @@
  + JETTY-814 Add org.mortbay.jetty.client.Address.toString()
  + JETTY-816 Implement reconnect on java bayeux client
  + JETTY-817 Aborted SSL connections may cause jetty to hang with full cpu
+ + JETTY-821 Allow lazy loading of persistent sessions
  + JETTY-822 Commit when autocommit=true causes error with mysql
  + JETTY-823 Extend start.config profiles
  + JETTY-825 URL decoding of spaces (+) fails for encoding not utf8
