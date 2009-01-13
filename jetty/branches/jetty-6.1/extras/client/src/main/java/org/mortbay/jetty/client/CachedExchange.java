@@ -26,8 +26,8 @@ import org.mortbay.jetty.HttpFields;
  */
 public class CachedExchange extends HttpExchange
 {
-    int _responseStatus;
-    HttpFields _responseFields;
+    protected int _responseStatus;
+    protected HttpFields _responseFields;
 
     public CachedExchange(boolean cacheFields)
     {
@@ -38,7 +38,7 @@ public class CachedExchange extends HttpExchange
     /* ------------------------------------------------------------ */
     public int getResponseStatus()
     {
-        if (_status < HttpExchange.STATUS_PARSING_HEADERS)
+        if (getStatus() < HttpExchange.STATUS_PARSING_HEADERS)
             throw new IllegalStateException("Response not received");
         return _responseStatus;
     }
@@ -46,7 +46,7 @@ public class CachedExchange extends HttpExchange
     /* ------------------------------------------------------------ */
     public HttpFields getResponseFields()
     {
-        if (_status < HttpExchange.STATUS_PARSING_CONTENT)
+        if (getStatus() < HttpExchange.STATUS_PARSING_HEADERS)
             throw new IllegalStateException("Headers not complete");
         return _responseFields;
     }
