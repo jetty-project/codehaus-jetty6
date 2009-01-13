@@ -1,5 +1,7 @@
 jetty-6.1-SNAPSHOT
+ + JETTY-600 Automated tests of WADI integration + upgrade to WADI 2.0
  + JETTY-749 Reliable message delivery
+ + JETTY-794 WADI integration tests fail intermittently.
  + JETTY-781 Add "mvn jetty:deploy-war" for deploying a pre-assembled war
  + JETTY-795 NullPointerException in SocketConnector.java
  + JETTY-798 Jboss session manager incompatible with LifeCycle.Listener
@@ -19,6 +21,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-830 Add ability to reserve connections on http client
  + JETTY-831 Add ability to stop java bayeux client
  + JETTY-832 More UrlDecoded handling in relation to JETTY-825
+ + JETTY-833 Update debian and rpm packages for new jsp-2.1-glassfish jars and servlet-api jar
  + Jetty-834 Configure DTD does not allow <Map> children
  + JETTY-841 Duplicate messages when sending private message to yourself with cometd chat demo
  + JETTY-842 NPE in jetty client when no path component
