@@ -14,51 +14,91 @@
 
 package org.mortbay.jetty.client;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.jetty.HttpHeaders;
+import org.mortbay.util.ByteArrayOutputStream2;
 import org.mortbay.util.StringUtil;
 
+/* ------------------------------------------------------------ */
 /**
- * A CachedExchange that retains all content for later use.
+ * A CachedExchange that retains response content for later use.
  *
  */
-public class ContentExchange extends CachedExchange
+public class ContentExchange extends HttpExchange
 {
-    int _contentLength = 1024;
-    String _encoding = "utf-8";
-    ByteArrayOutputStream _responseContent;
+    protected int _responseStatus;
+    protected int _contentLength = -1;
+    protected String _encoding = "utf-8";
+    protected ByteArrayOutputStream2 _responseContent;
 
-    File _fileForUpload;
+    protected File _fileForUpload;
 
     public ContentExchange()
     {
-        super(false);
     }
-    
+
     /* ------------------------------------------------------------ */
-    public ContentExchange(boolean cacheFields)
+    public int getResponseStatus()
     {
-        super(cacheFields);
+        if (getStatus() < HttpExchange.STATUS_PARSING_HEADERS)
+            throw new IllegalStateException("Response not received");
+        return _responseStatus;
     }
+
     
     /* ------------------------------------------------------------ */
+    /**
+     * @return The response content as a String
+     * @throws UnsupportedEncodingException
+     */
     public String getResponseContent() throws UnsupportedEncodingException
     {
         if (_responseContent != null)
-        {
             return _responseContent.toString(_encoding);
+        return null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return The response content as a byte array;
+     */
+    public byte[] getResponseBytes()
+    {
+        if (_responseContent != null)
+        {
+            if (_contentLength>=0 && _responseContent.getBuf().length==_contentLength)
+                return _responseContent.getBuf();
+            return _responseContent.toByteArray();
         }
         return null;
     }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param out An output stream to write the content to.
+     * @throws IOException
+     */
+    public void writeResponseBytesTo(OutputStream out) throws IOException
+    {
+        if (_responseContent != null)
+            out.write(_responseContent.getBuf(),0,_responseContent.getCount());
+    }
 
+    /* ------------------------------------------------------------ */
+    protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
+    {
+        _responseStatus = status;
+        super.onResponseStatus(version,status,reason);
+    }
+    
     /* ------------------------------------------------------------ */
     protected void onResponseHeader(Buffer name, Buffer value) throws IOException
     {
@@ -86,14 +126,17 @@ public class ContentExchange extends CachedExchange
         }
     }
 
+    /* ------------------------------------------------------------ */
     protected void onResponseContent(Buffer content) throws IOException
     {
         super.onResponseContent( content );
         if (_responseContent == null)
-            _responseContent = new ByteArrayOutputStream(_contentLength);
+            _responseContent = (_contentLength>=0)?new ByteArrayOutputStream2(_contentLength):new ByteArrayOutputStream2();
+        
         content.writeTo(_responseContent);
     }
 
+    /* ------------------------------------------------------------ */
     protected void onRetry() throws IOException
     {
         if ( _fileForUpload != null  )
@@ -109,16 +152,19 @@ public class ContentExchange extends CachedExchange
         super.onRetry();
     }
 
+    /* ------------------------------------------------------------ */
     private InputStream getInputStream() throws IOException
     {
         return new FileInputStream( _fileForUpload );
     }
 
+    /* ------------------------------------------------------------ */
     public File getFileForUpload()
     {
         return _fileForUpload;
     }
 
+    /* ------------------------------------------------------------ */
     public void setFileForUpload(File fileForUpload) throws IOException
     {
         this._fileForUpload = fileForUpload;
