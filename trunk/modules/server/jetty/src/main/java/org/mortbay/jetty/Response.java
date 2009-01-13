@@ -567,6 +567,12 @@ public class Response implements HttpServletResponse
             _characterEncoding=StringUtil.__ISO_8859_1;
         return _characterEncoding;
     }
+    
+    /* ------------------------------------------------------------ */
+    String getSetCharacterEncoding()
+    {
+        return _characterEncoding;
+    }
 
     /* ------------------------------------------------------------ */
     /*
