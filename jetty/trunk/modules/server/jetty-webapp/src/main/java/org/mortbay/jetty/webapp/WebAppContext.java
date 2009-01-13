@@ -861,7 +861,6 @@ public class WebAppContext extends Context
                 if (jarWebApp.exists() && jarWebApp.isDirectory())
                 {
                     web_app= jarWebApp;
-                    _war= web_app.toString();
                 }
             }
 
