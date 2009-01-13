@@ -37,7 +37,8 @@
  + JETTY-830 Add ability to reserve connections on http client
  + JETTY-831 Add ability to stop java bayeux client
  + JETTY-832 More UrlDecoded handling in relation to JETTY-825
- + Jetty-834 Configure DTD does not allow <Map> children
+ + JETTY-834 Configure DTD does not allow <Map> children
+ + JETTY-837 Response headers set via filter are ignored for static resources
  + JETTY-841 Duplicate messages when sending private message to yourself with cometd chat demo
  + JETTY-842 NPE in jetty client when no path component
  + JETTY-843 META-INF/MANIFEST.MF is not present in unpacked webapp
