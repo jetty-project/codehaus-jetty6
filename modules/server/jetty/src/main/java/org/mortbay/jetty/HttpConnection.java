@@ -31,6 +31,7 @@ import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.thread.Timeout;
+import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 
@@ -990,8 +991,32 @@ public class HttpConnection implements Connection
             if (content instanceof HttpContent)
             {
                 HttpContent c = (HttpContent) content;
-                if (c.getContentType() != null && !_responseFields.containsKey(HttpHeaders.CONTENT_TYPE_BUFFER)) 
-                    _responseFields.add(HttpHeaders.CONTENT_TYPE_BUFFER, c.getContentType());
+                Buffer contentType = c.getContentType();
+                if (contentType != null && !_responseFields.containsKey(HttpHeaders.CONTENT_TYPE_BUFFER))
+                {
+                    String enc = _response.getSetCharacterEncoding();
+                    if(enc==null)
+                        _responseFields.add(HttpHeaders.CONTENT_TYPE_BUFFER, contentType);
+                    else
+                    {
+                        if(contentType instanceof CachedBuffer)
+                        {
+                            CachedBuffer content_type = ((CachedBuffer)contentType).getAssociate(enc);
+                            if(content_type!=null)
+                                _responseFields.put(HttpHeaders.CONTENT_TYPE_BUFFER, content_type);
+                            else
+                            {
+                                _responseFields.put(HttpHeaders.CONTENT_TYPE_BUFFER, 
+                                        contentType+";charset="+QuotedStringTokenizer.quote(enc,";= "));
+                            }
+                        }
+                        else
+                        {
+                            _responseFields.put(HttpHeaders.CONTENT_TYPE_BUFFER, 
+                                    contentType+";charset="+QuotedStringTokenizer.quote(enc,";= "));
+                        }
+                    }
+                }
                 if (c.getContentLength() > 0) 
                     _responseFields.putLongField(HttpHeaders.CONTENT_LENGTH_BUFFER, c.getContentLength());
                 Buffer lm = c.getLastModified();
