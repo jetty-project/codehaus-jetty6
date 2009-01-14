@@ -33,6 +33,7 @@
  + JETTY-821 Allow lazy loading of persistent sessions
  + JETTY-822 Commit when autocommit=true causes error with mysql
  + JETTY-823 Extend start.config profiles
+ + JETTY-824 Access to inbound byte statistics
  + JETTY-825 URL decoding of spaces (+) fails for encoding not utf8
  + JETTY-830 Add ability to reserve connections on http client
  + JETTY-831 Add ability to stop java bayeux client
