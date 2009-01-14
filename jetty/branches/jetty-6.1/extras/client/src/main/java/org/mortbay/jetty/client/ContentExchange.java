@@ -32,7 +32,7 @@ import org.mortbay.util.StringUtil;
  * A CachedExchange that retains response content for later use.
  *
  */
-public class ContentExchange extends HttpExchange
+public class ContentExchange extends CachedExchange
 {
     protected int _responseStatus;
     protected int _contentLength = -1;
@@ -41,8 +41,16 @@ public class ContentExchange extends HttpExchange
 
     protected File _fileForUpload;
 
+    /* ------------------------------------------------------------ */
     public ContentExchange()
     {
+        super(false);
+    }
+
+    /* ------------------------------------------------------------ */
+    public ContentExchange(boolean keepHeaders)
+    {
+        super(keepHeaders);
     }
 
     /* ------------------------------------------------------------ */
