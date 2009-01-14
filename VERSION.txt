@@ -43,6 +43,7 @@
  + JETTY-841 Duplicate messages when sending private message to yourself with cometd chat demo
  + JETTY-842 NPE in jetty client when no path component
  + JETTY-843 META-INF/MANIFEST.MF is not present in unpacked webapp
+ + JETTY-844 Replace reflection with direct invocation in Slf4jLog
  + JETTY-854 JNDI scope does not work with applications in a .war
 
  

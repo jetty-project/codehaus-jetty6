@@ -69,21 +69,30 @@ public class Log
                 __log.info("Logging to {} via {}",__log,log_class.getName());
             }
         }
+        catch(NoClassDefFoundError e)
+        {
+            initStandardLogging(e);
+        }
         catch(Exception e)
         {
-            if (__log==null)
-            {
-                log_class=StdErrLog.class;
-                __log=new StdErrLog();
-                __log.info("Logging to {} via {}",__log,log_class.getName());
-                if(__verbose)
-                    e.printStackTrace();
-            }
+            initStandardLogging(e);
         }
 
         return __log!=null;
     }
-    
+
+    private static void initStandardLogging(Throwable e) {
+        Class log_class;
+        if (__log==null)
+        {
+            log_class= StdErrLog.class;
+            __log=new StdErrLog();
+            __log.info("Logging to {} via {}",__log,log_class.getName());
+            if(e != null && __verbose)
+                e.printStackTrace();
+        }
+    }
+
     public static void setLog(Logger log)
     {
         Log.__log=log;
