@@ -124,6 +124,11 @@ public class HttpParser implements Parser
     {
         return _contentLength;
     }
+    
+    public long getContentRead()
+    {
+        return _contentPosition;
+    }
 
     /* ------------------------------------------------------------------------------- */
     public int getState()
