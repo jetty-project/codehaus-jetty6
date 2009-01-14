@@ -299,6 +299,13 @@ public class Request extends Suspendable implements HttpServletRequest
         return _characterEncoding;
     }
     
+    public long getContentRead()
+    {
+        if (_connection==null || _connection.getParser()==null)
+            return -1;
+        
+        return ((HttpParser)_connection.getParser()).getContentRead();
+    }
 
     /* ------------------------------------------------------------ */
     /* 
