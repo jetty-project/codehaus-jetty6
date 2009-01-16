@@ -103,7 +103,16 @@ public class MultiPartFilter implements Filter
         
         String boundary="--"+value(content_type.substring(content_type.indexOf("boundary=")));
         byte[] byteBoundary=(boundary+"--").getBytes(StringUtil.__ISO_8859_1);
-        MultiMap params = new MultiMap();
+        // cross-container
+        MultiMap params = new MultiMap(request.getParameterMap());
+        
+        // jetty-specific but more efficient
+        /*MultiMap params = new MultiMap();
+        if(srequest instanceof org.mortbay.jetty.Request)
+        {
+            org.mortbay.jetty.Request req = ((org.mortbay.jetty.Request)srequest);
+            req.getUri().decodeQueryTo(params, req.getQueryEncoding());
+        }*/
         
         try
         {
@@ -380,6 +389,11 @@ public class MultiPartFilter implements Filter
             }
             else if (o instanceof String)
                 return (String)o;
+            else if (o instanceof String[])
+            {
+                String[] s = (String[])o;
+                return s.length>0 ? s[0] : null;
+            }
             return null;
         }
         
