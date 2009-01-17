@@ -11,13 +11,16 @@
       <outputDirectory>/</outputDirectory>
       <unpackOptions>
         <excludes>
+<!--
           <exclude>javax/servlet/*</exclude>
+-->
         <exclude>javax/servlet/http/Local*</exclude>
         <exclude>javax/servlet/http/No*</exclude>
         <exclude>javax/servlet/resources/**</exclude>
         <exclude>javax/servlet/jsp/**</exclude>
-        <exclude>javax/servlet/http/Http*</exclude>
-        <exclude>org/mortbay/jetty/handler/**</exclude>
+        <!--<exclude>javax/servlet/http/Http*</exclude>
+-->        
+<exclude>org/mortbay/jetty/handler/**</exclude>
         <exclude>org/mortbay/jetty/servlet/**</exclude>
         <exclude>org/mortbay/xml/**</exclude>
         <exclude>org/mortbay/jetty/xbean/**</exclude>
