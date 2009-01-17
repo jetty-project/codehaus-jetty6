@@ -172,7 +172,8 @@ public class JSONPojoConvertor implements JSON.Convertor
     /* ------------------------------------------------------------ */
     public void toJSON(Object obj, Output out)
     {
-        out.addClass(_pojoClass);
+        if(_fromJSON)
+            out.addClass(_pojoClass);
         for(Iterator iterator = _getters.entrySet().iterator(); iterator.hasNext();)
         {
             Map.Entry entry = (Map.Entry)iterator.next();
