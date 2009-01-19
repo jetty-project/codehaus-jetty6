@@ -46,6 +46,7 @@
  + JETTY-844 Replace reflection with direct invocation in Slf4jLog
  + JETTY-854 JNDI scope does not work with applications in a .war
  + JETTY-859 MultiPartFilter ignores the query string parameters
+ + JETTY-862 EncodedHttpURI ignores given encoding in constructor
 
  
 jetty-6.1.12 4 November 2008
