@@ -400,6 +400,11 @@ public class HttpConnection implements Connection
                         }
                         Log.debug("resume request",_request);
                         handleRequest();
+                        
+                        if (_generator.isCommitted() && !_generator.isComplete())
+                            _generator.flush();
+                        if (_endp.isBufferingOutput())
+                            _endp.flush();
                     }
                     else
                     {
