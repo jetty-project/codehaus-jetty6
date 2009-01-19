@@ -288,6 +288,9 @@ public class Suspendable
             {
                 case __HANDLING:
                     _state=__IDLE;
+                    _initial=true;
+                    _resumed=false;
+                    _timeout=false;
                     return true;
 
                 case __IDLE:
@@ -309,8 +312,10 @@ public class Suspendable
                     return false; 
 
                 case __COMPLETING:
-                    _initial=false;
                     _state=__IDLE;
+                    _initial=true;
+                    _resumed=false;
+                    _timeout=false;
                     return true;
 
                 case __SUSPENDED:
@@ -470,8 +475,8 @@ public class Suspendable
         synchronized (this)
         {
             _state=(_state==__SUSPENDED||_state==__IDLE)?__IDLE:__HANDLING;
-            _resumed = false;
             _initial = true;
+            _resumed = false;
             _timeout = false;
             cancelTimeout();
         }
