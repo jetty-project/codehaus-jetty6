@@ -21,12 +21,8 @@ public class EncodedHttpURITest extends TestCase
         //parse it, using the same encoding
         uri.parse(s);
         
-        System.err.println(uri.toString());
-        System.err.println(uri.getCompletePath());
-        
         //decode the url encoding
         String d = URLDecoder.decode(uri.getCompletePath(), "ISO-8859-1");
-        System.err.println(d);
         assertEquals(url, d);
 
     }
