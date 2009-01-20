@@ -1,4 +1,4 @@
-jetty-6.1-SNAPSHOT
+jetty-6.1.15.pre0 20 January 2009
  + JETTY-600 Automated tests of WADI integration + upgrade to WADI 2.0
  + JETTY-749 Reliable message delivery
  + JETTY-794 WADI integration tests fail intermittently.
