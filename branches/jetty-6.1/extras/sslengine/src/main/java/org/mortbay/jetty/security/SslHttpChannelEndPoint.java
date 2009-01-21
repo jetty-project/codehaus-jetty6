@@ -250,14 +250,14 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     {
         ByteBuffer bbuf=extractInputBuffer(buffer);
         int size=buffer.length();
-        HandshakeStatus status = _engine.getHandshakeStatus();
+        HandshakeStatus initialStatus = _engine.getHandshakeStatus();
         synchronized (bbuf)
         {
             try
             {
                 unwrap(bbuf);
 
-                int tries=0;
+                int tries=0, wraps=0;
                 loop: while (true)
                 {
                     // TODO REMOVE loop check
@@ -294,8 +294,8 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                                 // h.append("run task\n");
                                 task.run();
                             }
-                            if(status==HandshakeStatus.NOT_HANDSHAKING && 
-                                    HandshakeStatus.NEED_UNWRAP == _engine.getHandshakeStatus())
+                            if(initialStatus==HandshakeStatus.NOT_HANDSHAKING && 
+                                    HandshakeStatus.NEED_UNWRAP==_engine.getHandshakeStatus() && wraps==0)
                             {
                                 // java sslengine bug on TLS.. this should be NEED_WRAP
                                 // because a handshake response is needed to be sent to the client                                
@@ -306,6 +306,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
 
                         case NEED_WRAP:
                         {
+                            wraps++;
                             synchronized(_outBuffer)
                             {
                                 try
