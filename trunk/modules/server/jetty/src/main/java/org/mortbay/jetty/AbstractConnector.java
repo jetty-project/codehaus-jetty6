@@ -42,7 +42,7 @@ import org.mortbay.thread.ThreadPool;
  *
  * TODO - allow multiple Acceptor threads
  */
-public abstract class AbstractConnector extends AbstractBuffers implements Connector
+public abstract class AbstractConnector extends QueueAbstractBuffers implements Connector
 {
     private String _name;
     
