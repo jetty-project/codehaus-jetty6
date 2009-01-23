@@ -33,14 +33,7 @@ public abstract class ThreadLocalAbstractBuffers
         super();
     }
 
-    private ThreadLocal tlHeader = new ThreadLocal()
-    {
-        protected synchronized Object initialValue()
-        {
-            return newBuffer( _headerBufferSize );
-        }
-    };
-
+    private ThreadLocal tlHeader;
     private ThreadLocal tlRequest;
     private ThreadLocal tlResponse;
 
@@ -50,15 +43,30 @@ public abstract class ThreadLocalAbstractBuffers
 
         if ( size == _headerBufferSize )
         {
-           return (Buffer) tlHeader.get();
+           Buffer b = (Buffer) tlHeader.get();
+	   if (b!=null)
+	   {
+	       tlHeader.set(null);
+	       return b;
+	   }
         }
         else if ( size == _responseBufferSize )
         {
-            return (Buffer) tlResponse.get();
+           Buffer b = (Buffer) tlResponse.get();
+	   if (b!=null)
+	   {
+	       tlResponse.set(null);
+	       return b;
+	   }
         }
         else if ( size == _requestBufferSize )
         {
-            return (Buffer) tlRequest.get();
+           Buffer b = (Buffer) tlRequest.get();
+	   if (b!=null)
+	   {
+	       tlRequest.set(null);
+	       return b;
+	   }
         }
 
         return newBuffer( size );
@@ -67,13 +75,36 @@ public abstract class ThreadLocalAbstractBuffers
     public void returnBuffer( Buffer buffer )
     {
         buffer.clear();
+        if (!buffer.isVolatile() && !buffer.isImmutable())
+        {
+            int size=buffer.capacity();
+	    if ( size == _headerBufferSize )
+	    {
+	       tlHeader.set(buffer);
+	    }
+	    else if ( size == _responseBufferSize )
+	    {
+	       tlResponse.set(buffer);
+	    }
+	    else if ( size == _requestBufferSize )
+	    {
+	       tlRequest.set(buffer);
+	    }
+	}
     }
-    
     
 
     protected void doStart()
         throws Exception
     {
+        tlHeader = new ThreadLocal()
+        {
+            protected synchronized Object initialValue()
+            {
+                return newBuffer( _headerBufferSize );
+            }
+        };
+        
         tlRequest = new ThreadLocal()
         {
             protected synchronized Object initialValue()
