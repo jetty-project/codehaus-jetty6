@@ -5,13 +5,11 @@
   </formats>
   <fileSets>
     <fileSet>
-      <directory>${basedir}/target/dist-src</directory>
-      <outputDirectory>jetty-distribution-${version}-site-component</outputDirectory>
+      <directory>../../</directory>
+      <outputDirectory>${artifactId}-${version}</outputDirectory>
       <includes>
-        <include>target/site/**</include>
-        <include>README**</include>
-        <include>VERSION**</include>
-        <include>LICENSES/**</include>
+        <include>javadoc/**</include>
+        <include>jxr/**</include>
       </includes>
     </fileSet>
   </fileSets>
