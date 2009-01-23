@@ -9,7 +9,7 @@
   <artifactId>project</artifactId>
   <packaging>pom</packaging>
   <name>Jetty Server Project</name>
-  <version>6.1-SNAPSHOT</version>
+  <version>6.1.15.rc2</version>
   <repositories>
     <repository>
       <id>codehaus.org</id>
