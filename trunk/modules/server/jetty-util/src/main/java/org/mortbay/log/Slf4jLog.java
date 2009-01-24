@@ -16,6 +16,10 @@
 package org.mortbay.log;
 
 
+/* ------------------------------------------------------------ */
+/** Slf4jLog Logger
+ * 
+ */
 public class Slf4jLog implements Logger
 {
     private org.slf4j.Logger logger;
