@@ -242,7 +242,7 @@ public class SSLEngineTest extends TestCase
         // ~ Methods
         // ------------------------------------------------------------
 
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             // System.err.println("HANDLE "+request.getRequestURI());
             PrintWriter out=response.getWriter();

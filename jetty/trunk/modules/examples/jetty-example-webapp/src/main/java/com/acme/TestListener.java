@@ -69,14 +69,11 @@ public class TestListener implements HttpSessionListener,  HttpSessionAttributeL
     {
     	ServletContext context=sce.getServletContext();
     	
-    	context.addFilter("TestFilter", null, TestFilter.class.getName(), null);
-    	
-    	context.addFilterMapping(
-    			"TestFilter", 
-    			new String[]{"/dump/*","/dispatch/*","*.dump"}, new String[]{"*"}, 
-    			EnumSet.of(DispatcherType.ERROR,DispatcherType.FORWARD,DispatcherType.INCLUDE,DispatcherType.REQUEST), 
-    			true);
-    
+    	context.addFilter("TestFilter",TestFilter.class.getName()).setAsyncSupported(true);
+    	context.addFilterMappingForUrlPatterns("TestFilter",
+    	        EnumSet.of(DispatcherType.ERROR,DispatcherType.ASYNC,DispatcherType.FORWARD,DispatcherType.INCLUDE,DispatcherType.REQUEST),
+    	        true, 
+    	        new String[]{"/dump/*","/dispatch/*","*.dump"});
     }
 
     public void contextDestroyed(ServletContextEvent sce)

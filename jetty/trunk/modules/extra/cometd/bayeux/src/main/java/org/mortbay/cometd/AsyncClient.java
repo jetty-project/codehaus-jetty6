@@ -14,6 +14,7 @@
 
 package org.mortbay.cometd;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,20 +27,20 @@ import org.mortbay.thread.Timeout;
  * Extension of {@link ClientImpl} that uses {@link Continuation}s to
  * resume clients waiting for messages. Continuation clients are used for
  * remote clients and have removed if they are not accessed within
- * an idle timeout (@link {@link SuspendingBayeux#_clientTimer}).
+ * an idle timeout (@link {@link AsyncBayeux#_clientTimer}).
  * 
  * @author gregw
  *
  */
-public class SuspendingClient extends ClientImpl
+public class AsyncClient extends ClientImpl
 {
     private long _accessed;
     public transient Timeout.Task _timeout; 
-    private SuspendingBayeux _bayeux;
-    private transient ServletRequest _pollRequest;
+    private AsyncBayeux _bayeux;
+    private transient AsyncContext _asyncContext;
 
     /* ------------------------------------------------------------ */
-    protected SuspendingClient(SuspendingBayeux bayeux)
+    protected AsyncClient(AsyncBayeux bayeux)
     {
         super(bayeux);
         _bayeux=bayeux;
@@ -54,7 +55,7 @@ public class SuspendingClient extends ClientImpl
                 }
                 public String toString()
                 {
-                    return "T-"+SuspendingClient.this.toString();
+                    return "T-"+AsyncClient.this.toString();
                 }
             };
             _bayeux.startTimeout(_timeout,getTimeout());
@@ -63,19 +64,15 @@ public class SuspendingClient extends ClientImpl
 
 
     /* ------------------------------------------------------------ */
-    public void setPollRequest(ServletRequest request)
+    public void setAsyncContext(AsyncContext context)
     {
-        
-        if (request==null)
+        if (context==null)
         {
             synchronized (this)
             {
-                if (_pollRequest!=null)
-                {
-                    if(_pollRequest.isSuspended())
-                        _pollRequest.resume(); 
-                }
-                _pollRequest=null;
+                if (_asyncContext!=null)
+                    _asyncContext.dispatch(); 
+                _asyncContext=null;
                 if (_timeout!=null)
                     _bayeux.startTimeout(_timeout,getTimeout());
             }
@@ -84,12 +81,9 @@ public class SuspendingClient extends ClientImpl
         {
             synchronized (this)
             {
-                if (_pollRequest!=null)
-                {
-                    if(_pollRequest.isSuspended())
-                        _pollRequest.resume(); 
-                }
-                _pollRequest=request;
+                if (_asyncContext!=null)
+                    _asyncContext.dispatch(); 
+                _asyncContext=context;
                 if (_timeout!=null)
                     _bayeux.cancelTimeout(_timeout);
             }
@@ -97,9 +91,9 @@ public class SuspendingClient extends ClientImpl
     }
     
     /* ------------------------------------------------------------ */
-    public ServletRequest getPollRequest()
+    public AsyncContext getAsyncContext()
     {
-        return _pollRequest;
+        return _asyncContext;
     }
 
     /* ------------------------------------------------------------ */
@@ -107,12 +101,9 @@ public class SuspendingClient extends ClientImpl
     {
         synchronized (this)
         {
-            if (_pollRequest!=null)
-            {
-                ((HttpServletResponse)((HttpServletRequest)_pollRequest).getServletResponse()).addHeader("Debug","Resume");
-                _pollRequest.resume();
-            }
-            _pollRequest=null;
+            if (_asyncContext!=null)
+                _asyncContext.dispatch();
+            _asyncContext=null;
         }
     }
 

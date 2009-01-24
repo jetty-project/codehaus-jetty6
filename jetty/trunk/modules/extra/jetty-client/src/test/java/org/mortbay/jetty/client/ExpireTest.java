@@ -72,8 +72,7 @@ public class ExpireTest extends TestCase
         server.setConnectors( new Connector[] { connector } );
         server.setHandler( new AbstractHandler()
         {
-            public void handle( String target, HttpServletRequest servletRequest, HttpServletResponse response,
-                                int dispatch ) throws IOException,
+            public void handle( String target, HttpServletRequest servletRequest, HttpServletResponse response ) throws IOException,
                 ServletException
             {
                 Request request = (Request) servletRequest;

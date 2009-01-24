@@ -93,6 +93,8 @@ public class WebXmlConfiguration implements Configuration
         URL webapp24xsd=Loader.getResource(Servlet.class,"javax/servlet/resources/web-app_2_4.xsd",true);
         URL webapp25xsd=Loader.getResource(Servlet.class,"javax/servlet/resources/web-app_2_5.xsd",true);
         URL webapp30xsd=Loader.getResource(Servlet.class,"javax/servlet/resources/web-app_3_0.xsd",true);
+        URL webcommon30xsd=Loader.getResource(Servlet.class,"javax/servlet/resources/web-common_3_0.xsd",true);
+        URL webfragment30xsd=Loader.getResource(Servlet.class,"javax/servlet/resources/web-fragment_3_0.xsd",true);
         URL schemadtd=Loader.getResource(Servlet.class,"javax/servlet/resources/XMLSchema.dtd",true);
         URL xmlxsd=Loader.getResource(Servlet.class,"javax/servlet/resources/xml.xsd",true);
         URL webservice11xsd=Loader.getResource(Servlet.class,"javax/servlet/resources/j2ee_web_services_client_1_1.xsd",true);
@@ -141,6 +143,10 @@ public class WebXmlConfiguration implements Configuration
         redirect(xmlParser,"http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd",webapp25xsd);
         redirect(xmlParser,"web-app_3_0.xsd",webapp30xsd);
         redirect(xmlParser,"http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd",webapp30xsd);
+        redirect(xmlParser,"web-common_3_0.xsd",webcommon30xsd);
+        redirect(xmlParser,"http://java.sun.com/xml/ns/javaee/web-common_3_0.xsd",webcommon30xsd);
+        redirect(xmlParser,"web-fragment_3_0.xsd",webfragment30xsd);
+        redirect(xmlParser,"http://java.sun.com/xml/ns/javaee/web-fragment_3_0.xsd",webfragment30xsd);
         redirect(xmlParser,"xml.xsd",xmlxsd);
         redirect(xmlParser,"http://www.w3.org/2001/xml.xsd",xmlxsd);
         redirect(xmlParser,"datatypes.dtd",datatypesdtd);
@@ -543,7 +549,10 @@ public class WebXmlConfiguration implements Configuration
             String pvalue=paramNode.getString("param-value",false,true);
             holder.setInitParameter(pname, pvalue);
         }
-        
+
+        String async=node.getString("async-support",false,true);
+        if (async!=null)
+            holder.setAsyncSupported(Boolean.valueOf(async));
     }
 
     /* ------------------------------------------------------------ */
@@ -578,23 +587,12 @@ public class WebXmlConfiguration implements Configuration
         mapping.setServletNames((String[])names.toArray(new String[names.size()]));
 
 
-        int dispatcher=Handler.DEFAULT;
+        int dispatcher=FilterMapping.DEFAULT;
         iter=node.iterator("dispatcher");
         while(iter.hasNext())
         {
             String d=((XmlParser.Node)iter.next()).toString(false,true);
-            dispatcher|=Dispatcher.type(d);
-        }
-        mapping.setDispatches(dispatcher);
-
-        iter=node.iterator("life-cycle");
-        while(iter.hasNext())
-        {
-            String l=((XmlParser.Node)iter.next()).toString(false,true);
-            if ("initial".equalsIgnoreCase(l))
-                mapping.setInitialLifeCycle(true);
-            if ("redispatch".equalsIgnoreCase(l))
-                mapping.setRedispatchLifeCycle(true);
+            dispatcher|=FilterMapping.dispatch(d);
         }
         mapping.setDispatches(dispatcher);
         
@@ -753,7 +751,10 @@ public class WebXmlConfiguration implements Configuration
             if(roleName!=null)
                 holder.setRunAs(roleName);
         }
-        
+
+        String async=node.getString("async-support",false,true);
+        if (async!=null)
+            holder.setAsyncSupported(Boolean.valueOf(async));
     }
 
     /* ------------------------------------------------------------ */

@@ -16,20 +16,96 @@
 package org.mortbay.jetty.servlet;
 
 import java.util.Arrays;
+import java.util.EnumSet;
+
+import javax.servlet.DispatcherType;
 
 import org.mortbay.jetty.Handler;
 
 
 public class FilterMapping
 {
-    private int _dispatches=Handler.REQUEST;
+    /** Dispatch types */
+    public static final int DEFAULT=0;
+    public static final int REQUEST=1;
+    public static final int FORWARD=2;
+    public static final int INCLUDE=4;
+    public static final int ERROR=8;
+    public static final int ASYNC=16;
+    public static final int ALL=31;
+    
+
+    /* ------------------------------------------------------------ */
+    /** Dispatch type from name
+     */
+    public static int dispatch(String type)
+    {
+        if ("request".equalsIgnoreCase(type))
+            return REQUEST;
+        if ("forward".equalsIgnoreCase(type))
+            return FORWARD;
+        if ("include".equalsIgnoreCase(type))
+            return INCLUDE;
+        if ("error".equalsIgnoreCase(type))
+            return ERROR;
+        if ("async".equalsIgnoreCase(type))
+            return ASYNC;
+        throw new IllegalArgumentException(type);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Dispatch type from name
+     */
+    public static int dispatch(DispatcherType type)
+    {
+    	switch(type)
+    	{
+    	  case REQUEST:
+    		  return REQUEST;
+    	  case ASYNC:
+    		  return ASYNC;
+    	  case FORWARD:
+    		  return FORWARD;
+    	  case INCLUDE:
+    		  return INCLUDE;
+    	  case ERROR:
+    		  return ERROR;
+    	}
+        throw new IllegalArgumentException(type.toString());
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /** Dispatch type from name
+     */
+    public static DispatcherType dispatch(int type)
+    {
+    	switch(type)
+    	{
+    	  case REQUEST:
+    		  return DispatcherType.REQUEST;
+    	  case ASYNC:
+    		  return DispatcherType.ASYNC;
+    	  case FORWARD:
+    		  return DispatcherType.FORWARD;
+    	  case INCLUDE:
+    		  return DispatcherType.INCLUDE;
+    	  case ERROR:
+    		  return DispatcherType.ERROR;
+    	}
+        throw new IllegalArgumentException(""+type);
+    }
+	
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    
+	
+    private int _dispatches=DEFAULT;
     private String _filterName;
     private transient FilterHolder _holder;
     private String[] _pathSpecs;
     private String[] _servletNames;
-    private boolean _redispatch;
-    private boolean _initial;
-    
 
     /* ------------------------------------------------------------ */
     public FilterMapping()
@@ -38,20 +114,18 @@ public class FilterMapping
     /* ------------------------------------------------------------ */
     /** Check if this filter applies to a path.
      * @param path The path to check or null to just check type
-     * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
+     * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE, __ASYNC or __ERROR.
      * @return True if this filter applies
      */
-    boolean appliesTo(String path, int type,boolean initial)
+    boolean appliesTo(String path, int type)
     {
-        if (_initial==_redispatch || _initial&&initial || _redispatch&&!initial)
+        if (appliesTo(type))
         {
-            if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)) && _pathSpecs!=null )
-            {
-                for (int i=0;i<_pathSpecs.length;i++)
-                    if (_pathSpecs[i]!=null &&  PathMap.match(_pathSpecs[i], path,true))
-                        return true;
-            }
+            for (int i=0;i<_pathSpecs.length;i++)
+                if (_pathSpecs[i]!=null &&  PathMap.match(_pathSpecs[i], path,true))
+                    return true;
         }
+
         return false;
     }
     
@@ -61,16 +135,12 @@ public class FilterMapping
      *      {@link Handler#REQUEST}, {@link Handler#FORWARD}, {@link Handler#INCLUDE} or {@link Handler#ERROR}.
      * @return <code>true</code> if this filter applies
      */
-    boolean appliesTo(int type, boolean initial)
+    boolean appliesTo(int type)
     {
-        if (_initial==_redispatch || _initial&&initial || _redispatch&&!initial)
-        {
-            if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)))
-                return true;
-        }
-        return false;
+    	if (_dispatches==0)
+    		return type==REQUEST || type==ASYNC && _holder.isAsyncSupported();
+        return (_dispatches&type)!=0;
     }
-
     
     /* ------------------------------------------------------------ */
     /**
@@ -106,6 +176,20 @@ public class FilterMapping
     public String[] getPathSpecs()
     {
         return _pathSpecs;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setDispatcherTypes(EnumSet<DispatcherType> dispatcherTypes) 
+    {
+        _dispatches=DEFAULT;
+        if (dispatcherTypes.contains(DispatcherType.ERROR)) 
+            _dispatches|=ERROR;
+        if (dispatcherTypes.contains(DispatcherType.FORWARD)) 
+            _dispatches|=FORWARD;
+        if (dispatcherTypes.contains(DispatcherType.INCLUDE)) 
+            _dispatches|=INCLUDE;
+        if (dispatcherTypes.contains(DispatcherType.REQUEST)) 
+            _dispatches|=REQUEST;
     }
     
     /* ------------------------------------------------------------ */
@@ -193,39 +277,4 @@ public class FilterMapping
         return "(F="+_filterName+","+(_pathSpecs==null?"[]":Arrays.asList(_pathSpecs).toString())+","+(_servletNames==null?"[]":Arrays.asList(_servletNames).toString())+","+_dispatches+")"; 
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @return the redispatch
-     */
-    public boolean isRedispatchLifeCycle()
-    {
-        return _redispatch;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param redispatch the redispatch to set
-     */
-    public void setRedispatchLifeCycle(boolean redispatch)
-    {
-        _redispatch = redispatch;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return the initial
-     */
-    public boolean isInitialLifeCycle()
-    {
-        return _initial;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param initial the initial to set
-     */
-    public void setInitialLifeCycle(boolean initial)
-    {
-        _initial = initial;
-    }
 }

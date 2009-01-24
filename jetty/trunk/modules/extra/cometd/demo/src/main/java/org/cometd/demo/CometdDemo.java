@@ -14,12 +14,11 @@
 
 package org.cometd.demo;
 
-
 import java.util.Set;
 
 import org.mortbay.cometd.AbstractBayeux;
 import org.mortbay.cometd.ClientImpl;
-import org.mortbay.cometd.SuspendingCometdServlet;
+import org.mortbay.cometd.AsyncCometdServlet;
 import org.mortbay.cometd.ext.TimesyncExtension;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
@@ -29,6 +28,7 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.ssl.SslSocketConnector;
 import org.mortbay.jetty.ssl.SslSelectChannelConnector;
 import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceCollection;
@@ -36,75 +36,80 @@ import org.mortbay.thread.QueuedThreadPool;
 
 import org.cometd.Message;
 
-
 /* ------------------------------------------------------------ */
-/** Main class for cometd demo.
+/**
+ * Main class for cometd demo.
  * 
  * This is of use when running demo in a terracotta cluster
  * 
  * @author gregw
- *
+ * 
  */
 public class CometdDemo
 {
     private static int _testHandshakeFailure;
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param args
      */
     public static void main(String[] args) throws Exception
     {
-        int port = args.length==0?8080:Integer.parseInt(args[0]);
-     
-        String base="../../../..";
-        
-        // Manually contruct context to avoid hassles with webapp classloaders for now.
+        int port = args.length == 0?8080:Integer.parseInt(args[0]);
+
+        String base = "../../../..";
+
+        // Manually contruct context to avoid hassles with webapp classloaders
+        // for now.
         Server server = new Server();
         QueuedThreadPool qtp = new QueuedThreadPool();
         qtp.setMinThreads(5);
         qtp.setMaxThreads(200);
         server.setThreadPool(qtp);
-        
-        SelectChannelConnector connector=new SelectChannelConnector();
+
+        SelectChannelConnector connector = new SelectChannelConnector();
         // SocketConnector connector=new SocketConnector();
         connector.setPort(port);
         server.addConnector(connector);
-        SocketConnector bconnector=new SocketConnector();
-        bconnector.setPort(port+1);
+        SocketConnector bconnector = new SocketConnector();
+        bconnector.setPort(port + 1);
         server.addConnector(bconnector);
-        
-        SslSelectChannelConnector connector2=new SslSelectChannelConnector();
+
+        SslSelectChannelConnector connector2 = new SslSelectChannelConnector();
         // SslSocketConnector connector2=new SslSocketConnector();
-        connector2.setPort(port-80+443);
-        connector2.setKeystore(base+"/etc/keystore");
+        connector2.setPort(port - 80 + 443);
+        connector2.setKeystore(base + "/etc/keystore");
         connector2.setPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
         connector2.setKeyPassword("OBF:1u2u1wml1z7s1z7a1wnl1u2g");
-        connector2.setTruststore(base+"/etc/keystore");
+        connector2.setTruststore(base + "/etc/keystore");
         connector2.setTrustPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
-        server.addConnector(connector2);  
+        server.addConnector(connector2);
 
         ContextHandlerCollection contexts = new ContextHandlerCollection();
         server.setHandler(contexts);
-        
+
         MovedContextHandler moved = new MovedContextHandler(contexts,"/","/cometd");
         moved.setDiscardPathInfo(true);
-        
-        Context context = new Context(contexts,"/cometd",Context.NO_SECURITY|Context.SESSIONS);
-        
-	context.setBaseResource(new ResourceCollection(new Resource[]
-	{
-	    Resource.newResource("./src/main/webapp/"),
-            Resource.newResource("./target/cometd-demo-7.0-SNAPSHOT/"),
-	}));
-	
+
+        Context context = new Context(contexts,"/cometd",Context.NO_SECURITY | Context.SESSIONS);
+
+        context.setBaseResource(new ResourceCollection(new Resource[]
+        { Resource.newResource("./src/main/webapp/"), Resource.newResource("./target/cometd-demo-7.1-SNAPSHOT/"), }));
+
         // Demo bayeux session manager
-        // context.getSessionHandler().setSessionManager(new BayeuxSessionManager());
+        // context.getSessionHandler().setSessionManager(new
+        // BayeuxSessionManager());
         // context.addServlet(com.acme.SessionDump.class,"/session");
         // context.addServlet(com.acme.Dump.class,"/dump");
-        
+
+        /*
+         * FilterHolder filter_holder = context.addFilter(
+         * "org.mortbay.servlet.GzipFilter", "/*", 0);
+         * filter_holder.setAsyncSupported(true);
+         */
+
         // Cometd servlet
-        SuspendingCometdServlet cometd_servlet=new SuspendingCometdServlet();
+        AsyncCometdServlet cometd_servlet = new AsyncCometdServlet();
         ServletHolder cometd_holder = new ServletHolder(cometd_servlet);
         cometd_holder.setInitParameter("filters","/WEB-INF/filters.json");
         cometd_holder.setInitParameter("timeout","180000");
@@ -113,41 +118,42 @@ public class CometdDemo
         cometd_holder.setInitParameter("multiFrameInterval","1500");
         cometd_holder.setInitParameter("directDeliver","true");
         cometd_holder.setInitParameter("logLevel","1");
-        
-        context.addServlet(cometd_holder, "/cometd/*");
-        context.addServlet("org.mortbay.jetty.servlet.DefaultServlet", "/");
+        cometd_holder.setAsyncSupported(true);
+
+        context.addServlet(cometd_holder,"/cometd/*");
+        context.addServlet("org.mortbay.jetty.servlet.DefaultServlet","/");
         context.addEventListener(new BayeuxServicesListener());
-        
+
         server.start();
-        
+
         AbstractBayeux bayeux = cometd_servlet.getBayeux();
         bayeux.addExtension(new TimesyncExtension());
-        
-        bayeux.setSecurityPolicy(new AbstractBayeux.DefaultPolicy(){
+
+        bayeux.setSecurityPolicy(new AbstractBayeux.DefaultPolicy()
+        {
             public boolean canHandshake(Message message)
             {
-                if (_testHandshakeFailure<0)
+                if (_testHandshakeFailure < 0)
                 {
                     _testHandshakeFailure++;
                     return false;
                 }
                 return true;
             }
-            
         });
-        
+
         while (true)
         {
             Thread.sleep(2000);
-            Set<String> ids=bayeux.getClientIDs();
-            ClientImpl[] clients=new ClientImpl[ids.size()];
-            int i=0;
+            Set<String> ids = bayeux.getClientIDs();
+            ClientImpl[] clients = new ClientImpl[ids.size()];
+            int i = 0;
             for (String id : ids)
             {
-                clients[i]=(ClientImpl)bayeux.getClient(id);
+                clients[i] = (ClientImpl)bayeux.getClient(id);
                 i++;
             }
-            i=0;
+            i = 0;
         }
     }
 }

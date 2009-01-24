@@ -87,5 +87,12 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+    	<groupId>org.mortbay.jetty</groupId>
+    	<artifactId>jetty-servlet</artifactId>
+    	<version>${project.version}</version>
+    	<type>jar</type>
+    	<scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

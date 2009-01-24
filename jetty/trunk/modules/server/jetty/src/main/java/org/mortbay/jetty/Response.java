@@ -49,7 +49,6 @@ import org.mortbay.util.URIUtil;
 public class Response implements HttpServletResponse
 {
     public static final int
-        DISABLED=-1,
         NONE=0,
         STREAM=1,
         WRITER=2;
@@ -87,8 +86,6 @@ public class Response implements HttpServletResponse
     private String _contentType;
     private int _outputState;
     private PrintWriter _writer;
-    private boolean _disabled;
-    private int _disabledOutputState;
 
     /* ------------------------------------------------------------ */
     /**
@@ -240,7 +237,7 @@ public class Response implements HttpServletResponse
      */
     public void sendError(int code, String message) throws IOException
     {
-    	if (_connection.isIncluding() || _disabled)
+    	if (_connection.isIncluding())
     		return;
 
         if (isCommitted())
@@ -280,7 +277,7 @@ public class Response implements HttpServletResponse
                 request.setAttribute(ServletHandler.__J_S_ERROR_REQUEST_URI, request.getRequestURI());
                 request.setAttribute(ServletHandler.__J_S_ERROR_SERVLET_NAME,request.getServletName());
 
-                error_handler.handle(null,_connection.getRequest(),this, Handler.ERROR);
+                error_handler.handle(null,_connection.getRequest(),this);
             }
             else
             {
@@ -344,7 +341,7 @@ public class Response implements HttpServletResponse
      */
     public void sendError(int sc) throws IOException
     {
-        if (sc==102 && !_disabled)
+        if (sc==102)
             sendProcessing();
         else
             sendError(sc,null);
@@ -387,7 +384,7 @@ public class Response implements HttpServletResponse
      */
     public void sendRedirect(String location) throws IOException
     {
-    	if (_connection.isIncluding()|| _disabled)
+    	if (_connection.isIncluding())
     		return;
 
         if (location==null)
@@ -424,7 +421,7 @@ public class Response implements HttpServletResponse
      */
     public void setDateHeader(String name, long date)
     {
-        if (!_connection.isIncluding()&& !_disabled)
+        if (!_connection.isIncluding())
             _connection.getResponseFields().putDateField(name, date);
     }
 
@@ -434,7 +431,7 @@ public class Response implements HttpServletResponse
      */
     public void addDateHeader(String name, long date)
     {
-        if (!_connection.isIncluding()&& !_disabled)
+        if (!_connection.isIncluding())
             _connection.getResponseFields().addDateField(name, date);
     }
 
@@ -451,16 +448,13 @@ public class Response implements HttpServletResponse
             else
                 return;
         }
-        if (!_disabled)
+        _connection.getResponseFields().put(name, value);
+        if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
         {
-            _connection.getResponseFields().put(name, value);
-            if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
-            {
-                if (value==null)
-                    _connection._generator.setContentLength(-1);
-                else
-                    _connection._generator.setContentLength(Long.parseLong(value));
-            }
+            if (value==null)
+                _connection._generator.setContentLength(-1);
+            else
+                _connection._generator.setContentLength(Long.parseLong(value));
         }
     }
 
@@ -497,12 +491,9 @@ public class Response implements HttpServletResponse
                 return;
         }
 
-        if (!_disabled)
-        {
-            _connection.getResponseFields().add(name, value);
-            if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
-                _connection._generator.setContentLength(Long.parseLong(value));
-        }
+        _connection.getResponseFields().add(name, value);
+        if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
+            _connection._generator.setContentLength(Long.parseLong(value));
     }
 
     /* ------------------------------------------------------------ */
@@ -511,7 +502,7 @@ public class Response implements HttpServletResponse
      */
     public void setIntHeader(String name, int value)
     {
-        if (!_connection.isIncluding()&& !_disabled)
+        if (!_connection.isIncluding())
         {
             _connection.getResponseFields().putLongField(name, value);
             if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
@@ -525,7 +516,7 @@ public class Response implements HttpServletResponse
      */
     public void addIntHeader(String name, int value)
     {
-        if (!_connection.isIncluding()&& !_disabled)
+        if (!_connection.isIncluding())
         {
             _connection.getResponseFields().addLongField(name, value);
             if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
@@ -550,7 +541,7 @@ public class Response implements HttpServletResponse
     {
         if (sc<=0)
             throw new IllegalArgumentException();
-        if (!_connection.isIncluding() && !_disabled)
+        if (!_connection.isIncluding())
         {
             _status=sc;
             _reason=sm;
@@ -589,9 +580,6 @@ public class Response implements HttpServletResponse
      */
     public ServletOutputStream getOutputStream() throws IOException
     {
-        if (_outputState==DISABLED)
-            return __nullServletOut;
-
         if (_outputState!=NONE && _outputState!=STREAM)
             throw new IllegalStateException("WRITER");
 
@@ -606,14 +594,17 @@ public class Response implements HttpServletResponse
     }
 
     /* ------------------------------------------------------------ */
+    public boolean isOutputing()
+    {
+        return _outputState!=NONE;
+    }
+
+    /* ------------------------------------------------------------ */
     /*
      * @see javax.servlet.ServletResponse#getWriter()
      */
     public PrintWriter getWriter() throws IOException
     {
-        if (_outputState==DISABLED)
-            return __nullPrintWriter;
-
         if (_outputState!=NONE && _outputState!=WRITER)
             throw new IllegalStateException("STREAM");
 
@@ -648,7 +639,7 @@ public class Response implements HttpServletResponse
      */
     public void setCharacterEncoding(String encoding)
     {
-    	if (_connection.isIncluding() || _disabled)
+    	if (_connection.isIncluding())
     		return;
 
         if (this._outputState==0 && !isCommitted())
@@ -725,7 +716,7 @@ public class Response implements HttpServletResponse
         // Protect from setting after committed as default handling
         // of a servlet HEAD request ALWAYS sets _content length, even
         // if the getHandling committed the response!
-        if (isCommitted() || _connection.isIncluding() || _disabled)
+        if (isCommitted() || _connection.isIncluding())
             return;
         _connection._generator.setContentLength(len);
         if (len>=0)
@@ -759,7 +750,7 @@ public class Response implements HttpServletResponse
         // Protect from setting after committed as default handling
         // of a servlet HEAD request ALWAYS sets _content length, even
         // if the getHandling committed the response!
-        if (isCommitted() || _connection.isIncluding() || _disabled)
+        if (isCommitted() || _connection.isIncluding())
         	return;
         _connection._generator.setContentLength(len);
         _connection.getResponseFields().putLongField(HttpHeaders.CONTENT_LENGTH, len);
@@ -771,7 +762,7 @@ public class Response implements HttpServletResponse
      */
     public void setContentType(String contentType)
     {
-        if (isCommitted() || _connection.isIncluding() || _disabled)
+        if (isCommitted() || _connection.isIncluding())
             return;
 
         // Yes this method is horribly complex.... but there are lots of special cases and
@@ -937,8 +928,6 @@ public class Response implements HttpServletResponse
      */
     public void setBufferSize(int size)
     {
-        if (_disabled)
-            return;
         if (isCommitted() || getContentCount()>0)
             throw new IllegalStateException("Committed or content written");
         _connection.getGenerator().increaseContentBufferSize(size);
@@ -959,8 +948,7 @@ public class Response implements HttpServletResponse
      */
     public void flushBuffer() throws IOException
     {
-        if (!_disabled)
-            _connection.flushResponse();
+        _connection.flushResponse();
     }
 
     /* ------------------------------------------------------------ */
@@ -969,9 +957,12 @@ public class Response implements HttpServletResponse
      */
     public void reset()
     {
-        resetBuffer();
-
+        fwdReset();
+        _status=200;
+        _reason=null;
+        
         HttpFields response_fields=_connection.getResponseFields();
+        
         response_fields.clear();
         String connection=_connection.getRequestFields().getStringField(HttpHeaders.CONNECTION_BUFFER);
         if (connection!=null)
@@ -1006,9 +997,15 @@ public class Response implements HttpServletResponse
             Request request=_connection.getRequest();
             response_fields.put(HttpHeaders.DATE_BUFFER, request.getTimeStampBuffer(),request.getTimeStamp());
         }
-
-        _status=200;
-        _reason=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /*
+     * @see javax.servlet.ServletResponse#reset()
+     */
+    public void fwdReset()
+    {
+        resetBuffer();
         _mimeType=null;
         _cachedMimeType=null;
         _contentType=null;
@@ -1017,8 +1014,6 @@ public class Response implements HttpServletResponse
         _locale=null;
         _outputState=NONE;
         _writer=null;
-        _disabled=false;
-        _disabledOutputState=NONE;
     }
 
     /* ------------------------------------------------------------ */
@@ -1027,8 +1022,6 @@ public class Response implements HttpServletResponse
      */
     public void resetBuffer()
     {
-        if (_disabled)
-            return;
         if (isCommitted())
             throw new IllegalStateException("Committed");
         _connection.getGenerator().resetBuffer();
@@ -1050,7 +1043,7 @@ public class Response implements HttpServletResponse
      */
     public void setLocale(Locale locale)
     {
-        if (locale == null || isCommitted() ||_connection.isIncluding() || _disabled)
+        if (locale == null || isCommitted() ||_connection.isIncluding())
             return;
 
         _locale = locale;
@@ -1122,7 +1115,6 @@ public class Response implements HttpServletResponse
         return _reason;
     }
 
-
     /* ------------------------------------------------------------ */
     /**
      */
@@ -1155,34 +1147,7 @@ public class Response implements HttpServletResponse
         return "HTTP/1.1 "+_status+" "+ (_reason==null?"":_reason) +System.getProperty("line.separator")+
         _connection.getResponseFields().toString();
     }
-
-    /* ------------------------------------------------------------ */
-    public void disable()
-    {
-        if (!_disabled)
-            _disabledOutputState=_outputState;
-        _disabled=true;
-        _outputState=DISABLED;
-
-    }
-
-
-    /* ------------------------------------------------------------ */
-    public void enable()
-    {
-        if (_disabled)
-            _outputState=_disabledOutputState;
-        _disabled=false;
-    }
-
-
-    /* ------------------------------------------------------------ */
-    public boolean isDisabled()
-    {
-        return _disabled;
-    }
-
-
+    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
