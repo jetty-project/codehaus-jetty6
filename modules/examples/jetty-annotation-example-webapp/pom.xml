@@ -99,11 +99,5 @@
       <version>1.0</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>servlet-annotation-spec</artifactId>
-      <version>3.0.pre0</version>
-      <scope>provided</scope>
-    </dependency>
   </dependencies>
 </project>

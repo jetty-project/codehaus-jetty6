@@ -350,7 +350,7 @@ public class HttpExchangeTest extends TestCase
         newServer();
         _server.setHandler(new AbstractHandler()
         {
-            public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+            public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
             {
                 int i=0;
                 try

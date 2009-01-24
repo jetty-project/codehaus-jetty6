@@ -180,9 +180,7 @@ public class ServletTester
             else
                 connector.open();
 
-            return "http://"+(localhost?"127.0.0.1":
-                InetAddress.getLocalHost().getHostAddress()    
-            )+":"+connector.getLocalPort();
+            return "http://127.0.0.1:"+connector.getLocalPort();
         }
    }
 

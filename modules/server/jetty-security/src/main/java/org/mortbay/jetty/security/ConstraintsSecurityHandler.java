@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.Map;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -184,21 +185,22 @@ public class ConstraintsSecurityHandler extends HandlerWrapper implements Securi
     /* 
      * @see org.mortbay.jetty.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException 
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException 
     {
         Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
         Response base_response = (response instanceof Response) ? (Response)response:HttpConnection.getCurrentConnection().getResponse();
         UserRealm old_realm = base_request.getUserRealm();
+        DispatcherType dispatch=request.getDispatcherType();
         try
         {
             base_request.setUserRealm(getUserRealm());
-            if (dispatch==REQUEST && !checkSecurityConstraints(target,base_request,base_response))
+            if (DispatcherType.REQUEST.equals(dispatch) && !checkSecurityConstraints(target,base_request,base_response))
             {
                 base_request.setHandled(true);
                 return;
             }
             
-            if (dispatch==FORWARD && _checkWelcomeFiles && request.getAttribute("org.mortbay.jetty.welcome")!=null)
+            if (DispatcherType.FORWARD.equals(dispatch) && _checkWelcomeFiles && request.getAttribute("org.mortbay.jetty.welcome")!=null)
             {
                 request.removeAttribute("org.mortbay.jetty.welcome");
                 if (!checkSecurityConstraints(target,base_request,base_response))
@@ -217,17 +219,13 @@ public class ConstraintsSecurityHandler extends HandlerWrapper implements Securi
             }
             
             if (getHandler()!=null)
-                getHandler().handle(target, request, response, dispatch);
+                getHandler().handle(target, request, response);
         }
         finally
         {
-            if (_userRealm!=null)
-            {
-                if (dispatch==REQUEST)
-                {
-                    _userRealm.disassociate(base_request.getUserPrincipal());
-                }
-            }   
+            if (_userRealm!=null && DispatcherType.REQUEST.equals(dispatch))
+            	_userRealm.disassociate(base_request.getUserPrincipal());
+            
             base_request.setUserRealm(old_realm);
         }
     }

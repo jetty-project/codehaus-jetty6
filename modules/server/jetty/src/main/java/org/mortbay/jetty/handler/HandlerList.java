@@ -36,7 +36,7 @@ public class HandlerList extends HandlerCollection
     /* 
      * @see org.mortbay.jetty.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) 
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response) 
         throws IOException, ServletException
     {
         Handler[] handlers = getHandlers();
@@ -46,7 +46,7 @@ public class HandlerList extends HandlerCollection
             Request base_request = HttpConnection.getCurrentConnection().getRequest();
             for (int i=0;i<handlers.length;i++)
             {
-                handlers[i].handle(target,request, response, dispatch);
+                handlers[i].handle(target,request, response);
                 if ( base_request.isHandled())
                     return;
             }

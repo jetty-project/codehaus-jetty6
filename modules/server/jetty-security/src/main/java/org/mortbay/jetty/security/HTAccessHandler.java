@@ -89,9 +89,9 @@ public class HTAccessHandler extends ConstraintsSecurityHandler
      * 
      * @see org.mortbay.jetty.Handler#handle(java.lang.String,
      *      javax.servlet.http.HttpServletRequest,
-     *      javax.servlet.http.HttpServletResponse, int)
+     *      javax.servlet.http.HttpServletResponse)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
     {
         Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
         Response base_response=(response instanceof Response)?(Response)response:HttpConnection.getCurrentConnection().getResponse();
@@ -232,7 +232,7 @@ public class HTAccessHandler extends ConstraintsSecurityHandler
             
             if (getHandler()!=null)
             {
-                getHandler().handle(target,request,response,dispatch);
+                getHandler().handle(target,request,response);
             }
 
         }

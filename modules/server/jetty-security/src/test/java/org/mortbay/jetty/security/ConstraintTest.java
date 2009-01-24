@@ -202,7 +202,7 @@ public class ConstraintTest extends TestCase
     class RequestHandler extends AbstractHandler
     {
         
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             ((Request)request).setHandled(true);
             response.setStatus(200);

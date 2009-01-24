@@ -524,7 +524,8 @@ public class SslSelectChannelConnector extends SelectChannelConnector
             // TODO remove this hack
             public boolean isReadyForDispatch()
             {
-                return super.isReadyForDispatch() && !((HttpConnection)getConnection()).getRequest().isSuspended();
+                Request request = ((HttpConnection)getConnection()).getRequest();
+                return super.isReadyForDispatch() && !(request.isSuspended());
             }
         };
     }
