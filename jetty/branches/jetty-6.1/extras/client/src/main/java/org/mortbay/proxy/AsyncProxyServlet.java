@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
 
@@ -36,6 +38,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpSchemes;
+import org.mortbay.jetty.HttpURI;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.client.Address;
@@ -133,29 +136,35 @@ public class AsyncProxyServlet implements Servlet
                 if (request.getQueryString()!=null)
                     uri+="?"+request.getQueryString();
 
+                HttpURI url=proxyHttpURI(request.getScheme(),
+                        request.getServerName(),
+                        request.getServerPort(),
+                        uri);
+                
+                if (url==null)
+                {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
 
                 HttpExchange exchange = new HttpExchange()
                 {
 
                     protected void onRequestCommitted() throws IOException
                     {
-                        System.err.println("onRequestCommitted()");
                     }
 
                     protected void onRequestComplete() throws IOException
                     {
-                        System.err.println("onRequestComplete()");
                     }
 
                     protected void onResponseComplete() throws IOException
                     {
-                        System.err.println("onResponseComplete()");
                         continuation.resume();
                     }
 
                     protected void onResponseContent(Buffer content) throws IOException
                     {
-                        System.err.println("onResponseContent()");
                         // TODO Avoid this copy
                         while (content.hasContent())
                         {
@@ -166,12 +175,10 @@ public class AsyncProxyServlet implements Servlet
 
                     protected void onResponseHeaderComplete() throws IOException
                     {
-                        System.err.println("onResponseCompleteHeader()");
                     }
 
                     protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
                     {
-                        System.err.println("onResponseStatus("+version+","+status+","+reason+")");
                         if (reason!=null && reason.length()>0)
                             response.setStatus(status,reason.toString());
                         else
@@ -181,25 +188,18 @@ public class AsyncProxyServlet implements Servlet
 
                     protected void onResponseHeader(Buffer name, Buffer value) throws IOException
                     {
-                        System.err.println("onResponseHeader("+name+","+value+")");
                         String s = name.toString().toLowerCase();
                         if (!_DontProxyHeaders.contains(s))
                             response.addHeader(name.toString(),value.toString());
                     }
 
                 };
-
-                exchange.setScheme(HttpSchemes.HTTPS.equals(request.getScheme())?HttpSchemes.HTTPS_BUFFER:HttpSchemes.HTTP_BUFFER);
-                exchange.setMethod(request.getMethod());
-                exchange.setURI(uri);
-
+                
                 exchange.setVersion(request.getProtocol());
-                Address address=new Address(request.getServerName(),request.getServerPort());
-                exchange.setAddress(address);
-
-                System.err.println("PROXY TO http://"+address.getHost()+":"+address.getPort()+uri);
-
-
+                exchange.setMethod(request.getMethod());
+                
+                exchange.setURL(url.toString());
+                
                 // check connection header
                 String connectionHdr = request.getHeader("Connection");
                 if (connectionHdr!=null)
@@ -257,11 +257,15 @@ public class AsyncProxyServlet implements Servlet
                 continuation.suspend(30000);
             }
         }
-
-
-
     }
 
+
+    /* ------------------------------------------------------------ */
+    protected HttpURI proxyHttpURI(String scheme, String serverName, int serverPort, String uri)
+        throws MalformedURLException
+    {
+        return new HttpURI(scheme+"://"+serverName+":"+serverPort+uri);
+    }
 
     /* ------------------------------------------------------------ */
     public void handleConnect(HttpServletRequest request,
@@ -269,8 +273,6 @@ public class AsyncProxyServlet implements Servlet
         throws IOException
     {
         String uri = request.getRequestURI();
-
-        context.log("CONNECT: "+uri);
 
         String port = "";
         String host = "";
@@ -284,9 +286,6 @@ public class AsyncProxyServlet implements Servlet
                 host = host.substring(host.indexOf('/')+1);
         }
 
-
-
-
         InetSocketAddress inetAddress = new InetSocketAddress (host, Integer.parseInt(port));
 
         //if (isForbidden(HttpMessage.__SSL_SCHEME,addrPort.getHost(),addrPort.getPort(),false))
@@ -299,7 +298,6 @@ public class AsyncProxyServlet implements Servlet
             OutputStream out=response.getOutputStream();
 
             Socket socket = new Socket(inetAddress.getAddress(),inetAddress.getPort());
-            context.log("Socket: "+socket);
 
             response.setStatus(200);
             response.setHeader("Connection","close");
@@ -307,9 +305,7 @@ public class AsyncProxyServlet implements Servlet
 
 
 
-            context.log("out<-in");
             IO.copyThread(socket.getInputStream(),out);
-            context.log("in->out");
             IO.copy(in,socket.getOutputStream());
         }
     }
@@ -332,29 +328,44 @@ public class AsyncProxyServlet implements Servlet
     {
 
     }
+    
+    public static class Transparent extends AsyncProxyServlet
+    {
+        String _prefix;
+        String _server;
+        int _port;
+        
+        public Transparent()
+        {    
+        }
+        
+        public Transparent(String prefix,String server, int port)
+        {
+            _prefix=prefix;
+            _server=server;
+            _port=port;
+        }
+        
+        protected HttpURI proxyHttpURI(final String scheme, final String serverName, int serverPort, final String uri) throws MalformedURLException
+        {
+            if (!uri.startsWith(_prefix))
+                return null;
+            HttpURI url = super.proxyHttpURI(scheme,_server,_port,uri.substring(_prefix.length()));
+            return url;
+        }
+    }
 
 
     public static void main(String[] args)
         throws Exception
     {
-        Server server = new Server(8080);
-        HandlerCollection handlers = new HandlerCollection();
-        ContextHandlerCollection contexts = new ContextHandlerCollection();
-        handlers.setHandlers(new Handler[]{contexts,new DefaultHandler()});
-        server.setHandler(handlers);
-        WebAppContext webapp = new WebAppContext();
-        webapp.setContextPath("/test");
-        webapp.setResourceBase("../../webapps/test");
-        contexts.addHandler(webapp);
-        server.start();
-
         Server proxy = new Server();
         //SelectChannelConnector connector = new SelectChannelConnector();
         Connector connector = new SocketConnector();
         connector.setPort(8888);
         proxy.addConnector(connector);
         Context context = new Context(proxy,"/",0);
-        context.addServlet(new ServletHolder(new AsyncProxyServlet()), "/");
+        context.addServlet(new ServletHolder(new AsyncProxyServlet.Transparent("","www.google.com",80)), "/");
 
         proxy.start();
         proxy.join();
