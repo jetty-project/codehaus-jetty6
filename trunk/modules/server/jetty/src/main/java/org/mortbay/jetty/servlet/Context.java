@@ -19,8 +19,10 @@ import java.util.EnumSet;
 import java.util.Map;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletRegistration;
 
 import org.mortbay.jetty.Dispatcher;
 import org.mortbay.jetty.HandlerContainer;
@@ -333,80 +335,106 @@ public class Context extends ContextHandler
 
 
         /* ------------------------------------------------------------ */
-        /* (non-Javadoc)
-         * @see org.mortbay.jetty.handler.ContextHandler.SContext#addFilter(java.lang.String, java.lang.String, java.lang.String, java.util.Map)
-         */
-        public void addFilter(String filterName, String description, String className, Map<String, String> initParameters)
+        public FilterRegistration addFilter(String filterName, String className)
         {
-        	if (!isStarting())
-        		throw new IllegalStateException();
-        	
+            if (!isStarting())
+                    throw new IllegalStateException();
+            
             ServletHandler handler = Context.this.getServletHandler();
-            FilterHolder holder= handler.newFilterHolder();
+            final FilterHolder holder= handler.newFilterHolder();
             holder.setClassName(className);
             holder.setName(filterName);
-            holder.setInitParameters(initParameters);
             handler.addFilter(holder);
+            
+            return new FilterRegistration()
+            {
+                @Override
+                public void setInitParameter(String name, String value)
+                {
+                    holder.setInitParameter(name,value);
+                }
+
+                @Override
+                public void setAsyncSupported(boolean isAsyncSupported)
+                {
+                    holder.setAsyncSupported(isAsyncSupported);
+                }
+            };
         }
 
         /* ------------------------------------------------------------ */
-        /* (non-Javadoc)
-         * @see org.mortbay.jetty.handler.ContextHandler.SContext#addFilterMapping(java.lang.String, java.lang.String[], java.lang.String[], java.util.EnumSet, boolean)
-         */
-        public void addFilterMapping(String filterName, String[] urlPatterns, String[] servletNames, EnumSet<DispatcherType> dispatcherTypes,
-                boolean isMatchAfter)
+        public ServletRegistration addServlet(String servletName, String className)
         {
-        	if (!isStarting())
-        		throw new IllegalStateException();
+            if (!isStarting())
+                throw new IllegalStateException();
+
+            ServletHandler handler = Context.this.getServletHandler();
+            final ServletHolder holder= handler.newServletHolder();
+            holder.setClassName(className);
+            holder.setName(servletName);
+            handler.addServlet(holder);
+
+            return new ServletRegistration()
+            {
+                @Override
+                public void setAsyncSupported(boolean isAsyncSupported)
+                {
+                    holder.setAsyncSupported(isAsyncSupported);
+                }
+
+                @Override
+                public void setLoadOnStartup(int loadOnStartup)
+                {
+                    holder.setInitOrder(loadOnStartup);
+                }
+
+                @Override
+                public void setInitParameter(String name, String value)
+                {
+                    holder.setInitParameter(name,value);
+                }
+            };
+            
+        }
+
+        /* ------------------------------------------------------------ */
+        public void addFilterMappingForServletNames(String filterName, EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... servletNames)
+        {
+            if (!isStarting())
+                throw new IllegalStateException();
             ServletHandler handler = Context.this.getServletHandler();
             FilterMapping mapping = new FilterMapping();
             mapping.setFilterName(filterName);
-            mapping.setPathSpecs(urlPatterns);
             mapping.setServletNames(servletNames);
-            
-            int dispatches=mapping.getDispatches();
-            if (dispatcherTypes.contains(DispatcherType.ERROR)) 
-                dispatches|=ERROR;
-            if (dispatcherTypes.contains(DispatcherType.FORWARD)) 
-                dispatches|=FORWARD;
-            if (dispatcherTypes.contains(DispatcherType.INCLUDE)) 
-                dispatches|=INCLUDE;
-            if (dispatcherTypes.contains(DispatcherType.REQUEST)) 
-                dispatches|=REQUEST;
-            mapping.setDispatches(dispatches);
-            
+            mapping.setDispatcherTypes(dispatcherTypes);
             handler.addFilterMapping(mapping);
         }
 
         /* ------------------------------------------------------------ */
-        /* (non-Javadoc)
-         * @see org.mortbay.jetty.handler.ContextHandler.SContext#addServlet(java.lang.String, java.lang.String, java.lang.String, java.util.Map, int)
-         */
-        public void addServlet(String servletName, String description, String className, Map<String, String> initParameters, int loadOnStartup)
+        public void addFilterMappingForUrlPatterns(String filterName, EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... urlPatterns)
         {
-        	if (!isStarting())
-        		throw new IllegalStateException();
+            if (!isStarting())
+                throw new IllegalStateException();
             ServletHandler handler = Context.this.getServletHandler();
-            ServletHolder holder= handler.newServletHolder();
-            holder.setClassName(className);
-            holder.setName(servletName);
-            holder.setInitParameters(initParameters);
-            holder.setInitOrder(loadOnStartup);
-            handler.addServlet(holder);
+            FilterMapping mapping = new FilterMapping();
+            mapping.setFilterName(filterName);
+            mapping.setPathSpecs(urlPatterns);
+            mapping.setDispatcherTypes(dispatcherTypes);
+            handler.addFilterMapping(mapping);
         }
 
         /* ------------------------------------------------------------ */
-        /* (non-Javadoc)
-         * @see org.mortbay.jetty.handler.ContextHandler.SContext#addServletMapping(java.lang.String, java.lang.String[])
-         */
-        public void addServletMapping(String servletName, String[] urlPattern)
+        public void addServletMapping(String servletName, String[] urlPatterns)
         {
-        	if (!isStarting())
-        		throw new IllegalStateException();
+            if (!isStarting())
+                throw new IllegalStateException();
             ServletHandler handler = Context.this.getServletHandler();
-            ServletMapping mapping = new ServletMapping();
-            mapping.setPathSpecs(urlPattern);
-            handler.addServletMapping(mapping);
-        }   
+            ServletHolder holder= handler.newServletHolder();
+            holder.setName(servletName);
+            handler.addServlet(holder);
+        }
+        
+
+
     }
 }

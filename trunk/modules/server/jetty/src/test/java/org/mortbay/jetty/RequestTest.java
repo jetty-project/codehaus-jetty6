@@ -413,7 +413,7 @@ public class RequestTest extends TestCase
         RequestTester _checker;
         String _content;
         
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             ((Request)request).setHandled(true);
             

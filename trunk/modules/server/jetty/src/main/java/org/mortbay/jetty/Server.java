@@ -23,7 +23,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import javax.servlet.AsyncEvent;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.component.Container;
 import org.mortbay.component.LifeCycle;
@@ -314,14 +319,27 @@ public class Server extends HandlerWrapper implements Attributes
     public void handle(HttpConnection connection) throws IOException, ServletException
     {
         String target=connection.getRequest().getPathInfo();
+        HttpServletRequest request=connection.getRequest();
+        HttpServletResponse response=connection.getResponse();
+        
+        if (request.isAsyncStarted())
+        {
+            AsyncEvent event = connection.getRequest()._wrappedEvent;
+            if (event!=null)
+            {
+                request=(HttpServletRequest)event.getRequest();
+                response=(HttpServletResponse)event.getResponse();
+            }
+        }
+        
         if (Log.isDebugEnabled())
         {
             Log.debug("REQUEST "+target+" on "+connection);
-            handle(target, connection.getRequest(), connection.getResponse(), Handler.REQUEST);
+            handle(target, request, response);
             Log.debug("RESPONSE "+target+"  "+connection.getResponse().getStatus());
         }
         else
-            handle(target, connection.getRequest(), connection.getResponse(), Handler.REQUEST);
+            handle(target, request, response);
     }
 
     /* ------------------------------------------------------------ */

@@ -33,9 +33,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestAttributeEvent;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestWrapper;
@@ -97,15 +102,17 @@ import org.mortbay.util.ajax.Continuation;
  * @author gregw
  *
  */
-public class Request extends Suspendable implements HttpServletRequest
+public class Request extends AsyncRequest implements HttpServletRequest
 {
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
     private static final int __NONE=0, _STREAM=1, __READER=2;
+    private static final String __ASYNC_FWD="org.mortbay.asyncfwd";
     
     private boolean _handled =false;
     private Map _roleMap;
     private EndPoint _endp;
-    
+
+    private boolean _asyncSupported=true;
     private Attributes _attributes;
     private String _authType;
     private String _characterEncoding;
@@ -127,8 +134,8 @@ public class Request extends Suspendable implements HttpServletRequest
     private String _servletName;
     private HttpURI _uri;
     private Principal _userPrincipal;
-    private MultiMap _parameters;
-    private MultiMap _baseParameters;
+    private MultiMap<String> _parameters;
+    private MultiMap<String> _baseParameters;
     private boolean _paramsExtracted;
     private int _inputState=__NONE;
     private BufferedReader _reader;
@@ -142,39 +149,35 @@ public class Request extends Suspendable implements HttpServletRequest
     private Buffer _timeStampBuffer;
     private Continuation _continuation;
     private Object _requestAttributeListeners;
-    private Map _savedNewSessions;
+    private Map<Object,HttpSession> _savedNewSessions;
     private UserRealm _userRealm;
     private CookieCutter _cookies;
+    private DispatcherType _dispatcherType;
 
     /* ------------------------------------------------------------ */
     public Request()
     {
-        super(null);
+    	super(null);
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * 
-     */
     public Request(HttpConnection connection)
     {
-        super(connection);
-        _endp=connection.getEndPoint();
-        _dns=connection.getResolveNames();
+    	super(connection);
     }
 
     /* ------------------------------------------------------------ */
     protected void setConnection(HttpConnection connection)
     {
-        _connection=connection;
+    	super.setConnection(connection);
         _endp=connection.getEndPoint();
         _dns=connection.getResolveNames();
     }
-    
     /* ------------------------------------------------------------ */
     protected void recycle()
     {
-        super.reset();
+    	super.recycle();
+        _asyncSupported=true;
         _handled=false;
         if (_context!=null)
             throw new IllegalStateException("Request in context!");
@@ -264,7 +267,17 @@ public class Request extends Suspendable implements HttpServletRequest
     {
         if ("org.mortbay.jetty.ajax.Continuation".equals(name))
             return getContinuation(true);
-            
+        
+        if (DispatcherType.ASYNC.equals(_dispatcherType))
+        {
+            // TODO handle forwards(path!)
+            if (name.equals(Dispatcher.__FORWARD_PATH_INFO))    return getPathInfo();
+            if (name.equals(Dispatcher.__FORWARD_REQUEST_URI))  return getRequestURI();
+            if (name.equals(Dispatcher.__FORWARD_SERVLET_PATH)) return getServletPath();
+            if (name.equals(Dispatcher.__FORWARD_CONTEXT_PATH)) return getContextPath();
+            if (name.equals(Dispatcher.__FORWARD_QUERY_STRING)) return getQueryString();
+        }
+        
         if (_attributes==null)
             return null;
         return _attributes.getAttribute(name);
@@ -1681,7 +1694,7 @@ public class Request extends Suspendable implements HttpServletRequest
     public void saveNewSession(Object key,HttpSession session)
     {
         if (_savedNewSessions==null)
-            _savedNewSessions=new HashMap();
+            _savedNewSessions=new HashMap<Object,HttpSession>();
         _savedNewSessions.put(key,session);
     }
     /* ------------------------------------------------------------ */
@@ -1743,57 +1756,6 @@ public class Request extends Suspendable implements HttpServletRequest
     {
         return _roleMap;
     }
-
-    /* ------------------------------------------------------------ */
-    public void suspend()
-    {
-        long timeout = 30000L;
-        if (_context!=null)
-        {
-            Long t=(Long)_context.getAttribute("javax.servlet.suspendTimeoutMs");
-            if (t!=null)
-                timeout=t.longValue();
-        }
-        suspend(timeout);
-
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void resume()
-    {
-        removeAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR);
-        super.resume();
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void complete() throws IOException
-    {
-        try
-        {
-            _connection.getResponse().flushBuffer();
-        }
-        finally
-        {
-            super.complete();
-            
-            Object handlers = getAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR);
-            if(handlers != null )
-            {
-                for(int i=0;i<LazyList.size(handlers);i++)
-                {
-                    try
-                    {
-                        ((CompleteHandler)LazyList.get(handlers,i)).complete(this);
-                    }
-                    catch(Exception e)
-                    {
-                        Log.warn(e);
-                    }
-                }
-                removeAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR);
-            }
-        }
-    }
     
     /* ------------------------------------------------------------ */
     public ServletContext getServletContext()
@@ -1806,6 +1768,106 @@ public class Request extends Suspendable implements HttpServletRequest
     {
         return _connection.getResponse();
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public void addAsyncListener(AsyncListener listener)
+    {
+        _asyncListeners=LazyList.add(_asyncListeners,listener);
+    }
+
+    /* ------------------------------------------------------------ */
+    public void addAsyncListener(final AsyncListener listener, ServletRequest servletRequest, ServletResponse servletResponse)
+    {
+        final AsyncEvent event = new AsyncEvent(servletRequest,servletResponse);
+        
+        _asyncListeners=LazyList.add(_asyncListeners,new AsyncListener()
+        {
+            public void onComplete(AsyncEvent ev) throws IOException
+            {
+                listener.onComplete(event);
+            }
+
+            public void onTimeout(AsyncEvent ev) throws IOException
+            {
+                listener.onComplete(event);
+            }
+        });
+    }
+
+    /* ------------------------------------------------------------ */
+    public AsyncContext getAsyncContext()
+    {
+        if (isInitial() && !isAsyncStarted())
+            throw new IllegalStateException(super.getStatusString());
+        return this;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isAsyncSupported()
+    {
+        return _asyncSupported;
+    }
+
+    /* ------------------------------------------------------------ */
+    public AsyncContext startAsync() throws IllegalStateException
+    {
+        if (!_asyncSupported)
+            throw new IllegalStateException("!asyncSupported");
+        /*
+        if (_connection.getResponse().isOutputing())
+            throw new IllegalStateException("Response getOutputStream or getWriter called");
+        */
+        
+        suspend();  
+        return this;
+    }
+
+    /* ------------------------------------------------------------ */
+    public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException
+    {
+        if (!_asyncSupported)
+            throw new IllegalStateException("!asyncSupported");
+        /*
+        if (_connection.getResponse().isOutputing())
+            throw new IllegalStateException("Response getOutputStream or getWriter called");
+        */
+        _wrappedEvent = new AsyncEvent(servletRequest,servletResponse);
+        startAsync();
+        return this;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setAsyncSupported(boolean supported)
+    {
+        _asyncSupported=supported;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void forward(ServletContext context, String path)
+    {
+        // TODO XXX
+        setAttribute(__ASYNC_FWD,getRequestDispatcher(path));
+        dispatch();
+    }
+
+    /* ------------------------------------------------------------ */
+    public void forward(String path)
+    {
+        // TODO XXX
+        setAttribute(__ASYNC_FWD,getRequestDispatcher(path));
+        dispatch();
+    }
+
+    /* ------------------------------------------------------------ */
+    public DispatcherType getDispatcherType()
+    {
+    	return _dispatcherType;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setDispatcherType(DispatcherType type)
+    {
+    	_dispatcherType=type;
+    }
 }
 

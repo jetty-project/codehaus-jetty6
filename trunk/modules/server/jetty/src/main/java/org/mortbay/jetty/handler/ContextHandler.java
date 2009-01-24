@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
@@ -41,9 +42,12 @@ import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
+import javax.servlet.SessionCookieConfig;
+import javax.servlet.SessionTrackingMode;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -126,6 +130,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     private Object _contextListeners;
     private Object _contextAttributeListeners;
     private Object _requestListeners;
+    private Object _asyncListeners;
     private Object _requestAttributeListeners;
     private Set<String> _managedAttributes;
     
@@ -658,7 +663,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     /* 
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException
     {   
         boolean new_context=false;
@@ -669,9 +674,11 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         ClassLoader old_classloader=null;
         Thread current_thread=null;
         String pathInfo=null;
+
+        DispatcherType dispatch=request.getDispatcherType();
         
         Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
-        if( !isStarted() || _shutdown || (dispatch==REQUEST && base_request.isHandled()))
+        if( !isStarted() || _shutdown || (DispatcherType.REQUEST.equals(dispatch) && base_request.isHandled()))
             return;
         
         old_context=base_request.getContext();
@@ -712,7 +719,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             }
             
             // Nope - so check the target.
-            if (dispatch==REQUEST)
+            if (DispatcherType.REQUEST.equals(dispatch) || DispatcherType.ASYNC.equals(dispatch))
             {
                 if (_compactPath)
                     target=URIUtil.compactPath(target);
@@ -762,7 +769,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             
             // Update the paths
             base_request.setContext(_scontext);
-            if (dispatch!=INCLUDE && target.startsWith("/"))
+            if (!DispatcherType.INCLUDE.equals(dispatch) && target.startsWith("/"))
             {
                 if (_contextPath.length()==1)
                     base_request.setContextPath("");
@@ -790,36 +797,22 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 {
                     event = new ServletRequestEvent(_scontext,request);
                     for(int i=0;i<LazyList.size(_requestListeners);i++)
-                    {
-                        if(request.isInitial())
-                            ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestInitialized(event);
-                        else if(request.isResumed())
-                        {
-                            try
-                            {
-                                ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestResumed(event); 
-                            }
-                            catch(AbstractMethodError e)
-                            {
-                                Log.warn(LazyList.get(_requestListeners,i)+": "+e);
-                                Log.debug(e);
-                            }
-                        }
-                    }
+                        ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestInitialized(event);
                 }
-                for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
-                    base_request.addEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
+                if (_requestAttributeListeners!=null)
+                    for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+                        base_request.addEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
             }
             
             // Handle the request
             try
             {
-                if (dispatch==REQUEST && isProtectedTarget(target))
+                if (DispatcherType.REQUEST.equals(dispatch) && isProtectedTarget(target))
                     throw new HttpException(HttpServletResponse.SC_NOT_FOUND);
                 
                 Handler handler = getHandler();
                 if (handler!=null)
-                    handler.handle(target, request, response, dispatch);
+                    handler.handle(target, request, response);
             }
             catch(HttpException e)
             {
@@ -831,29 +824,13 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 // Handle more REALLY SILLY request events!
                 if (new_context)
                 {
-                    for(int i=LazyList.size(_requestListeners);i-->0;)
-                    {
-                        if(request.isSuspended())
-                        {
-                            try
-                            {
-                                ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestSuspended(event);
-
-                                Object list = request.getAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR);
-                                request.setAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR, LazyList.add(list, this));
-                            }
-                            catch(AbstractMethodError e)
-                            {
-                                Log.warn(LazyList.get(_requestListeners,i)+": "+e);
-                                Log.debug(e);
-                            }
-                        }
-                        else 
+                    if (_requestListeners!=null)
+                        for(int i=LazyList.size(_requestListeners);i-->0;)
                             ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestDestroyed(event);
-                    }
                     
-                    for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
-                        base_request.removeEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
+                    if(_requestAttributeListeners!=null)
+                        for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+                            base_request.removeEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
                 }
             }
         }
@@ -878,7 +855,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
 
     /* ------------------------------------------------------------ */
     /** Check the target.
-     * Called by {@link #handle(String, HttpServletRequest, HttpServletResponse, int)} when a
+     * Called by {@link #handle(String, HttpServletRequest, HttpServletResponse)} when a
      * target within a context is determined.  If the target is protected, 404 is returned.
      * The default implementation always returns false.
      * @see org.mortbay.jetty.webapp.WebAppContext#isProtectedTarget(String)
@@ -1305,6 +1282,25 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         return Collections.emptySet();
     }
 
+
+
+    /* ------------------------------------------------------------ */
+    private String normalizeHostname( String host )
+    {
+        if ( host == null )
+            return null;
+        
+        if ( host.endsWith( "." ) )
+            return host.substring( 0, host.length() -1);
+      
+            return host;
+    }
+
+    public void complete(Request request)
+    {
+        // TODO Auto-generated method stub
+        
+    }
     
     /* ------------------------------------------------------------ */
     /** Context.
@@ -1718,62 +1714,65 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             return "ServletContext@"+Integer.toHexString(hashCode())+"{"+(getContextPath().equals("")?URIUtil.SLASH:getContextPath())+","+getBaseResource()+"}";
         }
 
+
         /* ------------------------------------------------------------ */
-        /* (non-Javadoc)
-         * @see javax.servlet.ServletContext#addFilter(java.lang.String, java.lang.String, java.lang.String, java.util.Map)
-         */
-        public void addFilter(String filterName, String description, String className, Map<String, String> initParameters)
+        public EnumSet<SessionTrackingMode> getDefaultSessionTrackingModes()
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        public EnumSet<SessionTrackingMode> getEffectiveSessionTrackingModes()
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        public SessionCookieConfig getSessionCookieConfig()
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        public void setSessionCookieConfig(SessionCookieConfig sessionCookieConfig)
+        {
+            // TODO Auto-generated method stub
+            
+        }
+
+        /* ------------------------------------------------------------ */
+        public void setSessionTrackingModes(EnumSet<SessionTrackingMode> sessionTrackingModes)
+        {   
+        }
+
+        /* ------------------------------------------------------------ */
+        public FilterRegistration addFilter(String filterName, String className)
+        {
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        public ServletRegistration addServlet(String servletName, String className)
+        {
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        public void addFilterMappingForServletNames(String filterName, EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... servletNames)
         {
         }
 
         /* ------------------------------------------------------------ */
-        /* (non-Javadoc)
-         * @see javax.servlet.ServletContext#addFilterMapping(java.lang.String, java.lang.String[], java.lang.String[], java.util.EnumSet, boolean)
-         */
-        public void addFilterMapping(String filterName, String[] urlPatterns, String[] servletNames, EnumSet<DispatcherType> dispatcherTypes,
-                boolean isMatchAfter)
+        public void addFilterMappingForUrlPatterns(String filterName, EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... urlPatterns)
         {
         }
 
         /* ------------------------------------------------------------ */
-        /* (non-Javadoc)
-         * @see javax.servlet.ServletContext#addServlet(java.lang.String, java.lang.String, java.lang.String, java.util.Map, int)
-         */
-        public void addServlet(String servletName, String description, String className, Map<String, String> initParameters, int loadOnStartup)
-        {
-        }
-
-        /* ------------------------------------------------------------ */
-        /* (non-Javadoc)
-         * @see javax.servlet.ServletContext#addServletMapping(java.lang.String, java.lang.String[])
-         */
         public void addServletMapping(String servletName, String[] urlPatterns)
         {
-        }
-        
-    }
-
-    /* ------------------------------------------------------------ */
-    private String normalizeHostname( String host )
-    {
-        if ( host == null )
-            return null;
-        
-        if ( host.endsWith( "." ) )
-            return host.substring( 0, host.length() -1);
-      
-            return host;
-    }
-
-    public void complete(Request request)
-    {
-        if (_requestListeners!=null)
-        {
-            ServletRequestEvent event = new ServletRequestEvent(_scontext,request);
-            for(int i=0;i<LazyList.size(_requestListeners);i++)
-            {
-                ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestCompleted(event);
-            }
         }
         
     }

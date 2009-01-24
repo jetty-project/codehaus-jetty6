@@ -14,13 +14,22 @@
 
 package org.mortbay.jetty;
 
+import java.io.IOException;
+
+import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
+
 import org.mortbay.util.ajax.Continuation;
 
-public class Servlet3Continuation implements Continuation
+public class Servlet3Continuation implements Continuation, AsyncListener
 {
+    AsyncRequest _asyncContextState;
     Request _request;
     Object _object;
     RetryRequest _retry;
+    boolean _resumed=false;
+    boolean _timeout=false;
     
     Servlet3Continuation(Request request)
     {
@@ -34,7 +43,7 @@ public class Servlet3Continuation implements Continuation
 
     public boolean isExpired()
     {
-        return _request.isTimeout();
+        return _asyncContextState!=null && _timeout;
     }
 
     public boolean isNew()
@@ -44,23 +53,26 @@ public class Servlet3Continuation implements Continuation
 
     public boolean isPending()
     {
-        return _request.isSuspended() || !_request.isInitial();
+        return _asyncContextState!=null && (_asyncContextState.isSuspended() || !_asyncContextState.isInitial());
     }
 
     public boolean isResumed()
     {
-        return _request.isResumed();
+        return _asyncContextState!=null && _resumed;
     }
 
     public void reset()
     {
-        _request.reset();
+        _resumed=false;
+        _timeout=false;
     }
 
     public void resume()
     {
-        System.err.println("Resume");
-        _request.resume();
+        if (_asyncContextState==null)
+            throw new IllegalStateException();
+        _resumed=true;
+        _asyncContextState.dispatch();
     }
 
     public void setMutex(Object mutex)
@@ -74,15 +86,33 @@ public class Servlet3Continuation implements Continuation
 
     public boolean suspend(long timeout)
     {
-        System.err.println(_request);
-        if (!_request.isInitial()&&(_request.isResumed()||_request.isTimeout()))
-            return _request.isResumed();
+        _asyncContextState=_request;
+        if (!_asyncContextState.isInitial()||_resumed||_timeout)
+        {
+            _resumed=false;
+            _timeout=false;
+            return _resumed;
+        }
 
-        _request.suspend(timeout);
+        _request.setAsyncTimeout(timeout);
+        _request.addAsyncListener(this);
+        _request.startAsync();
+        _asyncContextState=_request;
         if (_retry==null)
             _retry=new RetryRequest();
         throw _retry;
         
+    }
+
+    public void onComplete(AsyncEvent event) throws IOException
+    {
+        
+    }
+
+    public void onTimeout(AsyncEvent event) throws IOException
+    {
+        _timeout=true;
+        _request.dispatch();
     }
 
 }

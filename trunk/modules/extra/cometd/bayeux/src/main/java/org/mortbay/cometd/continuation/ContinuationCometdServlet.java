@@ -39,7 +39,7 @@ import org.mortbay.util.ajax.ContinuationSupport;
 /* ------------------------------------------------------------ */
 /**
  * @author gregw
- * @deprecated use {@link org.mortbay.cometd.SuspendingCometdServlet}
+ * @deprecated use {@link org.mortbay.cometd.AsyncCometdServlet}
  */
 public class ContinuationCometdServlet extends AbstractCometdServlet
 {

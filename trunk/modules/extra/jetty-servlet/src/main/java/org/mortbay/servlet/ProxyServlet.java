@@ -48,7 +48,7 @@ public class ProxyServlet implements Servlet
 {
     private int _tunnelTimeoutMs=300000;
     
-    protected HashSet _DontProxyHeaders = new HashSet();
+    protected final HashSet _DontProxyHeaders = new HashSet();
     {
         _DontProxyHeaders.add("proxy-connection");
         _DontProxyHeaders.add("connection");

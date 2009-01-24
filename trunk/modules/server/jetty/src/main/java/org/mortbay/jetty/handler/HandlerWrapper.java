@@ -146,10 +146,12 @@ public class HandlerWrapper extends AbstractHandlerContainer
     /* 
      * @see org.mortbay.jetty.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
     {
         if (_handler!=null && isStarted())
-            _handler.handle(target,request, response, dispatch);
+        {
+            _handler.handle(target,request, response);
+        }
     }
     
 

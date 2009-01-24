@@ -449,7 +449,7 @@ public class ServletHolder extends Holder
             makeUnavailable(e);
             _servlet=null;
             _config=null;
-            throw new ServletException(e);
+            throw new ServletException(this.toString(),e);
         }
         finally
         {
@@ -462,7 +462,8 @@ public class ServletHolder extends Holder
     /* ------------------------------------------------------------ */
     /** Service a request with this servlet.
      */
-    public void handle(ServletRequest request,
+    public void handle(Request baseRequest,
+                       ServletRequest request,
                        ServletResponse response)
         throws ServletException,
                UnavailableException,
@@ -483,7 +484,7 @@ public class ServletHolder extends Holder
         // Service the request
         boolean servlet_error=true;
         Principal user=null;
-        Request base_request=null;
+        boolean suspendable = baseRequest.isAsyncSupported();
         try
         {
             // Handle aliased path
@@ -494,10 +495,12 @@ public class ServletHolder extends Holder
             // Handle run as
             if (_runAs!=null && _realm!=null)
             {
-                base_request=HttpConnection.getCurrentConnection().getRequest();
-                user=_realm.pushRole(base_request.getUserPrincipal(),_runAs);
-                base_request.setUserPrincipal(user);
+                user=_realm.pushRole(baseRequest.getUserPrincipal(),_runAs);
+                baseRequest.setUserPrincipal(user);
             }
+            
+            if (!isAsyncSupported())
+                baseRequest.setAsyncSupported(false);
             
             servlet.service(request,response);
             servlet_error=false;
@@ -509,11 +512,13 @@ public class ServletHolder extends Holder
         }
         finally
         {
+            baseRequest.setAsyncSupported(suspendable);
+            
             // pop run-as role
-            if (_runAs!=null && _realm!=null && user!=null && base_request!=null)
+            if (_runAs!=null && _realm!=null && user!=null)
             {
                 user=_realm.popRole(user);
-                base_request.setUserPrincipal(user);
+                baseRequest.setUserPrincipal(user);
             }
 
             // Handle error params.
