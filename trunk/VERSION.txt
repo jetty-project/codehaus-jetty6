@@ -48,7 +48,7 @@
  + JETTY-854 JNDI scope does not work with applications in a .war
  + JETTY-859 MultiPartFilter ignores the query string parameters
  + JETTY-862 EncodedHttpURI ignores given encoding in constructor
-
+ + JETTY-866 jetty-client test case fix
  + Synced r4208   contrib r1370
  
 jetty-6.1.12 4 November 2008
