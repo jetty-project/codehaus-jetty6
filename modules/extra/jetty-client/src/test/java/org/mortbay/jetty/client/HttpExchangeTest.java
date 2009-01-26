@@ -288,7 +288,7 @@ public class HttpExchangeTest extends TestCase
     
     public void testReserveConnections () throws Exception
     {
-       final HttpDestination destination = _httpClient.getDestination (new Address("localhost", _port), _scheme.equalsIgnoreCase("https"));
+       final HttpDestination destination = _httpClient.getDestination (new Address("localhost", _port), _scheme.equalsIgnoreCase("https://"));
        final org.mortbay.jetty.client.HttpConnection[] connections = new org.mortbay.jetty.client.HttpConnection[_maxConnectionsPerAddress];
        for (int i=0; i < _maxConnectionsPerAddress; i++)
        {
