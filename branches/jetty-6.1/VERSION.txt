@@ -1,3 +1,8 @@
+jetty-6.1-SNAPSHOT
+ +
+
+jetty-6.1.15.rc2 23 January 2009
+ + adjustment to jetty-client assembly packaging 
  + JETTY-567 Delay in initial TLS Handshake With FireFox 3 beta5 and SslSelectChannelConnector
 
 jetty-6.1.15.pre0 20 January 2009
