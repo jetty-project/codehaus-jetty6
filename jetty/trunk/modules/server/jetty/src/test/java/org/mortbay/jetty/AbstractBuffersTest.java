@@ -32,9 +32,9 @@ public class AbstractBuffersTest
 
     List<Thread> threadList = new ArrayList<Thread>();
 
-    int numThreads = 200;
+    int numThreads = 20;
 
-    int runTestLength = 20000;
+    int runTestLength = 5000;
 
     int threadWaitTime = 5;
 
@@ -62,7 +62,7 @@ public class AbstractBuffersTest
     {
         
     }
-/*
+    
     public void testAbstractQueueBuffers()
         throws Exception
     {
@@ -76,18 +76,15 @@ public class AbstractBuffersTest
 
         runTest = true;
         long currentTime = System.currentTimeMillis();
-        long startGet = buffers.getBufferGetTime();
         Thread.sleep( runTestLength );
         runTest = false;
 
         long testTime = System.currentTimeMillis() - currentTime;
-        long totalBufferGetTime = buffers.getBufferGetTime() - startGet;
         double totalBuffersRetrieved = buffersRetrieved.doubleValue();
 
-        System.out.println( "Queue Buffer Time in getBuffer: " + totalBufferGetTime );
-
-        System.out.println( "Buffers Retrieved: " + totalBuffersRetrieved );
-        System.out.println( "Test Time: " + testTime );
+        System.out.println( "Queue Buffer:");
+        System.out.println( "  Buffers Retrieved: " + totalBuffersRetrieved );
+        System.out.println( "  Test Time: " + testTime );
 
         for ( Iterator<Thread> i = threadList.iterator(); i.hasNext(); )
         {
@@ -107,18 +104,16 @@ public class AbstractBuffersTest
 
         runTest = true;
         long currentTime = System.currentTimeMillis();
-        long startGet = buffers.getBufferGetTime();
         Thread.sleep( runTestLength );
         runTest = false;
 
         long testTime = System.currentTimeMillis() - currentTime;
-        long totalBufferGetTime = buffers.getBufferGetTime() - startGet;
         double totalBuffersRetrieved = buffersRetrieved.doubleValue();
 
-        System.out.println( "List Buffer Time in getBuffer: " + totalBufferGetTime );
+        System.out.println( "List Buffer:");
 
-        System.out.println( "Buffers Retrieved: " + totalBuffersRetrieved );
-        System.out.println( "Test Time: " + testTime );
+        System.out.println( "  Buffers Retrieved: " + totalBuffersRetrieved );
+        System.out.println( "  Test Time: " + testTime );
 
         for ( Iterator<Thread> i = threadList.iterator(); i.hasNext(); )
         {
@@ -138,18 +133,15 @@ public class AbstractBuffersTest
 
         runTest = true;
         long currentTime = System.currentTimeMillis();
-        long startGet = buffers.getBufferGetTime();
         Thread.sleep( runTestLength );
         runTest = false;
 
         long testTime = System.currentTimeMillis() - currentTime;
-        long totalBufferGetTime = buffers.getBufferGetTime() - startGet;
         double totalBuffersRetrieved = buffersRetrieved.doubleValue();
 
-        System.out.println( "Thread Local Buffer Time in getBuffer: " + totalBufferGetTime );
-
-        System.out.println( "Buffers Retrieved: " + totalBuffersRetrieved );
-        System.out.println( "Test Time: " + testTime );
+        System.out.println( "Thread Local: ");
+        System.out.println( "  Buffers Retrieved: " + totalBuffersRetrieved );
+        System.out.println( "  Test Time: " + testTime );
 
         for ( Iterator<Thread> i = threadList.iterator(); i.hasNext(); )
         {
@@ -157,7 +149,7 @@ public class AbstractBuffersTest
             t.stop();
         }
     }
-*/
+
     /**
      * wrapper for testing different types of AbstractBuffers
      * 
@@ -168,9 +160,7 @@ public class AbstractBuffersTest
     {
         AbstractBuffers abuf;
 
-        long bufferGetTime = 0;
-
-        public InnerAbstractBuffers( int type )
+        public InnerAbstractBuffers( int type ) throws Exception
         {
             if ( type == __LIST )
             {
@@ -184,7 +174,7 @@ public class AbstractBuffersTest
             {
                 abuf = new InnerThreadLocalAbstractBuffers();
             }
-
+            abuf.start();
             if ( abuf == null )
             {
                 throw new IllegalArgumentException( "failed to init buffers" );
@@ -193,31 +183,13 @@ public class AbstractBuffersTest
 
         public Buffer getBuffer( int size )
         {
-            long time = System.currentTimeMillis();
             Buffer b = abuf.getBuffer( size );
-            synchronized ( this )
-            {
-                bufferGetTime = bufferGetTime + System.currentTimeMillis() - time;
-            }
             return b;
         }
 
         public void returnBuffer( Buffer buffer )
         {
             abuf.returnBuffer( buffer );
-        }
-
-        public void clearBufferGetTime()
-        {
-            synchronized ( this )
-            {
-                bufferGetTime = 0;
-            }
-        }
-
-        public long getBufferGetTime()
-        {
-            return bufferGetTime;
         }
 
     }
