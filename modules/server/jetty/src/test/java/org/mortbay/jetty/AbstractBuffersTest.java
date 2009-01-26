@@ -17,6 +17,7 @@ package org.mortbay.jetty;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
@@ -32,7 +33,7 @@ public class AbstractBuffersTest
 
     List<Thread> threadList = new ArrayList<Thread>();
 
-    int numThreads = 20;
+    int numThreads = 100;
 
     int runTestLength = 5000;
 
@@ -40,10 +41,12 @@ public class AbstractBuffersTest
 
     boolean runTest = false;
 
-    Double buffersRetrieved = new Double( 0 );
+    AtomicLong buffersRetrieved;
 
     private static int __LOCAL = 1;
+
     private static int __LIST = 2;
+
     private static int __QUEUE = 3;
 
     protected void setUp()
@@ -57,63 +60,48 @@ public class AbstractBuffersTest
     {
         super.tearDown();
     }
-    
-    public void testNothing() throws Exception
-    {
-        
-    }
-    
-    public void testAbstractQueueBuffers()
+
+    public void execAbstractBuffer( int type )
         throws Exception
     {
         threadList.clear();
-        buffers = new InnerAbstractBuffers( __QUEUE );
+        buffersRetrieved = new AtomicLong( 0 );
+        buffers = new InnerAbstractBuffers( type );
 
-        for ( int i = 0; i < numThreads; ++i )
-        {
-            threadList.add( new BufferPeeper( "QueuedBufferPeeper: " + i ) );
-        }
-
-        runTest = true;
-        long currentTime = System.currentTimeMillis();
-        Thread.sleep( runTestLength );
-        runTest = false;
-
-        long testTime = System.currentTimeMillis() - currentTime;
-        double totalBuffersRetrieved = buffersRetrieved.doubleValue();
-
-        System.out.println( "Queue Buffer:");
-        System.out.println( "  Buffers Retrieved: " + totalBuffersRetrieved );
-        System.out.println( "  Test Time: " + testTime );
-
-        for ( Iterator<Thread> i = threadList.iterator(); i.hasNext(); )
-        {
-            Thread t = i.next();
-            t.stop();
-        }
-    }
-
-    public void testListAbstractBuffers()
-        throws Exception
-    {
-        buffers = new InnerAbstractBuffers( __LIST );
         for ( int i = 0; i < numThreads; ++i )
         {
             threadList.add( new BufferPeeper( "BufferPeeper: " + i ) );
         }
 
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         runTest = true;
-        long currentTime = System.currentTimeMillis();
+
         Thread.sleep( runTestLength );
+
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+
         runTest = false;
 
-        long testTime = System.currentTimeMillis() - currentTime;
-        double totalBuffersRetrieved = buffersRetrieved.doubleValue();
+        long totalBuffersRetrieved = buffersRetrieved.get();
 
-        System.out.println( "List Buffer:");
-
-        System.out.println( "  Buffers Retrieved: " + totalBuffersRetrieved );
-        System.out.println( "  Test Time: " + testTime );
+        System.out.println( "Buffers Retrieved: " + totalBuffersRetrieved );
+        System.out.println( "Memory Used: " + ( mem1 - mem0 ) );
 
         for ( Iterator<Thread> i = threadList.iterator(); i.hasNext(); )
         {
@@ -125,42 +113,37 @@ public class AbstractBuffersTest
     public void testThreadLocalAbstractBuffers()
         throws Exception
     {
-        buffers = new InnerAbstractBuffers( __LOCAL );
-        for ( int i = 0; i < numThreads; ++i )
-        {
-            threadList.add( new BufferPeeper( "BufferPeeper: " + i ) );
-        }
+        System.out.println( "Thread Local Test" );
+        execAbstractBuffer( __LOCAL );
 
-        runTest = true;
-        long currentTime = System.currentTimeMillis();
-        Thread.sleep( runTestLength );
-        runTest = false;
+    }
 
-        long testTime = System.currentTimeMillis() - currentTime;
-        double totalBuffersRetrieved = buffersRetrieved.doubleValue();
+    public void testListAbstractBuffers()
+        throws Exception
+    {
+        System.out.println( "List Test" );
+        execAbstractBuffer( __LIST );
 
-        System.out.println( "Thread Local: ");
-        System.out.println( "  Buffers Retrieved: " + totalBuffersRetrieved );
-        System.out.println( "  Test Time: " + testTime );
+    }
 
-        for ( Iterator<Thread> i = threadList.iterator(); i.hasNext(); )
-        {
-            Thread t = i.next();
-            t.stop();
-        }
+    public void testAbstractQueueBuffers()
+        throws Exception
+    {
+        System.out.println( "Queue Test" );
+        execAbstractBuffer( __QUEUE );
     }
 
     /**
      * wrapper for testing different types of AbstractBuffers
      * 
      * @author jesse
-     *
      */
     private class InnerAbstractBuffers
     {
         AbstractBuffers abuf;
 
-        public InnerAbstractBuffers( int type ) throws Exception
+        public InnerAbstractBuffers( int type )
+            throws Exception
         {
             if ( type == __LIST )
             {
@@ -175,15 +158,19 @@ public class AbstractBuffersTest
                 abuf = new InnerThreadLocalAbstractBuffers();
             }
             abuf.start();
+
             if ( abuf == null )
             {
                 throw new IllegalArgumentException( "failed to init buffers" );
             }
+            abuf.doStart();
         }
 
         public Buffer getBuffer( int size )
         {
+
             Buffer b = abuf.getBuffer( size );
+
             return b;
         }
 
@@ -191,7 +178,6 @@ public class AbstractBuffersTest
         {
             abuf.returnBuffer( buffer );
         }
-
     }
 
     class InnerListAbstractBuffers
@@ -255,10 +241,8 @@ public class AbstractBuffersTest
                     {
                         Buffer buf = buffers.getBuffer( _headerBufferSize );
 
-                        synchronized ( buffersRetrieved )
-                        {
-                            ++buffersRetrieved;
-                        }
+                        buffersRetrieved.getAndIncrement();
+                        
 
                         buf.put( new Byte( "2" ).byteValue() );
 
