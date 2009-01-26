@@ -66,7 +66,7 @@ public abstract class AbstractBuffers
      */
     public void setHeaderBufferSize( int headerBufferSize )
     {
-        if (isRunning())
+        if (isStarted())
             throw new IllegalStateException();
         _headerBufferSize = headerBufferSize;
     }
@@ -84,8 +84,8 @@ public abstract class AbstractBuffers
      */
     public void setRequestBufferSize( int requestBufferSize )
     {
-        if (isRunning())
-            throw new IllegalStateException();
+        if (isStarted())
+          throw new IllegalStateException();
         _requestBufferSize = requestBufferSize;
     }
 
@@ -102,7 +102,7 @@ public abstract class AbstractBuffers
      */
     public void setResponseBufferSize( int responseBufferSize )
     {
-        if (isRunning())
+        if (isStarted())
             throw new IllegalStateException();
         _responseBufferSize = responseBufferSize;
     }
