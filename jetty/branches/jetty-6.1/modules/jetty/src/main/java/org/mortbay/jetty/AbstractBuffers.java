@@ -32,13 +32,101 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
     private int _requestBufferSize=8*1024;
     private int _responseBufferSize=24*1024;
 
-    // Use and array of buffers to avoid contention
-    private transient ArrayList _headerBuffers=new ArrayList();
-    protected transient int _loss;
-    private transient ArrayList _requestBuffers;
-    private transient ArrayList _responseBuffers;
+    final static private int __HEADER=0;
+    final static private int __REQUEST=1;
+    final static private int __RESPONSE=2;
+    final static private int __OTHER=3;
+    final private int[] _pool={2,1,1,2};
 
-    /* ------------------------------------------------------------ */
+    private final ThreadLocal _buffers=new ThreadLocal()
+    {
+        protected Object initialValue()
+        {
+            return new ThreadBuffers(_pool[__HEADER],_pool[__REQUEST],_pool[__RESPONSE],_pool[__OTHER]);
+        }
+    };
+   
+    public AbstractBuffers()
+    {
+        super();
+    }
+
+
+
+    public Buffer getBuffer(final int size )
+    {
+        final int set = (size==_headerBufferSize)?__HEADER
+                :(size==_responseBufferSize)?__RESPONSE
+                        :(size==_requestBufferSize)?__REQUEST:__OTHER;
+
+        final ThreadBuffers thread_buffers = (ThreadBuffers)_buffers.get();
+
+        final Buffer[] buffers=thread_buffers._buffers[set];
+        for (int i=0;i<buffers.length;i++)
+        {
+            final Buffer b=buffers[i];
+            if (b!=null && b.capacity()==size)
+            {
+                buffers[i]=null;
+                return b;
+            }
+        }
+
+        return newBuffer(size);
+    }
+
+    public void returnBuffer( Buffer buffer )
+    {
+        buffer.clear();
+        if (buffer.isVolatile() || buffer.isImmutable())
+            return;
+
+        int size=buffer.capacity();
+        final int set = (size==_headerBufferSize)?__HEADER
+                :(size==_responseBufferSize)?__RESPONSE
+                        :(size==_requestBufferSize)?__REQUEST:__OTHER;
+        
+        final ThreadBuffers thread_buffers = (ThreadBuffers)_buffers.get();
+        final Buffer[] buffers=thread_buffers._buffers[set];
+        for (int i=0;i<buffers.length;i++)
+        {
+            if (buffers[i]==null)
+            {
+                buffers[i]=buffer;
+                return;
+            }
+        }
+
+    }
+
+    protected void doStart()
+        throws Exception
+    {
+        super.doStart();
+        if (_headerBufferSize==_requestBufferSize && _headerBufferSize==_responseBufferSize)
+        {
+            _pool[__HEADER]+=_pool[__REQUEST]+_pool[__RESPONSE];
+            _pool[__REQUEST]=0;
+            _pool[__RESPONSE]=0;
+        }
+        else if (_headerBufferSize==_requestBufferSize)
+        {
+            _pool[__HEADER]+=_pool[__REQUEST];
+            _pool[__REQUEST]=0;
+        }
+        else if (_headerBufferSize==_responseBufferSize)
+        {
+            _pool[__HEADER]+=_pool[__RESPONSE];
+            _pool[__RESPONSE]=0;
+        }
+        else if (_requestBufferSize==_responseBufferSize)
+        {
+            _pool[__RESPONSE]+=_pool[__REQUEST];
+            _pool[__REQUEST]=0;
+        }
+
+    }
+
     /**
      * @return Returns the headerBufferSize.
      */
@@ -46,17 +134,17 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
     {
         return _headerBufferSize;
     }
-    
-    /* ------------------------------------------------------------ */
+
     /**
      * @param headerBufferSize The headerBufferSize to set.
      */
-    public void setHeaderBufferSize(int headerBufferSize)
+    public void setHeaderBufferSize( int headerBufferSize )
     {
+        if (isStarted())
+            throw new IllegalStateException();
         _headerBufferSize = headerBufferSize;
     }
-    
-    /* ------------------------------------------------------------ */
+
     /**
      * @return Returns the requestBufferSize.
      */
@@ -64,17 +152,17 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
     {
         return _requestBufferSize;
     }
-    
-    /* ------------------------------------------------------------ */
+
     /**
      * @param requestBufferSize The requestBufferSize to set.
      */
-    public void setRequestBufferSize(int requestBufferSize)
+    public void setRequestBufferSize( int requestBufferSize )
     {
+        if (isStarted())
+          throw new IllegalStateException();
         _requestBufferSize = requestBufferSize;
     }
-    
-    /* ------------------------------------------------------------ */
+
     /**
      * @return Returns the responseBufferSize.
      */
@@ -82,107 +170,30 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
     {
         return _responseBufferSize;
     }
-    
-    /* ------------------------------------------------------------ */
+
     /**
      * @param responseBufferSize The responseBufferSize to set.
      */
-    public void setResponseBufferSize(int responseBufferSize)
+    public void setResponseBufferSize( int responseBufferSize )
     {
+        if (isStarted())
+            throw new IllegalStateException();
         _responseBufferSize = responseBufferSize;
     }
-
     
-    /* ------------------------------------------------------------ */
-    protected abstract Buffer newBuffer(int size);
+    protected abstract Buffer newBuffer( int size );
 
-    
-    /* ------------------------------------------------------------ */
-    public Buffer getBuffer(int size)
+    protected static class ThreadBuffers
     {
-        if (size==_headerBufferSize)
-        {   
-            synchronized(_headerBuffers)
-            {
-                if (_headerBuffers.size()>0)
-                    return (Buffer) _headerBuffers.remove(_headerBuffers.size()-1);
-            }
-            return newBuffer(size);
-        }
-        else if (size==_responseBufferSize)
+        final Buffer[][] _buffers;
+        ThreadBuffers(int headers,int requests,int responses,int others)
         {
-            synchronized(_responseBuffers)
-            {
-                if (_responseBuffers.size()==0)
-                    return newBuffer(size);
-                return (Buffer) _responseBuffers.remove(_responseBuffers.size()-1);
-            }
-        }
-        else if (size==_requestBufferSize)
-        {
-            synchronized(_requestBuffers)
-            {
-                if (_requestBuffers.size()==0)
-                    return newBuffer(size);
-                return (Buffer) _requestBuffers.remove(_requestBuffers.size()-1);
-            }   
-        }
-        
-        return newBuffer(size);    
-    }
+            _buffers = new Buffer[4][];
+            _buffers[__HEADER]=new Buffer[headers];
+            _buffers[__REQUEST]=new Buffer[requests];
+            _buffers[__RESPONSE]=new Buffer[responses];
+            _buffers[__OTHER]=new Buffer[others];
 
-
-    /* ------------------------------------------------------------ */
-    public void returnBuffer(Buffer buffer)
-    {
-        buffer.clear();
-        if (!buffer.isVolatile() && !buffer.isImmutable())
-        {
-            int c=buffer.capacity();
-            if (c==_headerBufferSize)
-            {
-                synchronized(_headerBuffers)
-                {
-                    _headerBuffers.add(buffer);
-                }
-            }
-            else if (c==_responseBufferSize)
-            {
-                synchronized(_responseBuffers)
-                {
-                    _responseBuffers.add(buffer);
-                }
-            }
-            else if (c==_requestBufferSize)
-            {
-                synchronized(_requestBuffers)
-                {
-                    _requestBuffers.add(buffer);
-                }
-            }
         }
     }
-
-    /* ------------------------------------------------------------ */
-    protected void doStart() throws Exception
-    {
-        super.doStart();
-
-        if (_headerBuffers!=null)
-            _headerBuffers.clear();
-        else
-            _headerBuffers=new ArrayList();
-
-        if (_requestBuffers!=null)
-            _requestBuffers.clear();
-        else
-            _requestBuffers=new ArrayList();
-        
-        if (_responseBuffers!=null)
-            _responseBuffers.clear();
-        else
-            _responseBuffers=new ArrayList(); 
-    }
-    
-    
 }
