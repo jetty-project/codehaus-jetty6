@@ -172,6 +172,11 @@
         <version>${slf4j-version}</version>
       </dependency>
       <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j-version}</version>
+      </dependency>
+      <dependency>
         <groupId>ant</groupId>
         <artifactId>ant</artifactId>
         <version>${ant-version}</version>
@@ -194,6 +199,7 @@
     </dependencies>
   </dependencyManagement>
   <properties>
+    <test-test>${basedir}</test-test>
     <servlet-version>2.5-20081211</servlet-version>
      <!-- matches glassfish version SJSAS-9_1_1-B51-18_Sept_2008 -->
     <jsp21-version>9.1.1.B51.25.p1</jsp21-version>
