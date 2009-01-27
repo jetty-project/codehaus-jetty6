@@ -15,7 +15,9 @@
 package org.mortbay.thread;
 
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
+
+// see test case
+//import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.TestCase;
 
@@ -91,7 +93,8 @@ public class ThreadPoolTest extends TestCase
         Thread.sleep(1500);
         assertTrue(tp.getThreads()<threads);
     }
-    
+
+/* java5isms
     public void testStress() throws Exception
     {
         QueuedThreadPool tp= new QueuedThreadPool();
@@ -160,6 +163,7 @@ public class ThreadPoolTest extends TestCase
             assertTrue(false);
         }
     }
+*/
 
     public void testMaxStopTime() throws Exception
     {
