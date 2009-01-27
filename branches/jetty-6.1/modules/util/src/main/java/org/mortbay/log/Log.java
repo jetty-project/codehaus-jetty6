@@ -14,6 +14,8 @@
 
 package org.mortbay.log;
 import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import org.mortbay.util.Loader;
 
@@ -40,24 +42,39 @@ public class Log
     public final static String IGNORED_FMT= "IGNORED: {}";
     public final static String NOT_IMPLEMENTED= "NOT IMPLEMENTED ";
     
-    private static String logClass=System.getProperty("org.mortbay.log.class","org.mortbay.log.Slf4jLog");
-    private static boolean verbose = System.getProperty("VERBOSE",null)!=null;
-    private static boolean ignored = System.getProperty("IGNORED",null)!=null;
+    //public static String __logClass;
+    //public static boolean __verbose;
+    //public static boolean __ignored;
+    
+    private static String __logClass=System.getProperty("org.mortbay.log.class","org.mortbay.log.Slf4jLog");
+    private static boolean __verbose = System.getProperty("VERBOSE",null)!=null;
+    private static boolean __ignored = System.getProperty("IGNORED",null)!=null;
     private static Logger log;
-   
+    
     static
     {
+        AccessController.doPrivileged(new PrivilegedAction() 
+            {
+                public Object run() 
+                { 
+                    __logClass = System.getProperty("org.mortbay.log.class","org.mortbay.log.Slf4jLog"); 
+                    __verbose = System.getProperty("VERBOSE",null)!=null; 
+                    __ignored = System.getProperty("IGNORED",null)!=null; 
+                    return new Boolean(true); 
+                }
+            });
+   
         Class log_class=null;
         try
         {
-            log_class=Loader.loadClass(Log.class, logClass);
+            log_class=Loader.loadClass(Log.class, __logClass);
             log=(Logger) log_class.newInstance();
         }
         catch(Exception e)
         {
             log_class=StdErrLog.class;
             log=new StdErrLog();
-            if(verbose)
+            if(__verbose)
                 e.printStackTrace();
         }
         
@@ -113,12 +130,12 @@ public class Log
     {
         if (log==null)
             return;
-	if (ignored)
+	if (__ignored)
 	{
             log.warn(IGNORED,th);
             unwind(th);
 	}
-        else if (verbose)
+        else if (__verbose)
         {
             log.debug(IGNORED,th);
             unwind(th);
