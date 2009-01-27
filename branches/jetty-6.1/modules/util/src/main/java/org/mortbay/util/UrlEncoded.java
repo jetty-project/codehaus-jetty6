@@ -617,7 +617,7 @@ public class UrlEncoded extends MultiMap
                     if (buffer==null)
                     {
                         buffer=new Utf8StringBuffer(length);
-                        buffer.getStringBuffer().append(encoded.toCharArray(),offset,offset+i+1);
+                        buffer.getStringBuffer().append(encoded,offset,offset+i+1);
                     }
                     else
                         buffer.getStringBuffer().append(c);
@@ -627,7 +627,7 @@ public class UrlEncoded extends MultiMap
                     if (buffer==null)
                     {
                         buffer=new Utf8StringBuffer(length);
-                        buffer.getStringBuffer().append(encoded.toCharArray(),offset,offset+i);
+                        buffer.getStringBuffer().append(encoded,offset,offset+i);
                     }
                     
                     buffer.getStringBuffer().append(' ');
@@ -637,7 +637,7 @@ public class UrlEncoded extends MultiMap
                     if (buffer==null)
                     {
                         buffer=new Utf8StringBuffer(length);
-                        buffer.getStringBuffer().append(encoded.toCharArray(),offset,offset+i);
+                        buffer.getStringBuffer().append(encoded,offset,offset+i);
                     }
 
                     while(c=='%' && (i+2)<length)
@@ -687,7 +687,7 @@ public class UrlEncoded extends MultiMap
                         if (buffer==null)
                         {
                             buffer=new StringBuffer(length);
-                            buffer.append(encoded.toCharArray(),offset,offset+i+1);
+                            buffer.append(encoded,offset,offset+i+1);
                         }
                         else
                             buffer.append(c);
@@ -697,7 +697,7 @@ public class UrlEncoded extends MultiMap
                         if (buffer==null)
                         {
                             buffer=new StringBuffer(length);
-                            buffer.append(encoded.toCharArray(),offset,offset+i);
+                            buffer.append(encoded,offset,offset+i);
                         }
                         
                         buffer.append(' ');
@@ -707,7 +707,7 @@ public class UrlEncoded extends MultiMap
                         if (buffer==null)
                         {
                             buffer=new StringBuffer(length);
-                            buffer.append(encoded.toCharArray(),offset,offset+i);
+                            buffer.append(encoded,offset,offset+i);
                         }
 
                         byte[] ba=new byte[length];
