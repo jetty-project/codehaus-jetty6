@@ -152,6 +152,7 @@ public class ExpireTest extends TestCase
         }
         catch ( InterruptedException e )
         {
+            e.printStackTrace();
         }
 
         assertEquals( count, expireCount.get() );
