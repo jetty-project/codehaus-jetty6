@@ -1,7 +1,8 @@
 jetty-6.1-SNAPSHOT
+ + JETTY-691 System.getProperty() calls ... wrap them in doPrivileged
+ + JETTY-844 Replace reflection with direct invocation in Slf4jLog
  + JETTY-861 switched buffer pools to ThreadLocal implementation
  + JETTY-866 jetty-client test case fix
- + JETTY-891 System.getProperty() calls ... wrap them in doPrivileged
 
 jetty-6.1.15.rc2 23 January 2009
  + adjustment to jetty-client assembly packaging 
