@@ -14,6 +14,8 @@
 
 package org.mortbay.log;
 import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import org.mortbay.util.Loader;
 
@@ -40,11 +42,24 @@ public class Log
     public final static String IGNORED_FMT= "IGNORED: {}";
     public final static String NOT_IMPLEMENTED= "NOT IMPLEMENTED ";
     
-    private static String __logClass=System.getProperty("org.mortbay.log.class","org.mortbay.log.Slf4jLog");
-    private static boolean __verbose = System.getProperty("VERBOSE",null)!=null;
-    private static boolean __ignored = System.getProperty("IGNORED",null)!=null;
+    public static String __logClass;
+    public static boolean __verbose;
+    public static boolean __ignored;
+    
+    static
+    {
+        AccessController.doPrivileged(new PrivilegedAction<Boolean>() 
+            {
+                public Boolean run() 
+                { 
+                    __logClass = System.getProperty("org.mortbay.log.class","org.mortbay.log.Slf4jLog"); 
+                    __verbose = System.getProperty("VERBOSE",null)!=null; 
+                    __ignored = System.getProperty("IGNORED",null)!=null; return true; 
+                }
+            });
+    }
+       
     private static Logger __log;
-   
     private static boolean _initialized;
     
     public static boolean initialized()
