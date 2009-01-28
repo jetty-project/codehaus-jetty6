@@ -32,6 +32,7 @@ import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.HttpVersions;
 import org.mortbay.jetty.client.security.Authorization;
 import org.mortbay.jetty.ssl.SslSelectChannelEndPoint;
+
 import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
 
@@ -54,10 +55,9 @@ public class HttpConnection implements Connection
     public String _message;
     public Throwable _throwable;
     public boolean _reserved;
-    public boolean _expiring= false;
 
     /* The current exchange waiting for a response */
-    HttpExchange _exchange;
+    volatile HttpExchange _exchange;
     HttpExchange _pipeline;
 
     public void dump() throws IOException
@@ -74,7 +74,6 @@ public class HttpConnection implements Connection
     {
         public void expired()
         {
-            _expiring = true;
             HttpExchange ex = null;
             try
             {
@@ -106,7 +105,6 @@ public class HttpConnection implements Connection
                     ex.setStatus(HttpExchange.STATUS_EXPIRED);
                 }
             }
-            _expiring = false;
         }
     };
 
@@ -489,52 +487,51 @@ public class HttpConnection implements Connection
         @Override
         public void startResponse(Buffer version, int status, Buffer reason) throws IOException
         {
-            if ( !_expiring )
+            HttpExchange exchange = _exchange;
+            if (exchange!=null)
             {
                 _http11 = HttpVersions.HTTP_1_1_BUFFER.equals(version);
-                _exchange.getEventListener().onResponseStatus(version,status,reason);
-                _exchange.setStatus(HttpExchange.STATUS_PARSING_HEADERS);
+                exchange.getEventListener().onResponseStatus(version,status,reason);
+                exchange.setStatus(HttpExchange.STATUS_PARSING_HEADERS);
             }
         }
 
         @Override
         public void parsedHeader(Buffer name, Buffer value) throws IOException
         {
-            if ( !_expiring )
+            HttpExchange exchange = _exchange;
+            if (exchange!=null)
             {
                 if (HttpHeaders.CACHE.getOrdinal(name) == HttpHeaders.CONNECTION_ORDINAL)
                 {
                     _connectionHeader = HttpHeaderValues.CACHE.lookup(value);
                 }
-                _exchange.getEventListener().onResponseHeader(name,value);
+                exchange.getEventListener().onResponseHeader(name,value);
             }
         }
 
         @Override
         public void headerComplete() throws IOException
         {
-            if ( !_expiring )
-            {
-                _exchange.setStatus(HttpExchange.STATUS_PARSING_CONTENT);
-            }
+            HttpExchange exchange = _exchange;
+            if (exchange!=null)
+                exchange.setStatus(HttpExchange.STATUS_PARSING_CONTENT);
         }
 
         @Override
         public void content(Buffer ref) throws IOException
         {
-            if ( !_expiring )
-            {
-                _exchange.getEventListener().onResponseContent(ref);
-            }
+            HttpExchange exchange = _exchange;
+            if (exchange!=null)
+                exchange.getEventListener().onResponseContent(ref);
         }
 
         @Override
         public void messageComplete(long contextLength) throws IOException
         {
-            if ( !_expiring )
-            {
-                _exchange.setStatus(HttpExchange.STATUS_COMPLETED);
-            }
+            HttpExchange exchange = _exchange;
+            if (exchange!=null)
+                exchange.setStatus(HttpExchange.STATUS_COMPLETED);
         }
     }
 

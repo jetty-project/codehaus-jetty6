@@ -53,8 +53,9 @@ public class ExpireTest extends TestCase
     {
         client = new HttpClient();
         client.setConnectorType( HttpClient.CONNECTOR_SELECT_CHANNEL );
-        client.setTimeout( 500 );
+        client.setTimeout( 200 );
         client.setMaxRetries( 0 );
+        client.setMaxConnectionsPerAddress(100);
         try
         {
             client.start();
@@ -78,7 +79,7 @@ public class ExpireTest extends TestCase
                 Request request = (Request) servletRequest;
                 try
                 {
-                    Thread.sleep( 1000 );
+                    Thread.sleep( 2000 );
                 }
                 catch ( InterruptedException e )
                 {
@@ -110,17 +111,20 @@ public class ExpireTest extends TestCase
     {
         String baseUrl = "http://" + host + ":" + _port + "/";
 
-        int count = 0;
+        int count = 200;
         expireCount.set( 0 );
         Log.info( "Starting test on " + baseUrl );
-        while ( count < 500 )
+
+        for (int i=0;i<count;i++)
         {
+            if (i%10==0)
+                System.err.print('.');
+            expireCount.incrementAndGet();
             final ContentExchange ex = new ContentExchange()
             {
                 protected void onExpire()
                 {
-                    expireCount.addAndGet( 1 );
-                    // Log.info("Expired " + expireCount.get());
+                    expireCount.decrementAndGet();
                 }
             };
             ex.setMethod( "GET" );
@@ -135,24 +139,26 @@ public class ExpireTest extends TestCase
             {
                 break;
             }
-            count++;
         }
         // Log.info("Test done");
-        // Wait 10 seconds to be sure that all exchanges have expired
+        // Wait to be sure that all exchanges have expired
         try
         {
+            Thread.sleep( 2000 );
             int loops = 0;
-            while ( count != expireCount.get() && loops < 6 ) // max out at 30 seconds
+            while ( expireCount.get()>0 && loops < 10 ) // max out at 30 seconds
             {
-                Log.info( "waiting 5s for test to complete (max 30s)" );
+                Log.info( "waiting for test to complete: "+expireCount.get()+" of "+count );
                 ++loops;
-                Thread.sleep( 5000 );
+                Thread.sleep( 2000 );
             }
+            Thread.sleep( 2000 );
         }
         catch ( InterruptedException e )
         {
         }
+        System.err.println('!');
 
-        assertEquals( count, expireCount.get() );
+        assertEquals( 0, expireCount.get() );
     }
 }
