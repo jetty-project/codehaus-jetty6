@@ -102,12 +102,14 @@ import org.mortbay.util.ajax.Continuation;
  * @author gregw
  *
  */
-public class Request extends AsyncRequest implements HttpServletRequest
+public class Request implements HttpServletRequest
 {
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
     private static final int __NONE=0, _STREAM=1, __READER=2;
     private static final String __ASYNC_FWD="org.mortbay.asyncfwd";
-    
+
+    protected HttpConnection _connection;
+    protected final AsyncRequest _async;
     private boolean _handled =false;
     private Map _roleMap;
     private EndPoint _endp;
@@ -157,26 +159,35 @@ public class Request extends AsyncRequest implements HttpServletRequest
     /* ------------------------------------------------------------ */
     public Request()
     {
-    	super(null);
+        _async=new AsyncRequest();
     }
     
     /* ------------------------------------------------------------ */
     public Request(HttpConnection connection)
     {
-    	super(connection);
+        _connection=connection;
+        _async=new AsyncRequest(connection);
     }
 
     /* ------------------------------------------------------------ */
     protected void setConnection(HttpConnection connection)
     {
-    	super.setConnection(connection);
+        _connection=connection;
+    	_async.setConnection(connection);
         _endp=connection.getEndPoint();
         _dns=connection.getResolveNames();
     }
+
+    /* ------------------------------------------------------------ */
+    public AsyncRequest async()
+    {
+        return _async;
+    }
+    
     /* ------------------------------------------------------------ */
     protected void recycle()
     {
-    	super.recycle();
+    	_async.recycle();
         _asyncSupported=true;
         _handled=false;
         if (_context!=null)
@@ -215,6 +226,12 @@ public class Request extends AsyncRequest implements HttpServletRequest
         _savedNewSessions=null;
         if (_continuation!=null && _continuation.isPending())
             _continuation.reset();
+    }
+
+    /* ------------------------------------------------------------ */
+    public Response getResponse()
+    {
+        return _connection._response;
     }
 
     /* ------------------------------------------------------------ */
@@ -1772,7 +1789,7 @@ public class Request extends AsyncRequest implements HttpServletRequest
     /* ------------------------------------------------------------ */
     public void addAsyncListener(AsyncListener listener)
     {
-        _asyncListeners=LazyList.add(_asyncListeners,listener);
+        _async._listeners=LazyList.add(_async._listeners,listener);
     }
 
     /* ------------------------------------------------------------ */
@@ -1780,7 +1797,7 @@ public class Request extends AsyncRequest implements HttpServletRequest
     {
         final AsyncEvent event = new AsyncEvent(servletRequest,servletResponse);
         
-        _asyncListeners=LazyList.add(_asyncListeners,new AsyncListener()
+        _async._listeners=LazyList.add(_async._listeners,new AsyncListener()
         {
             public void onComplete(AsyncEvent ev) throws IOException
             {
@@ -1797,9 +1814,9 @@ public class Request extends AsyncRequest implements HttpServletRequest
     /* ------------------------------------------------------------ */
     public AsyncContext getAsyncContext()
     {
-        if (isInitial() && !isAsyncStarted())
-            throw new IllegalStateException(super.getStatusString());
-        return this;
+        if (_async.isInitial() && !isAsyncStarted())
+            throw new IllegalStateException(_async.getStatusString());
+        return _async;
     }
 
     /* ------------------------------------------------------------ */
@@ -1809,17 +1826,24 @@ public class Request extends AsyncRequest implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
+    public boolean isAsyncStarted()
+    {
+        return _async.isAsyncStarted();
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setAsyncTimeout(long timeout)
+    {
+        _async.setAsyncTimeout(timeout);
+    }
+    
+    /* ------------------------------------------------------------ */
     public AsyncContext startAsync() throws IllegalStateException
     {
         if (!_asyncSupported)
             throw new IllegalStateException("!asyncSupported");
-        /*
-        if (_connection.getResponse().isOutputing())
-            throw new IllegalStateException("Response getOutputStream or getWriter called");
-        */
-        
-        suspend();  
-        return this;
+        _async.suspend(_context,this,_connection._response);  
+        return _async;
     }
 
     /* ------------------------------------------------------------ */
@@ -1827,35 +1851,14 @@ public class Request extends AsyncRequest implements HttpServletRequest
     {
         if (!_asyncSupported)
             throw new IllegalStateException("!asyncSupported");
-        /*
-        if (_connection.getResponse().isOutputing())
-            throw new IllegalStateException("Response getOutputStream or getWriter called");
-        */
-        _wrappedEvent = new AsyncEvent(servletRequest,servletResponse);
-        startAsync();
-        return this;
+        _async.suspend(_context,servletRequest,servletResponse);
+        return _async;
     }
 
     /* ------------------------------------------------------------ */
     public void setAsyncSupported(boolean supported)
     {
         _asyncSupported=supported;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void forward(ServletContext context, String path)
-    {
-        // TODO XXX
-        setAttribute(__ASYNC_FWD,getRequestDispatcher(path));
-        dispatch();
-    }
-
-    /* ------------------------------------------------------------ */
-    public void forward(String path)
-    {
-        // TODO XXX
-        setAttribute(__ASYNC_FWD,getRequestDispatcher(path));
-        dispatch();
     }
 
     /* ------------------------------------------------------------ */
@@ -1869,5 +1872,7 @@ public class Request extends AsyncRequest implements HttpServletRequest
     {
     	_dispatcherType=type;
     }
+    
+    
 }
 

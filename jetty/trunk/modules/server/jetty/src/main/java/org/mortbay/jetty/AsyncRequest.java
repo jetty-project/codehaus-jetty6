@@ -17,9 +17,11 @@ package org.mortbay.jetty;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestAttributeListener;
+import javax.servlet.ServletRequestWrapper;
 import javax.servlet.ServletResponse;
 
 import org.mortbay.io.AsyncEndPoint;
@@ -39,7 +41,7 @@ public class AsyncRequest implements AsyncContext
     private static final int __UNSUSPENDING=5; // Has been scheduled
     private static final int __REDISPATCHED=6; // Request redispatched to filter/servlet
     private static final int __COMPLETING=7;   // complete while dispatched
-    private static final int __UNCOMPLETED=8;     // Request is completable
+    private static final int __UNCOMPLETED=8;  // Request is completable
     private static final int __COMPLETE=9;     // Request is complete
     
     // State table
@@ -55,35 +57,30 @@ public class AsyncRequest implements AsyncContext
     
  
     protected HttpConnection _connection;
+    protected Object _listeners;
     
-    protected int _state;
-    protected boolean _initial;
-    
-    protected long _timeoutMs;
-    protected final Timeout.Task _timeoutTask;
-    protected Object _asyncListeners;
-    protected AsyncEvent _event;
-    protected AsyncEvent _wrappedEvent;
-    
+    private int _state;
+    private boolean _initial;
+    private long _timeoutMs;
+    private AsyncEventState _event;
+
     /* ------------------------------------------------------------ */
-    protected AsyncRequest(HttpConnection connection)
+    protected AsyncRequest()
     {
         _state=__IDLE;
         _initial=true;
-            
-        _timeoutTask= new Timeout.Task()
-        {
-            public void expired()
-            {
-                AsyncRequest.this.expired();
-            }
-        };
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected AsyncRequest(final HttpConnection connection)
+    {
+        this();
         if (connection!=null)
             setConnection(connection);
     }
 
     /* ------------------------------------------------------------ */
-    protected void setConnection(HttpConnection connection)
+    protected void setConnection(final HttpConnection connection)
     {
         _connection=connection;
     }
@@ -169,7 +166,6 @@ public class AsyncRequest implements AsyncContext
     {
         synchronized (this)
         {
-            // DBG String S=getStatusString();try{
             switch(_state)
             {
                 case __DISPATCHED:
@@ -199,7 +195,6 @@ public class AsyncRequest implements AsyncContext
                 default:
                     throw new IllegalStateException(""+_state);
             }
-            // DBG }finally {System.err.println(S+"--dispatch-->"+getStatusString());}
         }
     }
 
@@ -207,11 +202,14 @@ public class AsyncRequest implements AsyncContext
     /* (non-Javadoc)
      * @see javax.servlet.ServletRequest#suspend(long)
      */
-    protected void suspend()
+    protected void suspend(final ServletContext context,
+            final ServletRequest request,
+            final ServletResponse response)
     {
         synchronized (this)
         {
-            // DBG String S=getStatusString();try{
+            _event=new AsyncEventState(context,request,response);
+            
             switch(_state)
             {
                 case __DISPATCHED:
@@ -235,7 +233,6 @@ public class AsyncRequest implements AsyncContext
                 default:
                     throw new IllegalStateException(""+_state);
             }
-            // DBG }finally {System.err.println(S+"--suspend-->"+getStatusString());}
         }
     }
 
@@ -248,7 +245,6 @@ public class AsyncRequest implements AsyncContext
     {
         synchronized (this)
         {
-            // DBG String S=getStatusString();try{
             switch(_state)
             {
                 case __REDISPATCHED:
@@ -289,8 +285,6 @@ public class AsyncRequest implements AsyncContext
                 default:
                     throw new IllegalStateException(this.getStatusString());
             }
-            // DBG }finally {System.err.println(S+"--undispatch-->"+getStatusString());}
-
         }
     }
 
@@ -300,7 +294,6 @@ public class AsyncRequest implements AsyncContext
         boolean dispatch=false;
         synchronized (this)
         {
-            // DBG String S=getStatusString();try{
             switch(_state)
             {
                 case __REDISPATCHED:
@@ -327,7 +320,6 @@ public class AsyncRequest implements AsyncContext
                 default:
                     throw new IllegalStateException(this.getStatusString());
             }
-            // DBG }finally {System.err.println(S+"--redispatch-->"+getStatusString());}
         }
         
         if (dispatch)
@@ -342,7 +334,6 @@ public class AsyncRequest implements AsyncContext
     {
         synchronized (this)
         {
-            // DBG String S=getStatusString();try{
             switch(_state)
             {
                 case __SUSPENDING:
@@ -351,24 +342,16 @@ public class AsyncRequest implements AsyncContext
                 default:
                     return;
             }
-            // DBG }finally {System.err.println(S+"--expired1-->"+getStatusString());}
         }
         
-        if (_asyncListeners!=null)
+        if (_listeners!=null)
         {
-            AsyncEvent event=_wrappedEvent;
-            if (event==null)
-            {    
-                event=_event;
-                if (event==null)
-                    event=_event=new AsyncEvent(_connection.getRequest(),_connection.getResponse());
-            }
-            for(int i=0;i<LazyList.size(_asyncListeners);i++)
+            for(int i=0;i<LazyList.size(_listeners);i++)
             {
                 try
                 {
-                    AsyncListener listener=((AsyncListener)LazyList.get(_asyncListeners,i));
-                    listener.onTimeout(event);
+                    AsyncListener listener=((AsyncListener)LazyList.get(_listeners,i));
+                    listener.onTimeout(_event);
                 }
                 catch(Exception e)
                 {
@@ -403,7 +386,6 @@ public class AsyncRequest implements AsyncContext
         boolean dispatch=false;
         synchronized (this)
         {
-            // DBG String S=getStatusString();try{
             switch(_state)
             {
                 case __IDLE:
@@ -429,7 +411,6 @@ public class AsyncRequest implements AsyncContext
                 default:
                     throw new IllegalStateException(this.getStatusString());
             }
-            // DBG }finally {System.err.println(S+"--complete-->"+getStatusString());}
         }
         
         if (dispatch)
@@ -448,7 +429,6 @@ public class AsyncRequest implements AsyncContext
     {
         synchronized (this)
         {
-            // DBG String S=getStatusString();try{
             switch(_state)
             {
                 case __UNCOMPLETED:
@@ -458,23 +438,15 @@ public class AsyncRequest implements AsyncContext
                 default:
                     throw new IllegalStateException(this.getStatusString());
             }
-            // DBG }finally {System.err.println(S+"--doComplete-->"+getStatusString());}
         }
 
-        if (_asyncListeners!=null)
+        if (_listeners!=null)
         {
-            AsyncEvent event=_wrappedEvent;
-            if (event==null)
-            {    
-                event=_event;
-                if (event==null)
-                    event=_event=new AsyncEvent(_connection.getRequest(),_connection.getResponse());
-            }
-            for(int i=0;i<LazyList.size(_asyncListeners);i++)
+            for(int i=0;i<LazyList.size(_listeners);i++)
             {
                 try
                 {
-                    ((AsyncListener)LazyList.get(_asyncListeners,i)).onComplete(event);
+                    ((AsyncListener)LazyList.get(_listeners,i)).onComplete(_event);
                 }
                 catch(Exception e)
                 {
@@ -489,7 +461,6 @@ public class AsyncRequest implements AsyncContext
     {
         synchronized (this)
         {
-            // DBG String S=getStatusString();try{
             switch(_state)
             {
                 case __DISPATCHED:
@@ -500,10 +471,9 @@ public class AsyncRequest implements AsyncContext
             }
             _initial = true;
             cancelTimeout();
-            _wrappedEvent=null;
+            _event=null;
             _timeoutMs=60000L; // TODO configure
-            _asyncListeners=null;
-            // DBG }finally {System.err.println(S+"--reset-->"+getStatusString());}
+            _listeners=null;
         }
     }    
     
@@ -515,8 +485,8 @@ public class AsyncRequest implements AsyncContext
             _state=__COMPLETE;
             _initial = false;
             cancelTimeout();
-            _wrappedEvent=null;
-            _asyncListeners=null;
+            _event=null;
+            _listeners=null;
         }
     }
 
@@ -558,7 +528,7 @@ public class AsyncRequest implements AsyncContext
             }            
         }
         else
-            _connection.scheduleTimeout(_timeoutTask,_timeoutMs);
+            _connection.scheduleTimeout(_event._timeout,_timeoutMs);
     }
 
     /* ------------------------------------------------------------ */
@@ -573,8 +543,8 @@ public class AsyncRequest implements AsyncContext
                 this.notifyAll();
             }
         }
-        else
-            _connection.cancelTimeout(_timeoutTask);
+        else if (_event!=null)
+            _connection.cancelTimeout(_event._timeout);
     }
 
     /* ------------------------------------------------------------ */
@@ -630,28 +600,30 @@ public class AsyncRequest implements AsyncContext
     /* ------------------------------------------------------------ */
     public void forward(ServletContext context, String path)
     {
-        throw new UnsupportedOperationException();
+        _event._dispatcher=context.getRequestDispatcher(path);
+        dispatch();
     }
 
     /* ------------------------------------------------------------ */
     public void forward(String path)
     {
-        throw new UnsupportedOperationException();
+        _event._dispatcher=_event._context.getRequestDispatcher(path);
+        dispatch();
     }
 
     /* ------------------------------------------------------------ */
     public ServletRequest getRequest()
     {
-        if (_wrappedEvent!=null)
-            return _wrappedEvent.getRequest();
+        if (_event!=null)
+            return _event.getRequest();
         return _connection.getRequest();
     }
 
     /* ------------------------------------------------------------ */
     public ServletResponse getResponse()
     {
-        if (_wrappedEvent!=null)
-            return _wrappedEvent.getResponse();
+        if (_event!=null)
+            return _event.getResponse();
         return _connection.getResponse();
     }
 
@@ -660,13 +632,33 @@ public class AsyncRequest implements AsyncContext
     {
         // TODO Auto-generated method stub
     }
-    
 
     /* ------------------------------------------------------------ */
     public boolean hasOriginalRequestAndResponse()
     {
-        return _wrappedEvent==null || (_wrappedEvent.getRequest()==this && _wrappedEvent.getResponse()==_connection.getResponse());
+        return (_event!=null && _event.getRequest()==_connection._request && _event.getResponse()==_connection._response);
     }
     
-    
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    protected class AsyncEventState extends AsyncEvent
+    {
+        final ServletContext _context;
+        final Timeout.Task _timeout;
+        RequestDispatcher _dispatcher;
+        
+        public AsyncEventState(ServletContext context, ServletRequest request, ServletResponse response)
+        {
+            super(request,response);
+            _context=context;
+            _timeout= new Timeout.Task()
+            {
+                public void expired()
+                {
+                    AsyncRequest.this.expired();
+                }
+            };
+        }
+    }
 }

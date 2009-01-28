@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -324,12 +325,9 @@ public class Server extends HandlerWrapper implements Attributes
         
         if (request.isAsyncStarted())
         {
-            AsyncEvent event = connection.getRequest()._wrappedEvent;
-            if (event!=null)
-            {
-                request=(HttpServletRequest)event.getRequest();
-                response=(HttpServletResponse)event.getResponse();
-            }
+            AsyncContext context = connection.getRequest().getAsyncContext();
+            request=(HttpServletRequest)context.getRequest();
+            response=(HttpServletResponse)context.getResponse();
         }
         
         if (Log.isDebugEnabled())
