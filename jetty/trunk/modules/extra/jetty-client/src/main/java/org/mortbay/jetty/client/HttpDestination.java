@@ -194,7 +194,7 @@ public class HttpDestination
         return connection;
     }
     
-    
+    /* ------------------------------------------------------------------------------- */
     public HttpConnection reserveConnection(long timeout) throws IOException
     {
         HttpConnection connection = getConnection(timeout);
@@ -337,8 +337,6 @@ public class HttpDestination
     /* ------------------------------------------------------------------------------- */
     public void returnConnection(HttpConnection connection, boolean close) throws IOException
     {
-       
-        
         if (connection.isReserved())
             connection.setReserved(false);
         
