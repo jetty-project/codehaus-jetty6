@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 
+import javax.net.ssl.SSLEngineResult.HandshakeStatus;
+
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
@@ -54,7 +56,6 @@ public class HttpConnection implements Connection
     public String _message;
     public Throwable _throwable;
     public boolean _reserved;
-    public boolean _expiring= false;
 
     /* The current exchange waiting for a response */
     HttpExchange _exchange;
@@ -74,7 +75,6 @@ public class HttpConnection implements Connection
     {
         public void expired()
         {
-            _expiring = true;
             HttpExchange ex = null;
             try
             {
@@ -106,8 +106,8 @@ public class HttpConnection implements Connection
                     ex.setStatus(HttpExchange.STATUS_EXPIRED);
                 }
             }
-            _expiring = false;
         }
+
     };
 
     /* ------------------------------------------------------------ */
@@ -489,52 +489,37 @@ public class HttpConnection implements Connection
         @Override
         public void startResponse(Buffer version, int status, Buffer reason) throws IOException
         {
-            if ( !_expiring )
-            {
-                _http11 = HttpVersions.HTTP_1_1_BUFFER.equals(version);
-                _exchange.getEventListener().onResponseStatus(version,status,reason);
-                _exchange.setStatus(HttpExchange.STATUS_PARSING_HEADERS);
-            }
+            _http11 = HttpVersions.HTTP_1_1_BUFFER.equals(version);
+            _exchange.getEventListener().onResponseStatus(version,status,reason);
+            _exchange.setStatus(HttpExchange.STATUS_PARSING_HEADERS);
         }
 
         @Override
         public void parsedHeader(Buffer name, Buffer value) throws IOException
         {
-            if ( !_expiring )
+            if (HttpHeaders.CACHE.getOrdinal(name) == HttpHeaders.CONNECTION_ORDINAL)
             {
-                if (HttpHeaders.CACHE.getOrdinal(name) == HttpHeaders.CONNECTION_ORDINAL)
-                {
-                    _connectionHeader = HttpHeaderValues.CACHE.lookup(value);
-                }
-                _exchange.getEventListener().onResponseHeader(name,value);
+                _connectionHeader = HttpHeaderValues.CACHE.lookup(value);
             }
+            _exchange.getEventListener().onResponseHeader(name,value);
         }
 
         @Override
         public void headerComplete() throws IOException
         {
-            if ( !_expiring )
-            {
-                _exchange.setStatus(HttpExchange.STATUS_PARSING_CONTENT);
-            }
+            _exchange.setStatus(HttpExchange.STATUS_PARSING_CONTENT);
         }
 
         @Override
         public void content(Buffer ref) throws IOException
         {
-            if ( !_expiring )
-            {
-                _exchange.getEventListener().onResponseContent(ref);
-            }
+            _exchange.getEventListener().onResponseContent(ref);
         }
 
         @Override
         public void messageComplete(long contextLength) throws IOException
         {
-            if ( !_expiring )
-            {
-                _exchange.setStatus(HttpExchange.STATUS_COMPLETED);
-            }
+            _exchange.setStatus(HttpExchange.STATUS_COMPLETED);
         }
     }
 
