@@ -24,7 +24,6 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.io.AsyncEndPoint;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
@@ -386,10 +385,10 @@ public class HttpConnection implements Connection
             {
                 try
                 {
-                    if (_request.isAsync())
+                    if (_request._async.isAsync())
                     {
                         Log.debug("resume request",_request);
-                        if (!_request.isComplete())
+                        if (!_request._async.isComplete())
                             handleRequest();
                         else if (!_parser.isComplete()) 
                             progress|=_parser.parseAvailable()>0;
@@ -508,7 +507,7 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     protected void handleRequest() throws IOException
     {
-        boolean handling=_server.isRunning() && _request.handling();
+        boolean handling=_server.isRunning() && _request._async.handling();
         boolean error = false;
 
         String threadName=null;
@@ -534,7 +533,7 @@ public class HttpConnection implements Connection
                         _out.reopen();
 
                     DispatcherType dispatch=DispatcherType.REQUEST;
-                    if (_request.isInitial())
+                    if (_request._async.isInitial())
                         _connector.customize(_endp, _request);
                     else 
                         dispatch=DispatcherType.ASYNC;
@@ -574,7 +573,7 @@ public class HttpConnection implements Connection
                 }
                 finally
                 {   
-                    handling = !_request.unhandle() && _server != null;
+                    handling = !_request._async.unhandle() && _server != null;
                 }
             }
         }
@@ -583,9 +582,9 @@ public class HttpConnection implements Connection
             if (threadName!=null)
                 Thread.currentThread().setName(threadName);
 
-            if (_request.isUncompleted())
+            if (_request._async.isUncompleted())
             {   
-                _request.doComplete();
+                _request._async.doComplete();
                 
                 if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
                 {

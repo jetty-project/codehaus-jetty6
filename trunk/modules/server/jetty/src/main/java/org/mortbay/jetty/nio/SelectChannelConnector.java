@@ -303,7 +303,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
             public boolean isReadyForDispatch()
             {
                 Request request = ((HttpConnection)getConnection()).getRequest();
-                return super.isReadyForDispatch() && !(request.isSuspended());
+                return super.isReadyForDispatch() && !(request.async().isSuspended());
             }
         };
     }
