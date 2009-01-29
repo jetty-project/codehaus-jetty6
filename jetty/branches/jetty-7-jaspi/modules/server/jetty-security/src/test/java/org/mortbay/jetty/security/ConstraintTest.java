@@ -176,8 +176,8 @@ public class ConstraintTest extends TestCase
         _connector.reopen();
         response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n\r\n");
         System.err.println(response);
-        assertTrue(response.startsWith("HTTP/1.1 302 "));
-        assertTrue(response.indexOf("Location") > 0);
+        assertTrue(response.startsWith("HTTP/1.1 200 "));
+//        assertTrue(response.indexOf("Location") > 0);
         assertTrue(response.indexOf("testLoginPage") > 0);
         String session = response.substring(response.indexOf("JSESSIONID=") + 11, response.indexOf(";Path=/ctx"));
 
