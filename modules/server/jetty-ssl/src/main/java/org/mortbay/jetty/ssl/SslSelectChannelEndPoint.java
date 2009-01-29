@@ -307,8 +307,10 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
                             if(initialStatus==HandshakeStatus.NOT_HANDSHAKING && 
                                     HandshakeStatus.NEED_UNWRAP==_engine.getHandshakeStatus() && wraps==0)
                             {
-                                // java sslengine bug on TLS.. this should be NEED_WRAP
-                                // because a handshake response is needed to be sent to the client                                
+                                // This should be NEED_WRAP
+                                // The fix simply detects the signature of the bug and then close the connection (fail-fast) so that ff3 will delegate to using SSL instead of TLS.
+                                // This is a jvm bug on java1.6 where the SSLEngine expects more data from the initial handshake when the client(ff3-tls) already had given it.
+                                // See http://jira.codehaus.org/browse/JETTY-567 for more details
                                 return -1;
                             }
                             break;
