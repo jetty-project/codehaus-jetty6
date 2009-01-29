@@ -109,7 +109,7 @@ public class FormServerAuthentication implements ServerAuthentication
         // not mandatory and not authenticated
         if (session == null || isLoginOrErrorPage(uri)) 
         {
-            return new SimpleAuthResult(ServerAuthStatus.SUCCESS);
+            return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS;
         }
             
 
@@ -154,14 +154,14 @@ public class FormServerAuthentication implements ServerAuthentication
                 }
                 // TODO is this correct response if isMandatory false??? Can
                 // that occur?
-                return new SimpleAuthResult(ServerAuthStatus.SEND_FAILURE);
+                return SimpleAuthResult.SEND_FAILURE_RESULTS;
             }
             // Check if the session is already authenticated.
 
             // Don't authenticate authform or errorpage
             if (!messageInfo.isAuthMandatory())
             // TODO verify this is correct action
-                return new SimpleAuthResult(ServerAuthStatus.SUCCESS);
+                return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS;
 
             // redirect to login page
             if (request.getQueryString() != null) uri += "?" + request.getQueryString();
@@ -173,7 +173,7 @@ public class FormServerAuthentication implements ServerAuthentication
             response.setContentLength(0);
             RequestDispatcher dispatcher = request.getRequestDispatcher(_formLoginPage);
             dispatcher.forward(request, response);
-            return new SimpleAuthResult(ServerAuthStatus.SEND_CONTINUE);
+            return SimpleAuthResult.SEND_CONTINUE_RESULTS;
         }
         catch (IOException e)
         {

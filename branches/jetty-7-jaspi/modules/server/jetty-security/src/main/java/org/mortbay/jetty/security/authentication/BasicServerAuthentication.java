@@ -85,11 +85,11 @@ public class BasicServerAuthentication implements ServerAuthentication
 
             if (!messageInfo.isAuthMandatory()) 
             {
-                return SimpleAuthResult.NO_AUTH_RESULTS;
+                return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS;
             }
             response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\"" + _realmName + '"');
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return new SimpleAuthResult(ServerAuthStatus.SEND_CONTINUE, null, null, (String[]) null, null);
+            return SimpleAuthResult.SEND_CONTINUE_RESULTS;
         }
         catch (IOException e)
         {

@@ -49,7 +49,7 @@ public class SessionCachingServerAuthentication implements ServerAuthentication
         HttpSession session = request.getSession(messageInfo.isAuthMandatory());
         // not mandatory and not authenticated
         if (session == null) 
-            return new SimpleAuthResult(ServerAuthStatus.SUCCESS, null, null, (String[]) null, null);
+            return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS;
 
         ServerAuthResult serverAuthResult = (ServerAuthResult) session.getAttribute(__J_AUTHENTICATED);
         if (serverAuthResult != null) 

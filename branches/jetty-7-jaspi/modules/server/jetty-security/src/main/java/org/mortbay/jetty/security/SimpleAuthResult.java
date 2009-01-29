@@ -33,7 +33,9 @@ import javax.security.auth.Subject;
 public class SimpleAuthResult implements ServerAuthResult
 {
 
-    public static final ServerAuthResult NO_AUTH_RESULTS = new SimpleAuthResult(null, null, null, Collections.<String> emptyList(), null);
+    public static final ServerAuthResult SUCCESS_UNAUTH_RESULTS = new SimpleAuthResult(ServerAuthStatus.SUCCESS, null, null, Collections.<String> emptyList(), null);
+    public static final ServerAuthResult SEND_CONTINUE_RESULTS = new SimpleAuthResult(ServerAuthStatus.SEND_CONTINUE, null, null, Collections.<String> emptyList(), null);
+    public static final ServerAuthResult SEND_FAILURE_RESULTS = new SimpleAuthResult(ServerAuthStatus.SEND_FAILURE, null, null, Collections.<String> emptyList(), null);
 
     private final ServerAuthStatus _authStatus;
 
@@ -63,11 +65,6 @@ public class SimpleAuthResult implements ServerAuthResult
         this._userPrincipal = userPrincipal;
         this._groups = groups == null ? Collections.<String> emptyList() : Arrays.asList(groups);
         this._authMethod = userPrincipal == null ? null : authMethod;
-    }
-
-    public SimpleAuthResult(ServerAuthStatus authStatus)
-    {
-        this(authStatus, null, null, (String[]) null, null);
     }
 
     public ServerAuthStatus getAuthStatus()
