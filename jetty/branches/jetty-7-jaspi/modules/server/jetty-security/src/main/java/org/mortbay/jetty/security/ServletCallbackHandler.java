@@ -35,6 +35,7 @@ import javax.security.auth.Subject;
 
 import org.mortbay.jetty.LoginCallback;
 import org.mortbay.jetty.security.LoginCallbackImpl;
+import org.mortbay.jetty.security.jaspi.callback.CredentialValidationCallback;
 
 /**
  * 
@@ -87,6 +88,24 @@ public class ServletCallbackHandler implements CallbackHandler
                     throw (IOException) new IOException("Could not login").initCause(e);
                 }
                 passwordValidationCallback.setResult(loginCallback.isSuccess());
+                subject.getPrivateCredentials().add(loginCallback);
+            }
+            else if (callback instanceof CredentialValidationCallback)
+            {
+                CredentialValidationCallback credentialValidationCallback = (CredentialValidationCallback) callback;
+                Subject subject = credentialValidationCallback.getSubject();
+                LoginCallback loginCallback = new LoginCallbackImpl(subject,
+                                                                credentialValidationCallback.getUsername(),
+                                                                credentialValidationCallback.getCredential());
+                try
+                {
+                    _loginService.login(loginCallback);
+                }
+                catch (ServerAuthException e)
+                {
+                    throw (IOException) new IOException("Could not login").initCause(e);
+                }
+                credentialValidationCallback.setResult(loginCallback.isSuccess());
                 subject.getPrivateCredentials().add(loginCallback);
             }
             // server to jaspi communication

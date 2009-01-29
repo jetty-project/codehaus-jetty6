@@ -28,6 +28,7 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
@@ -162,6 +163,10 @@ public class JAASLoginService implements LoginService
                         if (callback instanceof NameCallback)
                         {
                             ((NameCallback)callback).setName(loginCallback.getUserName());
+                        }
+                        else if (callback instanceof PasswordCallback)
+                        {
+                            ((PasswordCallback)callback).setPassword((char[]) loginCallback.getCredential());
                         }
                         else if (callback instanceof ObjectCallback)
                         {
