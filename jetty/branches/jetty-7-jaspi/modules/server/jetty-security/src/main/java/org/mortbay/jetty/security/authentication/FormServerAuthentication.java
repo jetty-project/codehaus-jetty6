@@ -25,6 +25,8 @@ import javax.security.auth.Subject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 
 import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.LoginCallbackImpl;
@@ -169,11 +171,14 @@ public class FormServerAuthentication implements ServerAuthentication
                                           + request.getServerPort()
                                           + URIUtil.addPaths(request.getContextPath(), uri));
             response.setContentLength(0);
-            response.sendRedirect(response.encodeRedirectURL(URIUtil.addPaths(request.getContextPath(), _formLoginPage)));
+            RequestDispatcher dispatcher = request.getRequestDispatcher(_formLoginPage);
+            dispatcher.forward(request, response);
             return new SimpleAuthResult(ServerAuthStatus.SEND_CONTINUE);
         }
         catch (IOException e)
         {
+            throw new ServerAuthException(e);
+        } catch (ServletException e) {
             throw new ServerAuthException(e);
         }
 
