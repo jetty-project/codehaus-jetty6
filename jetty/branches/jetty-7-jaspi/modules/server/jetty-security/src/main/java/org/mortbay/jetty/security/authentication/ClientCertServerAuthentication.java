@@ -72,7 +72,7 @@ public class ClientCertServerAuthentication implements ServerAuthentication
             {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN,
                                    "A client certificate is required for accessing this web application but the server's listener is not configured for mutual authentication (or the client did not provide a certificate).");
-                return new SimpleAuthResult(ServerAuthStatus.SEND_FAILURE, null, null, (String[]) null, null);
+                return SimpleAuthResult.SEND_FAILURE_RESULTS;
             }
             Principal principal = certs[0].getSubjectDN();
             if (principal == null) principal = certs[0].getIssuerDN();
@@ -91,10 +91,10 @@ public class ClientCertServerAuthentication implements ServerAuthentication
 
             if (!messageInfo.isAuthMandatory()) 
             { 
-                return new SimpleAuthResult(ServerAuthStatus.SEND_SUCCESS, null, null, (String[]) null, null); 
+                return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS; 
             }
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "The provided client certificate does not correspond to a trusted user.");
-            return new SimpleAuthResult(ServerAuthStatus.SEND_FAILURE, null, null, (String[]) null, null);
+            return SimpleAuthResult.SEND_FAILURE_RESULTS;
         }
         catch (IOException e)
         {

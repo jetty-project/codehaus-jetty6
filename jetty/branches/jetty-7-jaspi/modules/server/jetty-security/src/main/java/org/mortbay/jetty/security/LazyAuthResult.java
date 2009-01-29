@@ -56,7 +56,7 @@ public class LazyAuthResult implements ServerAuthResult
             }
             catch (ServerAuthException e)
             {
-                _delegate = SimpleAuthResult.NO_AUTH_RESULTS;
+                _delegate = SimpleAuthResult.SEND_FAILURE_RESULTS;
             }
         }
         return _delegate;

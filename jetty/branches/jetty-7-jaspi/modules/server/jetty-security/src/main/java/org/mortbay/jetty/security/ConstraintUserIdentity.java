@@ -42,7 +42,7 @@ public class ConstraintUserIdentity extends AbstractUserIdentity
 
     public ConstraintUserIdentity()
     {
-        super(SimpleAuthResult.NO_AUTH_RESULTS);
+        super(SimpleAuthResult.SUCCESS_UNAUTH_RESULTS);
     }
 
     // jaspi called from Request.isUserInRole and

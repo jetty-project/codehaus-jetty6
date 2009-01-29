@@ -142,7 +142,7 @@ public class DigestServerAuthentication implements ServerAuthentication
 
             }
 
-            if (!messageInfo.isAuthMandatory()) { return SimpleAuthResult.NO_AUTH_RESULTS; }
+            if (!messageInfo.isAuthMandatory()) { return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS; }
             String domain = request.getContextPath();
             if (domain == null) domain = "/";
             response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Digest realm=\"" + _realmName
@@ -153,7 +153,7 @@ public class DigestServerAuthentication implements ServerAuthentication
                                                              + "\", algorithm=MD5, qop=\"auth\""
                                                              + (_useStale ? (" stale=" + stale) : ""));
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return new SimpleAuthResult(ServerAuthStatus.SEND_CONTINUE, null, null, (String[]) null, null);
+            return SimpleAuthResult.SEND_CONTINUE_RESULTS;
         }
         catch (IOException e)
         {
