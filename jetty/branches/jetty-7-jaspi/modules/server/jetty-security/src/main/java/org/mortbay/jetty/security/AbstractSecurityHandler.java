@@ -65,7 +65,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
     // private ServletCallbackHandler servletCallbackHandler;
 
     //private ServerAuthentication _serverAuthentication;
-    private AuthenticationManager _authManager = new DefaultAuthenticationManager();
+    private AuthenticationManager<ServerAuthentication> _authManager = new DefaultAuthenticationManager();
 
     public static Principal __NO_USER = new Principal()
     {
@@ -204,7 +204,8 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                 // Subject clientSubject = new Subject();
                 try
                 {
-                    ServerAuthResult authResult = ((AbstractAuthenticationManager)_authManager).validateRequest(messageInfo);
+                    ServerAuthentication serverAuthentication = _authManager.getServerAuthentication();
+                    ServerAuthResult authResult = serverAuthentication.validateRequest(messageInfo);
                     // AuthStatus authStatus =
                     // authContext.validateRequest(messageInfo, clientSubject,
                     // serviceSubject);
@@ -216,17 +217,6 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                         // JASPI 3.8.4 establish request values
                         UserIdentity userIdentity = newUserIdentity(authResult);
                         base_request.setUserIdentity(userIdentity);
-                        // if (userIdentity.getUserPrincipal() == null)
-                        // {
-                        // base_request.setAuthType(null);
-                        // }
-                        // else
-                        // {
-                        // //NOTE! we assume jaspi is configured to always
-                        // provide correct authMethod values
-                        // base_request.setAuthType((String)
-                        // messageInfo.getMap().get(JettyMessageInfo.AUTH_METHOD_KEY));
-                        // }
                         // isAuthMandatory == false means that request is ok
                         // without any roles assigned.... no need to check now
                         // that we know the roles.
@@ -246,9 +236,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                             boolean secureResponse = true;
                             if (secureResponse)
                             {
-                                ((AbstractAuthenticationManager)_authManager).secureResponse(messageInfo, authResult);
-                                // authContext.secureResponse(messageInfo,
-                                // serviceSubject);
+                                serverAuthentication.secureResponse(messageInfo, authResult);
                             }
                         }
                       
@@ -287,34 +275,6 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
             }
             else
             {
-                // if (dispatch==REQUEST &&
-                // !checkSecurityConstraints(target,base_request,base_response))
-                // {
-                // base_request.setHandled(true);
-                // return;
-                // }
-                //
-                // if (dispatch==FORWARD && _checkWelcomeFiles &&
-                // request.getAttribute("org.mortbay.jetty.welcome")!=null)
-                // {
-                // request.removeAttribute("org.mortbay.jetty.welcome");
-                // if
-                // (!checkSecurityConstraints(target,base_request,base_response))
-                // {
-                // base_request.setHandled(true);
-                // return;
-                // }
-                // }
-
-                // jaspi what dispatch does this have???
-                // if (_authenticator instanceof FormAuthenticator &&
-                // target.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
-                // {
-                // _authenticator.authenticate(getUserRealm(),target,base_request,base_response);
-                // base_request.setHandled(true);
-                // return;
-                // }
-
                 if (getHandler() != null)
                 {
                     getHandler().handle(pathInContext, request, response, dispatch);

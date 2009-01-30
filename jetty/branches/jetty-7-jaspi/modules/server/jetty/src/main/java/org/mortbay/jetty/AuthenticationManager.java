@@ -17,7 +17,7 @@ package org.mortbay.jetty;
 import org.mortbay.component.LifeCycle;
 import org.mortbay.jetty.handler.SecurityHandler;
 
-public interface AuthenticationManager extends LifeCycle
+public interface AuthenticationManager<T> extends LifeCycle
 {
     void setAuthMethod (String method);
     String getAuthMethod ();
@@ -33,4 +33,6 @@ public interface AuthenticationManager extends LifeCycle
     
     void setSecurityHandler (SecurityHandler handler);
     SecurityHandler getSecurityHandler ();
+
+    T getServerAuthentication();
 }
