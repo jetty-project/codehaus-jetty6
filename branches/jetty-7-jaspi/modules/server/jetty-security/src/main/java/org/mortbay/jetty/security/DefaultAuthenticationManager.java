@@ -77,23 +77,7 @@ public class DefaultAuthenticationManager extends AbstractAuthenticationManager
         super.doStop();
     }
 
-    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) 
-    throws ServerAuthException
-    {
-        if (_serverAuthentication == null)
-            return null;
-        
-        return _serverAuthentication.secureResponse(messageInfo, validatedUser);
+    public ServerAuthentication getServerAuthentication() {
+        return _serverAuthentication;
     }
-
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) 
-    throws ServerAuthException
-    {
-        if (_serverAuthentication == null)
-            return null;
-        
-        return _serverAuthentication.validateRequest(messageInfo);
-    }
-
-   
 }

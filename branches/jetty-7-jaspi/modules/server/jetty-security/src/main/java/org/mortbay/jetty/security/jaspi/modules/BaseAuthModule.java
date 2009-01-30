@@ -48,6 +48,7 @@ import org.mortbay.jetty.security.jaspi.callback.CredentialValidationCallback;
 import org.mortbay.util.StringUtil;
 
 /**
+ * @deprecated use *ServerAuthentication
  * @version $Rev$ $Date$
  */
 public class BaseAuthModule implements ServerAuthModule, ServerAuthContext

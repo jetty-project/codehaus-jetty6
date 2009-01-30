@@ -38,6 +38,7 @@ import org.mortbay.jetty.security.LoginService;
 import org.mortbay.log.Log;
 
 /**
+ * @deprecated use *ServerAuthentication
  * @version $Rev$ $Date$
  */
 public class BasicAuthModule extends BaseAuthModule

@@ -19,7 +19,7 @@ import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.AuthenticationManager;
 import org.mortbay.jetty.handler.SecurityHandler;
 
-public abstract class AbstractAuthenticationManager extends AbstractLifeCycle implements AuthenticationManager, ServerAuthentication
+public abstract class AbstractAuthenticationManager extends AbstractLifeCycle implements AuthenticationManager<ServerAuthentication>
 {
     private String _method;
     private boolean _lazy = true; //by default allow lazy authentication

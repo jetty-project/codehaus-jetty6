@@ -36,6 +36,7 @@ import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.Password;
 
 /**
+ * @deprecated use *ServerAuthentication
  * @version $Rev$ $Date$
  */
 public class ClientCertAuthModule extends BaseAuthModule

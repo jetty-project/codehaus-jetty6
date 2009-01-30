@@ -43,6 +43,7 @@ import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 
 /**
+ * @deprecated use *ServerAuthentication
  * @version $Rev$ $Date$
  */
 public class DigestAuthModule extends BaseAuthModule

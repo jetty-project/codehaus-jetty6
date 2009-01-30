@@ -1,89 +1,59 @@
 package org.mortbay.jetty.security.jaspi;
 
-import javax.security.auth.message.ServerAuth;
-import javax.security.auth.message.config.ServerAuthConfig;
-import javax.security.auth.message.config.ServerAuthContext;
+import java.util.Map;
 
-import org.mortbay.jetty.handler.SecurityHandler;
+import javax.security.auth.Subject;
+import javax.security.auth.message.config.AuthConfigFactory;
+import javax.security.auth.message.config.AuthConfigProvider;
+import javax.security.auth.message.config.RegistrationListener;
+import javax.security.auth.message.config.ServerAuthConfig;
+
 import org.mortbay.jetty.security.AbstractAuthenticationManager;
-import org.mortbay.jetty.security.Constraint;
-import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.LoginService;
-import org.mortbay.jetty.security.ServerAuthException;
-import org.mortbay.jetty.security.ServerAuthResult;
-import org.mortbay.jetty.security.ServerAuthStatus;
 import org.mortbay.jetty.security.ServerAuthentication;
 import org.mortbay.jetty.security.ServletCallbackHandler;
-import org.mortbay.jetty.security.jaspi.modules.BasicAuthModule;
-import org.mortbay.jetty.security.jaspi.modules.ClientCertAuthModule;
-import org.mortbay.jetty.security.jaspi.modules.DigestAuthModule;
-import org.mortbay.jetty.security.jaspi.modules.FormAuthModule;
 
 public class JaspiAuthenticationManager extends AbstractAuthenticationManager
 {
+    private static String MESSAGE_LAYER = "HTTP";
     private ServerAuthentication _serverAuthentication;
-    private ServerAuthContext _serverAuthContext;
-    private ServerAuth _serverAuth;
+    private String appContext;
+    private Map authConfigProperties;
+    private Subject serviceSubject;
     
     public JaspiAuthenticationManager ()
     {}
-    
-    public void setServerAuth (ServerAuth serverAuth)
-    {
-        //TODO set a jaspi auth module to use, possibly third party
-        _serverAuth = serverAuth;
+
+    public void setAppContext(String appContext) {
+        this.appContext = appContext;
     }
-    
-    
+
+    public void setAuthConfigProperties(Map authConfigProperties) {
+        this.authConfigProperties = authConfigProperties;
+    }
+
+    public void setServiceSubject(Subject serviceSubject) {
+        this.serviceSubject = serviceSubject;
+    }
+
     protected void doStart() throws Exception
     {
         super.doStart();
 
-        if (getAuthMethod() != null && !"".equals(getAuthMethod()))
+        AuthConfigFactory authConfigFactory = AuthConfigFactory.getFactory();
+        RegistrationListener listener = new RegistrationListener()
         {
-            LoginService loginService = (LoginService)getSecurityHandler().getUserRealm();
 
-            ServletCallbackHandler callbackHandler=new ServletCallbackHandler(loginService);
+            public void notify(String layer, String appContext)
+            {}
 
-            //allow a jaspi auth module to be plugged in - only use our defaults if we
-            //haven't been given one to use
-            if (_serverAuth == null)
-            {
-                if (Constraint.__FORM_AUTH.equals(getAuthMethod()))
-                {
-                    _serverAuthContext = new FormAuthModule(callbackHandler, getLoginPage(), getErrorPage());
-                } 
-                else if (Constraint.__BASIC_AUTH.equals(getAuthMethod()))
-                {
-                    _serverAuthContext = new BasicAuthModule(callbackHandler, loginService.getName());
-                } 
-                else if (Constraint.__DIGEST_AUTH.equals(getAuthMethod()))
-                {
-                    _serverAuthContext = new DigestAuthModule(callbackHandler, loginService.getName());
-                } 
-                else if (Constraint.__CERT_AUTH.equals(getAuthMethod()) ||
-                        Constraint.__CERT_AUTH2.equals(getAuthMethod()))
-                {
-                    //TODO figure out how to configure max handshake?
-                    _serverAuthContext = new ClientCertAuthModule(callbackHandler);
-                }           
-                else
-                    throw new IllegalStateException ("Unrecognized auth method: "+getAuthMethod());
-            }
-
-            //TODO - how does the ServerAuth module relate to the ServerAuthContext? Can we plug in a
-            //3rd party jaspi module by passing it to our JaspiServerAuthentication?
-
-            String appContext = null;
-            ServerAuthConfig serverAuthConfig = new SimpleAuthConfig(appContext, _serverAuthContext);
-            _serverAuthentication = new JaspiServerAuthentication(appContext,
-                                                                  serverAuthConfig,
-                                                                  null,
-                                                                  callbackHandler,
-                                                                  //TODO??
-                                                                  null,
-                                                                  getAllowLazyAuth());
-        }
+        };
+        AuthConfigProvider authConfigProvider = authConfigFactory.getConfigProvider(MESSAGE_LAYER, appContext, listener);
+        LoginService loginService = (LoginService)getSecurityHandler().getUserRealm();
+        ServletCallbackHandler servletCallbackHandler = new ServletCallbackHandler(loginService);
+        ServerAuthConfig serverAuthConfig = authConfigProvider.getServerAuthConfig(MESSAGE_LAYER, appContext, servletCallbackHandler);
+        //TODO appContext is supposed to be server-name<space>context-root
+        _serverAuthentication = new JaspiServerAuthentication(appContext, serverAuthConfig, authConfigProperties, servletCallbackHandler, serviceSubject, getAllowLazyAuth());
     }
 
     protected void doStop() throws Exception
@@ -91,21 +61,7 @@ public class JaspiAuthenticationManager extends AbstractAuthenticationManager
         super.doStop();
     }
 
-    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) 
-    throws ServerAuthException
-    {
-        if (_serverAuthentication == null)
-            return null;
-        
-        return _serverAuthentication.secureResponse(messageInfo, validatedUser);
-    }
-
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) 
-    throws ServerAuthException
-    {
-        if (_serverAuthentication == null)
-            return null;
-        
-       return _serverAuthentication.validateRequest(messageInfo);
+    public ServerAuthentication getServerAuthentication() {
+        return _serverAuthentication;
     }
 }

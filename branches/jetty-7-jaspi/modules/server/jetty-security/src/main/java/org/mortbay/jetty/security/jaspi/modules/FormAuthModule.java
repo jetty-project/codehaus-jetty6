@@ -49,6 +49,7 @@ import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 
 /**
+ * @deprecated use *ServerAuthentication
  * @version $Rev$ $Date$
  */
 public class FormAuthModule extends BaseAuthModule
