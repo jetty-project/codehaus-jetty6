@@ -15,19 +15,29 @@
 
 package org.mortbay.jetty.security;
 
+import java.util.Map;
+
+import javax.security.auth.Subject;
+
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.AuthenticationManager;
 import org.mortbay.jetty.handler.SecurityHandler;
 
 public abstract class AbstractAuthenticationManager extends AbstractLifeCycle implements AuthenticationManager<ServerAuthentication>
 {
+    private SecurityHandler _securityHandler;
+    //for built-in auth methods
     private String _method;
-    private boolean _lazy = true; //by default allow lazy authentication
+    private boolean _lazy = false; //You must configure lazy auth if you know it works.
     private String _errorPage; //only for form auth
     private String _loginPage; //only for form auth
-    private SecurityHandler _securityHandler;
-    
-    
+    //for jaspi configuration
+    private String serverName;
+    private String contextRoot;
+    private Map authConfigProperties;
+    private Subject serviceSubject;
+
+
     public String getAuthMethod()
     {
         return _method;
@@ -76,5 +86,38 @@ public abstract class AbstractAuthenticationManager extends AbstractLifeCycle im
     public void setSecurityHandler(SecurityHandler handler)
     {
         _securityHandler = handler;  
-    } 
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public String getContextRoot() {
+        return contextRoot;
+    }
+
+    public Map getAuthConfigProperties() {
+         return authConfigProperties;
+     }
+
+     public void setContextRoot(String contextRoot) {
+        this.contextRoot = contextRoot;
+    }
+
+    public void setAuthConfigProperties(Map authConfigProperties) {
+        this.authConfigProperties = authConfigProperties;
+    }
+
+    public Subject getServiceSubject() {
+        return serviceSubject;
+    }
+
+    public void setServiceSubject(Subject serviceSubject) {
+        this.serviceSubject = serviceSubject;
+    }
+
 }

@@ -25,7 +25,7 @@ import org.mortbay.jetty.security.authentication.SessionCachingServerAuthenticat
 
 public class DefaultAuthenticationManager extends AbstractAuthenticationManager
 {
-    private ServerAuthentication _serverAuthentication;
+    protected ServerAuthentication _serverAuthentication;
   
     
     public DefaultAuthenticationManager ()

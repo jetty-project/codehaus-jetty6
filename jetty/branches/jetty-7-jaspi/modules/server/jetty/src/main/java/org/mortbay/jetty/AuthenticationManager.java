@@ -14,6 +14,10 @@
 
 package org.mortbay.jetty;
 
+import java.util.Map;
+
+import javax.security.auth.Subject;
+
 import org.mortbay.component.LifeCycle;
 import org.mortbay.jetty.handler.SecurityHandler;
 
@@ -32,7 +36,24 @@ public interface AuthenticationManager<T> extends LifeCycle
     String getErrorPage ();
     
     void setSecurityHandler (SecurityHandler handler);
+
     SecurityHandler getSecurityHandler ();
+
+    String getServerName();
+
+    void setServerName(String serverName);
+
+    String getContextRoot();
+
+    void setContextRoot(String contextRoot);
+
+    Map getAuthConfigProperties();
+
+    void setAuthConfigProperties(Map authConfigProperties);
+
+    Subject getServiceSubject();
+
+    void setServiceSubject(Subject serviceSubject);
 
     T getServerAuthentication();
 }

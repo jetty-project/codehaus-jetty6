@@ -24,11 +24,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Collections;
 import java.util.jar.JarEntry;
 import java.util.regex.Pattern;
 
 import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.config.ServerAuthContext;
+import javax.security.auth.Subject;
 import javax.servlet.Servlet;
 import javax.servlet.UnavailableException;
 
@@ -43,6 +45,7 @@ import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.ServerAuthentication;
 import org.mortbay.jetty.handler.SecurityHandler;
 import org.mortbay.jetty.RunAsToken;
+import org.mortbay.jetty.AuthenticationManager;
 import org.mortbay.jetty.security.ConstraintAware;
 import org.mortbay.jetty.security.ServletCallbackHandler;
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
@@ -1045,8 +1048,9 @@ public class WebXmlConfiguration implements Configuration
             }
 
            
-            String m = method.toString(false, true); 
-            getWebAppContext().getSecurityHandler().getAuthenticationManager().setAuthMethod(m);
+            String m = method.toString(false, true);
+            AuthenticationManager authenticationManager = _securityHandler.getAuthenticationManager();
+            authenticationManager.setAuthMethod(m);
             if (Constraint.__FORM_AUTH.equals(m))
             {  
                 XmlParser.Node formConfig = node.get("form-login-config");
@@ -1059,8 +1063,8 @@ public class WebXmlConfiguration implements Configuration
                     XmlParser.Node errorPage = formConfig.get("form-error-page");
                     if (errorPage != null) errorPageName = errorPage.toString(false, true);
                     
-                    _securityHandler.getAuthenticationManager().setLoginPage(loginPageName);
-                    _securityHandler.getAuthenticationManager().setErrorPage(errorPageName);
+                    authenticationManager.setLoginPage(loginPageName);
+                    authenticationManager.setErrorPage(errorPageName);
                 }
                 else
                 {
@@ -1068,6 +1072,16 @@ public class WebXmlConfiguration implements Configuration
                     throw new IllegalArgumentException("No form config given for form auth");
                 }
             }
+            //TODO what is server name??
+            String serverName = "server-name";
+            authenticationManager.setServerName(serverName);
+            authenticationManager.setContextRoot(getWebAppContext().getContextPath());
+            //TODO load these from server config???
+            Map authConfigProperties = Collections.emptyMap();
+            authenticationManager.setAuthConfigProperties(authConfigProperties);
+            //TODO figure out if this has a reasonable value??
+            Subject serviceSubject = null;
+            authenticationManager.setServiceSubject(serviceSubject);
         }
 
     }
