@@ -35,11 +35,8 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 
 import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.util.IO;
-import org.mortbay.util.StringUtil;
-
 /**
  * HttpServer Tester.
  */
@@ -103,8 +100,8 @@ public class HttpServerTestBase extends TestCase
         RESPONSE2_CONTENT;
 
     // Useful constants
-    private static final long PAUSE=15L;
-    private static final int LOOPS=50;
+    private static final long PAUSE=10L;
+    private static final int LOOPS=25;
     private static final String HOST="localhost";
 
     private Connector _connector;
@@ -769,7 +766,7 @@ public class HttpServerTestBase extends TestCase
      * 
      * @throws Exception
      */
-    private Server startServer(Handler handler) throws Exception
+    protected Server startServer(Handler handler) throws Exception
     {
         Server server=new Server();
 
@@ -777,9 +774,17 @@ public class HttpServerTestBase extends TestCase
         server.setConnectors(new Connector[]
         { _connector });
         server.setHandler(handler);
+        
+        configServer(server);
+        
         server.start();
         port=_connector.getLocalPort();
         return server;
+    }
+    
+    protected void configServer(Server server)
+    {
+        
     }
 
     private void writeFragments(byte[] bytes, int[] points, StringBuilder message, OutputStream os) throws IOException, InterruptedException

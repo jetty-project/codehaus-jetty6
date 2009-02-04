@@ -39,10 +39,8 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.nio.DirectNIOBuffer;
 import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
-import org.mortbay.jetty.ListAbstractBuffers;
-import org.mortbay.jetty.QueueAbstractBuffers;
+import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpSchemes;
-import org.mortbay.jetty.ThreadLocalAbstractBuffers;
 import org.mortbay.jetty.client.security.Authorization;
 import org.mortbay.jetty.client.security.RealmResolver;
 import org.mortbay.log.Log;
@@ -79,7 +77,7 @@ import org.mortbay.thread.Timeout;
  * @see {@link HttpExchange}
  * @see {@link HttpDestination}
  */
-public class HttpClient extends QueueAbstractBuffers
+public class HttpClient extends AbstractBuffers
 {
     public static final int CONNECTOR_SOCKET = 0;
     public static final int CONNECTOR_SELECT_CHANNEL = 2;

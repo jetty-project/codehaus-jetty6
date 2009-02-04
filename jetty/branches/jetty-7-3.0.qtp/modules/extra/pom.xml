@@ -17,7 +17,6 @@
     <module>jetty-servlet-tester</module>
     <module>jetty-servlet</module>
     <module>jetty-ajp</module>
-    <module>jetty-threadpool</module>
     <module>jetty-jspc-maven-plugin</module>
     <module>jetty-maven-plugin</module>
     <module>maven-jetty-plugin</module>
