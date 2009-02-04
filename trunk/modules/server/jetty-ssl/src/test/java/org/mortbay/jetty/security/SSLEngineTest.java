@@ -245,6 +245,8 @@ public class SSLEngineTest extends TestCase
         public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             // System.err.println("HANDLE "+request.getRequestURI());
+            String ssl_id = (String)request.getAttribute("javax.servlet.request.ssl_session_id");
+            assertNotNull(ssl_id);
             PrintWriter out=response.getWriter();
 
             try
