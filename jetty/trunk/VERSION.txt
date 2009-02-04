@@ -23,6 +23,7 @@
  + JETTY-794 WADI integration tests fail intermittently.
  + JETTY-795 NullPointerException in SocketConnector.java
  + JETTY-801 Bring back 2 arg EnvEntry constructor
+ + JETTY-802 Modify the default error pages to make association with Jetty clearer
  + JETTY-804 HttpClient timeout does not always work
  + JETTY-805 Fix jetty-jaas.xml for new UserRealm package
  + JETTY-806 Timeout related Deadlocks in HTTP Client

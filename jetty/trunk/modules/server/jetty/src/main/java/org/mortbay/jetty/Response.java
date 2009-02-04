@@ -307,11 +307,12 @@ public class Response implements HttpServletResponse
                 writer.write(message);
                 writer.write("</title>\n</head>\n<body>\n<h2>HTTP ERROR: ");
                 writer.write(Integer.toString(code));
-                writer.write("</h2><pre>");
-                writer.write(message);
-                writer.write("</pre>\n<p>RequestURI=");
+                writer.write("</h2>\n<p>Problem accessing ");
                 writer.write(uri);
-                writer.write("</p>\n<p><i><small><a href=\"http://jetty.mortbay.org\">Powered by jetty://</a></small></i></p>");
+                writer.write(". Reason:\n<pre>    ");
+                writer.write(message);
+                writer.write("</pre>");
+                writer.write("</p>\n<hr /><i><small>Powered by Jetty://</small></i>");
 
                 for (int i= 0; i < 20; i++)
                     writer.write("\n                                                ");
