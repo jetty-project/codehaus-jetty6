@@ -1,6 +1,8 @@
 jetty-6.1-SNAPSHOT
  + JETTY-872 Handshake handler calls wrong extension callback
  + JETTY-879 Support extra properties in jQuery comet implementation
+ + JETTY-802 Modify the default error pages to make association with Jetty clearer
+
 
 jetty-6.1.15.rc3 28 January 2009
  + JETTY-691 System.getProperty() calls ... wrap them in doPrivileged
@@ -20,6 +22,7 @@ jetty-6.1.15.pre0 20 January 2009
  + JETTY-795 NullPointerException in SocketConnector.java
  + JETTY-798 Jboss session manager incompatible with LifeCycle.Listener
  + JETTY-801 Bring back 2 arg EnvEntry constructor
+ + JETTY-802 Modify the default error pages to make association with Jetty very clear
  + JETTY-804 HttpClient timeout does not always work
  + JETTY-806 Timeout related Deadlocks in HTTP Client
  + JETTY-807 HttpTester to handle charsets
