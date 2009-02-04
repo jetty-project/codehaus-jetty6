@@ -117,7 +117,7 @@ public class ErrorHandler extends AbstractHandler
         writeErrorPageMessage(request,writer,code,message,uri);
         if (showStacks)
             writeErrorPageStacks(request,writer);
-        writer.write("<p><i><small><a href=\"http://jetty.mortbay.org/\">Powered by Jetty://</a></small></i></p>");
+        writer.write("<hr /><i><small>Powered by Jetty://</small></i>");
         for (int i= 0; i < 20; i++)
             writer.write("<br/>                                                \n");
     }
@@ -126,13 +126,13 @@ public class ErrorHandler extends AbstractHandler
     protected void writeErrorPageMessage(HttpServletRequest request, Writer writer, int code, String message,String uri)
     throws IOException
     {
-        writer.write("<h2>HTTP ERROR: ");
+        writer.write("<h2>HTTP ERROR ");
         writer.write(Integer.toString(code));
-        writer.write("</h2><pre>");
-        writer.write(message);
-        writer.write("</pre>\n<p>RequestURI=");
+        writer.write("</h2>\n<p>Problem accessing ");
         writer.write(uri);
-        writer.write("</p>");
+        writer.write(". Reason:\n<pre>    ");
+        writer.write(message);
+        writer.write("</pre></p>");
     }
 
     /* ------------------------------------------------------------ */
