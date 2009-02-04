@@ -1,16 +1,4 @@
-// ========================================================================
-// Copyright 2004-2005 Mort Bay Consulting Pty. Ltd.
-// ------------------------------------------------------------------------
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at 
-// http://www.apache.org/licenses/LICENSE-2.0
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-// ========================================================================
+
 
 package org.mortbay.thread;
 
@@ -18,7 +6,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -31,42 +18,59 @@ import org.mortbay.log.Log;
  * Avoids the expense of thread creation by pooling threads after
  * their run methods exit for reuse.
  * <p>
- * If the maximum pool size is reached, jobs wait for a free thread.
- * By default there is no maximum pool size.  Idle threads timeout
- * and terminate until the minimum number of threads are running.
+ * If an idle thread is available a job is directly dispatched,
+ * otherwise the job is queued.  After queuing a job, if the total
+ * number of threads is less than the maximum pool size, a new thread 
+ * is spawned.
  * <p>
- * @deprecated Use {@link QueuedThreadPool}
  * @author Greg Wilkins <gregw@mortbay.com>
- * @author Juancarlo Anez <juancarlo@modelistica.com>
  */
-public class BoundedThreadPool extends AbstractLifeCycle implements Serializable, ThreadPool
+public class OldQueuedThreadPool extends AbstractLifeCycle implements Serializable, ThreadPool
 {
     private static int __id;
+    
+    private String _name;
+    private Set _threads;
+    private List _idle;
+    private Runnable[] _jobs;
+    private int _nextJob;
+    private int _nextJobSlot;
+    private int _queued;
+    private int _maxQueued;
+    
     private boolean _daemon;
     private int _id;
-    private List _idle;
 
-    private final Object _lock = new Object();
-    private final Object _joinLock = new Object();
+    private final Object _lock = new Lock();
+    private final Object _threadsLock = new Lock();
+    private final Object _joinLock = new Lock();
 
     private long _lastShrink;
     private int _maxIdleTimeMs=60000;
-    private int _maxThreads=255;
-    private int _minThreads=1;
-    private String _name;
-    private List _queue;
-    private Set _threads;
+    private int _maxThreads=250;
+    private int _minThreads=2;
     private boolean _warned=false;
-    int _lowThreads=0;
-    int _priority= Thread.NORM_PRIORITY;
+    private int _lowThreads=0;
+    private int _priority= Thread.NORM_PRIORITY;
+    private int _spawnOrShrinkAt=0;
+    private int _maxStopTimeMs;
 
+    
     /* ------------------------------------------------------------------- */
     /* Construct
      */
-    public BoundedThreadPool()
+    public OldQueuedThreadPool()
     {
-        Log.warn(BoundedThreadPool.class+" deprecated: use "+QueuedThreadPool.class);
-        _name="btpool"+__id++;
+        _name="qtp"+__id++;
+    }
+    
+    /* ------------------------------------------------------------------- */
+    /* Construct
+     */
+    public OldQueuedThreadPool(int maxThreads)
+    {
+        this();
+        setMaxThreads(maxThreads);
     }
 
     /* ------------------------------------------------------------ */
@@ -74,39 +78,55 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
      * @return true 
      */
     public boolean dispatch(Runnable job) 
-    {
-        synchronized(_lock)
-        {       
-            if (!isRunning() || job==null)
-                return false;
+    {  
+        if (!isRunning() || job==null)
+            return false;
 
-            // Are there no threads available?
+        PoolThread thread=null;
+        boolean spawn=false;
+            
+        synchronized(_lock)
+        {
+            // Look for an idle thread
             int idle=_idle.size();
             if (idle>0)
-            {
-                PoolThread thread=(PoolThread)_idle.remove(idle-1);
-                thread.dispatch(job);
-            }
+                thread=(PoolThread)_idle.remove(idle-1);
             else
             {
-                // Are we at max size?
-                if (_threads.size()<_maxThreads)
-                {    
-                    // No - create a new thread!
-                    newThread(job);
-                }
-                else 
+                // queue the job
+                _queued++;
+                if (_queued>_maxQueued)
+                    _maxQueued=_queued;
+                _jobs[_nextJobSlot++]=job;
+                if (_nextJobSlot==_jobs.length)
+                    _nextJobSlot=0;
+                if (_nextJobSlot==_nextJob)
                 {
-                    if (!_warned)    
-                    {
-                        _warned=true;
-                        Log.debug("Out of threads for {}",this);
-                    }
-                    _queue.add(job);
+                    // Grow the job queue
+                    Runnable[] jobs= new Runnable[_jobs.length+_maxThreads];
+                    int split=_jobs.length-_nextJob;
+                    if (split>0)
+                        System.arraycopy(_jobs,_nextJob,jobs,0,split);
+                    if (_nextJob!=0)
+                        System.arraycopy(_jobs,0,jobs,split,_nextJobSlot);
+                    
+                    _jobs=jobs;
+                    _nextJob=0;
+                    _nextJobSlot=_queued;
                 }
+                  
+                spawn=_queued>_spawnOrShrinkAt;
             }
         }
-
+        
+        if (thread!=null)
+        {
+            thread.dispatch(job);
+        }
+        else if (spawn)
+        {
+            newThread();
+        }
         return true;
     }
 
@@ -128,7 +148,15 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
     {
         return _lowThreads;
     }
-
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return maximum queue size
+     */
+    public int getMaxQueued()
+    {
+        return _maxQueued;
+    }
     
     /* ------------------------------------------------------------ */
     /** Get the maximum thread idle time.
@@ -194,10 +222,45 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
     /* ------------------------------------------------------------ */
     public int getQueueSize()
     {
-        synchronized(_lock)
-        {
-            return _queue.size();
-        }
+        return _queued;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the spawnOrShrinkAt  The number of queued jobs (or idle threads) needed 
+     * before the thread pool is grown (or shrunk)
+     */
+    public int getSpawnOrShrinkAt()
+    {
+        return _spawnOrShrinkAt;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param spawnOrShrinkAt The number of queued jobs (or idle threads) needed 
+     * before the thread pool is grown (or shrunk)
+     */
+    public void setSpawnOrShrinkAt(int spawnOrShrinkAt)
+    {
+        _spawnOrShrinkAt=spawnOrShrinkAt;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return maximum total time that stop() will wait for threads to die.
+     */
+    public int getMaxStopTimeMs()
+    {
+        return _maxStopTimeMs;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param stopTimeMs maximum total time that stop() will wait for threads to die.
+     */
+    public void setMaxStopTimeMs(int stopTimeMs)
+    {
+        _maxStopTimeMs = stopTimeMs;
     }
 
     /* ------------------------------------------------------------ */
@@ -212,11 +275,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
     /* ------------------------------------------------------------ */
     public boolean isLowOnThreads()
     {
-        synchronized(_lock)
-        {
-            // maybe make this volatile?
-            return _queue.size()>_lowThreads;
-        }
+        return _queued>_lowThreads;
     }
 
     /* ------------------------------------------------------------ */
@@ -230,7 +289,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
         
         // TODO remove this semi busy loop!
         while (isStopping())
-            Thread.sleep(10);
+            Thread.sleep(100);
     }
 
     /* ------------------------------------------------------------ */
@@ -288,11 +347,11 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
         if (isStarted() && (minThreads<=0 || minThreads>_maxThreads))
             throw new IllegalArgumentException("!0<=minThreads<maxThreads");
         _minThreads=minThreads;
-        synchronized (_lock)
+        synchronized (_threadsLock)
         {
             while (isStarted() && _threads.size()<_minThreads)
             {
-                newThread(null);   
+                newThread();   
             }
         }
     }
@@ -326,11 +385,11 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
         
         _threads=new HashSet();
         _idle=new ArrayList();
-        _queue=new LinkedList();
+        _jobs=new Runnable[_maxThreads];
         
         for (int i=0;i<_minThreads;i++)
         {
-            newThread(null);
+            newThread();
         }   
     }
 
@@ -346,9 +405,10 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
     {   
         super.doStop();
         
+        long start=System.currentTimeMillis();
         for (int i=0;i<100;i++)
         {
-            synchronized (_lock)
+            synchronized (_threadsLock)
             {
                 Iterator iter = _threads.iterator();
                 while (iter.hasNext())
@@ -356,7 +416,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
             }
             
             Thread.yield();
-            if (_threads.size()==0)
+            if (_threads.size()==0 || (_maxStopTimeMs>0 && _maxStopTimeMs < (System.currentTimeMillis()-start)))
                break;
             
             try
@@ -364,6 +424,8 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
                 Thread.sleep(i*100);
             }
             catch(InterruptedException e){}
+            
+            
         }
 
         // TODO perhaps force stops
@@ -377,15 +439,22 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
     }
 
     /* ------------------------------------------------------------ */
-    protected PoolThread newThread(Runnable job)
+    protected void newThread()
     {
-        synchronized(_lock)
+        synchronized (_threadsLock)
         {
-            PoolThread thread =new PoolThread(job);
-            _threads.add(thread);
-            thread.setName(_name+"-"+_id++);
-            thread.start();  
-            return thread;
+            if (_threads.size()<_maxThreads)
+            {
+                PoolThread thread =new PoolThread();
+                _threads.add(thread);
+                thread.setName(thread.getId()+"@"+_name+"-"+_id++);
+                thread.start(); 
+            }
+            else if (!_warned)    
+            {
+                _warned=true;
+                Log.debug("Max threads for {}",this);
+            }
         }
     }
 
@@ -418,110 +487,98 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
             setDaemon(_daemon);
             setPriority(_priority);
         }
-
-        /* ------------------------------------------------------------ */
-        PoolThread(Runnable job)
-        {
-            setDaemon(_daemon);
-            setPriority(_priority);
-            _job=job;
-        }
-
+        
         /* ------------------------------------------------------------ */
         /** BoundedThreadPool run.
          * Loop getting jobs and handling them until idle or stopped.
          */
         public void run()
         {
+            boolean idle=false;
+            Runnable job=null;
             try
             {
-                Runnable job=null;
-
-                synchronized (this)
-                {
-                    job=_job;
-                    _job=null;
-                }
-                
                 while (isRunning())
-                {
+                {   
+                    // Run any job that we have.
                     if (job!=null)
                     {
-                        Runnable todo=job;
+                        final Runnable todo=job;
                         job=null;
+                        idle=false;
                         todo.run();
                     }
-                    else
+                    
+                    synchronized(_lock)
                     {
-                        // No job
-                        synchronized (_lock)
+                        // is there a queued job?
+                        if (_queued>0)
                         {
-                            // is there a queued job?
-                            if (_queue.size()>0)
-                            {
-                                job=(Runnable)_queue.remove(0);
-                                continue;
-                            }
-                            else
-                            {
-                                _warned=false;
-                                
-                                // consider shrinking the thread pool
-                                if (_threads.size()>_maxThreads ||     // we have too many threads  OR
-                                    _idle.size()>0 &&                  // are there idle threads?
-                                    _threads.size()>_minThreads)       // AND are there more than min threads?
-                                {
-                                    long now = System.currentTimeMillis();
-                                    if ((now-_lastShrink)>getMaxIdleTimeMs())
-                                    {
-                                        _lastShrink=now;
-                                        return;
-                                    }
-                                }
-                            }
-                               
-                            // we are going idle!
-                            _idle.add(this);
+                            _queued--;
+                            job=_jobs[_nextJob++];
+                            if (_nextJob==_jobs.length)
+                                _nextJob=0;
+                            continue;
                         }
 
-                        try
+                        // Should we shrink?
+                        final int threads=_threads.size();
+                        if (threads>_minThreads && 
+                            (threads>_maxThreads || 
+                             _idle.size()>_spawnOrShrinkAt))   
                         {
-                            synchronized (this)
+                            long now = System.currentTimeMillis();
+                            if ((now-_lastShrink)>getMaxIdleTimeMs())
                             {
-                                if (_job==null)
-                                    this.wait(getMaxIdleTimeMs());
-                                job=_job;
-                                _job=null;
-                            }
-                        }
-                        catch (InterruptedException e)
-                        {
-                            Log.ignore(e);
-                        }
-                        finally
-                        {
-                            synchronized (_lock)
-                            {
+                                _lastShrink=now;
                                 _idle.remove(this);
+                                return;
                             }
+                        }
+
+                        if (!idle)
+                        {   
+                            // Add ourselves to the idle set.
+                            _idle.add(this);
+                            idle=true;
                         }
                     }
+
+                    // We are idle
+                    // wait for a dispatched job
+                    synchronized (this)
+                    {
+                        if (_job==null)
+                            this.wait(getMaxIdleTimeMs());
+                        job=_job;
+                        _job=null;
+                    }
                 }
+            }
+            catch (InterruptedException e)
+            {
+                Log.ignore(e);
             }
             finally
             {
                 synchronized (_lock)
                 {
+                    _idle.remove(this);
+                }
+                synchronized (_threadsLock)
+                {
                     _threads.remove(this);
                 }
-                
-                Runnable job=null;
                 synchronized (this)
                 {
                     job=_job;
                 }
-                if (job!=null && isRunning())
-                    BoundedThreadPool.this.dispatch(job);
+                
+                // we died with a job! reschedule it
+                if (job!=null)
+                {
+                    OldQueuedThreadPool.this.dispatch(job);
+                }
             }
         }
         
@@ -530,12 +587,12 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
         {
             synchronized (this)
             {
-                if(_job!=null || job==null)
-                    throw new IllegalStateException();
                 _job=job;
                 this.notify();
             }
         }
     }
 
+    private class Lock{}
 }
+
