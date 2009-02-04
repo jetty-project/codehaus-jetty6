@@ -226,6 +226,7 @@ public class SSLEngineTest extends TestCase
         catch(SocketTimeoutException e)
         {
             System.err.println("Test timedout: "+e.toString());
+            e.printStackTrace(); // added to see if we can get more info from failures on CI
         }
         finally
         {
