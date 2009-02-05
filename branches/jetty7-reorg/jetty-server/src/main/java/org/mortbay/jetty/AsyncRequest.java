@@ -24,8 +24,8 @@ import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestWrapper;
 import javax.servlet.ServletResponse;
 
-import org.mortbay.io.AsyncEndPoint;
-import org.mortbay.io.EndPoint;
+import org.mortbay.jetty.io.AsyncEndPoint;
+import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
 import org.mortbay.util.LazyList;

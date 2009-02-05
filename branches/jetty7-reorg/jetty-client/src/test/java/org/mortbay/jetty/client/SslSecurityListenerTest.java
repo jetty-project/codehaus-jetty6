@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 
 import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpMethods;
@@ -44,6 +43,7 @@ import org.mortbay.jetty.security.ConstraintsSecurityHandler;
 import org.mortbay.jetty.security.HashUserRealm;
 import org.mortbay.jetty.ssl.SslSocketConnector;
 import org.mortbay.jetty.UserRealm;
+import org.mortbay.util.EofException;
 
 /**
  * Functional testing.

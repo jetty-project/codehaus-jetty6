@@ -35,15 +35,15 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.HttpURI;
 import org.mortbay.jetty.client.Address;
 import org.mortbay.jetty.client.HttpClient;
 import org.mortbay.jetty.client.HttpExchange;
+import org.mortbay.jetty.io.Buffer;
 import org.mortbay.log.Log;
+import org.mortbay.util.EofException;
 import org.mortbay.util.IO;
 import org.mortbay.util.TypeUtil;
 

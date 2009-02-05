@@ -22,9 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.mortbay.component.AbstractLifeCycle;
-import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.View;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.View;
 import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceFactory;
 

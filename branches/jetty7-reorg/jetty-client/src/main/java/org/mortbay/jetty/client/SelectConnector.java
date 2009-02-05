@@ -22,16 +22,16 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
 import org.mortbay.component.AbstractLifeCycle;
-import org.mortbay.io.Buffer;
-import org.mortbay.io.Buffers;
-import org.mortbay.io.Connection;
-import org.mortbay.io.nio.IndirectNIOBuffer;
-import org.mortbay.io.nio.NIOBuffer;
-import org.mortbay.io.nio.SelectChannelEndPoint;
-import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.HttpVersions;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.Buffers;
+import org.mortbay.jetty.io.Connection;
+import org.mortbay.jetty.io.nio.IndirectNIOBuffer;
+import org.mortbay.jetty.io.nio.NIOBuffer;
+import org.mortbay.jetty.io.nio.SelectChannelEndPoint;
+import org.mortbay.jetty.io.nio.SelectorManager;
 import org.mortbay.jetty.ssl.SslSelectChannelEndPoint;
 import org.mortbay.log.Log;
 

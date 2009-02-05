@@ -29,15 +29,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.EndPoint;
-import org.mortbay.io.nio.ChannelEndPoint;
-import org.mortbay.io.nio.IndirectNIOBuffer;
-import org.mortbay.io.nio.NIOBuffer;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.EndPoint;
+import org.mortbay.jetty.io.nio.ChannelEndPoint;
+import org.mortbay.jetty.io.nio.IndirectNIOBuffer;
+import org.mortbay.jetty.io.nio.NIOBuffer;
 import org.mortbay.jetty.nio.AbstractNIOConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.log.Log;
+import org.mortbay.util.EofException;
+import org.mortbay.util.HttpException;
 import org.mortbay.util.ajax.Continuation;
 
 /* ------------------------------------------------------------------------------- */

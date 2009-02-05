@@ -24,13 +24,14 @@ import java.lang.reflect.Modifier;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.Buffers;
-import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.EndPoint;
-import org.mortbay.io.View;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.Buffers;
+import org.mortbay.jetty.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.EndPoint;
+import org.mortbay.jetty.io.View;
 import org.mortbay.log.Log;
 import org.mortbay.util.ByteArrayOutputStream2;
+import org.mortbay.util.EofException;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 

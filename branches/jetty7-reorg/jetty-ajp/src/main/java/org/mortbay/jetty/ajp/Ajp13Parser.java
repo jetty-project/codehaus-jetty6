@@ -19,15 +19,15 @@ import java.io.InterruptedIOException;
 
 import javax.servlet.ServletInputStream;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.BufferUtil;
-import org.mortbay.io.Buffers;
-import org.mortbay.io.EndPoint;
-import org.mortbay.io.View;
-import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpTokens;
 import org.mortbay.jetty.Parser;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.BufferUtil;
+import org.mortbay.jetty.io.Buffers;
+import org.mortbay.jetty.io.EndPoint;
+import org.mortbay.jetty.io.View;
 import org.mortbay.log.Log;
+import org.mortbay.util.EofException;
 
 /**
  * @author Markus Kobler

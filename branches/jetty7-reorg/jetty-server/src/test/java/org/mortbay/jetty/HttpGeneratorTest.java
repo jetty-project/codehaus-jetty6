@@ -20,11 +20,11 @@ import java.io.IOException;
 
 import junit.framework.TestCase;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.ByteArrayEndPoint;
-import org.mortbay.io.SimpleBuffers;
-import org.mortbay.io.View;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.ByteArrayEndPoint;
+import org.mortbay.jetty.io.SimpleBuffers;
+import org.mortbay.jetty.io.View;
 
 /**
  * @author gregw

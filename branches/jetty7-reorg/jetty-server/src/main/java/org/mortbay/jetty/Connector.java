@@ -18,8 +18,8 @@ package org.mortbay.jetty;
 import java.io.IOException;
 
 import org.mortbay.component.LifeCycle;
-import org.mortbay.io.Buffers;
-import org.mortbay.io.EndPoint;
+import org.mortbay.jetty.io.Buffers;
+import org.mortbay.jetty.io.EndPoint;
 
 /** HTTP Connector.
  * Implementations of this interface provide connectors for the HTTP protocol.
