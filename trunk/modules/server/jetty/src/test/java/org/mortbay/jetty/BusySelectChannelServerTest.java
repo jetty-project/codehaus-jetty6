@@ -24,6 +24,7 @@ import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.thread.NewQueuedThreadPool;
 import org.mortbay.thread.QueuedThreadPool;
 
 /**
@@ -135,7 +136,7 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
 
     protected void configServer(Server server)
     {
-        // XXX works if I set OldQueuedThreadPool here!
+        // XXX works if I set Old QueuedThreadPool here!
         server.setThreadPool(new QueuedThreadPool());
     }
 }
