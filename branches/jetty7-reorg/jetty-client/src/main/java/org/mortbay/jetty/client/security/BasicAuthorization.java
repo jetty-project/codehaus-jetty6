@@ -18,9 +18,9 @@ package org.mortbay.jetty.client.security;
 import java.io.IOException;
 
 import org.mortbay.jetty.client.HttpExchange;
+import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
-import org.mortbay.jetty.io.HttpHeaders;
 import org.mortbay.jetty.security.B64Code;
 import org.mortbay.jetty.util.StringUtil;
 

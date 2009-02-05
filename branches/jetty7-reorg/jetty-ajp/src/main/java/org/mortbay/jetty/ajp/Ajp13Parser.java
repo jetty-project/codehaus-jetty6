@@ -19,11 +19,11 @@ import java.io.InterruptedIOException;
 
 import javax.servlet.ServletInputStream;
 
+import org.mortbay.jetty.http.HttpTokens;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.BufferUtil;
 import org.mortbay.jetty.io.Buffers;
 import org.mortbay.jetty.io.EndPoint;
-import org.mortbay.jetty.io.HttpTokens;
 import org.mortbay.jetty.io.Parser;
 import org.mortbay.jetty.io.View;
 import org.mortbay.jetty.util.EofException;

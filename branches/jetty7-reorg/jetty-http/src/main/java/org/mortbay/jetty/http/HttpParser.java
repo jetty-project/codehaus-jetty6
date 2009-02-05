@@ -12,21 +12,29 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.io;
+package org.mortbay.jetty.http;
 
 import java.io.IOException;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.io.HttpHeaderValues;
-import org.mortbay.jetty.io.HttpHeaders;
-import org.mortbay.jetty.io.HttpMethods;
-import org.mortbay.jetty.io.HttpStatus;
-import org.mortbay.jetty.io.HttpTokens;
-import org.mortbay.jetty.io.HttpVersions;
+import org.mortbay.jetty.http.HttpHeaderValues;
+import org.mortbay.jetty.http.HttpHeaders;
+import org.mortbay.jetty.http.HttpMethods;
+import org.mortbay.jetty.http.HttpStatus;
+import org.mortbay.jetty.http.HttpTokens;
+import org.mortbay.jetty.http.HttpVersions;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.BufferCache;
+import org.mortbay.jetty.io.BufferUtil;
+import org.mortbay.jetty.io.Buffers;
+import org.mortbay.jetty.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.io.Parser;
+import org.mortbay.jetty.io.View;
 import org.mortbay.jetty.io.BufferCache.CachedBuffer;
+import org.mortbay.jetty.io.View.CaseInsensitive;
 import org.mortbay.jetty.util.EofException;
 import org.mortbay.jetty.util.HttpException;
 import org.mortbay.jetty.util.StringUtil;

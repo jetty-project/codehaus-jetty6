@@ -51,8 +51,8 @@ import javax.servlet.SessionTrackingMode;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.io.Buffer;
-import org.mortbay.jetty.io.MimeTypes;
 import org.mortbay.jetty.server.Dispatcher;
 import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.HandlerContainer;

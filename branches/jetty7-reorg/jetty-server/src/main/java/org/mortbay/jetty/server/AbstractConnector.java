@@ -22,9 +22,9 @@ import java.net.UnknownHostException;
 
 import javax.servlet.ServletRequest;
 
+import org.mortbay.jetty.http.HttpFields;
+import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.io.EndPoint;
-import org.mortbay.jetty.io.HttpFields;
-import org.mortbay.jetty.io.HttpHeaders;
 import org.mortbay.jetty.util.EofException;
 import org.mortbay.jetty.util.component.LifeCycle;
 import org.mortbay.jetty.util.log.Log;

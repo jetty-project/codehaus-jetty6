@@ -29,7 +29,7 @@ import junit.framework.TestCase;
 
 import org.mortbay.jetty.client.security.HashRealmResolver;
 import org.mortbay.jetty.client.security.Realm;
-import org.mortbay.jetty.io.HttpMethods;
+import org.mortbay.jetty.http.HttpMethods;
 import org.mortbay.jetty.security.BasicAuthenticator;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;

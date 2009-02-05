@@ -33,7 +33,7 @@ import javax.servlet.http.HttpSessionContext;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.io.HttpHeaders;
+import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.LocalConnector;

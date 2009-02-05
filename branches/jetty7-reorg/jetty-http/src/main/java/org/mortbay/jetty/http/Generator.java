@@ -13,9 +13,11 @@
 //========================================================================
 
 
-package org.mortbay.jetty.io;
+package org.mortbay.jetty.http;
 
 import java.io.IOException;
+
+import org.mortbay.jetty.io.Buffer;
 
 
 public interface Generator
