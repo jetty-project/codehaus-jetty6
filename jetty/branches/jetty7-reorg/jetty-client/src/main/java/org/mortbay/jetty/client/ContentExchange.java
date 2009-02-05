@@ -23,7 +23,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.BufferUtil;
-import org.mortbay.jetty.server.HttpHeaders;
+import org.mortbay.jetty.io.HttpHeaders;
 import org.mortbay.jetty.util.StringUtil;
 
 /**

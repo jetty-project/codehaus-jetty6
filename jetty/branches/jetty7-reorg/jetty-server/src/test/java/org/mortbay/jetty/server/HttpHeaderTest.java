@@ -22,10 +22,10 @@ import junit.framework.TestCase;
 
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.HttpFields;
+import org.mortbay.jetty.io.HttpHeaderValues;
+import org.mortbay.jetty.io.HttpHeaders;
 import org.mortbay.jetty.io.View;
-import org.mortbay.jetty.server.HttpFields;
-import org.mortbay.jetty.server.HttpHeaderValues;
-import org.mortbay.jetty.server.HttpHeaders;
 
 /* ------------------------------------------------------------------------------- */
 /**

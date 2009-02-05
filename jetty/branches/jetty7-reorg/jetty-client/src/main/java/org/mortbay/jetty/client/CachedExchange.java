@@ -16,7 +16,7 @@ package org.mortbay.jetty.client;
 import java.io.IOException;
 
 import org.mortbay.jetty.io.Buffer;
-import org.mortbay.jetty.server.HttpFields;
+import org.mortbay.jetty.io.HttpFields;
 
 /**
  * An exchange that caches response status and fields for later use.

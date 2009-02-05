@@ -23,9 +23,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.io.HttpHeaders;
 import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.HttpConnection;
-import org.mortbay.jetty.server.HttpHeaders;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Response;
 import org.mortbay.jetty.server.UserRealm;

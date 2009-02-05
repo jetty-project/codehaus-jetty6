@@ -16,9 +16,9 @@ package org.mortbay.jetty.rewrite.handler;
 import java.io.IOException;
 import java.util.Enumeration;
 
+import org.mortbay.jetty.io.HttpFields;
+import org.mortbay.jetty.io.HttpHeaders;
 import org.mortbay.jetty.rewrite.handler.CookiePatternRule;
-import org.mortbay.jetty.server.HttpFields;
-import org.mortbay.jetty.server.HttpHeaders;
 
 
 public class CookiePatternRuleTest extends AbstractRuleTestCase

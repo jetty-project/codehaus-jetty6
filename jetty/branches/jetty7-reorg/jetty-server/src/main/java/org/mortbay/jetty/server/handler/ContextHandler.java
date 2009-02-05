@@ -52,11 +52,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.MimeTypes;
 import org.mortbay.jetty.server.Dispatcher;
 import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.HandlerContainer;
 import org.mortbay.jetty.server.HttpConnection;
-import org.mortbay.jetty.server.MimeTypes;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.util.Attributes;

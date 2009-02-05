@@ -27,7 +27,7 @@ import org.mortbay.jetty.client.security.Authorization;
 import org.mortbay.jetty.client.security.SecurityListener;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
-import org.mortbay.jetty.server.HttpHeaders;
+import org.mortbay.jetty.io.HttpHeaders;
 import org.mortbay.jetty.server.servlet.PathMap;
 import org.mortbay.jetty.util.log.Log;
 

@@ -20,8 +20,8 @@ import java.security.Principal;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.io.HttpHeaders;
 import org.mortbay.jetty.server.Authenticator;
-import org.mortbay.jetty.server.HttpHeaders;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Response;
 import org.mortbay.jetty.server.UserRealm;

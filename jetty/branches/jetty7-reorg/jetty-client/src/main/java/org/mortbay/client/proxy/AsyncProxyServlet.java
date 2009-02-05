@@ -39,7 +39,7 @@ import org.mortbay.jetty.client.Address;
 import org.mortbay.jetty.client.HttpClient;
 import org.mortbay.jetty.client.HttpExchange;
 import org.mortbay.jetty.io.Buffer;
-import org.mortbay.jetty.server.HttpHeaders;
+import org.mortbay.jetty.io.HttpHeaders;
 import org.mortbay.jetty.server.HttpSchemes;
 import org.mortbay.jetty.server.HttpURI;
 import org.mortbay.jetty.util.EofException;

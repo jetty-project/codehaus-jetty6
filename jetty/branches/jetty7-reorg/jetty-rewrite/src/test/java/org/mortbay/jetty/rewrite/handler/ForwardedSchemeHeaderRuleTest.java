@@ -14,8 +14,8 @@
 
 package org.mortbay.jetty.rewrite.handler;
 
+import org.mortbay.jetty.io.HttpFields;
 import org.mortbay.jetty.rewrite.handler.ForwardedSchemeHeaderRule;
-import org.mortbay.jetty.server.HttpFields;
 
 public class ForwardedSchemeHeaderRuleTest extends AbstractRuleTestCase
 {

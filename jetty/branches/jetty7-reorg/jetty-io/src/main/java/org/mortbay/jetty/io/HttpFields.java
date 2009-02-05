@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.server;
+package org.mortbay.jetty.io;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -33,12 +33,8 @@ import java.util.TimeZone;
 
 import javax.servlet.http.Cookie;
 
-import org.mortbay.jetty.io.Buffer;
-import org.mortbay.jetty.io.BufferCache;
-import org.mortbay.jetty.io.BufferDateCache;
-import org.mortbay.jetty.io.BufferUtil;
-import org.mortbay.jetty.io.ByteArrayBuffer;
-import org.mortbay.jetty.io.View;
+import org.mortbay.jetty.io.HttpHeaderValues;
+import org.mortbay.jetty.io.HttpHeaders;
 import org.mortbay.jetty.io.BufferCache.CachedBuffer;
 import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.QuotedStringTokenizer;
