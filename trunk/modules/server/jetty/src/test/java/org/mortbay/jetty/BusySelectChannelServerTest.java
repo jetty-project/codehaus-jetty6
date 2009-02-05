@@ -137,6 +137,6 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
     protected void configServer(Server server)
     {
         // XXX works if I set Old QueuedThreadPool here!
-        server.setThreadPool(new QueuedThreadPool());
+        server.setThreadPool(new NewQueuedThreadPool());
     }
 }
