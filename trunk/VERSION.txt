@@ -1,3 +1,5 @@
+Jetty-7.0-SNAPSHOT
+
  + JETTY-540 Merged 3.0 Public Review changes
  + JETTY-567 Delay in initial TLS Handshake With FireFox 3 beta5 and SslSelectChannelConnector
  + JETTY-600 Automated tests of WADI integration + upgrade to WADI 2.0
@@ -51,10 +53,77 @@
  + JETTY-844 Replace reflection with direct invocation in Slf4jLog
  + JETTY-854 JNDI scope does not work with applications in a .war
  + JETTY-859 MultiPartFilter ignores the query string parameters
+ + JETTY-861 switched buffer pools to ThreadLocal implementation
  + JETTY-862 EncodedHttpURI ignores given encoding in constructor
  + JETTY-866 jetty-client test case fix
  + JETTY-871 jetty-client expires() NPE race condition fixed
+ + JETTY-876 Added new BlockingArrayQueue.
  
+jetty-6.1.15.rc3 28 January 2009
+ + JETTY-691 System.getProperty() calls ... wrap them in doPrivileged
+ + JETTY-844 Replace reflection with direct invocation in Slf4jLog
+ + JETTY-861 switched buffer pools to ThreadLocal implementation
+ + JETTY-866 jetty-client test case fix
+
+jetty-6.1.15.rc2 23 January 2009
+ + adjustment to jetty-client assembly packaging
+ + JETTY-567 Delay in initial TLS Handshake With FireFox 3 beta5 and SslSelectChannelConnector
+
+jetty-6.1.15.pre0 20 January 2009
+ + JETTY-600 Automated tests of WADI integration + upgrade to WADI 2.0
+ + JETTY-749 Reliable message delivery
+ + JETTY-794 WADI integration tests fail intermittently.
+ + JETTY-781 Add "mvn jetty:deploy-war" for deploying a pre-assembled war
+ + JETTY-795 NullPointerException in SocketConnector.java
+ + JETTY-798 Jboss session manager incompatible with LifeCycle.Listener
+ + JETTY-801 Bring back 2 arg EnvEntry constructor
+ + JETTY-802 Modify the default error pages to make association with Jetty very clear
+ + JETTY-804 HttpClient timeout does not always work
+ + JETTY-806 Timeout related Deadlocks in HTTP Client
+ + JETTY-807 HttpTester to handle charsets
+ + JETTY-808 cometd client demo run.sh
+ + JETTY-809 Need a way to customize WEB-INF/lib file extensions that are added to the classpath
+ + JETTY-814 Add org.mortbay.jetty.client.Address.toString()
+ + JETTY-816 Implement reconnect on java bayeux client
+ + JETTY-817 Aborted SSL connections may cause jetty to hang with full cpu
+ + JETTY-819 Jetty Plus no more jre 1.4
+ + JETTY-821 Allow lazy loading of persistent sessions
+ + JETTY-824 Access to inbound byte statistics
+ + JETTY-825 URL decoding of spaces (+) fails for encoding not utf8
+ + JETTY-827 Externalize servlet api
+ + JETTY-830 Add ability to reserve connections on http client
+ + JETTY-831 Add ability to stop java bayeux client
+ + JETTY-832 More UrlDecoded handling in relation to JETTY-825
+ + JETTY-833 Update debian and rpm packages for new jsp-2.1-glassfish jars and servlet-api jar
+ + JETTY-834 Configure DTD does not allow <Map> children
+ + JETTY-837 Response headers set via filter are ignored for static resources
+ + JETTY-841 Duplicate messages when sending private message to yourself with cometd chat demo
+ + JETTY-842 NPE in jetty client when no path component
+ + JETTY-843 META-INF/MANIFEST.MF is not present in unpacked webapp
+ + JETTY-852 Ensure handshake and connect retried on failure for jquery-cometd
+ + JETTY-854 JNDI scope does not work with applications in a .war
+ + JETTY-855 jetty-client uber assembly support
+ + JETTY-858 ContentExchange provides bytes
+ + JETTY-859 MultiPartFilter ignores the query string parameters
+ + JETTY-862 EncodedHttpURI ignores given encoding in constructor
+
+jetty-6.1.14 14 November 2008
+ + JETTY-630 jetty6-plus rpm is missing the jetty6-plus jar
+ + JETTY-748 Reduced flushing of large content
+ + JETTY-765 ensure stop mojo works for all execution phases
+ + JETTY-777 include util5 on the jetty debs
+ + JETTY-778 handle granular windows timer in lifecycle test
+ + JETTY-779 Fixed line feed in request log
+ + JETTY-782 Implement interval advice for BayeuxClient
+ + JETTY-783 Update jetty self-signed certificate
+ + JETTY-784 TerracottaSessionManager leaks sessions scavenged in other nodes
+ + JETTY-787 Handle MSIE7 mixed encoding
+ + JETTY-788 Fix jotm for new scoped jndi
+ + JETTY-790 WaitingContinuations can change mutex if not pending
+ + JETTY-791 Ensure jdk1.4 compatibility for jetty-6
+ + JETTY-792 TerracottaSessionManager does not unlock new session with requested id
+ + JETTY-793 Fixed DataCache millisecond rounding
+
 jetty-6.1.12 4 November 2008
  + JETTY-731 Completed DeliverListener for cometd
  + JETTY-772 Increased default threadpool size to 250

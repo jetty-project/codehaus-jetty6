@@ -61,12 +61,12 @@ public class AbstractBuffersTest
         super.tearDown();
     }
 
-    public void execAbstractBuffer( int type )
+    public void execAbstractBuffer()
         throws Exception
     {
         threadList.clear();
         buffersRetrieved = new AtomicLong( 0 );
-        buffers = new InnerAbstractBuffers( type );
+        buffers = new InnerAbstractBuffers();
 
         for ( int i = 0; i < numThreads; ++i )
         {
@@ -110,78 +110,16 @@ public class AbstractBuffersTest
         }
     }
 
-    public void testThreadLocalAbstractBuffers()
+    public void testAbstractBuffers()
         throws Exception
     {
-        System.out.println( "Thread Local Test" );
-        execAbstractBuffer( __LOCAL );
+        execAbstractBuffer( );
 
     }
 
-    public void testListAbstractBuffers()
-        throws Exception
-    {
-        System.out.println( "List Test" );
-        execAbstractBuffer( __LIST );
 
-    }
-
-    public void testAbstractQueueBuffers()
-        throws Exception
-    {
-        System.out.println( "Queue Test" );
-        execAbstractBuffer( __QUEUE );
-    }
-
-    /**
-     * wrapper for testing different types of AbstractBuffers
-     * 
-     * @author jesse
-     */
-    private class InnerAbstractBuffers
-    {
-        AbstractBuffers abuf;
-
-        public InnerAbstractBuffers( int type )
-            throws Exception
-        {
-            if ( type == __LIST )
-            {
-                abuf = new InnerListAbstractBuffers();
-            }
-            else if ( type == __QUEUE )
-            {
-                abuf = new InnerQueueAbstractBuffers();
-            }
-            else if ( type == __LOCAL )
-            {
-                abuf = new InnerThreadLocalAbstractBuffers();
-            }
-            abuf.start();
-
-            if ( abuf == null )
-            {
-                throw new IllegalArgumentException( "failed to init buffers" );
-            }
-            abuf.doStart();
-        }
-
-        public Buffer getBuffer( int size )
-        {
-
-            Buffer b = abuf.getBuffer( size );
-
-            return b;
-        }
-
-        public void returnBuffer( Buffer buffer )
-        {
-            abuf.returnBuffer( buffer );
-        }
-    }
-
-    class InnerListAbstractBuffers
-        extends ListAbstractBuffers
+    class InnerAbstractBuffers
+        extends AbstractBuffers
     {
 
         public Buffer newBuffer( int size )
@@ -191,27 +129,6 @@ public class AbstractBuffersTest
 
     }
 
-    class InnerQueueAbstractBuffers
-        extends QueueAbstractBuffers
-    {
-
-        public Buffer newBuffer( int size )
-        {
-            return new ByteArrayBuffer( size );
-        }
-
-    }
-
-    class InnerThreadLocalAbstractBuffers
-        extends ThreadLocalAbstractBuffers
-    {
-
-        public Buffer newBuffer( int size )
-        {
-            return new ByteArrayBuffer( size );
-        }
-
-    }
 
     /**
      * generic buffer peeper

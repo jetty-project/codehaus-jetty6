@@ -30,11 +30,8 @@ import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.jetty.AbstractBuffers;
-import org.mortbay.jetty.ListAbstractBuffers;
-import org.mortbay.jetty.QueueAbstractBuffers;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.HttpVersions;
-import org.mortbay.jetty.ThreadLocalAbstractBuffers;
 import org.mortbay.jetty.ssl.SslSelectChannelEndPoint;
 import org.mortbay.log.Log;
 
@@ -161,7 +158,7 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
 
             if (_sslBuffers==null)
             {
-                AbstractBuffers buffers = new QueueAbstractBuffers()
+                AbstractBuffers buffers = new AbstractBuffers()
                 {
                     public Buffer newBuffer( int size )
                     {
