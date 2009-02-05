@@ -15,10 +15,7 @@
 
 package org.mortbay.thread;
 
-import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
@@ -38,7 +35,7 @@ public class NewQueuedThreadPool extends AbstractLifeCycle implements ThreadPool
     private final AtomicLong _lastShrink = new AtomicLong();
     private final ConcurrentLinkedQueue<Thread> _threads=new ConcurrentLinkedQueue<Thread>();
     private final Object _joinLock = new Object();
-    private BlockingQueue<Runnable> _jobs;
+    private BlockingArrayQueue<Runnable> _jobs;
     private String _name;
     private int _maxIdleTimeMs=60000;
     private int _maxThreads=254;
@@ -72,9 +69,8 @@ public class NewQueuedThreadPool extends AbstractLifeCycle implements ThreadPool
         super.doStart();
         _threadsStarted.set(0);
 
-        //_jobs=_maxQueued>0 ?new BlockingArrayQueue<Runnable>(_minThreads,_minThreads,_maxQueued)
-        //        :new BlockingArrayQueue<Runnable>(_minThreads,_minThreads);
-        _jobs=new LinkedBlockingQueue<Runnable>();
+        _jobs=_maxQueued>0 ?new BlockingArrayQueue<Runnable>(_minThreads,_minThreads,_maxQueued)
+                :new BlockingArrayQueue<Runnable>(_minThreads,_minThreads);
 
         int threads=_threadsStarted.get();
         while (isRunning() && threads<_minThreads)
