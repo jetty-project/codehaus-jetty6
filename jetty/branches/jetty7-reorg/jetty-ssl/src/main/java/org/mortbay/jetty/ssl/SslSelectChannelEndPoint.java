@@ -30,7 +30,7 @@ import org.mortbay.jetty.io.Buffers;
 import org.mortbay.jetty.io.nio.NIOBuffer;
 import org.mortbay.jetty.io.nio.SelectChannelEndPoint;
 import org.mortbay.jetty.io.nio.SelectorManager;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /**
@@ -559,7 +559,7 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
         if (_inNIOBuffer.length()==0)
         {
             if(!isOpen())
-                throw new org.mortbay.util.EofException();
+                throw new org.mortbay.jetty.util.EofException();
             return false;
         }
 

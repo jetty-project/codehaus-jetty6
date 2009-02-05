@@ -18,15 +18,15 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.mortbay.jetty.*;
-import org.mortbay.jetty.HttpFields.Field;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.Buffers;
 import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.io.EndPoint;
-import org.mortbay.log.Log;
-import org.mortbay.util.EofException;
-import org.mortbay.util.TypeUtil;
+import org.mortbay.jetty.server.*;
+import org.mortbay.jetty.server.HttpFields.Field;
+import org.mortbay.jetty.util.EofException;
+import org.mortbay.jetty.util.TypeUtil;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * @author lagdeppa (at) exist.com

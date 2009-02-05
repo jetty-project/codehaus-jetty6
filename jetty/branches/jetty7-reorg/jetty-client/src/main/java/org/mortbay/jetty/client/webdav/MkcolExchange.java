@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.client.CachedExchange;
 import org.mortbay.jetty.io.Buffer;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 
 public class MkcolExchange extends CachedExchange

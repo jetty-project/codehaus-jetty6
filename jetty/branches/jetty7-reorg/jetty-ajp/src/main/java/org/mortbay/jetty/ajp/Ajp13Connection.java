@@ -26,13 +26,13 @@ import java.util.Iterator;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Server;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.EndPoint;
-import org.mortbay.util.HttpException;
+import org.mortbay.jetty.server.Connector;
+import org.mortbay.jetty.server.HttpConnection;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Server;
+import org.mortbay.jetty.util.HttpException;
 
 /**
  * Connection implementation of the Ajp13 protocol. <p/> XXX Refactor to remove
@@ -128,8 +128,8 @@ public class Ajp13Connection extends HttpConnection
             } 
             catch (Exception e) 
             {
-                org.mortbay.log.Log.warn(e.toString());
-                org.mortbay.log.Log.ignore(e);
+                org.mortbay.jetty.util.log.Log.warn(e.toString());
+                org.mortbay.jetty.util.log.Log.ignore(e);
                 if (sslCert!=null)
                     _request.setAttribute("javax.servlet.request.X509Certificate", sslCert.toString());
             }

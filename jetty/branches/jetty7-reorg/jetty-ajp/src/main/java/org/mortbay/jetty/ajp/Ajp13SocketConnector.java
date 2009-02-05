@@ -16,19 +16,19 @@ package org.mortbay.jetty.ajp;
 
 import java.io.IOException;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpSchemes;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.handler.DefaultHandler;
-import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.io.EndPoint;
-import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.server.Connector;
+import org.mortbay.jetty.server.Handler;
+import org.mortbay.jetty.server.HttpConnection;
+import org.mortbay.jetty.server.HttpSchemes;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Server;
+import org.mortbay.jetty.server.bio.SocketConnector;
+import org.mortbay.jetty.server.handler.ContextHandlerCollection;
+import org.mortbay.jetty.server.handler.DefaultHandler;
+import org.mortbay.jetty.server.handler.HandlerCollection;
+import org.mortbay.jetty.server.nio.SelectChannelConnector;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * @author Greg Wilkins

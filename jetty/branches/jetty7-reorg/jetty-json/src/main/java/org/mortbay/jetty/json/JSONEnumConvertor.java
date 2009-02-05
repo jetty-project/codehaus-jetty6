@@ -18,8 +18,8 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.mortbay.jetty.json.JSON.Output;
-import org.mortbay.log.Log;
-import org.mortbay.util.Loader;
+import org.mortbay.jetty.util.Loader;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /**

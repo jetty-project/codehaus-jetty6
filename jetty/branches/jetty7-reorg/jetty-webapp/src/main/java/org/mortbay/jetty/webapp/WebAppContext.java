@@ -31,30 +31,30 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.HandlerContainer;
-import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.security.ConstraintsSecurityHandler;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.SessionHandler;
-import org.mortbay.log.Log;
-import org.mortbay.resource.JarResource;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.IO;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.Loader;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.server.Connector;
+import org.mortbay.jetty.server.HandlerContainer;
+import org.mortbay.jetty.server.handler.ContextHandler;
+import org.mortbay.jetty.server.handler.ErrorHandler;
+import org.mortbay.jetty.server.servlet.Context;
+import org.mortbay.jetty.server.servlet.ErrorPageErrorHandler;
+import org.mortbay.jetty.server.servlet.ServletHandler;
+import org.mortbay.jetty.server.servlet.SessionHandler;
+import org.mortbay.jetty.util.IO;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.Loader;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.resource.JarResource;
+import org.mortbay.jetty.util.resource.Resource;
 
 /* ------------------------------------------------------------ */
 /** Web Application Context Handler.
  * The WebAppContext handler is an extension of ContextHandler that
  * coordinates the construction and configuration of nested handlers:
- * {@link org.mortbay.jetty.security.ConstraintsSecurityHandler}, {@link org.mortbay.jetty.servlet.SessionHandler}
- * and {@link org.mortbay.jetty.servlet.ServletHandler}.
+ * {@link org.mortbay.jetty.security.ConstraintsSecurityHandler}, {@link org.mortbay.jetty.server.servlet.SessionHandler}
+ * and {@link org.mortbay.jetty.server.servlet.ServletHandler}.
  * The handlers are configured by pluggable configuration classes, with
  * the default being  {@link org.mortbay.jetty.webapp.WebXmlConfiguration} and 
  * {@link org.mortbay.jetty.webapp.JettyWebXmlConfiguration}.
@@ -292,7 +292,7 @@ public class WebAppContext extends Context
 
     /* ------------------------------------------------------------ */
     /** 
-     * @see org.mortbay.jetty.handler.ContextHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.mortbay.jetty.server.handler.ContextHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response)
     throws IOException, ServletException

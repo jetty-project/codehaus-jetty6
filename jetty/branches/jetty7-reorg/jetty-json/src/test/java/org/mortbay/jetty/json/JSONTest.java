@@ -31,7 +31,7 @@ import org.mortbay.jetty.json.JSONDateConvertor;
 import org.mortbay.jetty.json.JSONEnumConvertor;
 import org.mortbay.jetty.json.JSONObjectConvertor;
 import org.mortbay.jetty.json.JSON.Output;
-import org.mortbay.util.DateCache;
+import org.mortbay.jetty.util.DateCache;
 
 public class JSONTest extends TestCase
 {   

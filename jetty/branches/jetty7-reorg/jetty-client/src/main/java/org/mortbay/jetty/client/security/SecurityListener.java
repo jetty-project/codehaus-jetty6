@@ -21,13 +21,13 @@ import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.client.HttpDestination;
 import org.mortbay.jetty.client.HttpEventListenerWrapper;
 import org.mortbay.jetty.client.HttpExchange;
 import org.mortbay.jetty.io.Buffer;
-import org.mortbay.log.Log;
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.server.HttpHeaders;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.log.Log;
 
 
 /**

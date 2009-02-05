@@ -18,7 +18,7 @@ package org.mortbay.jetty.plus.annotation;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.server.servlet.ServletHolder;
 
 /**
  * RunAs

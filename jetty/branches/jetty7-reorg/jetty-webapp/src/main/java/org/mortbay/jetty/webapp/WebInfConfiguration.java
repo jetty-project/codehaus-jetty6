@@ -13,8 +13,8 @@
 // ========================================================================
 package org.mortbay.jetty.webapp;
 
-import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.resource.Resource;
 /* ------------------------------------------------------------------------------- */
 /**
  * Configure class path from a WEB-INF directory found within a contexts resource base.

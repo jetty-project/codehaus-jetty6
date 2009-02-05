@@ -35,7 +35,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.apache.derby.jdbc.EmbeddedDataSource;
-import org.mortbay.jetty.Request;
+import org.mortbay.jetty.server.Request;
 
 
 /* ---------------------------------------------------- */

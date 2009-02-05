@@ -25,14 +25,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.LocalConnector;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.UserRealm;
-import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.servlet.SessionHandler;
+import org.mortbay.jetty.server.Connector;
+import org.mortbay.jetty.server.LocalConnector;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Server;
+import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.server.handler.AbstractHandler;
+import org.mortbay.jetty.server.handler.ContextHandler;
+import org.mortbay.jetty.server.servlet.SessionHandler;
 
 /**
  * @author gregw

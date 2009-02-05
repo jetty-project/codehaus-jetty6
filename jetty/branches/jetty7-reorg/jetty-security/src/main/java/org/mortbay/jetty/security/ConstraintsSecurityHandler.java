@@ -23,19 +23,19 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.Authenticator;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
-import org.mortbay.jetty.UserRealm;
-import org.mortbay.jetty.handler.HandlerWrapper;
-import org.mortbay.jetty.handler.SecurityHandler;
-import org.mortbay.jetty.servlet.PathMap;
-import org.mortbay.log.Log;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.Loader;
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.server.Authenticator;
+import org.mortbay.jetty.server.Connector;
+import org.mortbay.jetty.server.HttpConnection;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Response;
+import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.server.handler.HandlerWrapper;
+import org.mortbay.jetty.server.handler.SecurityHandler;
+import org.mortbay.jetty.server.servlet.PathMap;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.Loader;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.log.Log;
 
 
 /* ------------------------------------------------------------ */

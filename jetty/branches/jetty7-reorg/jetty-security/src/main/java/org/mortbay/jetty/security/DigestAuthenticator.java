@@ -20,15 +20,15 @@ import java.security.Principal;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.Authenticator;
-import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
-import org.mortbay.jetty.UserRealm;
-import org.mortbay.log.Log;
-import org.mortbay.util.QuotedStringTokenizer;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.TypeUtil;
+import org.mortbay.jetty.server.Authenticator;
+import org.mortbay.jetty.server.HttpHeaders;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Response;
+import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.util.QuotedStringTokenizer;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.TypeUtil;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /** DIGEST authentication.

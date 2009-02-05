@@ -14,7 +14,7 @@
 
 package com.acme;
 
-import org.mortbay.component.AbstractLifeCycle;
+import org.mortbay.jetty.util.component.AbstractLifeCycle;
 
 public class Base extends AbstractLifeCycle
 {
