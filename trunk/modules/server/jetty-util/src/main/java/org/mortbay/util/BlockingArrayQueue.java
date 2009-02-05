@@ -53,7 +53,7 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
     
     private final ReentrantLock _takeLock = new ReentrantLock();
     private final Condition _notEmpty = _takeLock.newCondition();
-    private final ReentrantLock _putLock = new ReentrantLock();
+    private final ReentrantLock _offerLock = new ReentrantLock();
 
     /* ------------------------------------------------------------ */
     /** Create a growing partially blocking Queue
@@ -135,22 +135,20 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
     /* ------------------------------------------------------------ */
     public E peek()
     {
-        final AtomicInteger size = _size;
         if (_size.get() == 0)
             return null;
         
         E e = null;
-        final ReentrantLock takeLock = _takeLock;
-        takeLock.lock(); // Size cannot shrink
+        _takeLock.lock(); // Size cannot shrink
         try 
         {
             
-            if (size.get() > 0) 
+            if (_size.get() > 0) 
                 e = (E)_elements[_head];
         } 
         finally 
         {
-            takeLock.unlock();
+            _takeLock.unlock();
         }
         
         return e;
@@ -162,22 +160,19 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
         if (e == null) 
             throw new NullPointerException();
 
-        final AtomicInteger size = _size;
-        if (size.get() == _limit)
+        if (_size.get() == _limit)
             return false;
         
         boolean not_empty=false;
-        final ReentrantLock offerLock = _putLock;
-        offerLock.lock();  // size cannot now grow... only shrink
+        _offerLock.lock();  // size cannot now grow... only shrink
         try 
         {
-            if (size.get() < _limit) 
+            if (_size.get() < _limit) 
             {
                 // should we expand array?
-                if (size.get()==_elements.length)
+                if (_size.get()==_elements.length)
                 {
-                    final ReentrantLock pollLock=_takeLock;
-                    pollLock.lock();   // Need to grow array
+                    _takeLock.lock();   // Need to grow array
                     try
                     {
                         if (!grow())
@@ -185,34 +180,32 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
                     }
                     finally
                     {
-                        pollLock.unlock();
+                        _takeLock.unlock();
                     }
                 }
 
                 // add the element
-                final Object[] elements=_elements;
-                elements[_tail]=e;
-                _tail=(_tail+1)%elements.length;
+                _elements[_tail]=e;
+                _tail=(_tail+1)%_elements.length;
                 
-                not_empty=0==size.getAndIncrement();
+                not_empty=0==_size.getAndIncrement();
             }
         } 
         finally 
         {
-            offerLock.unlock();
+            _offerLock.unlock();
         }
         
         if (not_empty)
         {
-            final ReentrantLock takeLock=_takeLock;
-            takeLock.lock();
+            _takeLock.lock();
             try
             {
                 _notEmpty.signal();
             }
             finally
             {
-                takeLock.unlock();
+                _takeLock.unlock();
             }
         }  
 
@@ -223,29 +216,26 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
     /* ------------------------------------------------------------ */
     public E poll()
     {
-        final AtomicInteger size = _size;
         if (_size.get() == 0)
             return null;
         
         E e = null;
-        final ReentrantLock takeLock = _takeLock;
-        takeLock.lock(); // Size cannot shrink
+        _takeLock.lock(); // Size cannot shrink
         try 
         {
-            if (size.get() > 0) 
+            if (_size.get() > 0) 
             {
-                final Object[] elements=_elements;
                 final int head=_head;
-                e = (E)elements[head];
-                _head=(head+1)%elements.length;
+                e = (E)_elements[head];
+                _head=(head+1)%_elements.length;
                 
-                if (size.decrementAndGet()>0)
+                if (_size.decrementAndGet()>0)
                     _notEmpty.signal();
             }
         } 
         finally 
         {
-            takeLock.unlock();
+            _takeLock.unlock();
         }
         
         return e;
@@ -260,16 +250,13 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
      */
     public E take() throws InterruptedException
     {
-        final AtomicInteger size = _size;
-        
         E e = null;
-        final ReentrantLock takeLock = _takeLock;
-        takeLock.lockInterruptibly();  // Size cannot shrink
+        _takeLock.lockInterruptibly();  // Size cannot shrink
         try 
         {
             try 
             {
-                while (size.get() == 0)
+                while (_size.get() == 0)
                 {
                     _notEmpty.await();
                 }
@@ -280,17 +267,16 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
                 throw ie;
             }
 
-            final Object[] elements=_elements;
             final int head=_head;
-            e = (E)elements[head];
-            _head=(head+1)%elements.length;
+            e = (E)_elements[head];
+            _head=(head+1)%_elements.length;
 
-            if (size.decrementAndGet()>0)
+            if (_size.decrementAndGet()>0)
                 _notEmpty.signal();
         } 
         finally 
         {
-            takeLock.unlock();
+            _takeLock.unlock();
         }
         
         return e;
@@ -311,17 +297,15 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
      */
     public E poll(long time, TimeUnit unit) throws InterruptedException
     {
-        final AtomicInteger size = _size;
         
         E e = null;
-        final ReentrantLock takeLock = _takeLock;
         
-        takeLock.lockInterruptibly(); // Size cannot shrink
+        _takeLock.lockInterruptibly(); // Size cannot shrink
         try 
         {    
             try 
             {
-                if (size.get() == 0)
+                if (_size.get() == 0)
                 {
                     if (!_notEmpty.await(time,unit))
                         return null;
@@ -333,17 +317,15 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
                 throw ie;
             }
 
-            final Object[] elements=_elements;
-            final int head=_head;
-            e = (E)elements[head];
-            _head=(head+1)%elements.length;
+            e = (E)_elements[_head];
+            _head=(_head+1)%_elements.length;
 
-            if (size.decrementAndGet()>0)
+            if (_size.decrementAndGet()>0)
                 _notEmpty.signal();
         } 
         finally 
         {
-            takeLock.unlock();
+            _takeLock.unlock();
         }
         
         return e;
@@ -361,12 +343,10 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
     /* ------------------------------------------------------------ */
     public void clear()
     {
-        final ReentrantLock putLock = _putLock;
-        final ReentrantLock takeLock = _takeLock;
-        putLock.lock();
+        _offerLock.lock();
         try
         {
-            takeLock.lock();
+            _takeLock.lock();
             try
             {
                 _head=0;
@@ -375,12 +355,12 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
             }
             finally
             {
-                takeLock.unlock();
+                _takeLock.unlock();
             }
         }
         finally
         {
-            putLock.unlock();
+            _offerLock.unlock();
         }
     }
 
@@ -399,12 +379,10 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
     /* ------------------------------------------------------------ */
     public E get(int index)
     {
-        final ReentrantLock putLock = _putLock;
-        final ReentrantLock takeLock = _takeLock;
-        putLock.lock();
+        _offerLock.lock();
         try
         {
-            takeLock.lock();
+            _takeLock.lock();
             try
             {
                 if (index<0 || index>=_size.get())
@@ -416,24 +394,22 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
             }
             finally
             {
-                takeLock.unlock();
+                _takeLock.unlock();
             }
         }
         finally
         {
-            putLock.unlock();
+            _offerLock.unlock();
         }
     }
     
     /* ------------------------------------------------------------ */
     public E remove(int index)
     {
-        final ReentrantLock putLock = _putLock;
-        final ReentrantLock takeLock = _takeLock;
-        putLock.lock();
+        _offerLock.lock();
         try
         {
-            takeLock.lock();
+            _takeLock.lock();
             try
             {
 
@@ -470,12 +446,12 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
             }
             finally
             {
-                takeLock.unlock();
+                _takeLock.unlock();
             }
         }
         finally
         {
-            putLock.unlock();
+            _offerLock.unlock();
         }
     }
 
@@ -485,12 +461,10 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
         if (e == null) 
             throw new NullPointerException();
 
-        final ReentrantLock putLock = _putLock;
-        final ReentrantLock takeLock = _takeLock;
-        putLock.lock();
+        _offerLock.lock();
         try
         {
-            takeLock.lock();
+            _takeLock.lock();
             try
             {
 
@@ -506,12 +480,12 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
             }
             finally
             {
-                takeLock.unlock();
+                _takeLock.unlock();
             }
         }
         finally
         {
-            putLock.unlock();
+            _offerLock.unlock();
         }
     }
     
@@ -521,12 +495,10 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
         if (e == null) 
             throw new NullPointerException();
 
-        final ReentrantLock putLock = _putLock;
-        final ReentrantLock takeLock = _takeLock;
-        putLock.lock();
+        _offerLock.lock();
         try
         {
-            takeLock.lock();
+            _takeLock.lock();
             try
             {
 
@@ -571,12 +543,12 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
             }
             finally
             {
-                takeLock.unlock();
+                _takeLock.unlock();
             }
         }
         finally
         {
-            putLock.unlock();
+            _offerLock.unlock();
         }
     }
 
