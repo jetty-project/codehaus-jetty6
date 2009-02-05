@@ -2,6 +2,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-872 Handshake handler calls wrong extension callback
  + JETTY-879 Support extra properties in jQuery comet implementation
  + JETTY-802 Modify the default error pages to make association with Jetty clearer
+ + JETTY-882 ChannelBayeuxListener called too many times
 
 
 jetty-6.1.15.rc3 28 January 2009
