@@ -206,13 +206,23 @@ public class BlockingArrayQueueTest extends TestCase
                     {
                         while(_running)
                         {
-                            Integer msg=queue.poll();
-                            if (msg==null)
+                            int r=1+random.nextInt(10);
+                            if (r%2==0)
                             {
-                                Thread.sleep(1+random.nextInt(10));
-                                continue;
+                                Integer msg=queue.poll();
+                                if (msg==null)
+                                {
+                                    Thread.sleep(1+random.nextInt(10));
+                                    continue;
+                                }
+                                consumed.add(msg);
                             }
-                            consumed.add(msg);
+                            else
+                            {
+                                Integer msg=queue.poll(r,TimeUnit.MILLISECONDS);
+                                if (msg!=null)
+                                    consumed.add(msg);
+                            }
                         }
 
                     }
