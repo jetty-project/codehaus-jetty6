@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.plus.jaas;
+package org.mortbay.jetty.jaas;
 
 // ========================================================================
 // $Id: SSOJAASUserRealm.java 1001 2008-02-01 09:31:51Z fred nizery $

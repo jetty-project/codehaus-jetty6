@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.plus.jaas;
+package org.mortbay.jetty.jaas;
 
 
 public class JAASRole extends JAASPrincipal

@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.plus.jaas.spi;
+package org.mortbay.jetty.jaas.spi;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -143,7 +143,7 @@ public class PropertyFileLoginModule extends AbstractLoginModule
     /** 
      * Don't implement this as we want to pre-fetch all of the
      * users.
-     * @see org.mortbay.jetty.plus.jaas.spi.AbstractLoginModule#lazyLoadUser(java.lang.String)
+     * @see org.mortbay.jetty.jaas.spi.AbstractLoginModule#lazyLoadUser(java.lang.String)
      * @param username
      * @throws Exception
      */

@@ -1,5 +1,5 @@
 // ========================================================================
-// $Id$
+// $Id: AbstractCallbackHandler.java 305 2006-03-07 10:32:14Z janb $
 // Copyright 2003-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.plus.jaas.callback;
+package org.mortbay.jetty.jaas.callback;
 
 import java.io.IOException;
 

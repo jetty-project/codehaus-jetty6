@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.plus.jaas.spi;
+package org.mortbay.jetty.jaas.spi;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -60,7 +60,7 @@ public class JDBCLoginModule extends AbstractDatabaseLoginModule
     
     /** 
      * Get a connection from the DriverManager
-     * @see org.mortbay.jetty.plus.jaas.spi.AbstractDatabaseLoginModule#getConnection()
+     * @see org.mortbay.jetty.jaas.spi.AbstractDatabaseLoginModule#getConnection()
      * @return
      * @throws Exception
      */
