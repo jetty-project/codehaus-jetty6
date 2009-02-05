@@ -57,7 +57,7 @@ Jetty-7.0-SNAPSHOT
  + JETTY-862 EncodedHttpURI ignores given encoding in constructor
  + JETTY-866 jetty-client test case fix
  + JETTY-871 jetty-client expires() NPE race condition fixed
- + JETTY-876 Added new BlockingArrayQueue.
+ + JETTY-876 Added new BlockingArrayQueue and new QueuedThreadPool
  
 jetty-6.1.15.rc3 28 January 2009
  + JETTY-691 System.getProperty() calls ... wrap them in doPrivileged
