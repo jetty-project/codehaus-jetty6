@@ -1,6 +1,6 @@
 // ========================================================================
 // $Id$
-// Copyright 2003-2004 Mort Bay Consulting Pty. Ltd.
+// Copyright 2002-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,18 +13,16 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.plus.jaas.callback;
+package org.mortbay.jetty.jaas;
 
-import javax.security.auth.callback.Callback;
+import java.io.Serializable;
+import java.security.Principal;
+
 
 
 /* ---------------------------------------------------- */
-/** ObjectCallback
- *
- * <p>Can be used as a LoginModule Callback to
- * obtain a user's credential as an Object, rather than
- * a char[], to which some credentials may not be able
- * to be converted
+/** JAASPrincipal
+ * <p>Impl class of Principal interface.
  *
  * <p><h4>Notes</h4>
  * <p>
@@ -39,26 +37,45 @@ import javax.security.auth.callback.Callback;
  * @version 1.0 Tue Apr 15 2003
  * @author Jan Bartel (janb)
  */
-public class ObjectCallback implements Callback
+public class JAASPrincipal implements Principal, Serializable
 {
-
-    protected Object _object;
+    private String name = null;
     
-    public void setObject(Object o)
+    
+    public JAASPrincipal(String userName)
     {
-        _object = o;
-    }
-
-    public Object getObject ()
-    {
-        return _object;
+        this.name = userName;
     }
 
 
-    public void clearObject ()
+    public boolean equals (Object p)
     {
-        _object = null;
+        if (! (p instanceof JAASPrincipal))
+            return false;
+
+        return getName().equals(((JAASPrincipal)p).getName());
+    }
+
+
+    public int hashCode ()
+    {
+        return getName().hashCode();
+    }
+
+
+    public String getName ()
+    {
+        return this.name;
+    }
+
+
+    public String toString ()
+    {
+        return getName();
     }
     
+
     
 }
+
+    

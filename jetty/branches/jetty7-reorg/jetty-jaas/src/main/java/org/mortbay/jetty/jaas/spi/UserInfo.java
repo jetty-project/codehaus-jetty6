@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.plus.jaas.spi;
+package org.mortbay.jetty.jaas.spi;
 
 import java.util.ArrayList;
 import java.util.List;

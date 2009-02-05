@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.plus.jaas.spi;
+package org.mortbay.jetty.jaas.spi;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -30,9 +30,9 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
-import org.mortbay.jetty.plus.jaas.JAASPrincipal;
-import org.mortbay.jetty.plus.jaas.JAASRole;
-import org.mortbay.jetty.plus.jaas.callback.ObjectCallback;
+import org.mortbay.jetty.jaas.JAASPrincipal;
+import org.mortbay.jetty.jaas.JAASRole;
+import org.mortbay.jetty.jaas.callback.ObjectCallback;
 
 /**
  * AbstractLoginModule

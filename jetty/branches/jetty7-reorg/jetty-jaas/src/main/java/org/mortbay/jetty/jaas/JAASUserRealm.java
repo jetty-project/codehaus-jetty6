@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.plus.jaas;
+package org.mortbay.jetty.jaas;
 
 import java.security.Principal;
 import java.security.acl.Group;
@@ -27,8 +27,8 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 import org.mortbay.jetty.Request;
-import org.mortbay.jetty.plus.jaas.callback.AbstractCallbackHandler;
-import org.mortbay.jetty.plus.jaas.callback.DefaultCallbackHandler;
+import org.mortbay.jetty.jaas.callback.AbstractCallbackHandler;
+import org.mortbay.jetty.jaas.callback.DefaultCallbackHandler;
 import org.mortbay.jetty.UserRealm;
 import org.mortbay.log.Log;
 import org.mortbay.util.Loader;

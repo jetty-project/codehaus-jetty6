@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.plus.jaas.spi;
+package org.mortbay.jetty.jaas.spi;
 import java.sql.Connection;
 import java.util.Map;
 
@@ -42,7 +42,7 @@ import javax.sql.DataSource;
  * A LoginModule that uses a DataSource to retrieve user authentication
  * and authorisation information.
  * 
- * @see org.mortbay.jetty.plus.jaas.spi.JDBCLoginModule
+ * @see org.mortbay.jetty.jaas.spi.JDBCLoginModule
  *
  */
 public class DataSourceLoginModule extends AbstractDatabaseLoginModule
@@ -83,7 +83,7 @@ public class DataSourceLoginModule extends AbstractDatabaseLoginModule
 
     /** 
      * Get a connection from the DataSource
-     * @see org.mortbay.jetty.plus.jaas.spi.AbstractDatabaseLoginModule#getConnection()
+     * @see org.mortbay.jetty.jaas.spi.AbstractDatabaseLoginModule#getConnection()
      * @return
      * @throws Exception
      */

@@ -1,4 +1,4 @@
-package org.mortbay.jetty.plus.jaas.spi;
+package org.mortbay.jetty.jaas.spi;
 
 // ========================================================================
 // Copyright 2007 Mort Bay Consulting Pty. Ltd.
@@ -37,7 +37,7 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginException;
 
-import org.mortbay.jetty.plus.jaas.callback.ObjectCallback;
+import org.mortbay.jetty.jaas.callback.ObjectCallback;
 import org.mortbay.jetty.security.Credential;
 import org.mortbay.log.Log;
 
