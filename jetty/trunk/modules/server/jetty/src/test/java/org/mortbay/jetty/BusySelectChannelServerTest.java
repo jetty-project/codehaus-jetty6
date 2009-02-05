@@ -24,12 +24,14 @@ import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.thread.QueuedThreadPool;
 
 /**
  * HttpServer Tester.
  */
 public class BusySelectChannelServerTest extends HttpServerTestBase
 {
+   
     public BusySelectChannelServerTest()
     {
         super(new SelectChannelConnector()
@@ -44,9 +46,6 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
                 {
                     int write;
                     int read;
-                    NIOBuffer one = new IndirectNIOBuffer(1);
-                    NIOBuffer two = new IndirectNIOBuffer(2);
-                    NIOBuffer three = new IndirectNIOBuffer(3);
                     
                     /* ------------------------------------------------------------ */
                     /* (non-Javadoc)
@@ -55,9 +54,9 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
                     public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
                     {
                         int x=write++&0xff;
-                        if (x<16)
+                        if (x<8)
                             return 0;
-                        if (x<128)
+                        if (x<32)
                             return flush(header);
                         return super.flush(header,buffer,trailer);
                     }
@@ -69,9 +68,9 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
                     public int flush(Buffer buffer) throws IOException
                     {
                         int x=write++&0xff;
-                        if (x<16)
+                        if (x<8)
                             return 0;
-                        if (x<96)
+                        if (x<32)
                         {
                             View v = new View(buffer);
                             v.setPutIndex(v.getIndex()+1);
@@ -90,21 +89,21 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
                     public int fill(Buffer buffer) throws IOException
                     {
                         int x=read++&0xff;
-                        if (x<32)
+                        if (x<8)
                             return 0;
-                        
-                        if (x<64 & buffer.space()>0)
+
+                        if (x<16 & buffer.space()>=1)
                         {
-                            one.clear();
+                            NIOBuffer one = new IndirectNIOBuffer(1);
                             int l=super.fill(one);
                             if (l>0)
                                 buffer.put(one.peek(0));
                             return l;
                         }
                         
-                        if (x<96 & buffer.space()>0)
+                        if (x<24 & buffer.space()>=2)
                         {
-                            two.clear();
+                            NIOBuffer two = new IndirectNIOBuffer(2);
                             int l=super.fill(two);
                             if (l>0)
                                 buffer.put(two.peek(0));
@@ -113,9 +112,9 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
                             return l;
                         }
                         
-                        if (x<128 & buffer.space()>0)
+                        if (x<64 & buffer.space()>=3)
                         {
-                            three.clear();
+                            NIOBuffer three = new IndirectNIOBuffer(3);
                             int l=super.fill(three);
                             if (l>0)
                                 buffer.put(three.peek(0));
@@ -128,10 +127,15 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
                         
                         return super.fill(buffer);
                     }
-                    
                 };
-            }
-            
-        });
-    }   
+            }  
+        }); 
+    }  
+    
+
+    protected void configServer(Server server)
+    {
+        // XXX works if I set OldQueuedThreadPool here!
+        server.setThreadPool(new QueuedThreadPool());
+    }
 }
