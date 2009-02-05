@@ -1774,6 +1774,14 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         public void addServletMapping(String servletName, String[] urlPatterns)
         {
         }
+
+        public boolean setInitParameter(String name, String value)
+        {
+            if (ContextHandler.this.getInitParameter(name)!=null)
+                return false;
+            ContextHandler.this.getInitParams().put(name,value);
+            return true;
+        }
         
     }
 
