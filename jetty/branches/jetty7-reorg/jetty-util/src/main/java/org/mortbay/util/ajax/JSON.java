@@ -64,7 +64,7 @@ import org.mortbay.util.TypeUtil;
  * The class {@link JSON.Literal} may be used to hold pre-gnerated JSON object. 
  * <p>
  * The interface {@link Convertor} may be implemented to provide static convertors for objects that may be registered 
- * with {@link #registerConvertor(Class, org.mortbay.util.ajax.JSON.Convertor)}. These convertors are looked up by class, interface and
+ * with {@link #registerConvertor(Class, org.mortbay.jetty.json.JSON.Convertor)}. These convertors are looked up by class, interface and
  * super class by {@link #getConvertor(Class)}.
  * </p>
  * @author gregw

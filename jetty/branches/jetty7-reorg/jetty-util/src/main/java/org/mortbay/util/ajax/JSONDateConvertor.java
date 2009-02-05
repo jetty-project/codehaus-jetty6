@@ -21,9 +21,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.mortbay.jetty.json.JSON.Output;
 import org.mortbay.log.Log;
 import org.mortbay.util.DateCache;
-import org.mortbay.util.ajax.JSON.Output;
 
 /* ------------------------------------------------------------ */
 /**

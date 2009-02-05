@@ -8,53 +8,7 @@
   <artifactId>jetty-plus</artifactId>
   <name>Jetty :: Plus</name>
   <description>Jetty JavaEE style services</description>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <executions>
-          <execution>
-            <goals>
-              <goal>manifest</goal>
-            </goals>
-            <configuration>
-              <instructions>
-                <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
-                <Import-Package>!org.mortbay.jetty.plus.*,*</Import-Package>
-              </instructions>
-            </configuration>
-           </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <!--
-        Required for OSGI
-        -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>               
-            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-          </archive>
-        </configuration>
-      </plugin>
-      <!-- always include sources since jetty-xbean makes use of them -->
-      <plugin>
-         <groupId>org.apache.maven.plugins</groupId>
-         <artifactId>maven-source-plugin</artifactId>
-         <executions>
-           <execution>
-             <id>attach-sources</id>
-             <goals>
-               <goal>jar</goal>
-             </goals>
-           </execution>
-         </executions>
-      </plugin>
-    </plugins>
-  </build>
+ 
   <dependencies>
     <dependency>
       <groupId>org.apache.derby</groupId>

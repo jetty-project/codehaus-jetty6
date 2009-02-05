@@ -24,8 +24,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.mortbay.jetty.json.JSON.Output;
 import org.mortbay.log.Log;
-import org.mortbay.util.ajax.JSON.Output;
 /* ------------------------------------------------------------ */
 /**
  * Converts POJOs to JSON and vice versa.

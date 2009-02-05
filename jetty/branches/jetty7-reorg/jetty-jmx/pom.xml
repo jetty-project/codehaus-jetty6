@@ -8,42 +8,7 @@
   <artifactId>jetty-jmx</artifactId>
   <name>Jetty :: JMX Management</name>
   <description>JMX management artifact for jetty.</description>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <executions>
-          <execution>
-            <goals>
-              <goal>manifest</goal>
-            </goals>
-            <configuration>
-              <instructions>
-                <Bundle-SymbolicName>org.mortbay.jetty.management</Bundle-SymbolicName>
-                <Bundle-DocURL>http://jetty.mortbay.org</Bundle-DocURL>
-                <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
-                <Import-Package>!org.mortbay.component.management.*,!org.mortbay.jetty.deployer.management.*,!org.mortbay.jetty.nio.management.*,!org.mortbay.log.management.*,!org.mortbay.management.*,!org.mortbay.thread.management.*,!org.mortbay.jetty.handler.management.*,!org.mortbay.jetty.management.*,!org.mortbay.jetty.servlet.management.*,!org.mortbay.jetty.webapp.management.*,*</Import-Package>
-              </instructions>
-            </configuration>
-           </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <!--
-        Required for OSGI
-        -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>               
-            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-          </archive>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+  
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

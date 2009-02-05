@@ -97,9 +97,11 @@
     <!-- will be the actual jetty.zip etc
     <module>jetty-distribution</module>
     -->
-    <module>jetty-html</module>
+    <module>jetty-io</module>
+    <module>jetty-jaas</module>
     <module>jetty-jmx</module>
     <module>jetty-jndi</module>
+    <module>jetty-json</module>
     <module>jetty-plus</module>
     <module>jetty-rewrite</module>
     <module>jetty-security</module>
