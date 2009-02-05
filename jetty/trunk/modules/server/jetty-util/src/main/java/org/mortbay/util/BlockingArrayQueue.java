@@ -164,7 +164,7 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
             return false;
         
         boolean not_empty=false;
-        _offerLock.lock();  // size cannot now grow... only shrink
+        _offerLock.lock();  // size cannot grow... only shrink
         try 
         {
             if (_size.get() < _limit) 
@@ -299,16 +299,19 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
     {
         
         E e = null;
+
+        long nanos = unit.toNanos(time);
         
         _takeLock.lockInterruptibly(); // Size cannot shrink
         try 
         {    
             try 
             {
-                if (_size.get() == 0)
+                while (_size.get() == 0)
                 {
-                    if (!_notEmpty.await(time,unit))
+                    if (nanos<=0)
                         return null;
+                    nanos = _notEmpty.awaitNanos(nanos);
                 }
             } 
             catch (InterruptedException ie) 
