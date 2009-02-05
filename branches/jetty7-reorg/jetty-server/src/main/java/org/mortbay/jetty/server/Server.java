@@ -31,6 +31,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.io.HttpGenerator;
 import org.mortbay.jetty.server.bio.SocketConnector;
 import org.mortbay.jetty.server.handler.HandlerCollection;
 import org.mortbay.jetty.server.handler.HandlerWrapper;

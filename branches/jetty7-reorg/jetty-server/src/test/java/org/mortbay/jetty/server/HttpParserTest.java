@@ -20,10 +20,10 @@ import junit.framework.TestCase;
 
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.HttpFields;
+import org.mortbay.jetty.io.HttpParser;
 import org.mortbay.jetty.io.SimpleBuffers;
 import org.mortbay.jetty.io.bio.StringEndPoint;
-import org.mortbay.jetty.server.HttpFields;
-import org.mortbay.jetty.server.HttpParser;
 import org.mortbay.jetty.util.StringUtil;
 
 /**

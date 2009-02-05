@@ -28,9 +28,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.io.HttpHeaders;
+import org.mortbay.jetty.io.MimeTypes;
 import org.mortbay.jetty.server.HttpConnection;
-import org.mortbay.jetty.server.HttpHeaders;
-import org.mortbay.jetty.server.MimeTypes;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.handler.AbstractHandler;
 import org.mortbay.jetty.util.StringUtil;

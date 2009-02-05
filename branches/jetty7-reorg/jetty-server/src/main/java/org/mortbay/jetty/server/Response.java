@@ -26,6 +26,14 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.mortbay.jetty.io.Generator;
+import org.mortbay.jetty.io.HttpFields;
+import org.mortbay.jetty.io.HttpGenerator;
+import org.mortbay.jetty.io.HttpHeaderValues;
+import org.mortbay.jetty.io.HttpHeaders;
+import org.mortbay.jetty.io.HttpStatus;
+import org.mortbay.jetty.io.HttpVersions;
+import org.mortbay.jetty.io.MimeTypes;
 import org.mortbay.jetty.io.BufferCache.CachedBuffer;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.handler.ErrorHandler;

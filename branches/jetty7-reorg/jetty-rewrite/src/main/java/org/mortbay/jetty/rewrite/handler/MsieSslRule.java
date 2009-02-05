@@ -19,8 +19,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.server.HttpHeaderValues;
-import org.mortbay.jetty.server.HttpHeaders;
+import org.mortbay.jetty.io.HttpHeaderValues;
+import org.mortbay.jetty.io.HttpHeaders;
 import org.mortbay.jetty.util.StringMap;
 
 /**

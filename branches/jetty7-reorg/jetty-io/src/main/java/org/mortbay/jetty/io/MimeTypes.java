@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.server;
+package org.mortbay.jetty.io;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -21,8 +21,6 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.mortbay.jetty.io.Buffer;
-import org.mortbay.jetty.io.BufferCache;
 import org.mortbay.jetty.io.BufferCache.CachedBuffer;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.log.Log;

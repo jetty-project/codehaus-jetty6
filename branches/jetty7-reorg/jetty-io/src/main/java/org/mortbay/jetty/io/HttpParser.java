@@ -12,20 +12,20 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.server;
+package org.mortbay.jetty.io;
 
 import java.io.IOException;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.io.AbstractBuffer;
-import org.mortbay.jetty.io.Buffer;
-import org.mortbay.jetty.io.BufferUtil;
-import org.mortbay.jetty.io.Buffers;
-import org.mortbay.jetty.io.ByteArrayBuffer;
-import org.mortbay.jetty.io.EndPoint;
-import org.mortbay.jetty.io.View;
+import org.mortbay.jetty.io.HttpHeaderValues;
+import org.mortbay.jetty.io.HttpHeaders;
+import org.mortbay.jetty.io.HttpMethods;
+import org.mortbay.jetty.io.HttpStatus;
+import org.mortbay.jetty.io.HttpTokens;
+import org.mortbay.jetty.io.HttpVersions;
+import org.mortbay.jetty.io.Parser;
 import org.mortbay.jetty.io.BufferCache.CachedBuffer;
 import org.mortbay.jetty.util.EofException;
 import org.mortbay.jetty.util.HttpException;

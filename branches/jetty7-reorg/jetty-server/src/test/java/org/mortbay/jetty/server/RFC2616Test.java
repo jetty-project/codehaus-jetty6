@@ -26,9 +26,9 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.mortbay.jetty.io.HttpFields;
 import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.Handler;
-import org.mortbay.jetty.server.HttpFields;
 import org.mortbay.jetty.server.LocalConnector;
 import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.handler.ContextHandler;

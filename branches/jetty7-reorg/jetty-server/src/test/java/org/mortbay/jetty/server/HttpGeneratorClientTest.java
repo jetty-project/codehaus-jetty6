@@ -21,12 +21,12 @@ import junit.framework.TestCase;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.io.ByteArrayEndPoint;
+import org.mortbay.jetty.io.HttpFields;
+import org.mortbay.jetty.io.HttpGenerator;
+import org.mortbay.jetty.io.HttpMethods;
+import org.mortbay.jetty.io.HttpParser;
 import org.mortbay.jetty.io.SimpleBuffers;
 import org.mortbay.jetty.io.View;
-import org.mortbay.jetty.server.HttpFields;
-import org.mortbay.jetty.server.HttpGenerator;
-import org.mortbay.jetty.server.HttpMethods;
-import org.mortbay.jetty.server.HttpParser;
 
 public class HttpGeneratorClientTest extends TestCase
 {
