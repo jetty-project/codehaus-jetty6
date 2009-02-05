@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.client.proxy;
+package org.mortbay.jetty.client.proxy;
 
 
 import java.io.IOException;
