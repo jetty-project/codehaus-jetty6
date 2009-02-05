@@ -14,7 +14,10 @@
 
 package org.mortbay.util;
 
+import java.util.HashSet;
 import java.util.Queue;
+import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -177,37 +180,39 @@ public class BlockingArrayQueueTest extends TestCase
     public void testConcurrentAccess() throws Exception
     {
         final int THREADS=50;
-        final int LOOPS=500;
+        final int LOOPS=1000;
 
         final BlockingArrayQueue<Integer> queue = new BlockingArrayQueue<Integer>(1+THREADS*LOOPS);
-        final AtomicInteger[] count = new AtomicInteger[THREADS];
-        for (int i=0;i<count.length;i++)
-            count[i]=new AtomicInteger();
+        
+        final ConcurrentLinkedQueue<Integer> produced=new ConcurrentLinkedQueue<Integer>();
+        final ConcurrentLinkedQueue<Integer> consumed=new ConcurrentLinkedQueue<Integer>();
+        
 
         _running=true;
         
         // start consumers
-        final CyclicBarrier barrier0 = new CyclicBarrier(count.length+1);
-        for (int i=0;i<count.length;i++)
+        final CyclicBarrier barrier0 = new CyclicBarrier(THREADS+1);
+        for (int i=0;i<THREADS;i++)
         {
             final Integer id = new Integer(i);
             new Thread()
             {
                 public void run()
                 {
+                    final Random random = new Random();
+                    
                     setPriority(getPriority()-1);
                     try
                     {
                         while(_running)
                         {
-                            Integer i=queue.poll();
-                            if (i==null)
+                            Integer msg=queue.poll();
+                            if (msg==null)
                             {
-                                Thread.sleep(10*THREADS);
+                                Thread.sleep(1+random.nextInt(10));
                                 continue;
                             }
-
-                            count[i].incrementAndGet();
+                            consumed.add(msg);
                         }
 
                     }
@@ -232,23 +237,24 @@ public class BlockingArrayQueueTest extends TestCase
         }
 
         // start producers
-        final AtomicInteger offers = new AtomicInteger();
-        final CyclicBarrier barrier1 = new CyclicBarrier(count.length+1);
-        for (int i=0;i<count.length;i++)
+        final CyclicBarrier barrier1 = new CyclicBarrier(THREADS+1);
+        for (int i=0;i<THREADS;i++)
         {
             final Integer id = new Integer(i);
             new Thread()
             {
                 public void run()
                 {
+                    final Random random = new Random();
                     try
                     {
                         for (int j=0;j<LOOPS;j++)
                         {
-                            if (!queue.offer(id))
-                                throw new Exception(id+" FULL! "+queue.size()+" "+offers.get());
-                            offers.incrementAndGet();
-                            Thread.sleep(5);
+                            Integer msg = new Integer(random.nextInt());
+                            produced.add(msg);
+                            if (!queue.offer(msg))
+                                throw new Exception(id+" FULL! "+queue.size());
+                            Thread.sleep(1+random.nextInt(10));
                         }
                     }
                     catch (Exception e)
@@ -282,8 +288,12 @@ public class BlockingArrayQueueTest extends TestCase
         }   
         _running=false;
         barrier0.await();
-        for (int i=0;i<count.length;i++)
-            assertEquals("loop "+i,LOOPS,count[i].get());
+        
+        HashSet<Integer> prodSet = new HashSet<Integer>(produced);
+        HashSet<Integer> consSet = new HashSet<Integer>(consumed);
+        
+        assertEquals(prodSet,consSet);
+        
         
         
         
