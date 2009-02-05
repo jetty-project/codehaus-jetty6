@@ -159,15 +159,14 @@ public class BlockingArrayQueue<E> extends AbstractList<E> implements Queue<E>
     {
         if (e == null) 
             throw new NullPointerException();
-
-        if (_size.get() == _limit)
-            return false;
         
         boolean not_empty=false;
         _offerLock.lock();  // size cannot grow... only shrink
         try 
         {
-            if (_size.get() < _limit) 
+            if (_size.get() >= _limit) 
+                return false;
+            else
             {
                 // should we expand array?
                 if (_size.get()==_elements.length)

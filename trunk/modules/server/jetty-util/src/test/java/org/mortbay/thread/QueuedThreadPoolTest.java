@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.TestCase;
 
-public class NewThreadPoolTest extends TestCase
+public class QueuedThreadPoolTest extends TestCase
 {
     final AtomicInteger _jobs=new AtomicInteger();
     
@@ -44,7 +44,7 @@ public class NewThreadPoolTest extends TestCase
     
     public void testThreadPool() throws Exception
     {        
-        NewQueuedThreadPool tp= new NewQueuedThreadPool();
+        QueuedThreadPool tp= new QueuedThreadPool();
         tp.setMinThreads(5);
         tp.setMaxThreads(10);
         tp.setMaxIdleTimeMs(500);
@@ -132,7 +132,7 @@ public class NewThreadPoolTest extends TestCase
 
     public void testMaxStopTime() throws Exception
     {
-        NewQueuedThreadPool tp= new NewQueuedThreadPool();
+        QueuedThreadPool tp= new QueuedThreadPool();
         tp.setMaxStopTimeMs(500);
         tp.start();
         tp.dispatch(new Runnable(){
