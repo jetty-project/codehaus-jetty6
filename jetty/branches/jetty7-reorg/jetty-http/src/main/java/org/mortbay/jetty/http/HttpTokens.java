@@ -13,7 +13,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.io;
+package org.mortbay.jetty.http;
 
 /**
  * HTTP constants

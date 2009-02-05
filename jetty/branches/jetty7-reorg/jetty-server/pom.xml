@@ -30,6 +30,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-http</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
     	<groupId>org.apache.derby</groupId>
     	<artifactId>derby</artifactId>
     	<version>10.4.1.3</version>

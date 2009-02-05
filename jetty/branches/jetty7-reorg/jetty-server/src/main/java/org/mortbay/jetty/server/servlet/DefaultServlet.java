@@ -30,13 +30,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.http.HttpFields;
+import org.mortbay.jetty.http.HttpHeaderValues;
+import org.mortbay.jetty.http.HttpHeaders;
+import org.mortbay.jetty.http.HttpMethods;
+import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
-import org.mortbay.jetty.io.HttpFields;
-import org.mortbay.jetty.io.HttpHeaderValues;
-import org.mortbay.jetty.io.HttpHeaders;
-import org.mortbay.jetty.io.HttpMethods;
-import org.mortbay.jetty.io.MimeTypes;
 import org.mortbay.jetty.io.WriterOutputStream;
 import org.mortbay.jetty.io.nio.DirectNIOBuffer;
 import org.mortbay.jetty.io.nio.IndirectNIOBuffer;

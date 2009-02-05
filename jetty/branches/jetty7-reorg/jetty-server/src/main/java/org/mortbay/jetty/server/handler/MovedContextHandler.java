@@ -20,7 +20,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.io.HttpHeaders;
+import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.server.HandlerContainer;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.Request;

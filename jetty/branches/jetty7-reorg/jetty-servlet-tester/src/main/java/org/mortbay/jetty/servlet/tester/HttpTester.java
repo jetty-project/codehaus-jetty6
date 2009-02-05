@@ -19,15 +19,15 @@ import java.util.Enumeration;
 
 import javax.servlet.http.Cookie;
 
+import org.mortbay.jetty.http.HttpFields;
+import org.mortbay.jetty.http.HttpGenerator;
+import org.mortbay.jetty.http.HttpHeaders;
+import org.mortbay.jetty.http.HttpParser;
+import org.mortbay.jetty.http.HttpVersions;
+import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.io.ByteArrayEndPoint;
-import org.mortbay.jetty.io.HttpFields;
-import org.mortbay.jetty.io.HttpGenerator;
-import org.mortbay.jetty.io.HttpHeaders;
-import org.mortbay.jetty.io.HttpParser;
-import org.mortbay.jetty.io.HttpVersions;
-import org.mortbay.jetty.io.MimeTypes;
 import org.mortbay.jetty.io.SimpleBuffers;
 import org.mortbay.jetty.io.View;
 import org.mortbay.jetty.io.bio.StringEndPoint;
@@ -284,7 +284,7 @@ public class HttpTester
      * @param name
      * @param value
      * @throws IllegalArgumentException
-     * @see org.mortbay.jetty.io.HttpFields#add(java.lang.String, java.lang.String)
+     * @see org.mortbay.jetty.http.HttpFields#add(java.lang.String, java.lang.String)
      */
     public void addHeader(String name, String value) throws IllegalArgumentException
     {
@@ -295,7 +295,7 @@ public class HttpTester
     /**
      * @param name
      * @param date
-     * @see org.mortbay.jetty.io.HttpFields#addDateField(java.lang.String, long)
+     * @see org.mortbay.jetty.http.HttpFields#addDateField(java.lang.String, long)
      */
     public void addDateHeader(String name, long date)
     {
@@ -306,7 +306,7 @@ public class HttpTester
     /**
      * @param name
      * @param value
-     * @see org.mortbay.jetty.io.HttpFields#addLongField(java.lang.String, long)
+     * @see org.mortbay.jetty.http.HttpFields#addLongField(java.lang.String, long)
      */
     public void addLongHeader(String name, long value)
     {
@@ -316,7 +316,7 @@ public class HttpTester
     /* ------------------------------------------------------------ */
     /**
      * @param cookie
-     * @see org.mortbay.jetty.io.HttpFields#addSetCookie(javax.servlet.http.Cookie)
+     * @see org.mortbay.jetty.http.HttpFields#addSetCookie(javax.servlet.http.Cookie)
      */
     public void addSetCookie(Cookie cookie)
     {
@@ -327,7 +327,7 @@ public class HttpTester
     /**
      * @param name
      * @return
-     * @see org.mortbay.jetty.io.HttpFields#getDateField(java.lang.String)
+     * @see org.mortbay.jetty.http.HttpFields#getDateField(java.lang.String)
      */
     public long getDateHeader(String name)
     {
@@ -337,7 +337,7 @@ public class HttpTester
     /* ------------------------------------------------------------ */
     /**
      * @return
-     * @see org.mortbay.jetty.io.HttpFields#getFieldNames()
+     * @see org.mortbay.jetty.http.HttpFields#getFieldNames()
      */
     public Enumeration getHeaderNames()
     {
@@ -349,7 +349,7 @@ public class HttpTester
      * @param name
      * @return
      * @throws NumberFormatException
-     * @see org.mortbay.jetty.io.HttpFields#getLongField(java.lang.String)
+     * @see org.mortbay.jetty.http.HttpFields#getLongField(java.lang.String)
      */
     public long getLongHeader(String name) throws NumberFormatException
     {
@@ -360,7 +360,7 @@ public class HttpTester
     /**
      * @param name
      * @return
-     * @see org.mortbay.jetty.io.HttpFields#getStringField(java.lang.String)
+     * @see org.mortbay.jetty.http.HttpFields#getStringField(java.lang.String)
      */
     public String getHeader(String name)
     {
@@ -371,7 +371,7 @@ public class HttpTester
     /**
      * @param name
      * @return
-     * @see org.mortbay.jetty.io.HttpFields#getValues(java.lang.String)
+     * @see org.mortbay.jetty.http.HttpFields#getValues(java.lang.String)
      */
     public Enumeration getHeaderValues(String name)
     {
@@ -382,7 +382,7 @@ public class HttpTester
     /**
      * @param name
      * @param value
-     * @see org.mortbay.jetty.io.HttpFields#put(java.lang.String, java.lang.String)
+     * @see org.mortbay.jetty.http.HttpFields#put(java.lang.String, java.lang.String)
      */
     public void setHeader(String name, String value)
     {
@@ -393,7 +393,7 @@ public class HttpTester
     /**
      * @param name
      * @param date
-     * @see org.mortbay.jetty.io.HttpFields#putDateField(java.lang.String, long)
+     * @see org.mortbay.jetty.http.HttpFields#putDateField(java.lang.String, long)
      */
     public void setDateHeader(String name, long date)
     {
@@ -404,7 +404,7 @@ public class HttpTester
     /**
      * @param name
      * @param value
-     * @see org.mortbay.jetty.io.HttpFields#putLongField(java.lang.String, long)
+     * @see org.mortbay.jetty.http.HttpFields#putLongField(java.lang.String, long)
      */
     public void setLongHeader(String name, long value)
     {
@@ -414,7 +414,7 @@ public class HttpTester
     /* ------------------------------------------------------------ */
     /**
      * @param name
-     * @see org.mortbay.jetty.io.HttpFields#remove(java.lang.String)
+     * @see org.mortbay.jetty.http.HttpFields#remove(java.lang.String)
      */
     public void removeHeader(String name)
     {

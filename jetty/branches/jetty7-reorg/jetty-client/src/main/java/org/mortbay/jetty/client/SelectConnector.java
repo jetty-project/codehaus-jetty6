@@ -21,11 +21,11 @@ import java.nio.channels.SocketChannel;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
+import org.mortbay.jetty.http.HttpMethods;
+import org.mortbay.jetty.http.HttpVersions;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.Buffers;
 import org.mortbay.jetty.io.Connection;
-import org.mortbay.jetty.io.HttpMethods;
-import org.mortbay.jetty.io.HttpVersions;
 import org.mortbay.jetty.io.nio.IndirectNIOBuffer;
 import org.mortbay.jetty.io.nio.NIOBuffer;
 import org.mortbay.jetty.io.nio.SelectChannelEndPoint;

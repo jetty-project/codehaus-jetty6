@@ -19,7 +19,7 @@ import java.io.FileOutputStream;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.io.MimeTypes;
+import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.server.ResourceCache;
 import org.mortbay.jetty.server.ResourceCache.Content;
 import org.mortbay.jetty.util.resource.Resource;

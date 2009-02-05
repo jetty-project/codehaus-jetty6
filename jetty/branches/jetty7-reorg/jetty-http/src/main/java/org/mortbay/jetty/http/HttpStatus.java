@@ -12,7 +12,11 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.io;
+package org.mortbay.jetty.http;
+
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.BufferCache;
+import org.mortbay.jetty.io.ByteArrayBuffer;
 
 
 /* ------------------------------------------------------------------------------- */

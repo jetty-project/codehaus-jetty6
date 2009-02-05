@@ -40,10 +40,10 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
+import org.mortbay.jetty.http.HttpParser;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.Connection;
 import org.mortbay.jetty.io.EndPoint;
-import org.mortbay.jetty.io.HttpParser;
 import org.mortbay.jetty.io.bio.SocketEndPoint;
 import org.mortbay.jetty.io.nio.DirectNIOBuffer;
 import org.mortbay.jetty.io.nio.IndirectNIOBuffer;

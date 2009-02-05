@@ -13,7 +13,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.io;
+package org.mortbay.jetty.http;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -24,11 +24,12 @@ import java.lang.reflect.Modifier;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.io.Generator;
-import org.mortbay.jetty.io.HttpFields;
-import org.mortbay.jetty.io.HttpMethods;
-import org.mortbay.jetty.io.HttpTokens;
-import org.mortbay.jetty.io.HttpVersions;
+import org.mortbay.jetty.http.Generator;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.Buffers;
+import org.mortbay.jetty.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.EndPoint;
+import org.mortbay.jetty.io.View;
 import org.mortbay.jetty.util.ByteArrayOutputStream2;
 import org.mortbay.jetty.util.EofException;
 import org.mortbay.jetty.util.StringUtil;

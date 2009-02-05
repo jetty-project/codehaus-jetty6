@@ -29,10 +29,10 @@ import junit.framework.TestCase;
 import junit.framework.TestResult;
 
 import org.mortbay.jetty.client.security.ProxyAuthorization;
+import org.mortbay.jetty.http.HttpHeaders;
+import org.mortbay.jetty.http.HttpMethods;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
-import org.mortbay.jetty.io.HttpHeaders;
-import org.mortbay.jetty.io.HttpMethods;
 import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.Request;
