@@ -22,8 +22,8 @@ import javax.naming.Name;
 import javax.naming.NameParser;
 import javax.naming.NamingException;
 
-import org.mortbay.log.Log;
-import org.mortbay.naming.NamingUtil;
+import org.mortbay.jetty.jndi.NamingUtil;
+import org.mortbay.jetty.util.log.Log;
 
 
 

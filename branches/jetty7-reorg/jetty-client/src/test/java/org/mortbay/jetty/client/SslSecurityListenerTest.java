@@ -27,23 +27,23 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpMethods;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Server;
 import org.mortbay.jetty.client.security.HashRealmResolver;
 import org.mortbay.jetty.client.security.Realm;
-import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.security.BasicAuthenticator;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintsSecurityHandler;
 import org.mortbay.jetty.security.HashUserRealm;
+import org.mortbay.jetty.server.Connector;
+import org.mortbay.jetty.server.Handler;
+import org.mortbay.jetty.server.HttpConnection;
+import org.mortbay.jetty.server.HttpMethods;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Server;
+import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.server.handler.AbstractHandler;
 import org.mortbay.jetty.ssl.SslSocketConnector;
-import org.mortbay.jetty.UserRealm;
-import org.mortbay.util.EofException;
+import org.mortbay.jetty.util.EofException;
 
 /**
  * Functional testing.

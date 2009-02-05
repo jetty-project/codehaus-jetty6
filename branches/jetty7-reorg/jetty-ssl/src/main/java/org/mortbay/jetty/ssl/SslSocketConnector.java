@@ -43,15 +43,15 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
-import org.mortbay.jetty.HttpSchemes;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.io.bio.SocketEndPoint;
 import org.mortbay.jetty.security.Password;
-import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.TypeUtil;
+import org.mortbay.jetty.server.HttpSchemes;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.bio.SocketConnector;
+import org.mortbay.jetty.util.TypeUtil;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.resource.Resource;
 
 /* ------------------------------------------------------------ */
 /**

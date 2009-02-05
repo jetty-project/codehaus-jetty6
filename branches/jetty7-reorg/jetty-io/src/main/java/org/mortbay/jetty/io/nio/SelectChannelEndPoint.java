@@ -20,14 +20,14 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
-import org.mortbay.util.EofException;
-import org.mortbay.util.HttpException;
 import org.mortbay.jetty.io.AsyncEndPoint;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.Connection;
 import org.mortbay.jetty.io.nio.SelectorManager.SelectSet;
-import org.mortbay.log.Log;
-import org.mortbay.thread.Timeout;
+import org.mortbay.jetty.util.EofException;
+import org.mortbay.jetty.util.HttpException;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.thread.Timeout;
 
 /* ------------------------------------------------------------ */
 /**

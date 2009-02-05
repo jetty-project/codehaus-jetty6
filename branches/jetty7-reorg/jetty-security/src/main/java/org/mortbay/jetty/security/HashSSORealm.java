@@ -21,10 +21,10 @@ import java.util.Random;
 
 import javax.servlet.http.Cookie;
 
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
-import org.mortbay.jetty.UserRealm;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Response;
+import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.util.log.Log;
 
 
 

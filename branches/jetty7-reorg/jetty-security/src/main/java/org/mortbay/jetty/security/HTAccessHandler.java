@@ -23,18 +23,18 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
-import org.mortbay.jetty.UserRealm;
-import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.log.Log;
-import org.mortbay.log.Logger;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.server.Handler;
+import org.mortbay.jetty.server.HttpConnection;
+import org.mortbay.jetty.server.HttpHeaders;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Response;
+import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.server.handler.ContextHandler;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.log.Logger;
+import org.mortbay.jetty.util.resource.Resource;
 
 /* ------------------------------------------------------------ */
 /**
@@ -87,7 +87,7 @@ public class HTAccessHandler extends ConstraintsSecurityHandler
     /**
      * {@inheritDoc}
      * 
-     * @see org.mortbay.jetty.Handler#handle(java.lang.String,
+     * @see org.mortbay.jetty.server.Handler#handle(java.lang.String,
      *      javax.servlet.http.HttpServletRequest,
      *      javax.servlet.http.HttpServletResponse)
      */

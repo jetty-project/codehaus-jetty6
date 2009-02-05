@@ -26,17 +26,17 @@ import javax.naming.NameNotFoundException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 
+import org.mortbay.jetty.jndi.NamingUtil;
 import org.mortbay.jetty.plus.naming.EnvEntry;
 import org.mortbay.jetty.plus.naming.NamingEntry;
 import org.mortbay.jetty.plus.naming.NamingEntryUtil;
 import org.mortbay.jetty.plus.naming.Resource;
 import org.mortbay.jetty.plus.naming.Transaction;
+import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.jetty.webapp.WebAppContext;
-import org.mortbay.log.Log;
-import org.mortbay.naming.NamingUtil;
+import org.mortbay.jetty.xml.XmlConfiguration;
 
-import org.mortbay.xml.XmlConfiguration;
 
 /**
  * EnvConfiguration
@@ -114,10 +114,10 @@ public class EnvConfiguration implements Configuration
             
             //look for a file called WEB-INF/jetty-env.xml
             //and process it if it exists
-            org.mortbay.resource.Resource web_inf = getWebAppContext().getWebInf();
+            org.mortbay.jetty.util.resource.Resource web_inf = getWebAppContext().getWebInf();
             if(web_inf!=null && web_inf.isDirectory())
             {
-                org.mortbay.resource.Resource jettyEnv = web_inf.addPath("jetty-env.xml");
+                org.mortbay.jetty.util.resource.Resource jettyEnv = web_inf.addPath("jetty-env.xml");
                 if(jettyEnv.exists())
                 {
                     jettyEnvXmlUrl = jettyEnv.getURL();

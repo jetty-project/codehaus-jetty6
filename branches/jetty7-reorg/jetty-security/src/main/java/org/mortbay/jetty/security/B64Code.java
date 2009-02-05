@@ -16,7 +16,7 @@ package org.mortbay.jetty.security;
 
 import java.io.UnsupportedEncodingException;
 
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.util.StringUtil;
 
 /* ------------------------------------------------------------ */
 

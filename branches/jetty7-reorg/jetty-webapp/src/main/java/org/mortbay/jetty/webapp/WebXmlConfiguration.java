@@ -29,27 +29,27 @@ import java.util.regex.Pattern;
 import javax.servlet.Servlet;
 import javax.servlet.UnavailableException;
 
-import org.mortbay.jetty.Authenticator;
-import org.mortbay.jetty.Dispatcher;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.UserRealm;
-import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.security.BasicAuthenticator;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.DigestAuthenticator;
 import org.mortbay.jetty.security.FormAuthenticator;
-import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
-import org.mortbay.jetty.servlet.FilterHolder;
-import org.mortbay.jetty.servlet.FilterMapping;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.servlet.ServletMapping;
-import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.Loader;
-import org.mortbay.xml.XmlParser;
+import org.mortbay.jetty.server.Authenticator;
+import org.mortbay.jetty.server.Dispatcher;
+import org.mortbay.jetty.server.Handler;
+import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.server.handler.ContextHandler;
+import org.mortbay.jetty.server.servlet.ErrorPageErrorHandler;
+import org.mortbay.jetty.server.servlet.FilterHolder;
+import org.mortbay.jetty.server.servlet.FilterMapping;
+import org.mortbay.jetty.server.servlet.ServletHandler;
+import org.mortbay.jetty.server.servlet.ServletHolder;
+import org.mortbay.jetty.server.servlet.ServletMapping;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.Loader;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.resource.Resource;
+import org.mortbay.jetty.xml.XmlParser;
 /* ------------------------------------------------------------------------------- */
 /**
  * Configure by parsing default web.xml and web.xml

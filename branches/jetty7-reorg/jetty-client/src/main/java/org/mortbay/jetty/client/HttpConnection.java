@@ -18,12 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 
-import org.mortbay.jetty.HttpGenerator;
-import org.mortbay.jetty.HttpHeaderValues;
-import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.jetty.HttpParser;
-import org.mortbay.jetty.HttpSchemes;
-import org.mortbay.jetty.HttpVersions;
 import org.mortbay.jetty.client.security.Authorization;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.Buffers;
@@ -31,10 +25,16 @@ import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.io.Connection;
 import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.io.nio.SelectChannelEndPoint;
+import org.mortbay.jetty.server.HttpGenerator;
+import org.mortbay.jetty.server.HttpHeaderValues;
+import org.mortbay.jetty.server.HttpHeaders;
+import org.mortbay.jetty.server.HttpParser;
+import org.mortbay.jetty.server.HttpSchemes;
+import org.mortbay.jetty.server.HttpVersions;
 import org.mortbay.jetty.ssl.SslSelectChannelEndPoint;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.thread.Timeout;
 
-import org.mortbay.log.Log;
-import org.mortbay.thread.Timeout;
 
 /**
  * 

@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import org.mortbay.util.StringMap;
+import org.mortbay.jetty.util.StringMap;
 
 /* ------------------------------------------------------------------------------- */
 /** 

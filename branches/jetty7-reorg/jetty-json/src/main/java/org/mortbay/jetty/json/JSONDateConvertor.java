@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.mortbay.jetty.json.JSON.Output;
-import org.mortbay.log.Log;
-import org.mortbay.util.DateCache;
+import org.mortbay.jetty.util.DateCache;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /**

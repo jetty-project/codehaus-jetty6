@@ -18,7 +18,7 @@ package org.mortbay.jetty.plus.annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * PostConstructCallback

@@ -28,11 +28,11 @@ import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Server;
 import org.mortbay.jetty.plus.naming.NamingEntryUtil;
 import org.mortbay.jetty.security.AbstractUserRealm;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Server;
+import org.mortbay.jetty.util.log.Log;
 
 
 
@@ -237,7 +237,7 @@ public class DataSourceUserRealm extends AbstractUserRealm
     /** 
      * Check if user is authentic
      * 
-     * @see org.mortbay.jetty.security.HashUserRealm#authenticate(java.lang.String, java.lang.Object, org.mortbay.jetty.Request)
+     * @see org.mortbay.jetty.security.HashUserRealm#authenticate(java.lang.String, java.lang.Object, org.mortbay.jetty.server.Request)
      */
     public Principal authenticate(String username,
             Object credentials,

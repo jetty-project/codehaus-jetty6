@@ -17,7 +17,7 @@ package org.mortbay.jetty.io;
 import java.io.UnsupportedEncodingException;
 
 import org.mortbay.jetty.io.BufferCache.CachedBuffer;
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.util.StringUtil;
 
 /* ------------------------------------------------------------------------------- */
 /** Buffer utility methods.

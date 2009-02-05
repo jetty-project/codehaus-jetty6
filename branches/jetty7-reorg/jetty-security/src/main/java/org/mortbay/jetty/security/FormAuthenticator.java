@@ -24,13 +24,13 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
-import org.mortbay.jetty.Authenticator;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
-import org.mortbay.jetty.UserRealm;
-import org.mortbay.log.Log;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.server.Authenticator;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Response;
+import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.log.Log;
 
 
 /* ------------------------------------------------------------ */
