@@ -21,8 +21,8 @@ import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
 
 import org.mortbay.component.AbstractLifeCycle;
-import org.mortbay.io.EndPoint;
-import org.mortbay.io.bio.SocketEndPoint;
+import org.mortbay.jetty.io.EndPoint;
+import org.mortbay.jetty.io.bio.SocketEndPoint;
 import org.mortbay.log.Log;
 
 class SocketConnector extends AbstractLifeCycle implements HttpClient.Connector

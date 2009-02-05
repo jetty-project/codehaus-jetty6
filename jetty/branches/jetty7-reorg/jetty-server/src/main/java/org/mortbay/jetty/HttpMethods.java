@@ -14,8 +14,8 @@
 
 package org.mortbay.jetty;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.BufferCache;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.BufferCache;
 
 /* ------------------------------------------------------------------------------- */
 /** 

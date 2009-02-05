@@ -19,15 +19,17 @@ import java.io.IOException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.io.AbstractBuffer;
-import org.mortbay.io.Buffer;
-import org.mortbay.io.BufferUtil;
-import org.mortbay.io.Buffers;
-import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.EndPoint;
-import org.mortbay.io.View;
-import org.mortbay.io.BufferCache.CachedBuffer;
+import org.mortbay.jetty.io.AbstractBuffer;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.BufferUtil;
+import org.mortbay.jetty.io.Buffers;
+import org.mortbay.jetty.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.EndPoint;
+import org.mortbay.jetty.io.View;
+import org.mortbay.jetty.io.BufferCache.CachedBuffer;
 import org.mortbay.log.Log;
+import org.mortbay.util.EofException;
+import org.mortbay.util.HttpException;
 import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------------------------- */

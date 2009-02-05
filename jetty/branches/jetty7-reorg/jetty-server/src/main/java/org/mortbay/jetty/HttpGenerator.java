@@ -18,12 +18,13 @@ package org.mortbay.jetty;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.BufferUtil;
-import org.mortbay.io.Buffers;
-import org.mortbay.io.EndPoint;
-import org.mortbay.io.BufferCache.CachedBuffer;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.BufferUtil;
+import org.mortbay.jetty.io.Buffers;
+import org.mortbay.jetty.io.EndPoint;
+import org.mortbay.jetty.io.BufferCache.CachedBuffer;
 import org.mortbay.log.Log;
+import org.mortbay.util.EofException;
 import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */

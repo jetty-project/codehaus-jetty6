@@ -22,17 +22,17 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.EndPoint;
-import org.mortbay.io.bio.SocketEndPoint;
 import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.AsyncRequest;
-import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.EndPoint;
+import org.mortbay.jetty.io.bio.SocketEndPoint;
 import org.mortbay.log.Log;
+import org.mortbay.util.EofException;
+import org.mortbay.util.HttpException;
 
 
 /* ------------------------------------------------------------------------------- */

@@ -21,13 +21,13 @@ import java.nio.channels.ByteChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
-import org.mortbay.io.EndPoint;
-import org.mortbay.io.nio.ChannelEndPoint;
-import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
+import org.mortbay.jetty.io.EndPoint;
+import org.mortbay.jetty.io.nio.ChannelEndPoint;
 import org.mortbay.log.Log;
+import org.mortbay.util.EofException;
+import org.mortbay.util.HttpException;
 
 
 /* ------------------------------------------------------------------------------- */

@@ -14,6 +14,10 @@
 
 package org.mortbay.io;
 
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.BufferCache;
+import org.mortbay.jetty.io.ByteArrayBuffer;
+
 import junit.framework.TestCase;
 
 /* ------------------------------------------------------------------------------- */
