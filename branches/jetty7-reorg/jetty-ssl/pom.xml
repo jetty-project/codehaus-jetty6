@@ -8,55 +8,7 @@
   <artifactId>jetty-ssl</artifactId>
   <name>Jetty :: SSL Engine</name>
   <description>The jetty ssl engine.</description>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <executions>
-          <execution>
-            <goals>
-              <goal>manifest</goal>
-            </goals>
-            <configuration>
-              <instructions>
-                <Bundle-SymbolicName>org.mortbay.jetty.ssl</Bundle-SymbolicName>
-                <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
-                <Export-Package>org.mortbay.jetty.ssl;version=${project.version}</Export-Package>
-                <Bundle-DocURL>http://jetty.mortbay.org</Bundle-DocURL>
-              </instructions>
-            </configuration>
-           </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <!--
-        Required for OSGI
-        -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>               
-            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-          </archive>
-        </configuration>
-      </plugin>
-      <!-- always include sources since jetty-xbean makes use of them -->
-       <plugin>
-         <groupId>org.apache.maven.plugins</groupId>
-         <artifactId>maven-source-plugin</artifactId>
-         <executions>
-           <execution>
-             <id>attach-sources</id>
-             <goals>
-               <goal>jar</goal>
-             </goals>
-           </execution>
-         </executions>
-      </plugin>
-     </plugins>
-  </build>
+
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>

@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.mortbay.util.ajax.JSON.Output;
+import org.mortbay.jetty.json.JSON.Output;
 
 /* ------------------------------------------------------------ */
 /**
