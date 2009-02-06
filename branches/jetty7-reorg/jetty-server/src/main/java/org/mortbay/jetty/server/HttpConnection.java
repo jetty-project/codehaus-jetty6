@@ -25,6 +25,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.http.AbstractGenerator;
+import org.mortbay.jetty.http.EncodedHttpURI;
 import org.mortbay.jetty.http.Generator;
 import org.mortbay.jetty.http.HttpFields;
 import org.mortbay.jetty.http.HttpGenerator;
@@ -33,6 +34,7 @@ import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.http.HttpMethods;
 import org.mortbay.jetty.http.HttpParser;
 import org.mortbay.jetty.http.HttpStatus;
+import org.mortbay.jetty.http.HttpURI;
 import org.mortbay.jetty.http.HttpVersions;
 import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.io.Buffer;

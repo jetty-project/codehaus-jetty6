@@ -3,7 +3,7 @@ package org.mortbay.jetty.server;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
-import org.mortbay.jetty.server.EncodedHttpURI;
+import org.mortbay.jetty.http.EncodedHttpURI;
 
 import junit.framework.TestCase;
 
