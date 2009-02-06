@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.ssl;
+package org.mortbay.jetty.http;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

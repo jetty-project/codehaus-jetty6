@@ -12,14 +12,13 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.ssl;
+package org.mortbay.jetty.security;
 
 import java.io.IOException;
 import java.security.Principal;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.server.Authenticator;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Response;

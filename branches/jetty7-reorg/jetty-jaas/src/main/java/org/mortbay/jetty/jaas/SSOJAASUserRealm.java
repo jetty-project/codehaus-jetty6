@@ -32,10 +32,10 @@ package org.mortbay.jetty.jaas;
 
 import java.security.Principal;
 
-import org.mortbay.jetty.security.Credential;
 import org.mortbay.jetty.security.SSORealm;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Response;
+import org.mortbay.jetty.server.security.Credential;
 
 
 

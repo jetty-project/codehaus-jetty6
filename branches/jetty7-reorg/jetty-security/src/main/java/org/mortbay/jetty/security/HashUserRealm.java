@@ -31,6 +31,7 @@ import java.util.StringTokenizer;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Response;
 import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.server.security.Password;
 import org.mortbay.jetty.util.Scanner;
 import org.mortbay.jetty.util.Scanner.BulkListener;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;

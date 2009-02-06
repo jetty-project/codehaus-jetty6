@@ -16,7 +16,7 @@ package org.mortbay.jetty.jaas.spi;
 
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.apacheds.ApacheDs;
-import org.mortbay.jetty.security.Credential;
+import org.mortbay.jetty.server.security.Credential;
 import org.mortbay.jetty.jaas.JAASRole;
 import org.mortbay.jetty.jaas.callback.DefaultCallbackHandler;
 import org.apache.directory.shared.ldap.util.Base64;

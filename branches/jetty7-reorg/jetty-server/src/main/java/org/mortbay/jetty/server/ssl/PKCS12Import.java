@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.ssl;
+package org.mortbay.jetty.server.ssl;
 
 import java.io.File;
 import java.io.FileInputStream;

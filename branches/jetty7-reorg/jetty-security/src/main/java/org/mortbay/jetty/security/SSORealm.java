@@ -19,6 +19,7 @@ import java.security.Principal;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Response;
 import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.server.security.Credential;
 
 
 /* ------------------------------------------------------------ */

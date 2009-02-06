@@ -24,6 +24,7 @@ import org.mortbay.jetty.http.HttpHeaderValues;
 import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.http.HttpParser;
 import org.mortbay.jetty.http.HttpVersions;
+import org.mortbay.jetty.http.SslSelectChannelEndPoint;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.Buffers;
 import org.mortbay.jetty.io.ByteArrayBuffer;
@@ -31,7 +32,6 @@ import org.mortbay.jetty.io.Connection;
 import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.io.nio.SelectChannelEndPoint;
 import org.mortbay.jetty.http.HttpSchemes;
-import org.mortbay.jetty.ssl.SslSelectChannelEndPoint;
 import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.util.thread.Timeout;
 

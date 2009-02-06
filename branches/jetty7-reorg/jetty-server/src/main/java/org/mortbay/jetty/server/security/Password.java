@@ -12,9 +12,12 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.security;
+package org.mortbay.jetty.server.security;
 import java.io.IOException;
 
+import org.mortbay.jetty.server.security.Credential;
+import org.mortbay.jetty.server.security.Credential.Crypt;
+import org.mortbay.jetty.server.security.Credential.MD5;
 import org.mortbay.jetty.util.log.Log;
 
 
