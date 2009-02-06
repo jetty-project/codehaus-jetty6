@@ -34,6 +34,7 @@ import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.io.nio.ChannelEndPoint;
 import org.mortbay.jetty.io.nio.IndirectNIOBuffer;
 import org.mortbay.jetty.io.nio.NIOBuffer;
+import org.mortbay.jetty.server.ajax.Continuation;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Server;
@@ -42,7 +43,6 @@ import org.mortbay.jetty.server.servlet.Context;
 import org.mortbay.jetty.server.servlet.ServletHolder;
 import org.mortbay.jetty.util.EofException;
 import org.mortbay.jetty.util.HttpException;
-import org.mortbay.jetty.util.ajax.Continuation;
 import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------------------------- */

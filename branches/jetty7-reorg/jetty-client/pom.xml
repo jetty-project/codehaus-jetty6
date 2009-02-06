@@ -7,23 +7,27 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty-client</artifactId>
   <name>Jetty :: Asynchronous HTTP Client</name>
-
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-http</artifactId>
       <version>${project.version}</version>
     </dependency>  
-    <dependency>
+   <!-- <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-server</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
-    </dependency>  
+    </dependency> -->  
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>servlet-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
     	<groupId>org.mortbay.jetty</groupId>

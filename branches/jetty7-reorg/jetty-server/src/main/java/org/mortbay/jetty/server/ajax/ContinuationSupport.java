@@ -13,7 +13,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.util.ajax;
+package org.mortbay.jetty.server.ajax;
 
 import javax.servlet.http.HttpServletRequest;
 

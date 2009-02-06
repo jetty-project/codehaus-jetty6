@@ -62,6 +62,7 @@ import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.io.nio.DirectNIOBuffer;
 import org.mortbay.jetty.io.nio.IndirectNIOBuffer;
 import org.mortbay.jetty.io.nio.NIOBuffer;
+import org.mortbay.jetty.server.ajax.Continuation;
 import org.mortbay.jetty.server.handler.CompleteHandler;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.handler.SecurityHandler;
@@ -73,7 +74,6 @@ import org.mortbay.jetty.util.MultiMap;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.URIUtil;
 import org.mortbay.jetty.util.UrlEncoded;
-import org.mortbay.jetty.util.ajax.Continuation;
 import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */

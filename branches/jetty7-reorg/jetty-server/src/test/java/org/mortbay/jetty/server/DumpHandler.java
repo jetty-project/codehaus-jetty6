@@ -30,12 +30,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.http.MimeTypes;
+import org.mortbay.jetty.server.ajax.Continuation;
+import org.mortbay.jetty.server.ajax.ContinuationSupport;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.handler.AbstractHandler;
 import org.mortbay.jetty.util.StringUtil;
-import org.mortbay.jetty.util.ajax.Continuation;
-import org.mortbay.jetty.util.ajax.ContinuationSupport;
 import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
