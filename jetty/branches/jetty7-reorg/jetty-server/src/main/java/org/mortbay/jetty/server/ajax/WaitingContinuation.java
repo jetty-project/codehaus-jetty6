@@ -13,11 +13,11 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.util.ajax;
+package org.mortbay.jetty.server.ajax;
 
 import org.mortbay.jetty.util.log.Log;
 
-public class WaitingContinuation implements org.mortbay.jetty.util.ajax.Continuation
+public class WaitingContinuation implements org.mortbay.jetty.server.ajax.Continuation
 {
     Object _mutex;
     Object _object;
