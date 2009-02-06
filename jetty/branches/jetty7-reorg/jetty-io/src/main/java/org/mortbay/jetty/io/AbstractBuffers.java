@@ -12,12 +12,10 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.server;
+package org.mortbay.jetty.io;
 
 import java.util.ArrayList;
 
-import org.mortbay.jetty.io.Buffer;
-import org.mortbay.jetty.io.Buffers;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
 
 /* ------------------------------------------------------------ */

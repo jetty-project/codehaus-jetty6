@@ -14,7 +14,7 @@
 
 package org.mortbay.jetty.server;
 
-import org.mortbay.jetty.server.HttpURI;
+import org.mortbay.jetty.http.HttpURI;
 
 import junit.framework.TestCase;
 

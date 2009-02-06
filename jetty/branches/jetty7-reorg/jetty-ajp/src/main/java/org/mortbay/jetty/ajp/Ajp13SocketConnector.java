@@ -16,11 +16,11 @@ package org.mortbay.jetty.ajp;
 
 import java.io.IOException;
 
+import org.mortbay.jetty.http.HttpSchemes;
 import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.HttpConnection;
-import org.mortbay.jetty.server.HttpSchemes;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.bio.SocketConnector;

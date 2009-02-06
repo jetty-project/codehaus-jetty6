@@ -16,8 +16,8 @@ package org.mortbay.jetty.server.servlet;
 
 import junit.framework.TestCase;
 
+import org.mortbay.jetty.http.PathMap;
 import org.mortbay.jetty.server.HttpParserTest;
-import org.mortbay.jetty.server.servlet.PathMap;
 
 /* ------------------------------------------------------------ */
 /**

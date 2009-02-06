@@ -19,9 +19,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.mortbay.jetty.io.AbstractBuffers;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
-import org.mortbay.jetty.server.AbstractBuffers;
 
 import junit.framework.TestCase;
 

@@ -31,7 +31,7 @@ import org.mortbay.jetty.server.Response;
 import org.mortbay.jetty.server.UserRealm;
 import org.mortbay.jetty.server.handler.HandlerWrapper;
 import org.mortbay.jetty.server.handler.SecurityHandler;
-import org.mortbay.jetty.server.servlet.PathMap;
+import org.mortbay.jetty.http.PathMap;
 import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.Loader;
 import org.mortbay.jetty.util.StringUtil;

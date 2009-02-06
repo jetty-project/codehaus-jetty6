@@ -20,6 +20,7 @@ import java.util.EnumSet;
 
 import javax.servlet.DispatcherType;
 
+import org.mortbay.jetty.http.PathMap;
 import org.mortbay.jetty.server.Handler;
 
 

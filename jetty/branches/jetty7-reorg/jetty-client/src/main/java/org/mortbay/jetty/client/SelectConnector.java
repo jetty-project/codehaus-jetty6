@@ -30,7 +30,7 @@ import org.mortbay.jetty.io.nio.IndirectNIOBuffer;
 import org.mortbay.jetty.io.nio.NIOBuffer;
 import org.mortbay.jetty.io.nio.SelectChannelEndPoint;
 import org.mortbay.jetty.io.nio.SelectorManager;
-import org.mortbay.jetty.server.AbstractBuffers;
+import org.mortbay.jetty.io.AbstractBuffers;
 import org.mortbay.jetty.ssl.SslSelectChannelEndPoint;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
 import org.mortbay.jetty.util.log.Log;

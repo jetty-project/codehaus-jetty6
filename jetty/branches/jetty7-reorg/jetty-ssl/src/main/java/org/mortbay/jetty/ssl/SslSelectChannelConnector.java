@@ -52,7 +52,7 @@ import org.mortbay.jetty.io.nio.SelectChannelEndPoint;
 import org.mortbay.jetty.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.security.Password;
 import org.mortbay.jetty.server.HttpConnection;
-import org.mortbay.jetty.server.HttpSchemes;
+import org.mortbay.jetty.http.HttpSchemes;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.nio.SelectChannelConnector;
 import org.mortbay.jetty.util.TypeUtil;
