@@ -28,6 +28,8 @@ import org.mortbay.jetty.server.Authenticator;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Response;
 import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.server.security.Credential;
+import org.mortbay.jetty.server.security.Password;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.URIUtil;
 import org.mortbay.jetty.util.log.Log;

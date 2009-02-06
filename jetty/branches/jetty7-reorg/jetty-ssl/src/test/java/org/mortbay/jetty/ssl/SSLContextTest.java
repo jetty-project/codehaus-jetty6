@@ -51,8 +51,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.handler.AbstractHandler;
-import org.mortbay.jetty.ssl.SslSelectChannelConnector;
-import org.mortbay.jetty.ssl.SslSocketConnector;
+import org.mortbay.jetty.server.ssl.SslSelectChannelConnector;
+import org.mortbay.jetty.server.ssl.SslSocketConnector;
 
 import jsslutils.sslcontext.PKIXSSLContextFactory;
 import jsslutils.sslcontext.X509SSLContextFactory;

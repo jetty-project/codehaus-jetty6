@@ -18,7 +18,7 @@ package org.mortbay.jetty.jaas.spi;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mortbay.jetty.security.Credential;
+import org.mortbay.jetty.server.security.Credential;
 
 /**
  * UserInfo

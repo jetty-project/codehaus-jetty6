@@ -40,7 +40,7 @@ import junit.framework.TestCase;
 import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.handler.AbstractHandler;
-import org.mortbay.jetty.ssl.SslSelectChannelConnector;
+import org.mortbay.jetty.server.ssl.SslSelectChannelConnector;
 
 /**
  * HttpServer Tester.

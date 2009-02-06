@@ -24,12 +24,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.http.HttpHeaders;
+import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Response;
 import org.mortbay.jetty.server.UserRealm;
 import org.mortbay.jetty.server.handler.ContextHandler;
+import org.mortbay.jetty.server.security.UnixCrypt;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.URIUtil;
 import org.mortbay.jetty.util.log.Log;

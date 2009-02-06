@@ -38,7 +38,7 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginException;
 
 import org.mortbay.jetty.jaas.callback.ObjectCallback;
-import org.mortbay.jetty.security.Credential;
+import org.mortbay.jetty.server.security.Credential;
 import org.mortbay.jetty.util.log.Log;
 
 /**

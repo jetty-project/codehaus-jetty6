@@ -13,10 +13,11 @@
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-ssl</artifactId>
       <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-server</artifactId>
+      <artifactId>jetty-http</artifactId>
       <version>${project.version}</version>
     </dependency>  
     <dependency>

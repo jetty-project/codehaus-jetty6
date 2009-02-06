@@ -12,10 +12,11 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.security;
+package org.mortbay.jetty.server.security;
 
 import java.security.MessageDigest;
 
+import org.mortbay.jetty.server.security.UnixCrypt;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.TypeUtil;
 import org.mortbay.jetty.util.log.Log;

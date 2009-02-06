@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.ssl;
+package org.mortbay.jetty.server.ssl;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -41,6 +41,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 import org.mortbay.jetty.http.HttpParser;
+import org.mortbay.jetty.http.SslSelectChannelEndPoint;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.Connection;
 import org.mortbay.jetty.io.EndPoint;
@@ -50,7 +51,7 @@ import org.mortbay.jetty.io.nio.IndirectNIOBuffer;
 import org.mortbay.jetty.io.nio.NIOBuffer;
 import org.mortbay.jetty.io.nio.SelectChannelEndPoint;
 import org.mortbay.jetty.io.nio.SelectorManager.SelectSet;
-import org.mortbay.jetty.security.Password;
+import org.mortbay.jetty.server.security.Password;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.http.HttpSchemes;
 import org.mortbay.jetty.server.Request;

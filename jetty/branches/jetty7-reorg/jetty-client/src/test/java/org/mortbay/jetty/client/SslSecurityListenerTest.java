@@ -42,7 +42,7 @@ import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.UserRealm;
 import org.mortbay.jetty.server.handler.AbstractHandler;
-import org.mortbay.jetty.ssl.SslSocketConnector;
+import org.mortbay.jetty.server.ssl.SslSocketConnector;
 import org.mortbay.jetty.util.EofException;
 
 /**

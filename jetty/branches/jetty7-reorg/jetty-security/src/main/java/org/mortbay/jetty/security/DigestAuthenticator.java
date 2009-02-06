@@ -21,10 +21,12 @@ import java.security.Principal;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.http.HttpHeaders;
+import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.server.Authenticator;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Response;
 import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.server.security.Credential;
 import org.mortbay.jetty.util.QuotedStringTokenizer;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.TypeUtil;

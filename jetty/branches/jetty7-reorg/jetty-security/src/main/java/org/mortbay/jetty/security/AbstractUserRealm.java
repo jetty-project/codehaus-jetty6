@@ -25,6 +25,8 @@ import java.util.List;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Response;
 import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.server.security.Credential;
+import org.mortbay.jetty.server.security.Password;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
 
 public abstract class AbstractUserRealm extends AbstractLifeCycle implements UserRealm, SSORealm
