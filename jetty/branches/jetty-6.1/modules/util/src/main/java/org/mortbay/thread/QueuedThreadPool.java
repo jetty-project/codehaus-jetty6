@@ -72,7 +72,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
      */
     public QueuedThreadPool()
     {
-        _name="qtp-"+hashcode();
+        _name="qtp-"+hashCode();
     }
     
     /* ------------------------------------------------------------------- */

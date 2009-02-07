@@ -3,7 +3,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-879 Support extra properties in jQuery comet implementation
  + JETTY-802 Modify the default error pages to make association with Jetty clearer
  + JETTY-882 ChannelBayeuxListener called too many times
-
+ + JETTY-884 Use hashcode for threadpool ID
 
 jetty-6.1.15.rc3 28 January 2009
  + JETTY-691 System.getProperty() calls ... wrap them in doPrivileged
