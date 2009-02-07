@@ -222,6 +222,7 @@ public class FilterMapping
     void setFilterHolder(FilterHolder holder)
     {
         _holder = holder;
+        setFilterName(holder.getName());
     }
     
     /* ------------------------------------------------------------ */

@@ -211,7 +211,7 @@ public class QoSFilterTest extends TestCase
 
                 synchronized(TestServlet.class)
                 {
-                    System.err.println(_count++);
+                    // System.err.println(_count++);
                     __sleepers--;
                     if(__sleepers > __maxSleepers)
                         __maxSleepers = __sleepers;
