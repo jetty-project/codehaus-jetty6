@@ -18,10 +18,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.AsyncRequest;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.HttpConnection;
@@ -168,6 +170,17 @@ public class ContextHandlerCollection extends HandlerCollection
 	    return;
 
 	Request base_request = HttpConnection.getCurrentConnection().getRequest();
+	
+	AsyncRequest async = base_request.getAsyncRequest();
+	if (async!=null)
+	{
+	    ContextHandler context=async.getContextHandler();
+	    if (context!=null)
+	    {
+	        context.doHandle(target,base_request,request,response);
+	        return;
+	    }
+	}
 	
 	// data structure which maps a request to a context; first-best match wins
 	// { context path => 

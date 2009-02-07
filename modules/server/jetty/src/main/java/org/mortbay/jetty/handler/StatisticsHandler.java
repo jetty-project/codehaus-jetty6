@@ -92,7 +92,7 @@ public class StatisticsHandler extends HandlerWrapper implements CompleteHandler
         {
             synchronized(this)
             {
-                AsyncRequest asyncContextState=base_request.async();
+                AsyncRequest asyncContextState=base_request.getAsyncRequest();
 
                 if(asyncContextState==null)
                 {
