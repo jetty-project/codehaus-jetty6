@@ -15,6 +15,8 @@
 
 package org.mortbay.util.ajax;
 
+import org.mortbay.log.Log;
+
 public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
 {
     Object _mutex;
@@ -77,7 +79,7 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
             }
             catch (InterruptedException e)
             {
-                e.printStackTrace();
+                Log.ignore(e);
             }
             finally
             {
