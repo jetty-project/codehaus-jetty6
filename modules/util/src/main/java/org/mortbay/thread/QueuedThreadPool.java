@@ -40,8 +40,6 @@ import org.mortbay.log.Log;
  */
 public class QueuedThreadPool extends AbstractLifeCycle implements Serializable, ThreadPool
 {
-    private static int __id;
-    
     private String _name;
     private Set _threads;
     private List _idle;
@@ -74,7 +72,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
      */
     public QueuedThreadPool()
     {
-        _name="qtp"+__id++;
+        _name="qtp-"+hashcode();
     }
     
     /* ------------------------------------------------------------------- */
