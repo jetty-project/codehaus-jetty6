@@ -179,7 +179,7 @@ public class Request implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
-    public AsyncRequest async()
+    public AsyncRequest getAsyncRequest()
     {
         return _async;
     }
@@ -1683,13 +1683,7 @@ public class Request implements HttpServletRequest
     {
         if (request instanceof Request)
             return (Request) request;
-        
-        while (request instanceof ServletRequestWrapper)
-            request = (HttpServletRequest)((ServletRequestWrapper)request).getRequest();
-        
-        if (request instanceof Request)
-            return (Request) request;
-        
+
         return HttpConnection.getCurrentConnection().getRequest();
     }
     

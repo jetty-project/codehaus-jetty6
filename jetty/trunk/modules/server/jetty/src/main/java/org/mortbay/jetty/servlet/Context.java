@@ -340,7 +340,7 @@ public class Context extends ContextHandler
             if (!isStarting())
                     throw new IllegalStateException();
             
-            ServletHandler handler = Context.this.getServletHandler();
+            final ServletHandler handler = Context.this.getServletHandler();
             final FilterHolder holder= handler.newFilterHolder();
             holder.setClassName(className);
             holder.setName(filterName);
@@ -359,6 +359,34 @@ public class Context extends ContextHandler
                 {
                     holder.setAsyncSupported(isAsyncSupported);
                 }
+
+                @Override
+                public void addMappingForServletNames(EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... servletNames)
+                {
+                    FilterMapping mapping = new FilterMapping();
+                    mapping.setFilterHolder(holder);
+                    mapping.setDispatcherTypes(dispatcherTypes);
+                    mapping.setServletNames(servletNames);
+                    
+                    if (isMatchAfter)
+                        handler.addFilterMapping(mapping);
+                    else
+                        handler.prependFilterMapping(mapping);
+                }
+
+                @Override
+                public void addMappingForUrlPatterns(EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... urlPatterns)
+                {
+                    FilterMapping mapping = new FilterMapping();
+                    mapping.setFilterHolder(holder);
+                    mapping.setDispatcherTypes(dispatcherTypes);
+                    mapping.setPathSpecs(urlPatterns);
+                    
+                    if (isMatchAfter)
+                        handler.addFilterMapping(mapping);
+                    else
+                        handler.prependFilterMapping(mapping);
+                }
             };
         }
 
@@ -368,7 +396,7 @@ public class Context extends ContextHandler
             if (!isStarting())
                 throw new IllegalStateException();
 
-            ServletHandler handler = Context.this.getServletHandler();
+            final ServletHandler handler = Context.this.getServletHandler();
             final ServletHolder holder= handler.newServletHolder();
             holder.setClassName(className);
             holder.setName(servletName);
@@ -392,6 +420,15 @@ public class Context extends ContextHandler
                 public void setInitParameter(String name, String value)
                 {
                     holder.setInitParameter(name,value);
+                }
+
+                @Override
+                public void addMapping(String... urlPatterns)
+                {
+                    ServletMapping mapping = new ServletMapping();
+                    mapping.setServletName(holder.getName());
+                    mapping.setPathSpecs(urlPatterns);
+                    handler.addServletMapping(mapping);
                 }
             };
             
