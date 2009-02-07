@@ -94,6 +94,7 @@ public class HttpExchangeTest extends TestCase
     public void sender(final int nb,final boolean close) throws Exception
     {
         _count.set(0);
+        final CountDownLatch complete=new CountDownLatch(nb);
         final CountDownLatch latch=new CountDownLatch(nb);
         HttpExchange[] httpExchange = new HttpExchange[nb];
         long start=System.currentTimeMillis();
@@ -147,10 +148,12 @@ public class HttpExchangeTest extends TestCase
                         latch.countDown();
                     else
                         System.err.println(n+" ONLY "+len);
+                    complete.countDown();
                 }
 
                 protected void onConnectionFailed(Throwable ex)
                 {
+                    complete.countDown();
                     result="failed";
                     System.err.println(n+" FAILED "+ex);
                     super.onConnectionFailed(ex);
@@ -158,6 +161,7 @@ public class HttpExchangeTest extends TestCase
 
                 protected void onException(Throwable ex)
                 {
+                    complete.countDown();
                     result="excepted";
                     System.err.println(n+" EXCEPTED "+ex);
                     super.onException(ex);
@@ -165,6 +169,7 @@ public class HttpExchangeTest extends TestCase
 
                 protected void onExpire()
                 {
+                    complete.countDown();
                     result="expired";
                     System.err.println(n+" EXPIRED "+len);
                     super.onExpire();
@@ -184,35 +189,8 @@ public class HttpExchangeTest extends TestCase
             _httpClient.send(httpExchange[n]);
         }
 
-        latch.await(100,TimeUnit.MILLISECONDS);
-        if (latch.getCount()>0)
-            latch.await(1,TimeUnit.SECONDS);
-        if (latch.getCount()>0)
-            latch.await(5,TimeUnit.SECONDS);
-        long last=latch.getCount();
-        if (last>0)
-        {
-            while(last>0)
-            {
-                System.err.println("waiting for "+last);
-                latch.await(10,TimeUnit.SECONDS);
-                long next=latch.getCount();
-                if (last==next)
-                    break;
-                last=next;
-            }
-            System.err.println("missed "+latch.getCount());
-            if (last>0)
-            {
-                _httpClient.dump();
-                System.err.println("--");
-                for (HttpExchange o : httpExchange)
-                    if (o.getStatus()!=HttpExchange.STATUS_COMPLETED)
-                        System.err.println(o);
-
-            }
-        }
-        
+        assertTrue(complete.await(10,TimeUnit.SECONDS));
+            
         long elapsed=System.currentTimeMillis()-start;
         // make windows-friendly ... System.currentTimeMillis() on windows is dope! 
         if(elapsed>0)
