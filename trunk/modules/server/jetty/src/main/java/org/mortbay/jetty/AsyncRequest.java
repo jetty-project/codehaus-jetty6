@@ -26,6 +26,8 @@ import javax.servlet.ServletResponse;
 
 import org.mortbay.io.AsyncEndPoint;
 import org.mortbay.io.EndPoint;
+import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.handler.ContextHandler.SContext;
 import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
 import org.mortbay.util.LazyList;
@@ -598,16 +600,17 @@ public class AsyncRequest implements AsyncContext
     }
 
     /* ------------------------------------------------------------ */
-    public void forward(ServletContext context, String path)
+    public void dispatch(ServletContext context, String path)
     {
-        _event._dispatcher=context.getRequestDispatcher(path);
+        _event._context=context;
+        _event._path=path;
         dispatch();
     }
 
     /* ------------------------------------------------------------ */
-    public void forward(String path)
+    public void dispatch(String path)
     {
-        _event._dispatcher=_event._context.getRequestDispatcher(path);
+        _event._path=path;
         dispatch();
     }
 
@@ -630,7 +633,7 @@ public class AsyncRequest implements AsyncContext
     /* ------------------------------------------------------------ */
     public void start(Runnable run)
     {
-        // TODO Auto-generated method stub
+        ((SContext)_event._context).getContextHandler().handle(run);
     }
 
     /* ------------------------------------------------------------ */
@@ -638,15 +641,22 @@ public class AsyncRequest implements AsyncContext
     {
         return (_event!=null && _event.getRequest()==_connection._request && _event.getResponse()==_connection._response);
     }
-    
 
+    /* ------------------------------------------------------------ */
+    public ContextHandler getContextHandler()
+    {
+        if (_event!=null && _event._context!=null)
+            return ((SContext)_event._context).getContextHandler();
+        return null;
+    }
+    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     protected class AsyncEventState extends AsyncEvent
     {
-        final ServletContext _context;
         final Timeout.Task _timeout;
-        RequestDispatcher _dispatcher;
+        ServletContext _context;
+        String _path;
         
         public AsyncEventState(ServletContext context, ServletRequest request, ServletResponse response)
         {
@@ -661,4 +671,5 @@ public class AsyncRequest implements AsyncContext
             };
         }
     }
+
 }

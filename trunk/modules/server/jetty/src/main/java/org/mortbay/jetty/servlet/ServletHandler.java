@@ -902,6 +902,28 @@ public class ServletHandler extends AbstractHandler
         if (mapping != null)
             setFilterMappings((FilterMapping[])LazyList.addToArray(getFilterMappings(), mapping, FilterMapping.class));
     }
+    
+    /* ------------------------------------------------------------ */
+    /** Convenience method to add a preconstructed FilterMapping
+     * @param mapping
+     */
+    public void prependFilterMapping (FilterMapping mapping)
+    {
+        if (mapping != null)
+        {
+            FilterMapping[] mappings =getFilterMappings();
+            if (mappings==null || mappings.length==0)
+                setFilterMappings(new FilterMapping[] {mapping});
+            else
+            {
+
+                FilterMapping[] new_mappings=new FilterMapping[mappings.length+1];
+                System.arraycopy(mappings,0,new_mappings,1,mappings.length);
+                new_mappings[0]=mapping;
+                setFilterMappings(new_mappings);
+            }
+        }
+    }
 
     /* ------------------------------------------------------------ */
     protected synchronized void updateNameMappings()

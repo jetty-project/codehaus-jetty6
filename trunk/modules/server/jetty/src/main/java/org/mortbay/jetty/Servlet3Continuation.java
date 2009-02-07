@@ -53,7 +53,7 @@ public class Servlet3Continuation implements Continuation, AsyncListener
 
     public boolean isPending()
     {
-        return _asyncContext!=null && (_request.async().isSuspended() || !_request.async().isInitial());
+        return _asyncContext!=null && (_request.getAsyncRequest().isSuspended() || !_request.getAsyncRequest().isInitial());
     }
 
     public boolean isResumed()
@@ -87,7 +87,7 @@ public class Servlet3Continuation implements Continuation, AsyncListener
     public boolean suspend(long timeout)
     {
         _asyncContext=_request.startAsync();;
-        if (!_request.async().isInitial()||_resumed||_timeout)
+        if (!_request.getAsyncRequest().isInitial()||_resumed||_timeout)
         {
             _resumed=false;
             _timeout=false;
@@ -110,7 +110,7 @@ public class Servlet3Continuation implements Continuation, AsyncListener
     public void onTimeout(AsyncEvent event) throws IOException
     {
         _timeout=true;
-        _request.async().dispatch();
+        _request.getAsyncRequest().dispatch();
     }
 
 }

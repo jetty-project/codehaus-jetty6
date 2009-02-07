@@ -18,6 +18,7 @@ package org.mortbay.jetty.handler;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Inherited;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -658,12 +659,81 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             _contextAttributes.clearAttributes();
         _contextAttributes=null;
     }
-    
+
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException
+    {   
+        Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
+        DispatcherType dispatch=request.getDispatcherType();
+        
+        if( !isStarted() || _shutdown || (DispatcherType.REQUEST.equals(dispatch) && base_request.isHandled()))
+            return;
+
+        // Check the vhosts
+        if (_vhosts!=null && _vhosts.length>0)
+        {
+            String vhost = normalizeHostname( request.getServerName());
+
+            boolean match=false;
+            
+            // TODO non-linear lookup
+            for (int i=0;!match && i<_vhosts.length;i++)
+            {
+                String contextVhost = _vhosts[i];
+                if(contextVhost==null) continue;
+                if(contextVhost.startsWith("*.")) {
+                    // wildcard only at the beginning, and only for one additional subdomain level
+                    match=contextVhost.regionMatches(true,2,vhost,vhost.indexOf(".")+1,contextVhost.length()-2);
+                } else
+                    match=contextVhost.equalsIgnoreCase(vhost);
+            }
+            if (!match)
+                return;
+        }
+        
+        // Check the connector
+        if (_connectors!=null && _connectors.size()>0)
+        {
+            String connector=HttpConnection.getCurrentConnection().getConnector().getName();
+            if (connector==null || !_connectors.contains(connector))
+                return;
+        }
+                
+        if (_compactPath)
+            target=URIUtil.compactPath(target);
+            
+        if (target.startsWith(_contextPath))
+        {
+            if (_contextPath.length()==target.length() && _contextPath.length()>1 &&!_allowNullPathInfo)
+            {
+                // context request must end with /
+                base_request.setHandled(true);
+                if (request.getQueryString()!=null)
+                    response.sendRedirect(URIUtil.addPaths(request.getRequestURI(),URIUtil.SLASH)+"?"+request.getQueryString());
+                else 
+                    response.sendRedirect(URIUtil.addPaths(request.getRequestURI(),URIUtil.SLASH));
+                return;
+            }
+        }
+        else
+        {
+            // Not for this context!
+            return;
+        }
+        
+        doHandle(target,base_request,request,response);
+    }        
+        
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
+    public void doHandle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException
     {   
         boolean new_context=false;
@@ -677,106 +747,51 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
 
         DispatcherType dispatch=request.getDispatcherType();
         
-        Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
-        if( !isStarted() || _shutdown || (DispatcherType.REQUEST.equals(dispatch) && base_request.isHandled()))
-            return;
-        
-        old_context=base_request.getContext();
+        old_context=baseRequest.getContext();
         
         // Are we already in this context?
         if (old_context!=_scontext)
         {
             new_context=true;
             
-            // Check the vhosts
-            if (_vhosts!=null && _vhosts.length>0)
-            {
-                String vhost = normalizeHostname( request.getServerName());
-
-                boolean match=false;
-                
-                // TODO non-linear lookup
-                for (int i=0;!match && i<_vhosts.length;i++)
-                {
-                    String contextVhost = _vhosts[i];
-                    if(contextVhost==null) continue;
-                    if(contextVhost.startsWith("*.")) {
-                        // wildcard only at the beginning, and only for one additional subdomain level
-                        match=contextVhost.regionMatches(true,2,vhost,vhost.indexOf(".")+1,contextVhost.length()-2);
-                    } else
-                        match=contextVhost.equalsIgnoreCase(vhost);
-                }
-                if (!match)
-                    return;
-            }
-            
-            // Check the connector
-            if (_connectors!=null && _connectors.size()>0)
-            {
-                String connector=HttpConnection.getCurrentConnection().getConnector().getName();
-                if (connector==null || !_connectors.contains(connector))
-                    return;
-            }
-            
-            // Nope - so check the target.
+            // check the target.
             if (DispatcherType.REQUEST.equals(dispatch) || DispatcherType.ASYNC.equals(dispatch))
             {
-                if (_compactPath)
-                    target=URIUtil.compactPath(target);
-                
-                if (target.equals(_contextPath))
-                {
-                    if (_contextPath.length()==1)
-                    {
-                        target=URIUtil.SLASH;
-                        pathInfo=URIUtil.SLASH;
-                    }
-                    else if (_allowNullPathInfo)
-                    {
-                        target=URIUtil.SLASH;
-                        pathInfo=null;
-                        request.setAttribute("org.mortbay.jetty.nullPathInfo",target);
-                    }
-                    else
-                    {
-                        base_request.setHandled(true);
-                        if (request.getQueryString()!=null)
-                            response.sendRedirect(URIUtil.addPaths(request.getRequestURI(),URIUtil.SLASH)+"?"+request.getQueryString());
-                        else 
-                            response.sendRedirect(URIUtil.addPaths(request.getRequestURI(),URIUtil.SLASH));
-                        return;
-                    }
-                }
-                else if (target.startsWith(_contextPath) && (_contextPath.length()==1 || target.charAt(_contextPath.length())=='/'))
+                if (target.length()>_contextPath.length())
                 {
                     if (_contextPath.length()>1)
                         target=target.substring(_contextPath.length());
                     pathInfo=target;
                 }
-                else 
+                else if (_contextPath.length()==1)
                 {
-                    // Not for this context!
-                    return;
+                    target=URIUtil.SLASH;
+                    pathInfo=URIUtil.SLASH;
+                }
+                else
+                {
+                    target=URIUtil.SLASH;
+                    pathInfo=null;
                 }
             }
         }
         
         try
         {
-            old_context_path=base_request.getContextPath();
-            old_servlet_path=base_request.getServletPath();
-            old_path_info=base_request.getPathInfo();
+            old_context_path=baseRequest.getContextPath();
+            old_servlet_path=baseRequest.getServletPath();
+            old_path_info=baseRequest.getPathInfo();
             
             // Update the paths
-            base_request.setContext(_scontext);
+            baseRequest.setContext(_scontext);
             if (!DispatcherType.INCLUDE.equals(dispatch) && target.startsWith("/"))
             {
                 if (_contextPath.length()==1)
-                    base_request.setContextPath("");
+                    baseRequest.setContextPath("");
                 else
-                    base_request.setContextPath(_contextPath);
-                base_request.setServletPath(null);
-                base_request.setPathInfo(pathInfo);
+                    baseRequest.setContextPath(_contextPath);
+                baseRequest.setServletPath(null);
+                baseRequest.setPathInfo(pathInfo);
             }
 
             ServletRequestEvent event=null;
@@ -801,7 +816,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 }
                 if (_requestAttributeListeners!=null)
                     for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
-                        base_request.addEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
+                        baseRequest.addEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
             }
             
             // Handle the request
@@ -830,7 +845,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                     
                     if(_requestAttributeListeners!=null)
                         for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
-                            base_request.removeEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
+                            baseRequest.removeEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
                 }
             }
         }
@@ -845,10 +860,38 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 }
                 
                 // reset the context and servlet path.
-                base_request.setContext(old_context);
-                base_request.setContextPath(old_context_path);
-                base_request.setServletPath(old_servlet_path);
-                base_request.setPathInfo(old_path_info); 
+                baseRequest.setContext(old_context);
+                baseRequest.setContextPath(old_context_path);
+                baseRequest.setServletPath(old_servlet_path);
+                baseRequest.setPathInfo(old_path_info); 
+            }
+        }
+    }    
+    
+    /* ------------------------------------------------------------ */
+    /* Handle a runnable in this context
+     */
+    public void handle(Runnable runnable)
+    {   
+        ClassLoader old_classloader=null;
+        Thread current_thread=null;
+        try
+        {
+            // Set the classloader
+            if (_classLoader!=null)
+            {
+                current_thread=Thread.currentThread();
+                old_classloader=current_thread.getContextClassLoader();
+                current_thread.setContextClassLoader(_classLoader);
+            }
+            
+            runnable.run();
+        }
+        finally
+        {
+            if (old_classloader!=null)
+            {
+                current_thread.setContextClassLoader(old_classloader);
             }
         }
     }
@@ -1714,65 +1757,46 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             return "ServletContext@"+Integer.toHexString(hashCode())+"{"+(getContextPath().equals("")?URIUtil.SLASH:getContextPath())+","+getBaseResource()+"}";
         }
 
+        public FilterRegistration addFilter(String filterName, String className)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
 
-        /* ------------------------------------------------------------ */
+        public ServletRegistration addServlet(String servletName, String className)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public FilterRegistration findFilterRegistration(String filterName)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public ServletRegistration findServletRegistration(String servletName)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
         public EnumSet<SessionTrackingMode> getDefaultSessionTrackingModes()
         {
             // TODO Auto-generated method stub
             return null;
         }
 
-        /* ------------------------------------------------------------ */
         public EnumSet<SessionTrackingMode> getEffectiveSessionTrackingModes()
         {
             // TODO Auto-generated method stub
             return null;
         }
 
-        /* ------------------------------------------------------------ */
         public SessionCookieConfig getSessionCookieConfig()
         {
             // TODO Auto-generated method stub
             return null;
-        }
-
-        /* ------------------------------------------------------------ */
-        public void setSessionCookieConfig(SessionCookieConfig sessionCookieConfig)
-        {
-            // TODO Auto-generated method stub
-            
-        }
-
-        /* ------------------------------------------------------------ */
-        public void setSessionTrackingModes(EnumSet<SessionTrackingMode> sessionTrackingModes)
-        {   
-        }
-
-        /* ------------------------------------------------------------ */
-        public FilterRegistration addFilter(String filterName, String className)
-        {
-            return null;
-        }
-
-        /* ------------------------------------------------------------ */
-        public ServletRegistration addServlet(String servletName, String className)
-        {
-            return null;
-        }
-
-        /* ------------------------------------------------------------ */
-        public void addFilterMappingForServletNames(String filterName, EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... servletNames)
-        {
-        }
-
-        /* ------------------------------------------------------------ */
-        public void addFilterMappingForUrlPatterns(String filterName, EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... urlPatterns)
-        {
-        }
-
-        /* ------------------------------------------------------------ */
-        public void addServletMapping(String servletName, String[] urlPatterns)
-        {
         }
 
         public boolean setInitParameter(String name, String value)
@@ -1782,7 +1806,17 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             ContextHandler.this.getInitParams().put(name,value);
             return true;
         }
-        
+
+        public void setSessionCookieConfig(SessionCookieConfig sessionCookieConfig)
+        {
+            // TODO Auto-generated method stub
+        }
+
+        public void setSessionTrackingModes(EnumSet<SessionTrackingMode> sessionTrackingModes)
+        {
+            // TODO Auto-generated method stub
+            
+        }
     }
 
 }

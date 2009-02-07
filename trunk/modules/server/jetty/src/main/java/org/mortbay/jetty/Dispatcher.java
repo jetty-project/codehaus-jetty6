@@ -43,22 +43,20 @@ import org.mortbay.util.UrlEncoded;
 public class Dispatcher implements RequestDispatcher
 {
     /** Dispatch include attribute names */
-    public final static String __INCLUDE_JETTY="org.mortbay.jetty.included";
     public final static String __INCLUDE_PREFIX="javax.servlet.include.";
-    public final static String __INCLUDE_REQUEST_URI= "javax.servlet.include.request_uri";
-    public final static String __INCLUDE_CONTEXT_PATH= "javax.servlet.include.context_path";
-    public final static String __INCLUDE_SERVLET_PATH= "javax.servlet.include.servlet_path";
-    public final static String __INCLUDE_PATH_INFO= "javax.servlet.include.path_info";
-    public final static String __INCLUDE_QUERY_STRING= "javax.servlet.include.query_string";
+    public final static String __INCLUDE_REQUEST_URI= INCLUDE_REQUEST_URI;
+    public final static String __INCLUDE_CONTEXT_PATH= INCLUDE_CONTEXT_PATH;
+    public final static String __INCLUDE_SERVLET_PATH= INCLUDE_SERVLET_PATH;
+    public final static String __INCLUDE_PATH_INFO= INCLUDE_PATH_INFO;
+    public final static String __INCLUDE_QUERY_STRING= INCLUDE_QUERY_STRING;
 
     /** Dispatch include attribute names */
-    public final static String __FORWARD_JETTY="org.mortbay.jetty.forwarded";
     public final static String __FORWARD_PREFIX="javax.servlet.forward.";
-    public final static String __FORWARD_REQUEST_URI= "javax.servlet.forward.request_uri";
-    public final static String __FORWARD_CONTEXT_PATH= "javax.servlet.forward.context_path";
-    public final static String __FORWARD_SERVLET_PATH= "javax.servlet.forward.servlet_path";
-    public final static String __FORWARD_PATH_INFO= "javax.servlet.forward.path_info";
-    public final static String __FORWARD_QUERY_STRING= "javax.servlet.forward.query_string";
+    public final static String __FORWARD_REQUEST_URI= FORWARD_REQUEST_URI;
+    public final static String __FORWARD_CONTEXT_PATH= FORWARD_CONTEXT_PATH;
+    public final static String __FORWARD_SERVLET_PATH= FORWARD_SERVLET_PATH;
+    public final static String __FORWARD_PATH_INFO= FORWARD_PATH_INFO;
+    public final static String __FORWARD_QUERY_STRING= FORWARD_QUERY_STRING;
 
     /** JSP attributes */
     public final static String __JSP_FILE="org.apache.catalina.jsp_file";
@@ -135,7 +133,7 @@ public class Dispatcher implements RequestDispatcher
             base_request.setDispatcherType(DispatcherType.INCLUDE);
             base_request.getConnection().include();
             if (_named!=null)
-                _contextHandler.handle(_named, (HttpServletRequest)request, (HttpServletResponse)response);
+                _contextHandler.doHandle(_named, base_request,(HttpServletRequest)request, (HttpServletResponse)response);
             else 
             {
                 String query=_dQuery;
@@ -172,7 +170,7 @@ public class Dispatcher implements RequestDispatcher
                 
                 base_request.setAttributes(attr);
                 
-                _contextHandler.handle(_named==null?_path:_named, (HttpServletRequest)request, (HttpServletResponse)response);
+                _contextHandler.doHandle(_named==null?_path:_named, base_request,(HttpServletRequest)request, (HttpServletResponse)response);
             }
         }
         finally
@@ -210,7 +208,7 @@ public class Dispatcher implements RequestDispatcher
             base_request.setDispatcherType(dispatch);
             
             if (_named!=null)
-                _contextHandler.handle(_named, (HttpServletRequest)request, (HttpServletResponse)response);
+                _contextHandler.doHandle(_named, base_request,(HttpServletRequest)request, (HttpServletResponse)response);
             else 
             {
                 String query=_dQuery;
@@ -320,7 +318,7 @@ public class Dispatcher implements RequestDispatcher
                 base_request.setAttributes(attr);
                 base_request.setQueryString(query);
                 
-                _contextHandler.handle(_path, (HttpServletRequest)request, (HttpServletResponse)response);
+                _contextHandler.doHandle(_path, base_request,(HttpServletRequest)request, (HttpServletResponse)response);
                 
                 if (base_request.getConnection().getResponse().isWriting())
                 {
@@ -383,11 +381,8 @@ public class Dispatcher implements RequestDispatcher
                     return _query;
             }
             
-            if (key.startsWith(__INCLUDE_PREFIX) || key.equals(__INCLUDE_JETTY) )
+            if (key.startsWith(__INCLUDE_PREFIX))
                 return null;
-
-            if (key.equals(__FORWARD_JETTY)) 
-                return Boolean.TRUE;
             
             return _attr.getAttribute(key);
         }
@@ -501,8 +496,6 @@ public class Dispatcher implements RequestDispatcher
             else if (key.startsWith(__INCLUDE_PREFIX)) 
                     return null;
             
-            if (key.equals(__INCLUDE_JETTY)) 
-                return Boolean.TRUE;
             
             return _attr.getAttribute(key);
         }
