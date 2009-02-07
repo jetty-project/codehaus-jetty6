@@ -348,14 +348,14 @@ public abstract class SelectorManager extends AbstractLifeCycle
 
                             if (channel.isConnected())
                             {
-                                SelectionKey key = channel.register(_selector,SelectionKey.OP_READ,att);
+                                SelectionKey key = channel.register(selector,SelectionKey.OP_READ,att);
                                 SelectChannelEndPoint endpoint = newEndPoint(channel,this,key);
                                 key.attach(endpoint);
                                 endpoint.schedule();
                             }
                             else
                             {
-                                channel.register(_selector,SelectionKey.OP_CONNECT,att);
+                                channel.register(selector,SelectionKey.OP_CONNECT,att);
                             }
 
                         }
@@ -384,7 +384,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 {
                     _idleTimeout.setNow(now);
                     _timeout.setNow(now);
-                    if (_lowResourcesConnections>0 && _selector.keys().size()>_lowResourcesConnections)
+                    if (_lowResourcesConnections>0 && selector.keys().size()>_lowResourcesConnections)
                         _idleTimeout.setDuration(_lowResourcesMaxIdleTime);
                     else 
                         _idleTimeout.setDuration(_maxIdleTime);
@@ -414,7 +414,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         if (_jvmBug++>5) 
                         {
                             // Probably JVM BUG!    
-                            for (SelectionKey key: _selector.keys())
+                            for (SelectionKey key: selector.keys())
                             {    
                                 if (key.interestOps()==0 && key.isValid())
                                     key.cancel();

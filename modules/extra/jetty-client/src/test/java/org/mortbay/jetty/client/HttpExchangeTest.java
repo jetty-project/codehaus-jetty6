@@ -189,7 +189,7 @@ public class HttpExchangeTest extends TestCase
             _httpClient.send(httpExchange[n]);
         }
 
-        assertTrue(complete.await(10,TimeUnit.SECONDS));
+        assertTrue(complete.await(45,TimeUnit.SECONDS));
             
         long elapsed=System.currentTimeMillis()-start;
         // make windows-friendly ... System.currentTimeMillis() on windows is dope! 
