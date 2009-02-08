@@ -44,6 +44,7 @@ import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiException;
+import org.mortbay.util.URIUtil;
 
 /* ------------------------------------------------------------ */
 /** Jetty HTTP Servlet Server.
@@ -315,20 +316,14 @@ public class Server extends HandlerWrapper implements Attributes
     /* ------------------------------------------------------------ */
     /* Handle a request from a connection.
      * Called to handle a request on the connection when either the header has been received,
-     * or after the entire request has been received (for short requests of known length).
+     * or after the entire request has been received (for short requests of known length), or
+     * on the dispatch of an async request.
      */
     public void handle(HttpConnection connection) throws IOException, ServletException
     {
-        String target=connection.getRequest().getPathInfo();
-        HttpServletRequest request=connection.getRequest();
-        HttpServletResponse response=connection.getResponse();
-        
-        if (request.isAsyncStarted())
-        {
-            AsyncContext context = connection.getRequest().getAsyncContext();
-            request=(HttpServletRequest)context.getRequest();
-            response=(HttpServletResponse)context.getResponse();
-        }
+        final String target=connection.getRequest().getPathInfo();
+        final HttpServletRequest request=connection.getRequest();
+        final HttpServletResponse response=connection.getResponse();
         
         if (Log.isDebugEnabled())
         {
@@ -339,6 +334,51 @@ public class Server extends HandlerWrapper implements Attributes
         else
             handle(target, request, response);
     }
+    
+    /* ------------------------------------------------------------ */
+    /* Handle a request from a connection.
+     * Called to handle a request on the connection when either the header has been received,
+     * or after the entire request has been received (for short requests of known length), or
+     * on the dispatch of an async request.
+     */
+    public void handleAsync(HttpConnection connection) throws IOException, ServletException
+    {
+        final AsyncRequest async = connection.getRequest().getAsyncRequest();
+        final AsyncRequest.AsyncEventState state = async.getAsyncEventState();
+
+        final Request base_request=connection.getRequest();
+        final String path=state.getPath();
+        if (path!=null)
+        {
+            // this is a dispatch with a path
+            base_request.setAttribute(AsyncContext.ASYNC_REQUEST_URI,base_request.getRequestURI());
+            base_request.setAttribute(AsyncContext.ASYNC_QUERY_STRING,base_request.getQueryString());
+            
+            base_request.setAttribute(AsyncContext.ASYNC_CONTEXT_PATH,state.getSuspendedContext().getContextPath());
+
+            final String contextPath=state.getServletContext().getContextPath();
+            HttpURI uri = new HttpURI(URIUtil.addPaths(contextPath,path));
+            base_request.setUri(uri);
+            base_request.setRequestURI(null);
+            base_request.setPathInfo(base_request.getRequestURI());
+            base_request.setQueryString(uri.getQuery());            
+        }
+        
+        final String target=base_request.getPathInfo();
+        final HttpServletRequest request=(HttpServletRequest)async.getRequest();
+        final HttpServletResponse response=(HttpServletResponse)async.getResponse();
+
+        if (Log.isDebugEnabled())
+        {
+            Log.debug("REQUEST "+target+" on "+connection);
+            handle(target, request, response);
+            Log.debug("RESPONSE "+target+"  "+connection.getResponse().getStatus());
+        }
+        else
+            handle(target, request, response);
+    }
+    
+    
 
     /* ------------------------------------------------------------ */
     public void join() throws InterruptedException 
