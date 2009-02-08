@@ -32,6 +32,12 @@ import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
 import org.mortbay.util.LazyList;
 
+/* ------------------------------------------------------------ */
+/** Asyncrhonous Request.
+ * 
+ * @author gregw
+ *
+ */
 public class AsyncRequest implements AsyncContext
 {
     // STATES:
@@ -57,10 +63,12 @@ public class AsyncRequest implements AsyncContext
     // UNSUSPENDING */  {  __REDISPATCHED,  __Illegal,      __Illegal,       __Ignore  },
     // REDISPATCHED */  {   __Illegal,  __UNCOMPLETED,   __SUSPENDING,       __Ignore  },
     
- 
+
+    /* ------------------------------------------------------------ */
     protected HttpConnection _connection;
     protected Object _listeners;
-    
+
+    /* ------------------------------------------------------------ */
     private int _state;
     private boolean _initial;
     private long _timeoutMs;
@@ -97,6 +105,12 @@ public class AsyncRequest implements AsyncContext
     public long getAsyncTimeout()
     {
         return _timeoutMs;
+    } 
+
+    /* ------------------------------------------------------------ */
+    public AsyncEventState getAsyncEventState()
+    {
+        return _event;
     } 
    
     /* ------------------------------------------------------------ */
@@ -602,7 +616,7 @@ public class AsyncRequest implements AsyncContext
     /* ------------------------------------------------------------ */
     public void dispatch(ServletContext context, String path)
     {
-        _event._context=context;
+        _event._dispatchContext=context;
         _event._path=path;
         dispatch();
     }
@@ -633,7 +647,7 @@ public class AsyncRequest implements AsyncContext
     /* ------------------------------------------------------------ */
     public void start(Runnable run)
     {
-        ((SContext)_event._context).getContextHandler().handle(run);
+        ((SContext)_event.getServletContext()).getContextHandler().handle(run);
     }
 
     /* ------------------------------------------------------------ */
@@ -645,23 +659,24 @@ public class AsyncRequest implements AsyncContext
     /* ------------------------------------------------------------ */
     public ContextHandler getContextHandler()
     {
-        if (_event!=null && _event._context!=null)
-            return ((SContext)_event._context).getContextHandler();
+        if (_event!=null)
+            return ((SContext)_event.getServletContext()).getContextHandler();
         return null;
     }
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    protected class AsyncEventState extends AsyncEvent
+    public class AsyncEventState extends AsyncEvent
     {
         final Timeout.Task _timeout;
-        ServletContext _context;
+        final ServletContext _suspendedContext;
+        ServletContext _dispatchContext;
         String _path;
         
         public AsyncEventState(ServletContext context, ServletRequest request, ServletResponse response)
         {
             super(request,response);
-            _context=context;
+            _suspendedContext=context;
             _timeout= new Timeout.Task()
             {
                 public void expired()
@@ -670,6 +685,25 @@ public class AsyncRequest implements AsyncContext
                 }
             };
         }
+        
+        public ServletContext getSuspendedContext()
+        {
+            return _suspendedContext;
+        }
+        
+        public ServletContext getDispatchContext()
+        {
+            return _dispatchContext;
+        }
+        
+        public ServletContext getServletContext()
+        {
+            return _dispatchContext==null?_suspendedContext:_dispatchContext;
+        }
+        
+        public String getPath()
+        {
+            return _path;
+        }   
     }
-
 }

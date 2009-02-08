@@ -157,9 +157,10 @@ public class Dump extends HttpServlet
         {
             request.setAttribute("ASYNC",Boolean.TRUE);
 
-            if (request.getParameter("forward")!=null)
+            if (request.getParameter("dispatch")!=null)
             {
-                final long resume=Long.parseLong(request.getParameter("forward"));
+                final long resume=Long.parseLong(request.getParameter("dispatch"));
+                final String path=request.getParameter("dispatchPath");
                 new Thread(new Runnable()
                 {
                     public void run()
@@ -172,7 +173,11 @@ public class Dump extends HttpServlet
                         {
                             e.printStackTrace();
                         }
-                        request.getAsyncContext().dispatch();
+                        if (path!=null)
+                            request.getAsyncContext().dispatch(path);
+                        else
+                            request.getAsyncContext().dispatch();
+                            
                     }
 
                 }).start();
