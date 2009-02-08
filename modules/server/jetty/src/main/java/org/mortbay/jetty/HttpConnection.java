@@ -532,14 +532,18 @@ public class HttpConnection implements Connection
                     if (_out!=null)
                         _out.reopen();
 
-                    DispatcherType dispatch=DispatcherType.REQUEST;
                     if (_request._async.isInitial())
+                    {
+                        _request.setDispatcherType(DispatcherType.REQUEST);
                         _connector.customize(_endp, _request);
+                        _server.handle(this);
+                    }
                     else 
-                        dispatch=DispatcherType.ASYNC;
-                    _request.setDispatcherType(dispatch);
+                    {
+                        _request.setDispatcherType(DispatcherType.ASYNC);
+                        _server.handleAsync(this);
+                    }
 
-                    _server.handle(this);
                 }
                 catch (RetryRequest r)
                 {
