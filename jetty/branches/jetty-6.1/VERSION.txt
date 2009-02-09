@@ -11,6 +11,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-878 Removed printStackTrace from WaitingContinuation
  + JETTY-882 ChannelBayeuxListener called too many times
  + JETTY-884 Use hashcode for threadpool ID
+ + JETTY-815 Add comet support to jQuery javascript library
 
 jetty-6.1.15.rc3 28 January 2009
  + JETTY-691 System.getProperty() calls ... wrap them in doPrivileged
