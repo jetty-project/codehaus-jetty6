@@ -401,6 +401,8 @@ public class Response implements HttpServletResponse
                 String path=_connection.getRequest().getRequestURI();
                 String parent=(path.endsWith("/"))?path:URIUtil.parentPath(path);
                 location=URIUtil.canonicalPath(URIUtil.addPaths(parent,location));
+                if(location==null)
+                    throw new IllegalStateException("path cannot be above root");
                 if (!location.startsWith("/"))
                     buf.append('/');
                 buf.append(location);
