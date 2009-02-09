@@ -136,6 +136,16 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
     {
         return _logDateFormat;
     }
+    
+    public void setLogLocale(Locale logLocale)
+    {
+        _logLocale = logLocale;
+    }
+    
+    public Locale getLogLocale()
+    {
+        return _logLocale;
+    }
 
     public void setLogTimeZone(String tz)
     {

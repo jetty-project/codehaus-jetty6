@@ -57,6 +57,7 @@ Jetty-7.0-SNAPSHOT
  + JETTY-861 switched buffer pools to ThreadLocal implementation
  + JETTY-862 EncodedHttpURI ignores given encoding in constructor
  + JETTY-866 jetty-client test case fix
+ + JETTY-869 NCSARequestLog locale config
  + JETTY-871 jetty-client expires() NPE race condition fixed
  + JETTY-876 Added new BlockingArrayQueue and new QueuedThreadPool
  
