@@ -8,39 +8,6 @@
   <artifactId>jetty-servlet-tester</artifactId>
   <packaging>jar</packaging>
   <name>Jetty Extra :: Servlet Tester</name>
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copyfiles</id>
-            <phase>install</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <tasks>
-                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}" todir="../../../lib/ext" />
-              </tasks>
-            </configuration>
-          </execution>
-          <execution>
-            <id>clean</id>
-            <phase>clean</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <tasks>
-                <delete failonerror="false" file="../../../lib/ext/${project.artifactId}-${project.version}.${project.packaging}" />
-              </tasks>
-            </configuration>
-          </execution>		  
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
