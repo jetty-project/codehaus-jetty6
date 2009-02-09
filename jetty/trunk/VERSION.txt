@@ -47,6 +47,7 @@ Jetty-7.0-SNAPSHOT
  + JETTY-832 More UrlDecoded handling in relation to JETTY-825
  + JETTY-834 Configure DTD does not allow <Map> children
  + JETTY-837 Response headers set via filter are ignored for static resources
+ + JETTY-840 add default mime types to *.htc and *.pps
  + JETTY-841 Duplicate messages when sending private message to yourself with cometd chat demo
  + JETTY-842 NPE in jetty client when no path component
  + JETTY-843 META-INF/MANIFEST.MF is not present in unpacked webapp
