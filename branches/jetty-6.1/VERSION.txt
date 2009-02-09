@@ -5,6 +5,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-879 Support extra properties in jQuery comet implementation
  + JETTY-802 Modify the default error pages to make association with Jetty clearer
  + JETTY-869 NCSARequestLog locale config
+ + JETTY-870 NullPointerException in Response when performing redirect to wrong relative URL
  + JETTY-878 Removed printStackTrace from WaitingContinuation
  + JETTY-882 ChannelBayeuxListener called too many times
  + JETTY-884 Use hashcode for threadpool ID
