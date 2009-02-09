@@ -18,9 +18,12 @@ package org.mortbay.jetty.plugin;
 
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -128,12 +131,23 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      */
     protected String reload;
     
-    
+    /**
+     * File containing system properties to be set before execution
+     * 
+     * Note that these properties will NOT override System properties
+     * that have been set on the command line, by the JVM, or directly 
+     * in the POM via systemProperties. Optional.
+     * 
+     * @parameter expression="${jetty.systemPropertiesFile}"
+     */
+    protected File systemPropertiesFile;
+
     /**
      * System properties to set before execution. 
      * Note that these properties will NOT override System properties 
-     * that have been set on the command line or by the JVM. Optional.
-     * @parameter 
+     * that have been set on the command line or by the JVM. They WILL 
+     * override System properties that have been set via systemPropertiesFile.
+     * Optional.
      */
     protected SystemProperties systemProperties;
     
@@ -269,6 +283,53 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         return this.scanIntervalSeconds;
     }
 
+    /**
+     * @return returns the path to the systemPropertiesFile
+     */
+    public File getSystemPropertiesFile()
+    {
+        return this.systemPropertiesFile;
+    }
+    
+    public void setSystemPropertiesFile(File file) throws Exception
+    {
+        this.systemPropertiesFile = file;
+        FileInputStream propFile = new FileInputStream(systemPropertiesFile);
+        Properties properties = new Properties();
+        properties.load(propFile);
+        
+        if (this.systemProperties == null )
+            this.systemProperties = new SystemProperties();
+        
+        for (Enumeration keys = properties.keys(); keys.hasMoreElements();  )
+        {
+            String key = (String)keys.nextElement();
+            if ( ! systemProperties.containsSystemProperty(key) )
+            {
+                SystemProperty prop = new SystemProperty();
+                prop.setKey(key);
+                prop.setValue(properties.getProperty(key));
+                
+                this.systemProperties.setSystemProperty(prop);
+            }
+        }
+        
+    }
+    
+    public void setSystemProperties(SystemProperties systemProperties)
+    {
+        if (this.systemProperties == null)
+            this.systemProperties = systemProperties;
+        else
+        {
+            Iterator itor = systemProperties.getSystemProperties().iterator();
+            while (itor.hasNext())
+            {
+                SystemProperty prop = (SystemProperty)itor.next();
+                this.systemProperties.setSystemProperty(prop);
+            }   
+        }
+    }
 
     public File getJettyXmlFile ()
     {
