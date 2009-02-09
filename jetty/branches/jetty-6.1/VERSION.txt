@@ -12,6 +12,8 @@ jetty-6.1-SNAPSHOT
  + JETTY-882 ChannelBayeuxListener called too many times
  + JETTY-884 Use hashcode for threadpool ID
  + JETTY-815 Add comet support to jQuery javascript library
+ + JETTY-887 Split configuration and handshaking in jquery comet
+ + JETTY-888 Fix abort in case of multiple outstanding connections
 
 jetty-6.1.15.rc3 28 January 2009
  + JETTY-691 System.getProperty() calls ... wrap them in doPrivileged
