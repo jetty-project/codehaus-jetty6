@@ -11,39 +11,6 @@
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>clean</id>
-            <phase>clean</phase>
-            <goals>
-              <goal>run</goal>
-            </goals> 
-            <configuration>
-              <tasks>
-                <delete failonerror="false" includeemptydirs="true">
-                  <fileset dir="../../../lib/annotations/">
-                    <include name="${project.artifactId}.jar" />
-                  </fileset>
-                </delete>
-              </tasks>
-            </configuration>
-          </execution>
-          <execution>
-            <id>copyjar</id>
-            <phase>install</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <tasks>
-                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../../lib/annotations/${project.artifactId}-${project.version}.${project.packaging}" />
-              </tasks>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <version>1.4.2</version>
@@ -74,23 +41,6 @@
             <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
           </archive>
         </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-deps</id>
-            <phase>install</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <excludeGroupIds>javax.mail,javax.activation,junit</excludeGroupIds>
-              <excludeArtifactIds>jetty-util,jetty,jetty-jndi,jetty-plus,servlet-api</excludeArtifactIds>
-              <outputDirectory>../../../lib/annotations</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
