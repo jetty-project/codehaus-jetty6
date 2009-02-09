@@ -1,0 +1,1252 @@
+Index: modules/extra/jetty-servlet/src/test/java/org/mortbay/servlet/QoSFilterTest.java
+===================================================================
+--- modules/extra/jetty-servlet/src/test/java/org/mortbay/servlet/QoSFilterTest.java	(revision 3825)
++++ modules/extra/jetty-servlet/src/test/java/org/mortbay/servlet/QoSFilterTest.java	(working copy)
+@@ -87,6 +87,7 @@
+     public void testBlockingQosFilter() throws Exception
+     {
+         FilterHolder holder = new FilterHolder(QoSFilter2.class);
++        holder.setSuspendSupported(true);
+         holder.setInitParameter(QoSFilter.MAX_REQUESTS_INIT_PARAM, ""+MAX_QOS);
+         _tester.getContext().getServletHandler().addFilterWithMapping(holder,"/*",Handler.REQUEST);
+ 
+@@ -103,6 +104,7 @@
+     public void testQosFilter() throws Exception
+     {    
+         FilterHolder holder = new FilterHolder(QoSFilter2.class);
++        holder.setSuspendSupported(true);
+         holder.setInitParameter(QoSFilter.MAX_REQUESTS_INIT_PARAM, ""+MAX_QOS);
+         _tester.getContext().getServletHandler().addFilterWithMapping(holder,"/*",Handler.REQUEST);
+         
+@@ -189,6 +191,7 @@
+     
+     public static class TestServlet extends HttpServlet implements Servlet
+     {
++        private int _count;
+         private static int __sleepers;
+         private static int __maxSleepers;
+          
+@@ -207,6 +210,7 @@
+ 
+                 synchronized(TestServlet.class)
+                 {
++                    System.err.println(_count++);
+                     __sleepers--;
+                     if(__sleepers > __maxSleepers)
+                         __maxSleepers = __sleepers;
+Index: modules/extra/jetty-servlet/src/main/java/org/mortbay/servlet/GzipFilter.java
+===================================================================
+--- modules/extra/jetty-servlet/src/main/java/org/mortbay/servlet/GzipFilter.java	(revision 3825)
++++ modules/extra/jetty-servlet/src/main/java/org/mortbay/servlet/GzipFilter.java	(working copy)
+@@ -64,7 +64,7 @@
+ {
+     protected Set _mimeTypes;
+     protected int _bufferSize=8192;
+-    protected int _minGzipSize=0;
++    protected int _minGzipSize=1;
+     protected Set _excluded;
+     
+     public void init(FilterConfig filterConfig) throws ServletException
+@@ -131,13 +131,16 @@
+             }
+             finally
+             {
+-                if (exceptional && !response.isCommitted())
++                if (!request.isSuspended())
+                 {
+-                    wrappedResponse.resetBuffer();
+-                    wrappedResponse.noGzip();
++                    if (exceptional && !response.isCommitted())
++                    {
++                        wrappedResponse.resetBuffer();
++                        wrappedResponse.noGzip();
++                    }
++                    else
++                        wrappedResponse.finish();
+                 }
+-                else
+-                    wrappedResponse.finish();
+             }
+         }
+         else
+@@ -203,6 +206,30 @@
+                 _gzStream.setContentLength(length);
+         }
+         
++        public void addHeader(String name, String value)
++        {
++            if ("content-length".equalsIgnoreCase(name))
++            {
++                _contentLength=Long.parseLong(value);
++                if (_gzStream!=null)
++                    _gzStream.setContentLength(_contentLength);
++            }
++            else if ("content-type".equalsIgnoreCase(name))
++            {   
++                setContentType(value);
++            }
++            else if ("content-encoding".equalsIgnoreCase(name))
++            {   
++                super.addHeader(name,value);
++                if (!isCommitted())
++                {
++                    noGzip();
++                }
++            }
++            else
++                super.addHeader(name,value);
++        }
++
+         public void setHeader(String name, String value)
+         {
+             if ("content-length".equalsIgnoreCase(name))
+Index: modules/extra/jetty-servlet/src/main/java/org/mortbay/servlet/QoSFilter.java
+===================================================================
+--- modules/extra/jetty-servlet/src/main/java/org/mortbay/servlet/QoSFilter.java	(revision 3825)
++++ modules/extra/jetty-servlet/src/main/java/org/mortbay/servlet/QoSFilter.java	(working copy)
+@@ -114,7 +114,7 @@
+         boolean accepted=false;
+         try
+         {
+-            if (request.isInitial() || request.getAttribute(_suspended)==null)
++            if (request.getAttribute(_suspended)==null)
+             {
+                 accepted=_passes.tryAcquire(_waitMs,TimeUnit.MILLISECONDS);
+                 if (accepted)
+@@ -140,7 +140,7 @@
+                 if (suspended.booleanValue())
+                 {
+                     request.setAttribute(_suspended,Boolean.FALSE);
+-                    if (request.isResumed())
++                    if (request.getAttribute("javax.servlet.resumed")==Boolean.TRUE)
+                     {
+                         _passes.acquire();
+                         accepted=true;
+Index: modules/extra/jetty-servlet-tester/src/main/java/org/mortbay/jetty/testing/ServletTester.java
+===================================================================
+--- modules/extra/jetty-servlet-tester/src/main/java/org/mortbay/jetty/testing/ServletTester.java	(revision 3825)
++++ modules/extra/jetty-servlet-tester/src/main/java/org/mortbay/jetty/testing/ServletTester.java	(working copy)
+@@ -180,9 +180,7 @@
+             else
+                 connector.open();
+ 
+-            return "http://"+(localhost?"127.0.0.1":
+-                InetAddress.getLocalHost().getHostAddress()    
+-            )+":"+connector.getLocalPort();
++            return "http://127.0.0.1:"+connector.getLocalPort();
+         }
+    }
+ 
+Index: modules/extra/cometd/demo/src/main/java/org/cometd/demo/CometdDemo.java
+===================================================================
+--- modules/extra/cometd/demo/src/main/java/org/cometd/demo/CometdDemo.java	(revision 3825)
++++ modules/extra/cometd/demo/src/main/java/org/cometd/demo/CometdDemo.java	(working copy)
+@@ -28,6 +28,7 @@
+ import org.mortbay.jetty.nio.SelectChannelConnector;
+ import org.mortbay.jetty.ssl.SslSocketConnector;
+ import org.mortbay.jetty.servlet.Context;
++import org.mortbay.jetty.servlet.FilterHolder;
+ import org.mortbay.jetty.servlet.ServletHolder;
+ import org.mortbay.resource.Resource;
+ import org.mortbay.resource.ResourceCollection;
+@@ -94,6 +95,9 @@
+         // context.addServlet(com.acme.SessionDump.class,"/session");
+         // context.addServlet(com.acme.Dump.class,"/dump");
+         
++	FilterHolder filter_holder = context.addFilter("org.mortbay.servlet.GzipFilter","/*",0);
++	filter_holder.setSuspendSupported(true);
++	
+         // Cometd servlet
+         SuspendingCometdServlet cometd_servlet=new SuspendingCometdServlet();
+         ServletHolder cometd_holder = new ServletHolder(cometd_servlet);
+@@ -104,6 +108,7 @@
+         cometd_holder.setInitParameter("multiFrameInterval","1500");
+         cometd_holder.setInitParameter("directDeliver","true");
+         cometd_holder.setInitParameter("logLevel","1");
++        cometd_holder.setSuspendSupported(true);
+         
+         context.addServlet(cometd_holder, "/cometd/*");
+         context.addServlet("org.mortbay.jetty.servlet.DefaultServlet", "/");
+Index: modules/extra/jetty-client/src/test/java/org/mortbay/proxy/AsyncProxyServer.java
+===================================================================
+--- modules/extra/jetty-client/src/test/java/org/mortbay/proxy/AsyncProxyServer.java	(revision 0)
++++ modules/extra/jetty-client/src/test/java/org/mortbay/proxy/AsyncProxyServer.java	(revision 0)
+@@ -0,0 +1,30 @@
++package org.mortbay.proxy;
++
++import org.mortbay.jetty.Connector;
++import org.mortbay.jetty.Server;
++import org.mortbay.jetty.nio.SelectChannelConnector;
++import org.mortbay.jetty.servlet.FilterHolder;
++import org.mortbay.jetty.servlet.ServletHandler;
++import org.mortbay.jetty.servlet.ServletHolder;
++
++public class AsyncProxyServer
++{
++    public static void main(String[] args)
++        throws Exception
++    {
++        Server server = new Server();
++        Connector connector=new SelectChannelConnector();
++        connector.setPort(8888);
++        server.setConnectors(new Connector[]{connector});
++        
++        ServletHandler handler=new ServletHandler();
++        server.setHandler(handler);
++        
++        FilterHolder gzip = handler.addFilterWithMapping("org.mortbay.servlet.GzipFilter","/*",0);
++        ServletHolder proxy = handler.addServletWithMapping("org.mortbay.proxy.AsyncProxyServlet","/");
++        
++        
++        server.start();
++        server.join();
++    }
++}
+
+Property changes on: modules/extra/jetty-client/src/test/java/org/mortbay/proxy/AsyncProxyServer.java
+___________________________________________________________________
+Added: svn:eol-style
+   + native
+
+Index: modules/extra/jetty-client/src/main/java/org/mortbay/proxy/AsyncProxyServlet.java
+===================================================================
+--- modules/extra/jetty-client/src/main/java/org/mortbay/proxy/AsyncProxyServlet.java	(revision 3825)
++++ modules/extra/jetty-client/src/main/java/org/mortbay/proxy/AsyncProxyServlet.java	(working copy)
+@@ -116,179 +116,171 @@
+             final InputStream in=request.getInputStream();
+             final OutputStream out=response.getOutputStream();
+ 
+-            if (request.isInitial())
++            if (request.getAttribute("javax.servlet.timeout")==Boolean.TRUE)
+             {
+-                String uri=request.getRequestURI();
+-                if (request.getQueryString()!=null)
+-                    uri+="?"+request.getQueryString();
++                response.sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT);
++                return;
++            }
+ 
+-                HttpExchange exchange = new HttpExchange()
++            String uri=request.getRequestURI();
++            if (request.getQueryString()!=null)
++                uri+="?"+request.getQueryString();
++
++            HttpExchange exchange = new HttpExchange()
++            {
++                protected void onResponseComplete() throws IOException
+                 {
+-                    protected void onRequestCommitted() throws IOException
+-                    {
+-                    }
++                    out.close();
++                    request.complete();
++                }
+ 
+-                    protected void onRequestComplete() throws IOException
++                protected void onResponseContent(Buffer content) throws IOException
++                {
++                    content.writeTo(out);
++                }
++
++                protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
++                {
++                    if (reason!=null && reason.length()>0)
++                        response.setStatus(status,reason.toString());
++                    else
++                        response.setStatus(status);
++                }
++
++                protected void onResponseHeader(Buffer name, Buffer value) throws IOException
++                {
++                    String s = name.toString().toLowerCase();
++                    if (!_DontProxyHeaders.contains(s))
++                        response.addHeader(name.toString(),value.toString());
++                }
++
++                protected void onConnectionFailed(Throwable ex)
++                {
++                    onException(ex);
++                }
++
++                protected void onException(Throwable ex)
++                {
++                    if (ex instanceof EofException)
+                     {
++                        Log.ignore(ex);
++                        return;
+                     }
+ 
+-                    protected void onResponseComplete() throws IOException
++                    try
+                     {
++                        Log.warn(ex.toString());
++                        Log.debug(ex);
++                        if (!response.isCommitted())
++                            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                         request.complete();
+                     }
+-
+-                    protected void onResponseContent(Buffer content) throws IOException
++                    catch(EofException e)
+                     {
+-                        content.writeTo(out);
++                        Log.ignore(e);
+                     }
+-
+-                    protected void onResponseHeaderComplete() throws IOException
++                    catch(IOException e)
+                     {
++                        Log.warn(e.toString());
++                        Log.debug(e);
+                     }
++                }
+ 
+-                    protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
++                protected void onExpire()
++                {
++                    try
+                     {
+-                        if (reason!=null && reason.length()>0)
+-                            response.setStatus(status,reason.toString());
+-                        else
+-                            response.setStatus(status);
++                        if (!response.isCommitted())
++                            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
++                        request.complete();
+                     }
+-
+-                    protected void onResponseHeader(Buffer name, Buffer value) throws IOException
++                    catch(EofException e)
+                     {
+-                        String s = name.toString().toLowerCase();
+-                        if (!_DontProxyHeaders.contains(s))
+-                            response.addHeader(name.toString(),value.toString());
++                        Log.ignore(e);
+                     }
+-
+-                    protected void onConnectionFailed(Throwable ex)
++                    catch(IOException e)
+                     {
+-                        onException(ex);
++                        Log.warn(e.toString());
++                        Log.debug(e);
+                     }
++                }
+ 
+-                    protected void onException(Throwable ex)
+-                    {
+-                        if (ex instanceof EofException)
+-                        {
+-                            Log.ignore(ex);
+-                            return;
+-                        }
++            };
+ 
+-                        try
+-                        {
+-                            Log.warn(ex.toString());
+-                            Log.debug(ex);
+-                            if (!response.isCommitted())
+-                                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+-                            request.complete();
+-                        }
+-                        catch(EofException e)
+-                        {
+-                            Log.ignore(e);
+-                        }
+-                        catch(IOException e)
+-                        {
+-                            Log.warn(e.toString());
+-                            Log.debug(e);
+-                        }
+-                    }
++            exchange.setScheme(HttpSchemes.HTTPS.equals(request.getScheme())?HttpSchemes.HTTPS_BUFFER:HttpSchemes.HTTP_BUFFER);
++            exchange.setMethod(request.getMethod());
++            exchange.setURI(uri);
+ 
+-                    protected void onExpire()
+-                    {
+-                        try
+-                        {
+-                            if (!response.isCommitted())
+-                                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+-                            request.complete();
+-                        }
+-                        catch(EofException e)
+-                        {
+-                            Log.ignore(e);
+-                        }
+-                        catch(IOException e)
+-                        {
+-                            Log.warn(e.toString());
+-                            Log.debug(e);
+-                        }
+-                    }
++            exchange.setVersion(request.getProtocol());
++            Address address=new Address(request.getServerName(),request.getServerPort());
++            exchange.setAddress(address);
+ 
+-                };
++            if (Log.isDebugEnabled())
++                Log.debug("PROXY TO http://"+address.getHost()+":"+address.getPort()+uri);
+ 
+-                exchange.setScheme(HttpSchemes.HTTPS.equals(request.getScheme())?HttpSchemes.HTTPS_BUFFER:HttpSchemes.HTTP_BUFFER);
+-                exchange.setMethod(request.getMethod());
+-                exchange.setURI(uri);
+ 
+-                exchange.setVersion(request.getProtocol());
+-                Address address=new Address(request.getServerName(),request.getServerPort());
+-                exchange.setAddress(address);
++            // check connection header
++            String connectionHdr = request.getHeader("Connection");
++            if (connectionHdr!=null)
++            {
++                connectionHdr=connectionHdr.toLowerCase();
++                if (connectionHdr.indexOf("keep-alive")<0  &&
++                        connectionHdr.indexOf("close")<0)
++                    connectionHdr=null;
++            }
+ 
+-                if (Log.isDebugEnabled())
+-                    Log.debug("PROXY TO http://"+address.getHost()+":"+address.getPort()+uri);
++            // copy headers
++            boolean xForwardedFor=false;
++            boolean hasContent=false;
++            long contentLength=-1;
++            Enumeration<?> enm = request.getHeaderNames();
++            while (enm.hasMoreElements())
++            {
++                // TODO could be better than this!
++                String hdr=(String)enm.nextElement();
++                String lhdr=hdr.toLowerCase();
+ 
++                if (_DontProxyHeaders.contains(lhdr))
++                    continue;
++                if (connectionHdr!=null && connectionHdr.indexOf(lhdr)>=0)
++                    continue;
+ 
+-                // check connection header
+-                String connectionHdr = request.getHeader("Connection");
+-                if (connectionHdr!=null)
++                if ("content-type".equals(lhdr))
++                    hasContent=true;
++                if ("content-length".equals(lhdr))
+                 {
+-                    connectionHdr=connectionHdr.toLowerCase();
+-                    if (connectionHdr.indexOf("keep-alive")<0  &&
+-                            connectionHdr.indexOf("close")<0)
+-                        connectionHdr=null;
++                    contentLength=request.getContentLength();
++                    exchange.setRequestHeader(HttpHeaders.CONTENT_LENGTH,TypeUtil.toString(contentLength));
++                    if (contentLength>0)
++                        hasContent=true;
+                 }
+ 
+-                // copy headers
+-                boolean xForwardedFor=false;
+-                boolean hasContent=false;
+-                long contentLength=-1;
+-                Enumeration<?> enm = request.getHeaderNames();
+-                while (enm.hasMoreElements())
++                Enumeration<?> vals = request.getHeaders(hdr);
++                while (vals.hasMoreElements())
+                 {
+-                    // TODO could be better than this!
+-                    String hdr=(String)enm.nextElement();
+-                    String lhdr=hdr.toLowerCase();
+-
+-                    if (_DontProxyHeaders.contains(lhdr))
+-                        continue;
+-                    if (connectionHdr!=null && connectionHdr.indexOf(lhdr)>=0)
+-                        continue;
+-
+-                    if ("content-type".equals(lhdr))
+-                        hasContent=true;
+-                    if ("content-length".equals(lhdr))
++                    String val = (String)vals.nextElement();
++                    if (val!=null)
+                     {
+-                        contentLength=request.getContentLength();
+-                        exchange.setRequestHeader(HttpHeaders.CONTENT_LENGTH,TypeUtil.toString(contentLength));
+-                        if (contentLength>0)
+-                            hasContent=true;
++                        exchange.setRequestHeader(lhdr,val);
++                        xForwardedFor|="X-Forwarded-For".equalsIgnoreCase(hdr);
+                     }
+-
+-                    Enumeration<?> vals = request.getHeaders(hdr);
+-                    while (vals.hasMoreElements())
+-                    {
+-                        String val = (String)vals.nextElement();
+-                        if (val!=null)
+-                        {
+-                            exchange.setRequestHeader(lhdr,val);
+-                            xForwardedFor|="X-Forwarded-For".equalsIgnoreCase(hdr);
+-                        }
+-                    }
+                 }
++            }
+ 
+-                // Proxy headers
+-                exchange.setRequestHeader("Via","1.1 (jetty)");
+-                if (!xForwardedFor)
+-                    exchange.addRequestHeader("X-Forwarded-For",
+-                            request.getRemoteAddr());
++            // Proxy headers
++            exchange.setRequestHeader("Via","1.1 (jetty)");
++            if (!xForwardedFor)
++                exchange.addRequestHeader("X-Forwarded-For",request.getRemoteAddr());
+ 
+-                if (hasContent)
+-                    exchange.setRequestContentSource(in);
++            if (hasContent)
++                exchange.setRequestContentSource(in);
+ 
+-                request.suspend();
+-                _client.send(exchange);
++            request.suspend();
++            _client.send(exchange);
+ 
+-            }
+         }
+     }
++    
+ 
+ 
+     /* ------------------------------------------------------------ */
+Index: modules/server/jetty/src/main/java/org/mortbay/jetty/servlet/FilterMapping.java
+===================================================================
+--- modules/server/jetty/src/main/java/org/mortbay/jetty/servlet/FilterMapping.java	(revision 3825)
++++ modules/server/jetty/src/main/java/org/mortbay/jetty/servlet/FilterMapping.java	(working copy)
+@@ -41,17 +41,15 @@
+      * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
+      * @return True if this filter applies
+      */
+-    boolean appliesTo(String path, int type,boolean initial)
++    boolean appliesTo(String path, int type)
+     {
+-        if (_initial==_redispatch || _initial&&initial || _redispatch&&!initial)
+-        {
+-            if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)) && _pathSpecs!=null )
+-            {
+-                for (int i=0;i<_pathSpecs.length;i++)
+-                    if (_pathSpecs[i]!=null &&  PathMap.match(_pathSpecs[i], path,true))
+-                        return true;
+-            }
+-        }
++	if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)) && _pathSpecs!=null )
++	{
++	    for (int i=0;i<_pathSpecs.length;i++)
++		if (_pathSpecs[i]!=null &&  PathMap.match(_pathSpecs[i], path,true))
++		    return true;
++	}
++        
+         return false;
+     }
+     
+@@ -61,13 +59,10 @@
+      *      {@link Handler#REQUEST}, {@link Handler#FORWARD}, {@link Handler#INCLUDE} or {@link Handler#ERROR}.
+      * @return <code>true</code> if this filter applies
+      */
+-    boolean appliesTo(int type, boolean initial)
++    boolean appliesTo(int type)
+     {
+-        if (_initial==_redispatch || _initial&&initial || _redispatch&&!initial)
+-        {
+-            if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)))
+-                return true;
+-        }
++        if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)))
++            return true;
+         return false;
+     }
+ 
+Index: modules/server/jetty/src/main/java/org/mortbay/jetty/servlet/Invoker.java
+===================================================================
+--- modules/server/jetty/src/main/java/org/mortbay/jetty/servlet/Invoker.java	(revision 3825)
++++ modules/server/jetty/src/main/java/org/mortbay/jetty/servlet/Invoker.java	(working copy)
+@@ -30,6 +30,8 @@
+ 
+ import org.mortbay.jetty.Dispatcher;
+ import org.mortbay.jetty.Handler;
++import org.mortbay.jetty.HttpConnection;
++import org.mortbay.jetty.Request;
+ import org.mortbay.jetty.handler.ContextHandler;
+ import org.mortbay.jetty.handler.HandlerWrapper;
+ import org.mortbay.log.Log;
+@@ -216,8 +218,12 @@
+         }
+         
+         if (holder!=null)
+-            holder.handle(new Request(request,included,servlet,servlet_path,path_info),
++        {
++            final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
++            holder.handle(base_request,
++                    new InvokedRequest(request,included,servlet,servlet_path,path_info),
+                           response);
++        }
+         else
+         {
+             Log.info("Can't find holder for servlet: "+servlet);
+@@ -228,14 +234,14 @@
+     }
+ 
+     /* ------------------------------------------------------------ */
+-    class Request extends HttpServletRequestWrapper
++    class InvokedRequest extends HttpServletRequestWrapper
+     {
+         String _servletPath;
+         String _pathInfo;
+         boolean _included;
+         
+         /* ------------------------------------------------------------ */
+-        Request(HttpServletRequest request,
++        InvokedRequest(HttpServletRequest request,
+                 boolean included,
+                 String name,
+                 String servletPath,
+Index: modules/server/jetty/src/main/java/org/mortbay/jetty/servlet/Holder.java
+===================================================================
+--- modules/server/jetty/src/main/java/org/mortbay/jetty/servlet/Holder.java	(revision 3825)
++++ modules/server/jetty/src/main/java/org/mortbay/jetty/servlet/Holder.java	(working copy)
+@@ -38,6 +38,7 @@
+     protected String _displayName;
+     protected Map _initParams;
+     protected boolean _extInstance;
++    protected boolean _suspendable;
+ 
+     /* ---------------------------------------------------------------- */
+     protected String _name;
+@@ -218,12 +219,26 @@
+     {
+         _servletHandler = servletHandler;
+     }
++
++    /* ------------------------------------------------------------ */
++    public void setSuspendSupported(boolean suspendable)
++    {
++        _suspendable=suspendable;
++    }
++
++    /* ------------------------------------------------------------ */
++    public boolean isSuspendSupported()
++    {
++        return _suspendable;
++    }
+     
+     /* ------------------------------------------------------------ */
+     public String toString()
+     {
+         return _name;
+     }
++    
++
+ }
+ 
+ 
+Index: modules/server/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java
+===================================================================
+--- modules/server/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(revision 3825)
++++ modules/server/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(working copy)
+@@ -14,7 +14,6 @@
+ 
+ package org.mortbay.jetty.servlet;
+ 
+-
+ import java.io.IOException;
+ import java.util.ArrayList;
+ import java.util.Arrays;
+@@ -335,7 +334,7 @@
+                     }
+                     
+                     if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
+-                        chain=getFilterChain(type, target, servlet_holder,request.isInitial());
++                        chain=getFilterChain(base_request,type, target, servlet_holder);
+                 }      
+             }
+             else
+@@ -345,7 +344,7 @@
+                 if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
+                 {
+                     base_request.setServletName(servlet_holder.getName());
+-                    chain=getFilterChain(type, null,servlet_holder,request.isInitial());
++                    chain=getFilterChain(base_request,type, null,servlet_holder);
+                 }
+             }
+ 
+@@ -362,7 +361,7 @@
+                 if (chain!=null)
+                     chain.doFilter(request, response);
+                 else 
+-                    servlet_holder.handle(request,response);
++                    servlet_holder.handle(base_request,request,response);
+             }
+             else
+                 notFound(request, response);
+@@ -474,13 +473,10 @@
+     }
+ 
+     /* ------------------------------------------------------------ */
+-    private FilterChain getFilterChain(int requestType, String pathInContext, ServletHolder servletHolder, boolean initial) 
++    private FilterChain getFilterChain(Request baseRequest,int requestType, String pathInContext, ServletHolder servletHolder) 
+     {
+         String key=pathInContext==null?servletHolder.getName():pathInContext;
+-        if (!initial)
+-            key="!"+key;
+             
+-        
+         if (_filterChainsCached && _chainCache!=null)
+         {
+             FilterChain chain = (FilterChain)_chainCache[requestType].get(key);
+@@ -497,7 +493,7 @@
+             for (int i= 0; i < _filterPathMappings.size(); i++)
+             {
+                 FilterMapping mapping = (FilterMapping)_filterPathMappings.get(i);
+-                if (mapping.appliesTo(pathInContext, requestType,initial))
++                if (mapping.appliesTo(pathInContext, requestType))
+                     filters= LazyList.add(filters, mapping.getFilterHolder());
+             }
+         }
+@@ -512,7 +508,7 @@
+                 for (int i=0; i<LazyList.size(o);i++)
+                 {
+                     FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
+-                    if (mapping.appliesTo(requestType,initial))
++                    if (mapping.appliesTo(requestType))
+                         filters=LazyList.add(filters,mapping.getFilterHolder());
+                 }
+                 
+@@ -520,7 +516,7 @@
+                 for (int i=0; i<LazyList.size(o);i++)
+                 {
+                     FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
+-                    if (mapping.appliesTo(requestType,initial))
++                    if (mapping.appliesTo(requestType))
+                         filters=LazyList.add(filters,mapping.getFilterHolder());
+                 }
+             }
+@@ -539,7 +535,7 @@
+ 	    _chainCache[requestType].put(key,chain);
+         }
+         else if (LazyList.size(filters) > 0)
+-            chain = new Chain(filters, servletHolder);
++            chain = new Chain(baseRequest,filters, servletHolder);
+     
+         return chain;
+     }
+@@ -1109,7 +1105,27 @@
+                 if (Log.isDebugEnabled())
+                     Log.debug("call filter " + _filterHolder);
+                 Filter filter= _filterHolder.getFilter();
+-                filter.doFilter(request, response, _next);
++                if (_filterHolder.isSuspendSupported())
++                    filter.doFilter(request, response, _next);
++                else
++                {
++                    final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
++                    final boolean suspendable=base_request.isSuspendSupported();
++                    if (suspendable)
++                    {
++                        try
++                        {
++                            base_request.setSuspendSupported(false);
++                            filter.doFilter(request, response, _next);
++                        }
++                        finally
++                        {
++                            base_request.setSuspendSupported(true);
++                        }
++                    }
++                    else
++                        filter.doFilter(request, response, _next);
++                }
+                 return;
+             }
+ 
+@@ -1118,7 +1134,8 @@
+             {
+                 if (Log.isDebugEnabled())
+                     Log.debug("call servlet " + _servletHolder);
+-                _servletHolder.handle(request, response);
++                final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
++                _servletHolder.handle(base_request,request, response);
+             }
+             else // Not found
+                 notFound((HttpServletRequest)request, (HttpServletResponse)response);
+@@ -1138,13 +1155,15 @@
+     /* ------------------------------------------------------------ */
+     private class Chain implements FilterChain
+     {
++        final Request _baseRequest;
++        final Object _chain;
++        final ServletHolder _servletHolder;
+         int _filter= 0;
+-        Object _chain;
+-        ServletHolder _servletHolder;
+ 
+         /* ------------------------------------------------------------ */
+-        Chain(Object filters, ServletHolder servletHolder)
++        Chain(Request baseRequest, Object filters, ServletHolder servletHolder)
+         {
++            _baseRequest=baseRequest;
+             _chain= filters;
+             _servletHolder= servletHolder;
+         }
+@@ -1161,7 +1180,24 @@
+                 FilterHolder holder= (FilterHolder)LazyList.get(_chain, _filter++);
+                 if (Log.isDebugEnabled()) Log.debug("call filter " + holder);
+                 Filter filter= holder.getFilter();
+-                filter.doFilter(request, response, this);
++                
++                if (holder.isSuspendSupported() || !_baseRequest.isSuspendSupported())
++                {
++                    filter.doFilter(request, response, this);
++                }
++                else
++                {
++                    try
++                    {
++                        _baseRequest.setSuspendSupported(false);
++                        filter.doFilter(request, response, this);
++                    }
++                    finally
++                    {
++                        _baseRequest.setSuspendSupported(true);
++                    }
++                }
++                    
+                 return;
+             }
+ 
+@@ -1169,7 +1205,7 @@
+             if (_servletHolder != null)
+             {
+                 if (Log.isDebugEnabled()) Log.debug("call servlet " + _servletHolder);
+-                _servletHolder.handle(request, response);
++                _servletHolder.handle(_baseRequest,request, response);
+             }
+             else // Not found
+                 notFound((HttpServletRequest)request, (HttpServletResponse)response);
+Index: modules/server/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHolder.java
+===================================================================
+--- modules/server/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHolder.java	(revision 3825)
++++ modules/server/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHolder.java	(working copy)
+@@ -462,7 +462,8 @@
+     /* ------------------------------------------------------------ */
+     /** Service a request with this servlet.
+      */
+-    public void handle(ServletRequest request,
++    public void handle(Request baseRequest,
++                       ServletRequest request,
+                        ServletResponse response)
+         throws ServletException,
+                UnavailableException,
+@@ -483,7 +484,7 @@
+         // Service the request
+         boolean servlet_error=true;
+         Principal user=null;
+-        Request base_request=null;
++        boolean suspendable = baseRequest.isSuspendSupported();
+         try
+         {
+             // Handle aliased path
+@@ -494,11 +495,13 @@
+             // Handle run as
+             if (_runAs!=null && _realm!=null)
+             {
+-                base_request=HttpConnection.getCurrentConnection().getRequest();
+-                user=_realm.pushRole(base_request.getUserPrincipal(),_runAs);
+-                base_request.setUserPrincipal(user);
++                user=_realm.pushRole(baseRequest.getUserPrincipal(),_runAs);
++                baseRequest.setUserPrincipal(user);
+             }
+             
++            if (!isSuspendSupported())
++                baseRequest.setSuspendSupported(false);
++            
+             servlet.service(request,response);
+             servlet_error=false;
+         }
+@@ -509,11 +512,13 @@
+         }
+         finally
+         {
++            baseRequest.setSuspendSupported(suspendable);
++            
+             // pop run-as role
+-            if (_runAs!=null && _realm!=null && user!=null && base_request!=null)
++            if (_runAs!=null && _realm!=null && user!=null)
+             {
+                 user=_realm.popRole(user);
+-                base_request.setUserPrincipal(user);
++                baseRequest.setUserPrincipal(user);
+             }
+ 
+             // Handle error params.
+Index: modules/server/jetty/src/main/java/org/mortbay/jetty/Response.java
+===================================================================
+--- modules/server/jetty/src/main/java/org/mortbay/jetty/Response.java	(revision 3825)
++++ modules/server/jetty/src/main/java/org/mortbay/jetty/Response.java	(working copy)
+@@ -49,7 +49,6 @@
+ public class Response implements HttpServletResponse
+ {
+     public static final int
+-        DISABLED=-1,
+         NONE=0,
+         STREAM=1,
+         WRITER=2;
+@@ -87,8 +86,6 @@
+     private String _contentType;
+     private int _outputState;
+     private PrintWriter _writer;
+-    private boolean _disabled;
+-    private int _disabledOutputState;
+ 
+     /* ------------------------------------------------------------ */
+     /**
+@@ -240,7 +237,7 @@
+      */
+     public void sendError(int code, String message) throws IOException
+     {
+-    	if (_connection.isIncluding() || _disabled)
++    	if (_connection.isIncluding())
+     		return;
+ 
+         if (isCommitted())
+@@ -344,7 +341,7 @@
+      */
+     public void sendError(int sc) throws IOException
+     {
+-        if (sc==102 && !_disabled)
++        if (sc==102)
+             sendProcessing();
+         else
+             sendError(sc,null);
+@@ -387,7 +384,7 @@
+      */
+     public void sendRedirect(String location) throws IOException
+     {
+-    	if (_connection.isIncluding()|| _disabled)
++    	if (_connection.isIncluding())
+     		return;
+ 
+         if (location==null)
+@@ -424,7 +421,7 @@
+      */
+     public void setDateHeader(String name, long date)
+     {
+-        if (!_connection.isIncluding()&& !_disabled)
++        if (!_connection.isIncluding())
+             _connection.getResponseFields().putDateField(name, date);
+     }
+ 
+@@ -434,7 +431,7 @@
+      */
+     public void addDateHeader(String name, long date)
+     {
+-        if (!_connection.isIncluding()&& !_disabled)
++        if (!_connection.isIncluding())
+             _connection.getResponseFields().addDateField(name, date);
+     }
+ 
+@@ -451,16 +448,13 @@
+             else
+                 return;
+         }
+-        if (!_disabled)
++        _connection.getResponseFields().put(name, value);
++        if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
+         {
+-            _connection.getResponseFields().put(name, value);
+-            if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
+-            {
+-                if (value==null)
+-                    _connection._generator.setContentLength(-1);
+-                else
+-                    _connection._generator.setContentLength(Long.parseLong(value));
+-            }
++            if (value==null)
++                _connection._generator.setContentLength(-1);
++            else
++                _connection._generator.setContentLength(Long.parseLong(value));
+         }
+     }
+ 
+@@ -497,12 +491,9 @@
+                 return;
+         }
+ 
+-        if (!_disabled)
+-        {
+-            _connection.getResponseFields().add(name, value);
+-            if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
+-                _connection._generator.setContentLength(Long.parseLong(value));
+-        }
++        _connection.getResponseFields().add(name, value);
++        if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
++            _connection._generator.setContentLength(Long.parseLong(value));
+     }
+ 
+     /* ------------------------------------------------------------ */
+@@ -511,7 +502,7 @@
+      */
+     public void setIntHeader(String name, int value)
+     {
+-        if (!_connection.isIncluding()&& !_disabled)
++        if (!_connection.isIncluding())
+         {
+             _connection.getResponseFields().putLongField(name, value);
+             if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
+@@ -525,7 +516,7 @@
+      */
+     public void addIntHeader(String name, int value)
+     {
+-        if (!_connection.isIncluding()&& !_disabled)
++        if (!_connection.isIncluding())
+         {
+             _connection.getResponseFields().addLongField(name, value);
+             if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
+@@ -550,7 +541,7 @@
+     {
+         if (sc<=0)
+             throw new IllegalArgumentException();
+-        if (!_connection.isIncluding() && !_disabled)
++        if (!_connection.isIncluding())
+         {
+             _status=sc;
+             _reason=sm;
+@@ -583,9 +574,6 @@
+      */
+     public ServletOutputStream getOutputStream() throws IOException
+     {
+-        if (_outputState==DISABLED)
+-            return __nullServletOut;
+-
+         if (_outputState!=NONE && _outputState!=STREAM)
+             throw new IllegalStateException("WRITER");
+ 
+@@ -605,9 +593,6 @@
+      */
+     public PrintWriter getWriter() throws IOException
+     {
+-        if (_outputState==DISABLED)
+-            return __nullPrintWriter;
+-
+         if (_outputState!=NONE && _outputState!=WRITER)
+             throw new IllegalStateException("STREAM");
+ 
+@@ -642,7 +627,7 @@
+      */
+     public void setCharacterEncoding(String encoding)
+     {
+-    	if (_connection.isIncluding() || _disabled)
++    	if (_connection.isIncluding())
+     		return;
+ 
+         // TODO throw unsupported encoding exception ???
+@@ -721,7 +706,7 @@
+         // Protect from setting after committed as default handling
+         // of a servlet HEAD request ALWAYS sets _content length, even
+         // if the getHandling committed the response!
+-        if (isCommitted() || _connection.isIncluding() || _disabled)
++        if (isCommitted() || _connection.isIncluding())
+             return;
+         _connection._generator.setContentLength(len);
+         if (len>=0)
+@@ -755,7 +740,7 @@
+         // Protect from setting after committed as default handling
+         // of a servlet HEAD request ALWAYS sets _content length, even
+         // if the getHandling committed the response!
+-        if (isCommitted() || _connection.isIncluding() || _disabled)
++        if (isCommitted() || _connection.isIncluding())
+         	return;
+         _connection._generator.setContentLength(len);
+         _connection.getResponseFields().putLongField(HttpHeaders.CONTENT_LENGTH, len);
+@@ -767,7 +752,7 @@
+      */
+     public void setContentType(String contentType)
+     {
+-        if (isCommitted() || _connection.isIncluding() || _disabled)
++        if (isCommitted() || _connection.isIncluding())
+             return;
+ 
+         // Yes this method is horribly complex.... but there are lots of special cases and
+@@ -933,8 +918,6 @@
+      */
+     public void setBufferSize(int size)
+     {
+-        if (_disabled)
+-            return;
+         if (isCommitted() || getContentCount()>0)
+             throw new IllegalStateException("Committed or content written");
+         _connection.getGenerator().increaseContentBufferSize(size);
+@@ -955,8 +938,7 @@
+      */
+     public void flushBuffer() throws IOException
+     {
+-        if (!_disabled)
+-            _connection.flushResponse();
++        _connection.flushResponse();
+     }
+ 
+     /* ------------------------------------------------------------ */
+@@ -1013,8 +995,6 @@
+         _locale=null;
+         _outputState=NONE;
+         _writer=null;
+-        _disabled=false;
+-        _disabledOutputState=NONE;
+     }
+ 
+     /* ------------------------------------------------------------ */
+@@ -1023,8 +1003,6 @@
+      */
+     public void resetBuffer()
+     {
+-        if (_disabled)
+-            return;
+         if (isCommitted())
+             throw new IllegalStateException("Committed");
+         _connection.getGenerator().resetBuffer();
+@@ -1046,7 +1024,7 @@
+      */
+     public void setLocale(Locale locale)
+     {
+-        if (locale == null || isCommitted() ||_connection.isIncluding() || _disabled)
++        if (locale == null || isCommitted() ||_connection.isIncluding())
+             return;
+ 
+         _locale = locale;
+@@ -1151,37 +1129,10 @@
+         return "HTTP/1.1 "+_status+" "+ (_reason==null?"":_reason) +System.getProperty("line.separator")+
+         _connection.getResponseFields().toString();
+     }
+-
++    
+     /* ------------------------------------------------------------ */
+-    public void disable()
+-    {
+-        if (!_disabled)
+-            _disabledOutputState=_outputState;
+-        _disabled=true;
+-        _outputState=DISABLED;
+-
+-    }
+-
+-
+     /* ------------------------------------------------------------ */
+-    public void enable()
+-    {
+-        if (_disabled)
+-            _outputState=_disabledOutputState;
+-        _disabled=false;
+-    }
+-
+-
+     /* ------------------------------------------------------------ */
+-    public boolean isDisabled()
+-    {
+-        return _disabled;
+-    }
+-
+-
+-    /* ------------------------------------------------------------ */
+-    /* ------------------------------------------------------------ */
+-    /* ------------------------------------------------------------ */
+     private static class NullOutput extends ServletOutputStream
+     {
+         public void write(int b) throws IOException
+Index: modules/server/jetty-webapp/src/main/java/org/mortbay/jetty/webapp/WebXmlConfiguration.java
+===================================================================
+--- modules/server/jetty-webapp/src/main/java/org/mortbay/jetty/webapp/WebXmlConfiguration.java	(revision 3825)
++++ modules/server/jetty-webapp/src/main/java/org/mortbay/jetty/webapp/WebXmlConfiguration.java	(working copy)
+@@ -544,6 +544,8 @@
+             holder.setInitParameter(pname, pvalue);
+         }
+         
++        XmlParser.Node suspendable=node.get("suspend-supported");
++        holder.setSuspendSupported(suspendable!=null);
+     }
+ 
+     /* ------------------------------------------------------------ */
+@@ -586,17 +588,6 @@
+             dispatcher|=Dispatcher.type(d);
+         }
+         mapping.setDispatches(dispatcher);
+-
+-        iter=node.iterator("life-cycle");
+-        while(iter.hasNext())
+-        {
+-            String l=((XmlParser.Node)iter.next()).toString(false,true);
+-            if ("initial".equalsIgnoreCase(l))
+-                mapping.setInitialLifeCycle(true);
+-            if ("redispatch".equalsIgnoreCase(l))
+-                mapping.setRedispatchLifeCycle(true);
+-        }
+-        mapping.setDispatches(dispatcher);
+         
+         _filterMappings=LazyList.add(_filterMappings,mapping);
+     }
+@@ -753,7 +744,9 @@
+             if(roleName!=null)
+                 holder.setRunAs(roleName);
+         }
+-        
++
++        XmlParser.Node suspendable=node.get("suspendable");
++        holder.setSuspendSupported(suspendable!=null);
+     }
+ 
+     /* ------------------------------------------------------------ */
+Index: modules/examples/jetty-example-webapp/src/main/webapp/WEB-INF/web.xml
+===================================================================
+--- modules/examples/jetty-example-webapp/src/main/webapp/WEB-INF/web.xml	(revision 3826)
++++ modules/examples/jetty-example-webapp/src/main/webapp/WEB-INF/web.xml	(working copy)
+@@ -15,6 +15,7 @@
+   <filter>
+     <filter-name>QoSFilter</filter-name>
+     <filter-class>org.mortbay.servlet.QoSFilter</filter-class>
++    <suspend-supported/>
+     <init-param>
+       <param-name>maxRequests</param-name>
+       <param-value>20</param-value>
+@@ -28,6 +29,7 @@
+   <filter>
+     <filter-name>MultiPart</filter-name>
+     <filter-class>org.mortbay.servlet.MultiPartFilter</filter-class>
++    <suspend-supported/>
+     <init-param>
+       <param-name>deleteFiles</param-name>
+       <param-value>true</param-value>
+@@ -41,6 +43,7 @@
+   <filter>
+     <filter-name>GzipFilter</filter-name>
+     <filter-class>org.mortbay.servlet.jetty.IncludableGzipFilter</filter-class>
++    <suspend-supported/>
+     <init-param>
+       <param-name>bufferSize</param-name>
+       <param-value>8192</param-value>
+@@ -101,6 +104,7 @@
+   <servlet>
+     <servlet-name>Dump</servlet-name>
+     <servlet-class>com.acme.Dump</servlet-class>
++    <suspend-supported/>
+     <load-on-startup>1</load-on-startup>
+     <run-as><role-name>admin</role-name></run-as>
+   </servlet>
+@@ -136,6 +140,7 @@
+   <servlet>
+     <servlet-name>Dispatch</servlet-name>
+     <servlet-class>com.acme.DispatchServlet</servlet-class>
++    <suspend-supported/>
+     <load-on-startup>1</load-on-startup>
+   </servlet>
+   
+@@ -169,6 +174,7 @@
+   <servlet>
+     <servlet-name>Chat</servlet-name>
+     <servlet-class>com.acme.ChatServlet</servlet-class>
++    <suspend-supported/>
+     <load-on-startup>1</load-on-startup>
+   </servlet>
+ 
