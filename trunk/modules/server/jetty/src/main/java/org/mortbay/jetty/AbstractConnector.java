@@ -219,7 +219,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     /**
      * @return Returns the soLingerTime.
      */
-    public long getSoLingerTime()
+    public int getSoLingerTime()
     {
         return _soLingerTime;
     }
