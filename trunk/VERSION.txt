@@ -34,6 +34,7 @@ Jetty-7.0-SNAPSHOT
  + JETTY-807 HttpTester to handle charsets
  + JETTY-808 cometd client demo run.sh
  + JETTY-809 Need a way to customize WEB-INF/lib file extensions that are added to the classpath
+ + JETTY-811 Allow configuration of system properties for the maven plugin using a file
  + JETTY-813 Simplify NCSARequestLog.java
  + JETTY-814 Add org.mortbay.jetty.client.Address.toString()
  + JETTY-816 Implement reconnect on java bayeux client
