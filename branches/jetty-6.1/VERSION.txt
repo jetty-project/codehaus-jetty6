@@ -1,6 +1,7 @@
 jetty-6.1-SNAPSHOT
  + JETTY-496 Support inetd/xinetd through use of System.inheritedChannel()
  + JETTY-713 Expose additional AbstractConnector methods via MBean
+ + JETTY-811 Allow configuration of system properties for the maven plugin using a file
  + JETTY-840 add default mime types to *.htc and *.pps
  + JETTY-872 Handshake handler calls wrong extension callback
  + JETTY-879 Support extra properties in jQuery comet implementation
