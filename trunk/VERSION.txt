@@ -55,6 +55,7 @@ Jetty-7.0-SNAPSHOT
  + JETTY-842 NPE in jetty client when no path component
  + JETTY-843 META-INF/MANIFEST.MF is not present in unpacked webapp
  + JETTY-844 Replace reflection with direct invocation in Slf4jLog
+ + JETTY-848 Temporary folder not fully cleanup after stop (via Sweeper)
  + JETTY-854 JNDI scope does not work with applications in a .war
  + JETTY-859 MultiPartFilter ignores the query string parameters
  + JETTY-861 switched buffer pools to ThreadLocal implementation
