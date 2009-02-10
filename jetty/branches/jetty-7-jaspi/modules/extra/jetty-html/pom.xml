@@ -30,37 +30,6 @@
         </excludes>
       </testResource>
     </testResources>
-    <plugins>
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>clean</id>
-            <phase>clean</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <tasks>
-                <delete failonerror="false" file="../../../lib/ext/${project.artifactId}-${project.version}.${project.packaging}" />
-              </tasks>
-            </configuration>
-          </execution>
-          <execution>
-            <id>copyjar</id>
-            <phase>install</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <tasks>
-                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}" todir="../../../lib/ext/" />
-              </tasks>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
   </build>
   <dependencies>
     <dependency>

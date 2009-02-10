@@ -30,6 +30,7 @@ import org.mortbay.jetty.HttpGenerator;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpParser;
 import org.mortbay.jetty.HttpVersions;
+import org.mortbay.jetty.MimeTypes;
 import org.mortbay.util.ByteArrayOutputStream2;
 
 /* ------------------------------------------------------------ */
@@ -66,8 +67,17 @@ public class HttpTester
     protected ByteArrayOutputStream2 _parsedContent;
     protected byte[] _genContent;
     
+    private String _charset, _defaultCharset;
+    private Buffer _contentType;
+    
     public HttpTester()
     {
+        this("UTF-8");
+    }
+    
+    public HttpTester(String charset)
+    {
+        _defaultCharset = charset;
     }
     
     public void reset()
@@ -81,6 +91,39 @@ public class HttpTester
          _parsedContent=null;
          _genContent=null;
     }
+    
+    private String getString(Buffer buffer)
+    {
+        return getString(buffer.asArray());
+    }
+    
+    private String getString(byte[] b)
+    {
+        if(_charset==null)
+            return new String(b);
+        try
+        {
+            return new String(b, _charset);
+        }
+        catch(Exception e)
+        {
+            return new String(b);
+        }
+    }
+    
+    private byte[] getByteArray(String str)
+    {
+        if(_charset==null)
+            return str.getBytes();
+        try
+        {
+            return str.getBytes(_charset);
+        }
+        catch(Exception e)
+        {
+            return str.getBytes();
+        }
+    }
 
     /* ------------------------------------------------------------ */
     /**
@@ -91,19 +134,28 @@ public class HttpTester
      */
     public String parse(String rawHTTP) throws IOException
     {
-        ByteArrayBuffer buf = new ByteArrayBuffer(rawHTTP);
+        _charset = _defaultCharset;
+        ByteArrayBuffer buf = new ByteArrayBuffer(getByteArray(rawHTTP));
         View view = new View(buf);
         HttpParser parser = new HttpParser(view,new PH());
         parser.parse();
-        return view.toString();
+        return getString(view.asArray());
     }
 
     /* ------------------------------------------------------------ */
     public String generate() throws IOException
     {
+        _charset = _defaultCharset;
+        _contentType = _fields.get(HttpHeaders.CONTENT_TYPE_BUFFER);
+        if(_contentType!=null)
+        {
+            String charset = MimeTypes.getCharsetFromContentType(_contentType);
+            if(charset!=null)
+                _charset = charset;
+        }
         Buffer bb=new ByteArrayBuffer(32*1024 + (_genContent!=null?_genContent.length:0));
         Buffer sb=new ByteArrayBuffer(4*1024);
-        StringEndPoint endp = new StringEndPoint();
+        StringEndPoint endp = new StringEndPoint(_charset);
         HttpGenerator generator = new HttpGenerator(new SimpleBuffers(new Buffer[]{sb,bb}),endp, sb.capacity(), bb.capacity());
         
         if (_method!=null)
@@ -213,6 +265,18 @@ public class HttpTester
     public void setVersion(String version)
     {
         _version=version;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getContentType()
+    {
+        return getString(_contentType);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getCharacterEncoding()
+    {
+        return _charset;
     }
 
     /* ------------------------------------------------------------ */
@@ -361,9 +425,9 @@ public class HttpTester
     public String getContent()
     {
         if (_parsedContent!=null)
-            return _parsedContent.toString();
+            return getString(_parsedContent.toByteArray());
         if (_genContent!=null)
-            return new String(_genContent);
+            return getString(_genContent);
         return null;
     }
     
@@ -373,7 +437,7 @@ public class HttpTester
         _parsedContent=null;
         if (content!=null)
         {
-            _genContent=content.getBytes();
+            _genContent=getByteArray(content);
             setLongHeader(HttpHeaders.CONTENT_LENGTH,_genContent.length);
         }
         else
@@ -389,17 +453,17 @@ public class HttpTester
         public void startRequest(Buffer method, Buffer url, Buffer version) throws IOException
         {
             reset();
-            _method=method.toString();
-            _uri=url.toString();
-            _version=version.toString();
+            _method=getString(method);
+            _uri=getString(url);
+            _version=getString(version);
         }
 
         public void startResponse(Buffer version, int status, Buffer reason) throws IOException
         {
             reset();
-            _version=version.toString();
+            _version=getString(version);
             _status=status;
-            _reason=reason.toString();
+            _reason=getString(reason);
         }
         
         public void parsedHeader(Buffer name, Buffer value) throws IOException
@@ -409,6 +473,13 @@ public class HttpTester
 
         public void headerComplete() throws IOException
         {
+            _contentType = _fields.get(HttpHeaders.CONTENT_TYPE_BUFFER);
+            if(_contentType!=null)
+            {
+                String charset = MimeTypes.getCharsetFromContentType(_contentType);
+                if(charset!=null)
+                    _charset = charset;
+            }
         }
 
         public void messageComplete(long contextLength) throws IOException

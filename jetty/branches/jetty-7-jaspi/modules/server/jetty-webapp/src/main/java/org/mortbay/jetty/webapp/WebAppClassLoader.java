@@ -22,6 +22,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
+import java.util.HashSet;
 import java.util.StringTokenizer;
 
 import org.mortbay.jetty.handler.ContextHandler;
@@ -56,6 +57,7 @@ public class WebAppClassLoader extends URLClassLoader
     private String _name;
     private WebAppContext _context;
     private ClassLoader _parent;
+    private HashSet<String> _extensions;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -80,6 +82,18 @@ public class WebAppClassLoader extends URLClassLoader
         _context=context;
         if (_parent==null)
             throw new IllegalArgumentException("no parent classloader!");
+        
+        _extensions = new HashSet<String>();
+        _extensions.add(".jar");
+        _extensions.add(".zip");
+        
+        String extensions = System.getProperty(WebAppClassLoader.class.getName() + ".extensions");
+        if(extensions!=null)
+        {
+            StringTokenizer tokenizer = new StringTokenizer(extensions, ",;");
+            while(tokenizer.hasMoreTokens())
+                _extensions.add(tokenizer.nextToken().trim());
+        }
         
         if (context.getExtraClasspath()!=null)
             addClassPath(context.getExtraClasspath());
@@ -183,7 +197,15 @@ public class WebAppClassLoader extends URLClassLoader
         }
     }
 
-    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param file Checks if this file type can be added to the classpath.
+     */
+    private boolean isFileSupported(String file)
+    {
+        int dot = file.lastIndexOf('.');
+        return dot!=-1 && _extensions.contains(file.substring(dot));
+    }
     
     /* ------------------------------------------------------------ */
     /** Add elements to the class path for the context from the jar and zip files found
@@ -203,7 +225,7 @@ public class WebAppClassLoader extends URLClassLoader
                 try {
                     Resource fn=lib.addPath(files[f]);
                     String fnlc=fn.getName().toLowerCase();
-                    if (fnlc.endsWith(".jar") || fnlc.endsWith(".zip"))
+                    if (isFileSupported(fnlc))
                     {
                         String jar=fn.toString();
                         jar=StringUtil.replace(jar, ",", "%2C");

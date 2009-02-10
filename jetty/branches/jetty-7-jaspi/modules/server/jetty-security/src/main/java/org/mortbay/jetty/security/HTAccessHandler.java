@@ -79,7 +79,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
      * 
      * @see org.mortbay.jetty.Handler#handle(java.lang.String,
      *      javax.servlet.http.HttpServletRequest,
-     *      javax.servlet.http.HttpServletResponse, int)
+     *      javax.servlet.http.HttpServletResponse)
      * @param authResult
      */
     /*
@@ -285,7 +285,20 @@ public class HTAccessHandler extends AbstractSecurityHandler
     {
         return ((HTAccess) constraintInfo)._requireName != null;
     }
-
+/* where did this come from in the merge?
+                // set user
+                if (user!=null)
+                {
+                    base_request.setAuthType(Constraint.__BASIC_AUTH);
+                    base_request.setUserPrincipal(getPrincipal(user, getUserRealm()));
+                }
+            }
+            
+            if (getHandler()!=null)
+            {
+                getHandler().handle(target,request,response);
+            }
+*/
     protected boolean checkWebResourcePermissions(String pathInContext, Request request, 
                                                   Response response, Object constraintInfo, UserIdentity userIdentity) throws IOException
     {

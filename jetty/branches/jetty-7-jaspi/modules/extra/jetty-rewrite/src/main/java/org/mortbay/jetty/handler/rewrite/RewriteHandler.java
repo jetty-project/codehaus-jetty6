@@ -327,7 +327,7 @@ public class RewriteHandler extends HandlerWrapper
     /* (non-Javadoc)
      * @see org.mortbay.jetty.handler.HandlerWrapper#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
     {
         if (isStarted())
         { 
@@ -336,7 +336,7 @@ public class RewriteHandler extends HandlerWrapper
             
             if (!_rules.isHandled())
             {
-                super.handle(target, request, response, dispatch);
+                super.handle(target, request, response);
             }
         }
     }

@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.Collections;
 
+import java.security.Principal;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -440,7 +442,7 @@ public class ServletHolder extends Holder
             makeUnavailable(e);
             _servlet=null;
             _config=null;
-            throw new ServletException(e);
+            throw new ServletException(this.toString(),e);
         }
         finally
         {
@@ -453,7 +455,8 @@ public class ServletHolder extends Holder
     /* ------------------------------------------------------------ */
     /** Service a request with this servlet.
      */
-    public void handle(ServletRequest request,
+    public void handle(Request baseRequest,
+                       ServletRequest request,
                        ServletResponse response)
         throws ServletException,
                UnavailableException,
@@ -473,9 +476,10 @@ public class ServletHolder extends Holder
         
         // Service the request
         boolean servlet_error=true;
-        Request base_request;
         RunAsToken oldRunAs = null;
         UserIdentity userIdentity = null;
+        Principal user=null;
+        boolean suspendable = baseRequest.isAsyncSupported();
         try
         {
             // Handle aliased path
@@ -486,10 +490,12 @@ public class ServletHolder extends Holder
             // Handle run as
             if (_runAs!=null)
             {
-                base_request=HttpConnection.getCurrentConnection().getRequest();
-                userIdentity = base_request.getUserIdentity();
+                userIdentity = baseRequest.getUserIdentity();
                 oldRunAs = userIdentity.setRunAsRole(_runAs);
             }
+            
+            if (!isAsyncSupported())
+                baseRequest.setAsyncSupported(false);
             
             servlet.service(request,response);
             servlet_error=false;
@@ -501,6 +507,8 @@ public class ServletHolder extends Holder
         }
         finally
         {
+            baseRequest.setAsyncSupported(suspendable);
+            
             // pop run-as role
             if (_runAs!=null && userIdentity!=null)
             {

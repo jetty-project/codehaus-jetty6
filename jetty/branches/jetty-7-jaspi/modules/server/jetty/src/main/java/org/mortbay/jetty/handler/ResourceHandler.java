@@ -221,7 +221,7 @@ public class ResourceHandler extends AbstractHandler
     /* 
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
     {
         Request base_request = request instanceof Request?(Request)request:HttpConnection.getCurrentConnection().getRequest();
         if (base_request.isHandled())

@@ -29,7 +29,7 @@ import org.mortbay.thread.ThreadPool;
 
 
 /** Abstract Connector implementation.
- * This abstract implemenation of the Connector interface provides:<ul>
+ * This abstract implementation of the Connector interface provides:<ul>
  * <li>AbstractLifeCycle implementation</li>
  * <li>Implementations for connector getters and setters</li>
  * <li>Buffer management</li>
@@ -39,8 +39,6 @@ import org.mortbay.thread.ThreadPool;
  * </ul>
  * 
  * @author gregw
- *
- * TODO - allow multiple Acceptor threads
  */
 public abstract class AbstractConnector extends AbstractBuffers implements Connector
 {
@@ -221,7 +219,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     /**
      * @return Returns the soLingerTime.
      */
-    public long getSoLingerTime()
+    public int getSoLingerTime()
     {
         return _soLingerTime;
     }

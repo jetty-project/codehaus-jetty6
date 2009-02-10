@@ -293,9 +293,9 @@ public class WebAppContext extends Context
 
     /* ------------------------------------------------------------ */
     /** 
-     * @see org.mortbay.jetty.handler.ContextHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
+     * @see org.mortbay.jetty.handler.ContextHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response)
     throws IOException, ServletException
     {   
         if (_unavailable)
@@ -303,7 +303,7 @@ public class WebAppContext extends Context
             response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         }
         else
-            super.handle(target, request, response, dispatch);
+            super.handle(target, request, response);
     }
 
     /* ------------------------------------------------------------ */
@@ -345,6 +345,12 @@ public class WebAppContext extends Context
                 _configurations[i].configureClassLoader();
 
             getTempDirectory();
+            if (_tmpDir!=null && !_isExistingTmpDir && !isTempWorkDirectory())
+            {
+                File sentinel = new File(_tmpDir, ".active");
+                if(!sentinel.exists())
+                    sentinel.mkdir();
+            }
 
             super.doStart();
 
@@ -862,7 +868,6 @@ public class WebAppContext extends Context
                 if (jarWebApp.exists() && jarWebApp.isDirectory())
                 {
                     web_app= jarWebApp;
-                    _war= web_app.toString();
                 }
             }
 

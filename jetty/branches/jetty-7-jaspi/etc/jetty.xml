@@ -66,6 +66,13 @@
     <!--   java -jar start.jar etc/jetty.xml etc/jetty-bio.xml           -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- To allow Jetty to be started from xinetd                        -->
+    <!-- mixin jetty-xinetd.xml:                                         -->
+    <!--   java -jar start.jar etc/jetty.xml etc/jetty-xinetd.xml        -->
+    <!--                                                                 -->
+    <!-- See jetty-xinetd.xml for further instructions.                  -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
     <!-- =========================================================== -->
     <!-- Set handler Collection Structure                            --> 
