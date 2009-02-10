@@ -480,9 +480,7 @@ public class ServletHandler extends AbstractHandler
         finally
         {
             base_request.setServletName(old_servlet_name);
-
             if (user_identity != null)
-
             {
                 user_identity.setServletHolder(old_servlet_holder);
             }

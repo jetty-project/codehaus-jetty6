@@ -129,7 +129,6 @@ public class ConstraintTest extends TestCase
 
         _connector.reopen();
         response = _connector.getResponses("GET /ctx/forbid/info HTTP/1.0\r\n\r\n");
-        System.out.println(response);
         assertTrue(response.startsWith("HTTP/1.1 403 Forbidden"));
 
         _connector.reopen();
@@ -217,12 +216,11 @@ public class ConstraintTest extends TestCase
     class RequestHandler extends AbstractHandler
     {
 
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response ) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             ((Request) request).setHandled(true);
             response.setStatus(200);
             response.getOutputStream().println(request.getRequestURI());
         }
-	
     }
 }

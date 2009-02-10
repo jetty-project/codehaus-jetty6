@@ -16,7 +16,6 @@
 package org.mortbay.jetty.plus.annotation;
 
 import org.mortbay.jetty.handler.SecurityHandler;
-import javax.servlet.ServletException;
 
 import javax.servlet.ServletException;
 

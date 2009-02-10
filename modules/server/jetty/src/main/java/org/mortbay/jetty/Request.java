@@ -57,7 +57,6 @@ import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.handler.CompleteHandler;
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.handler.SecurityHandler;
 import org.mortbay.jetty.handler.ContextHandler.SContext;
 import org.mortbay.log.Log;
 import org.mortbay.util.Attributes;
@@ -113,6 +112,7 @@ public class Request implements HttpServletRequest
     private boolean _handled =false;
     private Map _roleMap;
     private EndPoint _endp;
+
     private boolean _asyncSupported=true;
     private Attributes _attributes;
     private String _characterEncoding;
@@ -133,7 +133,7 @@ public class Request implements HttpServletRequest
     private String _servletPath;
     private String _servletName;
     private HttpURI _uri;
-    private Principal _userPrincipal;
+//    private Principal _userPrincipal;
     private MultiMap<String> _parameters;
     private MultiMap<String> _baseParameters;
     private boolean _paramsExtracted;
@@ -150,11 +150,10 @@ public class Request implements HttpServletRequest
     private Continuation _continuation;
     private Object _requestAttributeListeners;
     private Map<Object,HttpSession> _savedNewSessions;
-    private UserRealm _userRealm;
+//    private UserRealm _userRealm;
     private CookieCutter _cookies;
     private UserIdentity _userIdentity = UserIdentity.UNAUTHENTICATED_IDENTITY;
     private DispatcherType _dispatcherType;
-
 
     /* ------------------------------------------------------------ */
     public Request()
@@ -992,23 +991,14 @@ public class Request implements HttpServletRequest
      */
     public Principal getUserPrincipal()
     {
-
         /* JASPI requires that all requests go through authentication before being processed, so this code should never apply
         if (_userPrincipal != null && _userPrincipal instanceof ConstraintSecurityHandler.NotChecked)
-
         {
-<<<<<<< .working
-            _userPrincipal = UserRealm.NO_USER;
-            
-            SecurityHandler securityHandler =(SecurityHandler)_context.getContextHandler().getChildHandlerByClass(SecurityHandler.class);
-            if (securityHandler!=null)
-=======
             ConstraintSecurityHandler.NotChecked not_checked=(ConstraintSecurityHandler.NotChecked)_userPrincipal;
             _userPrincipal = ConstraintSecurityHandler.__NO_USER;
 
             SecurityHandler securityHandler =(SecurityHandler)_context.getContextHandler().getChildHandlerByClass(SecurityHandler.class);
             if (securityHandler!=null)
->>>>>>> .merge-right.r4465
             {
                 Authenticator auth=securityHandler.getAuthenticator();
                 UserRealm realm=securityHandler.getUserRealm();
@@ -1029,11 +1019,9 @@ public class Request implements HttpServletRequest
         }
         */
         
-
 //        if (_userPrincipal == AbstractSecurityHandler.__NO_USER)
 //            return null;
         return _userIdentity.getUserPrincipal();
-
     }
 
     /* ------------------------------------------------------------ */

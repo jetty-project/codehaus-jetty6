@@ -58,7 +58,6 @@ public class SecurityListenerTest extends TestCase
     private Server _server;
     private int _port;
     private HttpClient _httpClient;
-
     private Realm _jettyRealm;
     private static final String APP_CONTEXT = "localhost /";
 
@@ -87,7 +86,6 @@ public class SecurityListenerTest extends TestCase
                 return "jetty";
             }
         };
-
         _httpClient.setRealmResolver( new SimpleRealmResolver(_jettyRealm) );
     }
 

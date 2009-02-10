@@ -22,7 +22,6 @@ package org.mortbay.jetty.security;
 import java.io.IOException;
 import java.security.Principal;
 
-import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -165,16 +164,14 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
      *      javax.servlet.http.HttpServletRequest,
      *      javax.servlet.http.HttpServletResponse, int)
      */
-    public void handle(String pathInContext, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+    public void handle(String pathInContext, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
         Request base_request = (request instanceof Request) ? (Request) request : HttpConnection.getCurrentConnection().getRequest();
         Response base_response = (response instanceof Response) ? (Response) response : HttpConnection.getCurrentConnection().getResponse();
-        DispatcherType dispatch=request.getDispatcherType();
-        
         try
         {
-            boolean checkSecurity = DispatcherType.REQUEST.equals(dispatch);
-            if (DispatcherType.FORWARD.equals(dispatch) && _checkWelcomeFiles && request.getAttribute("org.mortbay.jetty.welcome") != null)
+            boolean checkSecurity = dispatch == FilterMapping.REQUEST;
+            if (dispatch == FilterMapping.FORWARD && _checkWelcomeFiles && request.getAttribute("org.mortbay.jetty.welcome") != null)
             {
                 request.removeAttribute("org.mortbay.jetty.welcome");
                 checkSecurity = true;

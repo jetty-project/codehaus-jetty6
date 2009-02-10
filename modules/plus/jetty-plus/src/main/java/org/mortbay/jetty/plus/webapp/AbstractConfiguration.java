@@ -49,7 +49,6 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
     protected LifeCycleCallbackCollection _callbacks = new LifeCycleCallbackCollection();
     protected InjectionCollection _injections = new InjectionCollection();
     protected RunAsCollection _runAsCollection = new RunAsCollection();
-    protected SecurityHandler _securityHandler;
     
     public abstract void bindEnvEntry (String name, Object value) throws Exception;
     
@@ -77,14 +76,14 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
         
         //set up our special ServletHandler to remember injections and lifecycle callbacks
         ServletHandler servletHandler = new ServletHandler();
-        _securityHandler = getWebAppContext().getSecurityHandler();
+        SecurityHandler securityHandler = getWebAppContext().getSecurityHandler();
         org.mortbay.jetty.servlet.ServletHandler existingHandler = getWebAppContext().getServletHandler();       
         servletHandler.setFilterMappings(existingHandler.getFilterMappings());
         servletHandler.setFilters(existingHandler.getFilters());
         servletHandler.setServlets(existingHandler.getServlets());
         servletHandler.setServletMappings(existingHandler.getServletMappings());
         getWebAppContext().setServletHandler(servletHandler);
-        _securityHandler.setHandler(servletHandler);       
+        securityHandler.setHandler(servletHandler);       
     }
     
     public void configureDefaults ()
@@ -450,7 +449,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
         {
             _runAsCollection.setRunAs(holders[i], _securityHandler);
         }
-
+        
         EventListener[] listeners = getWebAppContext().getEventListeners();
         for (int i=0;i<listeners.length;i++)
         {

@@ -34,10 +34,8 @@ import javax.servlet.UnavailableException;
 
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
-
 import org.mortbay.jetty.UserIdentity;
 import org.mortbay.jetty.RunAsToken;
-
 import org.mortbay.log.Log;
 
 
@@ -88,15 +86,6 @@ public class ServletHolder extends Holder
     public ServletHolder(Class servlet)
     {
         super(servlet);
-    }
-
-    /* ---------------------------------------------------------------- */
-    /**
-     * @return The unavailable exception or null if not unavailable
-     */
-    public UnavailableException getUnavailableException()
-    {
-        return _unavailableEx;
     }
     
     /* ------------------------------------------------------------ */
@@ -398,10 +387,8 @@ public class ServletHolder extends Holder
                 _unavailable=System.currentTimeMillis()+5000; // TODO configure
         }
     }
-    
 
     /* ------------------------------------------------------------ */
-
     private void makeUnavailable(Throwable e)
     {
         if (e instanceof UnavailableException)
