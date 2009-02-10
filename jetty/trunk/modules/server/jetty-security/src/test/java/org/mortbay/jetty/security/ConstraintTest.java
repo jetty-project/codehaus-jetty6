@@ -17,58 +17,63 @@ package org.mortbay.jetty.security;
 
 
 import java.io.IOException;
-import java.security.Principal;
+import java.util.Collections;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
-
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.LocalConnector;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.security.authentication.BasicServerAuthentication;
+import org.mortbay.jetty.security.authentication.FormServerAuthentication;
+import org.mortbay.jetty.security.authentication.SessionCachingServerAuthentication;
+import org.mortbay.jetty.security.HashLoginService;
 import org.mortbay.jetty.servlet.SessionHandler;
+import org.mortbay.jetty.security.B64Code;
 
 /**
  * @author gregw
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
  */
 public class ConstraintTest extends TestCase
 {
+
+    private static final String TEST_REALM = "TestRealm";
+
     Server _server = new Server();
     LocalConnector _connector = new LocalConnector();
     ContextHandler _context = new ContextHandler();
     SessionHandler _session = new SessionHandler();
-    ConstraintsSecurityHandler _security = new ConstraintsSecurityHandler();
+    ConstraintSecurityHandler _security = new ConstraintSecurityHandler();
+    LoginService _loginService = new HashLoginService("TestRealm",
+                                                      Collections.<String, HashLoginService.User>singletonMap("user", new HashLoginService.KnownUser("user", new Password("pass"), new String[] {"user"})));
+    final ServletCallbackHandler _callbackHandler = new ServletCallbackHandler(_loginService);
     RequestHandler _handler = new RequestHandler();
-    UserRealm _realm = new TestUserRealm();
-    
+    private static final String APP_CONTEXT = "localhost /ctx";
+
     public ConstraintTest(String arg0)
     {
         super(arg0);
         _server.setConnectors(new Connector[]{_connector});
-        
         _context.setContextPath("/ctx");
-        
         _server.setHandler(_context);
         _context.setHandler(_session);
         _session.setHandler(_security);
         _security.setHandler(_handler);
-        
+        _security.setAuthenticationManager(new DefaultAuthenticationManager());
+
         Constraint constraint0 = new Constraint();
         constraint0.setAuthenticate(true);
         constraint0.setName("forbid");
         ConstraintMapping mapping0 = new ConstraintMapping();
         mapping0.setPathSpec("/forbid/*");
         mapping0.setConstraint(constraint0);
-        
+
         Constraint constraint1 = new Constraint();
         constraint1.setAuthenticate(true);
         constraint1.setName("auth");
@@ -76,12 +81,12 @@ public class ConstraintTest extends TestCase
         ConstraintMapping mapping1 = new ConstraintMapping();
         mapping1.setPathSpec("/auth/*");
         mapping1.setConstraint(constraint1);
-        
-        _security.setUserRealm(_realm);
+
         _security.setConstraintMappings(new ConstraintMapping[]
-        {
-                mapping0,mapping1
-        });
+                {
+                        mapping0, mapping1
+                },
+                Collections.singleton("user"));
     }
 
     public static void main(String[] args)
@@ -95,8 +100,7 @@ public class ConstraintTest extends TestCase
     protected void setUp() throws Exception
     {
         super.setUp();
-        
-        _server.start();
+
     }
 
     /*
@@ -107,182 +111,118 @@ public class ConstraintTest extends TestCase
         super.tearDown();
         _server.stop();
     }
-    
-    
+
+
     public void testBasic()
-    	throws Exception
+            throws Exception
     {
-        _security.setAuthenticator(new BasicAuthenticator());
+        _security.getAuthenticationManager().setAuthMethod(Constraint.__BASIC_AUTH);
+        _security.setUserRealm(_loginService);
+        //ServerAuthentication serverAuthentication = new BasicServerAuthentication(_loginService, TEST_REALM);
+        //_security.setServerAuthentication(serverAuthentication);
+        _server.start();
+
         String response;
-        
-        response=_connector.getResponses("GET /ctx/noauth/info HTTP/1.0\r\n\r\n");
+
+        response = _connector.getResponses("GET /ctx/noauth/info HTTP/1.0\r\n\r\n");
         assertTrue(response.startsWith("HTTP/1.1 200 OK"));
-        
-        _connector.reopen();
-        response=_connector.getResponses("GET /ctx/forbid/info HTTP/1.0\r\n\r\n");
-        assertTrue(response.startsWith("HTTP/1.1 403 Forbidden"));
-        
-        _connector.reopen();
-        response=_connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n\r\n");
-        assertTrue(response.startsWith("HTTP/1.1 401 Unauthorized"));
-        assertTrue(response.indexOf("WWW-Authenticate: Basic realm=\"TestRealm\"")>0);
 
         _connector.reopen();
-        response=_connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n"+
-            "Authorization: "+B64Code.encode("user:wrong")+"\r\n"+
-            "\r\n");
-        assertTrue(response.startsWith("HTTP/1.1 401 Unauthorized"));
-        assertTrue(response.indexOf("WWW-Authenticate: Basic realm=\"TestRealm\"")>0);
-        
+        response = _connector.getResponses("GET /ctx/forbid/info HTTP/1.0\r\n\r\n");
+        System.out.println(response);
+        assertTrue(response.startsWith("HTTP/1.1 403 Forbidden"));
+
         _connector.reopen();
-        response=_connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n"+
-            "Authorization: "+B64Code.encode("user:pass")+"\r\n"+
-            "\r\n");
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 401 Unauthorized"));
+        assertTrue(response.indexOf("WWW-Authenticate: basic realm=\"TestRealm\"") > 0);
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n" +
+                "Authorization: " + B64Code.encode("user:wrong") + "\r\n" +
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 401 Unauthorized"));
+        assertTrue(response.indexOf("WWW-Authenticate: basic realm=\"TestRealm\"") > 0);
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n" +
+                "Authorization: " + B64Code.encode("user:pass") + "\r\n" +
+                "\r\n");
         assertTrue(response.startsWith("HTTP/1.1 200 OK"));
-        
+
     }
 
     public void testForm()
-        throws Exception
+            throws Exception
     {
-        FormAuthenticator authenticator = new FormAuthenticator();
-        authenticator.setErrorPage("/testErrorPage");
-        authenticator.setLoginPage("/testLoginPage");
-        _security.setAuthenticator(authenticator);
+        _security.getAuthenticationManager().setAuthMethod(Constraint.__FORM_AUTH);
+        _security.getAuthenticationManager().setLoginPage("/testLoginPage");
+        _security.getAuthenticationManager().setErrorPage("/testErrorPage");
+        _security.setUserRealm(_loginService);
+        
+       // ServerAuthentication serverAuthentication = new SessionCachingServerAuthentication(new FormServerAuthentication("/testLoginPage", "/testErrorPage", _loginService));
+       // _security.setServerAuthentication(serverAuthentication);
+        _server.start();
+
         String response;
 
         _connector.reopen();
-        response=_connector.getResponses("GET /ctx/noauth/info HTTP/1.0\r\n\r\n");
+        response = _connector.getResponses("GET /ctx/noauth/info HTTP/1.0\r\n\r\n");
         assertTrue(response.startsWith("HTTP/1.1 200 OK"));
-        
+
         _connector.reopen();
-        response=_connector.getResponses("GET /ctx/forbid/info HTTP/1.0\r\n\r\n");
+        response = _connector.getResponses("GET /ctx/forbid/info HTTP/1.0\r\n\r\n");
         assertTrue(response.startsWith("HTTP/1.1 403 Forbidden"));
-        
+
         _connector.reopen();
-        response=_connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n\r\n");
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n\r\n");
         System.err.println(response);
-        assertTrue(response.startsWith("HTTP/1.1 302 "));
-        assertTrue(response.indexOf("Location")>0);
-        assertTrue(response.indexOf("testLoginPage")>0);
-        String session=response.substring(response.indexOf("JSESSIONID=")+11,response.indexOf(";Path=/ctx"));
+        assertTrue(response.startsWith("HTTP/1.1 200 "));
+//        assertTrue(response.indexOf("Location") > 0);
+        assertTrue(response.indexOf("testLoginPage") > 0);
+        String session = response.substring(response.indexOf("JSESSIONID=") + 11, response.indexOf(";Path=/ctx"));
 
         _connector.reopen();
-        response=_connector.getResponses("POST /ctx/j_security_check HTTP/1.0\r\n"+
-            "Cookie: JSESSIONID="+session+"\r\n"+
-            "Content-Type: application/x-www-form-urlencoded\r\n"+
-            "Content-Length: 31\r\n"+
-            "\r\n"+
-            "j_username=user&j_password=wrong\r\n");
+        response = _connector.getResponses("POST /ctx/j_security_check HTTP/1.0\r\n" +
+                "Cookie: JSESSIONID=" + session + "\r\n" +
+                "Content-Type: application/x-www-form-urlencoded\r\n" +
+                "Content-Length: 31\r\n" +
+                "\r\n" +
+                "j_username=user&j_password=wrong\r\n");
         assertTrue(response.startsWith("HTTP/1.1 302 "));
-        assertTrue(response.indexOf("Location")>0);
-        assertTrue(response.indexOf("testErrorPage")>0);
-        
+        assertTrue(response.indexOf("Location") > 0);
+        assertTrue(response.indexOf("testErrorPage") > 0);
+
 
         _connector.reopen();
-        response=_connector.getResponses("POST /ctx/j_security_check HTTP/1.0\r\n"+
-            "Cookie: JSESSIONID="+session+"\r\n"+
-            "Content-Type: application/x-www-form-urlencoded\r\n"+
-            "Content-Length: 31\r\n"+
-            "\r\n"+
-            "j_username=user&j_password=pass\r\n");
+        response = _connector.getResponses("POST /ctx/j_security_check HTTP/1.0\r\n" +
+                "Cookie: JSESSIONID=" + session + "\r\n" +
+                "Content-Type: application/x-www-form-urlencoded\r\n" +
+                "Content-Length: 31\r\n" +
+                "\r\n" +
+                "j_username=user&j_password=pass\r\n");
         assertTrue(response.startsWith("HTTP/1.1 302 "));
-        assertTrue(response.indexOf("Location")>0);
-        assertTrue(response.indexOf("/ctx/auth/info")>0);
-        
+        assertTrue(response.indexOf("Location") > 0);
+        assertTrue(response.indexOf("/ctx/auth/info") > 0);
+
         _connector.reopen();
-        response=_connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n"+
-                "Cookie: JSESSIONID="+session+"\r\n"+
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n" +
+                "Cookie: JSESSIONID=" + session + "\r\n" +
                 "\r\n");
         assertTrue(response.startsWith("HTTP/1.1 200 OK"));
-        
+
     }
-    
-    
+
+
     class RequestHandler extends AbstractHandler
     {
-        
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response ) throws IOException, ServletException
         {
-            ((Request)request).setHandled(true);
+            ((Request) request).setHandled(true);
             response.setStatus(200);
             response.getOutputStream().println(request.getRequestURI());
-        }   
-    }
-
-    
-    class TestUserRealm implements UserRealm
-    {
-        String _username="user";
-        Object _credentials="pass";
-        
-        public Principal authenticate(String username, Object credentials, Request request)
-        {
-            if (_username!=null && _username.equals(username) &&
-                _credentials!=null && _credentials.equals(credentials))
-                return new Principal()
-            {
-                public String getName()
-                {
-                    return _username;
-                }
-            };
-            
-            return null;
-            
         }
-
-        public void disassociate(Principal user)
-        {
-            // TODO Auto-generated method stub
-            
-        }
-
-        public String getName()
-        {
-            return "TestRealm";
-        }
-
-        public Principal getPrincipal(final String username)
-        {
-            return new Principal()
-            {
-                public String getName()
-                {
-                    return username;
-                }
-            };
-        }
-
-        public boolean isUserInRole(Principal user, String role)
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        public void logout(Principal user)
-        {
-            // TODO Auto-generated method stub
-            
-        }
-
-        public Principal popRole(Principal user)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        public Principal pushRole(Principal user, String role)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        public boolean reauthenticate(Principal user)
-        {
-            // TODO Auto-generated method stub
-            return user!=null;
-        }
-        
+	
     }
 }

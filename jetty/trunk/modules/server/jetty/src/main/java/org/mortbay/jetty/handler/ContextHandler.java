@@ -496,7 +496,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     /** Set shutdown status.
      * This field allows for graceful shutdown of a context. A started context may be put into non accepting state so
      * that existing requests can complete, but no new requests are accepted.
-     * @param accepting true if this context is accepting new requests
+     * @param shutdown true if this context is (not?) accepting new requests
      */
     public void setShutdown(boolean shutdown)
     {

@@ -18,6 +18,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 
@@ -37,13 +40,13 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.client.security.HashRealmResolver;
 import org.mortbay.jetty.client.security.Realm;
 import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.jetty.security.BasicAuthenticator;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
-import org.mortbay.jetty.security.ConstraintsSecurityHandler;
-import org.mortbay.jetty.security.HashUserRealm;
+import org.mortbay.jetty.security.ConstraintSecurityHandler;
+import org.mortbay.jetty.security.DefaultAuthenticationManager;
+import org.mortbay.jetty.security.HashLoginService;
+import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.ssl.SslSocketConnector;
-import org.mortbay.jetty.UserRealm;
 
 /**
  * Functional testing.
@@ -55,6 +58,7 @@ public class SslSecurityListenerTest extends TestCase
     protected HttpClient _httpClient;
     protected Realm _jettyRealm;
     protected int _type = HttpClient.CONNECTOR_SOCKET;
+    private static final String APP_CONTEXT = "localhost /";
 
     protected void setUp() throws Exception
     {
@@ -141,8 +145,6 @@ public class SslSecurityListenerTest extends TestCase
         _server.setConnectors(new Connector[]
         { connector });
 
-        UserRealm userRealm = new HashUserRealm("MyRealm","src/test/resources/realm.properties");
-
         Constraint constraint = new Constraint();
         constraint.setName("Need User or Admin");
         constraint.setRoles(new String[]
@@ -153,12 +155,16 @@ public class SslSecurityListenerTest extends TestCase
         cm.setConstraint(constraint);
         cm.setPathSpec("/*");
 
-        ConstraintsSecurityHandler sh = new ConstraintsSecurityHandler();
+        LoginService loginService = new HashLoginService("MyRealm","src/test/resources/realm.properties");
+        ConstraintSecurityHandler sh = new ConstraintSecurityHandler();
+        sh.setAuthenticationManager(new DefaultAuthenticationManager());
+        sh.getAuthenticationManager().setAuthMethod(Constraint.__BASIC_AUTH);
+        sh.setUserRealm(loginService);
+        //ServerAuthentication serverAuthentication = new BasicServerAuthentication(loginService, "MyRealm");
+        //sh.setServerAuthentication(serverAuthentication);
+        Set<String> roles = new HashSet<String>(Arrays.asList(new String[]{"user", "admin"}));
+        sh.setConstraintMappings(new ConstraintMapping[] { cm }, roles);
         _server.setHandler(sh);
-        sh.setUserRealm(userRealm);
-        sh.setConstraintMappings(new ConstraintMapping[]
-        { cm });
-        sh.setAuthenticator(new BasicAuthenticator());
 
         Handler testHandler = new AbstractHandler()
         {

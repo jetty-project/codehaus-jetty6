@@ -146,7 +146,7 @@ public class LazyList
     /* ------------------------------------------------------------ */
     /** Add the contents of an array to a LazyList
      * @param list The list to add to or null if none yet created.
-     * @param collection The Collection whose contents should be added.
+     * @param array The array whose contents should be added.
      * @return The lazylist created or added to.
      */
     public static Object addArray(Object list, Object[] array)

@@ -20,6 +20,7 @@ import java.util.HashMap;
 import javax.servlet.ServletException;
 
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.handler.SecurityHandler;
 import org.mortbay.log.Log;
 
 
@@ -58,7 +59,7 @@ public class RunAsCollection
         return (RunAs)_runAsMap.get(className);
     }
     
-    public void setRunAs (Object o)
+    public void setRunAs(Object o, SecurityHandler securityHandler)
     throws ServletException
     {
         if (o==null)
@@ -74,7 +75,7 @@ public class RunAsCollection
         if (runAs == null)
             return;
 
-        runAs.setRunAs(holder); 
+        runAs.setRunAs(holder, securityHandler); 
     }
 
 }

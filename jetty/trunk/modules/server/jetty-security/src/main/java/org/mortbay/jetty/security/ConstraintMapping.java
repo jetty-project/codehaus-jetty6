@@ -15,59 +15,65 @@
 
 package org.mortbay.jetty.security;
 
-
 public class ConstraintMapping
 {
-    String method;
-    String pathSpec;
-    Constraint constraint;
-    
+    String _method;
+
+    String _pathSpec;
+
+    Constraint _constraint;
+
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the constraint.
      */
     public Constraint getConstraint()
     {
-        return constraint;
+        return _constraint;
     }
+
     /* ------------------------------------------------------------ */
     /**
      * @param constraint The constraint to set.
      */
     public void setConstraint(Constraint constraint)
     {
-        this.constraint = constraint;
+        this._constraint = constraint;
     }
+
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the method.
      */
     public String getMethod()
     {
-        return method;
+        return _method;
     }
+
     /* ------------------------------------------------------------ */
     /**
      * @param method The method to set.
      */
     public void setMethod(String method)
     {
-        this.method = method;
+        this._method = method;
     }
+
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the pathSpec.
      */
     public String getPathSpec()
     {
-        return pathSpec;
+        return _pathSpec;
     }
+
     /* ------------------------------------------------------------ */
     /**
      * @param pathSpec The pathSpec to set.
      */
     public void setPathSpec(String pathSpec)
     {
-        this.pathSpec = pathSpec;
+        this._pathSpec = pathSpec;
     }
 }

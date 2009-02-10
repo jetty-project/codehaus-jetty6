@@ -239,10 +239,10 @@
     <!-- configuration (see $(jetty.home)/contexts/test.xml for an   -->
     <!-- example).                                                   -->
     <!-- =========================================================== -->
-    <Set name="UserRealms">
-      <Array type="org.mortbay.jetty.security.UserRealm">
+    <Set name="LoginServices">
+      <Array type="org.mortbay.jetty.LoginService">
         <Item>
-          <New class="org.mortbay.jetty.security.HashUserRealm">
+          <New class="org.mortbay.jetty.security.jaspi.modules.HashLoginService">
             <Set name="name">Test Realm</Set>
             <Set name="config"><SystemProperty name="jetty.home" default="."/>/etc/realm.properties</Set>
             <Set name="refreshInterval">0</Set>

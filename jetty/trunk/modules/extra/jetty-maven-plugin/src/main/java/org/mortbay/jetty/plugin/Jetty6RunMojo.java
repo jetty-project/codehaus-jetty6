@@ -15,19 +15,17 @@
 
 package org.mortbay.jetty.plugin;
 
-import java.io.File;
-
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.RequestLog;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
-import org.mortbay.jetty.UserRealm;
 import org.mortbay.xml.XmlConfiguration;
 
 /**
@@ -84,7 +82,7 @@ public class Jetty6RunMojo extends AbstractJettyRunMojo
      * List of security realms to set up. Optional.
      * @parameter
      */
-    private UserRealm[] userRealms;
+    private UserRealm[] loginServices;
     
 
 
@@ -118,11 +116,11 @@ public class Jetty6RunMojo extends AbstractJettyRunMojo
     /**
      * 
      * 
-     * @see org.mortbay.jetty.plugin.AbstractJettyRunMojo#getConfiguredUserRealms()
+     * @see AbstractJettyMojo#getConfiguredUserRealms()
      */
     public Object[] getConfiguredUserRealms()
     {
-        return this.userRealms;
+        return loginServices;
     }
 
     
