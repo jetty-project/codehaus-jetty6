@@ -356,12 +356,15 @@ public class DataSourceUserRealm extends AbstractLoginService
     throws NamingException, SQLException
     {
         Connection connection = null;
+        boolean autocommit = true; 
         
         if (_createTables)
         {
             try
             {
                 connection = getConnection();
+                autocommit = connection.getAutoCommit();
+                connection.setAutoCommit(false);
                 DatabaseMetaData metaData = connection.getMetaData();
                 
                 //check if tables exist
@@ -380,7 +383,7 @@ public class DataSourceUserRealm extends AbstractLoginService
                             _userTablePasswordField+" varchar(20) not null, primary key("+_userTableKey+"))");
                     if (Log.isDebugEnabled()) Log.debug("Created table "+_userTableName);
                 }
-                connection.commit();
+                
                 result.close();
 
                 tableName = (metaData.storesLowerCaseIdentifiers()? _roleTableName.toLowerCase(): (metaData.storesUpperCaseIdentifiers()?_roleTableName.toUpperCase(): _roleTableName));
@@ -397,7 +400,7 @@ public class DataSourceUserRealm extends AbstractLoginService
                     connection.createStatement().executeUpdate(str);
                     if (Log.isDebugEnabled()) Log.debug("Created table "+_roleTableName);
                 }
-                connection.commit();
+                
                 result.close();
 
                 tableName = (metaData.storesLowerCaseIdentifiers()? _userRoleTableName.toLowerCase(): (metaData.storesUpperCaseIdentifiers()?_userRoleTableName.toUpperCase(): _userRoleTableName));
@@ -418,8 +421,9 @@ public class DataSourceUserRealm extends AbstractLoginService
                     connection.createStatement().executeUpdate("create index indx_user_role on "+_userRoleTableName+"("+_userRoleTableUserKey+")");
                     if (Log.isDebugEnabled()) Log.debug("Created table "+_userRoleTableName +" and index");
                 }
+                
+                result.close();   
                 connection.commit();
-                result.close();                
             }
             finally
             {
@@ -427,6 +431,7 @@ public class DataSourceUserRealm extends AbstractLoginService
                 {
                     try
                     {
+                        connection.setAutoCommit(autocommit);
                         connection.close();
                     }
                     catch (SQLException e)

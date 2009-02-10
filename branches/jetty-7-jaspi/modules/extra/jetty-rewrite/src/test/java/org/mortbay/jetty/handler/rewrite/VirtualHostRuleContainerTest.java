@@ -178,7 +178,7 @@ public class VirtualHostRuleContainerTest extends AbstractRuleTestCase
 
     private void handleRequest() throws Exception
     {
-        _server.handle("/cheese/bar", _request, _response, 0);
+        _server.handle("/cheese/bar", _request, _response);
     }
 }
    

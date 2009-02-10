@@ -16,6 +16,13 @@ package org.mortbay.jetty;
 
 import org.mortbay.component.LifeCycle;
 
+/**
+ * A Handler that contains other Handlers.
+ * <p>
+ * The contained handlers may be one (see @{link {@link org.mortbay.jetty.handler.HandlerWrapper})
+ * or many (see {@link org.mortbay.jetty.handler.HandlerList} or {@link org.mortbay.jetty.handler.HandlerCollection}. 
+ *
+ */
 public interface HandlerContainer extends LifeCycle
 {
     public void addHandler(Handler handler);

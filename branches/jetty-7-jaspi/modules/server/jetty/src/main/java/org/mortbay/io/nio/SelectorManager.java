@@ -257,8 +257,8 @@ public abstract class SelectorManager extends AbstractLifeCycle
         private transient Timeout _timeout;
         private transient Selector _selector;
         private transient int _setID;
-        private transient boolean _selecting;
         private transient int _jvmBug;
+        private volatile boolean _selecting;
         
         /* ------------------------------------------------------------ */
         SelectSet(int acceptorID) throws Exception
@@ -314,12 +314,15 @@ public abstract class SelectorManager extends AbstractLifeCycle
             try
             {
                 List<?> changes;
+                final Selector selector;
                 synchronized (_changes)
                 {
                     changes=_changes[_change];
                     _change=_change==0?1:0;
                     _selecting=true;
+                    selector=_selector;
                 }
+                
 
                 // Make any key changes required
                 for (int i = 0; i < changes.size(); i++)
@@ -345,14 +348,14 @@ public abstract class SelectorManager extends AbstractLifeCycle
 
                             if (channel.isConnected())
                             {
-                                SelectionKey key = channel.register(_selector,SelectionKey.OP_READ,att);
+                                SelectionKey key = channel.register(selector,SelectionKey.OP_READ,att);
                                 SelectChannelEndPoint endpoint = newEndPoint(channel,this,key);
                                 key.attach(endpoint);
                                 endpoint.schedule();
                             }
                             else
                             {
-                                channel.register(_selector,SelectionKey.OP_CONNECT,att);
+                                channel.register(selector,SelectionKey.OP_CONNECT,att);
                             }
 
                         }
@@ -381,7 +384,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 {
                     _idleTimeout.setNow(now);
                     _timeout.setNow(now);
-                    if (_lowResourcesConnections>0 && _selector.keys().size()>_lowResourcesConnections)
+                    if (_lowResourcesConnections>0 && selector.keys().size()>_lowResourcesConnections)
                         _idleTimeout.setDuration(_lowResourcesMaxIdleTime);
                     else 
                         _idleTimeout.setDuration(_maxIdleTime);
@@ -400,7 +403,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 if (wait > 0) 
                 {
                     long before=now;
-                    int selected=_selector.select(wait);
+                    int selected=selector.select(wait);
                     now = System.currentTimeMillis();
                     _idleTimeout.setNow(now);
                     _timeout.setNow(now);
@@ -411,12 +414,12 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         if (_jvmBug++>5) 
                         {
                             // Probably JVM BUG!    
-                            for (SelectionKey key: _selector.keys())
+                            for (SelectionKey key: selector.keys())
                             {    
                                 if (key.interestOps()==0 && key.isValid())
                                     key.cancel();
                             }
-                            _selector.selectNow();
+                            selector.selectNow();
                         } 
                     }
                     else
@@ -424,16 +427,16 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 }
                 else 
                 {
-                    _selector.selectNow();
+                    selector.selectNow();
                     _jvmBug=0;
                 }
 
-                // have we been destroyed while sleeping\
-                if (_selector==null || !_selector.isOpen())
+                // have we been destroyed while sleeping
+                if (_selector==null || !selector.isOpen())
                     return;
 
                 // Look for things to do
-                for (SelectionKey key: _selector.selectedKeys())
+                for (SelectionKey key: selector.selectedKeys())
                 {   
                     try
                     {
@@ -535,7 +538,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 }
                 
                 // Everything always handled
-                _selector.selectedKeys().clear();
+                selector.selectedKeys().clear();
 
                 // tick over the timers
                 _idleTimeout.tick(now);
@@ -547,10 +550,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
             }
             finally
             {
-                synchronized(this)
-                {
-                    _selecting=false;
-                }
+                _selecting=false;
             }
         }
 
@@ -607,10 +607,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
             while(selecting)
             {
                 wakeup();
-                synchronized (this)
-                {
-                    selecting=_selecting;
-                }
+                selecting=_selecting;
             }
             
             ArrayList<SelectionKey> keys=new ArrayList<SelectionKey>(_selector.keys());
@@ -637,6 +634,13 @@ public abstract class SelectorManager extends AbstractLifeCycle
             
             synchronized (this)
             {
+                selecting=_selecting;
+                while(selecting)
+                {
+                    wakeup();
+                    selecting=_selecting;
+                }
+                
                 _idleTimeout.cancelAll();
                 _timeout.cancelAll();
                 try
@@ -652,5 +656,4 @@ public abstract class SelectorManager extends AbstractLifeCycle
             }
         }
     }
-
 }

@@ -226,6 +226,7 @@ public class SSLEngineTest extends TestCase
         catch(SocketTimeoutException e)
         {
             System.err.println("Test timedout: "+e.toString());
+            e.printStackTrace(); // added to see if we can get more info from failures on CI
         }
         finally
         {
@@ -242,9 +243,11 @@ public class SSLEngineTest extends TestCase
         // ~ Methods
         // ------------------------------------------------------------
 
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             // System.err.println("HANDLE "+request.getRequestURI());
+            String ssl_id = (String)request.getAttribute("javax.servlet.request.ssl_session_id");
+            //assertNotNull(ssl_id);
             PrintWriter out=response.getWriter();
 
             try

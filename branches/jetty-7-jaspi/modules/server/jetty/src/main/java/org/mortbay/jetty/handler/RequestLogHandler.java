@@ -16,6 +16,7 @@ package org.mortbay.jetty.handler;
 
 import java.io.IOException;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -43,11 +44,11 @@ public class RequestLogHandler extends HandlerWrapper
     /* 
      * @see org.mortbay.jetty.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException
     {
-        super.handle(target, request, response, dispatch);
-        if (dispatch==REQUEST && _requestLog!=null)
+        super.handle(target, request, response);
+        if (DispatcherType.REQUEST.equals(request.getDispatcherType()) && _requestLog!=null)
             _requestLog.log((Request)request, (Response)response);
     }
 

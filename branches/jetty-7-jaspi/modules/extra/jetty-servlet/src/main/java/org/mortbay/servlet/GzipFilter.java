@@ -22,6 +22,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPOutputStream;
 
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
@@ -64,7 +66,7 @@ public class GzipFilter extends UserAgentFilter
 {
     protected Set _mimeTypes;
     protected int _bufferSize=8192;
-    protected int _minGzipSize=0;
+    protected int _minGzipSize=1;
     protected Set _excluded;
     
     public void init(FilterConfig filterConfig) throws ServletException
@@ -121,7 +123,7 @@ public class GzipFilter extends UserAgentFilter
                 }
             }
 
-            GZIPResponseWrapper wrappedResponse=newGZIPResponseWrapper(request,response);
+            final GZIPResponseWrapper wrappedResponse=newGZIPResponseWrapper(request,response);
             
             boolean exceptional=true;
             try
@@ -131,7 +133,20 @@ public class GzipFilter extends UserAgentFilter
             }
             finally
             {
-                if (exceptional && !response.isCommitted())
+                if (request.isAsyncStarted() && !req.getAsyncContext().hasOriginalRequestAndResponse())   
+                {
+                    request.addAsyncListener(new AsyncListener()
+                    {
+                        public void onComplete(AsyncEvent event) throws IOException
+                        {
+                            wrappedResponse.finish();
+                        }
+
+                        public void onTimeout(AsyncEvent event) throws IOException
+                        {}
+                    });
+                }
+                else if (exceptional && !response.isCommitted())
                 {
                     wrappedResponse.resetBuffer();
                     wrappedResponse.noGzip();
@@ -150,7 +165,6 @@ public class GzipFilter extends UserAgentFilter
     {
         return new GZIPResponseWrapper(request,response);
     }
-
 
     public class GZIPResponseWrapper extends HttpServletResponseWrapper
     {
@@ -181,7 +195,6 @@ public class GzipFilter extends UserAgentFilter
             }
         }
 
-        
         public void setStatus(int sc, String sm)
         {
             super.setStatus(sc,sm);
@@ -203,6 +216,30 @@ public class GzipFilter extends UserAgentFilter
                 _gzStream.setContentLength(length);
         }
         
+        public void addHeader(String name, String value)
+        {
+            if ("content-length".equalsIgnoreCase(name))
+            {
+                _contentLength=Long.parseLong(value);
+                if (_gzStream!=null)
+                    _gzStream.setContentLength(_contentLength);
+            }
+            else if ("content-type".equalsIgnoreCase(name))
+            {   
+                setContentType(value);
+            }
+            else if ("content-encoding".equalsIgnoreCase(name))
+            {   
+                super.addHeader(name,value);
+                if (!isCommitted())
+                {
+                    noGzip();
+                }
+            }
+            else
+                super.addHeader(name,value);
+        }
+
         public void setHeader(String name, String value)
         {
             if ("content-length".equalsIgnoreCase(name))
@@ -538,4 +575,5 @@ public class GzipFilter extends UserAgentFilter
             }
         }
     }
+    
 }

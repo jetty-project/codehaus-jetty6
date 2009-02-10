@@ -34,6 +34,7 @@ import org.mortbay.jetty.UserIdentity;
 import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.handler.SecurityHandler;
+import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.log.Log;
 
 /**
@@ -169,8 +170,8 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
         Response base_response = (response instanceof Response) ? (Response) response : HttpConnection.getCurrentConnection().getResponse();
         try
         {
-            boolean checkSecurity = dispatch == REQUEST;
-            if (dispatch == FORWARD && _checkWelcomeFiles && request.getAttribute("org.mortbay.jetty.welcome") != null)
+            boolean checkSecurity = dispatch == FilterMapping.REQUEST;
+            if (dispatch == FilterMapping.FORWARD && _checkWelcomeFiles && request.getAttribute("org.mortbay.jetty.welcome") != null)
             {
                 request.removeAttribute("org.mortbay.jetty.welcome");
                 checkSecurity = true;
@@ -230,7 +231,8 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                         {
                             // jaspi 3.8.3 auth processing may wrap messages,
                             // use the modified versions
-                            getHandler().handle(pathInContext, messageInfo.getRequestMessage(), messageInfo.getResponseMessage(), dispatch);
+                            //getHandler().handle(pathInContext, messageInfo.getRequestMessage(), messageInfo.getResponseMessage(), dispatch);                           
+                            getHandler().handle(pathInContext, messageInfo.getRequestMessage(), messageInfo.getResponseMessage());
                             // TODO set secureResponse = false on error thrown
                             // by servlet to jetty
                             boolean secureResponse = true;
@@ -277,7 +279,8 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
             {
                 if (getHandler() != null)
                 {
-                    getHandler().handle(pathInContext, request, response, dispatch);
+                    //getHandler().handle(pathInContext, request, response, dispatch);
+                	getHandler().handle(pathInContext, request, response);
                 }
             }
         }

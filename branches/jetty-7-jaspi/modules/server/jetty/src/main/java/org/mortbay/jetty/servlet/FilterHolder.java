@@ -29,24 +29,7 @@ import org.mortbay.log.Log;
  */
 public class FilterHolder
     extends Holder
-{
-
-    /* ------------------------------------------------------------ */
-    /** Dispatch type from name
-     */
-    public static int dispatch(String type)
-    {
-        if ("request".equalsIgnoreCase(type))
-            return Handler.REQUEST;
-        if ("forward".equalsIgnoreCase(type))
-            return Handler.FORWARD;
-        if ("include".equalsIgnoreCase(type))
-            return Handler.INCLUDE;
-        if ("error".equalsIgnoreCase(type))
-            return Handler.ERROR;
-        throw new IllegalArgumentException(type);
-    }
-    
+{    
     /* ------------------------------------------------------------ */
     private transient Filter _filter;
     private transient Config _config;
@@ -117,7 +100,8 @@ public class FilterHolder
         _config=null;
         super.doStop();   
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void destroyInstance (Object o)
     throws Exception
     {
@@ -179,9 +163,6 @@ public class FilterHolder
             return FilterHolder.this.getInitParameterNames();
         }
     }
-    
-
-
 }
 
 

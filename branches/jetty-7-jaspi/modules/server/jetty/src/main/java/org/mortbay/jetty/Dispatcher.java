@@ -43,55 +43,23 @@ import org.mortbay.util.UrlEncoded;
 public class Dispatcher implements RequestDispatcher
 {
     /** Dispatch include attribute names */
-    public final static String __INCLUDE_JETTY="org.mortbay.jetty.included";
     public final static String __INCLUDE_PREFIX="javax.servlet.include.";
-    public final static String __INCLUDE_REQUEST_URI= "javax.servlet.include.request_uri";
-    public final static String __INCLUDE_CONTEXT_PATH= "javax.servlet.include.context_path";
-    public final static String __INCLUDE_SERVLET_PATH= "javax.servlet.include.servlet_path";
-    public final static String __INCLUDE_PATH_INFO= "javax.servlet.include.path_info";
-    public final static String __INCLUDE_QUERY_STRING= "javax.servlet.include.query_string";
+    public final static String __INCLUDE_REQUEST_URI= INCLUDE_REQUEST_URI;
+    public final static String __INCLUDE_CONTEXT_PATH= INCLUDE_CONTEXT_PATH;
+    public final static String __INCLUDE_SERVLET_PATH= INCLUDE_SERVLET_PATH;
+    public final static String __INCLUDE_PATH_INFO= INCLUDE_PATH_INFO;
+    public final static String __INCLUDE_QUERY_STRING= INCLUDE_QUERY_STRING;
 
     /** Dispatch include attribute names */
-    public final static String __FORWARD_JETTY="org.mortbay.jetty.forwarded";
     public final static String __FORWARD_PREFIX="javax.servlet.forward.";
-    public final static String __FORWARD_REQUEST_URI= "javax.servlet.forward.request_uri";
-    public final static String __FORWARD_CONTEXT_PATH= "javax.servlet.forward.context_path";
-    public final static String __FORWARD_SERVLET_PATH= "javax.servlet.forward.servlet_path";
-    public final static String __FORWARD_PATH_INFO= "javax.servlet.forward.path_info";
-    public final static String __FORWARD_QUERY_STRING= "javax.servlet.forward.query_string";
+    public final static String __FORWARD_REQUEST_URI= FORWARD_REQUEST_URI;
+    public final static String __FORWARD_CONTEXT_PATH= FORWARD_CONTEXT_PATH;
+    public final static String __FORWARD_SERVLET_PATH= FORWARD_SERVLET_PATH;
+    public final static String __FORWARD_PATH_INFO= FORWARD_PATH_INFO;
+    public final static String __FORWARD_QUERY_STRING= FORWARD_QUERY_STRING;
 
     /** JSP attributes */
     public final static String __JSP_FILE="org.apache.catalina.jsp_file";
-
-    /* ------------------------------------------------------------ */
-    /** Dispatch type from name
-     */
-    public static int type(String type)
-    {
-        if ("request".equalsIgnoreCase(type))
-            return Handler.REQUEST;
-        if ("forward".equalsIgnoreCase(type))
-            return Handler.FORWARD;
-        if ("include".equalsIgnoreCase(type))
-            return Handler.INCLUDE;
-        if ("error".equalsIgnoreCase(type))
-            return Handler.ERROR;
-        throw new IllegalArgumentException(type);
-    }
-
-    
-    public static int type (DispatcherType type)
-    {
-        if (type.equals(DispatcherType.REQUEST))
-            return Handler.REQUEST;
-        if (type.equals(DispatcherType.FORWARD))
-            return Handler.FORWARD;
-        if (type.equals(DispatcherType.INCLUDE))
-            return Handler.INCLUDE;
-        if (type.equals(DispatcherType.ERROR))
-            return Handler.ERROR;
-        throw new IllegalArgumentException(type.toString());
-    }
 
     /* ------------------------------------------------------------ */
     private ContextHandler _contextHandler;
@@ -134,7 +102,7 @@ public class Dispatcher implements RequestDispatcher
      */
     public void forward(ServletRequest request, ServletResponse response) throws ServletException, IOException
     {
-        forward(request, response, Handler.FORWARD);
+        forward(request, response, DispatcherType.FORWARD);
     }
     
     /* ------------------------------------------------------------ */
@@ -143,7 +111,7 @@ public class Dispatcher implements RequestDispatcher
      */
     public void error(ServletRequest request, ServletResponse response) throws ServletException, IOException
     {
-        forward(request, response, Handler.ERROR);
+        forward(request, response, DispatcherType.ERROR);
     }
     
     /* ------------------------------------------------------------ */
@@ -157,13 +125,15 @@ public class Dispatcher implements RequestDispatcher
         
         // TODO - allow stream or writer????
         
+        DispatcherType old_type = base_request.getDispatcherType();
         Attributes old_attr=base_request.getAttributes();
         MultiMap old_params=base_request.getParameters();
         try
         {
+            base_request.setDispatcherType(DispatcherType.INCLUDE);
             base_request.getConnection().include();
             if (_named!=null)
-                _contextHandler.handle(_named, (HttpServletRequest)request, (HttpServletResponse)response, Handler.INCLUDE);
+                _contextHandler.doHandle(_named, base_request,(HttpServletRequest)request, (HttpServletResponse)response);
             else 
             {
                 String query=_dQuery;
@@ -200,7 +170,7 @@ public class Dispatcher implements RequestDispatcher
                 
                 base_request.setAttributes(attr);
                 
-                _contextHandler.handle(_named==null?_path:_named, (HttpServletRequest)request, (HttpServletResponse)response, Handler.INCLUDE);
+                _contextHandler.doHandle(_named==null?_path:_named, base_request,(HttpServletRequest)request, (HttpServletResponse)response);
             }
         }
         finally
@@ -208,6 +178,7 @@ public class Dispatcher implements RequestDispatcher
             base_request.setAttributes(old_attr);
             base_request.getConnection().included();
             base_request.setParameters(old_params);
+            base_request.setDispatcherType(old_type);
         }
     }
 
@@ -216,10 +187,11 @@ public class Dispatcher implements RequestDispatcher
     /* 
      * @see javax.servlet.RequestDispatcher#forward(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
      */
-    protected void forward(ServletRequest request, ServletResponse response, int dispatch) throws ServletException, IOException
+    protected void forward(ServletRequest request, ServletResponse response, DispatcherType dispatch) throws ServletException, IOException
     {
         Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
-        response.resetBuffer(); 
+        Response base_response=(Response)base_request.getResponse();
+        base_response.fwdReset();
         request.removeAttribute(__JSP_FILE); // TODO remove when glassfish 1044 is fixed
         
         String old_uri=base_request.getRequestURI();
@@ -229,10 +201,14 @@ public class Dispatcher implements RequestDispatcher
         String old_query=base_request.getQueryString();
         Attributes old_attr=base_request.getAttributes();
         MultiMap old_params=base_request.getParameters();
+        DispatcherType old_type=base_request.getDispatcherType();
+        
         try
         {
+            base_request.setDispatcherType(dispatch);
+            
             if (_named!=null)
-                _contextHandler.handle(_named, (HttpServletRequest)request, (HttpServletResponse)response, dispatch);
+                _contextHandler.doHandle(_named, base_request,(HttpServletRequest)request, (HttpServletResponse)response);
             else 
             {
                 String query=_dQuery;
@@ -342,7 +318,7 @@ public class Dispatcher implements RequestDispatcher
                 base_request.setAttributes(attr);
                 base_request.setQueryString(query);
                 
-                _contextHandler.handle(_path, (HttpServletRequest)request, (HttpServletResponse)response, dispatch);
+                _contextHandler.doHandle(_path, base_request,(HttpServletRequest)request, (HttpServletResponse)response);
                 
                 if (base_request.getConnection().getResponse().isWriting())
                 {
@@ -365,6 +341,7 @@ public class Dispatcher implements RequestDispatcher
             base_request.setAttributes(old_attr);
             base_request.setParameters(old_params);
             base_request.setQueryString(old_query);
+            base_request.setDispatcherType(old_type);
         }
     }
 
@@ -392,18 +369,20 @@ public class Dispatcher implements RequestDispatcher
         {
             if (Dispatcher.this._named==null)
             {
-                if (key.equals(__FORWARD_PATH_INFO))    return _pathInfo;
-                if (key.equals(__FORWARD_REQUEST_URI))  return _requestURI;
-                if (key.equals(__FORWARD_SERVLET_PATH)) return _servletPath;
-                if (key.equals(__FORWARD_CONTEXT_PATH)) return _contextPath;
-                if (key.equals(__FORWARD_QUERY_STRING)) return _query;
+                if (key.equals(__FORWARD_PATH_INFO))    
+                    return _pathInfo;
+                if (key.equals(__FORWARD_REQUEST_URI))  
+                    return _requestURI;
+                if (key.equals(__FORWARD_SERVLET_PATH)) 
+                    return _servletPath;
+                if (key.equals(__FORWARD_CONTEXT_PATH)) 
+                    return _contextPath;
+                if (key.equals(__FORWARD_QUERY_STRING)) 
+                    return _query;
             }
             
-            if (key.startsWith(__INCLUDE_PREFIX) || key.equals(__INCLUDE_JETTY) )
+            if (key.startsWith(__INCLUDE_PREFIX))
                 return null;
-
-            if (key.equals(__FORWARD_JETTY)) 
-                return Boolean.TRUE;
             
             return _attr.getAttribute(key);
         }
@@ -444,11 +423,16 @@ public class Dispatcher implements RequestDispatcher
         {
             if (_named==null && key.startsWith("javax.servlet."))
             {
-                if (key.equals(__FORWARD_PATH_INFO))         _pathInfo=(String)value;
-                else if (key.equals(__FORWARD_REQUEST_URI))  _requestURI=(String)value;
-                else if (key.equals(__FORWARD_SERVLET_PATH)) _servletPath=(String)value;
-                else if (key.equals(__FORWARD_CONTEXT_PATH)) _contextPath=(String)value;
-                else if (key.equals(__FORWARD_QUERY_STRING)) _query=(String)value;
+                if (key.equals(__FORWARD_PATH_INFO))         
+                    _pathInfo=(String)value;
+                else if (key.equals(__FORWARD_REQUEST_URI))  
+                    _requestURI=(String)value;
+                else if (key.equals(__FORWARD_SERVLET_PATH)) 
+                    _servletPath=(String)value;
+                else if (key.equals(__FORWARD_CONTEXT_PATH)) 
+                    _contextPath=(String)value;
+                else if (key.equals(__FORWARD_QUERY_STRING)) 
+                    _query=(String)value;
                 
                 else if (value==null)
                     _attr.removeAttribute(key);
@@ -512,8 +496,6 @@ public class Dispatcher implements RequestDispatcher
             else if (key.startsWith(__INCLUDE_PREFIX)) 
                     return null;
             
-            if (key.equals(__INCLUDE_JETTY)) 
-                return Boolean.TRUE;
             
             return _attr.getAttribute(key);
         }

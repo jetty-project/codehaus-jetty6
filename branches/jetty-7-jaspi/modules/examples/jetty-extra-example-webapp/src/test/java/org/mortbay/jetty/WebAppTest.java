@@ -141,17 +141,73 @@ public class WebAppTest extends TestCase
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dispatch/includeS/dump/info?query=foo");
         assertTrue(IO.toString(url.openStream()).startsWith("<H1>"));
 
-        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?continue=1000");
-        assertTrue(IO.toString(url.openStream()).startsWith("<html>"));
-        
-        
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?lines=100");
         
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.addRequestProperty("accept-encoding","gzip");
         connection.connect();
         assertEquals("gzip",connection.getHeaderField("Content-Encoding"));
+    }
+    
 
+    public void testAsync() throws Exception
+    {
+        URL url = null;
+
+        long start;
+        long latency;
+        start=System.currentTimeMillis();
+        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?sleep=500");
+        assertTrue(IO.toString(url.openStream()).startsWith("<html>"));
+        latency=System.currentTimeMillis()-start;
+        assertTrue(latency>250);
+        assertTrue(latency<2000);
+        
+        start=System.currentTimeMillis();
+        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?continue=500");
+        assertTrue(IO.toString(url.openStream()).startsWith("<html>"));
+        latency=System.currentTimeMillis()-start;
+        assertTrue(latency>250);
+        assertTrue(latency<2000);
+
+        start=System.currentTimeMillis();
+        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?continue=10000&resume=500");
+        assertTrue(IO.toString(url.openStream()).startsWith("<html>"));
+        latency=System.currentTimeMillis()-start;
+        assertTrue(latency>250);
+        assertTrue(latency<2000);
+
+        start=System.currentTimeMillis();
+        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?async=500");
+        assertTrue(IO.toString(url.openStream()).startsWith("<html>"));
+        latency=System.currentTimeMillis()-start;
+        assertTrue(latency>250);
+        assertTrue(""+latency,latency<2000);
+        
+        start=System.currentTimeMillis();
+        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?async=10000&dispatch=500");
+        assertTrue(IO.toString(url.openStream()).startsWith("<html>"));
+        latency=System.currentTimeMillis()-start;
+        assertTrue(latency>250);
+        assertTrue(""+latency,latency<2000);
+        
+        start=System.currentTimeMillis();
+        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?async=10000&dispatch=500&dispatchPath=/dump/xxx");
+        String dispatch=IO.toString(url.openStream());
+        assertTrue(dispatch.startsWith("<html>"));
+        assertTrue(dispatch.indexOf("/dump/xxx")>0);
+        latency=System.currentTimeMillis()-start;
+        assertTrue(latency>400);
+        assertTrue(""+latency,latency<2000);
+        
+        start=System.currentTimeMillis();
+        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?async=10000&complete=500");
+        assertTrue(IO.toString(url.openStream()).startsWith("<h1>COMPLETED"));
+        latency=System.currentTimeMillis()-start;
+        assertTrue(latency>400);
+        assertTrue(""+latency,latency<2000);
+        
+        
     }
     
 
