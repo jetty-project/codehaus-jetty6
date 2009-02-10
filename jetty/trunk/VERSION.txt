@@ -65,6 +65,7 @@ Jetty-7.0-SNAPSHOT
  + JETTY-871 jetty-client expires() NPE race condition fixed
  + JETTY-876 Added new BlockingArrayQueue and new QueuedThreadPool
  + JETTY-894 Add android .apk to mime types
+ + JETTY-897 Remove swing dependency in GzipFilter
  
 jetty-6.1.15.rc3 28 January 2009
  + JETTY-691 System.getProperty() calls ... wrap them in doPrivileged
