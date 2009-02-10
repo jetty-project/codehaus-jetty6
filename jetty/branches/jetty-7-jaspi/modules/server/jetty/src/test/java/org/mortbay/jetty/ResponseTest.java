@@ -366,7 +366,7 @@ public class ResponseTest extends TestCase
             server.addConnector(socketConnector);
             server.addHandler(new AbstractHandler() 
             {
-                public void handle(String string, HttpServletRequest request, HttpServletResponse response, int i) throws IOException, ServletException 
+                public void handle(String string, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException 
                 {
                     response.setStatus(200);
                     response.setContentType("text/plain");

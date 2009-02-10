@@ -27,8 +27,6 @@ import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.HashLoginService;
 import org.mortbay.jetty.security.LoginService;
-import org.mortbay.jetty.webapp.WebAppContext;
-import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.QueuedThreadPool;
 
 public class LikeJettyXml
@@ -36,7 +34,7 @@ public class LikeJettyXml
     public static void main(String[] args)
         throws Exception
     {
-        String jetty_default=new java.io.File("./start.jar").exists()?".":"../../..";;
+        String jetty_default=new java.io.File("./start.jar").exists()?".":"../../..";
         String jetty_home = System.getProperty("jetty.home",jetty_default);
         
         Server server = new Server();

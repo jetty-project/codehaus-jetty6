@@ -304,7 +304,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         String servletPath=null;
         String pathInfo=null;
         Enumeration reqRanges = null;
-        Boolean included =(Boolean)request.getAttribute(Dispatcher.__INCLUDE_JETTY);
+        Boolean included =request.getAttribute(Dispatcher.__INCLUDE_REQUEST_URI)!=null;
         if (included!=null && included.booleanValue())
         {
             servletPath=(String)request.getAttribute(Dispatcher.__INCLUDE_SERVLET_PATH);

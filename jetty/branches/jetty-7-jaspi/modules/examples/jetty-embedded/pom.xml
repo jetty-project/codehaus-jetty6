@@ -41,34 +41,34 @@
           <property><name>runEmbedded</name></property>
       </activation>
       <build>
-		<plugins>
-		  <plugin>
-			<artifactId>maven-antrun-plugin</artifactId>
-			<executions>
-			  <execution>
-				<id>run</id>
-				<phase>test</phase>
-				<configuration>
-				  <tasks>
-					<echo>-------------------------------------------------------------</echo>
-					<echo>***                Running Embedded Tests                 ***</echo>
-					<echo>-------------------------------------------------------------</echo>
-					<java classname="RunEmbedded">
-					  <classpath>
-					   <path refid="maven.compile.classpath" />
-					   <path refid="maven.test.classpath" />
-					   <path refid="maven.dependency.classpath" />
-					  </classpath>
-					</java>
-				  </tasks>
-				</configuration>
-				<goals>
-				  <goal>run</goal>
-				</goals>
-			  </execution>
-			</executions>
-		  </plugin>
-		</plugins>
+    <plugins>
+      <plugin>
+      <artifactId>maven-antrun-plugin</artifactId>
+      <executions>
+        <execution>
+        <id>run</id>
+        <phase>test</phase>
+        <configuration>
+          <tasks>
+          <echo>-------------------------------------------------------------</echo>
+          <echo>***                Running Embedded Tests                 ***</echo>
+          <echo>-------------------------------------------------------------</echo>
+          <java classname="RunEmbedded">
+            <classpath>
+             <path refid="maven.compile.classpath" />
+             <path refid="maven.test.classpath" />
+             <path refid="maven.dependency.classpath" />
+            </classpath>
+          </java>
+          </tasks>
+        </configuration>
+        <goals>
+          <goal>run</goal>
+        </goals>
+        </execution>
+      </executions>
+      </plugin>
+    </plugins>
       </build>
     </profile>
   </profiles>

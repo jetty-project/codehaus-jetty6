@@ -27,6 +27,7 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.bio.SocketEndPoint;
 import org.mortbay.jetty.AbstractConnector;
+import org.mortbay.jetty.AsyncRequest;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpException;
@@ -113,7 +114,7 @@ public class SocketConnector extends AbstractConnector
     }
 
     /* ------------------------------------------------------------------------------- */
-    protected Buffer newBuffer(int size)
+    public Buffer newBuffer(int size)
     {
         return new ByteArrayBuffer(size);
     }
@@ -199,12 +200,11 @@ public class SocketConnector extends AbstractConnector
             if (l<0)
                 close();
             return l;
-        }
-        
+        } 
         
         public void close() throws IOException
         {
-            _connection.getRequest().reset();
+            _connection.getRequest().getAsyncRequest().cancel();
             super.close();
         }
 
