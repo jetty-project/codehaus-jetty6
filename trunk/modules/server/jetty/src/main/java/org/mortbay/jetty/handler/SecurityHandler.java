@@ -1,3 +1,4 @@
+
 // ========================================================================
 // Copyright 2008 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
@@ -12,19 +13,31 @@
 // limitations under the License.
 // ========================================================================
 
+
 package org.mortbay.jetty.handler;
 
-import org.mortbay.jetty.Authenticator;
+import org.mortbay.component.LifeCycle;
+import org.mortbay.jetty.AuthenticationManager;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
+import org.mortbay.jetty.RunAsToken;
 import org.mortbay.jetty.UserRealm;
 
-public interface SecurityHandler extends Handler, HandlerContainer
+
+/**
+ * @version $Rev$ $Date$
+ */
+public interface SecurityHandler extends LifeCycle, Handler, HandlerContainer
 {
     void setHandler(Handler handler);
+
     Handler getHandler();
 
-    Authenticator getAuthenticator();
+    RunAsToken newRunAsToken(String runAsRole);
 
-    UserRealm getUserRealm();
+    void setAuthenticationManager (AuthenticationManager authManager);
+    AuthenticationManager getAuthenticationManager();
+    
+    UserRealm getUserRealm ();
+    void setUserRealm (UserRealm realm);
 }

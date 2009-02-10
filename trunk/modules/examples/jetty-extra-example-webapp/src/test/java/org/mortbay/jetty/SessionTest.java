@@ -25,8 +25,8 @@ import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.RequestLogHandler;
-import org.mortbay.jetty.security.HashUserRealm;
-import org.mortbay.jetty.UserRealm;
+import org.mortbay.jetty.security.HashLoginService;
+import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.util.IO;
 
@@ -58,10 +58,10 @@ public class SessionTest extends TestCase
         test0 = new WebAppContext(contexts,"../../../webapps/test","/test0");
         test1 = new WebAppContext(contexts,"../../../webapps/test","/test1");
 
-        HashUserRealm userRealm = new HashUserRealm();
+        HashLoginService userRealm = new HashLoginService();
         userRealm.setName("Test Realm");
         userRealm.setConfig("../../../etc/realm.properties");
-        server.setUserRealms(new UserRealm[]{userRealm});
+        server.setUserRealms(new LoginService[]{userRealm});
         
         server.start();
         

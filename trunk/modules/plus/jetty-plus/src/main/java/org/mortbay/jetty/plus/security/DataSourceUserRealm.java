@@ -16,33 +16,37 @@
 
 package org.mortbay.jetty.plus.security;
 
-import java.security.Principal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.naming.InitialContext;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.plus.naming.NamingEntryUtil;
-import org.mortbay.jetty.security.AbstractUserRealm;
+import org.mortbay.jetty.security.AbstractLoginService;
+import org.mortbay.jetty.security.HashLoginService;
+import org.mortbay.jetty.security.Password;
 import org.mortbay.log.Log;
 
 
 
 /**
+ *
+ * //TODO JASPI cf JDBCLoginService
  * DataSourceUserRealm
  *
  * Obtain user/password/role information from a database
  * via jndi DataSource.
  */
-public class DataSourceUserRealm extends AbstractUserRealm
+public class DataSourceUserRealm extends AbstractLoginService
 {
     private String _jndiName = "javax.sql.DataSource/default";
     private DataSource _datasource;
@@ -233,55 +237,13 @@ public class DataSourceUserRealm extends AbstractUserRealm
         return _cacheMs;
     }
     
-    /* ------------------------------------------------------------ */
-    /** 
-     * Check if user is authentic
-     * 
-     * @see org.mortbay.jetty.security.HashUserRealm#authenticate(java.lang.String, java.lang.Object, org.mortbay.jetty.Request)
-     */
-    public Principal authenticate(String username,
-            Object credentials,
-            Request request)
-    {
-        synchronized (this)
-        {
-            long now = System.currentTimeMillis();
-            if (now - _lastHashPurge > _cacheMs || _cacheMs == 0)
-            {
-                _users.clear();
-                _roles.clear();
-                _lastHashPurge = now;
-            }
-            Principal user = super.getPrincipal(username);
-            if (user == null)
-            {
-                loadUser(username);
-                user = super.getPrincipal(username);
-            }
-        }
-        return super.authenticate(username, credentials, request);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Check if a user is in a role.
-     * @param user The user, which must be from this realm 
-     * @param roleName 
-     * @return True if the user can act in the role.
-     */
-    public synchronized boolean isUserInRole(Principal user, String roleName)
-    {
-        if(super.getPrincipal(user.getName())==null)
-            loadUser(user.getName());
-        return super.isUserInRole(user, roleName);
-    }
-
 
     /* ------------------------------------------------------------ */
     /** Load user's info from database.
      * 
      * @param user
      */
-    private void loadUser (String user)
+    private void loadUser (String userName)
     {
         Connection connection = null;
         try
@@ -290,23 +252,24 @@ public class DataSourceUserRealm extends AbstractUserRealm
             connection = getConnection();
             
             PreparedStatement statement = connection.prepareStatement(_userSql);
-            statement.setObject(1, user);
+            statement.setObject(1, userName);
             ResultSet rs = statement.executeQuery();
     
             if (rs.next())
             {
                 int key = rs.getInt(_userTableKey);
-                putUser(user, rs.getString(_userTablePasswordField));
+                String credentials = rs.getString(_userTablePasswordField); 
                 statement.close();
                 
                 statement = connection.prepareStatement(_roleSql);
                 statement.setInt(1, key);
                 rs = statement.executeQuery();
-
+                List<String> roles = new ArrayList<String>();
                 while (rs.next())
-                    putUserRole(user, rs.getString(_roleTableRoleField));
-                
-                statement.close();
+                    roles.add(rs.getString(_roleTableRoleField));    
+                statement.close();            
+                KnownUser user = new KnownUser(userName, new Password(credentials), roles.toArray(new String[roles.size()]));
+                putUser(userName, user);
             }
         }
         catch (NamingException e)
@@ -315,7 +278,7 @@ public class DataSourceUserRealm extends AbstractUserRealm
         }
         catch (SQLException e)
         {
-            Log.warn("Problem loading user info for "+user, e);
+            Log.warn("Problem loading user info for "+userName, e);
         }
         finally
         {

@@ -39,12 +39,12 @@ import java.security.Principal;
  */
 public class JAASPrincipal implements Principal, Serializable
 {
-    private String name = null;
+    private String _name = null;
     
     
     public JAASPrincipal(String userName)
     {
-        this.name = userName;
+        this._name = userName;
     }
 
 
@@ -65,7 +65,7 @@ public class JAASPrincipal implements Principal, Serializable
 
     public String getName ()
     {
-        return this.name;
+        return this._name;
     }
 
 

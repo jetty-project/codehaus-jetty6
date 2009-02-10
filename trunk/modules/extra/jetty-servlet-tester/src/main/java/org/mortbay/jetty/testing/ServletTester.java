@@ -55,8 +55,10 @@ public class ServletTester
 {
     Server _server = new Server();
     LocalConnector _connector = new LocalConnector();
-    Context _context = new Context(Context.SESSIONS|Context.SECURITY);
-    
+//    Context _context = new Context(Context.SESSIONS|Context.SECURITY);
+    //jaspi why security if it is not set up?
+    Context _context = new Context(Context.SESSIONS);
+
     public ServletTester()
     {
         try

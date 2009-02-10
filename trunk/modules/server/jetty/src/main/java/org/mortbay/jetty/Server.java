@@ -192,10 +192,10 @@ public class Server extends HandlerWrapper implements Attributes
         HttpGenerator.setServerVersion(_version);
         MultiException mex=new MultiException();
       
-        for (int i=0;_realms !=null && i<_realms.length; i++)
+        for (int i=0; _realms !=null && i< _realms.length; i++)
         {
             if (_realms[i] instanceof LifeCycle)
-                ((LifeCycle)_realms[i]).start();
+                ((LifeCycle) _realms[i]).start();
         }
 
         Iterator itor = _dependentLifeCycles.iterator();
@@ -252,10 +252,10 @@ public class Server extends HandlerWrapper implements Attributes
     {
         MultiException mex=new MultiException();
         
-        for (int i=0;_realms !=null && i<_realms.length; i++)
+        for (int i=0; _realms !=null && i< _realms.length; i++)
         {
             if (_realms[i] instanceof LifeCycle)
-                ((LifeCycle)_realms[i]).stop();
+                ((LifeCycle) _realms[i]).stop();
         }
         
         if (_graceful>0)
@@ -388,7 +388,7 @@ public class Server extends HandlerWrapper implements Attributes
 
     /* ------------------------------------------------------------ */
     /**
-     * @return Map of realm name to UserRealm instances.
+     * @return UserRealm instances.
      */
     public UserRealm[] getUserRealms()
     {
@@ -397,22 +397,22 @@ public class Server extends HandlerWrapper implements Attributes
     
     /* ------------------------------------------------------------ */
     /**
-     * @param realms Map of realm name to UserRealm instances.
+     * @param loginServices
      */
     public void setUserRealms(UserRealm[] realms)
     {
-        _container.update(this,_realms,realms, "realm",true);
-        _realms=realms;
+        _container.update(this, realms, _realms, "userRealms",true);
+        _realms = realms;
     }
     
     /* ------------------------------------------------------------ */
-    public void addUserRealm(UserRealm realm)
+    public void addLoginService(UserRealm realm)
     {
         setUserRealms((UserRealm[])LazyList.addToArray(getUserRealms(), realm, UserRealm.class));
     }
     
     /* ------------------------------------------------------------ */
-    public void removeUserRealm(UserRealm realm)
+    public void removeLoginService(UserRealm realm)
     {
         setUserRealms((UserRealm[])LazyList.removeFromArray(getUserRealms(), realm));
     }

@@ -72,7 +72,7 @@ import org.mortbay.util.ajax.Continuation;
 /* ------------------------------------------------------------ */
 /** Jetty Request.
  * <p>
- * Implements {@link javax.servlet.HttpServletRequest} from the {@link javax.servlet} package.   
+ * Implements {@link javax.servlet.http.HttpServletRequest} from the {@link javax.servlet.http} package.
  * </p>
  * <p>
  * The standard interface of mostly getters,
@@ -80,18 +80,18 @@ import org.mortbay.util.ajax.Continuation;
  * passed to.  This allows the request object to be as lightweight as possible and not
  * actually implement any significant behaviour. For example<ul>
  * 
- * <li>The {@link getContextPath} method will return null, until the requeset has been 
- * passed to a {@link ContextHandler} which matches the {@link getPathInfo} with a context
- * path and calls {@link setContextPath} as a result.</li>
+ * <li>The {@link Request#getContextPath} method will return null, until the requeset has been
+ * passed to a {@link ContextHandler} which matches the {@link Request#getPathInfo} with a context
+ * path and calls {@link Request#setContextPath} as a result.</li>
  * 
  * <li>the HTTP session methods
  * will all return null sessions until such time as a request has been passed to
  * a {@link org.mortbay.jetty.servlet.SessionHandler} which checks for session cookies
  * and enables the ability to create new sessions.</li>
  * 
- * <li>The {@link getServletPath} method will return null until the request has been
+ * <li>The {@link Request#getServletPath} method will return null until the request has been
  * passed to a {@link org.mortbay.jetty.servlet.ServletHandler} and the pathInfo matched
- * against the servlet URL patterns and {@link setServletPath} called as a result.</li>
+ * against the servlet URL patterns and {@link Request#setServletPath} called as a result.</li>
  * </ul>
  * 
  * A request instance is created for each {@link HttpConnection} accepted by the server 
@@ -113,10 +113,8 @@ public class Request implements HttpServletRequest
     private boolean _handled =false;
     private Map _roleMap;
     private EndPoint _endp;
-
     private boolean _asyncSupported=true;
     private Attributes _attributes;
-    private String _authType;
     private String _characterEncoding;
     private String _queryEncoding;
     private String _serverName;
@@ -154,7 +152,9 @@ public class Request implements HttpServletRequest
     private Map<Object,HttpSession> _savedNewSessions;
     private UserRealm _userRealm;
     private CookieCutter _cookies;
+    private UserIdentity _userIdentity = UserIdentity.UNAUTHENTICATED_IDENTITY;
     private DispatcherType _dispatcherType;
+
 
     /* ------------------------------------------------------------ */
     public Request()
@@ -194,7 +194,6 @@ public class Request implements HttpServletRequest
             throw new IllegalStateException("Request in context!");
         if(_attributes!=null)
             _attributes.clearAttributes();
-        _authType=null;
         _characterEncoding=null;
         _queryEncoding=null;
         _context=null;
@@ -213,7 +212,7 @@ public class Request implements HttpServletRequest
         _timeStamp=0;
         _timeStampBuffer=null;
         _uri=null;
-        _userPrincipal=null;
+        _userIdentity=UserIdentity.UNAUTHENTICATED_IDENTITY;
         if (_baseParameters!=null)
             _baseParameters.clear();
         _parameters=null;
@@ -317,7 +316,7 @@ public class Request implements HttpServletRequest
      */
     public String getAuthType()
     {
-        return _authType;
+        return _userIdentity.getAuthMethod();
     }
 
     /* ------------------------------------------------------------ */
@@ -993,12 +992,23 @@ public class Request implements HttpServletRequest
      */
     public Principal getUserPrincipal()
     {
-        if (_userPrincipal != null && _userPrincipal == UserRealm.NOT_CHECKED && _context!=null)
+
+        /* JASPI requires that all requests go through authentication before being processed, so this code should never apply
+        if (_userPrincipal != null && _userPrincipal instanceof ConstraintSecurityHandler.NotChecked)
+
         {
+<<<<<<< .working
             _userPrincipal = UserRealm.NO_USER;
             
             SecurityHandler securityHandler =(SecurityHandler)_context.getContextHandler().getChildHandlerByClass(SecurityHandler.class);
             if (securityHandler!=null)
+=======
+            ConstraintSecurityHandler.NotChecked not_checked=(ConstraintSecurityHandler.NotChecked)_userPrincipal;
+            _userPrincipal = ConstraintSecurityHandler.__NO_USER;
+
+            SecurityHandler securityHandler =(SecurityHandler)_context.getContextHandler().getChildHandlerByClass(SecurityHandler.class);
+            if (securityHandler!=null)
+>>>>>>> .merge-right.r4465
             {
                 Authenticator auth=securityHandler.getAuthenticator();
                 UserRealm realm=securityHandler.getUserRealm();
@@ -1017,10 +1027,13 @@ public class Request implements HttpServletRequest
                 }
             }
         }
+        */
         
-        if (_userPrincipal == UserRealm.NO_USER) 
-            return null;
-        return _userPrincipal;
+
+//        if (_userPrincipal == AbstractSecurityHandler.__NO_USER)
+//            return null;
+        return _userIdentity.getUserPrincipal();
+
     }
 
     /* ------------------------------------------------------------ */
@@ -1094,19 +1107,20 @@ public class Request implements HttpServletRequest
      */
     public boolean isUserInRole(String role)
     {
-        if (_roleMap!=null)
-        {
-            String r=(String)_roleMap.get(role);
-            if (r!=null)
-                role=r;
-        }
-
-        Principal principal = getUserPrincipal();
-        
-        if (_userRealm!=null && principal!=null)
-            return _userRealm.isUserInRole(principal, role);
-        
-        return false;
+        return _userIdentity.isUserInRole(role);
+//        if (_roleMap!=null)
+//        {
+//            String r=(String)_roleMap.get(role);
+//            if (r!=null)
+//                role=r;
+//        }
+//
+//        Principal principal = getUserPrincipal();
+//
+//        if (_userRealm!=null && principal!=null)
+//            return _userRealm.isUserInRole(principal, role);
+//
+//        return false;
     }
 
     /* ------------------------------------------------------------ */
@@ -1138,10 +1152,10 @@ public class Request implements HttpServletRequest
      * Set a request attribute.
      * if the attribute name is "org.mortbay.jetty.Request.queryEncoding" then
      * the value is also passed in a call to {@link #setQueryEncoding}.
-     *  
+     *
      * if the attribute name is "org.mortbay.jetty.ResponseBuffer", then
-     * the response buffer is flushed with @{link #flushResponseBuffer}  
-     * 
+     * the response buffer is flushed with @{link #flushResponseBuffer}
+     *
      * @see javax.servlet.ServletRequest#setAttribute(java.lang.String, java.lang.Object)
      */
     public void setAttribute(String name, Object value)
@@ -1163,7 +1177,7 @@ public class Request implements HttpServletRequest
         }
         else if("org.mortbay.jetty.ResponseBuffer".equals(name))
         {
-            try 
+            try
             {
                 ByteBuffer byteBuffer=(ByteBuffer)value;
                 synchronized (byteBuffer)
@@ -1173,7 +1187,7 @@ public class Request implements HttpServletRequest
                         :(NIOBuffer)new IndirectNIOBuffer(byteBuffer,true);
                     ((HttpConnection.Output)getServletResponse().getOutputStream()).sendResponse(buffer);
                 }
-            } 
+            }
             catch (IOException e)
             {
                 throw new RuntimeException(e);
@@ -1277,7 +1291,7 @@ public class Request implements HttpServletRequest
         {
             content_type = HttpFields.valueParameters(content_type, null);
             
-            if (MimeTypes.FORM_ENCODED.equalsIgnoreCase(content_type) && 
+            if (MimeTypes.FORM_ENCODED.equalsIgnoreCase(content_type) &&
                     (HttpMethods.POST.equals(getMethod()) || HttpMethods.PUT.equals(getMethod())))
             {
                 int content_length = getContentLength();
@@ -1404,16 +1418,7 @@ public class Request implements HttpServletRequest
     {
         return _inputState;
     }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param authType The authType to set.
-     */
-    public void setAuthType(String authType)
-    {
-        _authType = authType;
-    }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param cookies The cookies to set.
@@ -1551,12 +1556,17 @@ public class Request implements HttpServletRequest
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * @param userPrincipal The userPrincipal to set.
-     */
-    public void setUserPrincipal(Principal userPrincipal)
+
+    public UserIdentity getUserIdentity()
     {
-        _userPrincipal = userPrincipal;
+        return _userIdentity;
+    }
+
+    public void setUserIdentity(UserIdentity userIdentity)
+    {
+        if (userIdentity == null)
+            throw new NullPointerException("No UserIdentity");
+        this._userIdentity = userIdentity;
     }
 
     /* ------------------------------------------------------------ */
@@ -1714,24 +1724,6 @@ public class Request implements HttpServletRequest
         if (_savedNewSessions==null)
             return null;
         return (HttpSession) _savedNewSessions.get(key);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the userRealm.
-     */
-    public UserRealm getUserRealm()
-    {
-        return _userRealm;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param userRealm The userRealm to set.
-     */
-    public void setUserRealm(UserRealm userRealm)
-    {
-        _userRealm = userRealm;
     }
 
     /* ------------------------------------------------------------ */

@@ -29,9 +29,7 @@ import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.handler.SecurityHandler;
-import org.mortbay.log.Log;
 import org.mortbay.util.Loader;
-import org.mortbay.util.URIUtil;
 
 
 /* ------------------------------------------------------------ */
@@ -87,13 +85,13 @@ public class Context extends ContextHandler
     }
 
     /* ------------------------------------------------------------ */
-    public Context(HandlerContainer parent, SessionHandler sessionHandler,SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    public Context(HandlerContainer parent, SessionHandler sessionHandler, SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {   
         this(parent,null,sessionHandler,securityHandler,servletHandler,errorHandler);
     }
 
     /* ------------------------------------------------------------ */
-    public Context(HandlerContainer parent, String contextPath, SessionHandler sessionHandler,SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    public Context(HandlerContainer parent, String contextPath, SessionHandler sessionHandler, SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {   
         super((ContextHandler.SContext)null);
         _scontext = new SContext();
@@ -136,11 +134,12 @@ public class Context extends ContextHandler
     }    
 
     /* ------------------------------------------------------------ */
+    //TODO jaspi doesn't this kinda suck?
     static SecurityHandler newSecurityHandler()
     {
         try
         {
-            Class<?> l = Loader.loadClass(Context.class,"org.mortbay.jetty.security.ConstraintsSecurityHandler");
+            Class<?> l = Loader.loadClass(Context.class,"org.mortbay.jetty.security.ConstraintSecurityHandler");
             return (SecurityHandler)l.newInstance();
         }
         catch(Exception e)
@@ -148,7 +147,7 @@ public class Context extends ContextHandler
             throw new IllegalStateException(e);
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @see org.mortbay.jetty.handler.ContextHandler#startContext()
@@ -265,7 +264,7 @@ public class Context extends ContextHandler
 
     /* ------------------------------------------------------------ */
     /**
-     * @param securityHandler The {@link SecurityHandler} to set on this context.
+     * @param securityHandler The {@link org.mortbay.jetty.handler.SecurityHandler} to set on this context.
      */
     public void setSecurityHandler(SecurityHandler securityHandler)
     {

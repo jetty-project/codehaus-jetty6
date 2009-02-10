@@ -26,9 +26,9 @@
   <!-- the web.xml file.                                           -->
   <!-- =========================================================== -->
   <!-- 
-  <Call name="addUserRealm">
+  <Call name="addLoginService">
     <Arg>
-      <New class="org.mortbay.jetty.plus.jaas.JAASUserRealm">
+      <New class="org.mortbay.jetty.plus.jaas.JAASLoginService">
 	      <Set name="name">xyzrealm</Set>
 	      <Set name="LoginModuleName">xyz</Set>
 	    </New>

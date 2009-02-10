@@ -34,8 +34,8 @@ import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.HashUserRealm;
-import org.mortbay.jetty.UserRealm;
+import org.mortbay.jetty.security.HashLoginService;
+import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
 import org.mortbay.log.StdErrLog;
@@ -49,7 +49,7 @@ public class WebAppTest extends TestCase
     Connector connector=new SelectChannelConnector();
     HandlerCollection handlers = new HandlerCollection();
     ContextHandlerCollection contexts = new ContextHandlerCollection();
-    HashUserRealm userRealm = new HashUserRealm();
+    HashLoginService userRealm = new HashLoginService();
     RequestLogHandler requestLogHandler = new RequestLogHandler();
     WebAppContext context;
     
@@ -73,7 +73,7 @@ public class WebAppTest extends TestCase
         
         userRealm.setName("Test Realm");
         userRealm.setConfig(dir.getAbsolutePath()+"/etc/realm.properties");
-        server.setUserRealms(new UserRealm[]{userRealm});
+        server.setUserRealms(new LoginService[]{userRealm});
         
 	File file = File.createTempFile("test",".log");
         NCSARequestLog requestLog = new NCSARequestLog(file.getAbsolutePath());

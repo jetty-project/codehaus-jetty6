@@ -291,6 +291,13 @@
     <session-timeout>5</session-timeout>
   </session-config>
 
+  <security-role>
+    <role-name>content-administrator</role-name>
+  </security-role>
+  <security-role>
+    <role-name>admin</role-name>
+  </security-role>
+
 </web-app>
 
 

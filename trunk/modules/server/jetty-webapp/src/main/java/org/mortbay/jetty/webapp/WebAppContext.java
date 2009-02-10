@@ -35,7 +35,8 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
-import org.mortbay.jetty.security.ConstraintsSecurityHandler;
+import org.mortbay.jetty.handler.SecurityHandler;
+import org.mortbay.jetty.security.ConstraintSecurityHandler;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.servlet.ServletHandler;
@@ -53,7 +54,7 @@ import org.mortbay.util.URIUtil;
 /** Web Application Context Handler.
  * The WebAppContext handler is an extension of ContextHandler that
  * coordinates the construction and configuration of nested handlers:
- * {@link org.mortbay.jetty.security.ConstraintsSecurityHandler}, {@link org.mortbay.jetty.servlet.SessionHandler}
+ * {@link org.mortbay.jetty.security.ConstraintSecurityHandler}, {@link org.mortbay.jetty.servlet.SessionHandler}
  * and {@link org.mortbay.jetty.servlet.ServletHandler}.
  * The handlers are configured by pluggable configuration classes, with
  * the default being  {@link org.mortbay.jetty.webapp.WebXmlConfiguration} and 
@@ -163,11 +164,11 @@ public class WebAppContext extends Context
     /* ------------------------------------------------------------ */
     /**
      */
-    public WebAppContext(ConstraintsSecurityHandler securityHandler,SessionHandler sessionHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    public WebAppContext(SecurityHandler securityHandler,SessionHandler sessionHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {
         super(null,
               sessionHandler!=null?sessionHandler:new SessionHandler(),
-              securityHandler!=null?securityHandler:new ConstraintsSecurityHandler(),
+              securityHandler!=null?securityHandler:new ConstraintSecurityHandler(),
               servletHandler!=null?servletHandler:new ServletHandler(),
               null);
         
@@ -197,10 +198,10 @@ public class WebAppContext extends Context
     
 
     /* ------------------------------------------------------------ */
-    public ConstraintsSecurityHandler getConstraintsSecurityHandler()
-    {
-        return (ConstraintsSecurityHandler)getSecurityHandler();
-    }
+//    public SecurityHandler getConstraintsSecurityHandler()
+//    {
+//        return (ConstraintsSecurityHandler)getSecurityHandler();
+//    }
 
     
     /* ------------------------------------------------------------ */
@@ -964,7 +965,7 @@ public class WebAppContext extends Context
     /* ------------------------------------------------------------ */
     /**
      * The override descriptor is a web.xml format file that is applied to the context after the standard WEB-INF/web.xml
-     * @param defaultsDescriptor The overrideDescritpor to set.
+     * @param overrideDescriptor The overrideDescritpor to set.
      */
     public void setOverrideDescriptor(String overrideDescriptor)
     {

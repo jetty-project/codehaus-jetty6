@@ -21,26 +21,29 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.security.Principal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.security.auth.Subject;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import org.apache.derby.jdbc.EmbeddedDataSource;
-import org.mortbay.jetty.Request;
+import org.mortbay.jetty.LoginCallback;
+import org.mortbay.jetty.security.LoginCallbackImpl;
 
 
 /* ---------------------------------------------------- */
 /** TestJAASUserRealm
- * <p> Test JAAS in Jetty - relies on the JDBCUserRealm.
+ * <p> Test JAAS in Jetty - relies on the JAASLoginService.
  *
  * <p><h4>Notes</h4>
  * <p>
@@ -118,7 +121,7 @@ public class TestJAASUserRealm extends TestCase
         writer.close();
         
         BufferedReader reader = new BufferedReader(new FileReader(configFile));
-        String s = "";
+        String s;
         for (s = reader.readLine(); (s != null); s = reader.readLine())
         {
             System.out.println (s);
@@ -140,7 +143,7 @@ public class TestJAASUserRealm extends TestCase
         EmbeddedDataSource eds = new EmbeddedDataSource();
         
         Context comp = null;
-        Context env = null;
+        Context env;
         try
         {
             //make the java:comp/env
@@ -191,46 +194,49 @@ public class TestJAASUserRealm extends TestCase
             connection.close();
             
             
-            //create a JAASUserRealm
-            JAASUserRealm realm = new JAASUserRealm ("testRealm");
+            //create a JAASLoginService
+            JAASLoginService loginService = new JAASLoginService("testRealm");
             
-            realm.setLoginModuleName ("ds");
+            loginService.setLoginModuleName ("ds");
+
+            LoginCallback loginCallback = new LoginCallbackImpl(new Subject(), "me", "blah".toCharArray());
+            loginService.login(loginCallback);
+            assertFalse (loginCallback.isSuccess());
+
+            loginCallback = new LoginCallbackImpl(new Subject(), "me", "me".toCharArray());
+            loginService.login (loginCallback);
             
-            
-            JAASUserPrincipal userPrincipal = (JAASUserPrincipal)realm.authenticate ("me", "blah",(Request)null);
-            assertNull (userPrincipal);
-            
-            userPrincipal = (JAASUserPrincipal)realm.authenticate ("me", "me", (Request)null);
-            
-            assertNotNull (userPrincipal);
-            assertNotNull (userPrincipal.getName());
+            assertTrue (loginCallback.isSuccess());
+            Principal userPrincipal = loginCallback.getUserPrincipal();
+            assertNotNull ("principal expected", userPrincipal);
             assertTrue (userPrincipal.getName().equals("me"));
+            List<String> groups = loginCallback.getGroups();
+
+            assertTrue (groups.contains("roleA"));
+            assertTrue (groups.contains("roleB"));
+            assertFalse (groups.contains("roleC"));
             
-            assertTrue (userPrincipal.isUserInRole("roleA"));
-            assertTrue (userPrincipal.isUserInRole("roleB"));
-            assertTrue (!userPrincipal.isUserInRole("roleC"));
-            
-            realm.pushRole (userPrincipal, "roleC");
-            assertTrue (userPrincipal.isUserInRole("roleC"));
-            assertTrue (!userPrincipal.isUserInRole("roleA"));
-            assertTrue (!userPrincipal.isUserInRole("roleB"));
-            
-            realm.pushRole (userPrincipal, "roleD");
-            assertTrue (userPrincipal.isUserInRole("roleD"));
-            assertTrue (!userPrincipal.isUserInRole("roleC"));
-            assertTrue (!userPrincipal.isUserInRole("roleA"));
-            assertTrue (!userPrincipal.isUserInRole("roleB"));
-            
-            realm.popRole(userPrincipal);
-            assertTrue (userPrincipal.isUserInRole("roleC"));
-            assertTrue (!userPrincipal.isUserInRole("roleA"));
-            assertTrue (!userPrincipal.isUserInRole("roleB"));
-            
-            realm.popRole(userPrincipal);
-            assertTrue (!userPrincipal.isUserInRole("roleC"));
-            assertTrue (userPrincipal.isUserInRole("roleA"));
-            
-            realm.disassociate(userPrincipal);
+//            loginService.pushRole (userPrincipal, "roleC");
+//            assertTrue (userPrincipal.isUserInRole("roleC"));
+//            assertTrue (!userPrincipal.isUserInRole("roleA"));
+//            assertTrue (!userPrincipal.isUserInRole("roleB"));
+//
+//            loginService.pushRole (userPrincipal, "roleD");
+//            assertTrue (userPrincipal.isUserInRole("roleD"));
+//            assertTrue (!userPrincipal.isUserInRole("roleC"));
+//            assertTrue (!userPrincipal.isUserInRole("roleA"));
+//            assertTrue (!userPrincipal.isUserInRole("roleB"));
+//
+//            loginService.popRole(userPrincipal);
+//            assertTrue (userPrincipal.isUserInRole("roleC"));
+//            assertTrue (!userPrincipal.isUserInRole("roleA"));
+//            assertTrue (!userPrincipal.isUserInRole("roleB"));
+//
+//            loginService.popRole(userPrincipal);
+//            assertTrue (!userPrincipal.isUserInRole("roleC"));
+//            assertTrue (userPrincipal.isUserInRole("roleA"));
+//
+//            loginService.disassociate(userPrincipal);
         }
         finally
         {
@@ -256,23 +262,26 @@ public class TestJAASUserRealm extends TestCase
     public void testItPropertyFile ()
         throws Exception
     {
-        //create a JAASUserRealm
-        JAASUserRealm realm = new JAASUserRealm ("props");
-        realm.setLoginModuleName ("props");
+        //create a JAASLoginService
+        JAASLoginService loginService = new JAASLoginService("props");
+        loginService.setLoginModuleName ("props");
 
-        JAASUserPrincipal userPrincipal = (JAASUserPrincipal)realm.authenticate ("user", "wrong",(Request)null);
-        assertNull (userPrincipal);
-        
-        userPrincipal = (JAASUserPrincipal)realm.authenticate ("user", "user", (Request)null);
+        LoginCallback loginCallback = new LoginCallbackImpl(new Subject(), "user", "wrong".toCharArray());
+        loginService.login(loginCallback);
+        assertFalse (loginCallback.isSuccess());
 
-        assertNotNull (userPrincipal);
-        assertTrue (userPrincipal.getName().equals("user"));
+        loginCallback = new LoginCallbackImpl(new Subject(), "user", "user".toCharArray());
+        loginService.login(loginCallback);
 
-        assertTrue (userPrincipal.isUserInRole("pleb"));
-        assertTrue (userPrincipal.isUserInRole("user"));
-        assertTrue (!userPrincipal.isUserInRole("other"));       
-       
-        realm.disassociate (userPrincipal);  
+        assertTrue (loginCallback.isSuccess());
+        Principal userPrincipal = loginCallback.getUserPrincipal();
+        assertNotNull ("principal expected", userPrincipal);
+        assertEquals (userPrincipal.getName(),"user");
+        List<String> groups = loginCallback.getGroups();
+
+        assertTrue (groups.contains("pleb"));
+        assertTrue (groups.contains("user"));
+        assertFalse (groups.contains("other"));
     }
 
     public void tearDown ()
@@ -280,6 +289,5 @@ public class TestJAASUserRealm extends TestCase
     {
        
     }
-    
-    
+
 }
