@@ -19,10 +19,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.util.Enumeration;
 import java.util.HashSet;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -36,6 +39,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpSchemes;
+import org.mortbay.jetty.HttpURI;
 import org.mortbay.jetty.client.Address;
 import org.mortbay.jetty.client.HttpClient;
 import org.mortbay.jetty.client.HttpExchange;
@@ -116,11 +120,23 @@ public class AsyncProxyServlet implements Servlet
             final InputStream in=request.getInputStream();
             final OutputStream out=response.getOutputStream();
 
-            if (request.isInitial())
+            if (request.getDispatcherType()!=DispatcherType.ASYNC)
             {
                 String uri=request.getRequestURI();
                 if (request.getQueryString()!=null)
                     uri+="?"+request.getQueryString();
+
+		HttpURI url=proxyHttpURI(request.getScheme(),
+		                         request.getServerName(),
+		                         request.getServerPort(),
+		                         uri);
+		if (url==null)
+		{
+		    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+		    return;
+		}
+
+		final AsyncContext async=request.startAsync(request,response);
 
                 HttpExchange exchange = new HttpExchange()
                 {
@@ -134,7 +150,7 @@ public class AsyncProxyServlet implements Servlet
 
                     protected void onResponseComplete() throws IOException
                     {
-                        request.complete();
+                        async.complete();
                     }
 
                     protected void onResponseContent(Buffer content) throws IOException
@@ -173,58 +189,29 @@ public class AsyncProxyServlet implements Servlet
                             Log.ignore(ex);
                             return;
                         }
-
-                        try
-                        {
-                            Log.warn(ex.toString());
-                            Log.debug(ex);
-                            if (!response.isCommitted())
-                                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                            request.complete();
-                        }
-                        catch(EofException e)
-                        {
-                            Log.ignore(e);
-                        }
-                        catch(IOException e)
-                        {
-                            Log.warn(e.toString());
-                            Log.debug(e);
-                        }
+                        Log.warn(ex.toString());
+                        Log.debug(ex);
+                        if (!response.isCommitted())
+                            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        async.complete();
                     }
 
                     protected void onExpire()
                     {
-                        try
-                        {
-                            if (!response.isCommitted())
-                                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                            request.complete();
-                        }
-                        catch(EofException e)
-                        {
-                            Log.ignore(e);
-                        }
-                        catch(IOException e)
-                        {
-                            Log.warn(e.toString());
-                            Log.debug(e);
-                        }
+                        if (!response.isCommitted())
+                            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        async.complete();
                     }
 
                 };
 
                 exchange.setScheme(HttpSchemes.HTTPS.equals(request.getScheme())?HttpSchemes.HTTPS_BUFFER:HttpSchemes.HTTP_BUFFER);
                 exchange.setMethod(request.getMethod());
-                exchange.setURI(uri);
-
+		exchange.setURL(url.toString());
                 exchange.setVersion(request.getProtocol());
-                Address address=new Address(request.getServerName(),request.getServerPort());
-                exchange.setAddress(address);
 
                 if (Log.isDebugEnabled())
-                    Log.debug("PROXY TO http://"+address.getHost()+":"+address.getPort()+uri);
-
+                    Log.debug("PROXY TO "+url);
 
                 // check connection header
                 String connectionHdr = request.getHeader("Connection");
@@ -283,7 +270,6 @@ public class AsyncProxyServlet implements Servlet
                 if (hasContent)
                     exchange.setRequestContentSource(in);
 
-                request.suspend();
                 _client.send(exchange);
 
             }
@@ -341,6 +327,13 @@ public class AsyncProxyServlet implements Servlet
         }
     }
 
+    /* ------------------------------------------------------------ */
+    protected HttpURI proxyHttpURI(String scheme, String serverName, int serverPort, String uri)
+        throws MalformedURLException
+    {
+        return new HttpURI(scheme+"://"+serverName+":"+serverPort+uri);
+    }
+
 
     /* (non-Javadoc)
      * @see javax.servlet.Servlet#getServletInfo()
@@ -357,6 +350,5 @@ public class AsyncProxyServlet implements Servlet
     {
 
     }
-
 
 }

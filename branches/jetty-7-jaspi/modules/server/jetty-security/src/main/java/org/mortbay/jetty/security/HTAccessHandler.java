@@ -37,7 +37,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.LoginCallback;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
@@ -79,9 +78,10 @@ public class HTAccessHandler extends AbstractSecurityHandler
      * 
      * @see org.mortbay.jetty.Handler#handle(java.lang.String,
      *      javax.servlet.http.HttpServletRequest,
-     *      javax.servlet.http.HttpServletResponse, int)
+     *      javax.servlet.http.HttpServletResponse)
      * @param authResult
      */
+//<<<<<<< .working
     /*
      * public void handle(String target, HttpServletRequest request,
      * HttpServletResponse response, int dispatch) throws IOException,
@@ -171,6 +171,9 @@ public class HTAccessHandler extends AbstractSecurityHandler
      * base_request.setHandled(true); } } }
      */
     protected UserIdentity newUserIdentity(ServerAuthResult authResult)
+//=======
+//    public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+//>>>>>>> .merge-right.r4452
     {
         return new ConstraintUserIdentity(authResult);
     }
@@ -285,7 +288,20 @@ public class HTAccessHandler extends AbstractSecurityHandler
     {
         return ((HTAccess) constraintInfo)._requireName != null;
     }
-
+/* FIXME how did this come in with the merge? very weird AUDITME
+                // set user
+                if (user!=null)
+                {
+                    base_request.setAuthType(Constraint.__BASIC_AUTH);
+                    base_request.setUserPrincipal(getPrincipal(user, getUserRealm()));
+                }
+            }
+            
+            if (getHandler()!=null)
+            {
+                getHandler().handle(target,request,response);
+            }
+*/
     protected boolean checkWebResourcePermissions(String pathInContext, Request request, 
                                                   Response response, Object constraintInfo, UserIdentity userIdentity) throws IOException
     {

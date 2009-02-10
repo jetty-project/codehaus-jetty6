@@ -36,7 +36,7 @@ public class RewriteHandlerTest extends AbstractRuleTestCase
         _server.setHandler(_handler);
         _handler.setHandler(new AbstractHandler(){
 
-            public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+            public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
             {
                 response.setStatus(201);
                 request.setAttribute("target",target);
@@ -71,7 +71,7 @@ public class RewriteHandlerTest extends AbstractRuleTestCase
         _handler.setRewritePathInfo(false);
         _request.setRequestURI("/foo/bar");
         _request.setPathInfo("/foo/bar");
-        _handler.handle("/foo/bar",_request,_response,0);
+        _handler.handle("/foo/bar",_request,_response);
         assertEquals(201,_response.getStatus());
         assertEquals("/foo/bar",_request.getAttribute("target"));
         assertEquals("/foo/bar",_request.getAttribute("URI"));
@@ -84,7 +84,7 @@ public class RewriteHandlerTest extends AbstractRuleTestCase
         _handler.setOriginalPathAttribute(null);
         _request.setRequestURI("/aaa/bar");
         _request.setPathInfo("/aaa/bar");
-        _handler.handle("/aaa/bar",_request,_response,0);
+        _handler.handle("/aaa/bar",_request,_response);
         assertEquals(201,_response.getStatus());
         assertEquals("/ddd/bar",_request.getAttribute("target"));
         assertEquals("/aaa/bar",_request.getAttribute("URI"));
@@ -99,7 +99,7 @@ public class RewriteHandlerTest extends AbstractRuleTestCase
         _handler.setRewritePathInfo(true);
         _request.setRequestURI("/aaa/bar");
         _request.setPathInfo("/aaa/bar");
-        _handler.handle("/aaa/bar",_request,_response,0);
+        _handler.handle("/aaa/bar",_request,_response);
         assertEquals(201,_response.getStatus());
         assertEquals("/ddd/bar",_request.getAttribute("target"));
         assertEquals("/ddd/bar",_request.getAttribute("URI"));
@@ -112,7 +112,7 @@ public class RewriteHandlerTest extends AbstractRuleTestCase
         _rule2.setTerminating(true);
         _request.setRequestURI("/aaa/bar");
         _request.setPathInfo("/aaa/bar");
-        _handler.handle("/aaa/bar",_request,_response,0);
+        _handler.handle("/aaa/bar",_request,_response);
         assertEquals(201,_response.getStatus());
         assertEquals("/ccc/bar",_request.getAttribute("target"));
         assertEquals("/ccc/bar",_request.getAttribute("URI"));
@@ -128,7 +128,7 @@ public class RewriteHandlerTest extends AbstractRuleTestCase
         _request.setAttribute("info",null);
         _request.setRequestURI("/aaa/bar");
         _request.setPathInfo("/aaa/bar");
-        _handler.handle("/aaa/bar",_request,_response,0);
+        _handler.handle("/aaa/bar",_request,_response);
         assertEquals(200,_response.getStatus());
         assertEquals(null,_request.getAttribute("target"));
         assertEquals(null,_request.getAttribute("URI"));

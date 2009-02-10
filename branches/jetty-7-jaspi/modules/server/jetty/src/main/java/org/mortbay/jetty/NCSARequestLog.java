@@ -136,6 +136,16 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
     {
         return _logDateFormat;
     }
+    
+    public void setLogLocale(Locale logLocale)
+    {
+        _logLocale = logLocale;
+    }
+    
+    public Locale getLogLocale()
+    {
+        return _logLocale;
+    }
 
     public void setLogTimeZone(String tz)
     {
@@ -278,9 +288,7 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
             buf.append(' ');
             buf.append(request.getProtocol());
             buf.append("\" ");
-            if (request.isSuspended())
-                buf.append("SUS");
-            else
+            if (request.getAsyncRequest().isInitial())
             {
                 int status = response.getStatus();
                 if (status <= 0)
@@ -289,13 +297,15 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
                 buf.append((char)('0' + ((status / 10) % 10)));
                 buf.append((char)('0' + (status % 10)));
             }
+            else
+                buf.append("Async");
 
             long responseLength = response.getContentCount();
             if (responseLength >= 0)
             {
                 buf.append(' ');
                 if (responseLength > 99999)
-                    buf.append(Long.toString(responseLength));
+                    buf.append(responseLength);
                 else
                 {
                     if (responseLength > 9999)

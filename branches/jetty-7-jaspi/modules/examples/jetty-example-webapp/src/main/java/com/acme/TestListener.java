@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
@@ -69,14 +70,13 @@ public class TestListener implements HttpSessionListener,  HttpSessionAttributeL
     {
     	ServletContext context=sce.getServletContext();
     	
-    	context.addFilter("TestFilter", null, TestFilter.class.getName(), null);
+    	FilterRegistration registration=context.addFilter("TestFilter",TestFilter.class.getName());
     	
-    	context.addFilterMapping(
-    			"TestFilter", 
-    			new String[]{"/dump/*","/dispatch/*","*.dump"}, new String[]{"*"}, 
-    			EnumSet.of(DispatcherType.ERROR,DispatcherType.FORWARD,DispatcherType.INCLUDE,DispatcherType.REQUEST), 
-    			true);
-    
+    	registration.setAsyncSupported(true);
+    	registration.addMappingForUrlPatterns(
+    	        EnumSet.of(DispatcherType.ERROR,DispatcherType.ASYNC,DispatcherType.FORWARD,DispatcherType.INCLUDE,DispatcherType.REQUEST),
+    	        true, 
+    	        new String[]{"/dump/*","/dispatch/*","*.dump"});
     }
 
     public void contextDestroyed(ServletContextEvent sce)

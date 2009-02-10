@@ -18,10 +18,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.AsyncRequest;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.HttpConnection;
@@ -161,13 +163,24 @@ public class ContextHandlerCollection extends HandlerCollection
     /* 
      * @see org.mortbay.jetty.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
     {
         Handler[] handlers = getHandlers();
         if (handlers==null || handlers.length==0)
 	    return;
 
 	Request base_request = HttpConnection.getCurrentConnection().getRequest();
+	
+	AsyncRequest async = base_request.getAsyncRequest();
+	if (async!=null)
+	{
+	    ContextHandler context=async.getContextHandler();
+	    if (context!=null)
+	    {
+	        context.doHandle(target,base_request,request,response);
+	        return;
+	    }
+	}
 	
 	// data structure which maps a request to a context; first-best match wins
 	// { context path => 
@@ -195,7 +208,7 @@ public class ContextHandlerCollection extends HandlerCollection
                     for (int j=0; j<LazyList.size(list); j++)
                     {
                         Handler handler = (Handler)LazyList.get(list,j);
-                        handler.handle(target,request, response, dispatch);
+                        handler.handle(target,request, response);
                         if (base_request.isHandled())
                             return;
                     }
@@ -205,7 +218,7 @@ public class ContextHandlerCollection extends HandlerCollection
                     for (int j=0; j<LazyList.size(list); j++)
                     {
                         Handler handler = (Handler)LazyList.get(list,j);
-                        handler.handle(target,request, response, dispatch);
+                        handler.handle(target,request, response);
                         if (base_request.isHandled())
                             return;
                     }
@@ -216,7 +229,7 @@ public class ContextHandlerCollection extends HandlerCollection
                     for (int j=0; j<LazyList.size(list); j++)
                     {
                         Handler handler = (Handler)LazyList.get(list,j);
-                        handler.handle(target,request, response, dispatch);
+                        handler.handle(target,request, response);
                         if (base_request.isHandled())
                             return;
                     }
@@ -226,7 +239,7 @@ public class ContextHandlerCollection extends HandlerCollection
                     for (int j=0; j<LazyList.size(list); j++)
                     {
                         Handler handler = (Handler)LazyList.get(list,j);
-                        handler.handle(target,request, response, dispatch);
+                        handler.handle(target,request, response);
                         if (base_request.isHandled())
                             return;
                     }
@@ -238,7 +251,7 @@ public class ContextHandlerCollection extends HandlerCollection
             // This may not work in all circumstances... but then I think it should never be called
 	    for (int i=0;i<handlers.length;i++)
 	    {
-		handlers[i].handle(target,request, response, dispatch);
+		handlers[i].handle(target,request, response);
 		if ( base_request.isHandled())
 		    return;
 	    }

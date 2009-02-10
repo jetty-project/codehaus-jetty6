@@ -124,6 +124,11 @@ public class HttpParser implements Parser
     {
         return _contentLength;
     }
+    
+    public long getContentRead()
+    {
+        return _contentPosition;
+    }
 
     /* ------------------------------------------------------------------------------- */
     public int getState()
@@ -1037,7 +1042,7 @@ public class HttpParser implements Parser
         {
         }
 
-        public void messageComplete(long contextLength) throws IOException
+        public void messageComplete(long contentLength) throws IOException
         {
         }
 

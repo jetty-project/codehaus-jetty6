@@ -114,7 +114,7 @@ public class QoSFilter implements Filter
         boolean accepted=false;
         try
         {
-            if (request.isInitial() || request.getAttribute(_suspended)==null)
+            if (request.getAttribute(_suspended)==null)
             {
                 accepted=_passes.tryAcquire(_waitMs,TimeUnit.MILLISECONDS);
                 if (accepted)
@@ -124,10 +124,10 @@ public class QoSFilter implements Filter
                 else
                 {
                     request.setAttribute(_suspended,Boolean.TRUE);
-                    if (_suspendMs<=0)
-                        request.suspend();
-                    else
-                        request.suspend(_suspendMs);
+                    if (_suspendMs>0)
+                        request.setAsyncTimeout(_suspendMs);
+                    request.startAsync();
+                    
                     int priority = getPriority(request);
                     _queue[priority].add(request);
                     return;
@@ -140,7 +140,7 @@ public class QoSFilter implements Filter
                 if (suspended.booleanValue())
                 {
                     request.setAttribute(_suspended,Boolean.FALSE);
-                    if (request.isResumed())
+                    if (request.getAttribute("javax.servlet.resumed")==Boolean.TRUE)
                     {
                         _passes.acquire();
                         accepted=true;
@@ -186,7 +186,7 @@ public class QoSFilter implements Filter
                     ServletRequest r=_queue[p].poll();
                     if (r!=null)
                     {
-                        r.resume();
+                        r.getAsyncContext().dispatch();
                         break;
                     }
                 }

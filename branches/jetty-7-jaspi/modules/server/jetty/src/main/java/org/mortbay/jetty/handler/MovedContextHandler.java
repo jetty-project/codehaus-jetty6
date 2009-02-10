@@ -98,7 +98,7 @@ public class MovedContextHandler extends ContextHandler
     
     private class Redirector extends AbstractHandler
     {
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             if (_newContextURL==null)
                 return;
