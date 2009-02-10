@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPOutputStream;
 
-import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 import javax.servlet.FilterChain;
@@ -31,11 +30,9 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
-import javax.swing.text.WrappedPlainView;
 
 import org.mortbay.util.ByteArrayOutputStream2;
 import org.mortbay.util.StringUtil;
