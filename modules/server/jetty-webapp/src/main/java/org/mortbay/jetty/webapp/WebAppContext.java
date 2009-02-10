@@ -344,6 +344,12 @@ public class WebAppContext extends Context
                 _configurations[i].configureClassLoader();
 
             getTempDirectory();
+            if (_tmpDir!=null && !_isExistingTmpDir && !isTempWorkDirectory())
+            {
+                File sentinel = new File(_tmpDir, ".active");
+                if(!sentinel.exists())
+                    sentinel.mkdir();
+            }
 
             super.doStart();
 
