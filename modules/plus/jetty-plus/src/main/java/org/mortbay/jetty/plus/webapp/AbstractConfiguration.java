@@ -27,12 +27,12 @@ import org.mortbay.jetty.plus.annotation.LifeCycleCallback;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
 import org.mortbay.jetty.plus.annotation.PostConstructCallback;
 import org.mortbay.jetty.plus.annotation.PreDestroyCallback;
-import org.mortbay.jetty.plus.annotation.RunAsCollection;
+import org.mortbay.jetty.plus.annotation.RunAsCollection;           
 import org.mortbay.jetty.plus.servlet.ServletHandler;
-import org.mortbay.jetty.security.ConstraintsSecurityHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.webapp.WebXmlConfiguration;
+import org.mortbay.jetty.handler.SecurityHandler;
 import org.mortbay.log.Log;
 import org.mortbay.util.TypeUtil;
 import org.mortbay.xml.XmlParser;
@@ -49,6 +49,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
     protected LifeCycleCallbackCollection _callbacks = new LifeCycleCallbackCollection();
     protected InjectionCollection _injections = new InjectionCollection();
     protected RunAsCollection _runAsCollection = new RunAsCollection();
+    protected SecurityHandler _securityHandler;
     
     public abstract void bindEnvEntry (String name, Object value) throws Exception;
     
@@ -76,14 +77,14 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
         
         //set up our special ServletHandler to remember injections and lifecycle callbacks
         ServletHandler servletHandler = new ServletHandler();
-        ConstraintsSecurityHandler securityHandler = getWebAppContext().getConstraintsSecurityHandler();        
+        _securityHandler = getWebAppContext().getSecurityHandler();
         org.mortbay.jetty.servlet.ServletHandler existingHandler = getWebAppContext().getServletHandler();       
         servletHandler.setFilterMappings(existingHandler.getFilterMappings());
         servletHandler.setFilters(existingHandler.getFilters());
         servletHandler.setServlets(existingHandler.getServlets());
         servletHandler.setServletMappings(existingHandler.getServletMappings());
         getWebAppContext().setServletHandler(servletHandler);
-        securityHandler.setHandler(servletHandler);       
+        _securityHandler.setHandler(servletHandler);       
     }
     
     public void configureDefaults ()
@@ -447,9 +448,9 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
         ServletHolder[] holders = getWebAppContext().getServletHandler().getServlets();
         for (int i=0;holders!=null && i<holders.length;i++)
         {
-            _runAsCollection.setRunAs(holders[i]);
+            _runAsCollection.setRunAs(holders[i], _securityHandler);
         }
-               
+
         EventListener[] listeners = getWebAppContext().getEventListeners();
         for (int i=0;i<listeners.length;i++)
         {

@@ -378,6 +378,7 @@ public class Ajp13Parser implements Parser
                         _handler.parsedRemoteUser(Ajp13RequestPacket.getString(_buffer, _tok1));
                         break;
                     case Ajp13RequestHeaders.AUTH_TYPE_ATTR:
+                        //XXX JASPI how does this make sense?
                         _handler.parsedAuthorizationType(Ajp13RequestPacket.getString(_buffer, _tok1));
                         break;
 

@@ -20,6 +20,7 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.RequestLog;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
@@ -27,7 +28,6 @@ import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.PluginLog;
-import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.resource.Resource;
 
@@ -92,7 +92,7 @@ public class Jetty6PluginServer implements JettyPluginServer
     /**
      * 
      * 
-     * @see org.mortbay.jetty.plugin.JettyPluginServer#setUserRealms(org.mortbay.jetty.plugin.JettyPluginUserRealm[])
+     * @see org.mortbay.jetty.plugin.JettyPluginServer#setLoginServices(java.Object[])
      */
     public void setUserRealms(Object[] realms) throws Exception
     {
@@ -100,12 +100,12 @@ public class Jetty6PluginServer implements JettyPluginServer
             return;
  
          for (int i=0; i<realms.length;i++)
-             this.server.addUserRealm((UserRealm)realms[i]);
+             this.server.addLoginService((UserRealm)realms[i]);
     }
 
     /**
      * 
-     * @see org.mortbay.jetty.plugin.util.JettyPluginServer#getUserRealms()
+     * @see org.mortbay.jetty.plugin.util.JettyPluginServer#getLoginServices()
      */
     public Object[] getUserRealms()
     {
@@ -205,4 +205,5 @@ public class Jetty6PluginServer implements JettyPluginServer
     {
         this.server.getThreadPool().join();
     }
+
 }

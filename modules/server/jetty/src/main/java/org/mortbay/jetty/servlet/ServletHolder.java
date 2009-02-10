@@ -15,11 +15,13 @@
 package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.Collections;
+
+import java.security.Principal;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -32,9 +34,10 @@ import javax.servlet.UnavailableException;
 
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
-import org.mortbay.jetty.UserRealm;
-import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.handler.SecurityHandler;
+
+import org.mortbay.jetty.UserIdentity;
+import org.mortbay.jetty.RunAsToken;
+
 import org.mortbay.log.Log;
 
 
@@ -54,17 +57,17 @@ public class ServletHolder extends Holder
     /* ---------------------------------------------------------------- */
     private int _initOrder;
     private boolean _initOnStartup=false;
-    private Map _roleMap; 
+    private Map<String, String> _roleMap;
     private String _forcedPath;
-    private String _runAs;
-    private UserRealm _realm;    
+    private RunAsToken _runAs;
+    private UserIdentity _systemUserIdentity;
     
     private transient Servlet _servlet;
     private transient Config _config;
     private transient long _unavailable;
     private transient UnavailableException _unavailableEx;
+    public static final Map<String,String> NO_MAPPED_ROLES = Collections.emptyMap();
 
-    
     /* ---------------------------------------------------------------- */
     /** Constructor .
      */
@@ -174,7 +177,7 @@ public class ServletHolder extends Holder
     public synchronized void setUserRoleLink(String name,String link)
     {
         if (_roleMap==null)
-            _roleMap=new HashMap();
+            _roleMap=new HashMap<String, String>();
         _roleMap.put(name,link);
     }
     
@@ -188,14 +191,14 @@ public class ServletHolder extends Holder
     {
         if (_roleMap==null)
             return name;
-        String link=(String)_roleMap.get(name);
+        String link= _roleMap.get(name);
         return (link==null)?name:link;
     }
 
     /* ------------------------------------------------------------ */
-    public Map getRoleMap()
+    public Map<String, String> getRoleMap()
     {
-        return _roleMap;
+        return _roleMap == null? NO_MAPPED_ROLES : _roleMap;
     }
     
     /* ------------------------------------------------------------ */
@@ -203,13 +206,13 @@ public class ServletHolder extends Holder
      * @param role Role name that is added to UserPrincipal when this servlet
      * is called. 
      */
-    public void setRunAs(String role)
+    public void setRunAs(RunAsToken role)
     {
         _runAs=role;
     }
     
     /* ------------------------------------------------------------ */
-    public String getRunAs()
+    public RunAsToken getRunAs()
     {
         return _runAs;
     }
@@ -249,9 +252,10 @@ public class ServletHolder extends Holder
 
         _config=new Config();
 
-        if (_runAs!=null)
-            _realm=((SecurityHandler)(ContextHandler.getCurrentContext()
-                    .getContextHandler().getChildHandlerByClass(SecurityHandler.class))).getUserRealm();
+//        if (_runAs!=null)
+        //TODO jaspi this is ridiculously fragile
+//            _realm=((AbstractSecurityHandler)(ContextHandler.getCurrentContext()
+//                    .getContextHandler().getChildHandlerByClass(ConstraintSecurityHandler.class))).getUserRealm();
 
         if (javax.servlet.SingleThreadModel.class.isAssignableFrom(_class))
             _servlet = new SingleThreadedWrapper();
@@ -275,13 +279,13 @@ public class ServletHolder extends Holder
     /* ------------------------------------------------------------ */
     public void doStop()
     {
-        Principal user=null;
+        RunAsToken oldRunAs = null;
         try
         {
             // Handle run as
-            if (_runAs!=null && _realm!=null)
-                user=_realm.pushRole(null,_runAs);
-                
+            if (_runAs!=null && _systemUserIdentity!=null)
+                oldRunAs = _systemUserIdentity.setRunAsRole(_runAs);
+
             if (_servlet!=null)
             {                  
                 try
@@ -303,8 +307,8 @@ public class ServletHolder extends Holder
         {
             super.doStop();
             // pop run-as role
-            if (_runAs!=null && _realm!=null && user!=null)
-                _realm.popRole(user); 
+            if (_runAs!=null && _systemUserIdentity!=null)
+                _systemUserIdentity.setRunAsRole(oldRunAs);
         }
     }
 
@@ -375,13 +379,13 @@ public class ServletHolder extends Holder
     }
     
     /* ------------------------------------------------------------ */
-    private void makeUnavailable(UnavailableException e) 
+    private void makeUnavailable(UnavailableException e)
     {
         if (_unavailableEx==e && _unavailable!=0)
             return;
 
         _servletHandler.getServletContext().log("unavailable",e);
-        
+
         _unavailableEx=e;
         _unavailable=-1;
         if (e.isPermanent())   
@@ -395,8 +399,10 @@ public class ServletHolder extends Holder
         }
     }
     
+
     /* ------------------------------------------------------------ */
-    private void makeUnavailable(Throwable e) 
+
+    private void makeUnavailable(Throwable e)
     {
         if (e instanceof UnavailableException)
             makeUnavailable((UnavailableException)e);
@@ -409,25 +415,25 @@ public class ServletHolder extends Holder
     }
 
     /* ------------------------------------------------------------ */
-    private void initServlet() 
+    private void initServlet()
     	throws ServletException
     {
-        Principal user=null;
+        RunAsToken oldRunAs = null;
         try
         {
             if (_servlet==null)
                 _servlet=(Servlet)newInstance();
             if (_config==null)
                 _config=new Config();
-            
+
             //handle any cusomizations of the servlet, such as @postConstruct
             if (!(_servlet instanceof SingleThreadedWrapper))
                 _servlet = getServletHandler().customizeServlet(_servlet);
             
             // Handle run as
-            if (_runAs!=null && _realm!=null)
-                user=_realm.pushRole(null,_runAs);
-            
+            if (_runAs!=null && _systemUserIdentity!=null)
+                oldRunAs = _systemUserIdentity.setRunAsRole(_runAs);
+
             _servlet.init(_config);
         }
         catch (UnavailableException e)
@@ -454,8 +460,8 @@ public class ServletHolder extends Holder
         finally
         {
             // pop run-as role
-            if (_runAs!=null && _realm!=null && user!=null)
-                _realm.popRole(user);
+            if (_runAs!=null && _systemUserIdentity!=null)
+                _systemUserIdentity.setRunAsRole(oldRunAs);
         }
     }
     
@@ -483,6 +489,8 @@ public class ServletHolder extends Holder
         
         // Service the request
         boolean servlet_error=true;
+        RunAsToken oldRunAs = null;
+        UserIdentity userIdentity = null;
         Principal user=null;
         boolean suspendable = baseRequest.isAsyncSupported();
         try
@@ -493,10 +501,10 @@ public class ServletHolder extends Holder
                 request.setAttribute("org.apache.catalina.jsp_file",_forcedPath);
 
             // Handle run as
-            if (_runAs!=null && _realm!=null)
+            if (_runAs!=null)
             {
-                user=_realm.pushRole(baseRequest.getUserPrincipal(),_runAs);
-                baseRequest.setUserPrincipal(user);
+                userIdentity = baseRequest.getUserIdentity();
+                oldRunAs = userIdentity.setRunAsRole(_runAs);
             }
             
             if (!isAsyncSupported())
@@ -515,10 +523,9 @@ public class ServletHolder extends Holder
             baseRequest.setAsyncSupported(suspendable);
             
             // pop run-as role
-            if (_runAs!=null && _realm!=null && user!=null)
+            if (_runAs!=null && userIdentity!=null)
             {
-                user=_realm.popRole(user);
-                baseRequest.setUserPrincipal(user);
+                userIdentity.setRunAsRole(oldRunAs);
             }
 
             // Handle error params.

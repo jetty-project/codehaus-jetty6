@@ -34,4 +34,8 @@
       </form-error-page>
     </form-login-config>
   </login-config>
+
+  <security-role>
+    <role-name>roleA</role-name>
+  </security-role>
 </web-app>

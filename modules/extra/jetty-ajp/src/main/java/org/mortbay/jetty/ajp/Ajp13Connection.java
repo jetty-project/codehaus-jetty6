@@ -91,7 +91,8 @@ public class Ajp13Connection extends HttpConnection
 
         public void parsedAuthorizationType(Buffer authType) throws IOException
         {
-            _request.setAuthType(authType.toString());
+            //TODO JASPI this doesn't appear to make sense yet... how does ajp auth fit into jetty auth?
+//            _request.setAuthType(authType.toString());
         }
 
         public void parsedRemoteUser(Buffer remoteUser) throws IOException

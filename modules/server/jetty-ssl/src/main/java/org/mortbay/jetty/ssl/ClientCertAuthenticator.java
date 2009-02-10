@@ -15,14 +15,8 @@
 package org.mortbay.jetty.ssl;
 
 import java.io.IOException;
-import java.security.Principal;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.mortbay.jetty.Authenticator;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
-import org.mortbay.jetty.UserRealm;
+//import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.security.Constraint;
 
 /* ------------------------------------------------------------ */
@@ -33,7 +27,7 @@ import org.mortbay.jetty.security.Constraint;
  * certificate as the credential.
  * @author Greg Wilkins (gregw)
  */
-public class ClientCertAuthenticator implements Authenticator
+public class ClientCertAuthenticator
 {
     private int _maxHandShakeSeconds =60;
     
@@ -65,41 +59,41 @@ public class ClientCertAuthenticator implements Authenticator
      * the response as an auth challenge or redirect.
      * @exception IOException 
      */
-    public Principal authenticate(UserRealm realm,
-            String pathInContext,
-            Request request,
-            Response response)
-        throws IOException
-    {
-        java.security.cert.X509Certificate[] certs =
-            (java.security.cert.X509Certificate[])
-            request.getAttribute("javax.servlet.request.X509Certificate");
-            
-        // Need certificates.
-        if (certs==null || certs.length==0 || certs[0]==null)
-        {
-            if (response != null)
-                response.sendError(HttpServletResponse.SC_FORBIDDEN,"A client certificate is required for accessing this web application but the server's listener is not configured for mutual authentication (or the client did not provide a certificate).");
-            return null;
-        }
-        
-        Principal principal = certs[0].getSubjectDN();
-        if (principal==null)
-            principal=certs[0].getIssuerDN();
-        String username=principal==null?"clientcert":principal.getName();
-        
-        Principal user = realm.authenticate(username,certs,request);
-        if (user == null)
-        {
-            if (response != null)
-                response.sendError(HttpServletResponse.SC_FORBIDDEN,"The provided client certificate does not correspond to a trusted user.");
-            return null;
-        }
-        
-        request.setAuthType(Constraint.__CERT_AUTH);
-        request.setUserPrincipal(user);                
-        return user;
-    }
+//    public Principal authenticate(UserRealm realm,
+//            String pathInContext,
+//            Request request,
+//            Response response)
+//        throws IOException
+//    {
+//        java.security.cert.X509Certificate[] certs =
+//            (java.security.cert.X509Certificate[])
+//            request.getAttribute("javax.servlet.request.X509Certificate");
+//
+//        // Need certificates.
+//        if (certs==null || certs.length==0 || certs[0]==null)
+//        {
+//            if (response != null)
+//                response.sendError(HttpServletResponse.SC_FORBIDDEN,"A client certificate is required for accessing this web application but the server's listener is not configured for mutual authentication (or the client did not provide a certificate).");
+//            return null;
+//        }
+//
+//        Principal principal = certs[0].getSubjectDN();
+//        if (principal==null)
+//            principal=certs[0].getIssuerDN();
+//        String username=principal==null?"clientcert":principal.getName();
+//
+//        Principal user = realm.authenticate(username,certs,request);
+//        if (user == null)
+//        {
+//            if (response != null)
+//                response.sendError(HttpServletResponse.SC_FORBIDDEN,"The provided client certificate does not correspond to a trusted user.");
+//            return null;
+//        }
+//
+////        request.setAuthType(Constraint.__CERT_AUTH);
+////        request.setUserPrincipal(user);
+//        return user;
+//    }
     
     /* ------------------------------------------------------------ */
     public String getAuthMethod()

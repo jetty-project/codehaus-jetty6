@@ -50,7 +50,7 @@ detected.
 
   <Get name="securityHandler">
     <Set name="userRealm">
-      <New class="org.mortbay.jetty.security.HashUserRealm">
+      <New class="org.mortbay.jetty.security.HashLoginService">
 	    <Set name="name">Test Realm</Set>
 	    <Set name="config"><SystemProperty name="jetty.home" default="."/>/etc/realm.properties</Set>
             <!-- To enable reload of realm when properties change, uncomment the following lines -->
