@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.servlet.AsyncContext;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -80,11 +79,11 @@ public class AsyncRestServlet extends HttpServlet
         }
     }
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    protected void doGet(final HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         Long start=System.currentTimeMillis();
 
-        if (!request.isAsyncStarted() || request.getAttribute(CLIENT_ATTR)==null)
+        if (request.isInitial() || request.getAttribute(CLIENT_ATTR)==null)
         {
             // extract keywords to search for
             String[] keywords=request.getParameter(ITEMS_PARAM).split(",");
@@ -95,7 +94,7 @@ public class AsyncRestServlet extends HttpServlet
             final AtomicInteger count=new AtomicInteger(keywords.length);
             
             // suspend the request
-            final AsyncContext asyncContext = request.startAsync();
+            request.suspend();
             request.setAttribute(CLIENT_ATTR, results);
 
             // For each keyword
@@ -117,7 +116,7 @@ public class AsyncRestServlet extends HttpServlet
 
                         // if that was all, resume the request
                         if (count.decrementAndGet()<=0)
-                        	asyncContext.dispatch();
+                            request.resume();
                     }
                 };
 

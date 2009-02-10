@@ -38,7 +38,6 @@ public class Holder extends AbstractLifeCycle implements Serializable
     protected String _displayName;
     protected Map _initParams;
     protected boolean _extInstance;
-    protected boolean _asyncSupported;
 
     /* ---------------------------------------------------------------- */
     protected String _name;
@@ -153,8 +152,7 @@ public class Holder extends AbstractLifeCycle implements Serializable
             throw new InstantiationException("!"+_className);
         return _class.newInstance();
     }
-
-    /* ------------------------------------------------------------ */
+    
     public void destroyInstance(Object instance)
     throws Exception
     {
@@ -220,26 +218,12 @@ public class Holder extends AbstractLifeCycle implements Serializable
     {
         _servletHandler = servletHandler;
     }
-
-    /* ------------------------------------------------------------ */
-    public void setAsyncSupported(boolean suspendable)
-    {
-        _asyncSupported=suspendable;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isAsyncSupported()
-    {
-        return _asyncSupported;
-    }
     
     /* ------------------------------------------------------------ */
     public String toString()
     {
         return _name;
     }
-    
-
 }
 
 

@@ -7,41 +7,23 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.servlet.ServletHandler;
-
+import javax.servlet.http.HttpSession;
 
 // Simple asynchronous Chat room.
 // This does not handle duplicate usernames or multiple frames/tabs from the same browser
 // Some code is duplicated for clarity.
 public class ChatServlet extends HttpServlet
 {
-    AsyncListener _asyncListener = new AsyncListener()
-    {
-        public void onComplete(AsyncEvent event) throws IOException
-        {}
-
-        public void onTimeout(AsyncEvent event) throws IOException
-        {
-            event.getRequest().getAsyncContext().dispatch();
-        }
-    };
-    
     // inner class to hold message queue for each chat room member
     class Member
     {
         String _name;
-        AsyncContext _asyncContext;
+        ServletRequest _pollRequest;
         Queue<String> _queue = new LinkedList<String>();
     }
 
@@ -78,62 +60,37 @@ public class ChatServlet extends HttpServlet
         room.put(username,member); 
         response.setContentType("text/json;charset=utf-8");
         PrintWriter out=response.getWriter();
-        out.print("{action:\"join\"}");
+        out.print("{action:'join'}");
     }
 
     private synchronized void poll(HttpServletRequest request,HttpServletResponse response,String username)
     throws IOException
     {
         Map<String,Member> room=_rooms.get(request.getPathInfo());
-        if (room==null)
-        {
-            response.sendError(503);
-            return;
-        }
         Member member = room.get(username);
-        if (room==null)
-        {
-            response.sendError(503);
-            return;
-        }
 
         if (member._queue.size()>0)
         {
             // Send one chat message
             response.setContentType("text/json;charset=utf-8");
-            StringBuilder buf=new StringBuilder();
-            
-            buf.append("{\"action\":\"poll\",");
-            buf.append("\"from\":\"");
-            buf.append(member._queue.poll());
-            buf.append("\",");
-
-            String message = member._queue.poll();
-            int quote=message.indexOf('"');
-            while (quote>=0)
-            {
-                message=message.substring(0,quote)+'\\'+message.substring(quote);
-                quote=message.indexOf('"',quote+2);
-            }
-            buf.append("\"chat\":\"");
-            buf.append(message);
-            buf.append("\"}");
-            byte[] bytes = buf.toString().getBytes("utf-8");
-            response.setContentLength(bytes.length);
-            response.getOutputStream().write(bytes);
+            PrintWriter out=response.getWriter();
+            out.print("{action:'poll',");
+            out.print("from:'"+member._queue.poll()+"',");
+            out.print("chat:'"+member._queue.poll()+"'}");
         }
-        else if (request.isAsyncStarted()) 
+        //else if (request.getAttribute("javax.servlet.timeout")==Boolean.TRUE) 
+        else if (request.isTimeout()) 
         {
             // Timeout so send empty response
             response.setContentType("text/json;charset=utf-8");
             PrintWriter out=response.getWriter();
-            out.print("{action:\"poll\"}");
+            out.print("{action:'poll'}");
         }
         else
         {        
             // No chat in queue, so suspend and wait for timeout or chat
-            request.addAsyncListener(_asyncListener);
-            member._asyncContext=request.startAsync();
+            request.suspend();
+            member._pollRequest=request;
         }
     }
 
@@ -148,16 +105,16 @@ public class ChatServlet extends HttpServlet
             m._queue.add(message);  // chat
 
             // wakeup member if polling
-            if (m._asyncContext!=null)
+            if (m._pollRequest!=null)
             {
-                m._asyncContext.dispatch();
-                m._asyncContext=null;
+                m._pollRequest.resume();
+                m._pollRequest=null;
             }
         }
 
         response.setContentType("text/json;charset=utf-8");
         PrintWriter out=response.getWriter();
-        out.print("{action:\"chat\"}");  
+        out.print("{action:'chat'}");  
     }
 
     
@@ -168,11 +125,6 @@ public class ChatServlet extends HttpServlet
         if (!request.getRequestURI().endsWith("/"))
         {
             response.sendRedirect(request.getRequestURI()+"/");
-            return;
-        }
-        if (request.getParameter("action")!=null)
-        {
-            doPost(request,response);
             return;
         }
         
@@ -264,5 +216,4 @@ public class ChatServlet extends HttpServlet
         out.println("</script>");
         out.println("</body></html>");
     }
-    
 }

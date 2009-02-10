@@ -281,7 +281,8 @@ public class HttpClient extends AbstractBuffers
      * Create a new NIO buffer. If using direct buffers, it will create a direct
      * NIO buffer, other than an indirect buffer.
      */
-    public Buffer newBuffer(int size)
+    @Override
+    protected Buffer newBuffer(int size)
     {
         if (_connectorType != CONNECTOR_SOCKET)
         {

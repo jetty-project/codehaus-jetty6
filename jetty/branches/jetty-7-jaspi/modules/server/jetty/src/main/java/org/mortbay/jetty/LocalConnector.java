@@ -151,7 +151,7 @@ public class LocalConnector extends AbstractConnector
     }
 
     /* ------------------------------------------------------------ */
-    public Buffer newBuffer(int size)
+    protected Buffer newBuffer(int size)
     {
         return new ByteArrayBuffer(size);
     }

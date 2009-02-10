@@ -514,7 +514,7 @@ public class SSLContextTest extends TestCase {
 		// ------------------------------------------------------------
 
 		public void handle(String target, HttpServletRequest request,
-				HttpServletResponse response) throws IOException,
+				HttpServletResponse response, int dispatch) throws IOException,
 				ServletException {
 			PrintWriter out = response.getWriter();
 

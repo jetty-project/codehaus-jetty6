@@ -15,7 +15,6 @@
 package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -441,7 +440,7 @@ public class ServletHolder extends Holder
             makeUnavailable(e);
             _servlet=null;
             _config=null;
-            throw new ServletException(this.toString(),e);
+            throw new ServletException(e);
         }
         finally
         {
@@ -454,8 +453,7 @@ public class ServletHolder extends Holder
     /* ------------------------------------------------------------ */
     /** Service a request with this servlet.
      */
-    public void handle(Request baseRequest,
-                       ServletRequest request,
+    public void handle(ServletRequest request,
                        ServletResponse response)
         throws ServletException,
                UnavailableException,
@@ -478,9 +476,6 @@ public class ServletHolder extends Holder
         Request base_request;
         RunAsToken oldRunAs = null;
         UserIdentity userIdentity = null;
-        Principal user=null;
-        boolean suspendable = baseRequest.isAsyncSupported();
-
         try
         {
             // Handle aliased path
@@ -491,18 +486,10 @@ public class ServletHolder extends Holder
             // Handle run as
             if (_runAs!=null)
             {
-//<<<<<<< .working
-                //base_request=HttpConnection.getCurrentConnection().getRequest();
-                userIdentity = baseRequest.getUserIdentity();
+                base_request=HttpConnection.getCurrentConnection().getRequest();
+                userIdentity = base_request.getUserIdentity();
                 oldRunAs = userIdentity.setRunAsRole(_runAs);
-//=======
- //               user=_realm.pushRole(baseRequest.getUserPrincipal(),_runAs);
- //               baseRequest.setUserPrincipal(user);
-//>>>>>>> .merge-right.r4452
             }
-            
-            if (!isAsyncSupported())
-                baseRequest.setAsyncSupported(false);
             
             servlet.service(request,response);
             servlet_error=false;
@@ -514,15 +501,10 @@ public class ServletHolder extends Holder
         }
         finally
         {
-            baseRequest.setAsyncSupported(suspendable);
-            
             // pop run-as role
             if (_runAs!=null && userIdentity!=null)
-     //       if (_runAs!=null && _realm!=null && user!=null)
             {
                 userIdentity.setRunAsRole(oldRunAs);
-              //  user=_realm.popRole(user);
-              //  baseRequest.setUserPrincipal(user);
             }
 
             // Handle error params.

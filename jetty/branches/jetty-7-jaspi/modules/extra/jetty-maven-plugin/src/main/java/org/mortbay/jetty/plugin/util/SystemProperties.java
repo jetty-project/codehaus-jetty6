@@ -49,11 +49,6 @@ public class SystemProperties
         return (SystemProperty)properties.get(name);
     }
     
-    public boolean containsSystemProperty(String name)
-    {
-       return properties.containsKey(name); 
-    }
-    
     public List getSystemProperties ()
     {
         return new ArrayList(properties.values());

@@ -30,8 +30,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Dispatcher;
 import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.log.Log;
@@ -217,12 +215,8 @@ public class Invoker extends HttpServlet
         }
         
         if (holder!=null)
-        {
-            final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
-            holder.handle(base_request,
-                    new InvokedRequest(request,included,servlet,servlet_path,path_info),
+            holder.handle(new Request(request,included,servlet,servlet_path,path_info),
                           response);
-        }
         else
         {
             Log.info("Can't find holder for servlet: "+servlet);
@@ -233,14 +227,14 @@ public class Invoker extends HttpServlet
     }
 
     /* ------------------------------------------------------------ */
-    class InvokedRequest extends HttpServletRequestWrapper
+    class Request extends HttpServletRequestWrapper
     {
         String _servletPath;
         String _pathInfo;
         boolean _included;
         
         /* ------------------------------------------------------------ */
-        InvokedRequest(HttpServletRequest request,
+        Request(HttpServletRequest request,
                 boolean included,
                 String name,
                 String servletPath,

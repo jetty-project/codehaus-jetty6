@@ -54,8 +54,6 @@ public class HashSessionManager extends AbstractSessionManager
     private TimerTask _saveTask;
     protected Map _sessions;
     private File _storeDir;
-    private boolean _lazyLoad=false;
-    private boolean _sessionsLoaded=false;
     
     /* ------------------------------------------------------------ */
     public HashSessionManager()
@@ -80,9 +78,7 @@ public class HashSessionManager extends AbstractSessionManager
         {
             if (!_storeDir.exists())
                 _storeDir.mkdir();
-
-            if (!_lazyLoad)
-                restoreSessions();
+            restoreSessions();
         }
  
         setSavePeriod(getSavePeriod());
@@ -249,16 +245,6 @@ public class HashSessionManager extends AbstractSessionManager
 
             long now=System.currentTimeMillis();
 
-            try
-            {
-                if (!_sessionsLoaded && _lazyLoad)
-                    restoreSessions();
-            }
-            catch(Exception e)
-            {
-                Log.debug(e);
-            }
-            
             // Since Hashtable enumeration is not safe over deletes,
             // we build a list of stale sessions, then go back and invalidate
             // them
@@ -316,16 +302,6 @@ public class HashSessionManager extends AbstractSessionManager
     /* ------------------------------------------------------------ */
     public AbstractSessionManager.Session getSession(String idInCluster)
     {
-        try
-        {
-            if (!_sessionsLoaded && _lazyLoad)
-                restoreSessions();
-        }
-        catch(Exception e)
-        {
-            Log.warn(e);
-        }
-        
         if (_sessions==null)
             return null;
 
@@ -378,16 +354,6 @@ public class HashSessionManager extends AbstractSessionManager
     }
 
     /* ------------------------------------------------------------ */
-    public void setLazyLoad(boolean lazyLoad)
-    {
-        _lazyLoad = lazyLoad;
-    }
-    
-    public boolean isLazyLoad()
-    {
-        return _lazyLoad;
-    }
-    
     public void restoreSessions () throws Exception
     {
         if (_storeDir==null || !_storeDir.exists())
@@ -417,8 +383,6 @@ public class HashSessionManager extends AbstractSessionManager
                 Log.warn("Problem restoring session "+files[i].getName(), e);
             }
         }
-        
-        _sessionsLoaded = true;
     }
 
     /* ------------------------------------------------------------ */

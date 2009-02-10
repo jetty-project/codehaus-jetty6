@@ -51,7 +51,6 @@ public class StatisticsHandlerTest extends TestCase
         _server.stop();
     }
 
-    /* TODO fix this
     public void testSuspendedStats() throws Exception
     {
         process(new ResumeHandler());
@@ -62,7 +61,6 @@ public class StatisticsHandlerTest extends TestCase
         assertEquals(1,_statsHandler.getRequestsTimedout());
         assertEquals(1,_statsHandler.getRequestsResumed());
     }
-    */
 
     // TODO: keep it active without blocking
     // public void testActiveStats() throws Exception
@@ -113,7 +111,6 @@ public class StatisticsHandlerTest extends TestCase
         assertEquals(0,_statsHandler.getRequestsActiveDurationTotal());
     }
 
-    /*
     public void testDurationWithSuspend() throws Exception
     {
         int processDuration = 100;
@@ -129,9 +126,7 @@ public class StatisticsHandlerTest extends TestCase
         isApproximately(processDuration + suspendDuration,_statsHandler.getRequestsDurationTotal());
 
     }
-    */
 
-    /* TODO fix
     public void testResponses() throws Exception
     {
         // all return 200
@@ -146,9 +141,7 @@ public class StatisticsHandlerTest extends TestCase
         assertEquals(3,_statsHandler.getResponses2xx());
         
     }
-    */
 
-    /* TODO fix
     public void testComplete() throws Exception
     {
         int initialDelay = 200;
@@ -173,7 +166,6 @@ public class StatisticsHandlerTest extends TestCase
         //TODO failed in jaspi branch
 //        isApproximately(initialDelay + completeDuration,_statsHandler.getRequestsDurationTotal());
     }
-    */
     
     public void process() throws Exception
     {
@@ -207,9 +199,9 @@ public class StatisticsHandlerTest extends TestCase
             _lock = lock;
         }
 
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
-            if (!request.isAsyncStarted())
+            if (request.isInitial())
             {
                 try
                 {
@@ -240,12 +232,12 @@ public class StatisticsHandlerTest extends TestCase
             _suspendFor = suspendFor;
         }
 
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
-            if (!request.isAsyncStarted())
+            Request base_request = (request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
+            if (base_request.isInitial())
             {
-                request.setAsyncTimeout(_suspendFor);
-                request.startAsync();
+                base_request.suspend(_suspendFor);
             }
         }
 
@@ -253,12 +245,13 @@ public class StatisticsHandlerTest extends TestCase
 
     private static class ResumeHandler extends HandlerWrapper
     {
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
-            if (!request.isAsyncStarted())
+            if (request.isInitial())
             {
-                request.setAsyncTimeout(100000);
-                request.startAsync().dispatch();
+                request.suspend(100000);
+                request.resume();
             }
         }
 
@@ -273,9 +266,9 @@ public class StatisticsHandlerTest extends TestCase
             _duration = duration;
         }
 
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
-            if (!request.isAsyncStarted())
+            if (request.isInitial())
             {
                 try
                 {
@@ -301,7 +294,7 @@ public class StatisticsHandlerTest extends TestCase
             _suspendFor = suspendFor;
         }
 
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
 
             Integer i = (Integer)request.getAttribute("i");
@@ -310,8 +303,7 @@ public class StatisticsHandlerTest extends TestCase
 
             if (i < _suspendFor.length)
             {
-                request.setAsyncTimeout(_suspendFor[i]);
-                request.startAsync();
+                request.suspend(_suspendFor[i]);
                 request.setAttribute("i",i + 1);
                 return;
             }
@@ -343,11 +335,11 @@ public class StatisticsHandlerTest extends TestCase
             _lock = lock;
         }
         
-        public void handle(String target, final HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
             final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
             
-            if(!request.isAsyncStarted())
+            if(base_request.isInitial())
             {
                 try
                 {
@@ -356,8 +348,7 @@ public class StatisticsHandlerTest extends TestCase
                 {
                 }
                 
-                request.setAsyncTimeout(_completeDuration*10);
-                request.startAsync();
+                base_request.suspend(_completeDuration * 10);
                 
                 (new Thread() {
                     public void run()
@@ -365,12 +356,15 @@ public class StatisticsHandlerTest extends TestCase
                         try
                         {
                             Thread.sleep(_completeDuration);
-                            request.getAsyncContext().complete();
+                            base_request.complete();
                             
                             synchronized(_lock)
                             {
                                 _lock.notify();
                             }
+                        }
+                        catch(IOException e)
+                        {
                         }
                         catch(InterruptedException e)
                         {

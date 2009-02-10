@@ -641,19 +641,9 @@ public class UrlEncoded extends MultiMap
 
                     while(c=='%' && (i+2)<length)
                     {
-                        try
-                        {
-                            byte b=(byte)TypeUtil.parseInt(encoded,offset+i+1,2,16);
-                            buffer.append(b);
-                            i+=3;
-                        }
-                        catch(NumberFormatException nfe)
-                        {
-                            buffer.getStringBuffer().append('%');
-                            for(char next; ((next=encoded.charAt(++i+offset))!='%');)
-                                buffer.getStringBuffer().append((next=='+' ? ' ' : next));
-                        }
-
+                        byte b=(byte)TypeUtil.parseInt(encoded,offset+i+1,2,16);
+                        buffer.append(b);
+                        i+=3;
                         if (i<length)
                             c = encoded.charAt(offset+i);
                     }
@@ -714,31 +704,8 @@ public class UrlEncoded extends MultiMap
                         while(c>=0 && c<=0xff)
                         {
                             if (c=='%')
-                            {   
-                                if(i+2<length)
-                                {
-                                    try
-                                    {
-                                        ba[n++]=(byte)TypeUtil.parseInt(encoded,offset+i+1,2,16);
-                                        i+=3;
-                                    }
-                                    catch(NumberFormatException nfe)
-                                    {                                        
-                                        ba[n-1] = (byte)'%';                                    
-                                        for(char next; ((next=encoded.charAt(++i+offset))!='%');)
-                                            ba[n++] = (byte)(next=='+' ? ' ' : next);
-                                    }
-                                }
-                                else
-                                {
-                                    ba[n++] = (byte)'%';
-                                    i++;
-                                }
-                            }
-                            else if (c=='+')
-                            {
-                                ba[n++]=(byte)' ';
-                                i++;
+                            {    ba[n++]=(byte)TypeUtil.parseInt(encoded,offset+i+1,2,16);
+                                i+=3;
                             }
                             else
                             {

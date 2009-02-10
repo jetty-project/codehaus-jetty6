@@ -20,7 +20,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.AsyncRequest;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
@@ -81,7 +80,7 @@ public class StatisticsHandler extends HandlerWrapper implements CompleteHandler
 
 
     /* ------------------------------------------------------------ */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
         final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
         final Response base_response=(response instanceof Response)?((Response)response):HttpConnection.getCurrentConnection().getResponse();
@@ -92,34 +91,22 @@ public class StatisticsHandler extends HandlerWrapper implements CompleteHandler
         {
             synchronized(this)
             {
-                AsyncRequest asyncContextState=base_request.getAsyncRequest();
-
-                if(asyncContextState==null)
-                {
+                if(base_request.isInitial())
                     _requests++;
-                }
                 else
-                {
-                    if(asyncContextState.isInitial())
-                        _requests++;
-                    else
-                    {
-                        timestamp1=System.currentTimeMillis();
-                        /*
-                        if (asyncContextState.isTimeout())
-                            _requestsTimedout++;
-                        if(asyncContextState.isResumed())
-                            _requestsResumed++;
-                        */
-                    }
-                }
+                    timestamp1=System.currentTimeMillis();
+                
+                if(base_request.isTimeout())
+                    _requestsTimedout++;
+                if(base_request.isResumed())
+                    _requestsResumed++;
 
                 _requestsActive++;
                 if (_requestsActive>_requestsActiveMax)
                     _requestsActiveMax=_requestsActive;
             }
             
-            super.handle(target, request, response);
+            super.handle(target, request, response, dispatch);
         }
         finally
         {
@@ -139,7 +126,7 @@ public class StatisticsHandler extends HandlerWrapper implements CompleteHandler
                     _requestsActiveDurationMax=duration;
 
                 
-                if(request.isAsyncStarted())
+                if(base_request.isSuspended())
                 {
                     Object list = base_request.getAttribute(COMPLETE_HANDLER_ATTR);
                     base_request.setAttribute(COMPLETE_HANDLER_ATTR, LazyList.add(list, this));

@@ -169,7 +169,7 @@ public class SslSecurityListenerTest extends TestCase
         Handler testHandler = new AbstractHandler()
         {
 
-            public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+            public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
             {
                 System.err.println("passed authentication!\n"+((Request)request).getConnection().getRequestFields());
                 

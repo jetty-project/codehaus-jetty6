@@ -235,10 +235,8 @@ public class HttpExchange
         setAddress(new Address(uri.getHost(),port));
 
         String completePath = uri.getCompletePath();
-        if (completePath == null)
-            completePath = "/";
-        
-        setURI(completePath);
+        if (completePath != null)
+            setURI(completePath);
     }
 
     /* ------------------------------------------------------------ */
