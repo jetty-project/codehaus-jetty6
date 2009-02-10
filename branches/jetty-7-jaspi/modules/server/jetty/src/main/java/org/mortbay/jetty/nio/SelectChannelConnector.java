@@ -62,7 +62,7 @@ import org.mortbay.thread.Timeout.Task;
  */
 public class SelectChannelConnector extends AbstractNIOConnector 
 {
-    protected transient ServerSocketChannel _acceptChannel;
+    private transient ServerSocketChannel _acceptChannel;
     private long _lowResourcesConnections;
     private long _lowResourcesMaxIdleTime;
 
@@ -302,8 +302,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
             // TODO remove this hack
             public boolean isReadyForDispatch()
             {
-                Request request = ((HttpConnection)getConnection()).getRequest();
-                return super.isReadyForDispatch() && !(request.getAsyncRequest().isSuspended());
+                return super.isReadyForDispatch() && !((HttpConnection)getConnection()).getRequest().isSuspended();
             }
         };
     }

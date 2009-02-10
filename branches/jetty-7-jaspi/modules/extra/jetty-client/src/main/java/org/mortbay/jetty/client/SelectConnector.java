@@ -160,7 +160,7 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
             {
                 AbstractBuffers buffers = new AbstractBuffers()
                 {
-                    public Buffer newBuffer( int size )
+                    protected Buffer newBuffer( int size )
                     {
                         return new IndirectNIOBuffer( size);
                     }

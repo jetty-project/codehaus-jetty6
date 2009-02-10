@@ -49,7 +49,7 @@ public abstract class AbstractNIOConnector extends AbstractConnector implements 
     }
 
     /* ------------------------------------------------------------------------------- */
-    public Buffer newBuffer(int size)
+    protected Buffer newBuffer(int size)
     {
         // TODO
         // Header buffers always byte array buffers (efficiency of random access)

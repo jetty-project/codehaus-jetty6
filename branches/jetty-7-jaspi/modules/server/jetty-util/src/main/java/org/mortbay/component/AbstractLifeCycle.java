@@ -25,9 +25,9 @@ import org.mortbay.util.LazyList;
  */
 public abstract class AbstractLifeCycle implements LifeCycle
 {
-    private final Object _lock = new Object();
+    private Object _lock = new Object();
     private final int FAILED = -1, STOPPED = 0, STARTING = 1, STARTED = 2, STOPPING = 3;
-    private volatile int _state = STOPPED;
+    private transient int _state = STOPPED;
     protected LifeCycle.Listener[] _listeners;
 
     protected void doStart() throws Exception

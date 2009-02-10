@@ -26,6 +26,7 @@ import java.io.StringWriter;
 import java.io.InputStreamReader;
 
 import org.mortbay.log.Log;
+import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.QueuedThreadPool;
 
 /* ======================================================================== */

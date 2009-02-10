@@ -134,72 +134,31 @@ public class HttpDestination
     }
 
     /* ------------------------------------------------------------------------------- */
-    /**
-     * Get a connection. We either get an idle connection if one is available, or
-     * we make a new connection, if we have not yet reached maxConnections. If we
-     * have reached maxConnections, we wait until the number reduces.
-     * @param timeout max time prepared to block waiting to be able to get a connection
-     * @return
-     * @throws IOException
-     */
-    private HttpConnection getConnection(long timeout) throws IOException
+    public HttpConnection getConnection() throws IOException
     {
-        HttpConnection connection = null;
+        HttpConnection connection = getIdleConnection();
 
-        while ((connection == null) && (connection = getIdleConnection()) == null && timeout>0)
+        while (connection == null)
         {
-            int totalConnections = 0;
-            boolean starting = false;
             synchronized (this)
             {
-                totalConnections = _connections.size() + _pendingConnections;
-                if (totalConnections < _maxConnections)
-                {
-                    _newConnection++;
-                    startNewConnection();
-                    starting = true;
-                }
+                _newConnection++;
+                startNewConnection();
             }
-            
-            if (!starting)
+
+            try
             {
-                try
-                {
-                    Thread.currentThread().sleep(200);
-                    timeout-=200;
-                }
-                catch (InterruptedException e)
-                {
-                    Log.ignore(e);
-                }
+                Object o = _newQueue.take();
+                if (o instanceof HttpConnection)
+                    connection = (HttpConnection)o;
+                else
+                    throw (IOException)o;
             }
-            else
+            catch (InterruptedException e)
             {
-               try
-               {
-                   Object o = _newQueue.take();
-                   if (o instanceof HttpConnection)
-                   {
-                       connection = (HttpConnection)o;
-                   }
-                   else
-                       throw (IOException)o;
-               }
-               catch (InterruptedException e)
-               {
-                   Log.ignore(e);
-               }
-           }
+                Log.ignore(e);
+            }
         }
-        return connection;
-    }
-    
-    /* ------------------------------------------------------------------------------- */
-    public HttpConnection reserveConnection(long timeout) throws IOException
-    {
-        HttpConnection connection = getConnection(timeout);
-        if (connection != null)
-            connection.setReserved(true);
         return connection;
     }
 
@@ -242,7 +201,6 @@ public class HttpDestination
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             onConnectionFailed(e);
         }
     }
@@ -337,9 +295,6 @@ public class HttpDestination
     /* ------------------------------------------------------------------------------- */
     public void returnConnection(HttpConnection connection, boolean close) throws IOException
     {
-        if (connection.isReserved())
-            connection.setReserved(false);
-        
         if (close)
         {
             try

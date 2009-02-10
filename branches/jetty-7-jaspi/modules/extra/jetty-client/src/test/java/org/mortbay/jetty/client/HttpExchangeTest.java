@@ -26,8 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
-import junit.framework.TestResult;
-
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.Connector;
@@ -50,7 +48,6 @@ import org.mortbay.thread.QueuedThreadPool;
  */
 public class HttpExchangeTest extends TestCase
 {
-    protected int _maxConnectionsPerAddress = 2;
     protected String _scheme = "http://";
     protected Server _server;
     protected int _port;
@@ -63,7 +60,7 @@ public class HttpExchangeTest extends TestCase
         startServer();
         _httpClient=new HttpClient();
         _httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
-        _httpClient.setMaxConnectionsPerAddress(_maxConnectionsPerAddress);
+        _httpClient.setMaxConnectionsPerAddress(2);
         _httpClient.start();
     }
 
@@ -94,7 +91,6 @@ public class HttpExchangeTest extends TestCase
     public void sender(final int nb,final boolean close) throws Exception
     {
         _count.set(0);
-        final CountDownLatch complete=new CountDownLatch(nb);
         final CountDownLatch latch=new CountDownLatch(nb);
         HttpExchange[] httpExchange = new HttpExchange[nb];
         long start=System.currentTimeMillis();
@@ -148,12 +144,10 @@ public class HttpExchangeTest extends TestCase
                         latch.countDown();
                     else
                         System.err.println(n+" ONLY "+len);
-                    complete.countDown();
                 }
 
                 protected void onConnectionFailed(Throwable ex)
                 {
-                    complete.countDown();
                     result="failed";
                     System.err.println(n+" FAILED "+ex);
                     super.onConnectionFailed(ex);
@@ -161,7 +155,6 @@ public class HttpExchangeTest extends TestCase
 
                 protected void onException(Throwable ex)
                 {
-                    complete.countDown();
                     result="excepted";
                     System.err.println(n+" EXCEPTED "+ex);
                     super.onException(ex);
@@ -169,7 +162,6 @@ public class HttpExchangeTest extends TestCase
 
                 protected void onExpire()
                 {
-                    complete.countDown();
                     result="expired";
                     System.err.println(n+" EXPIRED "+len);
                     super.onExpire();
@@ -189,12 +181,37 @@ public class HttpExchangeTest extends TestCase
             _httpClient.send(httpExchange[n]);
         }
 
-        assertTrue(complete.await(45,TimeUnit.SECONDS));
-            
+        latch.await(100,TimeUnit.MILLISECONDS);
+        if (latch.getCount()>0)
+            latch.await(1,TimeUnit.SECONDS);
+        if (latch.getCount()>0)
+            latch.await(5,TimeUnit.SECONDS);
+        long last=latch.getCount();
+        if (last>0)
+        {
+            while(last>0)
+            {
+                System.err.println("waiting for "+last);
+                latch.await(10,TimeUnit.SECONDS);
+                long next=latch.getCount();
+                if (last==next)
+                    break;
+                last=next;
+            }
+            System.err.println("missed "+latch.getCount());
+            if (last>0)
+            {
+                _httpClient.dump();
+                System.err.println("--");
+                for (HttpExchange o : httpExchange)
+                    if (o.getStatus()!=HttpExchange.STATUS_COMPLETED)
+                        System.err.println(o);
+
+            }
+        }
+        
         long elapsed=System.currentTimeMillis()-start;
-        // make windows-friendly ... System.currentTimeMillis() on windows is dope! 
-        if(elapsed>0)
-            System.err.println(nb+"/"+_count+" c="+close+" rate="+(nb*1000/elapsed));
+        System.err.println(nb+"/"+_count+" c="+close+" rate="+(nb*1000/elapsed));
         
         assertEquals("nb="+nb+" close="+close,0,latch.getCount());
     }
@@ -204,8 +221,7 @@ public class HttpExchangeTest extends TestCase
         for (int i=0;i<200;i++)
         {
             ContentExchange httpExchange=new ContentExchange();
-            //httpExchange.setURL(_scheme+"localhost:"+_port+"/");
-            httpExchange.setURL(_scheme+"localhost:"+_port);
+            httpExchange.setURL(_scheme+"localhost:"+_port+"/");
             httpExchange.setMethod(HttpMethods.POST);
             httpExchange.setRequestContent(new ByteArrayBuffer("<hello />"));
             _httpClient.send(httpExchange);
@@ -263,35 +279,6 @@ public class HttpExchangeTest extends TestCase
         }
     }
 
-    
-    public void testReserveConnections () throws Exception
-    {
-       final HttpDestination destination = _httpClient.getDestination (new Address("localhost", _port), _scheme.equalsIgnoreCase("https://"));
-       final org.mortbay.jetty.client.HttpConnection[] connections = new org.mortbay.jetty.client.HttpConnection[_maxConnectionsPerAddress];
-       for (int i=0; i < _maxConnectionsPerAddress; i++)
-       {
-           connections[i] = destination.reserveConnection(200);
-           assertNotNull(connections[i]);
-           HttpExchange ex = new ContentExchange();
-           ex.setURL(_scheme+"localhost:"+_port+"/?i="+i);
-           ex.setMethod(HttpMethods.GET);
-           connections[i].send(ex);
-       }
-      
-       //try to get a connection, and only wait 500ms, as we have
-       //already reserved the max, should return null
-       org.mortbay.jetty.client.HttpConnection c = destination.reserveConnection(500);
-       assertNull(c);
-       
-       //unreserve first connection
-       destination.returnConnection(connections[0], false);
-       
-       //reserving one should now work
-       c = destination.reserveConnection(500);
-       assertNotNull(c);
-       
-        
-    }
     public static void copyStream(InputStream in, OutputStream out)
     {
         try
@@ -328,7 +315,7 @@ public class HttpExchangeTest extends TestCase
         newServer();
         _server.setHandler(new AbstractHandler()
         {
-            public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+            public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
             {
                 int i=0;
                 try
@@ -386,5 +373,4 @@ public class HttpExchangeTest extends TestCase
     {
         _server.stop();
     }
-
 }

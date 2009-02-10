@@ -28,12 +28,8 @@ import org.mortbay.util.MultiException;
 
 /* ------------------------------------------------------------ */
 /** A collection of handlers.  
- * <p>
- * For derived HandlerCollections, the order or manner of calling
- * the contained handlers is not defined. The default implementations
- * calls all handlers in list order, regardless of 
+ * For each request, all handler are called, regardless of 
  * the response status or exceptions.
- * <p>
  *  
  * @author gregw
  * @org.apache.xbean.XBean
@@ -103,7 +99,7 @@ public class HandlerCollection extends AbstractHandlerContainer
     /* 
      * @see org.mortbay.jetty.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response) 
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) 
         throws IOException, ServletException
     {
         if (_handlers!=null && isStarted())
@@ -114,7 +110,7 @@ public class HandlerCollection extends AbstractHandlerContainer
             {
                 try
                 {
-                    _handlers[i].handle(target,request, response);
+                    _handlers[i].handle(target,request, response, dispatch);
                 }
                 catch(IOException e)
                 {

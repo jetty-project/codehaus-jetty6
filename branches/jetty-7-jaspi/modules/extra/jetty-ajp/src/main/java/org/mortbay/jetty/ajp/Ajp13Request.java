@@ -24,14 +24,12 @@ public class Ajp13Request extends Request
     protected String _remoteUser;
 
     /* ------------------------------------------------------------ */
-    public Ajp13Request(HttpConnection connection)
-    {
-        super(connection);     
-    }
-    
-    /* ------------------------------------------------------------ */
     public Ajp13Request()
-    {     
+    {
+        super();
+        _remoteAddr = null;
+        _remoteHost = null;
+        _remoteUser = null;        
     }
 
     /* ------------------------------------------------------------ */

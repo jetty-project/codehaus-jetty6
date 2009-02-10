@@ -293,9 +293,9 @@ public class WebAppContext extends Context
 
     /* ------------------------------------------------------------ */
     /** 
-     * @see org.mortbay.jetty.handler.ContextHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.mortbay.jetty.handler.ContextHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response)
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
     throws IOException, ServletException
     {   
         if (_unavailable)
@@ -303,7 +303,7 @@ public class WebAppContext extends Context
             response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         }
         else
-            super.handle(target, request, response);
+            super.handle(target, request, response, dispatch);
     }
 
     /* ------------------------------------------------------------ */
@@ -862,6 +862,7 @@ public class WebAppContext extends Context
                 if (jarWebApp.exists() && jarWebApp.isDirectory())
                 {
                     web_app= jarWebApp;
+                    _war= web_app.toString();
                 }
             }
 

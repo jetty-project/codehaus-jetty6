@@ -154,6 +154,7 @@ public class DispatcherTest extends TestCase
     {
         protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
         {
+            assertEquals( true, request.getAttribute(Dispatcher.__FORWARD_JETTY) );
             assertEquals( "/context/ForwardServlet", request.getAttribute(Dispatcher.__FORWARD_REQUEST_URI));
             assertEquals( "/context", request.getAttribute(Dispatcher.__FORWARD_CONTEXT_PATH) );
             assertEquals( "/ForwardServlet", request.getAttribute(Dispatcher.__FORWARD_SERVLET_PATH));
@@ -186,6 +187,7 @@ public class DispatcherTest extends TestCase
     {
         protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
         {
+            assertEquals( true, request.getAttribute(Dispatcher.__INCLUDE_JETTY) );
             assertEquals( "/context/AssertIncludeServlet", request.getAttribute(Dispatcher.__INCLUDE_REQUEST_URI));
             assertEquals( "/context", request.getAttribute(Dispatcher.__INCLUDE_CONTEXT_PATH) );
             assertEquals( "/AssertIncludeServlet", request.getAttribute(Dispatcher.__INCLUDE_SERVLET_PATH));
@@ -220,12 +222,14 @@ public class DispatcherTest extends TestCase
         protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
         {
             // include doesn't hide forward
+            assertEquals( true, request.getAttribute(Dispatcher.__FORWARD_JETTY) );
             assertEquals( "/context/ForwardServlet/forwardpath", request.getAttribute(Dispatcher.__FORWARD_REQUEST_URI));
             assertEquals( "/context", request.getAttribute(Dispatcher.__FORWARD_CONTEXT_PATH) );
             assertEquals( "/ForwardServlet", request.getAttribute(Dispatcher.__FORWARD_SERVLET_PATH));
             assertEquals( "/forwardpath", request.getAttribute(Dispatcher.__FORWARD_PATH_INFO));
             assertEquals( "do=include", request.getAttribute(Dispatcher.__FORWARD_QUERY_STRING) );
             
+            assertEquals( true, request.getAttribute(Dispatcher.__INCLUDE_JETTY) );
             assertEquals( "/context/AssertForwardIncludeServlet/assertpath", request.getAttribute(Dispatcher.__INCLUDE_REQUEST_URI));
             assertEquals( "/context", request.getAttribute(Dispatcher.__INCLUDE_CONTEXT_PATH) );
             assertEquals( "/AssertForwardIncludeServlet", request.getAttribute(Dispatcher.__INCLUDE_SERVLET_PATH));
@@ -260,12 +264,14 @@ public class DispatcherTest extends TestCase
         protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
         {
             // forward hides include
+            assertEquals( null, request.getAttribute(Dispatcher.__INCLUDE_JETTY) );
             assertEquals( null, request.getAttribute(Dispatcher.__INCLUDE_REQUEST_URI));
             assertEquals( null, request.getAttribute(Dispatcher.__INCLUDE_CONTEXT_PATH) );
             assertEquals( null, request.getAttribute(Dispatcher.__INCLUDE_SERVLET_PATH));
             assertEquals( null, request.getAttribute(Dispatcher.__INCLUDE_PATH_INFO));
             assertEquals( null, request.getAttribute(Dispatcher.__INCLUDE_QUERY_STRING));    
 
+            assertEquals( true, request.getAttribute(Dispatcher.__FORWARD_JETTY) );
             assertEquals( "/context/IncludeServlet/includepath", request.getAttribute(Dispatcher.__FORWARD_REQUEST_URI));
             assertEquals( "/context", request.getAttribute(Dispatcher.__FORWARD_CONTEXT_PATH) );
             assertEquals( "/IncludeServlet", request.getAttribute(Dispatcher.__FORWARD_SERVLET_PATH));

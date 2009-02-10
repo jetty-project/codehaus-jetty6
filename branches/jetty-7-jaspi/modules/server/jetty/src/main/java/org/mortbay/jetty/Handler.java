@@ -16,9 +16,7 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
-import java.util.EnumSet;
 
-import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,6 +26,15 @@ import org.mortbay.component.LifeCycle;
 
 public interface Handler extends LifeCycle
 {
+    /** Dispatch types */
+    public static final int DEFAULT=0;
+    public static final int REQUEST=1;
+    public static final int FORWARD=2;
+    public static final int INCLUDE=4;
+    public static final int ERROR=8;
+    public static final int ALL=15;
+    
+    
     /* ------------------------------------------------------------ */
     /** Handle a request.
      * @param target The target of the request - either a URI or a name.
@@ -37,10 +44,11 @@ public interface Handler extends LifeCycle
      * @param response The response as the {@link Response}
      * object or a wrapper of that request. The {@link HttpConnection#getCurrentConnection()} 
      * method can be used access the Response object if required.
+     * @param dispatch The dispatch mode: {@link #REQUEST}, {@link #FORWARD}, {@link #INCLUDE}, {@link #ERROR}
      * @throws IOException
      * @throws ServletException
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response)
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
         throws IOException, ServletException;
     
     public void setServer(Server server);

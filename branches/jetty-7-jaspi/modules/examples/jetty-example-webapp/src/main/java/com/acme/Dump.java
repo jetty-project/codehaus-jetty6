@@ -24,24 +24,17 @@ import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.Locale;
 
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletResponseWrapper;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.mortbay.jetty.Dispatcher;
-import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
@@ -97,14 +90,9 @@ public class Dump extends HttpServlet
             try
             {
                 long s = Long.parseLong(request.getParameter("sleep"));
-                if (request.getHeader(HttpHeaders.EXPECT)!=null &&request.getHeader(HttpHeaders.EXPECT).indexOf("102")>=0)
-                {
-                    Thread.sleep(s/2);
-                    response.sendError(102);
-                    Thread.sleep(s/2);
-                }
-                else
-                    Thread.sleep(s);
+                Thread.sleep(s/2);
+                response.sendError(102);
+                Thread.sleep(s/2);
             }
             catch (InterruptedException e)
             {
@@ -114,30 +102,6 @@ public class Dump extends HttpServlet
             {
                 throw new ServletException(e);
             }
-        }
-
-        if (request.getAttribute("RESUME")==null && request.getParameter("resume")!=null)
-        {
-            request.setAttribute("RESUME",Boolean.TRUE);
-
-            final long resume=Long.parseLong(request.getParameter("resume"));
-            new Thread(new Runnable()
-            {
-                public void run()
-                {
-                    try
-                    {
-                        Thread.sleep(resume);
-                    }
-                    catch (InterruptedException e)
-                    {
-                        e.printStackTrace();
-                    }
-                    Continuation continuation = ContinuationSupport.getContinuation(request, null);
-                    continuation.resume();
-                }
-                
-            }).start();
         }
         
         if (request.getParameter("continue")!=null)
@@ -153,83 +117,64 @@ public class Dump extends HttpServlet
             }
         }
 
-        if (request.getAttribute("ASYNC")==null)
+        if (request.isInitial() && request.getParameter("resume")!=null)
         {
-            request.setAttribute("ASYNC",Boolean.TRUE);
-
-            if (request.getParameter("dispatch")!=null)
+            final long resume=Long.parseLong(request.getParameter("resume"));
+            new Thread(new Runnable()
             {
-                final long resume=Long.parseLong(request.getParameter("dispatch"));
-                final String path=request.getParameter("dispatchPath");
-                new Thread(new Runnable()
+                public void run()
                 {
-                    public void run()
+                    try
                     {
-                        try
-                        {
-                            Thread.sleep(resume);
-                        }
-                        catch (InterruptedException e)
-                        {
-                            e.printStackTrace();
-                        }
-                        if (path!=null)
-                            request.getAsyncContext().dispatch(path);
-                        else
-                            request.getAsyncContext().dispatch();
-                            
+                        Thread.sleep(resume);
                     }
-
-                }).start();
-            }
-
-            if (request.getParameter("complete")!=null)
+                    catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    request.resume();
+                }
+                
+            }).start();
+        }
+        
+        if (request.isInitial() && request.getParameter("complete")!=null)
+        {
+            final long complete=Long.parseLong(request.getParameter("complete"));
+            new Thread(new Runnable()
             {
-                final long complete=Long.parseLong(request.getParameter("complete"));
-                new Thread(new Runnable()
+                public void run()
                 {
-                    public void run()
+                    try
                     {
-                        try
-                        {
-                            Thread.sleep(complete);
-                        }
-                        catch (InterruptedException e)
-                        {
-                            e.printStackTrace();
-                        }
-                        try
-                        {
-                            HttpServletResponse response = (HttpServletResponse) request.getAsyncContext().getResponse();
-                            response.setContentType("text/html");
-                            response.getOutputStream().println("<h1>COMPLETED</h1>"); 
-                            request.getAsyncContext().complete();
-                        }
-                        catch (IOException e)
-                        {
-                            e.printStackTrace();
-                        }
+                        Thread.sleep(complete);
                     }
-
-                }).start();
-            }
-
-            if (request.getParameter("async")!=null)
-            {
-                final long async=Long.parseLong(request.getParameter("async"));
-                request.addAsyncListener(new AsyncListener(){
-                    public void onComplete(AsyncEvent event) throws IOException
+                    catch (InterruptedException e)
                     {
+                        e.printStackTrace();
                     }
-                    public void onTimeout(AsyncEvent event) throws IOException
+                    try
                     {
-                        event.getRequest().getAsyncContext().dispatch();
+                        HttpServletResponse response = (HttpServletResponse) request.getServletResponse();
+                        response.setContentType("text/html");
+                        response.getOutputStream().println("<h1>COMPLETED</h1>"); 
+                        request.complete();
                     }
-                });
-                request.setAsyncTimeout(async);
-                request.startAsync();
-                return;
-            }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+                
+            }).start();
+        }
+        
+        if (request.getAttribute("Dump"+this.hashCode())==null && request.getParameter("suspend")!=null)
+        {
+            request.setAttribute("Dump"+this.hashCode(),Boolean.TRUE);
+            final long suspend=Long.parseLong(request.getParameter("suspend"));
+            request.suspend(suspend);
+            return;
         }
             
         request.setAttribute("Dump", this);
@@ -444,10 +389,6 @@ public class Dump extends HttpServlet
             pout.write("<h1>Dump Servlet</h1>\n");
             pout.write("<table width=\"95%\">");
             pout.write("<tr>\n");
-            pout.write("<th align=\"right\">getDispatcherTYpe:&nbsp;</th>");
-            pout.write("<td>" + request.getDispatcherType()+"</td>");
-            pout.write("</tr><tr>\n");
-            pout.write("<tr>\n");
             pout.write("<th align=\"right\">getMethod:&nbsp;</th>");
             pout.write("<td>" + notag(request.getMethod())+"</td>");
             pout.write("</tr><tr>\n");
@@ -479,11 +420,17 @@ public class Dump extends HttpServlet
             pout.write("<td>"+notag(request.getQueryString())+"</td>");
             pout.write("</tr><tr>\n");
 
-            pout.write("<th align=\"right\">isAsyncSupported:&nbsp;</th>");
-            pout.write("<td>"+request.isAsyncSupported()+"</td>");
+            pout.write("<th align=\"right\">isInitial:&nbsp;</th>");
+            pout.write("<td>"+request.isInitial()+"</td>");
             pout.write("</tr><tr>\n");
-            pout.write("<th align=\"right\">isAsyncStarted:&nbsp;</th>");
-            pout.write("<td>"+request.isAsyncStarted()+"</td>");
+            pout.write("<th align=\"right\">isTimeout:&nbsp;</th>");
+            pout.write("<td>"+request.isTimeout()+"</td>");
+            pout.write("</tr><tr>\n");
+            pout.write("<th align=\"right\">isResumed:&nbsp;</th>");
+            pout.write("<td>"+request.isResumed()+"</td>");
+            pout.write("</tr><tr>\n");
+            pout.write("<th align=\"right\">isSuspended:&nbsp;</th>");
+            pout.write("<td>"+request.isSuspended()+"</td>");
             pout.write("</tr><tr>\n");
             
             pout.write("<th align=\"right\">getProtocol:&nbsp;</th>");
@@ -705,25 +652,10 @@ public class Dump extends HttpServlet
                 pout.write((w++)+": "+rw.getClass().getName()+"<br/>");
                 if (rw instanceof HttpServletRequestWrapper)
                     rw=((HttpServletRequestWrapper)rw).getRequest();
-                else if (rw instanceof ServletRequestWrapper)
+                else if (rw  instanceof ServletRequestWrapper)
                     rw=((ServletRequestWrapper)rw).getRequest();
                 else
                     rw=null;
-            }
-
-            /* ------------------------------------------------------------ */
-            pout.write("<h2>Response Wrappers</h2>\n");
-            ServletResponse rsw=response;
-            w=0;
-            while (rsw !=null)
-            {
-                pout.write((w++)+": "+rsw.getClass().getName()+"<br/>");
-                if (rsw instanceof HttpServletResponseWrapper)
-                    rsw=((HttpServletResponseWrapper)rsw).getResponse();
-                else if (rsw instanceof ServletResponseWrapper)
-                    rsw=((ServletResponseWrapper)rsw).getResponse();
-                else
-                    rsw=null;
             }
             
             pout.write("<br/>");

@@ -27,9 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.util.IO;
 
 /**
@@ -140,14 +138,12 @@ public class RequestTest extends TestCase
     public void testContent()
         throws Exception
     {
-      
         final int[] length=new int[1];
         
         _handler._checker = new RequestTester()
         {
             public boolean check(HttpServletRequest request,HttpServletResponse response)
             {
-                assertEquals(request.getContentLength(), ((Request)request).getContentRead());
                 length[0]=request.getContentLength();
                 return true;
             }  
@@ -163,13 +159,14 @@ public class RequestTest extends TestCase
             "Content-Length: "+l+"\r\n"+
             "Connection: close\r\n"+
             "\r\n"+
-            content;           
+            content;
+            content+="x";
+            
             _connector.reopen();
             String response = _connector.getResponses(request);
             assertEquals(l,length[0]);
             if (l>0)
                 assertEquals(l,_handler._content.length());
-            content+="x";
         }
     }
 
@@ -413,7 +410,7 @@ public class RequestTest extends TestCase
         RequestTester _checker;
         String _content;
         
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
             ((Request)request).setHandled(true);
             

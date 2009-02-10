@@ -18,7 +18,6 @@ package org.mortbay.jetty.servlet;
 import java.io.IOException;
 import java.util.EventListener;
 
-import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -130,10 +129,10 @@ public class SessionHandler extends HandlerWrapper
     /*
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response)
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
             throws IOException, ServletException
     {
-        setRequestedId(request);
+        setRequestedId(request, dispatch);
 
         Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
         SessionManager old_session_manager=null;
@@ -179,7 +178,7 @@ public class SessionHandler extends HandlerWrapper
                 Log.debug("session="+session);
             }
 
-            getHandler().handle(target, request, response);
+            getHandler().handle(target, request, response, dispatch);
         }
         catch (RetryRequest r)
         {
@@ -208,11 +207,11 @@ public class SessionHandler extends HandlerWrapper
      * @param request
      * @param dispatch
      */
-    protected void setRequestedId(HttpServletRequest request)
+    protected void setRequestedId(HttpServletRequest request, int dispatch)
     {
         Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
         String requested_session_id=request.getRequestedSessionId();
-        if (!DispatcherType.REQUEST.equals(request.getDispatcherType()) || requested_session_id!=null)
+        if (dispatch!=REQUEST || requested_session_id!=null)
         {
             return;
         }

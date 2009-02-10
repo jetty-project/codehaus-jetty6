@@ -260,14 +260,13 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
     {
         ByteBuffer bbuf=extractInputBuffer(buffer);
         int size=buffer.length();
-        HandshakeStatus initialStatus = _engine.getHandshakeStatus();
         synchronized (bbuf)
         {
             try
             {
                 unwrap(bbuf);
 
-                int tries=0, wraps=0;
+                int tries=0;
                 loop: while (true)
                 {
                     // TODO REMOVE loop check
@@ -304,21 +303,11 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
                                 // h.append("run task\n");
                                 task.run();
                             }
-                            if(initialStatus==HandshakeStatus.NOT_HANDSHAKING && 
-                                    HandshakeStatus.NEED_UNWRAP==_engine.getHandshakeStatus() && wraps==0)
-                            {
-                                // This should be NEED_WRAP
-                                // The fix simply detects the signature of the bug and then close the connection (fail-fast) so that ff3 will delegate to using SSL instead of TLS.
-                                // This is a jvm bug on java1.6 where the SSLEngine expects more data from the initial handshake when the client(ff3-tls) already had given it.
-                                // See http://jira.codehaus.org/browse/JETTY-567 for more details
-                                return -1;
-                            }
                             break;
                         }
 
                         case NEED_WRAP:
                         {
-                            wraps++;
                             synchronized(_outBuffer)
                             {
                                 try
@@ -557,11 +546,7 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
         // h.append("inNIOBuffer=").append(_inNIOBuffer.length()).append('\n');
         
         if (_inNIOBuffer.length()==0)
-        {
-            if(!isOpen())
-                throw new org.mortbay.jetty.EofException();
             return false;
-        }
 
         try
         {

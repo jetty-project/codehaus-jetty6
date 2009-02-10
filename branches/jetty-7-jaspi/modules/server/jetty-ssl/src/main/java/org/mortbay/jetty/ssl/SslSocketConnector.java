@@ -51,7 +51,6 @@ import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.security.Password;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
-import org.mortbay.util.TypeUtil;
 
 /* ------------------------------------------------------------ */
 /**
@@ -130,7 +129,6 @@ public class SslSocketConnector extends SocketConnector
         }
     }
 
-  
 
     /** Default value for the cipher Suites. */
     private String _excludeCipherSuites[] = null;
@@ -239,7 +237,6 @@ public class SslSocketConnector extends SocketConnector
      * This allows the required attributes to be set for SSL requests. <br>
      * The requirements of the Servlet specs are:
      * <ul>
-     * <li> an attribute named "javax.servlet.request.ssl_id" of type String (since Spec 3.0).</li>
      * <li> an attribute named "javax.servlet.request.cipher_suite" of type String.</li>
      * <li> an attribute named "javax.servlet.request.key_size" of type Integer.</li>
      * <li> an attribute named "javax.servlet.request.X509Certificate" of type
@@ -267,7 +264,6 @@ public class SslSocketConnector extends SocketConnector
             SSLSession sslSession = sslSocket.getSession();
             String cipherSuite = sslSession.getCipherSuite();
             Integer keySize;
-            String idStr;
             X509Certificate[] certs;
 
             CachedInfo cachedInfo = (CachedInfo) sslSession.getValue(CACHED_INFO_ATTR);
@@ -275,15 +271,12 @@ public class SslSocketConnector extends SocketConnector
             {
                 keySize = cachedInfo.getKeySize();
                 certs = cachedInfo.getCerts();
-                idStr = cachedInfo.getIdStr();
             }
             else
             {
                 keySize = new Integer(ServletSSL.deduceKeyLength(cipherSuite));
                 certs = getCertChain(sslSession);
-                byte[] idBytes = sslSession.getId();
-                idStr = TypeUtil.toHexString(idBytes);
-                cachedInfo = new CachedInfo(keySize, certs,idStr);
+                cachedInfo = new CachedInfo(keySize, certs);
                 sslSession.putValue(CACHED_INFO_ATTR, cachedInfo);
             }
 
@@ -291,8 +284,7 @@ public class SslSocketConnector extends SocketConnector
                 request.setAttribute("javax.servlet.request.X509Certificate", certs);
             else if (_needClientAuth) // Sanity check
                 throw new IllegalStateException("no client auth");
-            
-            request.setAttribute("javax.servlet.request.ssl_session_id", idStr);
+
             request.setAttribute("javax.servlet.request.cipher_suite", cipherSuite);
             request.setAttribute("javax.servlet.request.key_size", keySize);
         }
@@ -598,14 +590,11 @@ public class SslSocketConnector extends SocketConnector
     {
         private X509Certificate[] _certs;
         private Integer _keySize;
-        private String _idStr;
- 
 
-        CachedInfo(Integer keySize, X509Certificate[] certs,String id)
+        CachedInfo(Integer keySize, X509Certificate[] certs)
         {
             this._keySize = keySize;
             this._certs = certs;
-            this._idStr = id;
         }
 
         X509Certificate[] getCerts()
@@ -616,11 +605,6 @@ public class SslSocketConnector extends SocketConnector
         Integer getKeySize()
         {
             return _keySize;
-        }
-        
-        String getIdStr ()
-        {
-            return _idStr;
         }
     }
     

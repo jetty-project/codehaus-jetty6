@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 
+import javax.net.ssl.SSLEngineResult.HandshakeStatus;
+
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
@@ -32,7 +34,6 @@ import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.HttpVersions;
 import org.mortbay.jetty.client.security.Authorization;
 import org.mortbay.jetty.ssl.SslSelectChannelEndPoint;
-
 import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
 
@@ -54,10 +55,9 @@ public class HttpConnection implements Connection
     boolean _requestComplete;
     public String _message;
     public Throwable _throwable;
-    public boolean _reserved;
 
     /* The current exchange waiting for a response */
-    volatile HttpExchange _exchange;
+    HttpExchange _exchange;
     HttpExchange _pipeline;
 
     public void dump() throws IOException
@@ -106,6 +106,7 @@ public class HttpConnection implements Connection
                 }
             }
         }
+
     };
 
     /* ------------------------------------------------------------ */
@@ -116,16 +117,6 @@ public class HttpConnection implements Connection
         _parser = new HttpParser(buffers,endp,new Handler(),hbs,cbs);
     }
 
-    public void setReserved (boolean reserved)
-    {
-        _reserved = reserved;
-    }
-    
-    public boolean isReserved()
-    {
-        return _reserved;
-    }
-    
     /* ------------------------------------------------------------ */
     public HttpDestination getDestination()
     {
@@ -340,8 +331,7 @@ public class HttpConnection implements Connection
 
                             if (_pipeline == null)
                             {
-                                if (!isReserved())
-                                    _destination.returnConnection(this,close);
+                                _destination.returnConnection(this,close);
                                 if (close)
                                     return;
                             }
@@ -349,8 +339,7 @@ public class HttpConnection implements Connection
                             {
                                 if (close)
                                 {
-                                    if (!isReserved())
-                                        _destination.returnConnection(this,close);
+                                    _destination.returnConnection(this,close);
                                     _destination.send(_pipeline);
                                     _pipeline = null;
                                     return;
@@ -487,51 +476,37 @@ public class HttpConnection implements Connection
         @Override
         public void startResponse(Buffer version, int status, Buffer reason) throws IOException
         {
-            HttpExchange exchange = _exchange;
-            if (exchange!=null)
-            {
-                _http11 = HttpVersions.HTTP_1_1_BUFFER.equals(version);
-                exchange.getEventListener().onResponseStatus(version,status,reason);
-                exchange.setStatus(HttpExchange.STATUS_PARSING_HEADERS);
-            }
+            _http11 = HttpVersions.HTTP_1_1_BUFFER.equals(version);
+            _exchange.getEventListener().onResponseStatus(version,status,reason);
+            _exchange.setStatus(HttpExchange.STATUS_PARSING_HEADERS);
         }
 
         @Override
         public void parsedHeader(Buffer name, Buffer value) throws IOException
         {
-            HttpExchange exchange = _exchange;
-            if (exchange!=null)
+            if (HttpHeaders.CACHE.getOrdinal(name) == HttpHeaders.CONNECTION_ORDINAL)
             {
-                if (HttpHeaders.CACHE.getOrdinal(name) == HttpHeaders.CONNECTION_ORDINAL)
-                {
-                    _connectionHeader = HttpHeaderValues.CACHE.lookup(value);
-                }
-                exchange.getEventListener().onResponseHeader(name,value);
+                _connectionHeader = HttpHeaderValues.CACHE.lookup(value);
             }
+            _exchange.getEventListener().onResponseHeader(name,value);
         }
 
         @Override
         public void headerComplete() throws IOException
         {
-            HttpExchange exchange = _exchange;
-            if (exchange!=null)
-                exchange.setStatus(HttpExchange.STATUS_PARSING_CONTENT);
+            _exchange.setStatus(HttpExchange.STATUS_PARSING_CONTENT);
         }
 
         @Override
         public void content(Buffer ref) throws IOException
         {
-            HttpExchange exchange = _exchange;
-            if (exchange!=null)
-                exchange.getEventListener().onResponseContent(ref);
+            _exchange.getEventListener().onResponseContent(ref);
         }
 
         @Override
         public void messageComplete(long contextLength) throws IOException
         {
-            HttpExchange exchange = _exchange;
-            if (exchange!=null)
-                exchange.setStatus(HttpExchange.STATUS_COMPLETED);
+            _exchange.setStatus(HttpExchange.STATUS_COMPLETED);
         }
     }
 

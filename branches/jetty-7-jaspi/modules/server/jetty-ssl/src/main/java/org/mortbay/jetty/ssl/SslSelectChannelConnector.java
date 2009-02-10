@@ -57,7 +57,6 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.Password;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
-import org.mortbay.util.TypeUtil;
 
 /* ------------------------------------------------------------ */
 /**
@@ -216,7 +215,6 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         }
     }
 
-  
     /* ------------------------------------------------------------ */
     /**
      * Allow the Listener a chance to customise the request. before the server
@@ -224,8 +222,6 @@ public class SslSelectChannelConnector extends SelectChannelConnector
      * This allows the required attributes to be set for SSL requests. <br>
      * The requirements of the Servlet specs are:
      * <ul>
-     * <li> an attribute named "javax.servlet.request.ssl_session_id" of type
-     * String (since Servlet Spec 3.0).</li>
      * <li> an attribute named "javax.servlet.request.cipher_suite" of type
      * String.</li>
      * <li> an attribute named "javax.servlet.request.key_size" of type Integer.</li>
@@ -259,22 +255,18 @@ public class SslSelectChannelConnector extends SelectChannelConnector
             String cipherSuite=sslSession.getCipherSuite();
             Integer keySize;
             X509Certificate[] certs;
-            String idStr;
 
             CachedInfo cachedInfo=(CachedInfo)sslSession.getValue(CACHED_INFO_ATTR);
             if (cachedInfo!=null)
             {
                 keySize=cachedInfo.getKeySize();
                 certs=cachedInfo.getCerts();
-                idStr=cachedInfo.getIdStr();
             }
             else
             {
                 keySize=new Integer(ServletSSL.deduceKeyLength(cipherSuite));
                 certs=getCertChain(sslSession);
-                byte[] bytes = sslSession.getId();
-                idStr = TypeUtil.toHexString(bytes);
-                cachedInfo=new CachedInfo(keySize,certs,idStr);
+                cachedInfo=new CachedInfo(keySize,certs);
                 sslSession.putValue(CACHED_INFO_ATTR,cachedInfo);
             }
 
@@ -283,7 +275,6 @@ public class SslSelectChannelConnector extends SelectChannelConnector
 
             request.setAttribute("javax.servlet.request.cipher_suite",cipherSuite);
             request.setAttribute("javax.servlet.request.key_size",keySize);
-            request.setAttribute("javax.servlet.request.ssl_session_id", idStr);
         }
         catch (Exception e)
         {
@@ -533,8 +524,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
             // TODO remove this hack
             public boolean isReadyForDispatch()
             {
-                Request request = ((HttpConnection)getConnection()).getRequest();
-                return super.isReadyForDispatch() && !(request.getAsyncRequest().isSuspended());
+                return super.isReadyForDispatch() && !((HttpConnection)getConnection()).getRequest().isSuspended();
             }
         };
     }
@@ -651,13 +641,11 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     {
         private X509Certificate[] _certs;
         private Integer _keySize;
-        private String _idStr;
 
-        CachedInfo(Integer keySize, X509Certificate[] certs,String idStr)
+        CachedInfo(Integer keySize, X509Certificate[] certs)
         {
             this._keySize=keySize;
             this._certs=certs;
-            this._idStr=idStr;
         }
 
         X509Certificate[] getCerts()
@@ -668,11 +656,6 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         Integer getKeySize()
         {
             return _keySize;
-        }
-        
-        String getIdStr()
-        {
-            return _idStr;
         }
     }
 

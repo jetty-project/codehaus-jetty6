@@ -16,7 +16,6 @@ public class EncodedHttpURI extends HttpURI
     public EncodedHttpURI(String encoding)
     {
         super();
-        _encoding = encoding;
     }
     
     

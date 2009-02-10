@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 
-import javax.servlet.DispatcherType;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -32,7 +31,6 @@ import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.thread.Timeout;
-import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 
@@ -58,9 +56,10 @@ public class HttpConnection implements Connection
     private static int UNKNOWN = -2;
     private static ThreadLocal<HttpConnection> __currentConnection = new ThreadLocal<HttpConnection>();
 
-    private final long _timeStamp=System.currentTimeMillis();
+    private long _timeStamp=System.currentTimeMillis();
     private int _requests;
-    private volatile boolean _handling;
+    private boolean _handling;
+    private boolean _destroy;
     
     protected final Connector _connector;
     protected final EndPoint _endp;
@@ -141,20 +140,22 @@ public class HttpConnection implements Connection
     {
         synchronized(this)
         {
-            while(_handling)
-                Thread.yield();
+            _destroy=true;
+            if (!_handling)   
+            {
+                if (_parser!=null)
+                    _parser.reset(true);
 
-            if (_parser!=null)
-                _parser.reset(true);
+                if (_generator!=null)
+                    _generator.reset(true);
 
-            if (_generator!=null)
-                _generator.reset(true);
+                if (_requestFields!=null)
+                    _requestFields.destroy();
 
-            if (_requestFields!=null)
-                _requestFields.destroy();
+                if (_responseFields!=null)
+                    _responseFields.destroy();
 
-            if (_responseFields!=null)
-                _responseFields.destroy();
+            }
         }
     }
     
@@ -378,25 +379,26 @@ public class HttpConnection implements Connection
 
         try
         {
-            _handling=true;
+            synchronized(this)
+            {
+                if (_handling)
+                    throw new IllegalStateException(); // TODO delete this check
+                _handling=true;
+            }
             setCurrentConnection(this);
 
             while (more_in_buffer)
             {
                 try
                 {
-                    if (_request._async.isAsync())
+                    if (!_request.isInitial())
                     {
+                        if (_request.isSuspended())
+                        {
+                            Log.warn("suspended dispatch");
+                        }
                         Log.debug("resume request",_request);
-                        if (!_request._async.isComplete())
-                            handleRequest();
-                        else if (!_parser.isComplete()) 
-                            progress|=_parser.parseAvailable()>0;
-                        
-                        if (_generator.isCommitted() && !_generator.isComplete())
-                            _generator.flush();
-                        if (_endp.isBufferingOutput())
-                            _endp.flush();
+                        handleRequest();
                     }
                     else
                     {
@@ -461,10 +463,10 @@ public class HttpConnection implements Connection
                         progress=true;
                     }
 
-                    if (_request.isAsyncStarted())
+                    if (_request.isSuspended())
                     {
                         Log.debug("return with suspended request");
-                        more_in_buffer=false;
+                        return;
                     }
                     else if (_generator.isCommitted() && !_generator.isComplete() && _endp instanceof SelectChannelEndPoint) // TODO remove SelectChannel dependency
                         ((SelectChannelEndPoint)_endp).setWritable(false);
@@ -474,7 +476,16 @@ public class HttpConnection implements Connection
         finally
         {
             setCurrentConnection(null);
-            _handling=false;
+
+            synchronized(this)
+            {
+                _handling=false;
+
+                if (_destroy)
+                { 
+                    destroy();
+                }
+            }
         }
     }
     
@@ -507,118 +518,113 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     protected void handleRequest() throws IOException
     {
-        boolean handling=_server.isRunning() && _request._async.handling();
-        boolean error = false;
-
-        String threadName=null;
-        try
+        _request.handling();
+        boolean handling=_server.isRunning();
+        
+        while (handling)
         {
-            if (Log.isDebugEnabled())
+            _request.setHandled(false);
+            _response.enable();
+            boolean error = false;
+            String threadName=null;
+            try
             {
-                threadName=Thread.currentThread().getName();
-                Thread.currentThread().setName(threadName+" - "+_uri);
-            }
-            
-            while (handling)
-            {
-                _request.setHandled(false);
-                try
-                {
-                    String info=URIUtil.canonicalPath(_uri.getDecodedPath());
-                    if (info==null)
-                        throw new HttpException(400);
-                    _request.setPathInfo(info);
-
-                    if (_out!=null)
-                        _out.reopen();
-
-                    if (_request._async.isInitial())
-                    {
-                        _request.setDispatcherType(DispatcherType.REQUEST);
-                        _connector.customize(_endp, _request);
-                        _server.handle(this);
-                    }
-                    else 
-                    {
-                        _request.setDispatcherType(DispatcherType.ASYNC);
-                        _server.handleAsync(this);
-                    }
-
-                }
-                catch (RetryRequest r)
-                {
-                    Log.ignore(r);
-                }
-                catch (EofException e)
-                {
-                    Log.ignore(e);
-                    error=true;
-                }
-                catch (HttpException e)
-                {
-                    Log.debug(e);
-                    _request.setHandled(true);
-                    _response.sendError(e.getStatus(), e.getReason());
-                    error=true;
-                }
-                catch (Exception e)
-                {
-                    Log.warn(e);
-                    _request.setHandled(true);
-                    _generator.sendError(500, null, null, true);
-                    error=true;
-                }
-                catch (Error e)
-                {
-                    Log.warn(e);
-                    _request.setHandled(true);
-                    _generator.sendError(500, null, null, true);
-                    error=true;
-                }
-                finally
-                {   
-                    handling = !_request._async.unhandle() && _server != null;
-                }
-            }
-        }
-        finally
-        {
-            if (threadName!=null)
-                Thread.currentThread().setName(threadName);
-
-            if (_request._async.isUncompleted())
-            {   
-                _request._async.doComplete();
+                String info=URIUtil.canonicalPath(_uri.getDecodedPath());
+                if (info==null)
+                    throw new HttpException(400);
+                _request.setPathInfo(info);
                 
-                if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
+                if (_out!=null)
+                    _out.reopen();
+                
+                if (_request.isInitial())
+                    _connector.customize(_endp, _request);
+                  
+                if (Log.isDebugEnabled())
                 {
-                    // Continue not sent so don't parse any content 
-                    _expect = UNKNOWN;
-                    if (_parser instanceof HttpParser)
-                        ((HttpParser)_parser).setState(HttpParser.STATE_END);
+                    threadName=Thread.currentThread().getName();
+                    Thread.currentThread().setName(threadName+" - "+_uri);
                 }
 
-                if(_endp.isOpen())
+                if (_request.shouldHandleRequest())
                 {
-                    if (_generator.isPersistent())
-                        _connector.persist(_endp);
-
-                    if (error) 
-                        _endp.close();
-                    else
-                    {
-                        if (!_response.isCommitted() && !_request.isHandled())
-                            _response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                        _response.complete();
-                    }
+                    _server.handle(this);
                 }
                 else
                 {
-                    _response.complete(); 
+                    _request.setHandled(true);
                 }
-
+            }
+            catch (RetryRequest r)
+            {
+                Log.ignore(r);
+            }
+            catch (EofException e)
+            {
+                Log.ignore(e);
+                error=true;
+            }
+            catch (HttpException e)
+            {
+                Log.debug(e);
                 _request.setHandled(true);
-            } 
+                _response.sendError(e.getStatus(), e.getReason());
+                error=true;
+            }
+            catch (Exception e)
+            {
+                Log.warn(e);
+                _request.setHandled(true);
+                _generator.sendError(500, null, null, true);
+                error=true;
+            }
+            catch (Error e)
+            {
+                Log.warn(e);
+                _request.setHandled(true);
+                _generator.sendError(500, null, null, true);
+                error=true;
+            }
+            finally
+            {   
+                handling = !_request.unhandling() && _server != null;
+                if (handling)
+                    continue;
+                
+                if (threadName!=null)
+                    Thread.currentThread().setName(threadName);
+                
+                
+                if (_request.shouldComplete() )
+                {
+                    if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
+                    {
+                        // Continue not sent so don't parse any content 
+                        _expect = UNKNOWN;
+                        if (_parser instanceof HttpParser)
+                            ((HttpParser)_parser).setState(HttpParser.STATE_END);
+                    }
+                    
+                    if(_endp.isOpen())
+                    {
+                        if (_generator.isPersistent())
+                            _connector.persist(_endp);
+                        
+                        if (error) 
+                            _endp.close();
+                        else
+                        {
+                            if (!_response.isCommitted() && !_request.isHandled())
+                                _response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                            _response.complete();
+                        }
+                    }
+                    else
+                    {
+                        _response.complete(); 
+                    }
+                }
+            }
         }
     }
 
@@ -891,7 +897,7 @@ public class HttpConnection implements Connection
          * 
          * @see org.mortbay.jetty.HttpParser.EventHandler#messageComplete(int)
          */
-        public void messageComplete(long contentLength) throws IOException
+        public void messageComplete(long contextLength) throws IOException
         {
             if (_delayedHandling)
             {
@@ -984,32 +990,8 @@ public class HttpConnection implements Connection
             if (content instanceof HttpContent)
             {
                 HttpContent c = (HttpContent) content;
-                Buffer contentType = c.getContentType();
-                if (contentType != null && !_responseFields.containsKey(HttpHeaders.CONTENT_TYPE_BUFFER))
-                {
-                    String enc = _response.getSetCharacterEncoding();
-                    if(enc==null)
-                        _responseFields.add(HttpHeaders.CONTENT_TYPE_BUFFER, contentType);
-                    else
-                    {
-                        if(contentType instanceof CachedBuffer)
-                        {
-                            CachedBuffer content_type = ((CachedBuffer)contentType).getAssociate(enc);
-                            if(content_type!=null)
-                                _responseFields.put(HttpHeaders.CONTENT_TYPE_BUFFER, content_type);
-                            else
-                            {
-                                _responseFields.put(HttpHeaders.CONTENT_TYPE_BUFFER, 
-                                        contentType+";charset="+QuotedStringTokenizer.quote(enc,";= "));
-                            }
-                        }
-                        else
-                        {
-                            _responseFields.put(HttpHeaders.CONTENT_TYPE_BUFFER, 
-                                    contentType+";charset="+QuotedStringTokenizer.quote(enc,";= "));
-                        }
-                    }
-                }
+                if (c.getContentType() != null && !_responseFields.containsKey(HttpHeaders.CONTENT_TYPE_BUFFER)) 
+                    _responseFields.add(HttpHeaders.CONTENT_TYPE_BUFFER, c.getContentType());
                 if (c.getContentLength() > 0) 
                     _responseFields.putLongField(HttpHeaders.CONTENT_LENGTH_BUFFER, c.getContentLength());
                 Buffer lm = c.getLastModified();
