@@ -19,7 +19,6 @@
     <module>jetty-ajp</module>
     <module>jetty-jspc-maven-plugin</module>
     <module>jetty-maven-plugin</module>
-    <module>maven-jetty-plugin</module>
-    <module>cometd</module>
+    <module>maven-jetty-plugin</module>    
   </modules>
 </project>
