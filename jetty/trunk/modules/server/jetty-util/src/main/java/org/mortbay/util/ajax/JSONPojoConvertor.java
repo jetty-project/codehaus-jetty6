@@ -14,6 +14,7 @@
 
 package org.mortbay.util.ajax;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -40,7 +41,7 @@ import org.mortbay.util.ajax.JSON.Output;
 public class JSONPojoConvertor implements JSON.Convertor
 {
     
-    private static final Object[] __getterArg = new Object[]{};
+    public static final Object[] GETTER_ARG = new Object[]{}, NULL_ARG = new Object[]{null};
     private static final Map<Class<?>, NumberType> __numberTypes = new HashMap<Class<?>, NumberType>();
     
     public static NumberType getNumberType(Class<?> clazz)
@@ -105,7 +106,7 @@ public class JSONPojoConvertor implements JSON.Convertor
                             else 
                                 break;
                             if(includeField(name, m))
-                                _getters.put(name, m);
+                                addGetter(name, m);
                         }
                         break;
                     case 1:
@@ -113,12 +114,30 @@ public class JSONPojoConvertor implements JSON.Convertor
                         {
                             name=name.substring(3,4).toLowerCase()+name.substring(4);
                             if(includeField(name, m))
-                                _setters.put(name, new Setter(name, m));
+                                addSetter(name, m);
                         }
                         break;                
                 }
             }
         }
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected void addGetter(String name, Method method)
+    {
+        _getters.put(name, method);
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected void addSetter(String name, Method method)
+    {
+        _setters.put(name, new Setter(name, method));
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected Setter getSetter(String name)
+    {
+        return _setters.get(name);
     }
 
     /* ------------------------------------------------------------ */
@@ -147,10 +166,17 @@ public class JSONPojoConvertor implements JSON.Convertor
             throw new RuntimeException(e);
         }
         
-        for(Iterator<Map.Entry<?, ?>> iterator = object.entrySet().iterator(); iterator.hasNext();)
+        setProps(obj, object);
+        return obj;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setProps(Object obj, Map<?,?> props)
+    {
+        for(Iterator<?> iterator = props.entrySet().iterator(); iterator.hasNext();)
         {
-            Map.Entry<?, ?> entry = iterator.next();
-            Setter setter = _setters.get(entry.getKey());
+            Map.Entry<?, ?> entry = (Map.Entry<?,?>) iterator.next();
+            Setter setter = getSetter((String)entry.getKey());
             if(setter!=null)
             {
                 try
@@ -161,12 +187,11 @@ public class JSONPojoConvertor implements JSON.Convertor
                 {
                     // TODO throw exception?
                     Log.warn("{} property '{}' not set. (errors)", _pojoClass.getName(), 
-                            setter.getPropertyName());                    
+                            setter.getPropertyName());
+                    log(e);
                 }
             }
         }
-        
-        return obj;
     }
 
     /* ------------------------------------------------------------ */
@@ -178,28 +203,43 @@ public class JSONPojoConvertor implements JSON.Convertor
         {            
             try
             {
-                out.add(entry.getKey(), entry.getValue().invoke(obj, __getterArg));                    
+                out.add(entry.getKey(), entry.getValue().invoke(obj, GETTER_ARG));                    
             }
             catch(Exception e)
             {
                 // TODO throw exception?
                 Log.warn("{} property '{}' excluded. (errors)", _pojoClass.getName(), 
-                        entry.getKey());                
+                        entry.getKey());
+                log(e);
             }
         }        
     }
     
+    /* ------------------------------------------------------------ */
+    protected void log(Throwable t)
+    {
+        Log.ignore(t);
+    }
+    
     public static class Setter
     {
-        private String _propertyName;
-        private Method _method;
-        private NumberType _numberType;
+        protected String _propertyName;
+        protected Method _method;
+        protected NumberType _numberType;
+        protected Class<?> _type;
+        protected Class<?> _componentType;
         
         public Setter(String propertyName, Method method)
         {
             _propertyName = propertyName;
             _method = method;
-            _numberType = __numberTypes.get(method.getParameterTypes()[0]);
+            _type = method.getParameterTypes()[0];
+            _numberType = (NumberType)__numberTypes.get(_type);
+            if(_numberType==null && _type.isArray())
+            {
+                _componentType = _type.getComponentType();
+                _numberType = (NumberType)__numberTypes.get(_componentType);
+            }
         }
         
         public String getPropertyName()
@@ -217,16 +257,73 @@ public class JSONPojoConvertor implements JSON.Convertor
             return _numberType;
         }
         
+        public Class<?> getType()
+        {
+            return _type;
+        }
+        
+        public Class<?> getComponentType()
+        {
+            return _componentType;
+        }
+        
         public boolean isPropertyNumber()
         {
             return _numberType!=null;
         }
         
         public void invoke(Object obj, Object value) throws IllegalArgumentException, 
+        IllegalAccessException, InvocationTargetException
+        {
+            if(value==null)
+                _method.invoke(obj, NULL_ARG);
+            else
+                invokeObject(obj, value);
+        }
+        
+        protected void invokeObject(Object obj, Object value) throws IllegalArgumentException, 
             IllegalAccessException, InvocationTargetException
         {
             if(_numberType!=null && value instanceof Number)
                 _method.invoke(obj, new Object[]{_numberType.getActualValue((Number)value)});
+            else if(_componentType!=null && value.getClass().isArray())
+            {
+                if(_numberType==null)
+                {
+                    int len = Array.getLength(value);
+                    Object array = Array.newInstance(_componentType, len);
+                    try
+                    {
+                        System.arraycopy(value, 0, array, 0, len);
+                    }
+                    catch(Exception e)
+                    {                        
+                        // unusual array with multiple types
+                        Log.ignore(e);
+                        _method.invoke(obj, new Object[]{value});
+                        return;
+                    }                    
+                    _method.invoke(obj, new Object[]{array});
+                }
+                else
+                {
+                    Object[] old = (Object[])value;
+                    Object array = Array.newInstance(_componentType, old.length);
+                    try
+                    {
+                        for(int i=0; i<old.length; i++)
+                            Array.set(array, i, _numberType.getActualValue((Number)old[i]));
+                    }
+                    catch(Exception e)
+                    {                        
+                        // unusual array with multiple types
+                        Log.ignore(e);
+                        _method.invoke(obj, new Object[]{value});
+                        return;
+                    }
+                    _method.invoke(obj, new Object[]{array});
+                }
+            }
             else
                 _method.invoke(obj, new Object[]{value});
         }

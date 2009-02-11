@@ -42,7 +42,9 @@ public class JSONPojoConvertorTest extends TestCase
         foo._double1 = 10000.11111d;
         foo._double2 = new Double(10000.22222d);
         
-        Bar bar = new Bar("Hello", true, new Baz("World", Boolean.FALSE, foo));
+        Bar bar = new Bar("Hello", true, new Baz("World", Boolean.FALSE, foo), new Baz[]{
+            new Baz("baz0", Boolean.TRUE, null), new Baz("baz1", Boolean.FALSE, null)
+        });
         
         String s = json.toJSON(bar);
         
@@ -56,7 +58,10 @@ public class JSONPojoConvertorTest extends TestCase
         
         Foo f = bz.getFoo();
         
-        assertEquals(f, foo);        
+        assertEquals(f, foo);
+        assertTrue(br.getBazs().length==2);
+        assertEquals(br.getBazs()[0].getMessage(), "baz0");
+        assertEquals(br.getBazs()[1].getMessage(), "baz1");
     }
     
     public void testExclude()
@@ -110,6 +115,7 @@ public class JSONPojoConvertorTest extends TestCase
         private String _title, _nullTest;
         private Baz _baz;
         private boolean _boolean1;
+        private Baz[] _bazs;
         
         public Bar()
         {
@@ -121,6 +127,12 @@ public class JSONPojoConvertorTest extends TestCase
             setTitle(title);
             setBoolean1(boolean1);
             setBaz(baz);
+        }
+        
+        public Bar(String title, boolean boolean1, Baz baz, Baz[] bazs)
+        {
+            this(title, boolean1, baz);
+            setBazs(bazs);
         }
         
         public String toString()
@@ -171,6 +183,16 @@ public class JSONPojoConvertorTest extends TestCase
         public boolean isBoolean1()
         {
             return _boolean1;
+        }
+        
+        public void setBazs(Baz[] bazs)
+        {
+            _bazs = bazs;
+        }
+        
+        public Baz[] getBazs()
+        {
+            return _bazs;
         }
     }
     
