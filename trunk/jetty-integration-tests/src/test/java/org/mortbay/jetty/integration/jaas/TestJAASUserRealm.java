@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.plus.jaas;
+package org.mortbay.jetty.integration.jaas;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -38,6 +38,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.mortbay.jetty.LoginCallback;
+import org.mortbay.jetty.plus.jaas.JAASLoginService;
 import org.mortbay.jetty.security.LoginCallbackImpl;
 
 

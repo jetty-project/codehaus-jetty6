@@ -460,7 +460,7 @@ public class LdapLoginModule extends AbstractLoginModule
      * @return
      * @throws LoginException
      */
-    protected boolean bindingLogin(String username, Object password) throws LoginException, NamingException
+    public boolean bindingLogin(String username, Object password) throws LoginException, NamingException
     {
         SearchResult searchResult = findUser(username);
 
