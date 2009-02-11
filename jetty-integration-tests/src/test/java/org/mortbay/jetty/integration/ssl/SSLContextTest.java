@@ -1,4 +1,4 @@
-package org.mortbay.jetty.security;
+package org.mortbay.jetty.integration.ssl;
 
 // ========================================================================
 // Copyright 2008 Mort Bay Consulting Pty. Ltd.
