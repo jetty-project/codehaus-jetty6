@@ -14,6 +14,6 @@
     <module>jetty-jmx</module>
     <module>jetty-plus</module>
     <module>jetty-jndi</module>
-    <!--module>jetty-annotations</module-->
+    <module>jetty-annotations</module>
   </modules>
 </project>
