@@ -170,9 +170,9 @@ public class JSONPojoConvertor implements JSON.Convertor
     }
     
     /* ------------------------------------------------------------ */
-    public void setProps(Object obj, Map object)
+    public void setProps(Object obj, Map props)
     {
-        for(Iterator iterator = object.entrySet().iterator(); iterator.hasNext();)
+        for(Iterator iterator = props.entrySet().iterator(); iterator.hasNext();)
         {
             Map.Entry entry = (Map.Entry)iterator.next();
             Setter setter = getSetter((String)entry.getKey());
@@ -263,7 +263,7 @@ public class JSONPojoConvertor implements JSON.Convertor
             return _type;
         }
         
-        public Class getCompontentType()
+        public Class getComponentType()
         {
             return _componentType;
         }
