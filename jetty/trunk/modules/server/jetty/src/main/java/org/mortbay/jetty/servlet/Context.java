@@ -347,19 +347,16 @@ public class Context extends ContextHandler
             
             return new FilterRegistration()
             {
-                @Override
                 public void setInitParameter(String name, String value)
                 {
                     holder.setInitParameter(name,value);
                 }
 
-                @Override
                 public void setAsyncSupported(boolean isAsyncSupported)
                 {
                     holder.setAsyncSupported(isAsyncSupported);
                 }
 
-                @Override
                 public void addMappingForServletNames(EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... servletNames)
                 {
                     FilterMapping mapping = new FilterMapping();
@@ -373,7 +370,6 @@ public class Context extends ContextHandler
                         handler.prependFilterMapping(mapping);
                 }
 
-                @Override
                 public void addMappingForUrlPatterns(EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... urlPatterns)
                 {
                     FilterMapping mapping = new FilterMapping();
@@ -385,6 +381,15 @@ public class Context extends ContextHandler
                         handler.addFilterMapping(mapping);
                     else
                         handler.prependFilterMapping(mapping);
+                }
+
+                public void setDescription(String description)
+                {   
+                }
+
+                public void setInitParameters(Map<String, String> initParameters)
+                {
+                    holder.setInitParameters(initParameters);
                 }
             };
         }
@@ -403,31 +408,36 @@ public class Context extends ContextHandler
 
             return new ServletRegistration()
             {
-                @Override
                 public void setAsyncSupported(boolean isAsyncSupported)
                 {
                     holder.setAsyncSupported(isAsyncSupported);
                 }
 
-                @Override
                 public void setLoadOnStartup(int loadOnStartup)
                 {
                     holder.setInitOrder(loadOnStartup);
                 }
 
-                @Override
                 public void setInitParameter(String name, String value)
                 {
                     holder.setInitParameter(name,value);
                 }
 
-                @Override
                 public void addMapping(String... urlPatterns)
                 {
                     ServletMapping mapping = new ServletMapping();
                     mapping.setServletName(holder.getName());
                     mapping.setPathSpecs(urlPatterns);
                     handler.addServletMapping(mapping);
+                }
+
+                public void setDescription(String description)
+                {
+                }
+
+                public void setInitParameters(Map<String, String> initParameters)
+                {
+                    holder.setInitParameters(initParameters);
                 }
             };
             
