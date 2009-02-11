@@ -12,7 +12,12 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.servlet;
+package org.mortbay.jetty.integration.session;
+
+import org.mortbay.jetty.servlet.AbstractSessionTest;
+import org.mortbay.jetty.servlet.JDBCSessionIdManager;
+import org.mortbay.jetty.servlet.JDBCSessionManager;
+import org.mortbay.jetty.servlet.SessionTestServer;
 
 
 public class JDBCSessionServerTest extends AbstractSessionTest

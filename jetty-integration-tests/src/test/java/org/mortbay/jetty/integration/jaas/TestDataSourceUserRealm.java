@@ -14,7 +14,7 @@
 // ========================================================================
 
 
-package org.mortbay.jetty.plus.security;
+package org.mortbay.jetty.integration.jaas;
 
 import java.io.File;
 import java.security.Principal;
@@ -28,6 +28,7 @@ import javax.sql.DataSource;
 
 import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.mortbay.jetty.plus.naming.Resource;
+import org.mortbay.jetty.plus.security.DataSourceUserRealm;
 
 
 
