@@ -137,8 +137,9 @@ public class TestJAASUserRealm extends TestCase
     public void testItDataSource ()
     throws Exception
     {
-        String tmpDir = System.getProperty("java.io.tmpdir")+System.getProperty("file.separator");
-        System.setProperty("derby.system.home", tmpDir);
+        //String tmpDir = System.getProperty("java.io.tmpdir")+System.getProperty("file.separator");
+        System.setProperty("derby.system.home", System.getProperty("basedir") + "/target/test-db-2");
+        //System.setProperty("derby.system.home", tmpDir);
         String dbname = "derby-"+(int)(random.nextDouble()*10000);
         
         EmbeddedDataSource eds = new EmbeddedDataSource();
@@ -241,7 +242,7 @@ public class TestJAASUserRealm extends TestCase
         }
         finally
         {
-            comp.destroySubcontext("env");
+            //comp.destroySubcontext("env");
             try
             {
                 Connection c = eds.getConnection();
