@@ -212,10 +212,10 @@ public class AnnotationProcessor
                 }
                 mapping.setServletNames((String[])names.toArray(new String[names.size()]));
                 
-                int dispatcher=Handler.DEFAULT;                
+                int dispatcher=FilterMapping.DEFAULT;                
                 for (DispatcherType d:annotation.filterMapping().dispatcherTypes())
                 {
-                   dispatcher = dispatcher|Dispatcher.type(d);            
+                   dispatcher = dispatcher|FilterMapping.dispatch(d);            
                 }
                 mapping.setDispatches(dispatcher);
                 LazyList.add(_filterMappings,mapping);
