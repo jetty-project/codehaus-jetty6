@@ -100,7 +100,6 @@
     <module>modules/plus</module>
     <module>modules/extra</module>
     <module>modules/examples</module>
-    <module>jetty-integration-tests</module>
   </modules>
   <repositories>
     <repository>
