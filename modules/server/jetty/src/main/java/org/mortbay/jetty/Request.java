@@ -109,7 +109,7 @@ public class Request implements HttpServletRequest
     private static final String __ASYNC_FWD="org.mortbay.asyncfwd";
 
     protected HttpConnection _connection;
-    protected final AsyncRequest _async;
+    protected final AsyncRequest _async = new AsyncRequest();
     private boolean _handled =false;
     private Map _roleMap;
     private EndPoint _endp;
@@ -159,18 +159,17 @@ public class Request implements HttpServletRequest
     /* ------------------------------------------------------------ */
     public Request()
     {
-        _async=new AsyncRequest();
     }
     
     /* ------------------------------------------------------------ */
     public Request(HttpConnection connection)
     {
-        _connection=connection;
-        _async=new AsyncRequest(connection);
+        setConnection(connection);
     }
 
     /* ------------------------------------------------------------ */
-    protected void setConnection(HttpConnection connection)
+    //final so we can safely call this from constructor
+    protected final void setConnection(HttpConnection connection)
     {
         _connection=connection;
     	_async.setConnection(connection);
