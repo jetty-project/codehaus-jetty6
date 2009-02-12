@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><project>
   <parent>
-    <artifactId>modules-server</artifactId>
+    <artifactId>jetty-project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
     <version>7.0-SNAPSHOT</version>
   </parent>

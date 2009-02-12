@@ -95,11 +95,26 @@
     </pluginManagement>
   </build>
   <modules>
-    <module>modules/server</module>
-    <module>modules/jsp</module>
-    <module>modules/plus</module>
-    <module>modules/extra</module>
-    <module>modules/examples</module>
+    <module>jetty-annotations</module>
+    <!--
+    <module>jetty-assembly</module>
+    -->
+    <module>jetty-client</module>
+    <module>jetty-deploy</module>
+    <module>jetty-http</module>
+    <module>jetty-io</module>
+    <module>jetty-jmx</module>
+    <module>jetty-jndi</module>
+    <module>jetty-plus</module>
+    <module>jetty-rewrite</module>
+    <module>jetty-security</module>
+    <module>jetty-server</module>
+    <module>jetty-servlet</module>
+    <module>jetty-servlet-tester</module>
+    <module>jetty-ssl</module>
+    <module>jetty-start</module>
+    <module>jetty-util</module>
+    <module>jetty-xml</module>
   </modules>
   <repositories>
     <repository>
