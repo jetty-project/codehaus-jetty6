@@ -12,15 +12,15 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.handler.management;
+package org.mortbay.jetty.jmx.handler;
 
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.jmx.ObjectMBean;
 import org.mortbay.jetty.util.Attributes;
-import org.mortbay.management.ObjectMBean;
 
 public class ContextHandlerMBean extends ObjectMBean
 {

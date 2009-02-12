@@ -12,12 +12,13 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.management;
+package org.mortbay.jetty.jmx;
 
 
 import junit.framework.TestCase;
 
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.jmx.ObjectMBean;
 
 import com.acme.Derived;
 

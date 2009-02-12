@@ -22,10 +22,10 @@
             </goals>
             <configuration>
               <instructions>
-                <Bundle-SymbolicName>org.mortbay.jetty.management</Bundle-SymbolicName>
+                <Bundle-SymbolicName>org.mortbay.jetty.jmx</Bundle-SymbolicName>
                 <Bundle-DocURL>http://jetty.mortbay.org</Bundle-DocURL>
                 <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
-                <Import-Package>!org.mortbay.component.management.*,!org.mortbay.jetty.deployer.management.*,!org.mortbay.jetty.nio.management.*,!org.mortbay.log.management.*,!org.mortbay.management.*,!org.mortbay.thread.management.*,!org.mortbay.jetty.handler.management.*,!org.mortbay.jetty.management.*,!org.mortbay.jetty.servlet.management.*,!org.mortbay.jetty.webapp.management.*,*</Import-Package>
+                <Import-Package>!org.mortbay.component.management.*,!org.mortbay.jetty.deployer.management.*,!org.mortbay.jetty.nio.management.*,!org.mortbay.log.management.*,!org.mortbay.jetty.jmx.*,!org.mortbay.thread.management.*,!org.mortbay.jetty.jmx.handler.*,!org.mortbay.jetty.jmx.*,!org.mortbay.jetty.jmx.servlet.*,!org.mortbay.jetty.jmx.webapp.*,*</Import-Package>
               </instructions>
             </configuration>
            </execution>

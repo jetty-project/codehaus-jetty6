@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.management;
+package org.mortbay.jetty.jmx;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -93,7 +93,7 @@ public class ObjectMBean implements DynamicMBean
      * <UL>
      * <LI>com.acme.management.MyClassMBean
      * <LI>com.acme.util.management.BaseClassMBean
-     * <LI>org.mortbay.management.ObjectMBean
+     * <LI>org.mortbay.jetty.jmx.ObjectMBean
      * </UL>
      *
      * @param o The object

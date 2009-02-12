@@ -12,11 +12,11 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.servlet.management;
+package org.mortbay.jetty.jmx.servlet;
 
+import org.mortbay.jetty.jmx.ObjectMBean;
 import org.mortbay.jetty.servlet.Holder;
 import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.management.ObjectMBean;
 
 public class HolderMBean extends ObjectMBean
 {

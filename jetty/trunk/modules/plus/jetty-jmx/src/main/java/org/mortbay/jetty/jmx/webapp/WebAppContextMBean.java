@@ -12,9 +12,9 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.webapp.management;
+package org.mortbay.jetty.jmx.webapp;
 
-import org.mortbay.jetty.handler.management.ContextHandlerMBean;
+import org.mortbay.jetty.jmx.handler.ContextHandlerMBean;
 import org.mortbay.jetty.webapp.WebAppContext;
 
 public class WebAppContextMBean extends ContextHandlerMBean
