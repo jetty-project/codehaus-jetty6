@@ -13,7 +13,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.naming.local;
+package org.mortbay.jetty.jndi.local;
 
 import java.util.Hashtable;
 import java.util.Properties;
@@ -25,7 +25,7 @@ import javax.naming.NameParser;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 
-import org.mortbay.naming.NamingContext;
+import org.mortbay.jetty.jndi.NamingContext;
 
 /**
  * 

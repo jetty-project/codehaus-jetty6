@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.naming.factories;
+package org.mortbay.jetty.jndi.factories;
 
 import java.util.Properties;
 
@@ -24,7 +24,8 @@ import javax.naming.LinkRef;
 import javax.naming.Name;
 import javax.naming.NameParser;
 
-import org.mortbay.naming.NamingUtil;
+import org.mortbay.jetty.jndi.NamingUtil;
+import org.mortbay.jetty.jndi.factories.MailSessionReference;
 
 import junit.framework.TestCase;
 
