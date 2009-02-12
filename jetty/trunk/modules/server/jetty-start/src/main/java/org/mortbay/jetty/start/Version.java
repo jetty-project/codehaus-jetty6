@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ========================================================================
-package org.mortbay.start;
+package org.mortbay.jetty.start;
 
 /**
  * Utility class for parsing and comparing version strings.
