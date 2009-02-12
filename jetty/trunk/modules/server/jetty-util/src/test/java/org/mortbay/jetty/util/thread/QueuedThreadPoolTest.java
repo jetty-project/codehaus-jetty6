@@ -44,7 +44,7 @@ public class QueuedThreadPoolTest extends TestCase
         }
     };    
     
-    public void /*test*/ThreadPool() throws Exception
+    public void testThreadPool() throws Exception
     {        
         QueuedThreadPool tp= new QueuedThreadPool();
         tp.setMinThreads(5);
