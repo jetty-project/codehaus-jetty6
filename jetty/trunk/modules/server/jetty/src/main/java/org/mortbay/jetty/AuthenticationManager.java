@@ -18,8 +18,8 @@ import java.util.Map;
 
 import javax.security.auth.Subject;
 
-import org.mortbay.component.LifeCycle;
 import org.mortbay.jetty.handler.SecurityHandler;
+import org.mortbay.jetty.util.component.LifeCycle;
 
 public interface AuthenticationManager<T> extends LifeCycle
 {

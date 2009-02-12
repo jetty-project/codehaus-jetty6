@@ -37,8 +37,8 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.mortbay.jetty.SessionIdManager;
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.log.Log;
-import org.mortbay.util.LazyList;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * JDBCSessionManager

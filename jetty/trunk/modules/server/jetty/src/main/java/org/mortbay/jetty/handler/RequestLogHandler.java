@@ -25,7 +25,7 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RequestLog;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.Server;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 
 

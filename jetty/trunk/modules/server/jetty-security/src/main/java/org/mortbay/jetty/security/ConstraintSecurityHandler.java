@@ -29,7 +29,7 @@ import org.mortbay.jetty.Response;
 import org.mortbay.jetty.RunAsToken;
 import org.mortbay.jetty.UserIdentity;
 import org.mortbay.jetty.servlet.PathMap;
-import org.mortbay.util.StringMap;
+import org.mortbay.jetty.util.StringMap;
 
 /* ------------------------------------------------------------ */
 /**

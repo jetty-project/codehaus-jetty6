@@ -25,8 +25,8 @@ import org.mortbay.jetty.client.HttpDestination;
 import org.mortbay.jetty.client.HttpEventListenerWrapper;
 import org.mortbay.jetty.client.HttpExchange;
 import org.mortbay.jetty.client.security.SecurityListener;
-import org.mortbay.log.Log;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * WebdavListener

@@ -26,8 +26,8 @@ import org.mortbay.io.Connection;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpException;
-import org.mortbay.log.Log;
-import org.mortbay.thread.Timeout;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.thread.Timeout;
 
 /* ------------------------------------------------------------ */
 /**

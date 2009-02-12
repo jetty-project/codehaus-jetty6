@@ -27,7 +27,7 @@ import junit.framework.TestCase;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.testing.HttpTester;
 import org.mortbay.jetty.testing.ServletTester;
-import org.mortbay.util.IO;
+import org.mortbay.jetty.util.IO;
 
 public class ServletTest extends TestCase
 {

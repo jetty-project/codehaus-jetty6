@@ -29,12 +29,12 @@ import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
-import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
-import org.mortbay.thread.Timeout;
-import org.mortbay.util.QuotedStringTokenizer;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.QuotedStringTokenizer;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.resource.Resource;
+import org.mortbay.jetty.util.thread.Timeout;
 
 /**
  * <p>A HttpConnection represents the connection of a HTTP client to the server

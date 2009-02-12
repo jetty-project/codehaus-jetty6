@@ -20,8 +20,8 @@ import java.io.FileOutputStream;
 import junit.framework.TestCase;
 
 import org.mortbay.jetty.ResourceCache.Content;
-import org.mortbay.resource.Resource;
-import org.mortbay.resource.ResourceFactory;
+import org.mortbay.jetty.util.resource.Resource;
+import org.mortbay.jetty.util.resource.ResourceFactory;
 
 public class ResourceCacheTest extends TestCase
 {

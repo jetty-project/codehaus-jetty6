@@ -33,7 +33,7 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.LocalConnector;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
-import org.mortbay.resource.Resource;
+import org.mortbay.jetty.util.resource.Resource;
 
 /**
  * @version $Revision$

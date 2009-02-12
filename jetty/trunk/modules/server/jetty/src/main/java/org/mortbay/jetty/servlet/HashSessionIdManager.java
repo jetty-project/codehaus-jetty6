@@ -21,11 +21,11 @@ import java.util.Random;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.SessionIdManager;
 import org.mortbay.jetty.servlet.AbstractSessionManager.Session;
-import org.mortbay.log.Log;
-import org.mortbay.util.MultiMap;
+import org.mortbay.jetty.util.MultiMap;
+import org.mortbay.jetty.util.component.AbstractLifeCycle;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /**

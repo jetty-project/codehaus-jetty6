@@ -27,7 +27,7 @@ import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.HttpURI;
 import org.mortbay.jetty.HttpVersions;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 
 /**

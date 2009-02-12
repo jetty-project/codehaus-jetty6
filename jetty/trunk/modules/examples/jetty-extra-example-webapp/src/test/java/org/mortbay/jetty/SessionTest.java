@@ -27,8 +27,8 @@ import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.security.HashLoginService;
 import org.mortbay.jetty.security.LoginService;
+import org.mortbay.jetty.util.IO;
 import org.mortbay.jetty.webapp.WebAppContext;
-import org.mortbay.util.IO;
 
 import junit.framework.TestCase;
 

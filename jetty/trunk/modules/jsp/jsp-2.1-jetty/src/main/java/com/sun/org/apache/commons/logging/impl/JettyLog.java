@@ -26,7 +26,7 @@ import com.sun.org.apache.commons.logging.Log;
 public class JettyLog implements Log
 {
     private String _name;
-    private org.mortbay.log.Logger _logger;
+    private org.mortbay.jetty.util.log.Logger _logger;
     
     /**
      * 
@@ -34,7 +34,7 @@ public class JettyLog implements Log
     public JettyLog(String name)
     {
         _name = name;
-        _logger = org.mortbay.log.Log.getLogger(name);
+        _logger = org.mortbay.jetty.util.log.Log.getLogger(name);
     }
     public  void fatal (Object message)
     {

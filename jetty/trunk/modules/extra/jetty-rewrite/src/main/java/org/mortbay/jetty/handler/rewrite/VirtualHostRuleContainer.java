@@ -19,7 +19,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.util.LazyList;
+import org.mortbay.jetty.util.LazyList;
 
 /**
  * Groups rules that apply only to a specific virtual host

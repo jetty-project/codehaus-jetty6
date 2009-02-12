@@ -14,7 +14,7 @@
 
 package org.mortbay.jetty;
 
-import org.mortbay.component.LifeCycle;
+import org.mortbay.jetty.util.component.LifeCycle;
 
 /**
  * A Handler that contains other Handlers.

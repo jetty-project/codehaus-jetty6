@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpHeaderValues;
 import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.util.StringMap;
+import org.mortbay.jetty.util.StringMap;
 
 /**
  * MSIE (Microsoft Internet Explorer) SSL Rule.

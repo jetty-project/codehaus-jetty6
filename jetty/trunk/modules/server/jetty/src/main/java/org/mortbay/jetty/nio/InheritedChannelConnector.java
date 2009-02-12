@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.channels.Channel;
 import java.nio.channels.ServerSocketChannel;
 
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * An implementation of the SelectChannelConnector which first tries to  

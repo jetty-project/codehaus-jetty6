@@ -28,8 +28,8 @@ import junit.framework.TestCase;
 
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.log.Log;
-import org.mortbay.log.StdErrLog;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.log.StdErrLog;
 
 /**
  * @author gregw

@@ -19,7 +19,7 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.TestSuite;
 
-import org.mortbay.util.IO;
+import org.mortbay.jetty.util.IO;
 
 
 /* ------------------------------------------------------------ */

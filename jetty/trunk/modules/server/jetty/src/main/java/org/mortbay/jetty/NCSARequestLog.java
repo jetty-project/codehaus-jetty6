@@ -24,14 +24,14 @@ import java.util.TimeZone;
 
 import javax.servlet.http.Cookie;
 
-import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.servlet.PathMap;
-import org.mortbay.log.Log;
-import org.mortbay.util.DateCache;
-import org.mortbay.util.RolloverFileOutputStream;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.TypeUtil;
-import org.mortbay.util.Utf8StringBuilder;
+import org.mortbay.jetty.util.DateCache;
+import org.mortbay.jetty.util.RolloverFileOutputStream;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.TypeUtil;
+import org.mortbay.jetty.util.Utf8StringBuilder;
+import org.mortbay.jetty.util.component.AbstractLifeCycle;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * This {@link RequestLog} implementation outputs logs in the pseudo-standard

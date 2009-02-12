@@ -21,13 +21,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.Scanner;
+import org.mortbay.jetty.util.Scanner;
+import org.mortbay.jetty.util.component.AbstractLifeCycle;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.resource.Resource;
 import org.mortbay.xml.XmlConfiguration;
 
 /**
@@ -82,7 +82,7 @@ public class ContextDeployer extends AbstractLifeCycle
         /**
          * Handle a new deployment
          * 
-         * @see org.mortbay.util.Scanner.FileAddedListener#fileAdded(java.lang.String)
+         * @see org.mortbay.jetty.util.Scanner.FileAddedListener#fileAdded(java.lang.String)
          */
         public void fileAdded(String filename) throws Exception
         {
@@ -92,7 +92,7 @@ public class ContextDeployer extends AbstractLifeCycle
         /**
          * Handle a change to an existing deployment. Undeploy then redeploy.
          * 
-         * @see org.mortbay.util.Scanner.FileChangedListener#fileChanged(java.lang.String)
+         * @see org.mortbay.jetty.util.Scanner.FileChangedListener#fileChanged(java.lang.String)
          */
         public void fileChanged(String filename) throws Exception
         {
@@ -102,7 +102,7 @@ public class ContextDeployer extends AbstractLifeCycle
         /**
          * Handle an undeploy.
          * 
-         * @see org.mortbay.util.Scanner.FileRemovedListener#fileRemoved(java.lang.String)
+         * @see org.mortbay.jetty.util.Scanner.FileRemovedListener#fileRemoved(java.lang.String)
          */
         public void fileRemoved(String filename) throws Exception
         {
@@ -291,7 +291,7 @@ public class ContextDeployer extends AbstractLifeCycle
     /**
      * Start the hot deployer looking for webapps to deploy/undeploy
      * 
-     * @see org.mortbay.component.AbstractLifeCycle#doStart()
+     * @see org.mortbay.jetty.util.component.AbstractLifeCycle#doStart()
      */
     protected void doStart() throws Exception
     {
@@ -333,7 +333,7 @@ public class ContextDeployer extends AbstractLifeCycle
     /**
      * Stop the hot deployer.
      * 
-     * @see org.mortbay.component.AbstractLifeCycle#doStop()
+     * @see org.mortbay.jetty.util.component.AbstractLifeCycle#doStop()
      */
     protected void doStop() throws Exception
     {

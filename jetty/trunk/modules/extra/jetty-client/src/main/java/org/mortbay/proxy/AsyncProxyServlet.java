@@ -43,9 +43,9 @@ import org.mortbay.jetty.HttpURI;
 import org.mortbay.jetty.client.Address;
 import org.mortbay.jetty.client.HttpClient;
 import org.mortbay.jetty.client.HttpExchange;
-import org.mortbay.log.Log;
-import org.mortbay.util.IO;
-import org.mortbay.util.TypeUtil;
+import org.mortbay.jetty.util.IO;
+import org.mortbay.jetty.util.TypeUtil;
+import org.mortbay.jetty.util.log.Log;
 
 
 

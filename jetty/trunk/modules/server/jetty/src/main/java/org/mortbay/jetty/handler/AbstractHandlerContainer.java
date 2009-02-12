@@ -18,7 +18,7 @@ package org.mortbay.jetty.handler;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
-import org.mortbay.util.LazyList;
+import org.mortbay.jetty.util.LazyList;
 
 
 /* ------------------------------------------------------------ */

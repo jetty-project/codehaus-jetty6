@@ -36,7 +36,7 @@ import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.handler.SecurityHandler;
 import org.mortbay.jetty.servlet.FilterMapping;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * @version $Rev$ $Date$

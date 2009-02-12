@@ -17,7 +17,7 @@ package org.mortbay.jetty.security;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /**

@@ -31,20 +31,20 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.component.Container;
-import org.mortbay.component.LifeCycle;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.log.Log;
-import org.mortbay.thread.QueuedThreadPool;
-import org.mortbay.thread.ThreadPool;
-import org.mortbay.util.Attributes;
-import org.mortbay.util.AttributesMap;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.MultiException;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.Attributes;
+import org.mortbay.jetty.util.AttributesMap;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.MultiException;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.component.Container;
+import org.mortbay.jetty.util.component.LifeCycle;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.thread.QueuedThreadPool;
+import org.mortbay.jetty.util.thread.ThreadPool;
 
 /* ------------------------------------------------------------ */
 /** Jetty HTTP Servlet Server.

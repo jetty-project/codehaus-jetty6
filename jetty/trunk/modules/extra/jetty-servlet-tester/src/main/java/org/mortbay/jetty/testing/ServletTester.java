@@ -28,7 +28,7 @@ import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.util.Attributes;
+import org.mortbay.jetty.util.Attributes;
 
 
 

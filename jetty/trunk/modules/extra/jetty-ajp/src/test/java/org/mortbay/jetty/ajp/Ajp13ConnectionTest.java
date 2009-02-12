@@ -17,7 +17,7 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.util.TypeUtil;
+import org.mortbay.jetty.util.TypeUtil;
 
 public class Ajp13ConnectionTest extends TestCase
 {

@@ -38,7 +38,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 import org.mortbay.naming.NamingContext;
 
 

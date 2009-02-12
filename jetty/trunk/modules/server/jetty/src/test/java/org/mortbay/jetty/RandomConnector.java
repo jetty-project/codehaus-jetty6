@@ -37,8 +37,8 @@ import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.nio.AbstractNIOConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.log.Log;
-import org.mortbay.util.ajax.Continuation;
+import org.mortbay.jetty.util.ajax.Continuation;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------------------------- */
 /**

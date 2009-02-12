@@ -24,7 +24,7 @@ import java.io.UnsupportedEncodingException;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.util.StringUtil;
 
 /**
  * A CachedExchange that retains all content for later use.

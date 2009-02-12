@@ -15,7 +15,8 @@
 package org.mortbay.jetty.handler.rewrite;
 
 import org.mortbay.jetty.servlet.PathMap;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.URIUtil;
+
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;

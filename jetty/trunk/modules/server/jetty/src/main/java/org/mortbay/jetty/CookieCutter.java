@@ -16,9 +16,9 @@ package org.mortbay.jetty;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
-import org.mortbay.log.Log;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.log.Log;
 
 
 /* ------------------------------------------------------------ */

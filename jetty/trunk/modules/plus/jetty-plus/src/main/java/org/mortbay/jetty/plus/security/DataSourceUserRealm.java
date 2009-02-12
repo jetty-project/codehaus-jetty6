@@ -34,7 +34,7 @@ import org.mortbay.jetty.plus.naming.NamingEntryUtil;
 import org.mortbay.jetty.security.AbstractLoginService;
 import org.mortbay.jetty.security.HashLoginService;
 import org.mortbay.jetty.security.Password;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 
 

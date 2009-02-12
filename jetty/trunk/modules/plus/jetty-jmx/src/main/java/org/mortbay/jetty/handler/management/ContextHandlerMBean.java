@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.util.Attributes;
 import org.mortbay.management.ObjectMBean;
-import org.mortbay.util.Attributes;
 
 public class ContextHandlerMBean extends ObjectMBean
 {

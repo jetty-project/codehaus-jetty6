@@ -30,9 +30,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.log.Log;
-import org.mortbay.util.IO;
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.util.IO;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.log.Log;
 
 //-----------------------------------------------------------------------------
 /**

@@ -22,7 +22,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.SimpleBuffers;
 import org.mortbay.io.bio.StringEndPoint;
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.util.StringUtil;
 
 /**
  * @author gregw

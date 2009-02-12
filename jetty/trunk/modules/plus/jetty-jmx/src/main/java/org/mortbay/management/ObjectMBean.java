@@ -45,11 +45,11 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.modelmbean.ModelMBean;
 
-import org.mortbay.log.Log;
-import org.mortbay.log.StdErrLog;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.Loader;
-import org.mortbay.util.TypeUtil;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.Loader;
+import org.mortbay.jetty.util.TypeUtil;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.log.StdErrLog;
 
 /* ------------------------------------------------------------ */
 /** ObjectMBean.

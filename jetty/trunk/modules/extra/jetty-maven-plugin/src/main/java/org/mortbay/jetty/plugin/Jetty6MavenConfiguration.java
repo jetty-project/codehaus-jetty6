@@ -30,9 +30,9 @@ import org.mortbay.jetty.plus.annotation.RunAsCollection;
 import org.mortbay.jetty.annotations.Configuration;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.webapp.WebAppClassLoader;
-import org.mortbay.log.Log;
-import org.mortbay.util.LazyList;
 
 public class Jetty6MavenConfiguration extends Configuration 
 {

@@ -31,10 +31,10 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.regex.Pattern;
 
+import org.mortbay.jetty.util.Loader;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.resource.Resource;
 import org.mortbay.jetty.webapp.JarScanner;
-import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.Loader;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.FieldVisitor;

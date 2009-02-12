@@ -21,10 +21,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.mortbay.util.LazyList;
-import org.mortbay.util.SingletonList;
-import org.mortbay.util.StringMap;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.SingletonList;
+import org.mortbay.jetty.util.StringMap;
+import org.mortbay.jetty.util.URIUtil;
 
 /* ------------------------------------------------------------ */
 /** URI path map to Object.

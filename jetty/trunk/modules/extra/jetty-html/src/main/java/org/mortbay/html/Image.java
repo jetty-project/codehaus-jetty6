@@ -18,8 +18,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import org.mortbay.log.Log;
-import org.mortbay.util.IO;
+import org.mortbay.jetty.util.IO;
+import org.mortbay.jetty.util.log.Log;
 
 
 /* ---------------------------------------------------------------- */
