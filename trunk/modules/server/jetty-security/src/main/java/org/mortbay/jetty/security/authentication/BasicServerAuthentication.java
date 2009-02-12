@@ -25,7 +25,7 @@ import javax.security.auth.Subject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpHeaders;
+import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.security.B64Code;

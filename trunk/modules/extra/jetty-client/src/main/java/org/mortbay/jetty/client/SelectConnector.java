@@ -22,8 +22,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
 import org.mortbay.jetty.AbstractBuffers;
-import org.mortbay.jetty.HttpMethods;
-import org.mortbay.jetty.HttpVersions;
+import org.mortbay.jetty.http.HttpMethods;
+import org.mortbay.jetty.http.HttpVersions;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.Buffers;
 import org.mortbay.jetty.io.Connection;

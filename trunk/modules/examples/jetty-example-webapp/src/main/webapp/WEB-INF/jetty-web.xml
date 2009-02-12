@@ -4,7 +4,7 @@
 <!--
 This is the jetty specific web application configuration file.  When starting
 a Web Application, the WEB-INF/web-jetty.xml file is looked for and if found, treated
-as a org.mortbay.xml.XmlConfiguration file and is applied to the
+as a org.mortbay.jetty.xml.XmlConfiguration file and is applied to the
 org.mortbay.jetty.servlet.WebApplicationContext objet
 -->
 

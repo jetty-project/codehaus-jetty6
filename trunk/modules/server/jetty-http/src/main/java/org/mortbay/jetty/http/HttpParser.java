@@ -12,13 +12,14 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty;
+package org.mortbay.jetty.http;
 
 import java.io.IOException;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.http.Parser;
 import org.mortbay.jetty.io.AbstractBuffer;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.BufferUtil;

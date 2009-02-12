@@ -34,9 +34,9 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import org.mortbay.jetty.AbstractBuffers;
-import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.client.security.Authorization;
 import org.mortbay.jetty.client.security.RealmResolver;
+import org.mortbay.jetty.http.HttpSchemes;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.io.nio.DirectNIOBuffer;

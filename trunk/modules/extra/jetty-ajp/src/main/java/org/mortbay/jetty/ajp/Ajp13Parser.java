@@ -19,8 +19,8 @@ import java.io.InterruptedIOException;
 
 import javax.servlet.ServletInputStream;
 
-import org.mortbay.jetty.HttpTokens;
-import org.mortbay.jetty.Parser;
+import org.mortbay.jetty.http.HttpTokens;
+import org.mortbay.jetty.http.Parser;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.BufferUtil;
 import org.mortbay.jetty.io.Buffers;

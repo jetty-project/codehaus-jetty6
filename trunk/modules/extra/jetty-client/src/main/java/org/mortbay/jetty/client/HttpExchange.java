@@ -18,12 +18,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 
-import org.mortbay.jetty.HttpFields;
-import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.jetty.HttpMethods;
-import org.mortbay.jetty.HttpSchemes;
-import org.mortbay.jetty.HttpURI;
-import org.mortbay.jetty.HttpVersions;
+import org.mortbay.jetty.http.HttpFields;
+import org.mortbay.jetty.http.HttpHeaders;
+import org.mortbay.jetty.http.HttpMethods;
+import org.mortbay.jetty.http.HttpSchemes;
+import org.mortbay.jetty.http.HttpURI;
+import org.mortbay.jetty.http.HttpVersions;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.io.BufferCache.CachedBuffer;

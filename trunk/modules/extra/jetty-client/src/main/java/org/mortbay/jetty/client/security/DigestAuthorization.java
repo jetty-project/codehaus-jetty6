@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.Map;
 
-import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.client.HttpExchange;
+import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.TypeUtil;
 

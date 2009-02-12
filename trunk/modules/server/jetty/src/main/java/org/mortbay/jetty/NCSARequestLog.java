@@ -24,6 +24,7 @@ import java.util.TimeZone;
 
 import javax.servlet.http.Cookie;
 
+import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.jetty.util.DateCache;
 import org.mortbay.jetty.util.RolloverFileOutputStream;

@@ -41,7 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.mortbay.jetty.Dispatcher;
-import org.mortbay.jetty.HttpHeaders;
+import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.ajax.Continuation;
 import org.mortbay.jetty.util.ajax.ContinuationSupport;

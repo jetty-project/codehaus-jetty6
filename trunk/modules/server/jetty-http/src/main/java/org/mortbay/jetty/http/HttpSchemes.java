@@ -12,32 +12,23 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty;
+package org.mortbay.jetty.http;
 
 import org.mortbay.jetty.io.Buffer;
-import org.mortbay.jetty.io.BufferCache;
+import org.mortbay.jetty.io.ByteArrayBuffer;
 
 /* ------------------------------------------------------------------------------- */
 /** 
  * 
  * @author gregw
  */
-public class HttpVersions
+public class HttpSchemes
 {
-	public final static String
-		HTTP_0_9 = "",
-		HTTP_1_0 = "HTTP/1.0",
-		HTTP_1_1 = "HTTP/1.1";
-		
-	public final static int
-		HTTP_0_9_ORDINAL=9,
-		HTTP_1_0_ORDINAL=10,
-		HTTP_1_1_ORDINAL=11;
-	
-	public final static BufferCache CACHE = new BufferCache();
-	
-    public final static Buffer 
-        HTTP_0_9_BUFFER=CACHE.add(HTTP_0_9,HTTP_0_9_ORDINAL),
-        HTTP_1_0_BUFFER=CACHE.add(HTTP_1_0,HTTP_1_0_ORDINAL),
-        HTTP_1_1_BUFFER=CACHE.add(HTTP_1_1,HTTP_1_1_ORDINAL);
+    public final static String
+        HTTP ="http",
+        HTTPS="https";
+    
+    public final static Buffer
+        HTTP_BUFFER = new ByteArrayBuffer(HTTP),
+        HTTPS_BUFFER = new ByteArrayBuffer(HTTPS);
 }

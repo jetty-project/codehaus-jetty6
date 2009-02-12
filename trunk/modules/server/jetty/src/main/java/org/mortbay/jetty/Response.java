@@ -28,6 +28,14 @@ import javax.servlet.http.HttpSession;
 
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
+import org.mortbay.jetty.http.Generator;
+import org.mortbay.jetty.http.HttpFields;
+import org.mortbay.jetty.http.HttpGenerator;
+import org.mortbay.jetty.http.HttpHeaderValues;
+import org.mortbay.jetty.http.HttpHeaders;
+import org.mortbay.jetty.http.HttpStatus;
+import org.mortbay.jetty.http.HttpVersions;
+import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.io.BufferCache.CachedBuffer;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.util.ByteArrayISO8859Writer;

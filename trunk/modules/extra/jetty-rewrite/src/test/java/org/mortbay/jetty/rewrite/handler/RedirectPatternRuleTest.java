@@ -15,7 +15,7 @@ package org.mortbay.jetty.rewrite.handler;
 
 import java.io.IOException;
 
-import org.mortbay.jetty.HttpHeaders;
+import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.rewrite.handler.RedirectPatternRule;
 
 

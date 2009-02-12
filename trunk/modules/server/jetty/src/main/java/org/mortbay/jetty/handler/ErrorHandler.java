@@ -21,10 +21,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpGenerator;
-import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.jetty.HttpMethods;
-import org.mortbay.jetty.MimeTypes;
+import org.mortbay.jetty.http.HttpGenerator;
+import org.mortbay.jetty.http.HttpHeaders;
+import org.mortbay.jetty.http.HttpMethods;
+import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.util.ByteArrayISO8859Writer;
 import org.mortbay.jetty.util.StringUtil;
 

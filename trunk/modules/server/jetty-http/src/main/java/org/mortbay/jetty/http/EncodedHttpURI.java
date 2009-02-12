@@ -1,4 +1,4 @@
-package org.mortbay.jetty;
+package org.mortbay.jetty.http;
 
 import java.io.UnsupportedEncodingException;
 

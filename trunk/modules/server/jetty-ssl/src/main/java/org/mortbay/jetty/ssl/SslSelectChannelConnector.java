@@ -41,9 +41,9 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpParser;
-import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.Request;
+import org.mortbay.jetty.http.HttpParser;
+import org.mortbay.jetty.http.HttpSchemes;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.Connection;
 import org.mortbay.jetty.io.EndPoint;
