@@ -15,6 +15,8 @@
 
 package org.mortbay.jetty.security;
 
+import org.mortbay.jetty.http.security.Constraint;
+
 public class ConstraintMapping
 {
     String _method;

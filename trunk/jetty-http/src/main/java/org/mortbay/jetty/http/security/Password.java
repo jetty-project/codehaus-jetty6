@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.security;
+package org.mortbay.jetty.http.security;
 
 import java.io.IOException;
 import java.util.Arrays;

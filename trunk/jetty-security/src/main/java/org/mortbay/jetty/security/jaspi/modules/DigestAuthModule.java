@@ -34,9 +34,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.http.HttpHeaders;
-import org.mortbay.jetty.security.B64Code;
-import org.mortbay.jetty.security.Constraint;
-import org.mortbay.jetty.security.Credential;
+import org.mortbay.jetty.http.security.B64Code;
+import org.mortbay.jetty.http.security.Constraint;
+import org.mortbay.jetty.http.security.Credential;
 import org.mortbay.jetty.util.QuotedStringTokenizer;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.TypeUtil;

@@ -114,6 +114,7 @@
     <module>jetty-ssl</module>
     <module>jetty-start</module>
     <module>jetty-util</module>
+    <module>jetty-webapp</module>
     <module>jetty-xml</module>
   </modules>
   <repositories>
