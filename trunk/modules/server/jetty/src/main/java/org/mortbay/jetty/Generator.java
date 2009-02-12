@@ -17,7 +17,7 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 
-import org.mortbay.io.Buffer;
+import org.mortbay.jetty.io.Buffer;
 
 public interface Generator
 {

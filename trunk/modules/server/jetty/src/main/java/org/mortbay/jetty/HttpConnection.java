@@ -24,11 +24,13 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.Connection;
-import org.mortbay.io.EndPoint;
-import org.mortbay.io.BufferCache.CachedBuffer;
-import org.mortbay.io.nio.SelectChannelEndPoint;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.Connection;
+import org.mortbay.jetty.io.EndPoint;
+import org.mortbay.jetty.io.EofException;
+import org.mortbay.jetty.io.HttpException;
+import org.mortbay.jetty.io.BufferCache.CachedBuffer;
+import org.mortbay.jetty.io.nio.SelectChannelEndPoint;
 import org.mortbay.jetty.util.QuotedStringTokenizer;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.URIUtil;

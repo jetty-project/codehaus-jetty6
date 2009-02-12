@@ -21,9 +21,9 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.BufferCache;
-import org.mortbay.io.BufferCache.CachedBuffer;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.BufferCache;
+import org.mortbay.jetty.io.BufferCache.CachedBuffer;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.log.Log;
 
