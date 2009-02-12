@@ -13,35 +13,57 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.plus.naming;
+package org.mortbay.jetty.plus.jndi;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.naming.Binding;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NameNotFoundException;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 
+import org.mortbay.jetty.jndi.NamingUtil;
+import org.mortbay.jetty.util.log.Log;
 
 
 /**
- * Resource
+ * EnvEntry
  *
  *
  */
-public class Resource extends NamingEntry
+public class EnvEntry extends NamingEntry
 {
-    
-    public  Resource (Object scope, String jndiName, Object objToBind)
+    private boolean overrideWebXml;
+  
+
+    public EnvEntry (Object scope, String jndiName, Object objToBind, boolean overrideWebXml)
     throws NamingException
     {
-        super(scope, jndiName, objToBind);
+        super (scope, jndiName, objToBind);
+        this.overrideWebXml = overrideWebXml;
     }
     
-    /**
-     * @param jndiName
-     * @param objToBind
-     */
-    public Resource (String jndiName, Object objToBind)
+    
+    public EnvEntry (String jndiName, Object objToBind, boolean overrideWebXml)
     throws NamingException
     {
         super(jndiName, objToBind);
+        this.overrideWebXml = overrideWebXml;
     }
-
+    
+    public EnvEntry (String jndiName, Object objToBind)
+    throws NamingException
+    {
+        this(jndiName, objToBind, false);
+    }
+    
+    
+    public boolean isOverrideWebXml ()
+    {
+        return this.overrideWebXml;
+    }
 }
