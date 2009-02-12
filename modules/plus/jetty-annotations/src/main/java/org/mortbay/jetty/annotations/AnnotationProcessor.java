@@ -389,8 +389,8 @@ public class AnnotationProcessor
                 {
                     //TODO don't ignore the shareable, auth etc etc
 
-                       if (!org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(_webApp, name, mappedName))
-                           if (!org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(_webApp.getServer(), name, mappedName))
+                       if (!org.mortbay.jetty.plus.jndi.NamingEntryUtil.bindToENC(_webApp, name, mappedName))
+                           if (!org.mortbay.jetty.plus.jndi.NamingEntryUtil.bindToENC(_webApp.getServer(), name, mappedName))
                                throw new IllegalStateException("No resource bound at "+(mappedName==null?name:mappedName));
                 }
                 catch (NamingException e)
@@ -442,8 +442,8 @@ public class AnnotationProcessor
                try
                {
                    //TODO don't ignore the shareable, auth etc etc
-                   if (!org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(_webApp, name,mappedName))
-                       if (!org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(_webApp.getServer(), name,mappedName))
+                   if (!org.mortbay.jetty.plus.jndi.NamingEntryUtil.bindToENC(_webApp, name,mappedName))
+                       if (!org.mortbay.jetty.plus.jndi.NamingEntryUtil.bindToENC(_webApp.getServer(), name,mappedName))
                            throw new IllegalStateException("No resource at "+(mappedName==null?name:mappedName));
                }
                catch (NamingException e)
@@ -535,15 +535,15 @@ public class AnnotationProcessor
                 {
                     //try binding name to environment
                     //try the webapp's environment first
-                    boolean bound = org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(_webApp, name, mappedName);
+                    boolean bound = org.mortbay.jetty.plus.jndi.NamingEntryUtil.bindToENC(_webApp, name, mappedName);
                     
                     //try the server's environment
                     if (!bound)
-                        bound = org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(_webApp.getServer(), name, mappedName);
+                        bound = org.mortbay.jetty.plus.jndi.NamingEntryUtil.bindToENC(_webApp.getServer(), name, mappedName);
                     
                     //try the jvm's environment
                     if (!bound)
-                        bound = org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(null, name, mappedName);
+                        bound = org.mortbay.jetty.plus.jndi.NamingEntryUtil.bindToENC(null, name, mappedName);
                     
                     //TODO if it is an env-entry from web.xml it can be injected, in which case there will be no
                     //NamingEntry, just a value bound in java:comp/env
@@ -660,11 +660,11 @@ public class AnnotationProcessor
             {
                 try
                 {
-                    boolean bound = org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(_webApp, name, mappedName);
+                    boolean bound = org.mortbay.jetty.plus.jndi.NamingEntryUtil.bindToENC(_webApp, name, mappedName);
                     if (!bound)
-                        bound = org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(_webApp.getServer(), name, mappedName);
+                        bound = org.mortbay.jetty.plus.jndi.NamingEntryUtil.bindToENC(_webApp.getServer(), name, mappedName);
                     if (!bound)
-                        bound =  org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(null, name, mappedName); 
+                        bound =  org.mortbay.jetty.plus.jndi.NamingEntryUtil.bindToENC(null, name, mappedName); 
                     if (!bound)
                     {
                         //see if there is an env-entry value been bound from web.xml

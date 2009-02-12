@@ -14,7 +14,7 @@
 
   <filter>
     <filter-name>QoSFilter</filter-name>
-    <filter-class>org.mortbay.servlet.QoSFilter</filter-class>
+    <filter-class>org.mortbay.jetty.servlet.QoSFilter</filter-class>
     <async-support>true</async-support>
     <init-param>
       <param-name>maxRequests</param-name>
@@ -29,7 +29,7 @@
 
   <filter>
     <filter-name>MultiPart</filter-name>
-    <filter-class>org.mortbay.servlet.MultiPartFilter</filter-class>
+    <filter-class>org.mortbay.jetty.servlet.MultiPartFilter</filter-class>
     <async-support>true</async-support>
     <init-param>
       <param-name>deleteFiles</param-name>
@@ -43,7 +43,7 @@
   
   <filter>
     <filter-name>GzipFilter</filter-name>
-    <filter-class>org.mortbay.servlet.jetty.IncludableGzipFilter</filter-class>
+    <filter-class>org.mortbay.jetty.servlet.jetty.IncludableGzipFilter</filter-class>
     <async-support>true</async-support>
     <init-param>
       <param-name>bufferSize</param-name>
@@ -76,7 +76,7 @@
   <!-- Comment out to support PUT and DELETE
   <filter>
     <filter-name>RestFilter</filter-name>
-    <filter-class>org.mortbay.servlet.RestFilter</filter-class>
+    <filter-class>org.mortbay.jetty.servlet.RestFilter</filter-class>
     <async-support>true</async-support>
     <init-param>
       <param-name>maxPutSize</param-name><param-value>1024</param-value>
@@ -163,7 +163,7 @@
    
   <servlet>
     <servlet-name>CGI</servlet-name>
-    <servlet-class>org.mortbay.servlet.CGI</servlet-class>
+    <servlet-class>org.mortbay.jetty.servlet.CGI</servlet-class>
     <load-on-startup>1</load-on-startup>
   </servlet>
   
