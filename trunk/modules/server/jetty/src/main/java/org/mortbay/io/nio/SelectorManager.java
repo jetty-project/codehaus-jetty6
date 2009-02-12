@@ -24,11 +24,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
-import org.mortbay.log.Log;
-import org.mortbay.thread.Timeout;
+import org.mortbay.jetty.util.component.AbstractLifeCycle;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.thread.Timeout;
 
 
 /* ------------------------------------------------------------ */

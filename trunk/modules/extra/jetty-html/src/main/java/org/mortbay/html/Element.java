@@ -22,7 +22,7 @@ import java.io.Writer;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 
 /* -------------------------------------------------------------------- */

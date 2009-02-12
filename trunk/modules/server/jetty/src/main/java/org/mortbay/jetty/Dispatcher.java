@@ -30,10 +30,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.util.Attributes;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.MultiMap;
-import org.mortbay.util.UrlEncoded;
+import org.mortbay.jetty.util.Attributes;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.MultiMap;
+import org.mortbay.jetty.util.UrlEncoded;
 
 /* ------------------------------------------------------------ */
 /** Servlet RequestDispatcher.

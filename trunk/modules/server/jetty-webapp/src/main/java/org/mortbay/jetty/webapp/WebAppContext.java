@@ -41,14 +41,14 @@ import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.SessionHandler;
-import org.mortbay.log.Log;
-import org.mortbay.resource.JarResource;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.IO;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.Loader;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.IO;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.Loader;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.resource.JarResource;
+import org.mortbay.jetty.util.resource.Resource;
 
 /* ------------------------------------------------------------ */
 /** Web Application Context Handler.

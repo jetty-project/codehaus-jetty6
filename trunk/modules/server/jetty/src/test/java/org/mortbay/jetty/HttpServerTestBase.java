@@ -35,8 +35,8 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 
 import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.thread.QueuedThreadPool;
-import org.mortbay.util.IO;
+import org.mortbay.jetty.util.IO;
+import org.mortbay.jetty.util.thread.QueuedThreadPool;
 /**
  * HttpServer Tester.
  */

@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.client.ContentExchange;
 import org.mortbay.jetty.client.HttpClient;
-import org.mortbay.util.ajax.JSON;
+import org.mortbay.jetty.util.ajax.JSON;
 
 /**
  * Servlet implementation class AsyncRESTServlet.

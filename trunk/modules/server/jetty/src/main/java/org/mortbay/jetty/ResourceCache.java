@@ -21,12 +21,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.View;
-import org.mortbay.resource.Resource;
-import org.mortbay.resource.ResourceFactory;
+import org.mortbay.jetty.util.component.AbstractLifeCycle;
+import org.mortbay.jetty.util.resource.Resource;
+import org.mortbay.jetty.util.resource.ResourceFactory;
 
 
 /* ------------------------------------------------------------ */

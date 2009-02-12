@@ -26,11 +26,11 @@ import java.util.HashSet;
 import java.util.StringTokenizer;
 
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.IO;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.util.IO;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.resource.Resource;
 
 
 /* ------------------------------------------------------------ */

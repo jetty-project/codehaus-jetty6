@@ -27,7 +27,7 @@ import org.mortbay.io.View;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpTokens;
 import org.mortbay.jetty.Parser;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * @author Markus Kobler

@@ -16,12 +16,12 @@
 
 package org.mortbay.jetty.handler;
 
-import org.mortbay.component.LifeCycle;
 import org.mortbay.jetty.AuthenticationManager;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.RunAsToken;
 import org.mortbay.jetty.UserRealm;
+import org.mortbay.jetty.util.component.LifeCycle;
 
 
 /**

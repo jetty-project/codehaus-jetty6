@@ -23,8 +23,8 @@ import java.util.Map;
 
 import javax.security.auth.Subject;
 
-import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.LoginCallback;
+import org.mortbay.jetty.util.component.AbstractLifeCycle;
 
 
 public abstract class AbstractLoginService extends AbstractLifeCycle implements LoginService

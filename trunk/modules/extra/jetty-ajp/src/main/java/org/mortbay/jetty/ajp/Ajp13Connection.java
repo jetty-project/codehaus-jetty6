@@ -128,8 +128,8 @@ public class Ajp13Connection extends HttpConnection
             } 
             catch (Exception e) 
             {
-                org.mortbay.log.Log.warn(e.toString());
-                org.mortbay.log.Log.ignore(e);
+                org.mortbay.jetty.util.log.Log.warn(e.toString());
+                org.mortbay.jetty.util.log.Log.ignore(e);
                 if (sslCert!=null)
                     _request.setAttribute("javax.servlet.request.X509Certificate", sslCert.toString());
             }

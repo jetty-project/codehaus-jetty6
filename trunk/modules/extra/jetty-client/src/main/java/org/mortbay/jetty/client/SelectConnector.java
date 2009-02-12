@@ -21,7 +21,6 @@ import java.nio.channels.SocketChannel;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
-import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.Connection;
@@ -33,7 +32,8 @@ import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.HttpVersions;
 import org.mortbay.jetty.ssl.SslSelectChannelEndPoint;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.component.AbstractLifeCycle;
+import org.mortbay.jetty.util.log.Log;
 
 class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector, Runnable
 {

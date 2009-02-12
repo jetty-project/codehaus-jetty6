@@ -24,7 +24,7 @@ import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.Request;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.URIUtil;
 
 /* ------------------------------------------------------------ */
 /** Moved ContextHandler.

@@ -21,7 +21,7 @@ import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.Properties;
 
-import org.mortbay.resource.Resource;
+import org.mortbay.jetty.util.resource.Resource;
 
 /**
  * FileConfigurationManager

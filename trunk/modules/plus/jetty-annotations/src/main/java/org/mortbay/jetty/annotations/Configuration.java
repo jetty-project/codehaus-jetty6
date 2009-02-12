@@ -24,8 +24,8 @@ import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
-import org.mortbay.log.Log;
-import org.mortbay.util.LazyList;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * Configuration

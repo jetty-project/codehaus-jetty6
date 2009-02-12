@@ -39,7 +39,7 @@ import javax.security.auth.login.LoginException;
 
 import org.mortbay.jetty.plus.jaas.callback.ObjectCallback;
 import org.mortbay.jetty.security.Credential;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * A LdapLoginModule for use with JAAS setups

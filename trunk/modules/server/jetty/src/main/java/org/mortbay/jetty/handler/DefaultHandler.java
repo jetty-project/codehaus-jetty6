@@ -29,10 +29,10 @@ import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
-import org.mortbay.log.Log;
-import org.mortbay.util.ByteArrayISO8859Writer;
-import org.mortbay.util.IO;
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.util.ByteArrayISO8859Writer;
+import org.mortbay.jetty.util.IO;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.log.Log;
 
 
 /* ------------------------------------------------------------ */

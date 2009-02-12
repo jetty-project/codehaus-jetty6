@@ -30,7 +30,7 @@ import org.mortbay.io.Buffers;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /**

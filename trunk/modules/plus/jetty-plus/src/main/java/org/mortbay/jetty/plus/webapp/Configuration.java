@@ -26,7 +26,7 @@ import org.mortbay.jetty.plus.naming.Link;
 import org.mortbay.jetty.plus.naming.NamingEntry;
 import org.mortbay.jetty.plus.naming.NamingEntryUtil;
 import org.mortbay.jetty.plus.naming.Transaction;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 import org.mortbay.naming.NamingUtil;
 
 

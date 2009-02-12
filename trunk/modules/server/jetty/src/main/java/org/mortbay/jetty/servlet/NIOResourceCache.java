@@ -30,8 +30,8 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.ResourceCache;
 import org.mortbay.jetty.nio.NIOConnector;
-import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.resource.Resource;
 
 class NIOResourceCache extends ResourceCache
 {

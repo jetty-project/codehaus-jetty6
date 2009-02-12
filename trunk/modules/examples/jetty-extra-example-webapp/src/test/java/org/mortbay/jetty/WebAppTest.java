@@ -36,11 +36,11 @@ import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.HashLoginService;
 import org.mortbay.jetty.security.LoginService;
+import org.mortbay.jetty.util.IO;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.log.StdErrLog;
+import org.mortbay.jetty.util.thread.QueuedThreadPool;
 import org.mortbay.jetty.webapp.WebAppContext;
-import org.mortbay.log.Log;
-import org.mortbay.log.StdErrLog;
-import org.mortbay.thread.QueuedThreadPool;
-import org.mortbay.util.IO;
 
 public class WebAppTest extends TestCase
 {

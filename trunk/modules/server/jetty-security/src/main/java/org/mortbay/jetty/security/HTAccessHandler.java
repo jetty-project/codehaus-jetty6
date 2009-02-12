@@ -45,11 +45,11 @@ import org.mortbay.jetty.RunAsToken;
 import org.mortbay.jetty.UserIdentity;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.security.jaspi.modules.BaseAuthModule;
-import org.mortbay.log.Log;
-import org.mortbay.log.Logger;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.log.Logger;
+import org.mortbay.jetty.util.resource.Resource;
 
 /* ------------------------------------------------------------ */
 /**

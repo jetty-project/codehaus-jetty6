@@ -30,7 +30,7 @@ import junit.framework.TestCase;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.util.IO;
+import org.mortbay.jetty.util.IO;
 
 /**
  * @author gregw

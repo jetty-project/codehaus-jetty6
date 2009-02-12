@@ -23,8 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.MultiException;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.MultiException;
 
 /* ------------------------------------------------------------ */
 /** A collection of handlers.  

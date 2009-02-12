@@ -31,7 +31,7 @@ import org.mortbay.jetty.RetryRequest;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.HandlerWrapper;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /** SessionHandler.

@@ -20,10 +20,10 @@ import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionIdManager;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.component.AbstractLifeCycle;
+import org.mortbay.jetty.util.log.Log;
 
 public abstract class AbstractSessionIdManager extends AbstractLifeCycle implements SessionIdManager
 {

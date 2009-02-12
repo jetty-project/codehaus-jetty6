@@ -22,7 +22,7 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.client.HttpExchange;
 import org.mortbay.jetty.security.B64Code;
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.util.StringUtil;
 
 /**
  * Sets proxy authentication headers for BASIC authentication challenges

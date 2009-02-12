@@ -20,8 +20,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import org.mortbay.log.Log;
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * @author gregw

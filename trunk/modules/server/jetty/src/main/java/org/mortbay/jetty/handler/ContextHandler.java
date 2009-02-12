@@ -61,14 +61,14 @@ import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
-import org.mortbay.log.Log;
-import org.mortbay.log.Logger;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.Attributes;
-import org.mortbay.util.AttributesMap;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.Loader;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.Attributes;
+import org.mortbay.jetty.util.AttributesMap;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.Loader;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.log.Logger;
+import org.mortbay.jetty.util.resource.Resource;
 
 /* ------------------------------------------------------------ */
 /** ContextHandler.

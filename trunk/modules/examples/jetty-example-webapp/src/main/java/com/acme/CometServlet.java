@@ -21,8 +21,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.util.ajax.Continuation;
-import org.mortbay.util.ajax.ContinuationSupport;
+import org.mortbay.jetty.util.ajax.Continuation;
+import org.mortbay.jetty.util.ajax.ContinuationSupport;
 
 /** CometServlet
  * This servlet implements the Comet API from tc6.x with the exception of the read method.

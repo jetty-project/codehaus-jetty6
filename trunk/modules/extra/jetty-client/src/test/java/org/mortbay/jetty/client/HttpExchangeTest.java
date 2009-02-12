@@ -40,7 +40,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.client.security.ProxyAuthorization;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.thread.QueuedThreadPool;
+import org.mortbay.jetty.util.thread.QueuedThreadPool;
 
 /**
  * Functional testing for HttpExchange.

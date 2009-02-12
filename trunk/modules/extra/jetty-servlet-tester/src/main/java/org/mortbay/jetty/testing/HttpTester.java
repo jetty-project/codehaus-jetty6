@@ -31,7 +31,7 @@ import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpParser;
 import org.mortbay.jetty.HttpVersions;
 import org.mortbay.jetty.MimeTypes;
-import org.mortbay.util.ByteArrayOutputStream2;
+import org.mortbay.jetty.util.ByteArrayOutputStream2;
 
 /* ------------------------------------------------------------ */
 /** Test support class.

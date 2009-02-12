@@ -22,9 +22,9 @@ import java.util.Map;
 
 import javax.servlet.UnavailableException;
 
-import org.mortbay.component.AbstractLifeCycle;
-import org.mortbay.log.Log;
-import org.mortbay.util.Loader;
+import org.mortbay.jetty.util.Loader;
+import org.mortbay.jetty.util.component.AbstractLifeCycle;
+import org.mortbay.jetty.util.log.Log;
 
 
 /* --------------------------------------------------------------------- */

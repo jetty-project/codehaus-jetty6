@@ -18,7 +18,7 @@ import java.io.IOException;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.jetty.client.HttpExchange;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 
 public class WebdavSupportedExchange extends HttpExchange

@@ -21,7 +21,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 
 import org.mortbay.jetty.Handler;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 /* --------------------------------------------------------------------- */
 /** 

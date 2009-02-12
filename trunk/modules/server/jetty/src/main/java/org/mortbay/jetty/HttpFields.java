@@ -40,11 +40,11 @@ import org.mortbay.io.BufferUtil;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.View;
 import org.mortbay.io.BufferCache.CachedBuffer;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.QuotedStringTokenizer;
-import org.mortbay.util.StringMap;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.QuotedStringTokenizer;
+import org.mortbay.jetty.util.StringMap;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.URIUtil;
 
 /* ------------------------------------------------------------ */
 /**

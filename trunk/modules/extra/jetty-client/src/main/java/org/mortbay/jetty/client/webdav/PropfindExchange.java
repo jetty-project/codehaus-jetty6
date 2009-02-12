@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.jetty.client.HttpExchange;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 
 public class PropfindExchange extends HttpExchange

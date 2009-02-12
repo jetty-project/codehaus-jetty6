@@ -22,7 +22,7 @@ import javax.naming.Name;
 import javax.naming.NamingException;
 import javax.naming.spi.ObjectFactory;
 
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 
 /** javaURLContextFactory

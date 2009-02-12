@@ -23,7 +23,7 @@ import org.mortbay.io.nio.DirectNIOBuffer;
 import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.RandomAccessFileBuffer;
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.util.StringUtil;
 
 /**
  * @author gregw

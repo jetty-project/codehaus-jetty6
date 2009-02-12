@@ -27,8 +27,8 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.View;
 import org.mortbay.io.BufferCache.CachedBuffer;
-import org.mortbay.log.Log;
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------------------------- */
 /**

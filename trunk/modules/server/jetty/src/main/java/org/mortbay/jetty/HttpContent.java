@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.resource.Resource;
+import org.mortbay.jetty.util.resource.Resource;
 
 /* ------------------------------------------------------------ */
 /** HttpContent.

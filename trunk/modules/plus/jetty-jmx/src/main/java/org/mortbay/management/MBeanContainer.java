@@ -28,13 +28,13 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.loading.PrivateMLet;
 
-import org.mortbay.component.AbstractLifeCycle;
-import org.mortbay.component.Container;
-import org.mortbay.component.Container.Relationship;
-import org.mortbay.log.Log;
-import org.mortbay.log.Logger;
-import org.mortbay.util.MultiMap;
-import org.mortbay.util.TypeUtil;
+import org.mortbay.jetty.util.MultiMap;
+import org.mortbay.jetty.util.TypeUtil;
+import org.mortbay.jetty.util.component.AbstractLifeCycle;
+import org.mortbay.jetty.util.component.Container;
+import org.mortbay.jetty.util.component.Container.Relationship;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.log.Logger;
 
 public class MBeanContainer extends AbstractLifeCycle implements Container.Listener
 {

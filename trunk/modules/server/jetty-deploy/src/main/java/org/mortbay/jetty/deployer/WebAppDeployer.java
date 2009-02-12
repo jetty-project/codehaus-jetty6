@@ -17,14 +17,14 @@ package org.mortbay.jetty.deployer;
 
 import java.util.ArrayList;
 
-import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.component.AbstractLifeCycle;
+import org.mortbay.jetty.util.resource.Resource;
 import org.mortbay.jetty.webapp.WebAppContext;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.URIUtil;
 
 /**
  * Web Application Deployer.

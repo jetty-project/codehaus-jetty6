@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.LoginService;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * @deprecated use *ServerAuthentication

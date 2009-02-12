@@ -27,7 +27,7 @@ import javax.naming.StringRefAddr;
 import javax.naming.spi.ObjectFactory;
 
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 
 

@@ -29,10 +29,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.log.Log;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.ajax.Continuation;
-import org.mortbay.util.ajax.ContinuationSupport;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.ajax.Continuation;
+import org.mortbay.jetty.util.ajax.ContinuationSupport;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /** Dump request handler.

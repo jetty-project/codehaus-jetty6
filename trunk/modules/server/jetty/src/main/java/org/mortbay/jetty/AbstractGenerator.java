@@ -29,10 +29,10 @@ import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.View;
-import org.mortbay.log.Log;
-import org.mortbay.util.ByteArrayOutputStream2;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.TypeUtil;
+import org.mortbay.jetty.util.ByteArrayOutputStream2;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.TypeUtil;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /**

@@ -17,7 +17,7 @@ package org.mortbay.jetty;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.mortbay.component.LifeCycle;
+import org.mortbay.jetty.util.component.LifeCycle;
 
 /** Session ID Manager.
  * Manages session IDs across multiple contexts.

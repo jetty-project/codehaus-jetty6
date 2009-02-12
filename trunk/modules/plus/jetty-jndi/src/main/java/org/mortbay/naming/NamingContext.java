@@ -38,7 +38,7 @@ import javax.naming.Reference;
 import javax.naming.Referenceable;
 import javax.naming.spi.NamingManager;
 
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 
 /*------------------------------------------------*/    

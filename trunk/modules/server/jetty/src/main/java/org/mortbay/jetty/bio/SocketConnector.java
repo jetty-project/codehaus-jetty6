@@ -32,7 +32,7 @@ import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 
 /* ------------------------------------------------------------------------------- */

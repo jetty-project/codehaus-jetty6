@@ -30,12 +30,12 @@ import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.log.Log;
-import org.mortbay.util.ByteArrayISO8859Writer;
-import org.mortbay.util.IO;
-import org.mortbay.util.QuotedStringTokenizer;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.ByteArrayISO8859Writer;
+import org.mortbay.jetty.util.IO;
+import org.mortbay.jetty.util.QuotedStringTokenizer;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /** Response.
