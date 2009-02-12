@@ -17,7 +17,7 @@ package org.mortbay.io;
 import java.text.DateFormatSymbols;
 import java.util.Locale;
 
-import org.mortbay.util.DateCache;
+import org.mortbay.jetty.util.DateCache;
 
 public class BufferDateCache extends DateCache
 {

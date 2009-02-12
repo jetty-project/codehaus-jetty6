@@ -37,7 +37,7 @@ import org.mortbay.jetty.LoginCallback;
 import org.mortbay.jetty.plus.jaas.callback.ObjectCallback;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 /* ---------------------------------------------------- */
 /** JAASLoginService

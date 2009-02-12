@@ -45,11 +45,11 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.UserIdentity;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.log.Log;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.MultiException;
-import org.mortbay.util.MultiMap;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.MultiException;
+import org.mortbay.jetty.util.MultiMap;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.log.Log;
 
 
 /* --------------------------------------------------------------------- */

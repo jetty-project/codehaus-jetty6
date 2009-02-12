@@ -29,8 +29,8 @@ import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.servlet.PathMap;
-import org.mortbay.log.Log;
-import org.mortbay.util.LazyList;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /** ContextHandlerCollection.

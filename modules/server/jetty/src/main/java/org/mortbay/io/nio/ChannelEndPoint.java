@@ -26,8 +26,8 @@ import java.nio.channels.SocketChannel;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
-import org.mortbay.log.Log;
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.log.Log;
 
 
 /**

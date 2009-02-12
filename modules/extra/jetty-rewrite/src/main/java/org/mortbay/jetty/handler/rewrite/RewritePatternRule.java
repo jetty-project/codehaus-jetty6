@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.servlet.PathMap;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.URIUtil;
 
 /**
  * Rewrite the URI by replacing the matched {@link PathMap} path with a fixed string. 

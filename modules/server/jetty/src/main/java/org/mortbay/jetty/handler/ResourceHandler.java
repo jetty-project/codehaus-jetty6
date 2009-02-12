@@ -33,10 +33,10 @@ import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.handler.ContextHandler.SContext;
-import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.TypeUtil;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.TypeUtil;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.resource.Resource;
 
 
 /* ------------------------------------------------------------ */

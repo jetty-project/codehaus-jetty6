@@ -59,15 +59,15 @@ import org.mortbay.jetty.handler.CompleteHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.SecurityHandler;
 import org.mortbay.jetty.handler.ContextHandler.SContext;
-import org.mortbay.log.Log;
-import org.mortbay.util.Attributes;
-import org.mortbay.util.AttributesMap;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.MultiMap;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.URIUtil;
-import org.mortbay.util.UrlEncoded;
-import org.mortbay.util.ajax.Continuation;
+import org.mortbay.jetty.util.Attributes;
+import org.mortbay.jetty.util.AttributesMap;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.MultiMap;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.UrlEncoded;
+import org.mortbay.jetty.util.ajax.Continuation;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /** Jetty Request.

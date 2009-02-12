@@ -30,7 +30,7 @@ import org.mortbay.jetty.client.ContentExchange;
 import org.mortbay.jetty.client.HttpClient;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 /* Test expiring connections
  * 

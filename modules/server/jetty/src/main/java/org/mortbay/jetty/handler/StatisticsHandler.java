@@ -24,7 +24,7 @@ import org.mortbay.jetty.AsyncRequest;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
-import org.mortbay.util.LazyList;
+import org.mortbay.jetty.util.LazyList;
 
 public class StatisticsHandler extends HandlerWrapper implements CompleteHandler
 {

@@ -39,10 +39,10 @@ import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.ServerAuthStatus;
 import org.mortbay.jetty.security.ServerAuthentication;
 import org.mortbay.jetty.security.SimpleAuthResult;
-import org.mortbay.log.Log;
-import org.mortbay.util.QuotedStringTokenizer;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.TypeUtil;
+import org.mortbay.jetty.util.QuotedStringTokenizer;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.TypeUtil;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * @version $Rev$ $Date$

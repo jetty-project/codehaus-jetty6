@@ -40,9 +40,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-import org.mortbay.util.MultiMap;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.TypeUtil;
+import org.mortbay.jetty.util.MultiMap;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.TypeUtil;
 
 /* ------------------------------------------------------------ */
 /**

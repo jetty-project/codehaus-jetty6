@@ -44,9 +44,9 @@ import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.Password;
-import org.mortbay.log.Log;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * @deprecated use *ServerAuthentication

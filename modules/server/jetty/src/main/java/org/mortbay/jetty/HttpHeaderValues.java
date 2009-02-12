@@ -21,7 +21,7 @@ import java.io.LineNumberReader;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
 import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * Cached HTTP Header values.

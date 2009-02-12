@@ -33,7 +33,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import org.mortbay.component.LifeCycle;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.nio.DirectNIOBuffer;
@@ -43,11 +42,12 @@ import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.client.security.Authorization;
 import org.mortbay.jetty.client.security.RealmResolver;
-import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
-import org.mortbay.thread.QueuedThreadPool;
-import org.mortbay.thread.ThreadPool;
-import org.mortbay.thread.Timeout;
+import org.mortbay.jetty.util.component.LifeCycle;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.resource.Resource;
+import org.mortbay.jetty.util.thread.QueuedThreadPool;
+import org.mortbay.jetty.util.thread.ThreadPool;
+import org.mortbay.jetty.util.thread.Timeout;
 
 /**
  * Http Client.

@@ -16,9 +16,9 @@ package org.mortbay.jetty.security;
 
 import java.security.MessageDigest;
 
-import org.mortbay.log.Log;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.TypeUtil;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.TypeUtil;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /**

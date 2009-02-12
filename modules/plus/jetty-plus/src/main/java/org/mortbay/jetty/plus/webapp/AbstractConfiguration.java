@@ -30,11 +30,11 @@ import org.mortbay.jetty.plus.annotation.PreDestroyCallback;
 import org.mortbay.jetty.plus.annotation.RunAsCollection;           
 import org.mortbay.jetty.plus.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.util.TypeUtil;
+import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.webapp.WebXmlConfiguration;
 import org.mortbay.jetty.handler.SecurityHandler;
-import org.mortbay.log.Log;
-import org.mortbay.util.TypeUtil;
 import org.mortbay.xml.XmlParser;
 
 

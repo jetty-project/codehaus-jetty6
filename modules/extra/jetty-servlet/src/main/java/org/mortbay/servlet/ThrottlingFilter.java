@@ -31,8 +31,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.log.Log;
-import org.mortbay.util.ajax.Continuation;
+import org.mortbay.jetty.util.ajax.Continuation;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * This filter protects a web application from having to handle an unmanageable load. 
@@ -74,7 +74,7 @@ import org.mortbay.util.ajax.Continuation;
  * but this may be over-ridden in derived classes. 
  * <p>
  * This filter works best with the {@link org.mortbay.jetty.nio.SelectChannelConnector}, as {@link org.mortbay.jetty.RetryRequest} based 
- * {@link org.mortbay.util.ajax.Continuation}s can be used to free the thread and other resources associated with the queued requests.
+ * {@link org.mortbay.jetty.util.ajax.Continuation}s can be used to free the thread and other resources associated with the queued requests.
  * 
  * @author - Tim Vernum
  */

@@ -21,7 +21,7 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.ByteArrayEndPoint;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.SimpleBuffers;
-import org.mortbay.util.TypeUtil;
+import org.mortbay.jetty.util.TypeUtil;
 
 import junit.framework.TestCase;
 

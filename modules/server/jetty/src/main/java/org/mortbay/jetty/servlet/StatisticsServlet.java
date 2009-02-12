@@ -30,7 +30,7 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.StatisticsHandler;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 public class StatisticsServlet extends HttpServlet
 {

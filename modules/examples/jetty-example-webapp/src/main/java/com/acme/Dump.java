@@ -42,9 +42,9 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.mortbay.jetty.Dispatcher;
 import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.ajax.Continuation;
-import org.mortbay.util.ajax.ContinuationSupport;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.ajax.Continuation;
+import org.mortbay.jetty.util.ajax.ContinuationSupport;
 
 
 

@@ -31,12 +31,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import org.mortbay.component.LifeCycle;
-import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.Loader;
-import org.mortbay.util.TypeUtil;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.Loader;
+import org.mortbay.jetty.util.TypeUtil;
+import org.mortbay.jetty.util.component.LifeCycle;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.resource.Resource;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 

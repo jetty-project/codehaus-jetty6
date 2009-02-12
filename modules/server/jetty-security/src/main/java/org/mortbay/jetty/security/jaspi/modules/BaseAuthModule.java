@@ -45,7 +45,7 @@ import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.security.Password;
 import org.mortbay.jetty.security.jaspi.callback.CredentialValidationCallback;
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.util.StringUtil;
 
 /**
  * @deprecated use *ServerAuthentication

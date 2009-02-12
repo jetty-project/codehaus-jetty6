@@ -22,7 +22,7 @@ import javax.naming.Name;
 import javax.naming.NameParser;
 import javax.naming.NamingException;
 
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 import org.mortbay.naming.NamingUtil;
 
 

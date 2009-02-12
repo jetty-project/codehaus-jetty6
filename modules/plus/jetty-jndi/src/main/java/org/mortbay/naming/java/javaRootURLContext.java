@@ -26,7 +26,7 @@ import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 import org.mortbay.naming.ContextFactory;
 import org.mortbay.naming.NamingContext;
 

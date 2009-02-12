@@ -28,8 +28,8 @@ import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.PluginLog;
+import org.mortbay.jetty.util.resource.Resource;
 import org.mortbay.jetty.webapp.WebAppContext;
-import org.mortbay.resource.Resource;
 
 /**
  * Jetty6PluginServer

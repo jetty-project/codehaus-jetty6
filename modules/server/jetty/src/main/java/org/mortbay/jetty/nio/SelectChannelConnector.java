@@ -28,8 +28,8 @@ import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
-import org.mortbay.log.Log;
-import org.mortbay.thread.Timeout.Task;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.thread.Timeout.Task;
 
 /* ------------------------------------------------------------------------------- */
 /**
@@ -44,7 +44,7 @@ import org.mortbay.thread.Timeout.Task;
  * This connector is best used when there are a many connections that have idle periods.
  * </p>
  * <p>
- * When used with {@link org.mortbay.util.ajax.Continuation}, threadless waits are supported. When
+ * When used with {@link org.mortbay.jetty.util.ajax.Continuation}, threadless waits are supported. When
  * a filter or servlet calls getEvent on a Continuation, a {@link org.mortbay.jetty.RetryRequest}
  * runtime exception is thrown to allow the thread to exit the current request handling. Jetty will
  * catch this exception and will not send a response to the client. Instead the thread is released

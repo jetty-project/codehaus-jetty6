@@ -34,8 +34,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.mortbay.util.ByteArrayOutputStream2;
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.util.ByteArrayOutputStream2;
+import org.mortbay.jetty.util.StringUtil;
 
 /* ------------------------------------------------------------ */
 /** GZIP Filter

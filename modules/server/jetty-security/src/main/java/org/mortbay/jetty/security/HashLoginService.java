@@ -22,10 +22,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.Scanner;
-import org.mortbay.util.Scanner.BulkListener;
+import org.mortbay.jetty.util.Scanner;
+import org.mortbay.jetty.util.Scanner.BulkListener;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.resource.Resource;
 
 /* ------------------------------------------------------------ */
 /**
@@ -176,7 +176,7 @@ public class HashLoginService extends AbstractLoginService implements LoginServi
 
 
     /**
-     * @see org.mortbay.component.AbstractLifeCycle#doStart()
+     * @see org.mortbay.jetty.util.component.AbstractLifeCycle#doStart()
      */
     protected void doStart() throws Exception
     {
@@ -230,7 +230,7 @@ public class HashLoginService extends AbstractLoginService implements LoginServi
     }
 
     /**
-     * @see org.mortbay.component.AbstractLifeCycle#doStop()
+     * @see org.mortbay.jetty.util.component.AbstractLifeCycle#doStop()
      */
     protected void doStop() throws Exception
     {

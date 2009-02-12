@@ -97,14 +97,8 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-util</artifactId>
+      <artifactId>jetty-http</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-    	<groupId>org.apache.derby</groupId>
-    	<artifactId>derby</artifactId>
-    	<version>10.4.1.3</version>
-    	<scope>test</scope>
     </dependency>
   </dependencies>
 </project>

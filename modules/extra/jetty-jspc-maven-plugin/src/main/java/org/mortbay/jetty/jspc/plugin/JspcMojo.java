@@ -23,7 +23,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
-import org.mortbay.util.IO;
+import org.mortbay.jetty.util.IO;
 
 import java.io.BufferedReader;
 import java.io.File;

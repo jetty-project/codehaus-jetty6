@@ -20,7 +20,7 @@ import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 
-import org.mortbay.util.ajax.Continuation;
+import org.mortbay.jetty.util.ajax.Continuation;
 
 public class Servlet3Continuation implements Continuation, AsyncListener
 {

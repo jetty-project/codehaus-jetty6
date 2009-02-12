@@ -28,9 +28,9 @@ import org.mortbay.io.AsyncEndPoint;
 import org.mortbay.io.EndPoint;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandler.SContext;
-import org.mortbay.log.Log;
-import org.mortbay.thread.Timeout;
-import org.mortbay.util.LazyList;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.thread.Timeout;
 
 /* ------------------------------------------------------------ */
 /** Asyncrhonous Request.

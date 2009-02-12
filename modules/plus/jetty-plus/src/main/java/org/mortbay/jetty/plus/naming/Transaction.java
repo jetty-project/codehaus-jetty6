@@ -18,7 +18,7 @@ package org.mortbay.jetty.plus.naming;
 import javax.naming.*;
 import javax.transaction.UserTransaction;
 
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 import org.mortbay.naming.NamingUtil;
 
 /**

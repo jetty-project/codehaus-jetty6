@@ -16,12 +16,12 @@ package org.mortbay.jetty;
 
 import java.io.UnsupportedEncodingException;
 
-import org.mortbay.util.MultiMap;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.TypeUtil;
-import org.mortbay.util.URIUtil;
-import org.mortbay.util.UrlEncoded;
-import org.mortbay.util.Utf8StringBuilder;
+import org.mortbay.jetty.util.MultiMap;
+import org.mortbay.jetty.util.StringUtil;
+import org.mortbay.jetty.util.TypeUtil;
+import org.mortbay.jetty.util.URIUtil;
+import org.mortbay.jetty.util.UrlEncoded;
+import org.mortbay.jetty.util.Utf8StringBuilder;
 
 
 /* ------------------------------------------------------------ */

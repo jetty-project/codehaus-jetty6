@@ -22,10 +22,10 @@ import java.net.UnknownHostException;
 
 import javax.servlet.ServletRequest;
 
-import org.mortbay.component.LifeCycle;
 import org.mortbay.io.EndPoint;
-import org.mortbay.log.Log;
-import org.mortbay.thread.ThreadPool;
+import org.mortbay.jetty.util.component.LifeCycle;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.thread.ThreadPool;
 
 
 /** Abstract Connector implementation.

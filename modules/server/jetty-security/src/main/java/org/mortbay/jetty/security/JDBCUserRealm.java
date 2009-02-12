@@ -26,9 +26,9 @@ import java.util.Properties;
 
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.UserRealm;
-import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.Loader;
+import org.mortbay.jetty.util.Loader;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.resource.Resource;
 
 /* ------------------------------------------------------------ */
 /** HashMapped User Realm with JDBC as data source.

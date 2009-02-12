@@ -18,8 +18,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.mortbay.log.Log;
-import org.mortbay.util.LazyList;
+import org.mortbay.jetty.util.LazyList;
+import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /** Byte range inclusive of end points.

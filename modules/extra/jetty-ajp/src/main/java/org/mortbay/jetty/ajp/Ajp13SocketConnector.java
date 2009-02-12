@@ -25,7 +25,7 @@ import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * @author Greg Wilkins

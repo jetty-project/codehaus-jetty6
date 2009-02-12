@@ -24,8 +24,8 @@ import java.lang.reflect.Method;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.mortbay.log.Log;
-import org.mortbay.util.IntrospectionUtil;
+import org.mortbay.jetty.util.IntrospectionUtil;
+import org.mortbay.jetty.util.log.Log;
 
 /**
  * Injection

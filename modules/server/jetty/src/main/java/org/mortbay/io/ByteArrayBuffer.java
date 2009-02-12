@@ -20,7 +20,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
-import org.mortbay.util.StringUtil;
+import org.mortbay.jetty.util.StringUtil;
 
 /* ------------------------------------------------------------------------------- */
 /**

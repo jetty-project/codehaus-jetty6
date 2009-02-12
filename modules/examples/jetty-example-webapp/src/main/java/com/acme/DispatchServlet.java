@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.mortbay.util.URIUtil;
+import org.mortbay.jetty.util.URIUtil;
 
 
 /* ------------------------------------------------------------ */

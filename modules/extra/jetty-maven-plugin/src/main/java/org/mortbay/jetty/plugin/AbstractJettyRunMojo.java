@@ -28,9 +28,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.util.FileUtils;
 import org.mortbay.jetty.plugin.util.ScanTargetPattern;
-import org.mortbay.resource.Resource;
-import org.mortbay.resource.ResourceCollection;
-import org.mortbay.util.Scanner;
+import org.mortbay.jetty.util.Scanner;
+import org.mortbay.jetty.util.resource.Resource;
+import org.mortbay.jetty.util.resource.ResourceCollection;
 
 /**
  * AbstractJettyRunMojo

@@ -29,7 +29,7 @@ import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.handler.SecurityHandler;
-import org.mortbay.util.Loader;
+import org.mortbay.jetty.util.Loader;
 
 
 /* ------------------------------------------------------------ */

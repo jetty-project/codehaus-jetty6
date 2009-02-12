@@ -38,8 +38,8 @@ import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.testing.HttpTester;
 import org.mortbay.jetty.testing.ServletTester;
-import org.mortbay.log.Log;
-import org.mortbay.util.IO;
+import org.mortbay.jetty.util.IO;
+import org.mortbay.jetty.util.log.Log;
 
 public class QoSFilterTest extends TestCase 
 {

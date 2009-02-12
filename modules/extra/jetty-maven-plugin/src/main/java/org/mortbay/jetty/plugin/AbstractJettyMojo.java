@@ -35,7 +35,7 @@ import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.PluginLog;
 import org.mortbay.jetty.plugin.util.SystemProperties;
 import org.mortbay.jetty.plugin.util.SystemProperty;
-import org.mortbay.util.Scanner;
+import org.mortbay.jetty.util.Scanner;
 
 
 

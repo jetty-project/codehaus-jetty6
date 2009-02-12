@@ -40,7 +40,7 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.util.log.Log;
 
 
 
@@ -394,7 +394,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
     /** 
      * Stop the scavenger.
      * 
-     * @see org.mortbay.component.AbstractLifeCycle#doStop()
+     * @see org.mortbay.jetty.util.component.AbstractLifeCycle#doStop()
      */
     public void doStop () 
     throws Exception

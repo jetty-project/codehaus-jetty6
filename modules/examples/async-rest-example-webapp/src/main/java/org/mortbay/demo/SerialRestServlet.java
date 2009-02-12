@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.util.ajax.JSON;
+import org.mortbay.jetty.util.ajax.JSON;
 
 /**
  * Servlet implementation class SerialRestServlet

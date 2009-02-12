@@ -37,8 +37,8 @@ import org.mortbay.jetty.Request;
 
 import org.mortbay.jetty.UserIdentity;
 import org.mortbay.jetty.RunAsToken;
+import org.mortbay.jetty.util.log.Log;
 
-import org.mortbay.log.Log;
 
 
 

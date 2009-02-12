@@ -30,8 +30,8 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
-import org.mortbay.log.Log;
-import org.mortbay.util.TypeUtil;
+import org.mortbay.jetty.util.TypeUtil;
+import org.mortbay.jetty.util.log.Log;
 
 /** Error Page Error Handler
  * 

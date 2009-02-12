@@ -25,9 +25,9 @@ import java.util.regex.Pattern;
 
 import javax.servlet.Servlet;
 
-import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.Loader;
+import org.mortbay.jetty.util.Loader;
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.resource.Resource;
 import org.mortbay.xml.XmlParser;
 
 /* ------------------------------------------------------------ */
