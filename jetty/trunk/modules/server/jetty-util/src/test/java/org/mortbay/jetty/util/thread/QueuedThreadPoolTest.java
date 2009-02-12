@@ -53,6 +53,7 @@ public class QueuedThreadPoolTest extends TestCase
         tp.setThreadsPriority(Thread.NORM_PRIORITY-1);
 
         tp.start();
+        Thread.sleep(100);
         assertEquals(5,tp.getThreads());
         assertEquals(5,tp.getIdleThreads());
         Thread.sleep(1000);
