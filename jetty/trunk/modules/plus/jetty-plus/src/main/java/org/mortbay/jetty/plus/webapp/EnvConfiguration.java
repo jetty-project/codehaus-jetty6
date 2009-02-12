@@ -35,8 +35,8 @@ import org.mortbay.jetty.plus.jndi.Transaction;
 import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.jetty.xml.XmlConfiguration;
 
-import org.mortbay.xml.XmlConfiguration;
 
 /**
  * EnvConfiguration

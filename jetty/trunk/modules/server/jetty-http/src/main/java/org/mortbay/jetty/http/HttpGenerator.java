@@ -13,11 +13,12 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty;
+package org.mortbay.jetty.http;
 
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.BufferUtil;
 import org.mortbay.jetty.io.Buffers;
@@ -224,7 +225,7 @@ public class HttpGenerator extends AbstractGenerator
      * @return the available space in the buffer.
      * @throws IOException
      */
-    protected int prepareUncheckedAddContent() throws IOException
+    public int prepareUncheckedAddContent() throws IOException
     {
         if (_noContent)
             return -1;

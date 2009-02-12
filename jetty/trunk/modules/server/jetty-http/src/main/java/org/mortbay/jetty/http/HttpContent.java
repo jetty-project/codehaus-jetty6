@@ -1,5 +1,5 @@
 //========================================================================
-//$Id: HttpTokens.java,v 1.1 2005/10/05 14:09:21 janb Exp $
+//$Id: HttpContent.java,v 1.1 2005/10/05 14:09:21 janb Exp $
 //Copyright 2004-2005 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,27 +13,26 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty;
+package org.mortbay.jetty.http;
 
-/**
- * HTTP constants
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.util.resource.Resource;
+
+/* ------------------------------------------------------------ */
+/** HttpContent.
+ * @author gregw
+ *
  */
-public interface HttpTokens
+public interface HttpContent
 {
-    // Terminal symbols.
-    static final byte COLON= (byte)':';
-    static final byte SPACE= 0x20;
-    static final byte CARRIAGE_RETURN= 0x0D;
-    static final byte LINE_FEED= 0x0A;
-    static final byte[] CRLF = {CARRIAGE_RETURN,LINE_FEED};
-    static final byte SEMI_COLON= (byte)';';
-    static final byte TAB= 0x09;
-
-    public static final int SELF_DEFINING_CONTENT= -4;
-    public static final int UNKNOWN_CONTENT= -3;
-    public static final int CHUNKED_CONTENT= -2;
-    public static final int EOF_CONTENT= -1;
-    public static final int NO_CONTENT= 0;
-
-    
+    Buffer getContentType();
+    Buffer getLastModified();
+    Buffer getBuffer();
+    Resource getResource();
+    long getContentLength();
+    InputStream getInputStream() throws IOException;
+    void release();
 }

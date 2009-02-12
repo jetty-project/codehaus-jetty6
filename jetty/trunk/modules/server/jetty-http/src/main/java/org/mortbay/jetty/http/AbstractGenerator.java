@@ -13,7 +13,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty;
+package org.mortbay.jetty.http;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -24,6 +24,11 @@ import java.lang.reflect.Modifier;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.http.Generator;
+import org.mortbay.jetty.http.HttpFields;
+import org.mortbay.jetty.http.HttpMethods;
+import org.mortbay.jetty.http.HttpTokens;
+import org.mortbay.jetty.http.HttpVersions;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.Buffers;
 import org.mortbay.jetty.io.ByteArrayBuffer;
@@ -377,7 +382,7 @@ public abstract class AbstractGenerator implements Generator
      * @return the available space in the buffer.
      * @throws IOException
      */
-    protected abstract int prepareUncheckedAddContent() throws IOException;
+    public abstract int prepareUncheckedAddContent() throws IOException;
 
     /* ------------------------------------------------------------ */
     void uncheckedAddContent(int b)
@@ -386,7 +391,7 @@ public abstract class AbstractGenerator implements Generator
     }
 
     /* ------------------------------------------------------------ */
-    void completeUncheckedAddContent()
+    public void completeUncheckedAddContent()
     {
         if (_noContent)
         {
@@ -554,7 +559,7 @@ public abstract class AbstractGenerator implements Generator
         }
         
         /* ------------------------------------------------------------ */
-        void reopen()
+        public void reopen()
         {
             _closed=false;
         }

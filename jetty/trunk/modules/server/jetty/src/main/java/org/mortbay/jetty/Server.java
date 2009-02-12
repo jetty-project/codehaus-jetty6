@@ -34,6 +34,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.HandlerWrapper;
+import org.mortbay.jetty.http.HttpGenerator;
+import org.mortbay.jetty.http.HttpURI;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.util.Attributes;
 import org.mortbay.jetty.util.AttributesMap;

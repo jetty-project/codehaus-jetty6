@@ -16,8 +16,8 @@ package org.mortbay.jetty.rewrite.handler;
 import java.io.IOException;
 import java.util.Enumeration;
 
-import org.mortbay.jetty.HttpFields;
-import org.mortbay.jetty.HttpHeaders;
+import org.mortbay.jetty.http.HttpFields;
+import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.rewrite.handler.CookiePatternRule;
 
 

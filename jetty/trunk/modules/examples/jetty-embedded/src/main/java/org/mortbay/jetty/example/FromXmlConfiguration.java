@@ -16,7 +16,7 @@ package org.mortbay.jetty.example;
 
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.xml.XmlConfiguration;
+import org.mortbay.jetty.xml.XmlConfiguration;
 
 public class FromXmlConfiguration
 {

@@ -29,6 +29,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.handler.AbstractHandler;
+import org.mortbay.jetty.http.HttpHeaders;
+import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.ajax.Continuation;
 import org.mortbay.jetty.util.ajax.ContinuationSupport;

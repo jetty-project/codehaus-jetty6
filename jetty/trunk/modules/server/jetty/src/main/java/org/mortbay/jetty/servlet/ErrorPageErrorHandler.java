@@ -27,9 +27,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Dispatcher;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
+import org.mortbay.jetty.http.HttpMethods;
 import org.mortbay.jetty.util.TypeUtil;
 import org.mortbay.jetty.util.log.Log;
 

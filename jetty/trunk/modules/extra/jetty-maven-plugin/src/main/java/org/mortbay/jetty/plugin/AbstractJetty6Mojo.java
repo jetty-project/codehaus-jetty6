@@ -18,8 +18,8 @@ package org.mortbay.jetty.plugin;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.RequestLog;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
+import org.mortbay.jetty.xml.XmlConfiguration;
 import org.mortbay.jetty.UserRealm;
-import org.mortbay.xml.XmlConfiguration;                         
 
 /**
  * AbstractJetty6Mojo

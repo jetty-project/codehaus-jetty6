@@ -14,9 +14,9 @@
 
 package org.mortbay.jetty.rewrite.handler;
 
-import org.mortbay.jetty.HttpFields;
-import org.mortbay.jetty.HttpHeaderValues;
-import org.mortbay.jetty.HttpHeaders;
+import org.mortbay.jetty.http.HttpFields;
+import org.mortbay.jetty.http.HttpHeaderValues;
+import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.rewrite.handler.MsieSslRule;
 
 

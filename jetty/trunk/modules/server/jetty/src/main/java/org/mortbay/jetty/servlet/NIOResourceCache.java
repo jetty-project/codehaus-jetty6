@@ -23,8 +23,8 @@ import java.io.InputStream;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.ResourceCache;
+import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.nio.DirectNIOBuffer;
 import org.mortbay.jetty.io.nio.IndirectNIOBuffer;

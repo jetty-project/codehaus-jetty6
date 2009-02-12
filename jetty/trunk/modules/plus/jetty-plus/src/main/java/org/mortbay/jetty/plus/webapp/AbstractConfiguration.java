@@ -34,8 +34,8 @@ import org.mortbay.jetty.util.TypeUtil;
 import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.webapp.WebXmlConfiguration;
+import org.mortbay.jetty.xml.XmlParser;
 import org.mortbay.jetty.handler.SecurityHandler;
-import org.mortbay.xml.XmlParser;
 
 
 
