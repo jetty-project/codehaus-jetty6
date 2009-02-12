@@ -30,12 +30,14 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.http.security.B64Code;
+import org.mortbay.jetty.http.security.Constraint;
+import org.mortbay.jetty.http.security.Password;
 import org.mortbay.jetty.security.authentication.BasicServerAuthentication;
 import org.mortbay.jetty.security.authentication.FormServerAuthentication;
 import org.mortbay.jetty.security.authentication.SessionCachingServerAuthentication;
 import org.mortbay.jetty.security.HashLoginService;
 import org.mortbay.jetty.servlet.SessionHandler;
-import org.mortbay.jetty.security.B64Code;
 
 /**
  * @author gregw

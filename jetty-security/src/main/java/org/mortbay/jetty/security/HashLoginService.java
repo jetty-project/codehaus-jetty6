@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.mortbay.jetty.http.security.Password;
 import org.mortbay.jetty.util.Scanner;
 import org.mortbay.jetty.util.Scanner.BulkListener;
 import org.mortbay.jetty.util.log.Log;
@@ -48,7 +49,7 @@ import org.mortbay.jetty.util.resource.Resource;
  * If DIGEST Authentication is used, the password must be in a recoverable
  * format, either plain text or OBF:.
  * 
- * @see org.mortbay.jetty.security.Password
+ * @see org.mortbay.jetty.http.security.Password
  * @author Greg Wilkins (gregw)
  */
 public class HashLoginService extends AbstractLoginService implements LoginService

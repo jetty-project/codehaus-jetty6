@@ -19,7 +19,7 @@ package org.mortbay.jetty.security.jaspi.callback;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 
-import org.mortbay.jetty.security.Credential;
+import org.mortbay.jetty.http.security.Credential;
 
 /**
  * CredentialValidationCallback

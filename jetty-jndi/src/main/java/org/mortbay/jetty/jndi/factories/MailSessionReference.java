@@ -36,7 +36,7 @@ import javax.naming.Referenceable;
 import javax.naming.StringRefAddr;
 import javax.naming.spi.ObjectFactory;
 
-import org.mortbay.jetty.security.Password;
+import org.mortbay.jetty.http.security.Password;
 
 /**
  * MailSessionReference

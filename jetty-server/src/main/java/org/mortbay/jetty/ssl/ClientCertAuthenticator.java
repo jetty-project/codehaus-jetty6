@@ -17,7 +17,7 @@ package org.mortbay.jetty.ssl;
 import java.io.IOException;
 
 //import org.mortbay.jetty.UserRealm;
-import org.mortbay.jetty.security.Constraint;
+import org.mortbay.jetty.http.security.Constraint;
 
 /* ------------------------------------------------------------ */
 /** Client Certificate Authenticator.
