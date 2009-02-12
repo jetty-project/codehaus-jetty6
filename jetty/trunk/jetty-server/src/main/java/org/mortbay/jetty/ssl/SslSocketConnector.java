@@ -48,7 +48,7 @@ import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.http.HttpSchemes;
 import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.io.bio.SocketEndPoint;
-import org.mortbay.jetty.security.Password;
+import org.mortbay.jetty.http.security.Password;
 import org.mortbay.jetty.util.TypeUtil;
 import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.util.resource.Resource;

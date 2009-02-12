@@ -14,6 +14,7 @@
 
 package org.mortbay.jetty.security;
 
+import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.security.authentication.BasicServerAuthentication;
 import org.mortbay.jetty.security.authentication.ClientCertServerAuthentication;
 import org.mortbay.jetty.security.authentication.DigestServerAuthentication;

@@ -21,7 +21,7 @@
  * by Iris Van den Broeke, Daniel Deville
  */
 
-package org.mortbay.jetty.security;
+package org.mortbay.jetty.http.security;
 
 /* ------------------------------------------------------------ */
 /**

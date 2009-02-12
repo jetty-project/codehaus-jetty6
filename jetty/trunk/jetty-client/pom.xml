@@ -46,13 +46,14 @@
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-ssl</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-server</artifactId>
       <version>${project.version}</version>
+    </dependency>  
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-security</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>  
     <dependency>
       <groupId>junit</groupId>
