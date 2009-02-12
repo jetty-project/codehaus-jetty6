@@ -18,10 +18,10 @@ import java.io.UnsupportedEncodingException;
 
 import junit.framework.TestCase;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.SimpleBuffers;
-import org.mortbay.io.bio.StringEndPoint;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.SimpleBuffers;
+import org.mortbay.jetty.io.bio.StringEndPoint;
 import org.mortbay.jetty.util.StringUtil;
 
 /**

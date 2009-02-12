@@ -33,13 +33,13 @@ import java.util.TimeZone;
 
 import javax.servlet.http.Cookie;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.BufferCache;
-import org.mortbay.io.BufferDateCache;
-import org.mortbay.io.BufferUtil;
-import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.View;
-import org.mortbay.io.BufferCache.CachedBuffer;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.BufferCache;
+import org.mortbay.jetty.io.BufferDateCache;
+import org.mortbay.jetty.io.BufferUtil;
+import org.mortbay.jetty.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.View;
+import org.mortbay.jetty.io.BufferCache.CachedBuffer;
 import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.QuotedStringTokenizer;
 import org.mortbay.jetty.util.StringMap;

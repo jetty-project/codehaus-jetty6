@@ -17,7 +17,7 @@ package org.mortbay.jetty.client;
 
 import java.io.IOException;
 
-import org.mortbay.io.Buffer;
+import org.mortbay.jetty.io.Buffer;
 
 public class HttpEventListenerWrapper implements HttpEventListener
 {

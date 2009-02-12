@@ -25,11 +25,11 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.Buffers;
-import org.mortbay.io.nio.NIOBuffer;
-import org.mortbay.io.nio.SelectChannelEndPoint;
-import org.mortbay.io.nio.SelectorManager;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.Buffers;
+import org.mortbay.jetty.io.nio.NIOBuffer;
+import org.mortbay.jetty.io.nio.SelectChannelEndPoint;
+import org.mortbay.jetty.io.nio.SelectorManager;
 import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
@@ -559,7 +559,7 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
         if (_inNIOBuffer.length()==0)
         {
             if(!isOpen())
-                throw new org.mortbay.jetty.EofException();
+                throw new org.mortbay.jetty.io.EofException();
             return false;
         }
 

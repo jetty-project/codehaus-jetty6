@@ -23,11 +23,11 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.servlet.http.Cookie;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.client.security.Authorization;
 import org.mortbay.jetty.client.security.SecurityListener;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.jetty.util.log.Log;
 

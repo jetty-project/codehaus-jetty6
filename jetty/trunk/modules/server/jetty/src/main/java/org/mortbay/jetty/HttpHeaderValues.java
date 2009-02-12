@@ -18,9 +18,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.BufferCache;
-import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.BufferCache;
+import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.util.log.Log;
 
 /**

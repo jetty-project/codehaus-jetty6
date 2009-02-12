@@ -16,11 +16,11 @@ package org.mortbay.jetty.ajp;
 
 import java.io.IOException;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.ByteArrayEndPoint;
-import org.mortbay.io.EndPoint;
-import org.mortbay.io.SimpleBuffers;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.ByteArrayEndPoint;
+import org.mortbay.jetty.io.EndPoint;
+import org.mortbay.jetty.io.SimpleBuffers;
 import org.mortbay.jetty.util.TypeUtil;
 
 import junit.framework.TestCase;

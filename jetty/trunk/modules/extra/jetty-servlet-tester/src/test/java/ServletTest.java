@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.testing.HttpTester;
 import org.mortbay.jetty.testing.ServletTester;
 import org.mortbay.jetty.util.IO;

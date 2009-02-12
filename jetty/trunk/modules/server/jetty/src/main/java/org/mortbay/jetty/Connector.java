@@ -17,8 +17,8 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 
-import org.mortbay.io.Buffers;
-import org.mortbay.io.EndPoint;
+import org.mortbay.jetty.io.Buffers;
+import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.util.component.LifeCycle;
 
 /** HTTP Connector.

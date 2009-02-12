@@ -20,9 +20,9 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.View;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.View;
 
 /* ------------------------------------------------------------------------------- */
 /**

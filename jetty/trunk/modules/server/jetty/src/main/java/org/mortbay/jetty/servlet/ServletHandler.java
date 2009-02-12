@@ -36,15 +36,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Dispatcher;
-import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.UserIdentity;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.io.EofException;
+import org.mortbay.jetty.io.HttpException;
 import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.MultiException;
 import org.mortbay.jetty.util.MultiMap;

@@ -24,13 +24,13 @@ import java.util.Iterator;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.EndPoint;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.EndPoint;
+import org.mortbay.jetty.io.HttpException;
 
 /**
  * Connection implementation of the Ajp13 protocol. <p/> XXX Refactor to remove

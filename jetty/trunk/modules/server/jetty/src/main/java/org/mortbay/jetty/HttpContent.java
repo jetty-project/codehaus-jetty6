@@ -18,7 +18,7 @@ package org.mortbay.jetty;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.mortbay.io.Buffer;
+import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.util.resource.Resource;
 
 /* ------------------------------------------------------------ */

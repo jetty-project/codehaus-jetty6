@@ -16,7 +16,6 @@ package org.mortbay.jetty.ajp;
 
 import java.io.IOException;
 
-import org.mortbay.io.EndPoint;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.Request;
@@ -24,6 +23,7 @@ import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.util.log.Log;
 
