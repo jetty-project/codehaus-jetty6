@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.xml;import java.net.URL;
+package org.mortbay.jetty.xml;import java.net.URL;
 import java.util.HashMap;
 
 
