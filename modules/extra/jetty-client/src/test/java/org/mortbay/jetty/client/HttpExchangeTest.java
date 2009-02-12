@@ -50,6 +50,7 @@ import org.mortbay.jetty.util.thread.QueuedThreadPool;
  */
 public class HttpExchangeTest extends TestCase
 {
+    private boolean _stress=Boolean.getBoolean("STRESS");
     protected int _maxConnectionsPerAddress = 2;
     protected String _scheme = "http://";
     protected Server _server;
@@ -82,8 +83,11 @@ public class HttpExchangeTest extends TestCase
         sender(10,true);
         sender(100,false);
         sender(100,true);
-        sender(1000,false);
-        sender(1000,true);
+        if (_stress)
+        {
+            sender(1000,false);
+            sender(1000,true);
+        }
     }
 
     /**
