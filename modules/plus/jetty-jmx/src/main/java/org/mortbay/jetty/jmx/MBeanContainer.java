@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.management;
+package org.mortbay.jetty.jmx;
 
 import java.net.URL;
 import java.util.ArrayList;
