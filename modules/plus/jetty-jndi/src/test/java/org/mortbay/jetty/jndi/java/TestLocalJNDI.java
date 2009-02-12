@@ -1,4 +1,4 @@
-package org.mortbay.naming.java;
+package org.mortbay.jetty.jndi.java;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -8,7 +8,7 @@ import javax.naming.NameParser;
 
 import junit.framework.TestCase;
 
-import org.mortbay.naming.NamingUtil;
+import org.mortbay.jetty.jndi.NamingUtil;
 
 
 public class TestLocalJNDI extends TestCase

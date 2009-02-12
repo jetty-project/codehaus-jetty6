@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.naming;
+package org.mortbay.jetty.jndi;
 
 
 import java.util.Enumeration;

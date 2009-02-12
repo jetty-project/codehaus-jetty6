@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.naming.java;
+package org.mortbay.jetty.jndi.java;
 
 
 import java.net.URL;
@@ -38,8 +38,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.mortbay.jetty.jndi.NamingContext;
 import org.mortbay.jetty.util.log.Log;
-import org.mortbay.naming.NamingContext;
 
 
 

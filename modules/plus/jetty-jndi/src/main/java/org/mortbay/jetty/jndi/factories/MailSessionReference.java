@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.naming.factories;
+package org.mortbay.jetty.jndi.factories;
 
 
 import javax.mail.Authenticator;
