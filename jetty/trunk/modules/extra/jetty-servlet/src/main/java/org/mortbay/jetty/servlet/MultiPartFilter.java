@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ========================================================================
-package org.mortbay.servlet;
+package org.mortbay.jetty.servlet;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -61,7 +61,7 @@ import org.mortbay.jetty.util.TypeUtil;
  */
 public class MultiPartFilter implements Filter
 {
-    private final static String FILES ="org.mortbay.servlet.MultiPartFilter.files";
+    private final static String FILES ="org.mortbay.jetty.servlet.MultiPartFilter.files";
     private File tempdir;
     private boolean _deleteFiles;
     private ServletContext _context;

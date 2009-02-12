@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.servlet;
+package org.mortbay.jetty.servlet;
 
 import java.io.BufferedReader;
 import java.io.File;

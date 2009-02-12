@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ========================================================================
-package org.mortbay.servlet;
+package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +36,7 @@ import org.mortbay.jetty.LocalConnector;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.FilterMapping;
+import org.mortbay.jetty.servlet.QoSFilter;
 import org.mortbay.jetty.testing.HttpTester;
 import org.mortbay.jetty.testing.ServletTester;
 import org.mortbay.jetty.util.IO;
