@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.servlet;
+package org.mortbay.jetty.servlet;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,6 +23,7 @@ import java.net.URL;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.servlet.FilterHolder;
+import org.mortbay.jetty.servlet.PutFilter;
 import org.mortbay.jetty.testing.HttpTester;
 import org.mortbay.jetty.testing.ServletTester;
 import org.mortbay.jetty.util.IO;

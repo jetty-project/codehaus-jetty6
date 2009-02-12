@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.servlet; // was fi.csc.microarray.proto
+package org.mortbay.jetty.servlet; // was fi.csc.microarray.proto
 
 import java.io.File;
 import java.io.FileOutputStream;
