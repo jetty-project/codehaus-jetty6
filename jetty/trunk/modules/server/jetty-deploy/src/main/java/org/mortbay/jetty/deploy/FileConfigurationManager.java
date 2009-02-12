@@ -13,7 +13,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.deployer;
+package org.mortbay.jetty.deploy;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -46,7 +46,7 @@ public class FileConfigurationManager implements ConfigurationManager
     
     
     /** 
-     * @see org.mortbay.jetty.deployer.ConfigurationManager#getProperties()
+     * @see org.mortbay.jetty.deploy.ConfigurationManager#getProperties()
      */
     public Map getProperties()
     {

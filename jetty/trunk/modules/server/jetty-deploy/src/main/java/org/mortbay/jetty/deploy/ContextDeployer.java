@@ -13,7 +13,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.deployer;
+package org.mortbay.jetty.deploy;
 
 import java.io.File;
 import java.io.FilenameFilter;
