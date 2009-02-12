@@ -30,7 +30,7 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.plus.naming.NamingEntryUtil;
+import org.mortbay.jetty.plus.jndi.NamingEntryUtil;
 import org.mortbay.jetty.security.AbstractLoginService;
 import org.mortbay.jetty.security.HashLoginService;
 import org.mortbay.jetty.security.Password;

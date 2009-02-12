@@ -13,13 +13,13 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.plus.naming;
+package org.mortbay.jetty.plus.jndi;
 
 import javax.naming.*;
 import javax.transaction.UserTransaction;
 
+import org.mortbay.jetty.jndi.NamingUtil;
 import org.mortbay.jetty.util.log.Log;
-import org.mortbay.naming.NamingUtil;
 
 /**
  * Transaction
@@ -66,7 +66,7 @@ public class Transaction extends NamingEntry
      * Allow other bindings of UserTransaction.
      * 
      * These should be in ADDITION to java:comp/UserTransaction
-     * @see org.mortbay.jetty.plus.naming.NamingEntry#bindToENC(java.lang.String)
+     * @see org.mortbay.jetty.plus.jndi.NamingEntry#bindToENC(java.lang.String)
      */
     public void bindToENC (String localName)
     throws NamingException

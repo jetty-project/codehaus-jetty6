@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.plus.naming;
+package org.mortbay.jetty.plus.jndi;
 
 import javax.naming.NamingException;
 

@@ -1,4 +1,4 @@
-package org.mortbay.jetty.plus.naming;
+package org.mortbay.jetty.plus.jndi;
 
 import java.util.List;
 
@@ -7,6 +7,9 @@ import javax.naming.InitialContext;
 import javax.naming.Name;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
+
+import org.mortbay.jetty.plus.jndi.NamingEntry;
+import org.mortbay.jetty.plus.jndi.NamingEntryUtil;
 
 import junit.framework.TestCase;
 
