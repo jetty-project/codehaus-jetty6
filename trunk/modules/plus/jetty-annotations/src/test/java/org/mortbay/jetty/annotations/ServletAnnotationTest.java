@@ -68,7 +68,7 @@ public class ServletAnnotationTest extends TestCase
             env = comp.createSubcontext("env");
         }
           
-        org.mortbay.jetty.plus.naming.EnvEntry foo = new org.mortbay.jetty.plus.naming.EnvEntry("foo", new Double(1000.00), false);
+        org.mortbay.jetty.plus.jndi.EnvEntry foo = new org.mortbay.jetty.plus.jndi.EnvEntry("foo", new Double(1000.00), false);
         List servlets = new ArrayList();
         List filters = new ArrayList();
         List listeners = new ArrayList();

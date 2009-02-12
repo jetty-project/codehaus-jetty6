@@ -35,7 +35,7 @@ import org.mortbay.jetty.plus.annotation.Injection;
 import org.mortbay.jetty.plus.annotation.InjectionCollection;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
 import org.mortbay.jetty.plus.annotation.RunAsCollection;
-import org.mortbay.jetty.plus.naming.NamingEntry;
+import org.mortbay.jetty.plus.jndi.NamingEntry;
 import org.mortbay.jetty.webapp.WebAppContext;
 
 
@@ -136,8 +136,8 @@ public class TestAnnotationInheritance extends TestCase
         Context comp = (Context)ic.lookup("java:comp");
         Context env = comp.createSubcontext("env");
         
-        org.mortbay.jetty.plus.naming.EnvEntry resourceA = new org.mortbay.jetty.plus.naming.EnvEntry(server, "resA", new Integer(1000), false);
-        org.mortbay.jetty.plus.naming.EnvEntry resourceB = new org.mortbay.jetty.plus.naming.EnvEntry(server, "resB", new Integer(2000), false);
+        org.mortbay.jetty.plus.jndi.EnvEntry resourceA = new org.mortbay.jetty.plus.jndi.EnvEntry(server, "resA", new Integer(1000), false);
+        org.mortbay.jetty.plus.jndi.EnvEntry resourceB = new org.mortbay.jetty.plus.jndi.EnvEntry(server, "resB", new Integer(2000), false);
         
 
         classNames.add(ResourceA.class.getName());
