@@ -23,13 +23,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpFields;
-import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.jetty.HttpMethods;
-import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.handler.ContextHandler.SContext;
+import org.mortbay.jetty.http.HttpFields;
+import org.mortbay.jetty.http.HttpHeaders;
+import org.mortbay.jetty.http.HttpMethods;
+import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.io.WriterOutputStream;

@@ -36,7 +36,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.LoginCallback;
 import org.mortbay.jetty.Request;
@@ -44,6 +43,7 @@ import org.mortbay.jetty.Response;
 import org.mortbay.jetty.RunAsToken;
 import org.mortbay.jetty.UserIdentity;
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.security.jaspi.modules.BaseAuthModule;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.URIUtil;

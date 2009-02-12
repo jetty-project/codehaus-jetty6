@@ -1,5 +1,5 @@
 //========================================================================
-//$Id: HttpContent.java,v 1.1 2005/10/05 14:09:21 janb Exp $
+//$Id: HttpOnlyCookie.java,v 1.1 2005/10/05 14:09:21 janb Exp $
 //Copyright 2004-2005 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,26 +13,35 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty;
+package org.mortbay.jetty.http;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.mortbay.jetty.io.Buffer;
-import org.mortbay.jetty.util.resource.Resource;
+import javax.servlet.http.Cookie;
 
 /* ------------------------------------------------------------ */
-/** HttpContent.
+/** HttpOnlyCookie.
+ * 
+ * <p>
+ * Implements  {@link javax.servlet.Cookie} from the {@link javax.servlet} package.   
+ * </p>
+ * This derivation of javax.servlet.http.Cookie can be used to indicate
+ * that the microsoft httponly extension should be used.
+ * The addSetCookie method on HttpFields checks for this type.
+ * @deprecated use {@link javax.servlet.Cookie#setHttpOnly(boolean)}
  * @author gregw
  *
  */
-public interface HttpContent
+public class HttpOnlyCookie extends Cookie
 {
-    Buffer getContentType();
-    Buffer getLastModified();
-    Buffer getBuffer();
-    Resource getResource();
-    long getContentLength();
-    InputStream getInputStream() throws IOException;
-    void release();
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param name
+     * @param value
+     */
+    public HttpOnlyCookie(String name, String value)
+    {
+        super(name, value);
+	setHttpOnly(true);
+    }
+
 }

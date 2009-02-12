@@ -26,7 +26,7 @@ import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
-import org.mortbay.xml.XmlConfiguration;
+import org.mortbay.jetty.xml.XmlConfiguration;
 
 /**
  *  <p>

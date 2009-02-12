@@ -27,7 +27,7 @@ import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 import org.apache.derby.jdbc.EmbeddedDataSource;
-import org.mortbay.jetty.plus.naming.Resource;
+import org.mortbay.jetty.plus.jndi.Resource;
 import org.mortbay.jetty.plus.security.DataSourceUserRealm;
 
 

@@ -21,12 +21,12 @@ import java.io.IOException;
 import junit.framework.TestCase;
 
 import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.client.security.HashRealmResolver;
 import org.mortbay.jetty.client.security.Realm;
 import org.mortbay.jetty.client.security.SimpleRealmResolver;
 import org.mortbay.jetty.client.webdav.WebdavListener;
+import org.mortbay.jetty.http.HttpMethods;
 import org.mortbay.jetty.io.Buffer;
 
 /**

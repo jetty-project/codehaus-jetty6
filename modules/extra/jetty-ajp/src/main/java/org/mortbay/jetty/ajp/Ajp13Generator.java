@@ -19,7 +19,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import org.mortbay.jetty.*;
-import org.mortbay.jetty.HttpFields.Field;
+import org.mortbay.jetty.http.AbstractGenerator;
+import org.mortbay.jetty.http.HttpFields;
+import org.mortbay.jetty.http.HttpTokens;
+import org.mortbay.jetty.http.HttpVersions;
+import org.mortbay.jetty.http.HttpFields.Field;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.Buffers;
 import org.mortbay.jetty.io.ByteArrayBuffer;
@@ -289,7 +293,7 @@ public class Ajp13Generator extends AbstractGenerator
      * @return the available space in the buffer.
      * @throws IOException
      */
-    protected int prepareUncheckedAddContent() throws IOException
+    public int prepareUncheckedAddContent() throws IOException
     {
         if (_noContent)
             return -1;

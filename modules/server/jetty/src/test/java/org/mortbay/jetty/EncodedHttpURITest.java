@@ -3,6 +3,8 @@ package org.mortbay.jetty;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
+import org.mortbay.jetty.http.EncodedHttpURI;
+
 import junit.framework.TestCase;
 
 public class EncodedHttpURITest extends TestCase

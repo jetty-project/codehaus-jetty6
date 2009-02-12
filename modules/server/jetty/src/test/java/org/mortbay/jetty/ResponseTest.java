@@ -36,6 +36,7 @@ import junit.framework.TestCase;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.servlet.AbstractSessionManager;
 import org.mortbay.jetty.servlet.HashSessionIdManager;
 import org.mortbay.jetty.servlet.HashSessionManager;
