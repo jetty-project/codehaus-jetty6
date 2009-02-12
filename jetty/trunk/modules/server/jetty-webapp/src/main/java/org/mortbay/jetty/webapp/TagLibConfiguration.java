@@ -28,7 +28,7 @@ import javax.servlet.Servlet;
 import org.mortbay.jetty.util.Loader;
 import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.util.resource.Resource;
-import org.mortbay.xml.XmlParser;
+import org.mortbay.jetty.xml.XmlParser;
 
 /* ------------------------------------------------------------ */
 /** TagLibConfiguration.

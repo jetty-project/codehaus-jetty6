@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.xml;
+package org.mortbay.jetty.xml;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +46,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * entity handlers and a mini dom-like document tree.
  * <P>
  * By default, the parser is created as a validating parser only if xerces is present. This can be 
- * configured by setting the "org.mortbay.xml.XmlParser.Validating" system property.
+ * configured by setting the "org.mortbay.jetty.xml.XmlParser.Validating" system property.
  * 
  * @author Greg Wilkins (gregw)
  */
@@ -68,7 +68,7 @@ public class XmlParser
     {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         boolean validating_dft = factory.getClass().toString().startsWith("org.apache.xerces.");
-        String validating_prop = System.getProperty("org.mortbay.xml.XmlParser.Validating", validating_dft ? "true" : "false");
+        String validating_prop = System.getProperty("org.mortbay.jetty.xml.XmlParser.Validating", validating_dft ? "true" : "false");
         boolean validating = Boolean.valueOf(validating_prop).booleanValue();
 
         setValidating(validating);

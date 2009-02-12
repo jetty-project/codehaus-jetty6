@@ -1,7 +1,7 @@
 <?xml version="1.0"  encoding="ISO-8859-1"?> 
 <!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.2//EN" "http://jetty.mortbay.org/configure_1_2.dtd">
 
-<Configure class="org.mortbay.xml.TestConfiguration">
+<Configure class="org.mortbay.jetty.xml.TestConfiguration">
 
   <Set name="Test">SetValue</Set>
   <Set name="Test" type="int">2</Set>
@@ -102,7 +102,7 @@
      <Call name="toString"/>
   </Get>
 
-  <Call name="callStatic" class="org.mortbay.xml.TestConfiguration"/>
+  <Call name="callStatic" class="org.mortbay.jetty.xml.TestConfiguration"/>
 
   <Call name="call">
     <Arg><Array type="java.lang.Object">
@@ -122,7 +122,7 @@
     </Array></Arg>
   </Call>
 
-  <Set name="testField1"><Get class="org.mortbay.xml.TestConfiguration" name="VALUE"/></Set>
+  <Set name="testField1"><Get class="org.mortbay.jetty.xml.TestConfiguration" name="VALUE"/></Set>
   <Set name="testField2"><Get name="testInt"/></Set>
   <Set name="VALUE" type="int">42</Set>
 

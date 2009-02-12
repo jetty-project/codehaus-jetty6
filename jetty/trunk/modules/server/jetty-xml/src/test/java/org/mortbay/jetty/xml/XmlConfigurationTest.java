@@ -12,11 +12,14 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.xml;
+package org.mortbay.jetty.xml;
 
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.mortbay.jetty.xml.XmlConfiguration;
+import org.mortbay.jetty.xml.XmlParser;
 
 import junit.framework.TestCase;
 
@@ -29,7 +32,7 @@ public class XmlConfigurationTest extends TestCase
     {
         XmlParser parser = new XmlParser();
 
-        URL configURL = XmlConfiguration.class.getClassLoader().getResource("org/mortbay/xml/configure_6_0.dtd");
+        URL configURL = XmlConfiguration.class.getClassLoader().getResource("org/mortbay/jetty/xml/configure_6_0.dtd");
         parser.redirectEntity("configure.dtd", configURL);
         parser.redirectEntity("configure_1_3.dtd", configURL);
         parser.redirectEntity("http://jetty.mortbay.org/configure.dtd", configURL);
@@ -46,7 +49,7 @@ public class XmlConfigurationTest extends TestCase
         parser.redirectEntity("http://jetty.mortbay.org/configure_1_0.dtd", configURL);
         parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.0//EN", configURL);
         
-        URL url = XmlConfigurationTest.class.getClassLoader().getResource("org/mortbay/xml/configure.xml");
+        URL url = XmlConfigurationTest.class.getClassLoader().getResource("org/mortbay/jetty/xml/configure.xml");
         XmlParser.Node testDoc = parser.parse(url.toString());
         String testDocStr = testDoc.toString().trim();
         
@@ -61,7 +64,7 @@ public class XmlConfigurationTest extends TestCase
         Map properties = new HashMap();
         properties.put("whatever", "xxx");
         
-        URL url = XmlConfigurationTest.class.getClassLoader().getResource("org/mortbay/xml/configure.xml");
+        URL url = XmlConfigurationTest.class.getClassLoader().getResource("org/mortbay/jetty/xml/configure.xml");
         XmlConfiguration configuration =
             new XmlConfiguration(url);
         TestConfiguration tc = new TestConfiguration();
@@ -119,7 +122,7 @@ public class XmlConfigurationTest extends TestCase
         assertEquals( "nested call", "http://www.mortbay.com/",tc2.url.toString());
         
         configuration =
-            new XmlConfiguration("<Configure class=\"org.mortbay.xml.TestConfiguration\"><Set name=\"Test\">SetValue</Set><Set name=\"Test\" type=\"int\">2</Set></Configure>");
+            new XmlConfiguration("<Configure class=\"org.mortbay.jetty.xml.TestConfiguration\"><Set name=\"Test\">SetValue</Set><Set name=\"Test\" type=\"int\">2</Set></Configure>");
         TestConfiguration tc3 = new TestConfiguration();
         configuration.configure(tc3);
         assertEquals("Set String 3","SetValue",tc3.testObject);

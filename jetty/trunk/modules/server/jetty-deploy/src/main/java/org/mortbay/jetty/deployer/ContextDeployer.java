@@ -28,7 +28,7 @@ import org.mortbay.jetty.util.Scanner;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
 import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.util.resource.Resource;
-import org.mortbay.xml.XmlConfiguration;
+import org.mortbay.jetty.xml.XmlConfiguration;
 
 /**
  * Context Deployer

@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.xml;
+package org.mortbay.jetty.xml;
 
 import java.io.IOException;
 import java.io.InputStream;
