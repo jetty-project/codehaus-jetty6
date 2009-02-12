@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.start;
+package org.mortbay.jetty.start;
 
 import java.io.File;
 import java.io.IOException;
