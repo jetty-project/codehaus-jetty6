@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.naming;
+package org.mortbay.jetty.jndi;
 
 
 import java.util.Hashtable;
@@ -25,8 +25,8 @@ import javax.naming.Name;
 import javax.naming.NameParser;
 import javax.naming.NamingException;
 
+import org.mortbay.jetty.jndi.local.localContextRoot;
 import org.mortbay.jetty.util.log.Log;
-import org.mortbay.naming.local.localContextRoot;
 
 
 /*------------------------------------------------*/    
@@ -65,7 +65,7 @@ public class InitialContextFactory implements javax.naming.spi.InitialContextFac
      * This method won't be called if a name URL beginning
      * with java: is passed to an InitialContext.
      *
-     * @see org.mortbay.naming.java.javaURLContextFactory
+     * @see org.mortbay.jetty.jndi.java.javaURLContextFactory
      * @param env a <code>Hashtable</code> value
      * @return a <code>Context</code> value
      */

@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.naming.java;
+package org.mortbay.jetty.jndi.java;
 
 import java.util.Properties;
 

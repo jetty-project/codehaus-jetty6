@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.naming.java;
+package org.mortbay.jetty.jndi.java;
 
 
 import java.util.Hashtable;
@@ -26,9 +26,9 @@ import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
+import org.mortbay.jetty.jndi.ContextFactory;
+import org.mortbay.jetty.jndi.NamingContext;
 import org.mortbay.jetty.util.log.Log;
-import org.mortbay.naming.ContextFactory;
-import org.mortbay.naming.NamingContext;
 
 
 
