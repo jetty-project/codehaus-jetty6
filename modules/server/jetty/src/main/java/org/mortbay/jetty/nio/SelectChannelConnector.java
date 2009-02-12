@@ -21,13 +21,13 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
-import org.mortbay.io.Connection;
-import org.mortbay.io.EndPoint;
-import org.mortbay.io.nio.SelectChannelEndPoint;
-import org.mortbay.io.nio.SelectorManager;
-import org.mortbay.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
+import org.mortbay.jetty.io.Connection;
+import org.mortbay.jetty.io.EndPoint;
+import org.mortbay.jetty.io.nio.SelectChannelEndPoint;
+import org.mortbay.jetty.io.nio.SelectorManager;
+import org.mortbay.jetty.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.util.thread.Timeout.Task;
 

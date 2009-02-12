@@ -15,13 +15,13 @@ package org.mortbay.jetty.handler.rewrite;
 
 import junit.framework.TestCase;
 
-import org.mortbay.io.bio.StringEndPoint;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.LocalConnector;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.io.bio.StringEndPoint;
 
 public abstract class AbstractRuleTestCase extends TestCase
 {

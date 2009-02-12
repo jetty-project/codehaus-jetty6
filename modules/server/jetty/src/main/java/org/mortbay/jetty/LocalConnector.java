@@ -16,9 +16,9 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.ByteArrayEndPoint;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.ByteArrayEndPoint;
 import org.mortbay.jetty.util.StringUtil;
 
 public class LocalConnector extends AbstractConnector

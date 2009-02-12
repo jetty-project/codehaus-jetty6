@@ -17,12 +17,12 @@ import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.View;
-import org.mortbay.io.nio.IndirectNIOBuffer;
-import org.mortbay.io.nio.NIOBuffer;
-import org.mortbay.io.nio.SelectChannelEndPoint;
-import org.mortbay.io.nio.SelectorManager.SelectSet;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.View;
+import org.mortbay.jetty.io.nio.IndirectNIOBuffer;
+import org.mortbay.jetty.io.nio.NIOBuffer;
+import org.mortbay.jetty.io.nio.SelectChannelEndPoint;
+import org.mortbay.jetty.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.util.thread.QueuedThreadPool;
 

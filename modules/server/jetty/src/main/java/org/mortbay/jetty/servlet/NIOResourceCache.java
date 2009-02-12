@@ -21,14 +21,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.nio.DirectNIOBuffer;
-import org.mortbay.io.nio.IndirectNIOBuffer;
-import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.ResourceCache;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.nio.DirectNIOBuffer;
+import org.mortbay.jetty.io.nio.IndirectNIOBuffer;
+import org.mortbay.jetty.io.nio.NIOBuffer;
 import org.mortbay.jetty.nio.NIOConnector;
 import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.util.resource.Resource;

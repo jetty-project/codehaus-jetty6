@@ -26,9 +26,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
+import org.mortbay.jetty.io.BufferCache.CachedBuffer;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.util.ByteArrayISO8859Writer;
 import org.mortbay.jetty.util.IO;

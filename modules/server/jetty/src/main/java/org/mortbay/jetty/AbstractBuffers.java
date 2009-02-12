@@ -16,8 +16,8 @@ package org.mortbay.jetty;
 
 import java.util.ArrayList;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.Buffers;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.Buffers;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
 
 /* ------------------------------------------------------------ */

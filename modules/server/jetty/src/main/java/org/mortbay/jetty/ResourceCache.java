@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.View;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.ByteArrayBuffer;
+import org.mortbay.jetty.io.View;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
 import org.mortbay.jetty.util.resource.Resource;
 import org.mortbay.jetty.util.resource.ResourceFactory;

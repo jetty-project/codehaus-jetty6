@@ -18,8 +18,8 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.io.Buffer;
 import org.mortbay.jetty.client.CachedExchange;
+import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.util.log.Log;
 
 

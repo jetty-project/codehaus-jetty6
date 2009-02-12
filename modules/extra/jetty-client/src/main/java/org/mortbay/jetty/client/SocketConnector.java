@@ -20,8 +20,8 @@ import java.net.Socket;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
 
-import org.mortbay.io.EndPoint;
-import org.mortbay.io.bio.SocketEndPoint;
+import org.mortbay.jetty.io.EndPoint;
+import org.mortbay.jetty.io.bio.SocketEndPoint;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
 import org.mortbay.jetty.util.log.Log;
 

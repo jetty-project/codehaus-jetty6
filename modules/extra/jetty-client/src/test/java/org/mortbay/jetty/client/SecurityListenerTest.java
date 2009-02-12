@@ -27,9 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.mortbay.io.Buffer;
 import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpMethods;
@@ -38,6 +36,8 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.client.security.Realm;
 import org.mortbay.jetty.client.security.SimpleRealmResolver;
 import org.mortbay.jetty.handler.AbstractHandler;
+import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.io.EofException;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
