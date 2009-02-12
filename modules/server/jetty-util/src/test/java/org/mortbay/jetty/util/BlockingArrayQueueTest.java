@@ -92,45 +92,48 @@ public class BlockingArrayQueueTest extends TestCase
 
     public void testGrow() throws Exception
     {
-        BlockingArrayQueue<String> queue = new BlockingArrayQueue<String>(3,5);
+        BlockingArrayQueue<String> queue = new BlockingArrayQueue<String>(3,2);
         assertEquals(3,queue.getCapacity());
         
         queue.add("a");
-        queue.add("b");
+        queue.add("a");
+        assertEquals(2,queue.size());
         assertEquals(3,queue.getCapacity());
-        queue.add("c");
-        queue.add("d");
-        assertEquals(8,queue.getCapacity());
-        
-        for (int i=0;i<4;i++)
-            queue.add(""+('d'+i));
-        assertEquals(8,queue.getCapacity());
-        for (int i=0;i<4;i++)
-            queue.poll();
-        assertEquals(8,queue.getCapacity());
-        for (int i=0;i<4;i++)
-            queue.add(""+('d'+i));
-        assertEquals(8,queue.getCapacity());
-        for (int i=0;i<4;i++)
-            queue.poll();
-        assertEquals(8,queue.getCapacity());
-        for (int i=0;i<4;i++)
-            queue.add(""+('d'+i));
-        assertEquals(8,queue.getCapacity());
+        queue.add("a");
+        queue.add("a");
+        assertEquals(4,queue.size());
+        assertEquals(5,queue.getCapacity());
 
-        queue.add("z");
-        assertEquals(13,queue.getCapacity());
+        int s=5;
+        int c=5;
+        queue.add("a");
         
-        queue.clear();
-        assertEquals(13,queue.getCapacity());
-        for (int i=0;i<12;i++)
-            queue.add(""+('a'+i));
-        assertEquals(13,queue.getCapacity());
-        queue.clear();
-        assertEquals(13,queue.getCapacity());
-        for (int i=0;i<12;i++)
-            queue.add(""+('a'+i));
-        assertEquals(13,queue.getCapacity());
+        for (int t=0;t<100;t++)
+        {
+            assertEquals(s,queue.size());
+            assertEquals(c,queue.getCapacity());
+
+            for (int i=queue.size();i-->0;)
+                queue.poll();
+            assertEquals(0,queue.size());
+            assertEquals(c,queue.getCapacity());
+
+            for (int i=queue.getCapacity();i-->0;)
+                queue.add("a");
+            queue.add("a");
+            assertEquals(s+1,queue.size());
+            assertEquals(c+2,queue.getCapacity());
+
+            queue.poll();
+            queue.add("a");
+            queue.add("a");
+            assertEquals(s+2,queue.size());
+            assertEquals(c+2,queue.getCapacity());
+
+            s+=2;
+            c+=2;
+        }
+        
         
         
     }
