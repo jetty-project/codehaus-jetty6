@@ -16,8 +16,6 @@ package org.mortbay.jetty.ajp;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -117,13 +115,14 @@ public class Ajp13Connection extends HttpConnection
                 CertificateFactory cf = CertificateFactory.getInstance("X.509");
                 ByteArrayInputStream bis = new ByteArrayInputStream(sslCert.toString().getBytes());
 
-                Collection certCollection = cf.generateCertificates(bis);
+                Collection<? extends java.security.cert.Certificate> certCollection = cf.generateCertificates(bis);
                 X509Certificate[] certificates = new X509Certificate[certCollection.size()];
 
                 int i=0;
-                Iterator iter=certCollection.iterator();
-                while(iter.hasNext())
-                    certificates[i++] = (X509Certificate)iter.next();
+                for (Object aCertCollection : certCollection)
+                {
+                    certificates[i++] = (X509Certificate) aCertCollection;
+                }
 
                 _request.setAttribute("javax.servlet.request.X509Certificate", certificates);
             } 
@@ -175,7 +174,7 @@ public class Ajp13Connection extends HttpConnection
         {
             if (addr != null && addr.length()>0)
             {
-                ((Ajp13Request) _request).setRemoteAddr(addr.toString());
+                _request.setRemoteAddr(addr.toString());
             }
         }
 
@@ -183,7 +182,7 @@ public class Ajp13Connection extends HttpConnection
         {
             if (name != null && name.length()>0)
             {
-                ((Ajp13Request) _request).setRemoteHost(name.toString());
+                _request.setRemoteHost(name.toString());
             }
         }
 
@@ -197,7 +196,7 @@ public class Ajp13Connection extends HttpConnection
 
         public void parsedServerPort(int port) throws IOException
         {
-            ((Ajp13Request) _request).setServerPort(port);
+            _request.setServerPort(port);
         }
 
         public void parsedSslSecure(boolean secure) throws IOException

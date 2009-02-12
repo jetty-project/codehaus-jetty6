@@ -35,7 +35,7 @@ public class Ajp13Request extends Request
     }
 
     /* ------------------------------------------------------------ */
-    protected void setConnection(HttpConnection connection)
+    void setConnection(Ajp13Connection connection)
     {
         super.setConnection(connection);
     }
