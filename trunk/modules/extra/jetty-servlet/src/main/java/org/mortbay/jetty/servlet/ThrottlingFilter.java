@@ -16,7 +16,7 @@
  * ------------------------------------------------------------------------
  */
 
-package org.mortbay.servlet;
+package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
 import java.util.LinkedList;
