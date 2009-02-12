@@ -15,7 +15,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>org.mortbay.start.Main</mainClass>
+              <mainClass>org.mortbay.jetty.start.Main</mainClass>
             </manifest>
           </archive>
         </configuration>
