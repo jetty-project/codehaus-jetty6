@@ -22,9 +22,9 @@
             </goals>
             <configuration>
               <instructions>
-                <Bundle-SymbolicName>org.mortbay.xml</Bundle-SymbolicName>
+                <Bundle-SymbolicName>org.mortbay.jetty.xml</Bundle-SymbolicName>
                 <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
-                <Export-Package>org.mortbay.xml;version=${project.version}</Export-Package>
+                <Export-Package>org.mortbay.jetty.xml;version=${project.version}</Export-Package>
                 <Bundle-DocURL>http://jetty.mortbay.org</Bundle-DocURL>
               </instructions>
             </configuration>
