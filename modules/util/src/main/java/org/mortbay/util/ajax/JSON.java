@@ -748,13 +748,18 @@ public class JSON
                             return parseNumber(source);
                         else if (Character.isWhitespace(c))
                             break;
-                        throw new IllegalStateException("unknown char '"+c+"'("+(int)c+") in "+source);
+                        return handleUnknown(source, c);
                 }
             }
             source.next();
         }
 
         return null;
+    }
+    
+    protected Object handleUnknown(Source source, char c)
+    {
+        throw new IllegalStateException("unknown char '"+c+"'("+(int)c+") in "+source);
     }
 
     protected Object parseObject(Source source)
@@ -805,7 +810,7 @@ public class JSON
     }
     
 
-    private Object parseArray(Source source)
+    protected Object parseArray(Source source)
     {
         if (source.next()!='[')
             throw new IllegalStateException();
@@ -872,7 +877,7 @@ public class JSON
     }
     
 
-    private String parseString(Source source)
+    protected String parseString(Source source)
     {
         if (source.next()!='"')
             throw new IllegalStateException();
