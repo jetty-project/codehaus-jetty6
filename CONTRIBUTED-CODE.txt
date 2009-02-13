@@ -1,0 +1,7 @@
+
+Code is contributed and committed by the folks with licenses in the LICENSES-tmp directory.
+
+Some patches are contributed by users via JIRA @ http:/jira.codehaus.org/browse/JETTY
+
+Those patches are reviewed and mostly modified substantially by the committer.
+
