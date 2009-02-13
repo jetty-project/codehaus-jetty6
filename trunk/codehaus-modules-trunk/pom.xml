@@ -1,0 +1,34 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.mortbay.jetty</groupId> <!-- to be org.eclipse.jetty -->
+    <artifactId>jetty-project</artifactId>
+    <version>7.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>jetty-enhanced-parent</artifactId>
+  <name>Jetty :: Enhanced Parent</name>
+  <packaging>pom</packaging>
+  <!--
+  
+  Once we get this all moved around we will have scm, distro, etc sections here
+  
+  -->
+  <modules>
+    <module>async-jsp-example-webapp</module>
+    <module>async-rest-example-webapp</module>
+    <module>async-webservices-example-webapp</module>
+    <module>jaas-example-webapp</module>
+    <module>jetty-ajp</module>
+    <module>jetty-annotation-example-webapp</module>
+    <module>jetty-embedded</module>
+    <module>jetty-example-webapp</module>
+    <module>jetty-extra-example-webapp</module>
+    <module>jetty-html</module>
+    <module>jetty-integration-tests</module>
+    <module>jetty-jspc-maven-plugin</module>
+    <module>jetty-maven-plugin</module>
+    <module>jndi-maven-plugin</module>
+    <module>jsp-2.1-jetty</module>
+    <module>spring-ejb3-example-webapp</module>
+  </modules>
+</project>       
