@@ -16,7 +16,6 @@ package org.mortbay.jetty.servlet;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.HttpParserTest;
 
 /* ------------------------------------------------------------ */
 /**
@@ -34,11 +33,6 @@ public class PathMapTest extends TestCase
     public PathMapTest(String arg0)
     {
         super(arg0);
-    }
-
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(HttpParserTest.class);
     }
 
     /**
