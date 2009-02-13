@@ -122,7 +122,7 @@ public class MimeTypes
     {
         try
         {
-            ResourceBundle mime = ResourceBundle.getBundle("org/mortbay/jetty/mime");
+            ResourceBundle mime = ResourceBundle.getBundle("org/mortbay/jetty/http/mime");
             Enumeration i = mime.getKeys();
             while(i.hasMoreElements())
             {
@@ -139,7 +139,7 @@ public class MimeTypes
 
         try
         {
-            ResourceBundle encoding = ResourceBundle.getBundle("org/mortbay/jetty/encoding");
+            ResourceBundle encoding = ResourceBundle.getBundle("org/mortbay/jetty/http/encoding");
             Enumeration i = encoding.getKeys();
             while(i.hasMoreElements())
             {
