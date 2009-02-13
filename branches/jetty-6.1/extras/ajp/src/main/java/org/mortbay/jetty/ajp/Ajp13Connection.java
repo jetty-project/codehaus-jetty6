@@ -16,8 +16,6 @@ package org.mortbay.jetty.ajp;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -43,8 +41,6 @@ import org.mortbay.jetty.Server;
  */
 public class Ajp13Connection extends HttpConnection
 {
-    private boolean _sslSecure = false;
-
     public Ajp13Connection(Connector connector, EndPoint endPoint, Server server)
     {
         super(connector, endPoint, server,
@@ -60,12 +56,12 @@ public class Ajp13Connection extends HttpConnection
 
     public boolean isConfidential(Request request)
     {
-        return _sslSecure;
+        return ((Ajp13Request) request).isSslSecure();
     }
 
     public boolean isIntegral(Request request)
     {
-        return _sslSecure;
+        return ((Ajp13Request) request).isSslSecure();
     }
 
     public ServletInputStream getInputStream()
@@ -83,7 +79,7 @@ public class Ajp13Connection extends HttpConnection
         {
             _delayedHandling = false;
             _uri.clear();
-            _sslSecure = false;
+            ((Ajp13Request) _request).setSslSecure(false);
             _request.setTimeStamp(System.currentTimeMillis());
             _request.setUri(_uri);
             
@@ -201,7 +197,7 @@ public class Ajp13Connection extends HttpConnection
 
         public void parsedSslSecure(boolean secure) throws IOException
         {
-            _sslSecure = secure;
+            ((Ajp13Request) _request).setSslSecure(secure);
         }
 
         public void parsedQueryString(Buffer value) throws IOException
