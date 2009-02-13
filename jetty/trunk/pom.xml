@@ -97,9 +97,7 @@
   <modules>
     <module>jetty-ajp</module>
     <module>jetty-annotations</module>
-    <!--
     <module>jetty-assembly</module>
-    -->
     <module>jetty-client</module>
     <module>jetty-deploy</module>
     <module>jetty-http</module>
