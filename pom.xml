@@ -95,6 +95,7 @@
     </pluginManagement>
   </build>
   <modules>
+    <module>jetty-ajp</module>
     <module>jetty-annotations</module>
     <!--
     <module>jetty-assembly</module>
