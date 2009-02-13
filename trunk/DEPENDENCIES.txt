@@ -1,317 +1,43 @@
- ------------------------------------------------------------------------
- Building Jetty :: Project
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-project:pom:7.0-SNAPSHOT
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: Utilities
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT
- +- junit:junit:jar:3.8.2:test
- +- org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:provided
- \- org.slf4j:slf4j-api:jar:1.5.6:provided
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: IO Utility
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT
- +- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:compile
- \- junit:junit:jar:3.8.1:test
- 
- 
- 
- ------------------------------------------------------------------------
- Building Jetty :: Http Utility
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-http:jar:7.0-SNAPSHOT
- +- org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT:compile
- |  \- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:compile
- +- org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:compile
- \- junit:junit:jar:3.8.1:test
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: Server Core
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-server:jar:7.0-SNAPSHOT
- +- junit:junit:jar:3.8.2:test
- +- org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:compile
- \- org.mortbay.jetty:jetty-http:jar:7.0-SNAPSHOT:compile
-    \- org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT:compile
-       \- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:compile
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: AJP
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-ajp:jar:7.0-SNAPSHOT
- +- org.mortbay.jetty:jetty-server:jar:7.0-SNAPSHOT:compile
- |  +- org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:compile
- |  \- org.mortbay.jetty:jetty-http:jar:7.0-SNAPSHOT:compile
- |     \- org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT:compile
- |        \- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:compile
- \- junit:junit:jar:3.8.2:test
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: XML utilities
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-xml:jar:7.0-SNAPSHOT
- +- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:compile
- \- junit:junit:jar:3.8.2:test
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: Security
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-security:jar:7.0-SNAPSHOT
- +- org.mortbay.jetty:jetty-server:jar:7.0-SNAPSHOT:compile
- |  +- org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:compile
- |  \- org.mortbay.jetty:jetty-http:jar:7.0-SNAPSHOT:compile
- |     \- org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT:compile
- +- org.mortbay.jetty:jetty-xml:jar:7.0-SNAPSHOT:compile
- |  \- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:compile
- +- org.apache.geronimo.specs:geronimo-jaspi_1.0_spec:jar:1.0-SNAPSHOT:compile
- \- junit:junit:jar:3.8.2:test
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: Webapp Application Support
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-webapp:jar:7.0-SNAPSHOT
- +- org.mortbay.jetty:jetty-server:jar:7.0-SNAPSHOT:compile
- |  +- org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:compile
- |  \- org.mortbay.jetty:jetty-http:jar:7.0-SNAPSHOT:compile
- |     \- org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT:compile
- +- org.mortbay.jetty:jetty-xml:jar:7.0-SNAPSHOT:compile
- |  \- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:compile
- +- org.mortbay.jetty:jetty-security:jar:7.0-SNAPSHOT:compile
- |  \- org.apache.geronimo.specs:geronimo-jaspi_1.0_spec:jar:1.0-SNAPSHOT:compile
- \- junit:junit:jar:3.8.2:test
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: JNDI Naming
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-jndi:jar:7.0-SNAPSHOT
- +- junit:junit:jar:3.8.2:test
- +- org.mortbay.jetty:jetty-webapp:jar:7.0-SNAPSHOT:provided
- |  +- org.mortbay.jetty:jetty-server:jar:7.0-SNAPSHOT:provided
- |  |  +- org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:provided
- |  |  \- org.mortbay.jetty:jetty-http:jar:7.0-SNAPSHOT:provided
- |  |     \- org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT:provided
- |  +- org.mortbay.jetty:jetty-xml:jar:7.0-SNAPSHOT:provided
- |  |  \- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:provided
- |  \- org.mortbay.jetty:jetty-security:jar:7.0-SNAPSHOT:provided
- |     \- org.apache.geronimo.specs:geronimo-jaspi_1.0_spec:jar:1.0-SNAPSHOT:provided
- +- javax.mail:mail:jar:1.4:compile
- \- javax.activation:activation:jar:1.1:compile
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: Plus
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-plus:jar:7.0-SNAPSHOT
- +- org.apache.derby:derby:jar:10.1.1.0:test
- +- junit:junit:jar:3.8.2:test
- +- org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1.1:compile
- +- org.apache.geronimo.specs:geronimo-jaspi_1.0_spec:jar:1.0-SNAPSHOT:provided
- +- org.mortbay.jetty:jetty-webapp:jar:7.0-SNAPSHOT:provided
- |  +- org.mortbay.jetty:jetty-server:jar:7.0-SNAPSHOT:provided
- |  |  +- org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:provided
- |  |  \- org.mortbay.jetty:jetty-http:jar:7.0-SNAPSHOT:provided
- |  |     \- org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT:provided
- |  +- org.mortbay.jetty:jetty-xml:jar:7.0-SNAPSHOT:provided
- |  |  \- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:provided
- |  \- org.mortbay.jetty:jetty-security:jar:7.0-SNAPSHOT:provided
- \- org.mortbay.jetty:jetty-jndi:jar:7.0-SNAPSHOT:provided
-    +- javax.mail:mail:jar:1.4:provided
-    \- javax.activation:activation:jar:1.1:provided
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: Servlet Annotations
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-annotations:jar:7.0-SNAPSHOT
- +- junit:junit:jar:3.8.2:test
- +- org.mortbay.jetty:servlet-annotation-spec:jar:3.0.pre0:compile
- |  \- org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:compile (version managed from 3.0.pre1)
- +- org.mortbay.jetty:jetty-jndi:jar:7.0-SNAPSHOT:test
- |  +- javax.mail:mail:jar:1.4:test
- |  \- javax.activation:activation:jar:1.1:test
- +- org.mortbay.jetty:jetty-plus:jar:7.0-SNAPSHOT:compile
- |  \- org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1.1:compile
- +- org.mortbay.jetty:jetty-webapp:jar:7.0-SNAPSHOT:compile
- |  +- org.mortbay.jetty:jetty-server:jar:7.0-SNAPSHOT:compile
- |  |  \- org.mortbay.jetty:jetty-http:jar:7.0-SNAPSHOT:compile
- |  |     \- org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT:compile
- |  +- org.mortbay.jetty:jetty-xml:jar:7.0-SNAPSHOT:compile
- |  |  \- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:compile
- |  \- org.mortbay.jetty:jetty-security:jar:7.0-SNAPSHOT:compile
- |     \- org.apache.geronimo.specs:geronimo-jaspi_1.0_spec:jar:1.0-SNAPSHOT:compile
- +- org.apache.geronimo.specs:geronimo-annotation_1.0_spec:jar:1.0:compile
- +- asm:asm-commons:jar:3.1:compile
- |  \- asm:asm-tree:jar:3.1:compile
- \- asm:asm:jar:3.1:compile
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: Servlet Tester
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-servlet-tester:jar:7.0-SNAPSHOT
- +- org.mortbay.jetty:jetty-webapp:jar:7.0-SNAPSHOT:compile
- |  +- org.mortbay.jetty:jetty-server:jar:7.0-SNAPSHOT:compile
- |  |  +- org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:compile
- |  |  \- org.mortbay.jetty:jetty-http:jar:7.0-SNAPSHOT:compile
- |  |     \- org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT:compile
- |  +- org.mortbay.jetty:jetty-xml:jar:7.0-SNAPSHOT:compile
- |  |  \- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:compile
- |  \- org.mortbay.jetty:jetty-security:jar:7.0-SNAPSHOT:compile
- |     \- org.apache.geronimo.specs:geronimo-jaspi_1.0_spec:jar:1.0-SNAPSHOT:compile
- \- junit:junit:jar:3.8.2:test
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: Utility Servlets and Filters
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-servlet:jar:7.0-SNAPSHOT
- +- junit:junit:jar:3.8.2:test
- +- org.mortbay.jetty:jetty-webapp:jar:7.0-SNAPSHOT:provided
- |  +- org.mortbay.jetty:jetty-server:jar:7.0-SNAPSHOT:provided
- |  |  \- org.mortbay.jetty:jetty-http:jar:7.0-SNAPSHOT:provided
- |  |     \- org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT:provided
- |  +- org.mortbay.jetty:jetty-xml:jar:7.0-SNAPSHOT:provided
- |  \- org.mortbay.jetty:jetty-security:jar:7.0-SNAPSHOT:provided
- |     \- org.apache.geronimo.specs:geronimo-jaspi_1.0_spec:jar:1.0-SNAPSHOT:provided
- +- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:compile
- +- org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:provided
- \- org.mortbay.jetty:jetty-servlet-tester:jar:7.0-SNAPSHOT:test
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: Asynchronous HTTP Client
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-client:jar:7.0-SNAPSHOT
- +- org.mortbay.jetty:jetty-server:jar:7.0-SNAPSHOT:compile
- |  +- org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:compile
- |  \- org.mortbay.jetty:jetty-http:jar:7.0-SNAPSHOT:compile
- |     \- org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT:compile
- |        \- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:compile
- +- org.mortbay.jetty:jetty-security:jar:7.0-SNAPSHOT:test
- |  +- org.mortbay.jetty:jetty-xml:jar:7.0-SNAPSHOT:test
- |  \- org.apache.geronimo.specs:geronimo-jaspi_1.0_spec:jar:1.0-SNAPSHOT:test
- +- junit:junit:jar:3.8.2:test
- \- org.mortbay.jetty:jetty-servlet:jar:7.0-SNAPSHOT:test
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: Deployers
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-deploy:jar:7.0-SNAPSHOT
- +- org.mortbay.jetty:jetty-server:jar:7.0-SNAPSHOT:compile
- |  +- org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:compile
- |  \- org.mortbay.jetty:jetty-http:jar:7.0-SNAPSHOT:compile
- |     \- org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT:compile
- +- org.mortbay.jetty:jetty-webapp:jar:7.0-SNAPSHOT:compile
- |  \- org.mortbay.jetty:jetty-security:jar:7.0-SNAPSHOT:compile
- |     \- org.apache.geronimo.specs:geronimo-jaspi_1.0_spec:jar:1.0-SNAPSHOT:compile
- +- org.mortbay.jetty:jetty-xml:jar:7.0-SNAPSHOT:compile
- |  \- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:compile
- \- junit:junit:jar:3.8.2:test
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: JMX Management
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-jmx:jar:7.0-SNAPSHOT
- +- junit:junit:jar:3.8.2:test
- \- org.mortbay.jetty:jetty-webapp:jar:7.0-SNAPSHOT:compile
-    +- org.mortbay.jetty:jetty-server:jar:7.0-SNAPSHOT:compile
-    |  +- org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:compile
-    |  \- org.mortbay.jetty:jetty-http:jar:7.0-SNAPSHOT:compile
-    |     \- org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT:compile
-    +- org.mortbay.jetty:jetty-xml:jar:7.0-SNAPSHOT:compile
-    |  \- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:compile
-    \- org.mortbay.jetty:jetty-security:jar:7.0-SNAPSHOT:compile
-       \- org.apache.geronimo.specs:geronimo-jaspi_1.0_spec:jar:1.0-SNAPSHOT:compile
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: Rewrite Handler
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-rewrite:jar:7.0-SNAPSHOT
- +- junit:junit:jar:3.8.2:test
- +- org.mortbay.jetty:jetty-server:jar:7.0-SNAPSHOT:compile
- |  \- org.mortbay.jetty:jetty-http:jar:7.0-SNAPSHOT:compile
- |     \- org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT:compile
- |        \- org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:compile
- +- org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:compile
- \- org.mortbay.jetty:jetty-servlet-tester:jar:7.0-SNAPSHOT:test
-    \- org.mortbay.jetty:jetty-webapp:jar:7.0-SNAPSHOT:test
-       +- org.mortbay.jetty:jetty-xml:jar:7.0-SNAPSHOT:test
-       \- org.mortbay.jetty:jetty-security:jar:7.0-SNAPSHOT:test
-          \- org.apache.geronimo.specs:geronimo-jaspi_1.0_spec:jar:1.0-SNAPSHOT:test
-
-
-
- ------------------------------------------------------------------------
- Building Jetty :: Start
-    task-segment: [dependency:tree]
- ------------------------------------------------------------------------
- [dependency:tree]
- org.mortbay.jetty:jetty-start:jar:7.0-SNAPSHOT
- 
+asm:asm-commons:jar:3.1:compile
+asm:asm-tree:jar:3.1:compile
+asm:asm:jar:3.1:compile
+javax.activation:activation:jar:1.1:compile
+javax.activation:activation:jar:1.1:provided
+javax.activation:activation:jar:1.1:test
+javax.mail:mail:jar:1.4:compile
+javax.mail:mail:jar:1.4:provided
+javax.mail:mail:jar:1.4:test
+junit:junit:jar:3.8.1:test
+junit:junit:jar:3.8.2:test
+org.apache.derby:derby:jar:10.1.1.0:test
+org.apache.geronimo.specs:geronimo-annotation_1.0_spec:jar:1.0:compile
+org.apache.geronimo.specs:geronimo-jaspi_1.0_spec:jar:1.0-SNAPSHOT:compile
+org.apache.geronimo.specs:geronimo-jaspi_1.0_spec:jar:1.0-SNAPSHOT:provided
+org.apache.geronimo.specs:geronimo-jaspi_1.0_spec:jar:1.0-SNAPSHOT:test
+org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1.1:compile
+org.mortbay.jetty:jetty-http:jar:7.0-SNAPSHOT:compile
+org.mortbay.jetty:jetty-http:jar:7.0-SNAPSHOT:provided
+org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT:compile
+org.mortbay.jetty:jetty-io:jar:7.0-SNAPSHOT:provided
+org.mortbay.jetty:jetty-jndi:jar:7.0-SNAPSHOT:provided
+org.mortbay.jetty:jetty-jndi:jar:7.0-SNAPSHOT:test
+org.mortbay.jetty:jetty-plus:jar:7.0-SNAPSHOT:compile
+org.mortbay.jetty:jetty-security:jar:7.0-SNAPSHOT:compile
+org.mortbay.jetty:jetty-security:jar:7.0-SNAPSHOT:provided
+org.mortbay.jetty:jetty-security:jar:7.0-SNAPSHOT:test
+org.mortbay.jetty:jetty-server:jar:7.0-SNAPSHOT:compile
+org.mortbay.jetty:jetty-server:jar:7.0-SNAPSHOT:provided
+org.mortbay.jetty:jetty-servlet-tester:jar:7.0-SNAPSHOT:test
+org.mortbay.jetty:jetty-servlet:jar:7.0-SNAPSHOT:test
+org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:compile
+org.mortbay.jetty:jetty-util:jar:7.0-SNAPSHOT:provided
+org.mortbay.jetty:jetty-webapp:jar:7.0-SNAPSHOT:compile
+org.mortbay.jetty:jetty-webapp:jar:7.0-SNAPSHOT:provided
+org.mortbay.jetty:jetty-webapp:jar:7.0-SNAPSHOT:test
+org.mortbay.jetty:jetty-xml:jar:7.0-SNAPSHOT:compile
+org.mortbay.jetty:jetty-xml:jar:7.0-SNAPSHOT:provided
+org.mortbay.jetty:jetty-xml:jar:7.0-SNAPSHOT:test
+org.mortbay.jetty:servlet-annotation-spec:jar:3.0.pre0:compile
+org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:compile
+org.mortbay.jetty:servlet-api:jar:3.0-SNAPSHOT:provided
+org.slf4j:slf4j-api:jar:1.5.6:provided
