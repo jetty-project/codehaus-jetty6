@@ -22,6 +22,7 @@ public class Ajp13Request extends Request
     protected String _remoteAddr;
     protected String _remoteHost;
     protected String _remoteUser;
+    protected boolean _sslSecure;
 
     /* ------------------------------------------------------------ */
     public Ajp13Request(HttpConnection connection)
@@ -87,6 +88,18 @@ public class Ajp13Request extends Request
     {
         _remoteHost = remoteHost;
     }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isSslSecure()
+    {
+        return _sslSecure;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setSslSecure(boolean sslSecure)
+    {
+        _sslSecure = sslSecure;
+    }
 
     /* ------------------------------------------------------------ */
     protected void recycle()
@@ -94,6 +107,8 @@ public class Ajp13Request extends Request
         super.recycle();
         _remoteAddr = null;
         _remoteHost = null;
+	_remoteUser = null;
+	_sslSecure = false;
     }
 
 }
