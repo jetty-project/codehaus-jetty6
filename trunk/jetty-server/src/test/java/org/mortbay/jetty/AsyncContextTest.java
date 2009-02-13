@@ -46,7 +46,6 @@ public class AsyncContextTest extends TestCase
         _server.setConnectors(new Connector[]{ _connector });
         _server.setHandler(_handler);
         _server.start();
-
     }
 
     protected void tearDown() throws Exception
@@ -124,7 +123,7 @@ public class AsyncContextTest extends TestCase
     protected void check(String content,String response)
     {
         assertEquals("HTTP/1.1 200 OK",response.substring(0,15));
-        assertTrue(content.contains(content));
+        assertTrue(response.contains(content));
     }
     
     public synchronized String process(String content) throws Exception
