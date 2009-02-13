@@ -112,7 +112,6 @@
     <module>jetty-server</module>
     <module>jetty-servlet</module>
     <module>jetty-servlet-tester</module>
-    <module>jetty-ssl</module>
     <module>jetty-start</module>
     <module>jetty-util</module>
     <module>jetty-webapp</module>
