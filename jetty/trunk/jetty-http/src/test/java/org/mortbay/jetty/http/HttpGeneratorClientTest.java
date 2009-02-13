@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty;
+package org.mortbay.jetty.http;
 
 import java.io.IOException;
 
@@ -20,7 +20,6 @@ import junit.framework.TestCase;
 
 import org.mortbay.jetty.http.HttpFields;
 import org.mortbay.jetty.http.HttpGenerator;
-import org.mortbay.jetty.http.HttpGeneratorTest;
 import org.mortbay.jetty.http.HttpMethods;
 import org.mortbay.jetty.http.HttpParser;
 import org.mortbay.jetty.io.Buffer;
