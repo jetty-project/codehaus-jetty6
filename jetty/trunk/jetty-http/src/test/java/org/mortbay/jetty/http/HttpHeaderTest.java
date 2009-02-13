@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty;
+package org.mortbay.jetty.http;
 
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -26,6 +26,7 @@ import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.io.View;
+import org.mortbay.jetty.io.BufferCache.CachedBuffer;
 
 /* ------------------------------------------------------------------------------- */
 /**
@@ -370,6 +371,15 @@ public class HttpHeaderTest extends TestCase
         assertEquals("value",fields.getStringField("message-id").toLowerCase());
         
     }
+    
+    public void testHttpHeaderValues()
+    throws Exception
+    {
+        assertTrue(((CachedBuffer)HttpHeaderValues.CACHE.lookup("unknown value")).getOrdinal()<0);
+        assertTrue(((CachedBuffer)HttpHeaderValues.CACHE.lookup("close")).getOrdinal()>=0);
+        assertTrue(((CachedBuffer)HttpHeaderValues.CACHE.lookup("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1) Gecko/20061010 Firefox/2.0")).getOrdinal()>=0);
+    }
+    
     
     private Set enum2set(Enumeration e)
     {

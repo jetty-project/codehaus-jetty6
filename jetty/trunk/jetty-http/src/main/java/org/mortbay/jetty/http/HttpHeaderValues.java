@@ -80,7 +80,7 @@ public class HttpHeaderValues extends BufferCache
         
         try
         {
-            InputStream ua = HttpHeaderValues.class.getResourceAsStream("/org/mortbay/jetty/useragents");
+            InputStream ua = HttpHeaderValues.class.getResourceAsStream("/org/mortbay/jetty/http/useragents");
             if (ua!=null)
             {
                 LineNumberReader in = new LineNumberReader(new InputStreamReader(ua));
@@ -94,8 +94,8 @@ public class HttpHeaderValues extends BufferCache
         }
         catch(Exception e)
         {
-            e.printStackTrace();
-            Log.ignore(e);
+            Log.warn(e.toString());
+            Log.debug(e);
         }
     }
 }
