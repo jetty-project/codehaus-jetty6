@@ -413,14 +413,15 @@ public class HttpParser implements Parser
                 case STATE_FIELD2:
                     if (ch == HttpTokens.CARRIAGE_RETURN || ch == HttpTokens.LINE_FEED)
                     {
-                        byte digit=_tok1.peek(_tok1.getIndex());
-                        if (digit>='1'&&digit<='5')
+                        // TODO - we really should know if we are parsing request or response!
+                        final Buffer method = HttpMethods.CACHE.lookup(_tok0);
+                        if (method==_tok0 && _tok1.length()==3 && Character.isDigit(_tok1.peek()))
                         {
 			    _responseStatus = BufferUtil.toInt(_tok1);
                             _handler.startResponse(HttpVersions.CACHE.lookup(_tok0), _responseStatus,_buffer.sliceFromMark());
                         } 
                         else
-                            _handler.startRequest(HttpMethods.CACHE.lookup(_tok0), _tok1,HttpVersions.CACHE.lookup(_buffer.sliceFromMark()));
+                            _handler.startRequest(method, _tok1,HttpVersions.CACHE.lookup(_buffer.sliceFromMark()));
                         _eol=ch;
                         _state=STATE_HEADER;
                         _tok0.setPutIndex(_tok0.getIndex());
