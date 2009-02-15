@@ -29,6 +29,8 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestEvent;
+import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
@@ -299,6 +301,8 @@ public class ServletHandler extends AbstractHandler
         final String old_servlet_path=base_request.getServletPath();
         final String old_path_info=base_request.getPathInfo();
         final Map old_role_map=base_request.getRoleMap();
+        ServletRequestListener request_listener=null;
+        ServletRequestEvent request_event=null;
         
         try
         {
@@ -353,6 +357,15 @@ public class ServletHandler extends AbstractHandler
                 Log.debug("servlet holder="+servlet_holder);
             }
 
+            // Handle context listeners
+            request_listener = (ServletRequestListener)base_request.getEventListener(ServletRequestListener.class);
+            if (request_listener!=null)
+            {
+                base_request.removeEventListener(request_listener);
+                request_event = new ServletRequestEvent(getServletContext(),request);
+                request_listener.requestInitialized(request_event);
+            }
+            
             // Do the filter/handling thang
             if (servlet_holder!=null)
             {
@@ -461,6 +474,9 @@ public class ServletHandler extends AbstractHandler
         }
         finally
         {
+            if (request_listener!=null)
+                request_listener.requestDestroyed(request_event);
+            
             base_request.setServletName(old_servlet_name);
             base_request.setRoleMap(old_role_map);
             if (type!=INCLUDE)
@@ -486,11 +502,9 @@ public class ServletHandler extends AbstractHandler
             }
         }
         
-        
         // Build list of filters
         Object filters= null;
     
-        
         // Path filters
         if (pathInContext!=null && _filterPathMappings!=null)
         {

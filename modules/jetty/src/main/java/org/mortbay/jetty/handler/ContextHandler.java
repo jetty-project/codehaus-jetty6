@@ -745,14 +745,12 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 }
                 
                 // Handle the REALLY SILLY request events!
+                if (_requestAttributeListeners!=null)
+                    for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+                        base_request.addEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
                 if (_requestListeners!=null)
-                {
-                    event = new ServletRequestEvent(_scontext,request);
                     for(int i=0;i<LazyList.size(_requestListeners);i++)
-                        ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestInitialized(event);
-                }
-                for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
-                    base_request.addEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
+                        base_request.addEventListener(((EventListener)LazyList.get(_requestListeners,i)));
             }
             
             // Handle the request
@@ -775,11 +773,13 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 // Handle more REALLY SILLY request events!
                 if (new_context)
                 {
-                    for(int i=LazyList.size(_requestListeners);i-->0;)
-                        ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestDestroyed(event);
-                    
-                    for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
-                        base_request.removeEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
+                    if (_requestListeners!=null)
+                        for(int i=LazyList.size(_requestListeners);i-->0;)
+                            base_request.removeEventListener(((EventListener)LazyList.get(_requestListeners,i)));
+
+                    if (_requestAttributeListeners!=null)
+                        for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+                            base_request.removeEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
                 }
             }
         }
