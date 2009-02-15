@@ -152,7 +152,7 @@ public class Request implements HttpServletRequest
     private long _timeStamp;
     private Buffer _timeStampBuffer;
     private Continuation _continuation;
-    private Object _requestAttributeListeners;
+    private Object _requestListeners;
     private Map _savedNewSessions;
     private UserRealm _userRealm;
     
@@ -1294,13 +1294,20 @@ public class Request implements HttpServletRequest
         
         if (old_value!=null)
         {
-            if (_requestAttributeListeners!=null)
+            if (_requestListeners!=null)
             {
-                ServletRequestAttributeEvent event =
+                final ServletRequestAttributeEvent event =
                     new ServletRequestAttributeEvent(_context,this,name, old_value);
-
-                for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
-                    ((ServletRequestAttributeListener)LazyList.get(_requestAttributeListeners,i)).attributeRemoved(event);
+                final int size=LazyList.size(_requestListeners);
+                for(int i=0;i<size;i++)
+                {
+                    final EventListener listener = (ServletRequestAttributeListener)LazyList.get(_requestListeners,i);
+                    if (listener instanceof ServletRequestAttributeListener)
+                    {
+                        final ServletRequestAttributeListener l = (ServletRequestAttributeListener)listener;
+                        ((ServletRequestAttributeListener)l).attributeRemoved(event);
+                    }
+                }
             }
         }
     }
@@ -1346,21 +1353,25 @@ public class Request implements HttpServletRequest
             _attributes=new AttributesMap();
         _attributes.setAttribute(name, value);
         
-        if (_requestAttributeListeners!=null)
+        if (_requestListeners!=null)
         {
-            ServletRequestAttributeEvent event =
+            final ServletRequestAttributeEvent event =
                 new ServletRequestAttributeEvent(_context,this,name, old_value==null?value:old_value);
-
-            for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+            final int size=LazyList.size(_requestListeners);
+            for(int i=0;i<size;i++)
             {
-                ServletRequestAttributeListener l = (ServletRequestAttributeListener)LazyList.get(_requestAttributeListeners,i);
-                
-                if (old_value==null)
-                    l.attributeAdded(event);
-                else if (value==null)
-                    l.attributeRemoved(event);
-                else
-                    l.attributeReplaced(event);
+                final EventListener listener = (ServletRequestAttributeListener)LazyList.get(_requestListeners,i);
+                if (listener instanceof ServletRequestAttributeListener)
+                {
+                    final ServletRequestAttributeListener l = (ServletRequestAttributeListener)listener;
+
+                    if (old_value==null)
+                        l.attributeAdded(event);
+                    else if (value==null)
+                        l.attributeRemoved(event);
+                    else
+                        l.attributeReplaced(event);
+                }
             }
         }
     }
@@ -1853,16 +1864,30 @@ public class Request implements HttpServletRequest
     
 
     /* ------------------------------------------------------------ */
-    public synchronized void addEventListener(EventListener listener) 
+    public void addEventListener(final EventListener listener) 
     {
-        if (listener instanceof ServletRequestAttributeListener)
-            _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
+        _requestListeners= LazyList.add(_requestListeners, listener);
     }
     
     /* ------------------------------------------------------------ */
-    public synchronized void removeEventListener(EventListener listener) 
+    public void removeEventListener(final EventListener listener) 
     {
-        _requestAttributeListeners= LazyList.remove(_requestAttributeListeners, listener);
+        _requestListeners= LazyList.remove(_requestListeners, listener);
+    }
+
+    /* ------------------------------------------------------------ */
+    public EventListener getEventListener(Class clazz) 
+    {
+        if (_requestListeners!=null)
+        {
+            for(int i=LazyList.size(_requestListeners);i-->0;)
+            {
+                final EventListener listener = (EventListener)LazyList.get(_requestListeners,i);
+                if (clazz.isInstance(listener))
+                    return listener;
+            }
+        }
+        return null;
     }
 
     /* ------------------------------------------------------------ */
