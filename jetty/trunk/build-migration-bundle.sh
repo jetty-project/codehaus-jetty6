@@ -1,5 +1,7 @@
 #/bin/sh
 
+rm -Rf jetty-source-export
+
 echo 'checking out clean source'
 svn export http://svn.codehaus.org/jetty/jetty/trunk jetty-source-export
 
