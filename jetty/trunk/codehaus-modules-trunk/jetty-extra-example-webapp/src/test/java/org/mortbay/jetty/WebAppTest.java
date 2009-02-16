@@ -209,6 +209,19 @@ public class WebAppTest extends TestCase
         
         
     }
+
+
+    public void testRequestListener() throws Exception
+    {
+        URL url = null;
+        String result;
+        
+        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info/");
+        result=IO.toString(url.openStream());
+        assertTrue(result.startsWith("<html>"));
+        assertTrue(result.indexOf("requestInitialized")>0);
+        assertTrue(result.indexOf("'/test'")>0);
+    }
     
 
     public void testSecurity() throws Exception

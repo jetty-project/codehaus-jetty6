@@ -28,10 +28,12 @@ import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestAttributeEvent;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingEvent;
@@ -101,11 +103,14 @@ public class TestListener implements HttpSessionListener,  HttpSessionAttributeL
 
     public void requestDestroyed(ServletRequestEvent sre)
     {
+        ((HttpServletRequest)sre.getServletRequest()).getSession(false);
+        sre.getServletRequest().setAttribute("requestInitialized",null);
         // System.err.println("requestDestroyed "+sre);
     }
 
     public void requestInitialized(ServletRequestEvent sre)
     {
+        sre.getServletRequest().setAttribute("requestInitialized","'"+sre.getServletContext().getContextPath()+"'");
         // System.err.println("requestInitialized "+sre);
     }
 
