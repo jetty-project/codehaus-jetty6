@@ -43,7 +43,8 @@ import org.mortbay.util.IO;
  */
 public class HttpServerTestBase extends TestCase
 {
-
+    private static boolean stress=Boolean.getBoolean("STRESS");
+    
     // ~ Static fields/initializers
     // ---------------------------------------------
 
@@ -92,7 +93,7 @@ public class HttpServerTestBase extends TestCase
 
     // Useful constants
     private static final long PAUSE=15L;
-    private static final int LOOPS=250;
+    private static final int LOOPS=stress?250:25;
     private static final String HOST="localhost";
 
     private Connector _connector;
