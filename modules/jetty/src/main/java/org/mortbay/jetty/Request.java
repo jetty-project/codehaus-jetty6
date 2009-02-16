@@ -38,6 +38,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequestAttributeEvent;
 import javax.servlet.ServletRequestAttributeListener;
+import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletRequestWrapper;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
@@ -152,9 +153,11 @@ public class Request implements HttpServletRequest
     private long _timeStamp;
     private Buffer _timeStampBuffer;
     private Continuation _continuation;
-    private Object _requestListeners;
+    private Object _requestAttributeListeners;
+    private Object _contextRequestListeners;
     private Map _savedNewSessions;
     private UserRealm _userRealm;
+    private Object _requestListener;
     
     /* ------------------------------------------------------------ */
     /**
@@ -1294,14 +1297,14 @@ public class Request implements HttpServletRequest
         
         if (old_value!=null)
         {
-            if (_requestListeners!=null)
+            if (_requestAttributeListeners!=null)
             {
                 final ServletRequestAttributeEvent event =
                     new ServletRequestAttributeEvent(_context,this,name, old_value);
-                final int size=LazyList.size(_requestListeners);
+                final int size=LazyList.size(_requestAttributeListeners);
                 for(int i=0;i<size;i++)
                 {
-                    final EventListener listener = (ServletRequestAttributeListener)LazyList.get(_requestListeners,i);
+                    final EventListener listener = (ServletRequestAttributeListener)LazyList.get(_requestAttributeListeners,i);
                     if (listener instanceof ServletRequestAttributeListener)
                     {
                         final ServletRequestAttributeListener l = (ServletRequestAttributeListener)listener;
@@ -1353,14 +1356,14 @@ public class Request implements HttpServletRequest
             _attributes=new AttributesMap();
         _attributes.setAttribute(name, value);
         
-        if (_requestListeners!=null)
+        if (_requestAttributeListeners!=null)
         {
             final ServletRequestAttributeEvent event =
                 new ServletRequestAttributeEvent(_context,this,name, old_value==null?value:old_value);
-            final int size=LazyList.size(_requestListeners);
+            final int size=LazyList.size(_requestAttributeListeners);
             for(int i=0;i<size;i++)
             {
-                final EventListener listener = (ServletRequestAttributeListener)LazyList.get(_requestListeners,i);
+                final EventListener listener = (ServletRequestAttributeListener)LazyList.get(_requestAttributeListeners,i);
                 if (listener instanceof ServletRequestAttributeListener)
                 {
                     final ServletRequestAttributeListener l = (ServletRequestAttributeListener)listener;
@@ -1862,34 +1865,39 @@ public class Request implements HttpServletRequest
         return HttpConnection.getCurrentConnection().getRequest();
     }
     
-
     /* ------------------------------------------------------------ */
     public void addEventListener(final EventListener listener) 
     {
-        _requestListeners= LazyList.add(_requestListeners, listener);
+        if (listener instanceof ServletRequestAttributeListener)
+            _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
     }
     
     /* ------------------------------------------------------------ */
     public void removeEventListener(final EventListener listener) 
     {
-        _requestListeners= LazyList.remove(_requestListeners, listener);
+        _requestAttributeListeners= LazyList.remove(_requestAttributeListeners, listener);
     }
 
     /* ------------------------------------------------------------ */
-    public EventListener getEventListener(Class clazz) 
+    /**
+     * @param requestListeners {@link LazyList} of {@link ServletRequestListener}s
+     */
+    public void setRequestListeners(Object requestListeners)
     {
-        if (_requestListeners!=null)
-        {
-            for(int i=LazyList.size(_requestListeners);i-->0;)
-            {
-                final EventListener listener = (EventListener)LazyList.get(_requestListeners,i);
-                if (clazz.isInstance(listener))
-                    return listener;
-            }
-        }
-        return null;
+        _requestListener=requestListeners;
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @return {@link LazyList} of {@link ServletRequestListener}s
+     */
+    public Object takeRequestListeners()
+    {
+        final Object listeners=_requestListener;
+        _requestListener=null;
+        return listeners;
+    }
+    
     /* ------------------------------------------------------------ */
     public void saveNewSession(Object key,HttpSession session)
     {

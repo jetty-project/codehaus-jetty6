@@ -745,12 +745,13 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 }
                 
                 // Handle the REALLY SILLY request events!
+                base_request.setRequestListeners(_requestListeners);
                 if (_requestAttributeListeners!=null)
-                    for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+                {
+                    final int s=LazyList.size(_requestAttributeListeners);
+                    for(int i=0;i<s;i++)
                         base_request.addEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
-                if (_requestListeners!=null)
-                    for(int i=0;i<LazyList.size(_requestListeners);i++)
-                        base_request.addEventListener(((EventListener)LazyList.get(_requestListeners,i)));
+                }
             }
             
             // Handle the request
@@ -773,13 +774,12 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 // Handle more REALLY SILLY request events!
                 if (new_context)
                 {
-                    if (_requestListeners!=null)
-                        for(int i=LazyList.size(_requestListeners);i-->0;)
-                            base_request.removeEventListener(((EventListener)LazyList.get(_requestListeners,i)));
-
+                    base_request.takeRequestListeners();
                     if (_requestAttributeListeners!=null)
-                        for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+                    {
+                        for(int i=LazyList.size(_requestAttributeListeners);i-->0;)
                             base_request.removeEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
+                    }
                 }
             }
         }

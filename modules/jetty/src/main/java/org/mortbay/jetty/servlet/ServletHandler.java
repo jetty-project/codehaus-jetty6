@@ -301,7 +301,7 @@ public class ServletHandler extends AbstractHandler
         final String old_servlet_path=base_request.getServletPath();
         final String old_path_info=base_request.getPathInfo();
         final Map old_role_map=base_request.getRoleMap();
-        ServletRequestListener request_listener=null;
+        Object request_listeners=null;
         ServletRequestEvent request_event=null;
         
         try
@@ -358,12 +358,16 @@ public class ServletHandler extends AbstractHandler
             }
 
             // Handle context listeners
-            request_listener = (ServletRequestListener)base_request.getEventListener(ServletRequestListener.class);
-            if (request_listener!=null)
+            request_listeners = base_request.takeRequestListeners();
+            if (request_listeners!=null)
             {
-                base_request.removeEventListener(request_listener);
                 request_event = new ServletRequestEvent(getServletContext(),request);
-                request_listener.requestInitialized(request_event);
+                final int s=LazyList.size(request_listeners);
+                for(int i=0;i<s;i++)
+                {
+                    final ServletRequestListener listener = (ServletRequestListener)LazyList.get(request_listeners,i);
+                    listener.requestInitialized(request_event);
+                }
             }
             
             // Do the filter/handling thang
@@ -474,8 +478,14 @@ public class ServletHandler extends AbstractHandler
         }
         finally
         {
-            if (request_listener!=null)
-                request_listener.requestDestroyed(request_event);
+            if (request_listeners!=null)
+            {
+                for(int i=LazyList.size(request_listeners);i-->0;)
+                {
+                    final ServletRequestListener listener = (ServletRequestListener)LazyList.get(request_listeners,i);
+                    listener.requestDestroyed(request_event);
+                }
+            }
             
             base_request.setServletName(old_servlet_name);
             base_request.setRoleMap(old_role_map);
