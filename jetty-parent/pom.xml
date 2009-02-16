@@ -233,6 +233,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
+        <configuration>
+          <rules/>
+        </configuration>         
         <version>1.0-alpha-3</version>
         <executions>
           <execution>
