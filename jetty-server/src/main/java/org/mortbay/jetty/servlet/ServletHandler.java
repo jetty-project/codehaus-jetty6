@@ -30,6 +30,8 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestEvent;
+import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
@@ -305,6 +307,8 @@ public class ServletHandler extends AbstractHandler
 
         final UserIdentity user_identity = base_request.getUserIdentity() ==null? UserIdentity.UNAUTHENTICATED_IDENTITY: base_request.getUserIdentity();
         DispatcherType type = request.getDispatcherType();
+        Object request_listeners=null;
+        ServletRequestEvent request_event=null;
         
         try
         {
@@ -372,6 +376,19 @@ public class ServletHandler extends AbstractHandler
                 Log.debug("servlet holder="+servlet_holder);
             }
 
+            // Handle context listeners
+            request_listeners = base_request.takeRequestListeners();
+            if (request_listeners!=null)
+            {
+                request_event = new ServletRequestEvent(getServletContext(),request);
+                final int s=LazyList.size(request_listeners);
+                for(int i=0;i<s;i++)
+                {
+                    final ServletRequestListener listener = (ServletRequestListener)LazyList.get(request_listeners,i);
+                    listener.requestInitialized(request_event);
+                }
+            }
+            
             // Do the filter/handling thang
             if (servlet_holder!=null)
             {
@@ -479,6 +496,15 @@ public class ServletHandler extends AbstractHandler
         }
         finally
         {
+            if (request_listeners!=null)
+            {
+                for(int i=LazyList.size(request_listeners);i-->0;)
+                {
+                    final ServletRequestListener listener = (ServletRequestListener)LazyList.get(request_listeners,i);
+                    listener.requestDestroyed(request_event);
+                }
+            }
+            
             base_request.setServletName(old_servlet_name);
 
             if (user_identity != null)
@@ -510,7 +536,6 @@ public class ServletHandler extends AbstractHandler
         
         // Build list of filters
         Object filters= null;
-        
         // Path filters
         if (pathInContext!=null && _filterPathMappings!=null)
         {

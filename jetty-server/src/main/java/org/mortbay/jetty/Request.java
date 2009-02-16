@@ -43,6 +43,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestAttributeEvent;
 import javax.servlet.ServletRequestAttributeListener;
+import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletRequestWrapper;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
@@ -156,12 +157,11 @@ public class Request implements HttpServletRequest
     private Buffer _timeStampBuffer;
     private Continuation _continuation;
     private Object _requestAttributeListeners;
+    private Object _requestListeners;
     private Map<Object,HttpSession> _savedNewSessions;
-    private UserRealm _userRealm;
     private CookieCutter _cookies;
     private UserIdentity _userIdentity = UserIdentity.UNAUTHENTICATED_IDENTITY;
     private DispatcherType _dispatcherType;
-
 
     /* ------------------------------------------------------------ */
     public Request()
@@ -1003,18 +1003,10 @@ public class Request implements HttpServletRequest
         if (_userPrincipal != null && _userPrincipal instanceof ConstraintSecurityHandler.NotChecked)
 
         {
-<<<<<<< .working
             _userPrincipal = UserRealm.NO_USER;
             
             SecurityHandler securityHandler =(SecurityHandler)_context.getContextHandler().getChildHandlerByClass(SecurityHandler.class);
             if (securityHandler!=null)
-=======
-            ConstraintSecurityHandler.NotChecked not_checked=(ConstraintSecurityHandler.NotChecked)_userPrincipal;
-            _userPrincipal = ConstraintSecurityHandler.__NO_USER;
-
-            SecurityHandler securityHandler =(SecurityHandler)_context.getContextHandler().getChildHandlerByClass(SecurityHandler.class);
-            if (securityHandler!=null)
->>>>>>> .merge-right.r4465
             {
                 Authenticator auth=securityHandler.getAuthenticator();
                 UserRealm realm=securityHandler.getUserRealm();
@@ -1144,11 +1136,18 @@ public class Request implements HttpServletRequest
         {
             if (_requestAttributeListeners!=null)
             {
-                ServletRequestAttributeEvent event =
+                final ServletRequestAttributeEvent event =
                     new ServletRequestAttributeEvent(_context,this,name, old_value);
-
-                for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
-                    ((ServletRequestAttributeListener)LazyList.get(_requestAttributeListeners,i)).attributeRemoved(event);
+                final int size=LazyList.size(_requestAttributeListeners);
+                for(int i=0;i<size;i++)
+                {
+                    final EventListener listener = (ServletRequestAttributeListener)LazyList.get(_requestAttributeListeners,i);
+                    if (listener instanceof ServletRequestAttributeListener)
+                    {
+                        final ServletRequestAttributeListener l = (ServletRequestAttributeListener)listener;
+                        ((ServletRequestAttributeListener)l).attributeRemoved(event);
+                    }
+                }
             }
         }
     }
@@ -1206,19 +1205,23 @@ public class Request implements HttpServletRequest
         
         if (_requestAttributeListeners!=null)
         {
-            ServletRequestAttributeEvent event =
+            final ServletRequestAttributeEvent event =
                 new ServletRequestAttributeEvent(_context,this,name, old_value==null?value:old_value);
-
-            for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+            final int size=LazyList.size(_requestAttributeListeners);
+            for(int i=0;i<size;i++)
             {
-                ServletRequestAttributeListener l = (ServletRequestAttributeListener)LazyList.get(_requestAttributeListeners,i);
-                
-                if (old_value==null)
-                    l.attributeAdded(event);
-                else if (value==null)
-                    l.attributeRemoved(event);
-                else
-                    l.attributeReplaced(event);
+                final EventListener listener = (ServletRequestAttributeListener)LazyList.get(_requestAttributeListeners,i);
+                if (listener instanceof ServletRequestAttributeListener)
+                {
+                    final ServletRequestAttributeListener l = (ServletRequestAttributeListener)listener;
+
+                    if (old_value==null)
+                        l.attributeAdded(event);
+                    else if (value==null)
+                        l.attributeRemoved(event);
+                    else
+                        l.attributeReplaced(event);
+                }
             }
         }
     }
@@ -1703,20 +1706,39 @@ public class Request implements HttpServletRequest
         return HttpConnection.getCurrentConnection().getRequest();
     }
     
-
     /* ------------------------------------------------------------ */
-    public synchronized void addEventListener(EventListener listener) 
+    public void addEventListener(final EventListener listener) 
     {
         if (listener instanceof ServletRequestAttributeListener)
             _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
     }
     
     /* ------------------------------------------------------------ */
-    public synchronized void removeEventListener(EventListener listener) 
+    public void removeEventListener(final EventListener listener) 
     {
         _requestAttributeListeners= LazyList.remove(_requestAttributeListeners, listener);
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @param requestListeners {@link LazyList} of {@link ServletRequestListener}s
+     */
+    public void setRequestListeners(Object requestListeners)
+    {
+        _requestListeners=requestListeners;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return {@link LazyList} of {@link ServletRequestListener}s
+     */
+    public Object takeRequestListeners()
+    {
+        final Object listeners=_requestListeners;
+        _requestListeners=null;
+        return listeners;
+    }
+    
     /* ------------------------------------------------------------ */
     public void saveNewSession(Object key,HttpSession session)
     {

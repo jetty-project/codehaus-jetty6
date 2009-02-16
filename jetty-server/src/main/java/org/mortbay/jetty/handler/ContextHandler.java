@@ -667,10 +667,10 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     public void handle(String target, HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException
     {   
-        Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
+        Request baseRequest=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
         DispatcherType dispatch=request.getDispatcherType();
         
-        if( !isStarted() || _shutdown || (DispatcherType.REQUEST.equals(dispatch) && base_request.isHandled()))
+        if( !isStarted() || _shutdown || (DispatcherType.REQUEST.equals(dispatch) && baseRequest.isHandled()))
             return;
 
         // Check the vhosts
@@ -711,7 +711,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             if (_contextPath.length()==target.length() && _contextPath.length()>1 &&!_allowNullPathInfo)
             {
                 // context request must end with /
-                base_request.setHandled(true);
+                baseRequest.setHandled(true);
                 if (request.getQueryString()!=null)
                     response.sendRedirect(URIUtil.addPaths(request.getRequestURI(),URIUtil.SLASH)+"?"+request.getQueryString());
                 else 
@@ -725,7 +725,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             return;
         }
         
-        doHandle(target,base_request,request,response);
+        doHandle(target,baseRequest,request,response);
     }        
         
     
@@ -806,17 +806,13 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 }
                 
                 // Handle the REALLY SILLY request events!
-                // TODO, this really should be done AFTER security and session handlers
-                // Perhaps this can be moved to the servlet handler?
-                if (_requestListeners!=null)
-                {
-                    event = new ServletRequestEvent(_scontext,request);
-                    for(int i=0;i<LazyList.size(_requestListeners);i++)
-                        ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestInitialized(event);
-                }
+                baseRequest.setRequestListeners(_requestListeners);
                 if (_requestAttributeListeners!=null)
-                    for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+                {
+                    final int s=LazyList.size(_requestAttributeListeners);
+                    for(int i=0;i<s;i++)
                         baseRequest.addEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
+                }
             }
             
             // Handle the request
@@ -839,13 +835,12 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 // Handle more REALLY SILLY request events!
                 if (new_context)
                 {
-                    if (_requestListeners!=null)
-                        for(int i=LazyList.size(_requestListeners);i-->0;)
-                            ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestDestroyed(event);
-                    
-                    if(_requestAttributeListeners!=null)
-                        for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+                    baseRequest.takeRequestListeners();
+                    if (_requestAttributeListeners!=null)
+                    {
+                        for(int i=LazyList.size(_requestAttributeListeners);i-->0;)
                             baseRequest.removeEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
+                    }
                 }
             }
         }
