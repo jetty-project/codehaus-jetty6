@@ -154,9 +154,9 @@ public class Request implements HttpServletRequest
     private Buffer _timeStampBuffer;
     private Continuation _continuation;
     private Object _requestAttributeListeners;
+    private Object _requestListeners;
     private Map _savedNewSessions;
     private UserRealm _userRealm;
-    private Object _requestListener;
     
     /* ------------------------------------------------------------ */
     /**
@@ -1883,7 +1883,7 @@ public class Request implements HttpServletRequest
      */
     public void setRequestListeners(Object requestListeners)
     {
-        _requestListener=requestListeners;
+        _requestListeners=requestListeners;
     }
 
     /* ------------------------------------------------------------ */
@@ -1892,8 +1892,8 @@ public class Request implements HttpServletRequest
      */
     public Object takeRequestListeners()
     {
-        final Object listeners=_requestListener;
-        _requestListener=null;
+        final Object listeners=_requestListeners;
+        _requestListeners=null;
         return listeners;
     }
     
