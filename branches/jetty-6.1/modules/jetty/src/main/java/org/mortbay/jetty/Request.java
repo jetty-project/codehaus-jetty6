@@ -154,7 +154,6 @@ public class Request implements HttpServletRequest
     private Buffer _timeStampBuffer;
     private Continuation _continuation;
     private Object _requestAttributeListeners;
-    private Object _contextRequestListeners;
     private Map _savedNewSessions;
     private UserRealm _userRealm;
     private Object _requestListener;
