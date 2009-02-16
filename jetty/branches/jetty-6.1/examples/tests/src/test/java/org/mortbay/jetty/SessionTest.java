@@ -32,6 +32,7 @@ import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.util.IO;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 /**
@@ -168,7 +169,15 @@ public class SessionTest extends TestCase
     {
         String result=IO.toString((InputStream)new URL(url+uri).getContent()); 
         // System.err.println(uri+" ==> "+result); 
-        assertTrue(result!=null && result.contains(string));
+        try
+        {
+            assertTrue(result!=null && result.contains(string));
+        }
+        catch(AssertionFailedError e)
+        {
+            System.err.println("'"+string+"' not in '"+result+"'"); 
+            throw e;
+        }
     }
 
     protected void testNotContains(String uri, String string)

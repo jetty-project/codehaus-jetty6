@@ -85,7 +85,7 @@ public class TestListener implements HttpSessionListener,  HttpSessionAttributeL
 
     public void requestDestroyed(ServletRequestEvent sre)
     {
-        ((HttpServletRequest)sre.getServletRequest()).getSession(true);
+        ((HttpServletRequest)sre.getServletRequest()).getSession(false);
         sre.getServletRequest().setAttribute("requestInitialized",null);
         // System.err.println("requestDestroyed "+sre);
     }
