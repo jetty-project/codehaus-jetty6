@@ -17,6 +17,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-888 Fix abort in case of multiple outstanding connections
  + JETTY-894 Add android .apk to mime types
  + JETTY-898 Allow jetty debs to start with custom java args provided by users
+ + JETTY-909 Update useragents cache
 
 jetty-6.1.15.rc3 28 January 2009
  + JETTY-691 System.getProperty() calls ... wrap them in doPrivileged
