@@ -170,8 +170,9 @@ public class JSONPojoConvertor implements JSON.Convertor
     }
     
     /* ------------------------------------------------------------ */
-    public void setProps(Object obj, Map props)
+    public int setProps(Object obj, Map props)
     {
+        int count = 0;
         for(Iterator iterator = props.entrySet().iterator(); iterator.hasNext();)
         {
             Map.Entry entry = (Map.Entry)iterator.next();
@@ -181,6 +182,7 @@ public class JSONPojoConvertor implements JSON.Convertor
                 try
                 {
                     setter.invoke(obj, entry.getValue());                    
+                    count++;
                 }
                 catch(Exception e)
                 {
@@ -191,6 +193,7 @@ public class JSONPojoConvertor implements JSON.Convertor
                 }
             }
         }
+        return count;
     }
 
     /* ------------------------------------------------------------ */
