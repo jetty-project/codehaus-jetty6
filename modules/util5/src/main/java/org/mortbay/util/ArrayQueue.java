@@ -81,14 +81,23 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
     @Override
     public boolean add(E e)
     {
+        if (!offer(e))
+            throw new IllegalStateException("Full");
+        return true;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean offer(E e)
+    {
         synchronized(_lock)
         {
+            if (_size==_elements.length && !grow())
+                return false;
+                
             _size++;
             _elements[_nextSlot++]=e;
             if (_nextSlot==_elements.length)
                 _nextSlot=0;
-            if (_nextSlot==_nextE)
-                grow();
         }
         return true;
     }
@@ -100,12 +109,13 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
     */
     public void addUnsafe(E e)
     {
+        if (_size==_elements.length && !grow())
+            throw new IllegalStateException("Full");
+            
         _size++;
         _elements[_nextSlot++]=e;
         if (_nextSlot==_elements.length)
             _nextSlot=0;
-        if (_nextSlot==_nextE)
-            grow();
     }
     
     /* ------------------------------------------------------------ */
@@ -116,37 +126,6 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
             if (_nextSlot==_nextE)
                 throw new NoSuchElementException();
             return (E)_elements[_nextE];
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean offer(E e)
-    {
-        synchronized(_lock)
-        {
-            _size++;
-            _elements[_nextSlot++]=e;
-            if (_nextSlot==_elements.length)
-                _nextSlot=0;
-            if (_nextSlot==_nextE)
-            {
-                if (_growCapacity<=0)
-                    return false;
-                
-                Object[] elements=new Object[_elements.length+_growCapacity];
-                    
-                int split=_elements.length-_nextE;
-                if (split>0)
-                    System.arraycopy(_elements,_nextE,elements,0,split);
-                if (_nextE!=0)
-                    System.arraycopy(_elements,0,elements,split,_nextSlot);
-                
-                _elements=elements;
-                _nextE=0;
-                _nextSlot=_size;
-            }
-            
-            return true;
         }
     }
 
@@ -184,8 +163,10 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
         {
             if (_nextSlot==_nextE)
                 throw new NoSuchElementException();
-            E e = (E)_elements[_nextE++];
-            if (_nextE==_elements.length)
+            E e = (E)_elements[_nextE];
+            _elements[_nextE]=null;
+            _size--;
+            if (++_nextE==_elements.length)
                 _nextE=0;
             return e;
         }
@@ -228,9 +209,7 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
         {
             if (index<0 || index>=_size)
                 throw new IndexOutOfBoundsException("!("+0+"<"+index+"<="+_size+")");
-            int i = _nextE+index;
-            if (i>=_elements.length)
-                i-=_elements.length;
+            int i = (_nextE+index)%_elements.length;
             return (E)_elements[i];
         }
     }
@@ -242,9 +221,7 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
      */
     public E getUnsafe(int index)
     {
-        int i = _nextE+index;
-        if (i>=_elements.length)
-            i-=_elements.length;
+        int i = (_nextE+index)%_elements.length;
         return (E)_elements[i];
     }
     
@@ -256,9 +233,7 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
             if (index<0 || index>=_size)
                 throw new IndexOutOfBoundsException("!("+0+"<"+index+"<="+_size+")");
 
-            int i = _nextE+index;
-            if (i>=_elements.length)
-                i-=_elements.length;
+            int i = (_nextE+index)%_elements.length;
             E old=(E)_elements[i];
             
             if (i<_nextSlot)
@@ -273,10 +248,10 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
             {
                 // 0                         _elements.length
                 // ......_nextSlot   _nextE..........
-                System.arraycopy(_elements,i+1,_elements,i,_elements.length-1);
+                System.arraycopy(_elements,i+1,_elements,i,_elements.length-i-1);
                 if (_nextSlot>0)
                 {
-                    _elements[_elements.length]=_elements[0];
+                    _elements[_elements.length-1]=_elements[0];
                     System.arraycopy(_elements,1,_elements,0,_nextSlot-1);
                     _nextSlot--;
                 }
@@ -315,6 +290,9 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
             if (index<0 || index>_size)
                 throw new IndexOutOfBoundsException("!("+0+"<"+index+"<="+_size+")");
 
+            if (_size==_elements.length && !grow())
+                    throw new IllegalStateException("Full");
+            
             if (index==_size)
             {
                 add(element);
@@ -330,9 +308,6 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
                 if (_nextSlot==_elements.length)
                     _nextSlot=0;
                 
-                if (_nextSlot==_nextE)
-                    grow();
-
                 if (i<_nextSlot)
                 {
                     // 0                         _elements.length
@@ -359,10 +334,10 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
         }
     }
 
-    protected void grow()
+    protected boolean grow()
     {
         if (_growCapacity<=0)
-            throw new IllegalStateException("Full");
+            return false;
 
         Object[] elements=new Object[_elements.length+_growCapacity];
 
@@ -375,6 +350,7 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
         _elements=elements;
         _nextE=0;
         _nextSlot=_size;
+        return true;
     }
 
 }

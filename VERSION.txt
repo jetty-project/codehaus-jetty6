@@ -1,6 +1,7 @@
 jetty-6.1-SNAPSHOT
  + JETTY-496 Support inetd/xinetd through use of System.inheritedChannel()
  + JETTY-713 Expose additional AbstractConnector methods via MBean
+ + JETTY-749 Improved ack extension
  + JETTY-811 Allow configuration of system properties for the maven plugin using a file
  + JETTY-840 add default mime types to *.htc and *.pps
  + JETTY-848 Temporary folder not fully cleanup after stop (via Sweeper)
