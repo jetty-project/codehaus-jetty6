@@ -44,8 +44,8 @@ import org.mortbay.jetty.util.thread.Timeout.Task;
  * This connector is best used when there are a many connections that have idle periods.
  * </p>
  * <p>
- * When used with {@link org.mortbay.jetty.server.server.util.ajax.Continuation}, threadless waits are supported. When
- * a filter or servlet calls getEvent on a Continuation, a {@link org.mortbay.jetty.server.server.RetryRequest}
+ * When used with {@link org.mortbay.jetty.util.ajax.Continuation}, threadless waits are supported. When
+ * a filter or servlet calls getEvent on a Continuation, a {@link org.mortbay.jetty.server.RetryRequest}
  * runtime exception is thrown to allow the thread to exit the current request handling. Jetty will
  * catch this exception and will not send a response to the client. Instead the thread is released
  * and the Continuation is placed on the timer queue. If the Continuation timeout expires, or it's

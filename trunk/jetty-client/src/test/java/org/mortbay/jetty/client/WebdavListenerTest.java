@@ -83,7 +83,7 @@ public class WebdavListenerTest extends TestCase//extends HttpExchangeTest
                 }
         ));
 
-        _httpClient.registerListener( "org.mortbay.jetty.server.server.client.webdav.WebdavListener");
+        _httpClient.registerListener( "org.mortbay.jetty.client.webdav.WebdavListener");
         _httpClient.start();
     }
     

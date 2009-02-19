@@ -139,7 +139,7 @@ public class Context extends ContextHandler
     {
         try
         {
-            Class<?> l = Loader.loadClass(Context.class,"org.mortbay.jetty.server.server.security.ConstraintSecurityHandler");
+            Class<?> l = Loader.loadClass(Context.class,"org.mortbay.jetty.security.ConstraintSecurityHandler");
             return (SecurityHandler)l.newInstance();
         }
         catch(Exception e)
@@ -150,7 +150,7 @@ public class Context extends ContextHandler
 
     /* ------------------------------------------------------------ */
     /**
-     * @see org.mortbay.jetty.server.server.handler.ContextHandler#startContext()
+     * @see org.mortbay.jetty.server.handler.ContextHandler#startContext()
      */
     protected void startContext() throws Exception
     {
@@ -264,7 +264,7 @@ public class Context extends ContextHandler
 
     /* ------------------------------------------------------------ */
     /**
-     * @param securityHandler The {@link org.mortbay.jetty.server.server.handler.SecurityHandler} to set on this context.
+     * @param securityHandler The {@link org.mortbay.jetty.server.handler.SecurityHandler} to set on this context.
      */
     public void setSecurityHandler(SecurityHandler securityHandler)
     {

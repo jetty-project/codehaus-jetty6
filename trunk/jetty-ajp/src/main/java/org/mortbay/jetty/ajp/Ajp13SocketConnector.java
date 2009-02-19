@@ -56,7 +56,7 @@ public class Ajp13SocketConnector extends SocketConnector
 
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
-     * @see org.mortbay.jetty.server.server.bio.SocketConnector#customize(org.mortbay.io.EndPoint, org.mortbay.jetty.server.server.Request)
+     * @see org.mortbay.jetty.server.bio.SocketConnector#customize(org.mortbay.io.EndPoint, org.mortbay.jetty.server.Request)
      */
     public void customize(EndPoint endpoint, Request request) throws IOException
     {

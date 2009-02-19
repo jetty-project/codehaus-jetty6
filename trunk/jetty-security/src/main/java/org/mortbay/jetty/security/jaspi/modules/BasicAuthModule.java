@@ -46,7 +46,7 @@ public class BasicAuthModule extends BaseAuthModule
 
     private String realmName;
 
-    private static final String REALM_KEY = "org.mortbay.jetty.server.server.security.jaspi.modules.RealmName";
+    private static final String REALM_KEY = "org.mortbay.jetty.security.jaspi.modules.RealmName";
 
     public BasicAuthModule()
     {

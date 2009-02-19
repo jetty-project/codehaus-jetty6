@@ -289,7 +289,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
     /** 
      * Get the session id without any node identifier suffix.
      * 
-     * @see org.mortbay.jetty.server.server.SessionIdManager#getClusterId(java.lang.String)
+     * @see org.mortbay.jetty.server.SessionIdManager#getClusterId(java.lang.String)
      */
     public String getClusterId(String nodeId)
     {
@@ -301,7 +301,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
     /** 
      * Get the session id, including this node's id as a suffix.
      * 
-     * @see org.mortbay.jetty.server.server.SessionIdManager#getNodeId(java.lang.String, javax.servlet.http.HttpServletRequest)
+     * @see org.mortbay.jetty.server.SessionIdManager#getNodeId(java.lang.String, javax.servlet.http.HttpServletRequest)
      */
     public String getNodeId(String clusterId, HttpServletRequest request)
     {
@@ -340,7 +340,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
     /** 
      * Invalidate the session matching the id on all contexts.
      * 
-     * @see org.mortbay.jetty.server.server.SessionIdManager#invalidateAll(java.lang.String)
+     * @see org.mortbay.jetty.server.SessionIdManager#invalidateAll(java.lang.String)
      */
     public void invalidateAll(String id)
     {            
@@ -372,7 +372,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
      * Makes necessary database tables and starts a Session
      * scavenger thread.
      * 
-     * @see org.mortbay.jetty.server.server.servlet.AbstractSessionIdManager#doStart()
+     * @see org.mortbay.jetty.server.servlet.AbstractSessionIdManager#doStart()
      */
     public void doStart()
     {
@@ -394,7 +394,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
     /** 
      * Stop the scavenger.
      * 
-     * @see org.mortbay.jetty.server.server.util.component.AbstractLifeCycle#doStop()
+     * @see org.mortbay.jetty.util.component.AbstractLifeCycle#doStop()
      */
     public void doStop () 
     throws Exception
