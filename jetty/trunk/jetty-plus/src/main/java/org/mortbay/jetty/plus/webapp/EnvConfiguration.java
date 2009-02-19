@@ -62,7 +62,7 @@ public class EnvConfiguration implements Configuration
     
     
     /** 
-     * @see org.mortbay.jetty.server.server.webapp.Configuration#setWebAppContext(org.mortbay.jetty.server.server.webapp.WebAppContext)
+     * @see org.mortbay.jetty.webapp.Configuration#setWebAppContext(org.mortbay.jetty.webapp.WebAppContext)
      * @param context
      */
     public void setWebAppContext(WebAppContext context)
@@ -76,7 +76,7 @@ public class EnvConfiguration implements Configuration
     }
     
     /** 
-     * @see org.mortbay.jetty.server.server.webapp.Configuration#getWebAppContext()
+     * @see org.mortbay.jetty.webapp.Configuration#getWebAppContext()
      */
     public WebAppContext getWebAppContext()
     {
@@ -84,7 +84,7 @@ public class EnvConfiguration implements Configuration
     }
 
     /** 
-     * @see org.mortbay.jetty.server.server.webapp.Configuration#configureClassLoader()
+     * @see org.mortbay.jetty.webapp.Configuration#configureClassLoader()
      * @throws Exception
      */
     public void configureClassLoader() throws Exception
@@ -92,7 +92,7 @@ public class EnvConfiguration implements Configuration
     }
 
     /** 
-     * @see org.mortbay.jetty.server.server.webapp.Configuration#configureDefaults()
+     * @see org.mortbay.jetty.webapp.Configuration#configureDefaults()
      * @throws Exception
      */
     public void configureDefaults() throws Exception
@@ -102,7 +102,7 @@ public class EnvConfiguration implements Configuration
     }
 
     /** 
-     * @see org.mortbay.jetty.server.server.webapp.Configuration#configureWebApp()
+     * @see org.mortbay.jetty.webapp.Configuration#configureWebApp()
      * @throws Exception
      */
     public void configureWebApp() throws Exception
@@ -136,7 +136,7 @@ public class EnvConfiguration implements Configuration
 
     /** 
      * Remove all jndi setup
-     * @see org.mortbay.jetty.server.server.webapp.Configuration#deconfigureWebApp()
+     * @see org.mortbay.jetty.webapp.Configuration#deconfigureWebApp()
      * @throws Exception
      */
     public void deconfigureWebApp() throws Exception

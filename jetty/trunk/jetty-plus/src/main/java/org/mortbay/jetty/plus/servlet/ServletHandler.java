@@ -73,7 +73,7 @@ public class ServletHandler extends org.mortbay.jetty.server.servlet.ServletHand
     }
     
     /** 
-     * @see org.mortbay.jetty.server.server.servlet.ServletHandler#customizeFilter(javax.servlet.Filter)
+     * @see org.mortbay.jetty.server.servlet.ServletHandler#customizeFilter(javax.servlet.Filter)
      */
     public Filter customizeFilter(Filter filter) throws Exception
     {
@@ -88,7 +88,7 @@ public class ServletHandler extends org.mortbay.jetty.server.servlet.ServletHand
     
 
     /** 
-     * @see org.mortbay.jetty.server.server.servlet.ServletHandler#customizeServlet(javax.servlet.Servlet)
+     * @see org.mortbay.jetty.server.servlet.ServletHandler#customizeServlet(javax.servlet.Servlet)
      */
     public Servlet customizeServlet(Servlet servlet) throws Exception
     {      

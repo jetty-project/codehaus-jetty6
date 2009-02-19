@@ -46,8 +46,8 @@ import org.mortbay.jetty.util.log.Log;
  */
 public class FormServerAuthentication implements ServerAuthentication
 {
-    public final static String __J_URI = "org.mortbay.jetty.server.server.URI";
-    public final static String __J_AUTHENTICATED = "org.mortbay.jetty.server.server.Auth";
+    public final static String __J_URI = "org.mortbay.jetty.util.URI";
+    public final static String __J_AUTHENTICATED = "org.mortbay.jetty.server.Auth";
     public final static String __J_SECURITY_CHECK = "/j_security_check";
     public final static String __J_USERNAME = "j_username";
     public final static String __J_PASSWORD = "j_password";

@@ -40,7 +40,7 @@ public class LazyServerAuthentication implements ServerAuthentication
     }
 
     /** 
-     * @see org.mortbay.jetty.server.server.security.ServerAuthentication#validateRequest(org.mortbay.jetty.server.server.security.JettyMessageInfo)
+     * @see org.mortbay.jetty.security.ServerAuthentication#validateRequest(org.mortbay.jetty.server.server.security.JettyMessageInfo)
      */
     public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
     {

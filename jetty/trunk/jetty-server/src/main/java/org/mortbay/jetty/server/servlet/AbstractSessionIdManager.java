@@ -27,7 +27,7 @@ import org.mortbay.jetty.util.log.Log;
 
 public abstract class AbstractSessionIdManager extends AbstractLifeCycle implements SessionIdManager
 {
-    private final static String __NEW_SESSION_ID="org.mortbay.jetty.server.server.newSessionId";  
+    private final static String __NEW_SESSION_ID="org.mortbay.jetty.server.newSessionId";  
     protected final static String SESSION_ID_RANDOM_ALGORITHM = "SHA1PRNG";
     protected final static String SESSION_ID_RANDOM_ALGORITHM_ALT = "IBMSecureRandom";
     
@@ -74,7 +74,7 @@ public abstract class AbstractSessionIdManager extends AbstractLifeCycle impleme
     /** 
      * Create a new session id if necessary.
      * 
-     * @see org.mortbay.jetty.server.server.SessionIdManager#newSessionId(javax.servlet.http.HttpServletRequest, long)
+     * @see org.mortbay.jetty.server.SessionIdManager#newSessionId(javax.servlet.http.HttpServletRequest, long)
      */
     public String newSessionId(HttpServletRequest request, long created)
     {

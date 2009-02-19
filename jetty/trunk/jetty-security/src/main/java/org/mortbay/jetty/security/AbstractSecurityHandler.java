@@ -161,7 +161,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
     }/* ------------------------------------------------------------ */
 
     /*
-     * @see org.mortbay.jetty.server.server.Handler#handle(java.lang.String,
+     * @see org.mortbay.jetty.server.Handler#handle(java.lang.String,
      *      javax.servlet.http.HttpServletRequest,
      *      javax.servlet.http.HttpServletResponse, int)
      */
@@ -174,9 +174,9 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
         try
         {
             boolean checkSecurity = DispatcherType.REQUEST.equals(dispatch);
-            if (DispatcherType.FORWARD.equals(dispatch) && _checkWelcomeFiles && request.getAttribute("org.mortbay.jetty.server.server.welcome") != null)
+            if (DispatcherType.FORWARD.equals(dispatch) && _checkWelcomeFiles && request.getAttribute("org.mortbay.jetty.server.welcome") != null)
             {
-                request.removeAttribute("org.mortbay.jetty.server.server.welcome");
+                request.removeAttribute("org.mortbay.jetty.server.welcome");
                 checkSecurity = true;
             }
             if (checkSecurity)

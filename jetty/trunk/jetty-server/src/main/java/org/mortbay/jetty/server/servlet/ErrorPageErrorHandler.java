@@ -42,7 +42,7 @@ import org.mortbay.jetty.util.log.Log;
  */
 public class ErrorPageErrorHandler extends ErrorHandler
 {
-    public final static String ERROR_PAGE="org.mortbay.jetty.server.server.error_page";
+    public final static String ERROR_PAGE="org.mortbay.jetty.server.error_page";
     
     protected ServletContext _servletContext;
     protected Map _errorPages; // code or exception to URL
@@ -57,7 +57,7 @@ public class ErrorPageErrorHandler extends ErrorHandler
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.handler.ErrorHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
+     * @see org.mortbay.jetty.server.handler.ErrorHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException
     {

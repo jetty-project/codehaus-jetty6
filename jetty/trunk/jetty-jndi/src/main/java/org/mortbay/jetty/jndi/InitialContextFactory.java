@@ -65,7 +65,7 @@ public class InitialContextFactory implements javax.naming.spi.InitialContextFac
      * This method won't be called if a name URL beginning
      * with java: is passed to an InitialContext.
      *
-     * @see org.mortbay.jetty.server.server.jndi.java.javaURLContextFactory
+     * @see org.mortbay.jetty.jndi.java.javaURLContextFactory
      * @param env a <code>Hashtable</code> value
      * @return a <code>Context</code> value
      */
