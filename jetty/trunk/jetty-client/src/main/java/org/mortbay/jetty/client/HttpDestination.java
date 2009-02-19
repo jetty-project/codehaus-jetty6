@@ -21,7 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import javax.servlet.http.Cookie;
+//import javax.servlet.http.Cookie;
 
 import org.mortbay.jetty.client.security.Authorization;
 import org.mortbay.jetty.client.security.SecurityListener;

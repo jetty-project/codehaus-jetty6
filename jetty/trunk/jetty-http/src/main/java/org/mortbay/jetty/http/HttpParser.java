@@ -60,6 +60,8 @@ public class HttpParser implements Parser
     public static final int STATE_CHUNK_PARAMS=5;
     public static final int STATE_CHUNK=6;
 
+    public static final int __SC_BAD_REQUEST = 400; 
+    
     private Buffers _buffers; // source of buffers
     private EndPoint _endp;
     private Buffer _header; // Buffer for header data (and small _content)
@@ -362,7 +364,7 @@ public class HttpParser implements Parser
                     }
                     else if (ch < HttpTokens.SPACE && ch>=0)
                     {
-                        throw new HttpException(HttpServletResponse.SC_BAD_REQUEST);
+                        throw new HttpException(__SC_BAD_REQUEST);
                     }
                     break;
 
@@ -374,7 +376,7 @@ public class HttpParser implements Parser
                     }
                     else if (ch < HttpTokens.SPACE)
                     {
-                        throw new HttpException(HttpServletResponse.SC_BAD_REQUEST);
+                        throw new HttpException(__SC_BAD_REQUEST);
                     }
                     break;
 
