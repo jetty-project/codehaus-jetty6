@@ -60,6 +60,7 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+    <!--
     <dependency>
     	<groupId>org.mortbay.jetty</groupId>
     	<artifactId>jetty-servlet</artifactId>
@@ -67,5 +68,6 @@
     	<type>jar</type>
     	<scope>test</scope>
     </dependency>
+    -->
   </dependencies>
 </project>
