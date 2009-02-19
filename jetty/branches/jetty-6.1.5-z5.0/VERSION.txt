@@ -1,4 +1,5 @@
 jetty-6.1.5z5.0 - 21 Feb 2008
+ + JETTY-439 Fixed 100 continues clash with Connection:close
  + Allow code ranges on ErrorPageErrorHandler
  + Avoid FULL exception in window between blockForOutput and remote close
  + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
