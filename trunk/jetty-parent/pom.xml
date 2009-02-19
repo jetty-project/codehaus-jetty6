@@ -234,25 +234,22 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
         <configuration>
-          <rules/>
+          <rules>
+            <requireMavenVersion>
+              <version>[2.0.6,)</version>
+            </requireMavenVersion>
+            <requireJavaVersion>
+              <version>[1.5,)</version>
+            </requireJavaVersion>
+          </rules>
         </configuration>         
-        <version>1.0-alpha-3</version>
+        <version>1.0-alpha-4</version>
         <executions>
           <execution>
             <id>enforce-java</id>
             <goals>
               <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireMavenVersion>
-                  <version>[2.0.6,)</version>
-                </requireMavenVersion>
-                <requireJavaVersion>
-                  <version>[1.5,)</version>
-                </requireJavaVersion>
-              </rules>
-            </configuration>
+            </goals>       
           </execution>
         </executions>
       </plugin>
