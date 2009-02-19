@@ -16,15 +16,15 @@ package org.mortbay.jetty.ajp;
 
 import java.io.IOException;
 
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.handler.DefaultHandler;
-import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.http.HttpSchemes;
 import org.mortbay.jetty.io.EndPoint;
-import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.jetty.server.HttpConnection;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.bio.SocketConnector;
+import org.mortbay.jetty.server.handler.ContextHandlerCollection;
+import org.mortbay.jetty.server.handler.DefaultHandler;
+import org.mortbay.jetty.server.handler.HandlerCollection;
+import org.mortbay.jetty.server.nio.SelectChannelConnector;
 import org.mortbay.jetty.util.log.Log;
 
 /**
@@ -56,7 +56,7 @@ public class Ajp13SocketConnector extends SocketConnector
 
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
-     * @see org.mortbay.jetty.bio.SocketConnector#customize(org.mortbay.io.EndPoint, org.mortbay.jetty.Request)
+     * @see org.mortbay.jetty.server.server.bio.SocketConnector#customize(org.mortbay.io.EndPoint, org.mortbay.jetty.server.server.Request)
      */
     public void customize(EndPoint endpoint, Request request) throws IOException
     {

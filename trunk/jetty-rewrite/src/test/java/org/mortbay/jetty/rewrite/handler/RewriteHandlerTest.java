@@ -19,10 +19,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.rewrite.handler.RewriteHandler;
 import org.mortbay.jetty.rewrite.handler.RewritePatternRule;
 import org.mortbay.jetty.rewrite.handler.Rule;
+import org.mortbay.jetty.server.handler.AbstractHandler;
 
 
 public class RewriteHandlerTest extends AbstractRuleTestCase

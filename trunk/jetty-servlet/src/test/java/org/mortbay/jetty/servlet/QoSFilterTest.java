@@ -31,11 +31,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.LocalConnector;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.servlet.FilterHolder;
-import org.mortbay.jetty.servlet.FilterMapping;
+import org.mortbay.jetty.server.Handler;
+import org.mortbay.jetty.server.LocalConnector;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.servlet.FilterHolder;
+import org.mortbay.jetty.server.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.QoSFilter;
 import org.mortbay.jetty.testing.HttpTester;
 import org.mortbay.jetty.testing.ServletTester;

@@ -55,9 +55,9 @@ import org.mortbay.jetty.util.log.Log;
 public class FormAuthModule extends BaseAuthModule
 {
     /* ------------------------------------------------------------ */
-    public final static String __J_URI = "org.mortbay.jetty.URI";
+    public final static String __J_URI = "org.mortbay.jetty.server.server.URI";
 
-    public final static String __J_AUTHENTICATED = "org.mortbay.jetty.Auth";
+    public final static String __J_AUTHENTICATED = "org.mortbay.jetty.server.server.Auth";
 
     public final static String __J_SECURITY_CHECK = "/j_security_check";
 
@@ -66,11 +66,11 @@ public class FormAuthModule extends BaseAuthModule
     public final static String __J_PASSWORD = "j_password";
 
     // private String realmName;
-    public static final String LOGIN_PAGE_KEY = "org.mortbay.jetty.security.jaspi.modules.LoginPage";
+    public static final String LOGIN_PAGE_KEY = "org.mortbay.jetty.server.server.security.jaspi.modules.LoginPage";
 
-    public static final String ERROR_PAGE_KEY = "org.mortbay.jetty.security.jaspi.modules.ErrorPage";
+    public static final String ERROR_PAGE_KEY = "org.mortbay.jetty.server.server.security.jaspi.modules.ErrorPage";
 
-    public static final String SSO_SOURCE_KEY = "org.mortbay.jetty.security.jaspi.modules.SsoSource";
+    public static final String SSO_SOURCE_KEY = "org.mortbay.jetty.server.server.security.jaspi.modules.SsoSource";
 
     private String _formErrorPage;
 

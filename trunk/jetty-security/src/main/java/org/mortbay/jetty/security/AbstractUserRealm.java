@@ -22,11 +22,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
-import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.http.security.Credential;
 import org.mortbay.jetty.http.security.Password;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Response;
+import org.mortbay.jetty.server.UserRealm;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
 
 public abstract class AbstractUserRealm extends AbstractLifeCycle implements UserRealm, SSORealm

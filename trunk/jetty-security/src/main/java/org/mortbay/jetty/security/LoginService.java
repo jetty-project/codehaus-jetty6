@@ -22,8 +22,8 @@ package org.mortbay.jetty.security;
 
 import javax.security.auth.Subject;
 
-import org.mortbay.jetty.LoginCallback;
-import org.mortbay.jetty.UserRealm;
+import org.mortbay.jetty.server.LoginCallback;
+import org.mortbay.jetty.server.UserRealm;
 
 /**
  * @version $Rev$ $Date$

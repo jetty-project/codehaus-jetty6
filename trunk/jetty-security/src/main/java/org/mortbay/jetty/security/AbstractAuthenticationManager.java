@@ -19,8 +19,8 @@ import java.util.Map;
 
 import javax.security.auth.Subject;
 
-import org.mortbay.jetty.AuthenticationManager;
-import org.mortbay.jetty.handler.SecurityHandler;
+import org.mortbay.jetty.server.AuthenticationManager;
+import org.mortbay.jetty.server.handler.SecurityHandler;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
 
 public abstract class AbstractAuthenticationManager extends AbstractLifeCycle implements AuthenticationManager<ServerAuthentication>

@@ -17,8 +17,8 @@ package org.mortbay.jetty.jmx;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.Server;
 import org.mortbay.jetty.jmx.ObjectMBean;
+import org.mortbay.jetty.server.Server;
 
 import com.acme.Derived;
 

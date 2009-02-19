@@ -377,7 +377,7 @@ public class HttpHeaderTest extends TestCase
     {
         assertTrue(((CachedBuffer)HttpHeaderValues.CACHE.lookup("unknown value")).getOrdinal()<0);
         assertTrue(((CachedBuffer)HttpHeaderValues.CACHE.lookup("close")).getOrdinal()>=0);
-        assertTrue(((CachedBuffer)HttpHeaderValues.CACHE.lookup("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1) Gecko/20061010 Firefox/2.0")).getOrdinal()>=0);
+        assertTrue(((CachedBuffer)HttpHeaderValues.CACHE.lookup("Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)")).getOrdinal()>=0);
     }
     
     

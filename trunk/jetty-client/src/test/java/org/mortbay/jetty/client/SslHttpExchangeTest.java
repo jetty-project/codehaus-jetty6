@@ -16,9 +16,9 @@ package org.mortbay.jetty.client;
 
 import java.io.File;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.ssl.SslSocketConnector;
+import org.mortbay.jetty.server.Connector;
+import org.mortbay.jetty.server.Server;
+import org.mortbay.jetty.server.ssl.SslSocketConnector;
 
 /**
  * Functional testing for HttpExchange.

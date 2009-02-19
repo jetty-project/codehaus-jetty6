@@ -28,10 +28,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
-import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.http.security.Password;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Response;
+import org.mortbay.jetty.server.UserRealm;
 import org.mortbay.jetty.util.Scanner;
 import org.mortbay.jetty.util.Scanner.BulkListener;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
@@ -216,7 +216,7 @@ public class HashUserRealm extends AbstractUserRealm
     }
     
     /** 
-     * @see org.mortbay.jetty.util.component.AbstractLifeCycle#doStart()
+     * @see org.mortbay.jetty.server.server.util.component.AbstractLifeCycle#doStart()
      */
     protected void doStart() throws Exception
     {
@@ -274,7 +274,7 @@ public class HashUserRealm extends AbstractUserRealm
     }
 
     /** 
-     * @see org.mortbay.jetty.util.component.AbstractLifeCycle#doStop()
+     * @see org.mortbay.jetty.server.server.util.component.AbstractLifeCycle#doStop()
      */
     protected void doStop() throws Exception
     {

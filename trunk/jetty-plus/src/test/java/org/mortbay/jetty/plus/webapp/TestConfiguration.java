@@ -3,10 +3,10 @@ package org.mortbay.jetty.plus.webapp;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import org.mortbay.jetty.Server;
 import org.mortbay.jetty.plus.jndi.EnvEntry;
 import org.mortbay.jetty.plus.jndi.NamingEntry;
 import org.mortbay.jetty.plus.jndi.NamingEntryUtil;
+import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
 
 import junit.framework.TestCase;

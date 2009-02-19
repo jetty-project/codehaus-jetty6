@@ -19,7 +19,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.servlet.PathMap;
+import org.mortbay.jetty.server.servlet.PathMap;
 import org.mortbay.jetty.util.URIUtil;
 
 /**
@@ -50,7 +50,7 @@ public class RewritePatternRule extends PatternRule
     /* ------------------------------------------------------------ */
     /*
      * (non-Javadoc)
-     * @see org.mortbay.jetty.handler.rules.RuleBase#apply(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.mortbay.jetty.server.server.handler.rules.RuleBase#apply(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     public String apply(String target, HttpServletRequest request, HttpServletResponse response) throws IOException
     {

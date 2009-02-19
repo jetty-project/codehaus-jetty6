@@ -16,9 +16,9 @@ package org.mortbay.jetty.jmx;
 
 import java.util.Arrays;
 
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.server.Handler;
+import org.mortbay.jetty.server.Server;
+import org.mortbay.jetty.server.handler.ContextHandler;
 
 /**
  *

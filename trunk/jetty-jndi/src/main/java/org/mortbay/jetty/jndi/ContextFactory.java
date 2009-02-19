@@ -26,7 +26,7 @@ import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 import javax.naming.spi.ObjectFactory;
 
-import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.util.log.Log;
 
 
@@ -109,7 +109,7 @@ public class ContextFactory implements ObjectFactory
         
         if (loader != null)
         {
-            if (Log.isDebugEnabled()) Log.debug("Using classloader of current org.mortbay.jetty.handler.ContextHandler");
+            if (Log.isDebugEnabled()) Log.debug("Using classloader of current org.mortbay.jetty.server.server.handler.ContextHandler");
         }
         else
         {

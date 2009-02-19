@@ -19,7 +19,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.servlet.PathMap;
+import org.mortbay.jetty.server.servlet.PathMap;
 
 /**
  * Abstract rule that use a {@link PathMap} for pattern matching. It uses the 
@@ -49,7 +49,7 @@ public abstract class PatternRule extends Rule
 
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
-     * @see org.mortbay.jetty.handler.rules.RuleBase#matchAndApply(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.mortbay.jetty.server.server.handler.rules.RuleBase#matchAndApply(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     public String matchAndApply(String target, HttpServletRequest request, HttpServletResponse response) throws IOException
     {
