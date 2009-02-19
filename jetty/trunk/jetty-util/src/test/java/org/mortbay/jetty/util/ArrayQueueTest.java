@@ -12,9 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.util;
-
-import org.mortbay.jetty.util.ArrayQueue;
+package org.mortbay.util;
 
 import junit.framework.TestCase;
 
@@ -23,11 +21,11 @@ public class ArrayQueueTest extends TestCase
     
     public void testWrap() throws Exception
     {
-        ArrayQueue<String> queue = new ArrayQueue<String>(3);
+        ArrayQueue<String> queue = new ArrayQueue<String>(3,3);
         
         assertEquals(0,queue.size());
 
-        for (int i=0;i<3;i++)
+        for (int i=0;i<10;i++)
         {
             queue.offer("one");
             assertEquals(1,queue.size());
@@ -44,18 +42,21 @@ public class ArrayQueueTest extends TestCase
 
             assertEquals("[one, two, three]",queue.toString());
 
-            assertEquals("one",queue.poll());
+            assertEquals("two",queue.remove(1));
             assertEquals(2,queue.size());
-
-            assertEquals("two",queue.poll());
+            
+            assertEquals("one",queue.remove());
             assertEquals(1,queue.size());
 
             assertEquals("three",queue.poll());
             assertEquals(0,queue.size());
-
+            
+            assertEquals(null,queue.poll());
 
             queue.offer("xxx");
-            assertEquals(1,queue.size());
+            queue.offer("xxx");
+            assertEquals(2,queue.size());
+            assertEquals("xxx",queue.poll());
             assertEquals("xxx",queue.poll());
             assertEquals(0,queue.size());
 
@@ -86,7 +87,8 @@ public class ArrayQueueTest extends TestCase
     {
         ArrayQueue<String> queue = new ArrayQueue<String>(3,5);
         assertEquals(3,queue.getCapacity());
-        
+
+        queue.add("0");
         queue.add("a");
         queue.add("b");
         assertEquals(3,queue.getCapacity());
@@ -123,8 +125,26 @@ public class ArrayQueueTest extends TestCase
             queue.add(""+('a'+i));
         assertEquals(13,queue.getCapacity());
         
+            
+    }
+    
+    public void testFull() throws Exception
+    {
+        ArrayQueue<String> queue = new ArrayQueue<String>(2);
+        assertTrue(queue.offer("one"));
+        assertTrue(queue.offer("two"));
+        assertFalse(queue.offer("three"));
         
-        
+        try
+        {
+            queue.add("four");
+            assertTrue(false);
+        }
+        catch(Exception e)
+        {
+            
+        }
         
     }
+        
 }
