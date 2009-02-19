@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.util;
+package org.mortbay.jetty.util;
 
 import java.util.AbstractList;
 import java.util.Collection;
