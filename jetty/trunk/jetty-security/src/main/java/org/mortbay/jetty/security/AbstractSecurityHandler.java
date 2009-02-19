@@ -27,15 +27,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.AuthenticationManager;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
-import org.mortbay.jetty.UserIdentity;
-import org.mortbay.jetty.UserRealm;
-import org.mortbay.jetty.handler.HandlerWrapper;
-import org.mortbay.jetty.handler.SecurityHandler;
-import org.mortbay.jetty.servlet.FilterMapping;
+import org.mortbay.jetty.server.AuthenticationManager;
+import org.mortbay.jetty.server.HttpConnection;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Response;
+import org.mortbay.jetty.server.UserIdentity;
+import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.server.handler.HandlerWrapper;
+import org.mortbay.jetty.server.handler.SecurityHandler;
+import org.mortbay.jetty.server.servlet.FilterMapping;
 import org.mortbay.jetty.util.log.Log;
 
 /**
@@ -161,7 +161,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
     }/* ------------------------------------------------------------ */
 
     /*
-     * @see org.mortbay.jetty.Handler#handle(java.lang.String,
+     * @see org.mortbay.jetty.server.server.Handler#handle(java.lang.String,
      *      javax.servlet.http.HttpServletRequest,
      *      javax.servlet.http.HttpServletResponse, int)
      */
@@ -174,9 +174,9 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
         try
         {
             boolean checkSecurity = DispatcherType.REQUEST.equals(dispatch);
-            if (DispatcherType.FORWARD.equals(dispatch) && _checkWelcomeFiles && request.getAttribute("org.mortbay.jetty.welcome") != null)
+            if (DispatcherType.FORWARD.equals(dispatch) && _checkWelcomeFiles && request.getAttribute("org.mortbay.jetty.server.server.welcome") != null)
             {
-                request.removeAttribute("org.mortbay.jetty.welcome");
+                request.removeAttribute("org.mortbay.jetty.server.server.welcome");
                 checkSecurity = true;
             }
             if (checkSecurity)

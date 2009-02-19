@@ -33,9 +33,9 @@ import javax.security.auth.message.callback.SecretKeyCallback;
 import javax.security.auth.message.callback.TrustStoreCallback;
 import javax.security.auth.Subject;
 
-import org.mortbay.jetty.LoginCallback;
 import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.security.jaspi.callback.CredentialValidationCallback;
+import org.mortbay.jetty.server.LoginCallback;
 
 /**
  * 

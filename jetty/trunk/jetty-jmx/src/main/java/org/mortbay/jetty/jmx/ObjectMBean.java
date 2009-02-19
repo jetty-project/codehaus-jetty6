@@ -93,7 +93,7 @@ public class ObjectMBean implements DynamicMBean
      * <UL>
      * <LI>com.acme.management.MyClassMBean
      * <LI>com.acme.util.management.BaseClassMBean
-     * <LI>org.mortbay.jetty.jmx.ObjectMBean
+     * <LI>org.mortbay.jetty.server.server.jmx.ObjectMBean
      * </UL>
      *
      * @param o The object

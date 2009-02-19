@@ -27,24 +27,24 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Server;
 import org.mortbay.jetty.client.security.Realm;
 import org.mortbay.jetty.client.security.SimpleRealmResolver;
-import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.http.HttpMethods;
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.EofException;
-import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
 import org.mortbay.jetty.security.DefaultAuthenticationManager;
 import org.mortbay.jetty.security.HashLoginService;
 import org.mortbay.jetty.security.LoginService;
+import org.mortbay.jetty.server.Connector;
+import org.mortbay.jetty.server.Handler;
+import org.mortbay.jetty.server.HttpConnection;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Server;
+import org.mortbay.jetty.server.handler.AbstractHandler;
+import org.mortbay.jetty.server.nio.SelectChannelConnector;
 
 /**
  * Functional testing for HttpExchange.

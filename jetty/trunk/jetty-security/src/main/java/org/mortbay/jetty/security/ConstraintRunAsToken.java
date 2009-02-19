@@ -19,7 +19,7 @@
 
 package org.mortbay.jetty.security;
 
-import org.mortbay.jetty.RunAsToken;
+import org.mortbay.jetty.server.RunAsToken;
 
 
 /**

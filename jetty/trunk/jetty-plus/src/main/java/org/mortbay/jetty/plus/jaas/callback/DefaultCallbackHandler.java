@@ -23,8 +23,8 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-import org.mortbay.jetty.Request;
 import org.mortbay.jetty.http.security.Password;
+import org.mortbay.jetty.server.Request;
 
 
 

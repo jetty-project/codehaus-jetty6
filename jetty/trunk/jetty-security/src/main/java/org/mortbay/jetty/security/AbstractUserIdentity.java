@@ -21,7 +21,7 @@ package org.mortbay.jetty.security;
 
 import java.security.Principal;
 
-import org.mortbay.jetty.UserIdentity;
+import org.mortbay.jetty.server.UserIdentity;
 
 /**
  * @version $Rev$ $Date$

@@ -35,7 +35,7 @@ import org.mortbay.jetty.security.ServerAuthentication;
  */
 public class XCPSCachingServerAuthentication implements ServerAuthentication
 {
-    public final static String __J_AUTHENTICATED = "org.mortbay.jetty.Auth";
+    public final static String __J_AUTHENTICATED = "org.mortbay.jetty.server.server.Auth";
 
     private final ServerAuthentication _delegate;
 

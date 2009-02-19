@@ -10,7 +10,7 @@
 <!-- =============================================================== -->
 
 
-<Configure id="Server" class="org.mortbay.jetty.Server">
+<Configure id="Server" class="org.mortbay.jetty.server.server.Server">
 
     <!-- =========================================================== -->
     <!-- Server Thread Pool                                          -->
@@ -38,7 +38,7 @@
     -->    
     <Call name="addConnector">
       <Arg>
-          <New class="org.mortbay.jetty.nio.SelectChannelConnector">
+          <New class="org.mortbay.jetty.server.server.nio.SelectChannelConnector">
             <Set name="host"><SystemProperty name="jetty.host" /></Set>
             <Set name="port"><SystemProperty name="jetty.port" default="8080"/></Set>
             <Set name="maxIdleTime">30000</Set>
@@ -62,7 +62,7 @@
     <!-- =========================================================== -->
     <!--
     <Set name="sessionIdManager">
-      <New class="org.mortbay.jetty.servlet.HashSessionIdManager">
+      <New class="org.mortbay.jetty.server.server.servlet.HashSessionIdManager">
         <Set name="workerName">node1</Set>
       </New>
     </Set>
@@ -76,23 +76,23 @@
       <!-- ==========================================================  -->
       <!-- RewriteHandler Sample Configuration                         -->
       <!-- ==========================================================  -->
-      <New id="Handlers" class="org.mortbay.jetty.rewrite.handler.RewriteHandler">
+      <New id="Handlers" class="org.mortbay.jetty.server.server.rewrite.handler.RewriteHandler">
 
         <Set name="originalPathAttribute">requestedPath</Set>
         <Set name="rewriteRequestURI">true</Set>
         
         <Set name="rules">
-          <Array type="org.mortbay.jetty.rewrite.handler.Rule">
+          <Array type="org.mortbay.jetty.server.server.rewrite.handler.Rule">
 
             <Item>
-              <New id="" class="org.mortbay.jetty.rewrite.handler.RewritePatternRule">
+              <New id="" class="org.mortbay.jetty.server.server.rewrite.handler.RewritePatternRule">
                 <Set name="pattern">/*</Set>
                 <Set name="replacement">/test</Set>
               </New>
             </Item>
             
             <Item>
-              <New id="response" class="org.mortbay.jetty.rewrite.handler.ResponsePatternRule">
+              <New id="response" class="org.mortbay.jetty.server.server.rewrite.handler.ResponsePatternRule">
                 <Set name="pattern">/session/</Set>
                 <Set name="code">401</Set>
                 <Set name="reason">Setting error code 401</Set>
@@ -100,7 +100,7 @@
             </Item>
 
             <Item>
-              <New id="header" class="org.mortbay.jetty.rewrite.handler.HeaderPatternRule">
+              <New id="header" class="org.mortbay.jetty.server.server.rewrite.handler.HeaderPatternRule">
                 <Set name="pattern">*.jsp</Set>
                 <Set name="name">Server</Set>
                 <Set name="value">dexter webserver</Set>
@@ -108,7 +108,7 @@
             </Item>
 
             <Item>
-              <New id="header" class="org.mortbay.jetty.rewrite.handler.HeaderPatternRule">
+              <New id="header" class="org.mortbay.jetty.server.server.rewrite.handler.HeaderPatternRule">
                 <Set name="pattern">*.jsp</Set>
                 <Set name="name">title</Set>
                 <Set name="value">driven header purpose</Set>
@@ -116,21 +116,21 @@
             </Item>
 
             <Item>
-              <New id="redirect" class="org.mortbay.jetty.rewrite.handler.RedirectPatternRule">
+              <New id="redirect" class="org.mortbay.jetty.server.server.rewrite.handler.RedirectPatternRule">
                 <Set name="pattern">/test/dispatch</Set>
                 <Set name="location">http://jetty.mortbay.org</Set>
               </New>
             </Item>
 
             <Item>
-              <New id="regexRewrite" class="org.mortbay.jetty.rewrite.handler.RewriteRegexRule">
+              <New id="regexRewrite" class="org.mortbay.jetty.server.server.rewrite.handler.RewriteRegexRule">
                 <Set name="regex">/test-jaas/$</Set>
                 <Set name="replacement">/demo</Set>
               </New>
             </Item>
             
             <Item>
-              <New id="forwardedHttps" class="org.mortbay.jetty.rewrite.handler.ForwardedSchemeHeaderRule">
+              <New id="forwardedHttps" class="org.mortbay.jetty.server.server.rewrite.handler.ForwardedSchemeHeaderRule">
                 <Set name="header">X-Forwarded-Scheme</Set>
                 <Set name="headerValue">https</Set>
                 <Set name="scheme">https</Set>
@@ -138,7 +138,7 @@
             </Item>
 
             <Item>
-              <New id="virtualHost" class="org.mortbay.jetty.rewrite.handler.VirtualHostRuleContainer">
+              <New id="virtualHost" class="org.mortbay.jetty.server.server.rewrite.handler.VirtualHostRuleContainer">
 
                 <Set name="virtualHosts">
                   <Array type="java.lang.String">
@@ -151,7 +151,7 @@
 
                 <Call name="addRule">
                   <Arg>
-                    <New class="org.mortbay.jetty.rewrite.handler.CookiePatternRule">
+                    <New class="org.mortbay.jetty.server.server.rewrite.handler.CookiePatternRule">
                       <Set name="pattern">/*</Set>
                       <Set name="name">CookiePatternRule</Set>
                       <Set name="value">1</Set>
@@ -166,17 +166,17 @@
         </Set>
 
         <Set name="handler">
-          <New id="Handlers" class="org.mortbay.jetty.handler.HandlerCollection">
+          <New id="Handlers" class="org.mortbay.jetty.server.server.handler.HandlerCollection">
             <Set name="handlers">
-             <Array type="org.mortbay.jetty.Handler">
+             <Array type="org.mortbay.jetty.server.server.Handler">
                <Item>
-                 <New id="Contexts" class="org.mortbay.jetty.handler.ContextHandlerCollection"/>
+                 <New id="Contexts" class="org.mortbay.jetty.server.server.handler.ContextHandlerCollection"/>
                </Item>
                <Item>
-                 <New id="DefaultHandler" class="org.mortbay.jetty.handler.DefaultHandler"/>
+                 <New id="DefaultHandler" class="org.mortbay.jetty.server.server.handler.DefaultHandler"/>
                </Item>
                <Item>
-                 <New id="RequestLog" class="org.mortbay.jetty.handler.RequestLogHandler"/>
+                 <New id="RequestLog" class="org.mortbay.jetty.server.server.handler.RequestLogHandler"/>
                </Item>
              </Array>
             </Set>
@@ -198,7 +198,7 @@
     <!-- =========================================================== -->
     <Call name="addLifeCycle">
       <Arg>
-        <New class="org.mortbay.jetty.deployer.ContextDeployer">
+        <New class="org.mortbay.jetty.server.server.deployer.ContextDeployer">
           <Set name="contexts"><Ref id="Contexts"/></Set>
           <Set name="configurationDir"><SystemProperty name="jetty.home" default="."/>/contexts</Set>
           <Set name="scanInterval">1</Set>
@@ -221,7 +221,7 @@
     <!-- =========================================================== -->
     <Call name="addLifeCycle">
       <Arg>
-        <New class="org.mortbay.jetty.deployer.WebAppDeployer">
+        <New class="org.mortbay.jetty.server.server.deployer.WebAppDeployer">
           <Set name="contexts"><Ref id="Contexts"/></Set>
           <Set name="webAppDir"><SystemProperty name="jetty.home" default="."/>/webapps</Set>
     <Set name="parentLoaderPriority">false</Set>
@@ -240,9 +240,9 @@
     <!-- example).                                                   -->
     <!-- =========================================================== -->
     <Set name="LoginServices">
-      <Array type="org.mortbay.jetty.LoginService">
+      <Array type="org.mortbay.jetty.server.server.LoginService">
         <Item>
-          <New class="org.mortbay.jetty.security.jaspi.modules.HashLoginService">
+          <New class="org.mortbay.jetty.server.server.security.jaspi.modules.HashLoginService">
             <Set name="name">Test Realm</Set>
             <Set name="config"><SystemProperty name="jetty.home" default="."/>/etc/realm.properties</Set>
             <Set name="refreshInterval">0</Set>
@@ -260,7 +260,7 @@
     <!-- =========================================================== -->
     <Ref id="RequestLog">
       <Set name="requestLog">
-        <New id="RequestLogImpl" class="org.mortbay.jetty.NCSARequestLog">
+        <New id="RequestLogImpl" class="org.mortbay.jetty.server.server.NCSARequestLog">
           <Set name="filename"><SystemProperty name="jetty.logs" default="./logs"/>/yyyy_mm_dd.request.log</Set>
           <Set name="filenameDateFormat">yyyy_MM_dd</Set>
           <Set name="retainDays">90</Set>

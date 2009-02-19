@@ -23,9 +23,9 @@ import java.util.Map;
 
 import javax.security.auth.Subject;
 
-import org.mortbay.jetty.LoginCallback;
 import org.mortbay.jetty.http.security.Credential;
 import org.mortbay.jetty.http.security.Password;
+import org.mortbay.jetty.server.LoginCallback;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
 
 

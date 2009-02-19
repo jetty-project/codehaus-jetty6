@@ -54,7 +54,7 @@ import org.mortbay.jetty.util.log.Log;
  * <br><br>
  * <pre>
  * ldaploginmodule {
- *    org.mortbay.jetty.plus.jaas.spi.LdapLoginModule required
+ *    org.mortbay.jetty.server.server.plus.jaas.spi.LdapLoginModule required
  *    debug="true"
  *    contextFactory="com.sun.jndi.ldap.LdapCtxFactory"
  *    hostname="ldap.example.com"

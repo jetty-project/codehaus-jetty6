@@ -21,13 +21,13 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.EventListener;
 
-import org.mortbay.jetty.LocalConnector;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.io.ByteArrayBuffer;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.FilterHolder;
-import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.server.LocalConnector;
+import org.mortbay.jetty.server.Server;
+import org.mortbay.jetty.server.bio.SocketConnector;
+import org.mortbay.jetty.server.servlet.Context;
+import org.mortbay.jetty.server.servlet.FilterHolder;
+import org.mortbay.jetty.server.servlet.ServletHolder;
 import org.mortbay.jetty.util.Attributes;
 
 

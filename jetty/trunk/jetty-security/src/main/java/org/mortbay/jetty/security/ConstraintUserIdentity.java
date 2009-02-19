@@ -22,8 +22,8 @@ package org.mortbay.jetty.security;
 import java.security.Principal;
 import java.util.Map;
 
-import org.mortbay.jetty.RunAsToken;
-import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.server.RunAsToken;
+import org.mortbay.jetty.server.servlet.ServletHolder;
 
 /**
  * @version $Rev$ $Date$

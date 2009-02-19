@@ -34,18 +34,11 @@ import javax.security.auth.Subject;
 import javax.servlet.Servlet;
 import javax.servlet.UnavailableException;
 
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Dispatcher;
-import org.mortbay.jetty.UserRealm;
-import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
 import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.ServerAuthentication;
-import org.mortbay.jetty.handler.SecurityHandler;
 import org.mortbay.jetty.http.security.Constraint;
-import org.mortbay.jetty.RunAsToken;
-import org.mortbay.jetty.AuthenticationManager;
 import org.mortbay.jetty.security.ConstraintAware;
 import org.mortbay.jetty.security.ServletCallbackHandler;
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
@@ -58,12 +51,19 @@ import org.mortbay.jetty.security.authentication.BasicServerAuthentication;
 import org.mortbay.jetty.security.authentication.DigestServerAuthentication;
 import org.mortbay.jetty.security.authentication.ClientCertServerAuthentication;
 import org.mortbay.jetty.security.authentication.LazyServerAuthentication;
-import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
-import org.mortbay.jetty.servlet.FilterHolder;
-import org.mortbay.jetty.servlet.FilterMapping;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.servlet.ServletMapping;
+import org.mortbay.jetty.server.AuthenticationManager;
+import org.mortbay.jetty.server.Dispatcher;
+import org.mortbay.jetty.server.Handler;
+import org.mortbay.jetty.server.RunAsToken;
+import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.server.handler.ContextHandler;
+import org.mortbay.jetty.server.handler.SecurityHandler;
+import org.mortbay.jetty.server.servlet.ErrorPageErrorHandler;
+import org.mortbay.jetty.server.servlet.FilterHolder;
+import org.mortbay.jetty.server.servlet.FilterMapping;
+import org.mortbay.jetty.server.servlet.ServletHandler;
+import org.mortbay.jetty.server.servlet.ServletHolder;
+import org.mortbay.jetty.server.servlet.ServletMapping;
 import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.Loader;
 import org.mortbay.jetty.util.log.Log;
@@ -227,7 +227,7 @@ public class WebXmlConfiguration implements Configuration
     /**
      * Process webdefaults.xml
      * 
-     * @see org.mortbay.jetty.webapp.Configuration#configureDefaults()
+     * @see org.mortbay.jetty.server.server.webapp.Configuration#configureDefaults()
      */
     public void configureDefaults() throws Exception
     {
@@ -259,7 +259,7 @@ public class WebXmlConfiguration implements Configuration
     /**
      * Process web.xml
      * 
-     * @see org.mortbay.jetty.webapp.Configuration#configureWebApp()
+     * @see org.mortbay.jetty.server.server.webapp.Configuration#configureWebApp()
      */
     public void configureWebApp() throws Exception
     {
@@ -302,7 +302,7 @@ public class WebXmlConfiguration implements Configuration
         // either there is no web.xml, or it set metadata-complete to false, so
         // we need to look for fragments in WEB-INF/lib
         // Check to see if a specific search pattern has been set.
-        String tmp = (String) _context.getInitParameter("org.mortbay.jetty.webapp.WebXmlFragmentPattern");
+        String tmp = (String) _context.getInitParameter("org.mortbay.jetty.server.server.webapp.WebXmlFragmentPattern");
         Pattern webFragPattern = (tmp == null ? null : Pattern.compile(tmp));
 
         JarScanner fragScanner = new JarScanner()
@@ -685,7 +685,7 @@ public class WebXmlConfiguration implements Configuration
             {
                 Log.info("NO JSP Support for {}, did not find {}", _context.getContextPath(), servlet_class);
                 _hasJSP = false;
-                _jspServletClass = servlet_class = "org.mortbay.jetty.servlet.NoJspServlet";
+                _jspServletClass = servlet_class = "org.mortbay.jetty.server.server.servlet.NoJspServlet";
             }
             if (holder.getInitParameter("scratchdir") == null)
             {

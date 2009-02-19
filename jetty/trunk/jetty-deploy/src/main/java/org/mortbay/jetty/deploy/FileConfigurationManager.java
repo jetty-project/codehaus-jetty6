@@ -46,7 +46,7 @@ public class FileConfigurationManager implements ConfigurationManager
     
     
     /** 
-     * @see org.mortbay.jetty.deploy.ConfigurationManager#getProperties()
+     * @see org.mortbay.jetty.server.server.deploy.ConfigurationManager#getProperties()
      */
     public Map getProperties()
     {

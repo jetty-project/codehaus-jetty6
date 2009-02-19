@@ -23,13 +23,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Server;
 import org.mortbay.jetty.client.ContentExchange;
 import org.mortbay.jetty.client.HttpClient;
-import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.jetty.server.Connector;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Server;
+import org.mortbay.jetty.server.handler.AbstractHandler;
+import org.mortbay.jetty.server.nio.SelectChannelConnector;
 import org.mortbay.jetty.util.log.Log;
 
 /* Test expiring connections

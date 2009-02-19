@@ -19,9 +19,9 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.servlet.PathMap;
+import org.mortbay.jetty.server.HttpConnection;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.servlet.PathMap;
 import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.log.Log;
 

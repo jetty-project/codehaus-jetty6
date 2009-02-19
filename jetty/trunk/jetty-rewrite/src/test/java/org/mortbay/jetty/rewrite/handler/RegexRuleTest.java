@@ -20,8 +20,8 @@ import java.util.regex.Matcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.Request;
 import org.mortbay.jetty.rewrite.handler.RegexRule;
+import org.mortbay.jetty.server.Request;
 
 import junit.framework.TestCase;
 

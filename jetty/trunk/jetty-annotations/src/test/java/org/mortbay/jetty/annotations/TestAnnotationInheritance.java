@@ -28,7 +28,6 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.mortbay.jetty.Server;
 import org.mortbay.jetty.annotations.resources.ResourceA;
 import org.mortbay.jetty.annotations.resources.ResourceB;
 import org.mortbay.jetty.plus.annotation.Injection;
@@ -36,6 +35,7 @@ import org.mortbay.jetty.plus.annotation.InjectionCollection;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
 import org.mortbay.jetty.plus.annotation.RunAsCollection;
 import org.mortbay.jetty.plus.jndi.NamingEntry;
+import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
 
 

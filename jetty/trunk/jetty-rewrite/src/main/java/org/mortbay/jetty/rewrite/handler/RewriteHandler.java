@@ -20,10 +20,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.handler.HandlerWrapper;
-import org.mortbay.jetty.servlet.PathMap;
+import org.mortbay.jetty.server.HttpConnection;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.handler.HandlerWrapper;
+import org.mortbay.jetty.server.servlet.PathMap;
 import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.log.Log;
 
@@ -63,19 +63,19 @@ import org.mortbay.jetty.util.log.Log;
  * Here is a typical jetty.xml configuration would be: <pre>
  * 
  *   &lt;Set name="handler"&gt;
- *     &lt;New id="Handlers" class="org.mortbay.jetty.rewrite.handler.RewriteHandler"&gt;
+ *     &lt;New id="Handlers" class="org.mortbay.jetty.server.server.rewrite.handler.RewriteHandler"&gt;
  *       &lt;Set name="rules"&gt;
- *         &lt;Array type="org.mortbay.jetty.rewrite.handler.Rule"&gt;
+ *         &lt;Array type="org.mortbay.jetty.server.server.rewrite.handler.Rule"&gt;
  *
  *           &lt;Item&gt; 
- *             &lt;New id="rewrite" class="org.mortbay.jetty.rewrite.handler.RewritePatternRule"&gt;
+ *             &lt;New id="rewrite" class="org.mortbay.jetty.server.server.rewrite.handler.RewritePatternRule"&gt;
  *               &lt;Set name="pattern"&gt;/*&lt;/Set&gt;
  *               &lt;Set name="replacement"&gt;/test&lt;/Set&gt;
  *             &lt;/New&gt;
  *           &lt;/Item&gt;
  *
  *           &lt;Item&gt; 
- *             &lt;New id="response" class="org.mortbay.jetty.rewrite.handler.ResponsePatternRule"&gt;
+ *             &lt;New id="response" class="org.mortbay.jetty.server.server.rewrite.handler.ResponsePatternRule"&gt;
  *               &lt;Set name="pattern"&gt;/session/&lt;/Set&gt;
  *               &lt;Set name="code"&gt;400&lt;/Set&gt;
  *               &lt;Set name="reason"&gt;Setting error code 400&lt;/Set&gt;
@@ -83,7 +83,7 @@ import org.mortbay.jetty.util.log.Log;
  *           &lt;/Item&gt;
  *
  *           &lt;Item&gt; 
- *             &lt;New id="header" class="org.mortbay.jetty.rewrite.handler.HeaderPatternRule"&gt;
+ *             &lt;New id="header" class="org.mortbay.jetty.server.server.rewrite.handler.HeaderPatternRule"&gt;
  *               &lt;Set name="pattern"&gt;*.jsp&lt;/Set&gt;
  *               &lt;Set name="name"&gt;server&lt;/Set&gt;
  *               &lt;Set name="value"&gt;dexter webserver&lt;/Set&gt;
@@ -91,7 +91,7 @@ import org.mortbay.jetty.util.log.Log;
  *           &lt;/Item&gt;
  *
  *           &lt;Item&gt; 
- *             &lt;New id="header" class="org.mortbay.jetty.rewrite.handler.HeaderPatternRule"&gt;
+ *             &lt;New id="header" class="org.mortbay.jetty.server.server.rewrite.handler.HeaderPatternRule"&gt;
  *               &lt;Set name="pattern"&gt;*.jsp&lt;/Set&gt;
  *               &lt;Set name="name"&gt;title&lt;/Set&gt;
  *               &lt;Set name="value"&gt;driven header purpose&lt;/Set&gt;
@@ -99,21 +99,21 @@ import org.mortbay.jetty.util.log.Log;
  *           &lt;/Item&gt;
  *
  *           &lt;Item&gt; 
- *             &lt;New id="redirect" class="org.mortbay.jetty.rewrite.handler.RedirectPatternRule"&gt;
+ *             &lt;New id="redirect" class="org.mortbay.jetty.server.server.rewrite.handler.RedirectPatternRule"&gt;
  *               &lt;Set name="pattern"&gt;/test/dispatch&lt;/Set&gt;
  *               &lt;Set name="location"&gt;http://jetty.mortbay.org&lt;/Set&gt;
  *             &lt;/New&gt;
  *           &lt;/Item&gt;
  *
  *           &lt;Item&gt; 
- *             &lt;New id="regexRewrite" class="org.mortbay.jetty.rewrite.handler.RewriteRegexRule"&gt;
+ *             &lt;New id="regexRewrite" class="org.mortbay.jetty.server.server.rewrite.handler.RewriteRegexRule"&gt;
  *               &lt;Set name="regex"&gt;/test-jaas/$&lt;/Set&gt;
  *               &lt;Set name="replacement"&gt;/demo&lt;/Set&gt;
  *             &lt;/New&gt;
  *           &lt;/Item&gt;
  *           
  *           &lt;Item&gt; 
- *             &lt;New id="forwardedHttps" class="org.mortbay.jetty.rewrite.handler.ForwardedSchemeHeaderRule"&gt;
+ *             &lt;New id="forwardedHttps" class="org.mortbay.jetty.server.server.rewrite.handler.ForwardedSchemeHeaderRule"&gt;
  *               &lt;Set name="header"&gt;X-Forwarded-Scheme&lt;/Set&gt;
  *               &lt;Set name="headerValue"&gt;https&lt;/Set&gt;
  *               &lt;Set name="scheme"&gt;https&lt;/Set&gt;
@@ -121,7 +121,7 @@ import org.mortbay.jetty.util.log.Log;
  *           &lt;/Item&gt;
  *           
  *           &lt;Item&gt;
- *             &lt;New id="virtualHost" class="org.mortbay.jetty.rewrite.handler.VirtualHostRuleContainer"&gt;
+ *             &lt;New id="virtualHost" class="org.mortbay.jetty.server.server.rewrite.handler.VirtualHostRuleContainer"&gt;
  *
  *               &lt;Set name="virtualHosts"&gt;
  *                 &lt;Array type="java.lang.String"&gt;
@@ -134,7 +134,7 @@ import org.mortbay.jetty.util.log.Log;
  *
  *               &lt;Call name="addRule"&gt;
  *                 &lt;Arg&gt;
- *                   &lt;New class="org.mortbay.jetty.rewrite.handler.CookiePatternRule"&gt;
+ *                   &lt;New class="org.mortbay.jetty.server.server.rewrite.handler.CookiePatternRule"&gt;
  *                     &lt;Set name="pattern"&gt;/*&lt;/Set&gt;
  *                     &lt;Set name="name"&gt;CookiePatternRule&lt;/Set&gt;
  *                     &lt;Set name="value"&gt;1&lt;/Set&gt;
@@ -149,17 +149,17 @@ import org.mortbay.jetty.util.log.Log;
  *       &lt;/Set&gt;
  *
  *       &lt;Set name="handler"&gt;
- *         &lt;New id="Handlers" class="org.mortbay.jetty.handler.HandlerCollection"&gt;
+ *         &lt;New id="Handlers" class="org.mortbay.jetty.server.server.handler.HandlerCollection"&gt;
  *           &lt;Set name="handlers"&gt;
- *            &lt;Array type="org.mortbay.jetty.Handler"&gt;
+ *            &lt;Array type="org.mortbay.jetty.server.server.Handler"&gt;
  *              &lt;Item&gt;
- *                &lt;New id="Contexts" class="org.mortbay.jetty.handler.ContextHandlerCollection"/&gt;
+ *                &lt;New id="Contexts" class="org.mortbay.jetty.server.server.handler.ContextHandlerCollection"/&gt;
  *              &lt;/Item&gt;
  *              &lt;Item&gt;
- *                &lt;New id="DefaultHandler" class="org.mortbay.jetty.handler.DefaultHandler"/&gt;
+ *                &lt;New id="DefaultHandler" class="org.mortbay.jetty.server.server.handler.DefaultHandler"/&gt;
  *              &lt;/Item&gt;
  *              &lt;Item&gt;
- *                &lt;New id="RequestLog" class="org.mortbay.jetty.handler.RequestLogHandler"/&gt;
+ *                &lt;New id="RequestLog" class="org.mortbay.jetty.server.server.handler.RequestLogHandler"/&gt;
  *              &lt;/Item&gt;
  *            &lt;/Array&gt;
  *           &lt;/Set&gt;
@@ -325,7 +325,7 @@ public class RewriteHandler extends HandlerWrapper
     
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
-     * @see org.mortbay.jetty.handler.HandlerWrapper#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
+     * @see org.mortbay.jetty.server.server.handler.HandlerWrapper#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
     {
