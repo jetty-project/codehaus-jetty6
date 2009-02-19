@@ -22,7 +22,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
+//import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.http.Generator;
 import org.mortbay.jetty.http.HttpFields;
@@ -65,17 +65,17 @@ public abstract class AbstractGenerator implements Generator
     private static Buffer[] __reasons = new Buffer[505];
     static
     {
-        Field[] fields = HttpServletResponse.class.getDeclaredFields();
+        Field[] fields = HttpStatus.class.getDeclaredFields();
         for (int i=0;i<fields.length;i++)
         {
             if ((fields[i].getModifiers()&Modifier.STATIC)!=0 &&
-                 fields[i].getName().startsWith("SC_"))
+                 fields[i].getName().startsWith("ORDINAL_"))
             {
                 try
                 {
                     int code = fields[i].getInt(null);
                     if (code<__reasons.length)
-                        __reasons[code]=new ByteArrayBuffer(fields[i].getName().substring(3));
+                        __reasons[code]=new ByteArrayBuffer(fields[i].getName().substring(12).toUpperCase());
                 }
                 catch(IllegalAccessException e)
                 {}
