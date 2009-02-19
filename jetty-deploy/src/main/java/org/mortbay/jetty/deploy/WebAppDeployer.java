@@ -17,10 +17,10 @@ package org.mortbay.jetty.deploy;
 
 import java.util.ArrayList;
 
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HandlerContainer;
-import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
+import org.mortbay.jetty.server.Handler;
+import org.mortbay.jetty.server.HandlerContainer;
+import org.mortbay.jetty.server.handler.ContextHandler;
+import org.mortbay.jetty.server.handler.ContextHandlerCollection;
 import org.mortbay.jetty.util.URIUtil;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
 import org.mortbay.jetty.util.resource.Resource;

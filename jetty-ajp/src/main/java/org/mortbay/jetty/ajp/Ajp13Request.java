@@ -14,8 +14,8 @@
 
 package org.mortbay.jetty.ajp;
 
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
+import org.mortbay.jetty.server.HttpConnection;
+import org.mortbay.jetty.server.Request;
 
 public class Ajp13Request extends Request
 {

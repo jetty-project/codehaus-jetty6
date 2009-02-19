@@ -25,7 +25,7 @@ import java.security.PermissionCollection;
 import java.util.HashSet;
 import java.util.StringTokenizer;
 
-import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.util.IO;
 import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.StringUtil;
@@ -42,7 +42,7 @@ import org.mortbay.jetty.util.resource.Resource;
  * system classes are loaded from the classpath in preference to the
  * parent loader.  Java2 compliant loading, where the parent loader
  * always has priority, can be selected with the 
- * {@link org.mortbay.jetty.webapp.WebAppContext#setParentLoaderPriority(boolean)} 
+ * {@link org.mortbay.jetty.server.server.webapp.WebAppContext#setParentLoaderPriority(boolean)} 
  * method and influenced with {@link WebAppContext#isServerClass(String)} and 
  * {@link WebAppContext#isSystemClass(String)}.
  *

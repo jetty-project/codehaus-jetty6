@@ -20,14 +20,14 @@ import java.io.IOException;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Server;
 import org.mortbay.jetty.client.security.HashRealmResolver;
 import org.mortbay.jetty.client.security.Realm;
 import org.mortbay.jetty.client.security.SimpleRealmResolver;
 import org.mortbay.jetty.client.webdav.WebdavListener;
 import org.mortbay.jetty.http.HttpMethods;
 import org.mortbay.jetty.io.Buffer;
+import org.mortbay.jetty.server.Connector;
+import org.mortbay.jetty.server.Server;
 
 /**
  * Functional testing for HttpExchange.
@@ -83,7 +83,7 @@ public class WebdavListenerTest extends TestCase//extends HttpExchangeTest
                 }
         ));
 
-        _httpClient.registerListener( "org.mortbay.jetty.client.webdav.WebdavListener");
+        _httpClient.registerListener( "org.mortbay.jetty.server.server.client.webdav.WebdavListener");
         _httpClient.start();
     }
     

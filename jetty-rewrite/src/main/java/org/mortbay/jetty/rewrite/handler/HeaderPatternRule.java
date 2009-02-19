@@ -74,7 +74,7 @@ public class HeaderPatternRule extends PatternRule
      * the new value overwrites the previous one. Otherwise, it adds the new 
      * header name and value.
      * 
-     *@see org.mortbay.jetty.rewrite.handler.Rule#matchAndApply(String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     *@see org.mortbay.jetty.server.server.rewrite.handler.Rule#matchAndApply(String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     public String apply(String target, HttpServletRequest request, HttpServletResponse response) throws IOException
     {

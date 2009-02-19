@@ -20,10 +20,10 @@ import java.util.EventListener;
 import java.util.Iterator;
 import java.util.List;
 
-import org.mortbay.jetty.servlet.FilterHolder;
-import org.mortbay.jetty.servlet.FilterMapping;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.servlet.ServletMapping;
+import org.mortbay.jetty.server.servlet.FilterHolder;
+import org.mortbay.jetty.server.servlet.FilterMapping;
+import org.mortbay.jetty.server.servlet.ServletHolder;
+import org.mortbay.jetty.server.servlet.ServletMapping;
 import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.log.Log;
 
@@ -34,8 +34,8 @@ import org.mortbay.jetty.util.log.Log;
  */
 public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
 {
-    public static final String __web_inf_pattern = "org.mortbay.jetty.webapp.WebInfIncludeAnnotationJarPattern";
-    public static final String __container_pattern = "org.mortbay.jetty.webapp.ContainerIncludeAnnotationJarPattern";
+    public static final String __web_inf_pattern = "org.mortbay.jetty.server.server.webapp.WebInfIncludeAnnotationJarPattern";
+    public static final String __container_pattern = "org.mortbay.jetty.server.server.webapp.ContainerIncludeAnnotationJarPattern";
                                                       
     
     
@@ -45,7 +45,7 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
     }
 
     /** 
-     * @see org.mortbay.jetty.plus.webapp.AbstractConfiguration#parseAnnotations()
+     * @see org.mortbay.jetty.server.server.plus.webapp.AbstractConfiguration#parseAnnotations()
      */
     public void parseAnnotations() throws Exception
     {

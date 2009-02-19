@@ -18,8 +18,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.jmx.ObjectMBean;
+import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.util.Attributes;
 
 public class ContextHandlerMBean extends ObjectMBean

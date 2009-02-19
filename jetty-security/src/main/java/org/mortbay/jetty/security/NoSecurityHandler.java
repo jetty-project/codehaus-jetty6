@@ -19,11 +19,11 @@
 
 package org.mortbay.jetty.security;
 
-import org.mortbay.jetty.handler.HandlerWrapper;
-import org.mortbay.jetty.handler.SecurityHandler;
-import org.mortbay.jetty.AuthenticationManager;
-import org.mortbay.jetty.RunAsToken;
-import org.mortbay.jetty.UserRealm;
+import org.mortbay.jetty.server.AuthenticationManager;
+import org.mortbay.jetty.server.RunAsToken;
+import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.server.handler.HandlerWrapper;
+import org.mortbay.jetty.server.handler.SecurityHandler;
 
 /**
  * @version $Rev$ $Date$

@@ -16,10 +16,10 @@ package org.mortbay.jetty.security;
 
 import java.security.Principal;
 
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
-import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.http.security.Credential;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Response;
+import org.mortbay.jetty.server.UserRealm;
 
 
 /* ------------------------------------------------------------ */

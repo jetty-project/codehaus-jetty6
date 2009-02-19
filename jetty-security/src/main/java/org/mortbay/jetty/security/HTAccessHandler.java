@@ -35,19 +35,19 @@ import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.security.LoginCallbackImpl;
-import org.mortbay.jetty.LoginCallback;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
-import org.mortbay.jetty.RunAsToken;
-import org.mortbay.jetty.UserIdentity;
-import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.http.security.UnixCrypt;
 import org.mortbay.jetty.security.jaspi.modules.BaseAuthModule;
+import org.mortbay.jetty.server.Handler;
+import org.mortbay.jetty.server.LoginCallback;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Response;
+import org.mortbay.jetty.server.RunAsToken;
+import org.mortbay.jetty.server.UserIdentity;
+import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.URIUtil;
 import org.mortbay.jetty.util.log.Log;
@@ -80,7 +80,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
     /**
      * {@inheritDoc}
      * 
-     * @see org.mortbay.jetty.Handler#handle(java.lang.String,
+     * @see org.mortbay.jetty.server.server.Handler#handle(java.lang.String,
      *      javax.servlet.http.HttpServletRequest,
      *      javax.servlet.http.HttpServletResponse)
      * @param authResult
@@ -906,7 +906,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
     // TODO move to jaspi.modules package and configure something to set it up.
     public static class HTServerAuthModule extends BaseAuthModule implements ServerAuthModule, ServerAuthContext
     {
-        private static final String HT_ACCESS_KEY = "org.mortbay.jetty.security.HTAccess";
+        private static final String HT_ACCESS_KEY = "org.mortbay.jetty.server.server.security.HTAccess";
 
         private final CallbackHandler callbackHandler;
 

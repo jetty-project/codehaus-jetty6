@@ -34,7 +34,7 @@ public class PreDestroyCallback extends LifeCycleCallback
      * - returns void
      * - no checked exceptions
      * - not static
-     * @see org.mortbay.jetty.plus.annotation.LifeCycleCallback#validate(java.lang.Class, java.lang.reflect.Method)
+     * @see org.mortbay.jetty.server.server.plus.annotation.LifeCycleCallback#validate(java.lang.Class, java.lang.reflect.Method)
      */
     public void validate(Class clazz, Method method)
     {        

@@ -55,7 +55,7 @@ public class BaseAuthModule implements ServerAuthModule, ServerAuthContext
 {
     private static final Class[] SUPPORTED_MESSAGE_TYPES = new Class[] { HttpServletRequest.class, HttpServletResponse.class };
 
-    protected static final String LOGIN_SERVICE_KEY = "org.mortbay.jetty.security.jaspi.modules.LoginService";
+    protected static final String LOGIN_SERVICE_KEY = "org.mortbay.jetty.server.server.security.jaspi.modules.LoginService";
 
     protected CallbackHandler callbackHandler;
 

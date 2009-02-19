@@ -26,7 +26,7 @@ import java.util.List;
 
 import javax.security.auth.Subject;
 
-import org.mortbay.jetty.LoginCallback;
+import org.mortbay.jetty.server.LoginCallback;
 
 /**
  * This is similar to the jaspi PasswordValidationCallback but includes user

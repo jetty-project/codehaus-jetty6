@@ -20,14 +20,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
-import org.mortbay.jetty.RunAsToken;
-import org.mortbay.jetty.UserIdentity;
 import org.mortbay.jetty.http.security.Constraint;
-import org.mortbay.jetty.servlet.PathMap;
+import org.mortbay.jetty.server.Connector;
+import org.mortbay.jetty.server.HttpConnection;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Response;
+import org.mortbay.jetty.server.RunAsToken;
+import org.mortbay.jetty.server.UserIdentity;
+import org.mortbay.jetty.server.servlet.PathMap;
 import org.mortbay.jetty.util.LazyList;
 
 /* ------------------------------------------------------------ */

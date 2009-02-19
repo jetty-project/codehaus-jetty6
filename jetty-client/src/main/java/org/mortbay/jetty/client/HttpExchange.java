@@ -621,7 +621,7 @@ public class HttpExchange
     }
 
     /**
-     * @deprecated use {@link org.mortbay.jetty.client.CachedExchange}
+     * @deprecated use {@link org.mortbay.jetty.server.server.client.CachedExchange}
      *
      */
     public static class CachedExchange extends org.mortbay.jetty.client.CachedExchange
@@ -633,7 +633,7 @@ public class HttpExchange
     }
 
     /**
-     * @deprecated use {@link org.mortbay.jetty.client.ContentExchange}
+     * @deprecated use {@link org.mortbay.jetty.server.server.client.ContentExchange}
      *
      */
     public static class ContentExchange extends org.mortbay.jetty.client.ContentExchange
