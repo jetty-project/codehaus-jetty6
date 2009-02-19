@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import javax.servlet.http.HttpServletResponse;
+//import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.client.HttpDestination;
 import org.mortbay.jetty.client.HttpEventListenerWrapper;
@@ -38,6 +38,8 @@ import org.mortbay.jetty.util.log.Log;
  */
 public class SecurityListener extends HttpEventListenerWrapper
 {
+	public static final int __SC_UNAUTHORIZED = 401;
+	
     private HttpDestination _destination;
     private HttpExchange _exchange;
     private boolean _requestComplete;
@@ -117,7 +119,7 @@ public class SecurityListener extends HttpEventListenerWrapper
         if (Log.isDebugEnabled())
             Log.debug("SecurityListener:Response Status: " + status );
 
-        if ( status == HttpServletResponse.SC_UNAUTHORIZED && _attempts<_destination.getHttpClient().maxRetries()) 
+        if ( status == __SC_UNAUTHORIZED && _attempts<_destination.getHttpClient().maxRetries()) 
         {
             // Let's absorb events until we have done some retries
             setDelegatingResponses(false);
