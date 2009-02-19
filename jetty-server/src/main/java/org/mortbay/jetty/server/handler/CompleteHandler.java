@@ -34,6 +34,6 @@ import org.mortbay.jetty.server.Request;
  */
 public interface CompleteHandler
 {
-    public final static String COMPLETE_HANDLER_ATTR = "org.mortbay.jetty.server.server.handler.CompleteHandlers";
+    public final static String COMPLETE_HANDLER_ATTR = "org.mortbay.jetty.server.handler.CompleteHandlers";
     void complete(Request request);
 }

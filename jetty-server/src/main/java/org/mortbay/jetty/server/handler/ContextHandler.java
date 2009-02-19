@@ -77,7 +77,7 @@ import org.mortbay.jetty.util.resource.Resource;
  * servlet path, plus setting the context classloader.
  * 
  * <p>
- * If the context init parameter "org.mortbay.jetty.server.server.servlet.ManagedAttributes"
+ * If the context init parameter "org.mortbay.jetty.server.servlet.ManagedAttributes"
  * is set to a coma separated list of names, then they are treated as context
  * attribute names, which if set as attributes are passed to the servers Container
  * so that they may be managed with JMX.
@@ -90,7 +90,7 @@ import org.mortbay.jetty.util.resource.Resource;
 public class ContextHandler extends HandlerWrapper implements Attributes, Server.Graceful, CompleteHandler
 {
     private static ThreadLocal<SContext> __context=new ThreadLocal<SContext>();
-    public static final String MANAGED_ATTRIBUTES = "org.mortbay.jetty.server.server.servlet.ManagedAttributes";
+    public static final String MANAGED_ATTRIBUTES = "org.mortbay.jetty.server.servlet.ManagedAttributes";
     
     /* ------------------------------------------------------------ */
     /** Get the current ServletContext implementation.
@@ -124,7 +124,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     private Logger _logger;
     private boolean _shutdown;
     private boolean _allowNullPathInfo;
-    private int _maxFormContentSize=Integer.getInteger("org.mortbay.jetty.server.server.Request.maxFormContentSize",200000).intValue();
+    private int _maxFormContentSize=Integer.getInteger("org.mortbay.jetty.server.Request.maxFormContentSize",200000).intValue();
     private boolean _compactPath=false;
     private boolean _aliases=true;
 
@@ -662,7 +662,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.mortbay.jetty.server.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException
@@ -731,7 +731,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.mortbay.jetty.server.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     public void doHandle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException
@@ -896,7 +896,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
      * Called by {@link #handle(String, HttpServletRequest, HttpServletResponse)} when a
      * target within a context is determined.  If the target is protected, 404 is returned.
      * The default implementation always returns false.
-     * @see org.mortbay.jetty.server.server.webapp.WebAppContext#isProtectedTarget(String)
+     * @see org.mortbay.jetty.webapp.WebAppContext#isProtectedTarget(String)
      */
     /* ------------------------------------------------------------ */
     protected boolean isProtectedTarget(String target)

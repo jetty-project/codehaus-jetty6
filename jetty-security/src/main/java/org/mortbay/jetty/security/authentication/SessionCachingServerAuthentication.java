@@ -34,7 +34,7 @@ import org.mortbay.jetty.security.SimpleAuthResult;
  */
 public class SessionCachingServerAuthentication implements ServerAuthentication
 {
-    public final static String __J_AUTHENTICATED = "org.mortbay.jetty.server.server.Auth";
+    public final static String __J_AUTHENTICATED = "org.mortbay.jetty.server.Auth";
 
     private final ServerAuthentication _delegate;
 

@@ -49,7 +49,7 @@ public class RewriteRegexRule extends RegexRule
 
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
-     * @see org.mortbay.jetty.server.server.handler.rules.RegexRule#apply(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.util.regex.Matcher)
+     * @see org.mortbay.jetty.server.handler.rules.RegexRule#apply(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.util.regex.Matcher)
      */
     public String apply(String target, HttpServletRequest request, HttpServletResponse response, Matcher matcher) throws IOException
     {

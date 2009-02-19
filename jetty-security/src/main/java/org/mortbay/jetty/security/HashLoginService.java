@@ -49,7 +49,7 @@ import org.mortbay.jetty.util.resource.Resource;
  * If DIGEST Authentication is used, the password must be in a recoverable
  * format, either plain text or OBF:.
  * 
- * @see org.mortbay.jetty.server.server.http.security.Password
+ * @see org.mortbay.jetty.security.Password
  * @author Greg Wilkins (gregw)
  */
 public class HashLoginService extends AbstractLoginService implements LoginService
@@ -177,7 +177,7 @@ public class HashLoginService extends AbstractLoginService implements LoginServi
 
 
     /**
-     * @see org.mortbay.jetty.server.server.util.component.AbstractLifeCycle#doStart()
+     * @see org.mortbay.jetty.util.component.AbstractLifeCycle#doStart()
      */
     protected void doStart() throws Exception
     {
@@ -231,7 +231,7 @@ public class HashLoginService extends AbstractLoginService implements LoginServi
     }
 
     /**
-     * @see org.mortbay.jetty.server.server.util.component.AbstractLifeCycle#doStop()
+     * @see org.mortbay.jetty.util.component.AbstractLifeCycle#doStop()
      */
     protected void doStop() throws Exception
     {

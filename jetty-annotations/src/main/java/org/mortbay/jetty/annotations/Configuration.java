@@ -34,8 +34,8 @@ import org.mortbay.jetty.util.log.Log;
  */
 public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
 {
-    public static final String __web_inf_pattern = "org.mortbay.jetty.server.server.webapp.WebInfIncludeAnnotationJarPattern";
-    public static final String __container_pattern = "org.mortbay.jetty.server.server.webapp.ContainerIncludeAnnotationJarPattern";
+    public static final String __web_inf_pattern = "org.mortbay.jetty.server.webapp.WebInfIncludeAnnotationJarPattern";
+    public static final String __container_pattern = "org.mortbay.jetty.server.webapp.ContainerIncludeAnnotationJarPattern";
                                                       
     
     
@@ -45,7 +45,7 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
     }
 
     /** 
-     * @see org.mortbay.jetty.server.server.plus.webapp.AbstractConfiguration#parseAnnotations()
+     * @see org.mortbay.jetty.plus.webapp.AbstractConfiguration#parseAnnotations()
      */
     public void parseAnnotations() throws Exception
     {

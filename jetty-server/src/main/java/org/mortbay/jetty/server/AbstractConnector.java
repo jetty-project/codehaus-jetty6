@@ -113,7 +113,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     
     /* ------------------------------------------------------------------------------- */
     /*
-     * @see org.mortbay.jetty.server.server.HttpListener#getHttpServer()
+     * @see org.mortbay.jetty.http.HttpListener#getHttpServer()
      */
     public ThreadPool getThreadPool()
     {
@@ -457,7 +457,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.Connector#getConfidentialPort()
+     * @see org.mortbay.jetty.server.Connector#getConfidentialPort()
      */
     public int getConfidentialPort()
     {
@@ -467,7 +467,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.Connector#getConfidentialScheme()
+     * @see org.mortbay.jetty.server.Connector#getConfidentialScheme()
      */
     public String getConfidentialScheme()
     {
@@ -476,7 +476,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.Connector#isConfidential(org.mortbay.jetty.server.server.Request)
+     * @see org.mortbay.jetty.server.Connector#isConfidential(org.mortbay.jetty.server.Request)
      */
     public boolean isIntegral(Request request)
     {
@@ -485,7 +485,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.Connector#getConfidentialPort()
+     * @see org.mortbay.jetty.server.Connector#getConfidentialPort()
      */
     public int getIntegralPort()
     {
@@ -494,7 +494,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.Connector#getIntegralScheme()
+     * @see org.mortbay.jetty.server.Connector#getIntegralScheme()
      */
     public String getIntegralScheme()
     {
@@ -503,7 +503,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.Connector#isConfidential(org.mortbay.jetty.server.server.Request)
+     * @see org.mortbay.jetty.server.Connector#isConfidential(org.mortbay.jetty.server.Request)
      */
     public boolean isConfidential(Request request)
     {

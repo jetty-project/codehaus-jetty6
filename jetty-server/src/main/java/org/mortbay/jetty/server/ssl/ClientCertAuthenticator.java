@@ -16,7 +16,7 @@ package org.mortbay.jetty.server.ssl;
 
 import java.io.IOException;
 
-//import org.mortbay.jetty.server.server.UserRealm;
+//import org.mortbay.jetty.server.UserRealm;
 import org.mortbay.jetty.http.security.Constraint;
 
 /* ------------------------------------------------------------ */

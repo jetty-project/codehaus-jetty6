@@ -55,7 +55,7 @@ import org.mortbay.jetty.util.log.Log;
  */
 public class JAASLoginService implements LoginService
 {
-    public static String DEFAULT_ROLE_CLASS_NAME = "org.mortbay.jetty.server.server.plus.jaas.JAASRole";
+    public static String DEFAULT_ROLE_CLASS_NAME = "org.mortbay.jetty.plus.jaas.JAASRole";
     public static String[] DEFAULT_ROLE_CLASS_NAMES = {DEFAULT_ROLE_CLASS_NAME};
 	
     protected String[] _roleClassNames = DEFAULT_ROLE_CLASS_NAMES;

@@ -109,7 +109,7 @@ public class ContextFactory implements ObjectFactory
         
         if (loader != null)
         {
-            if (Log.isDebugEnabled()) Log.debug("Using classloader of current org.mortbay.jetty.server.server.handler.ContextHandler");
+            if (Log.isDebugEnabled()) Log.debug("Using classloader of current org.mortbay.jetty.server.handler.ContextHandler");
         }
         else
         {

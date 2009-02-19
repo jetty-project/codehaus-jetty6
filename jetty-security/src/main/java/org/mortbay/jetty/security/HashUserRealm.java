@@ -216,7 +216,7 @@ public class HashUserRealm extends AbstractUserRealm
     }
     
     /** 
-     * @see org.mortbay.jetty.server.server.util.component.AbstractLifeCycle#doStart()
+     * @see org.mortbay.jetty.util.component.AbstractLifeCycle#doStart()
      */
     protected void doStart() throws Exception
     {
@@ -274,7 +274,7 @@ public class HashUserRealm extends AbstractUserRealm
     }
 
     /** 
-     * @see org.mortbay.jetty.server.server.util.component.AbstractLifeCycle#doStop()
+     * @see org.mortbay.jetty.util.component.AbstractLifeCycle#doStop()
      */
     protected void doStop() throws Exception
     {

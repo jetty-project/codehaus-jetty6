@@ -80,7 +80,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
     /**
      * {@inheritDoc}
      * 
-     * @see org.mortbay.jetty.server.server.Handler#handle(java.lang.String,
+     * @see org.mortbay.jetty.server.Handler#handle(java.lang.String,
      *      javax.servlet.http.HttpServletRequest,
      *      javax.servlet.http.HttpServletResponse)
      * @param authResult
@@ -906,7 +906,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
     // TODO move to jaspi.modules package and configure something to set it up.
     public static class HTServerAuthModule extends BaseAuthModule implements ServerAuthModule, ServerAuthContext
     {
-        private static final String HT_ACCESS_KEY = "org.mortbay.jetty.server.server.security.HTAccess";
+        private static final String HT_ACCESS_KEY = "org.mortbay.jetty.security.HTAccess";
 
         private final CallbackHandler callbackHandler;
 

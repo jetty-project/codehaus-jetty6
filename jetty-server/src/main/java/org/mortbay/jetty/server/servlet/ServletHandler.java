@@ -66,7 +66,7 @@ import org.mortbay.jetty.util.log.Log;
  * Unless run as part of a {@link Context} or derivative, the {@link #initialize()}
  * method must be called manually after start().
  * 
- * @see org.mortbay.jetty.server.server.webapp.WebAppContext
+ * @see org.mortbay.jetty.webapp.WebAppContext
  * @author Greg Wilkins
  */
 public class ServletHandler extends AbstractHandler
@@ -112,7 +112,7 @@ public class ServletHandler extends AbstractHandler
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.handler.AbstractHandler#setServer(org.mortbay.jetty.server.server.Server)
+     * @see org.mortbay.jetty.server.handler.AbstractHandler#setServer(org.mortbay.jetty.server.Server)
      */
     public void setServer(Server server)
     {
@@ -290,7 +290,7 @@ public class ServletHandler extends AbstractHandler
     
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
+     * @see org.mortbay.jetty.server.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
     public void handle(String target, HttpServletRequest request,HttpServletResponse response)
          throws IOException, ServletException

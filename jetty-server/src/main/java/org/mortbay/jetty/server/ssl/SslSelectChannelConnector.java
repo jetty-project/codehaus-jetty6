@@ -123,7 +123,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
-     * @see org.mortbay.jetty.server.server.AbstractBuffers#getBuffer(int)
+     * @see org.mortbay.jetty.io.AbstractBuffers#getBuffer(int)
      */
     public Buffer getBuffer(int size)
     {
@@ -151,7 +151,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
 
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
-     * @see org.mortbay.jetty.server.server.AbstractBuffers#returnBuffer(org.mortbay.io.Buffer)
+     * @see org.mortbay.jetty.io.AbstractBuffers#returnBuffer(org.mortbay.io.Buffer)
      */
     public void returnBuffer(Buffer buffer)
     {

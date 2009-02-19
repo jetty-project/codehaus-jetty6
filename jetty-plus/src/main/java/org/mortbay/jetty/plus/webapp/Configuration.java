@@ -47,7 +47,7 @@ public class Configuration extends AbstractConfiguration
     }
     
     /** 
-     * @see org.mortbay.jetty.server.server.plus.webapp.AbstractConfiguration#bindEnvEntry(java.lang.String, java.lang.String)
+     * @see org.mortbay.jetty.plus.webapp.AbstractConfiguration#bindEnvEntry(java.lang.String, java.lang.String)
      * @param name
      * @param value
      * @throws Exception
@@ -88,7 +88,7 @@ public class Configuration extends AbstractConfiguration
      * If a resource reference with the same name is in a jetty-env.xml
      * file, it will already have been bound.
      * 
-     * @see org.mortbay.jetty.server.server.plus.webapp.AbstractConfiguration#bindResourceRef(java.lang.String)
+     * @see org.mortbay.jetty.plus.webapp.AbstractConfiguration#bindResourceRef(java.lang.String)
      * @param name
      * @throws Exception
      */
@@ -99,7 +99,7 @@ public class Configuration extends AbstractConfiguration
     }
 
     /** 
-     * @see org.mortbay.jetty.server.server.plus.webapp.AbstractConfiguration#bindResourceEnvRef(java.lang.String)
+     * @see org.mortbay.jetty.plus.webapp.AbstractConfiguration#bindResourceEnvRef(java.lang.String)
      * @param name
      * @throws Exception
      */
@@ -185,11 +185,11 @@ public class Configuration extends AbstractConfiguration
     }
 
     /** 
-     * @see org.mortbay.jetty.server.server.plus.webapp.AbstractConfiguration#parseAnnotations()
+     * @see org.mortbay.jetty.plus.webapp.AbstractConfiguration#parseAnnotations()
      */
     public void parseAnnotations() throws Exception
     {
-        //see org.mortbay.jetty.server.server.annotations.Configuration instead
+        //see org.mortbay.jetty.annotations.Configuration instead
     }
     
     /**

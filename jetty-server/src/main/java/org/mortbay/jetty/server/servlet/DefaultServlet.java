@@ -66,7 +66,7 @@ import org.mortbay.jetty.util.resource.ResourceFactory;
  * content, OPTION and TRACE methods for the context.                   
  * The following initParameters are supported, these can be set either
  * on the servlet itself or as ServletContext initParameters with a prefix
- * of org.mortbay.jetty.server.server.servlet.Default. :                          
+ * of org.mortbay.jetty.server.servlet.Default. :                          
  * <PRE>                                                                      
  *   acceptRanges     If true, range requests and responses are         
  *                    supported                                         
@@ -234,7 +234,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     /* ------------------------------------------------------------ */
     public String getInitParameter(String name)
     {
-        String value=getServletContext().getInitParameter("org.mortbay.jetty.server.server.servlet.Default."+name);
+        String value=getServletContext().getInitParameter("org.mortbay.jetty.server.servlet.Default."+name);
 	if (value==null)
 	    value=super.getInitParameter(name);
 	return value;
@@ -424,7 +424,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             {
                 String welcome=null;
                 
-                if (!endsWithSlash || (pathInContext.length()==1 && request.getAttribute("org.mortbay.jetty.server.server.nullPathInfo")!=null))
+                if (!endsWithSlash || (pathInContext.length()==1 && request.getAttribute("org.mortbay.jetty.server.nullPathInfo")!=null))
                 {
                     StringBuffer buf=request.getRequestURL();
                     synchronized(buf)
@@ -468,7 +468,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                                 dispatcher.include(request,response);
                             else
                             {
-                                request.setAttribute("org.mortbay.jetty.server.server.welcome",ipath);
+                                request.setAttribute("org.mortbay.jetty.server.welcome",ipath);
                                 dispatcher.forward(request,response);
                             }
                         }

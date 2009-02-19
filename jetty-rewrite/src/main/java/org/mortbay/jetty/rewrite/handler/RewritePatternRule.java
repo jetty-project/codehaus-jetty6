@@ -50,7 +50,7 @@ public class RewritePatternRule extends PatternRule
     /* ------------------------------------------------------------ */
     /*
      * (non-Javadoc)
-     * @see org.mortbay.jetty.server.server.handler.rules.RuleBase#apply(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.mortbay.jetty.server.handler.rules.RuleBase#apply(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     public String apply(String target, HttpServletRequest request, HttpServletResponse response) throws IOException
     {
