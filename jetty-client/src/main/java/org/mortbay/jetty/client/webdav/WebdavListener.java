@@ -17,7 +17,7 @@ package org.mortbay.jetty.client.webdav;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletResponse;
+//import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.client.HttpDestination;
 import org.mortbay.jetty.client.HttpEventListenerWrapper;
@@ -37,6 +37,9 @@ import org.mortbay.jetty.util.log.Log;
  */
 public class WebdavListener extends HttpEventListenerWrapper
 {
+	private static final int __SC_CONFLICT = 409;
+	private static final int __SC_FORBIDDEN = 403;
+	
     private HttpDestination _destination;
     private HttpExchange _exchange;
     private boolean _requestComplete;
@@ -73,7 +76,7 @@ public class WebdavListener extends HttpEventListenerWrapper
 
         // The dav spec says that CONFLICT should be returned when the parent collection doesn't exist but I am seeing
         // FORBIDDEN returned instead so running with that.
-        if ( status == HttpServletResponse.SC_CONFLICT || status == HttpServletResponse.SC_FORBIDDEN )
+        if ( status == __SC_CONFLICT || status == __SC_FORBIDDEN )
         {
             if ( _webdavEnabled )
             {
