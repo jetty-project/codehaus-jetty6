@@ -17,7 +17,6 @@ package org.mortbay.jetty.http;
 import java.io.IOException;
 
 import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.http.Parser;
 import org.mortbay.jetty.io.Buffer;
@@ -59,8 +58,6 @@ public class HttpParser implements Parser
     public static final int STATE_CHUNK_SIZE=4;
     public static final int STATE_CHUNK_PARAMS=5;
     public static final int STATE_CHUNK=6;
-
-    public static final int __SC_BAD_REQUEST = 400; 
     
     private Buffers _buffers; // source of buffers
     private EndPoint _endp;
@@ -364,7 +361,7 @@ public class HttpParser implements Parser
                     }
                     else if (ch < HttpTokens.SPACE && ch>=0)
                     {
-                        throw new HttpException(__SC_BAD_REQUEST);
+                        throw new HttpException(HttpStatus.ORDINAL_400_Bad_Request);
                     }
                     break;
 
@@ -376,7 +373,7 @@ public class HttpParser implements Parser
                     }
                     else if (ch < HttpTokens.SPACE)
                     {
-                        throw new HttpException(__SC_BAD_REQUEST);
+                        throw new HttpException(HttpStatus.ORDINAL_400_Bad_Request);
                     }
                     break;
 
