@@ -61,7 +61,7 @@ import org.mortbay.jetty.util.TypeUtil;
  */
 public class MultiPartFilter implements Filter
 {
-    private final static String FILES ="org.mortbay.jetty.server.server.servlet.MultiPartFilter.files";
+    private final static String FILES ="org.mortbay.jetty.server.servlet.MultiPartFilter.files";
     private File tempdir;
     private boolean _deleteFiles;
     private ServletContext _context;
@@ -108,9 +108,9 @@ public class MultiPartFilter implements Filter
         
         // jetty-specific but more efficient
         /*MultiMap params = new MultiMap();
-        if(srequest instanceof org.mortbay.jetty.server.server.Request)
+        if(srequest instanceof org.mortbay.jetty.server.Request)
         {
-            org.mortbay.jetty.server.server.Request req = ((org.mortbay.jetty.server.server.Request)srequest);
+            org.mortbay.jetty.server.Request req = ((org.mortbay.jetty.server.Request)srequest);
             req.getUri().decodeQueryTo(params, req.getQueryEncoding());
         }*/
         

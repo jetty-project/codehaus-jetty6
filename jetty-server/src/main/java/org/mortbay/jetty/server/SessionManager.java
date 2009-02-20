@@ -36,9 +36,9 @@ public interface SessionManager extends LifeCycle
     /**
      * Session cookie name.
      * Defaults to JSESSIONID, but can be set with the
-     * org.mortbay.jetty.server.server.servlet.SessionCookie context init parameter.
+     * org.mortbay.jetty.server.servlet.SessionCookie context init parameter.
      */
-    public final static String __SessionCookieProperty = "org.mortbay.jetty.server.server.servlet.SessionCookie";
+    public final static String __SessionCookieProperty = "org.mortbay.jetty.server.servlet.SessionCookie";
     public final static String __DefaultSessionCookie = "JSESSIONID";
 
 
@@ -46,10 +46,10 @@ public interface SessionManager extends LifeCycle
     /**
      * Session id path parameter name.
      * Defaults to jsessionid, but can be set with the
-     * org.mortbay.jetty.server.server.servlet.SessionIdPathParameterName context init parameter.
+     * org.mortbay.jetty.server.servlet.SessionIdPathParameterName context init parameter.
      * If set to null or "none" no URL rewriting will be done.
      */
-    public final static String __SessionIdPathParameterNameProperty = "org.mortbay.jetty.server.server.servlet.SessionIdPathParameterName";
+    public final static String __SessionIdPathParameterNameProperty = "org.mortbay.jetty.server.servlet.SessionIdPathParameterName";
     public final static String __DefaultSessionIdPathParameterName = "jsessionid";
 
 
@@ -60,7 +60,7 @@ public interface SessionManager extends LifeCycle
      * used as the domain for session cookies. If it is not set, then
      * no domain is specified for the session cookie.
      */
-    public final static String __SessionDomainProperty = "org.mortbay.jetty.server.server.servlet.SessionDomain";
+    public final static String __SessionDomainProperty = "org.mortbay.jetty.server.servlet.SessionDomain";
     public final static String __DefaultSessionDomain = null;
 
 
@@ -71,7 +71,7 @@ public interface SessionManager extends LifeCycle
      * used as the path for the session cookie.  If it is not set, then
      * the context path is used as the path for the cookie.
      */
-    public final static String __SessionPathProperty = "org.mortbay.jetty.server.server.servlet.SessionPath";
+    public final static String __SessionPathProperty = "org.mortbay.jetty.server.servlet.SessionPath";
 
     /* ------------------------------------------------------------ */
     /**
@@ -80,7 +80,7 @@ public interface SessionManager extends LifeCycle
      * used as the max age for the session cookie.  If it is not set, then
      * a max age of -1 is used.
      */
-    public final static String __MaxAgeProperty = "org.mortbay.jetty.server.server.servlet.MaxAge";
+    public final static String __MaxAgeProperty = "org.mortbay.jetty.server.servlet.MaxAge";
 
     /* ------------------------------------------------------------ */
     /**

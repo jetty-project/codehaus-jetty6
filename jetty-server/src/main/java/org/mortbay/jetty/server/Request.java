@@ -94,11 +94,11 @@ import org.mortbay.jetty.util.log.Log;
  * 
  * <li>the HTTP session methods
  * will all return null sessions until such time as a request has been passed to
- * a {@link org.mortbay.jetty.server.server.servlet.SessionHandler} which checks for session cookies
+ * a {@link org.mortbay.jetty.server.servlet.SessionHandler} which checks for session cookies
  * and enables the ability to create new sessions.</li>
  * 
  * <li>The {@link Request#getServletPath} method will return null until the request has been
- * passed to a {@link org.mortbay.jetty.server.server.servlet.ServletHandler} and the pathInfo matched
+ * passed to a {@link org.mortbay.jetty.server.servlet.ServletHandler} and the pathInfo matched
  * against the servlet URL patterns and {@link Request#setServletPath} called as a result.</li>
  * </ul>
  * 
@@ -287,7 +287,7 @@ public class Request implements HttpServletRequest
      */
     public Object getAttribute(String name)
     {
-        if ("org.mortbay.jetty.server.server.ajax.Continuation".equals(name))
+        if ("org.mortbay.jetty.server.ajax.Continuation".equals(name))
             return getContinuation(true);
         
         if (DispatcherType.ASYNC.equals(_dispatcherType))
@@ -1155,10 +1155,10 @@ public class Request implements HttpServletRequest
     /* ------------------------------------------------------------ */
     /* 
      * Set a request attribute.
-     * if the attribute name is "org.mortbay.jetty.server.server.Request.queryEncoding" then
+     * if the attribute name is "org.mortbay.jetty.server.Request.queryEncoding" then
      * the value is also passed in a call to {@link #setQueryEncoding}.
      *
-     * if the attribute name is "org.mortbay.jetty.server.server.ResponseBuffer", then
+     * if the attribute name is "org.mortbay.jetty.server.ResponseBuffer", then
      * the response buffer is flushed with @{link #flushResponseBuffer}
      *
      * @see javax.servlet.ServletRequest#setAttribute(java.lang.String, java.lang.Object)
@@ -1167,9 +1167,9 @@ public class Request implements HttpServletRequest
     {
         Object old_value=_attributes==null?null:_attributes.getAttribute(name);
         
-        if ("org.mortbay.jetty.server.server.Request.queryEncoding".equals(name))
+        if ("org.mortbay.jetty.server.Request.queryEncoding".equals(name))
             setQueryEncoding(value==null?null:value.toString());
-        else if("org.mortbay.jetty.server.server.sendContent".equals(name))
+        else if("org.mortbay.jetty.server.sendContent".equals(name))
         {
             try 
             {
@@ -1180,7 +1180,7 @@ public class Request implements HttpServletRequest
                 throw new RuntimeException(e);
             }
         }
-        else if("org.mortbay.jetty.server.server.ResponseBuffer".equals(name))
+        else if("org.mortbay.jetty.server.ResponseBuffer".equals(name))
         {
             try
             {
@@ -1314,7 +1314,7 @@ public class Request implements HttpServletRequest
                             maxFormContentSize=_context.getContextHandler().getMaxFormContentSize();
                         else
                         {
-                            Integer size = (Integer)_connection.getConnector().getServer().getAttribute("org.mortbay.jetty.server.server.Request.maxFormContentSize");
+                            Integer size = (Integer)_connection.getConnector().getServer().getAttribute("org.mortbay.jetty.server.Request.maxFormContentSize");
                             if (size!=null)
                                 maxFormContentSize =size.intValue();
                         }
@@ -1765,7 +1765,7 @@ public class Request implements HttpServletRequest
      * This call will effect the return of getQueryString and getParamaters.
      * It must be called before any geParameter methods.
      * 
-     * The request attribute "org.mortbay.jetty.server.server.Request.queryEncoding"
+     * The request attribute "org.mortbay.jetty.server.Request.queryEncoding"
      * may be set as an alternate method of calling setQueryEncoding.
      * 
      * @param queryEncoding

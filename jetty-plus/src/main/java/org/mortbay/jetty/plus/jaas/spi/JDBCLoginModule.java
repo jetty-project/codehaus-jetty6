@@ -60,7 +60,7 @@ public class JDBCLoginModule extends AbstractDatabaseLoginModule
     
     /** 
      * Get a connection from the DriverManager
-     * @see org.mortbay.jetty.server.server.plus.jaas.spi.AbstractDatabaseLoginModule#getConnection()
+     * @see org.mortbay.jetty.server.plus.jaas.spi.AbstractDatabaseLoginModule#getConnection()
      * @return
      * @throws Exception
      */

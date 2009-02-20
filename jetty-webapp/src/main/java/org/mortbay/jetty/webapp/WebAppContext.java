@@ -54,11 +54,11 @@ import org.mortbay.jetty.util.resource.Resource;
 /** Web Application Context Handler.
  * The WebAppContext handler is an extension of ContextHandler that
  * coordinates the construction and configuration of nested handlers:
- * {@link org.mortbay.jetty.server.server.security.ConstraintSecurityHandler}, {@link org.mortbay.jetty.server.server.servlet.SessionHandler}
- * and {@link org.mortbay.jetty.server.server.servlet.ServletHandler}.
+ * {@link org.mortbay.jetty.server.security.ConstraintSecurityHandler}, {@link org.mortbay.jetty.server.servlet.SessionHandler}
+ * and {@link org.mortbay.jetty.server.servlet.ServletHandler}.
  * The handlers are configured by pluggable configuration classes, with
- * the default being  {@link org.mortbay.jetty.server.server.webapp.WebXmlConfiguration} and 
- * {@link org.mortbay.jetty.server.server.webapp.JettyWebXmlConfiguration}.
+ * the default being  {@link org.mortbay.jetty.server.webapp.WebXmlConfiguration} and 
+ * {@link org.mortbay.jetty.server.webapp.JettyWebXmlConfiguration}.
  *      
  * @org.apache.xbean.XBean description="Creates a servlet web application at a given context from a resource base"
  * 
@@ -68,14 +68,14 @@ import org.mortbay.jetty.util.resource.Resource;
 public class WebAppContext extends Context
 {   
     public final static String WEB_DEFAULTS_XML="org/mortbay/jetty/webapp/webdefault.xml";
-    public final static String ERROR_PAGE="org.mortbay.jetty.server.server.error_page";
+    public final static String ERROR_PAGE="org.mortbay.jetty.server.error_page";
     
     private static String[] __dftConfigurationClasses =  
     { 
-        "org.mortbay.jetty.server.server.webapp.WebInfConfiguration", 
-        "org.mortbay.jetty.server.server.webapp.WebXmlConfiguration", 
-        "org.mortbay.jetty.server.server.webapp.JettyWebXmlConfiguration",
-        "org.mortbay.jetty.server.server.webapp.TagLibConfiguration" 
+        "org.mortbay.jetty.server.webapp.WebInfConfiguration", 
+        "org.mortbay.jetty.server.webapp.WebXmlConfiguration", 
+        "org.mortbay.jetty.server.webapp.JettyWebXmlConfiguration",
+        "org.mortbay.jetty.server.webapp.TagLibConfiguration" 
     } ;
     private String[] _configurationClasses=__dftConfigurationClasses;
     private Configuration[] _configurations;
@@ -86,7 +86,7 @@ public class WebAppContext extends Context
     private boolean _extractWAR=true;
     private boolean _copyDir=false;
     private boolean _logUrlOnStart =false;
-    private boolean _parentLoaderPriority= Boolean.getBoolean("org.mortbay.jetty.server.server.webapp.parentLoaderPriority");
+    private boolean _parentLoaderPriority= Boolean.getBoolean("org.mortbay.jetty.server.webapp.parentLoaderPriority");
     private PermissionCollection _permissions;
     private String[] _systemClasses = {
             "java.",
@@ -96,14 +96,14 @@ public class WebAppContext extends Context
             "org.w3c.", 
             "org.apache.commons.logging.", 
             "org.apache.log4j.",
-            "org.mortbay.jetty.server.server.servlet.", // webapp cannot change default servlets
+            "org.mortbay.jetty.server.servlet.", // webapp cannot change default servlets
             "org.mortbay.util.ajax.",     // webapp cannot change continuation classes
             "org.mortbay.naming."         // webapp cannot change naming classes
             };
     private String[] _serverClasses = {
             "-org.mortbay.naming.",       // don't hide naming classes
             "-org.mortbay.util.ajax.",    // don't hide continuation classes
-            "-org.mortbay.jetty.server.server.plus.jaas.", //don't hide jaas modules
+            "-org.mortbay.jetty.server.plus.jaas.", //don't hide jaas modules
             "org.mortbay.",               // hide rest of mortbay classes
             "org.slf4j."                  // hide slf4j
             }; 
@@ -251,7 +251,7 @@ public class WebAppContext extends Context
 
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
-     * @see org.mortbay.jetty.server.server.handler.ContextHandler#setClassLoader(java.lang.ClassLoader)
+     * @see org.mortbay.jetty.server.handler.ContextHandler#setClassLoader(java.lang.ClassLoader)
      */
     public void setClassLoader(ClassLoader classLoader)
     {
@@ -293,7 +293,7 @@ public class WebAppContext extends Context
 
     /* ------------------------------------------------------------ */
     /** 
-     * @see org.mortbay.jetty.server.server.handler.ContextHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.mortbay.jetty.server.handler.ContextHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response)
     throws IOException, ServletException
