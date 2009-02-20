@@ -101,7 +101,7 @@ public class HandlerCollection extends AbstractHandlerContainer
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.mortbay.jetty.server.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response) 
         throws IOException, ServletException
@@ -144,7 +144,7 @@ public class HandlerCollection extends AbstractHandlerContainer
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.handler.AbstractHandler#doStart()
+     * @see org.mortbay.jetty.server.handler.AbstractHandler#doStart()
      */
     protected void doStart() throws Exception
     {
@@ -160,7 +160,7 @@ public class HandlerCollection extends AbstractHandlerContainer
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.handler.AbstractHandler#doStop()
+     * @see org.mortbay.jetty.server.handler.AbstractHandler#doStop()
      */
     protected void doStop() throws Exception
     {
@@ -193,7 +193,7 @@ public class HandlerCollection extends AbstractHandlerContainer
     /* ------------------------------------------------------------ */
     /* Add a handler.
      * This implementation adds the passed handler to the end of the existing collection of handlers. 
-     * @see org.mortbay.jetty.server.server.HandlerContainer#addHandler(org.mortbay.jetty.server.server.Handler)
+     * @see org.mortbay.jetty.server.HandlerContainer#addHandler(org.mortbay.jetty.server.Handler)
      */
     public void addHandler(Handler handler)
     {

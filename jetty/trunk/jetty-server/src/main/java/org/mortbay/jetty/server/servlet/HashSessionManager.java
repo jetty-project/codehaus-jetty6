@@ -65,7 +65,7 @@ public class HashSessionManager extends AbstractSessionManager
 
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
-     * @see org.mortbay.jetty.server.server.servlet.AbstractSessionManager#doStart()
+     * @see org.mortbay.jetty.server.servlet.AbstractSessionManager#doStart()
      */
     public void doStart() throws Exception
     {
@@ -90,7 +90,7 @@ public class HashSessionManager extends AbstractSessionManager
 
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
-     * @see org.mortbay.jetty.server.server.servlet.AbstractSessionManager#doStop()
+     * @see org.mortbay.jetty.server.servlet.AbstractSessionManager#doStop()
      */
     public void doStop() throws Exception
     {

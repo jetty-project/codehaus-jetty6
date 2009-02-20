@@ -144,7 +144,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
 
     /* ------------------------------------------------------------------------------- */
     /*
-     * @see org.mortbay.jetty.server.server.HttpListener#setPort(int)
+     * @see org.mortbay.jetty.server.HttpListener#setPort(int)
      */
     public void setPort(int port)
     {
@@ -153,7 +153,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
 
     /* ------------------------------------------------------------------------------- */
     /*
-     * @see org.mortbay.jetty.server.server.HttpListener#getPort()
+     * @see org.mortbay.jetty.server.HttpListener#getPort()
      */
     public int getPort()
     {

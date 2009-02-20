@@ -227,7 +227,7 @@ public class WebXmlConfiguration implements Configuration
     /**
      * Process webdefaults.xml
      * 
-     * @see org.mortbay.jetty.server.server.webapp.Configuration#configureDefaults()
+     * @see org.mortbay.jetty.server.webapp.Configuration#configureDefaults()
      */
     public void configureDefaults() throws Exception
     {
@@ -259,7 +259,7 @@ public class WebXmlConfiguration implements Configuration
     /**
      * Process web.xml
      * 
-     * @see org.mortbay.jetty.server.server.webapp.Configuration#configureWebApp()
+     * @see org.mortbay.jetty.server.webapp.Configuration#configureWebApp()
      */
     public void configureWebApp() throws Exception
     {
@@ -302,7 +302,7 @@ public class WebXmlConfiguration implements Configuration
         // either there is no web.xml, or it set metadata-complete to false, so
         // we need to look for fragments in WEB-INF/lib
         // Check to see if a specific search pattern has been set.
-        String tmp = (String) _context.getInitParameter("org.mortbay.jetty.server.server.webapp.WebXmlFragmentPattern");
+        String tmp = (String) _context.getInitParameter("org.mortbay.jetty.server.webapp.WebXmlFragmentPattern");
         Pattern webFragPattern = (tmp == null ? null : Pattern.compile(tmp));
 
         JarScanner fragScanner = new JarScanner()
@@ -685,7 +685,7 @@ public class WebXmlConfiguration implements Configuration
             {
                 Log.info("NO JSP Support for {}, did not find {}", _context.getContextPath(), servlet_class);
                 _hasJSP = false;
-                _jspServletClass = servlet_class = "org.mortbay.jetty.server.server.servlet.NoJspServlet";
+                _jspServletClass = servlet_class = "org.mortbay.jetty.server.servlet.NoJspServlet";
             }
             if (holder.getInitParameter("scratchdir") == null)
             {

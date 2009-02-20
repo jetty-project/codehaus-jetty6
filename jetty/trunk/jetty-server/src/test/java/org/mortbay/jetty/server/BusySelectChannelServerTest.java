@@ -39,7 +39,7 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
         {
             /* ------------------------------------------------------------ */
             /* (non-Javadoc)
-             * @see org.mortbay.jetty.server.server.nio.SelectChannelConnector#newEndPoint(java.nio.channels.SocketChannel, org.mortbay.io.nio.SelectorManager.SelectSet, java.nio.channels.SelectionKey)
+             * @see org.mortbay.jetty.server.nio.SelectChannelConnector#newEndPoint(java.nio.channels.SocketChannel, org.mortbay.io.nio.SelectorManager.SelectSet, java.nio.channels.SelectionKey)
              */
             protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
             {
