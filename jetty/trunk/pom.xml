@@ -112,7 +112,9 @@
     <module>jetty-servlet-tester</module>
     <module>jetty-start</module>
     <module>jetty-test-webapp</module>
+    <!-- commented out because of missing servlet specific annotations
     <module>jetty-test-annotation-webapp</module>
+    -->
     <module>jetty-test-jaas-webapp</module>
     <module>jetty-test-jndi-webapp</module>
     <module>jetty-util</module>
