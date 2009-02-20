@@ -33,7 +33,7 @@ import org.mortbay.jetty.util.log.Log;
  */
 public class HashSessionIdManager extends AbstractLifeCycle implements SessionIdManager
 {
-    private final static String __NEW_SESSION_ID="org.mortbay.jetty.server.server.newSessionId";  
+    private final static String __NEW_SESSION_ID="org.mortbay.jetty.server.newSessionId";  
     protected final static String SESSION_ID_RANDOM_ALGORITHM = "SHA1PRNG";
     protected final static String SESSION_ID_RANDOM_ALGORITHM_ALT = "IBMSecureRandom";
 
