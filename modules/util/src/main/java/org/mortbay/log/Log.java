@@ -67,31 +67,17 @@ public class Log
             log_class=Loader.loadClass(Log.class, __logClass);
             __log=(Logger) log_class.newInstance();
         }
-        catch(NoClassDefFoundError e)
+        catch(Throwable e)
         {
-            initStandardLogging(e);
-        }
-        catch(Exception e)
-        {
-            initStandardLogging( e );
+            log_class = StdErrLog.class;
+            __log = new StdErrLog();
+            __logClass = log_class.getName();
+            if(__verbose)
+                e.printStackTrace();
         }
         
         __log.info("Logging to {} via {}",__log,log_class.getName());
     }
-    
-    private static void initStandardLogging( Throwable e )
-    {
-        Class log_class;
-        if ( __log == null )
-        {
-            log_class = StdErrLog.class;
-            __log = new StdErrLog();
-            __log.info( "Logging to {} via {}", __log, log_class.getName() );
-            if ( e != null && __verbose )
-                e.printStackTrace();
-        }
-    }
-
     
     public static void setLog(Logger log)
     {
