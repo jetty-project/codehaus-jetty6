@@ -35,24 +35,24 @@
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <!-- UNCOMMENT TO ACTIVATE
   <context-param>
-    <param-name>org.mortbay.jetty.server.server.servlet.SessionDomain</param-name>
+    <param-name>org.mortbay.jetty.server.servlet.SessionDomain</param-name>
     <param-value>127.0.0.1</param-value>
   </context-param>
 
   <context-param>
-    <param-name>org.mortbay.jetty.server.server.servlet.SessionPath</param-name>
+    <param-name>org.mortbay.jetty.server.servlet.SessionPath</param-name>
     <param-value>/</param-value>
   </context-param>
 
   <context-param>
-    <param-name>org.mortbay.jetty.server.server.servlet.MaxAge</param-name>
+    <param-name>org.mortbay.jetty.server.servlet.MaxAge</param-name>
     <param-value>-1</param-value>
   </context-param>
   -->
 
   <!-- control which jars from the container's classpath will be scanned for .tlds -->
   <context-param>
-    <param-name>org.mortbay.jetty.server.server.webapp.ContainerIncludeTLDJarPattern</param-name>
+    <param-name>org.mortbay.jetty.server.webapp.ContainerIncludeTLDJarPattern</param-name>
     <param-value>jsp-api-.*\.jar|jsp-.*\.jar</param-value>
   </context-param>
             
@@ -62,9 +62,9 @@
   <!-- defining this context-param in their web.xml file. Individual webapps   -->
   <!-- can also control which jars in their WEB-INF/lib will be scanned by     -->
   <!-- setting a context-param in web.xml called:                              -->
-  <!--                 org.mortbay.jetty.server.server.webapp.WebInfIncludeAnnotationPattern -->
+  <!--                 org.mortbay.jetty.server.webapp.WebInfIncludeAnnotationPattern -->
   <context-param>
-    <param-name>org.mortbay.jetty.server.server.webapp.ContainerIncludeAnnotationJarPattern</param-name>
+    <param-name>org.mortbay.jetty.server.webapp.ContainerIncludeAnnotationJarPattern</param-name>
     <param-value></param-value>
   </context-param>
 
@@ -120,7 +120,7 @@
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <servlet>
     <servlet-name>default</servlet-name>
-    <servlet-class>org.mortbay.jetty.server.server.servlet.DefaultServlet</servlet-class>
+    <servlet-class>org.mortbay.jetty.server.servlet.DefaultServlet</servlet-class>
     <init-param>
       <param-name>acceptRanges</param-name>
       <param-value>true</param-value>
@@ -312,7 +312,7 @@
   <!-- Uncomment for dynamic invocation
   <servlet>
     <servlet-name>invoker</servlet-name>
-    <servlet-class>org.mortbay.jetty.server.server.servlet.Invoker</servlet-class>
+    <servlet-class>org.mortbay.jetty.server.servlet.Invoker</servlet-class>
     <init-param>
       <param-name>verbose</param-name>
       <param-value>false</param-value>
@@ -341,7 +341,7 @@
   <!-- ==================================================================== -->
   <!-- Default MIME mappings                                                -->
   <!-- The default MIME mappings are provided by the mime.properties        -->
-  <!-- resource in the org.mortbay.jetty.server.server.jar file.  Additional or modified  -->
+  <!-- resource in the org.mortbay.jetty.server.jar file.  Additional or modified  -->
   <!-- mappings may be specified here                                       -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <!-- UNCOMMENT TO ACTIVATE

@@ -64,7 +64,7 @@ public class IncludableGzipFilter extends GzipFilter
         protected boolean setContentEncodingGzip()
         {
             if (_request.getAttribute("javax.servlet.include.request_uri")!=null)
-                _response.setHeader("org.mortbay.jetty.server.server.include.Content-Encoding", "gzip");
+                _response.setHeader("org.mortbay.jetty.server.include.Content-Encoding", "gzip");
             else
                 _response.setHeader("Content-Encoding", "gzip");
                 

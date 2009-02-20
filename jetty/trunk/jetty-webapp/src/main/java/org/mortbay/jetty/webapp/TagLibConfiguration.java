@@ -50,8 +50,8 @@ import org.mortbay.jetty.xml.XmlParser;
  */
 public class TagLibConfiguration implements Configuration
 {
-    public static final String __web_inf_pattern = "org.mortbay.jetty.server.server.webapp.WebInfIncludeTLDJarPattern";
-    public static final String __container_pattern = "org.mortbay.jetty.server.server.webapp.ContainerIncludeTLDJarPattern";
+    public static final String __web_inf_pattern = "org.mortbay.jetty.webapp.WebInfIncludeTLDJarPattern";
+    public static final String __container_pattern = "org.mortbay.jetty.server.webapp.ContainerIncludeTLDJarPattern";
     WebAppContext _context;
 
 
