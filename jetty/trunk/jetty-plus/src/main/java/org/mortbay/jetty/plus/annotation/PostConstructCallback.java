@@ -34,7 +34,7 @@ public class PostConstructCallback extends LifeCycleCallback
      *  - must be void return 
      *  - no checked exceptions
      *  - cannot be static
-     * @see org.mortbay.jetty.server.plus.annotation.LifeCycleCallback#validate(java.lang.Class, java.lang.reflect.Method)
+     * @see org.mortbay.jetty.server.server.plus.annotation.LifeCycleCallback#validate(java.lang.Class, java.lang.reflect.Method)
      */
     public void validate(Class clazz, Method method)
     {

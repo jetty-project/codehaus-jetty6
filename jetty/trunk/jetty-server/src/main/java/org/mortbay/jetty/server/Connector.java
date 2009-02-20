@@ -107,14 +107,14 @@ public interface Connector extends LifeCycle, Buffers
     /* ------------------------------------------------------------ */
     /**
      * @return The port to use when redirecting a request if a data constraint of integral is 
-     * required. See {@link org.mortbay.jetty.server.security.Constraint#getDataConstraint()}
+     * required. See {@link org.mortbay.jetty.server.server.security.Constraint#getDataConstraint()}
      */
     int getIntegralPort();
 
     /* ------------------------------------------------------------ */
     /**
      * @return The schema to use when redirecting a request if a data constraint of integral is 
-     * required. See {@link org.mortbay.jetty.server.security.Constraint#getDataConstraint()}
+     * required. See {@link org.mortbay.jetty.server.server.security.Constraint#getDataConstraint()}
      */
     String getIntegralScheme();
 
@@ -128,7 +128,7 @@ public interface Connector extends LifeCycle, Buffers
     /* ------------------------------------------------------------ */
     /**
      * @return The port to use when redirecting a request if a data constraint of confidential is 
-     * required. See {@link org.mortbay.jetty.server.security.Constraint#getDataConstraint()}
+     * required. See {@link org.mortbay.jetty.server.server.security.Constraint#getDataConstraint()}
      */
     int getConfidentialPort();
     
@@ -136,7 +136,7 @@ public interface Connector extends LifeCycle, Buffers
     /* ------------------------------------------------------------ */
     /**
      * @return The schema to use when redirecting a request if a data constraint of confidential is 
-     * required. See {@link org.mortbay.jetty.server.security.Constraint#getDataConstraint()}
+     * required. See {@link org.mortbay.jetty.server.server.security.Constraint#getDataConstraint()}
      */
     String getConfidentialScheme();
     

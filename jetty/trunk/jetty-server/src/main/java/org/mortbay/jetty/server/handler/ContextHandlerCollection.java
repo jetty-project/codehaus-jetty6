@@ -35,9 +35,9 @@ import org.mortbay.jetty.util.log.Log;
 /* ------------------------------------------------------------ */
 /** ContextHandlerCollection.
  * 
- * This {@link org.mortbay.jetty.server.handler.HandlerCollection} is creates a 
- * {@link org.mortbay.jetty.server.servlet.PathMap} to it's contained handlers based
- * on the context path and virtual hosts of any contained {@link org.mortbay.jetty.server.handler.ContextHandler}s.
+ * This {@link org.mortbay.jetty.server.server.handler.HandlerCollection} is creates a 
+ * {@link org.mortbay.jetty.server.server.servlet.PathMap} to it's contained handlers based
+ * on the context path and virtual hosts of any contained {@link org.mortbay.jetty.server.server.handler.ContextHandler}s.
  * The contexts do not need to be directly contained, only children of the contained handlers.
  * Multiple contexts may have the same context path and they are called in order until one
  * handles the request.  
@@ -141,7 +141,7 @@ public class ContextHandlerCollection extends HandlerCollection
     
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.handler.HandlerCollection#setHandlers(org.mortbay.jetty.server.Handler[])
+     * @see org.mortbay.jetty.server.server.handler.HandlerCollection#setHandlers(org.mortbay.jetty.server.server.Handler[])
      */
     public void setHandlers(Handler[] handlers)
     {
@@ -161,7 +161,7 @@ public class ContextHandlerCollection extends HandlerCollection
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
+     * @see org.mortbay.jetty.server.server.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
     {
