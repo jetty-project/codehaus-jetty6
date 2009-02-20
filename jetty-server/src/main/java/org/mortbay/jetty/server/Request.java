@@ -287,7 +287,7 @@ public class Request implements HttpServletRequest
      */
     public Object getAttribute(String name)
     {
-        if ("org.mortbay.jetty.server.server.ajax.Continuation".equals(name))
+        if ("org.mortbay.jetty.util.ajax.Continuation".equals(name))
             return getContinuation(true);
         
         if (DispatcherType.ASYNC.equals(_dispatcherType))
@@ -1167,9 +1167,9 @@ public class Request implements HttpServletRequest
     {
         Object old_value=_attributes==null?null:_attributes.getAttribute(name);
         
-        if ("org.mortbay.jetty.server.server.Request.queryEncoding".equals(name))
+        if ("org.mortbay.jetty.server.Request.queryEncoding".equals(name))
             setQueryEncoding(value==null?null:value.toString());
-        else if("org.mortbay.jetty.server.server.sendContent".equals(name))
+        else if("org.mortbay.jetty.server.sendContent".equals(name))
         {
             try 
             {
@@ -1180,7 +1180,7 @@ public class Request implements HttpServletRequest
                 throw new RuntimeException(e);
             }
         }
-        else if("org.mortbay.jetty.server.server.ResponseBuffer".equals(name))
+        else if("org.mortbay.jetty.server.ResponseBuffer".equals(name))
         {
             try
             {
@@ -1314,7 +1314,7 @@ public class Request implements HttpServletRequest
                             maxFormContentSize=_context.getContextHandler().getMaxFormContentSize();
                         else
                         {
-                            Integer size = (Integer)_connection.getConnector().getServer().getAttribute("org.mortbay.jetty.server.server.Request.maxFormContentSize");
+                            Integer size = (Integer)_connection.getConnector().getServer().getAttribute("org.mortbay.jetty.server.Request.maxFormContentSize");
                             if (size!=null)
                                 maxFormContentSize =size.intValue();
                         }

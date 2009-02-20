@@ -68,14 +68,14 @@ import org.mortbay.jetty.util.resource.Resource;
 public class WebAppContext extends Context
 {   
     public final static String WEB_DEFAULTS_XML="org/mortbay/jetty/webapp/webdefault.xml";
-    public final static String ERROR_PAGE="org.mortbay.jetty.server.server.error_page";
+    public final static String ERROR_PAGE="org.mortbay.jetty.server.error_page";
     
     private static String[] __dftConfigurationClasses =  
     { 
-        "org.mortbay.jetty.server.server.webapp.WebInfConfiguration", 
-        "org.mortbay.jetty.server.server.webapp.WebXmlConfiguration", 
-        "org.mortbay.jetty.server.server.webapp.JettyWebXmlConfiguration",
-        "org.mortbay.jetty.server.server.webapp.TagLibConfiguration" 
+        "org.mortbay.jetty.webapp.WebInfConfiguration", 
+        "org.mortbay.jetty.webapp.WebXmlConfiguration", 
+        "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",
+        "org.mortbay.jetty.webapp.TagLibConfiguration" 
     } ;
     private String[] _configurationClasses=__dftConfigurationClasses;
     private Configuration[] _configurations;
@@ -86,7 +86,7 @@ public class WebAppContext extends Context
     private boolean _extractWAR=true;
     private boolean _copyDir=false;
     private boolean _logUrlOnStart =false;
-    private boolean _parentLoaderPriority= Boolean.getBoolean("org.mortbay.jetty.server.server.webapp.parentLoaderPriority");
+    private boolean _parentLoaderPriority= Boolean.getBoolean("org.mortbay.jetty.server.webapp.parentLoaderPriority");
     private PermissionCollection _permissions;
     private String[] _systemClasses = {
             "java.",
@@ -96,14 +96,14 @@ public class WebAppContext extends Context
             "org.w3c.", 
             "org.apache.commons.logging.", 
             "org.apache.log4j.",
-            "org.mortbay.jetty.server.server.servlet.", // webapp cannot change default servlets
+            "org.mortbay.jetty.server.servlet.", // webapp cannot change default servlets
             "org.mortbay.util.ajax.",     // webapp cannot change continuation classes
             "org.mortbay.naming."         // webapp cannot change naming classes
             };
     private String[] _serverClasses = {
             "-org.mortbay.naming.",       // don't hide naming classes
             "-org.mortbay.util.ajax.",    // don't hide continuation classes
-            "-org.mortbay.jetty.server.server.plus.jaas.", //don't hide jaas modules
+            "-org.mortbay.jetty.plus.jaas.", //don't hide jaas modules
             "org.mortbay.",               // hide rest of mortbay classes
             "org.slf4j."                  // hide slf4j
             }; 

@@ -246,7 +246,7 @@ public class ThrottlingFilter implements Filter
 
     private Continuation getContinuation(ServletRequest request)
     {
-        return (Continuation) request.getAttribute("org.mortbay.jetty.server.server.ajax.Continuation");
+        return (Continuation) request.getAttribute("org.mortbay.jetty.util.ajax.Continuation");
     }
 
     public void destroy()
