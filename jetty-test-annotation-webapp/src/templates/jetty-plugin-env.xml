@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
 
-<Configure id='wac' class="org.mortbay.jetty.server.webapp.WebAppContext">
+<Configure id='wac' class="org.mortbay.jetty.server.server.webapp.WebAppContext">
 
 
  <!-- Add an override for a global EnvEntry                           -->
-  <New id="maxAmount"  class="org.mortbay.jetty.server.plus.naming.EnvEntry">
+  <New id="maxAmount"  class="org.mortbay.jetty.server.server.plus.naming.EnvEntry">
     <Arg><Ref id='wac'/></Arg>
     <Arg>maxAmount</Arg>
     <Arg type="java.lang.Double">55.0</Arg>
@@ -22,7 +22,7 @@
   <!-- =============================================================== -->
 
 
-  <New id="tx" class="org.mortbay.jetty.server.plus.naming.Transaction">
+  <New id="tx" class="org.mortbay.jetty.server.server.plus.naming.Transaction">
    <Arg>
      <New class="com.acme.MockUserTransaction"/>
    </Arg>
@@ -30,7 +30,7 @@
 
 
 
-  <New id="mydatasource" class="org.mortbay.jetty.server.plus.naming.Resource">
+  <New id="mydatasource" class="org.mortbay.jetty.server.server.plus.naming.Resource">
     <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource</Arg>
     <Arg>
@@ -42,7 +42,7 @@
 
   <Get name="securityHandler">
     <Set name="userRealm">
-      <New class="org.mortbay.jetty.server.security.HashUserRealm">
+      <New class="org.mortbay.jetty.server.server.security.HashUserRealm">
         <Set name="name">Test Realm</Set>
         <Set name="config"><SystemProperty name="jetty.home" default="../.."/>/etc/realm.properties</Set>
       </New>

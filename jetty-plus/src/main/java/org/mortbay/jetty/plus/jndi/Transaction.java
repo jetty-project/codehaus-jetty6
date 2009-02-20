@@ -66,7 +66,7 @@ public class Transaction extends NamingEntry
      * Allow other bindings of UserTransaction.
      * 
      * These should be in ADDITION to java:comp/UserTransaction
-     * @see org.mortbay.jetty.server.plus.jndi.NamingEntry#bindToENC(java.lang.String)
+     * @see org.mortbay.jetty.server.server.plus.jndi.NamingEntry#bindToENC(java.lang.String)
      */
     public void bindToENC (String localName)
     throws NamingException

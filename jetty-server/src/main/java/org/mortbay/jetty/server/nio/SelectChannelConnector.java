@@ -271,7 +271,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     
     /* ------------------------------------------------------------ */
     /*
-     * @see org.mortbay.jetty.server.AbstractConnector#doStart()
+     * @see org.mortbay.jetty.server.server.AbstractConnector#doStart()
      */
     protected void doStart() throws Exception
     {
@@ -287,7 +287,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
 
     /* ------------------------------------------------------------ */
     /*
-     * @see org.mortbay.jetty.server.AbstractConnector#doStop()
+     * @see org.mortbay.jetty.server.server.AbstractConnector#doStop()
      */
     protected void doStop() throws Exception
     {        

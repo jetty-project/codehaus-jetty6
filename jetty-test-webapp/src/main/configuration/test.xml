@@ -11,7 +11,7 @@ directory, additional configuration may be specified and hot deployments
 detected.
 ===================================================================== -->
 
-<Configure class="org.mortbay.jetty.server.webapp.WebAppContext">
+<Configure class="org.mortbay.jetty.server.server.webapp.WebAppContext">
 
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -50,7 +50,7 @@ detected.
 
   <Get name="securityHandler">
     <Set name="userRealm">
-      <New class="org.mortbay.jetty.server.security.HashLoginService">
+      <New class="org.mortbay.jetty.server.server.security.HashLoginService">
 	    <Set name="name">Test Realm</Set>
 	    <Set name="config"><SystemProperty name="jetty.home" default="."/>/etc/realm.properties</Set>
             <!-- To enable reload of realm when properties change, uncomment the following lines -->

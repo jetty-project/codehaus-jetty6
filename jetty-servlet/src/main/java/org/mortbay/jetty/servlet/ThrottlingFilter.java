@@ -38,7 +38,7 @@ import org.mortbay.jetty.util.log.Log;
  * This filter protects a web application from having to handle an unmanageable load. 
  * <p>
  * For servers where there is 1 application with standardized resource restrictions, then this affect can be easily
- *  controlled by limiting the size of the {@link org.mortbay.jetty.server.Server#setThreadPool server thread pool}, however
+ *  controlled by limiting the size of the {@link org.mortbay.jetty.server.server.Server#setThreadPool server thread pool}, however
  *  where there are multiple applications, or a single application has different resource requirements for different
  *  URLs, then this filter can assist in managing the number of requests being services at any point in time.
  * <p>
@@ -73,8 +73,8 @@ import org.mortbay.jetty.util.log.Log;
  * method {@link #rejectRequest}. By default this method sends the HTTP status code {@link HttpServletResponse#SC_SERVICE_UNAVAILABLE 503},
  * but this may be over-ridden in derived classes. 
  * <p>
- * This filter works best with the {@link org.mortbay.jetty.server.nio.SelectChannelConnector}, as {@link org.mortbay.jetty.server.RetryRequest} based 
- * {@link org.mortbay.jetty.server.util.ajax.Continuation}s can be used to free the thread and other resources associated with the queued requests.
+ * This filter works best with the {@link org.mortbay.jetty.server.server.nio.SelectChannelConnector}, as {@link org.mortbay.jetty.server.server.RetryRequest} based 
+ * {@link org.mortbay.jetty.server.server.util.ajax.Continuation}s can be used to free the thread and other resources associated with the queued requests.
  * 
  * @author - Tim Vernum
  */
@@ -246,7 +246,7 @@ public class ThrottlingFilter implements Filter
 
     private Continuation getContinuation(ServletRequest request)
     {
-        return (Continuation) request.getAttribute("org.mortbay.jetty.server.ajax.Continuation");
+        return (Continuation) request.getAttribute("org.mortbay.jetty.server.server.ajax.Continuation");
     }
 
     public void destroy()
