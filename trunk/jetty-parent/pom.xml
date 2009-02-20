@@ -133,6 +133,13 @@
       <organization>Webtide</organization>
       <organizationUrl>http://www.webtide.com</organizationUrl>
     </developer>
+    <developer>
+      <id>ayao</id>
+      <name>Athena Yao</name>
+      <email>yao.athena@gmail.com</email>
+      <organization>Webtide</organization>
+      <organizationUrl>http://www.webtide.com</organizationUrl>
+    </developer>
   </developers>
   <licenses>
     <license>
