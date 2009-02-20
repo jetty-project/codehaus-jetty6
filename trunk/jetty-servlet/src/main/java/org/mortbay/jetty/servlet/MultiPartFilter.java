@@ -110,7 +110,7 @@ public class MultiPartFilter implements Filter
         /*MultiMap params = new MultiMap();
         if(srequest instanceof org.mortbay.jetty.server.Request)
         {
-            org.mortbay.jetty.server.server.Request req = ((org.mortbay.jetty.server.Request)srequest);
+            org.mortbay.jetty.server.Request req = ((org.mortbay.jetty.server.Request)srequest);
             req.getUri().decodeQueryTo(params, req.getQueryEncoding());
         }*/
         
