@@ -18,8 +18,6 @@ package org.mortbay.jetty.http;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 
 import javax.servlet.ServletOutputStream;
 //import javax.servlet.http.HttpServletResponse;
@@ -62,37 +60,18 @@ public abstract class AbstractGenerator implements Generator
     private static byte[] NO_BYTES = {};
     private static int MAX_OUTPUT_CHARS = 512; 
 
-    private static Buffer[] __reasons = new Buffer[505];
-    static
-    {
-        Field[] fields = HttpStatus.class.getDeclaredFields();
-        for (int i=0;i<fields.length;i++)
-        {
-            if ((fields[i].getModifiers()&Modifier.STATIC)!=0 &&
-                 fields[i].getName().startsWith("ORDINAL_"))
-            {
-                try
-                {
-                    int code = fields[i].getInt(null);
-                    if (code<__reasons.length)
-                        __reasons[code]=new ByteArrayBuffer(fields[i].getName().substring(12).toUpperCase());
-                }
-                catch(IllegalAccessException e)
-                {}
-            }    
-        }
-    }
-    
     protected static Buffer getReasonBuffer(int code)
     {
-        Buffer reason=(code<__reasons.length)?__reasons[code]:null;
-        return reason==null?null:reason;
+        return HttpStatusCode.getMessageBuffer(code);
     }
     
     public static String getReason(int code)
     {
-        Buffer reason=(code<__reasons.length)?__reasons[code]:null;
-        return reason==null?TypeUtil.toString(code):reason.toString();
+        String message = HttpStatusCode.getMessage(code);
+        if(message != null) {
+            return message;
+        } 
+        return TypeUtil.toString(code);
     }
 
     // data

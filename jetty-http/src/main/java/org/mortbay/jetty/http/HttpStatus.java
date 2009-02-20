@@ -20,7 +20,7 @@ import org.mortbay.jetty.io.ByteArrayBuffer;
 
 /* ------------------------------------------------------------------------------- */
 /**
- * 
+ * @deprecated use {@link HttpStatusCode} instead.
  */
 public class HttpStatus
 {
