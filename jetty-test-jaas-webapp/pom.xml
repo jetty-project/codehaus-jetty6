@@ -46,5 +46,10 @@
       <version>2.1</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-security</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>
