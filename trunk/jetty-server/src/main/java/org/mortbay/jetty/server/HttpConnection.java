@@ -719,7 +719,7 @@ public class HttpConnection implements Connection
         
         /*
          * 
-         * @see org.mortbay.jetty.server.server.HttpParser.EventHandler#startRequest(org.mortbay.io.Buffer,
+         * @see org.mortbay.jetty.server.HttpParser.EventHandler#startRequest(org.mortbay.io.Buffer,
          *      org.mortbay.io.Buffer, org.mortbay.io.Buffer)
          */
         public void startRequest(Buffer method, Buffer uri, Buffer version) throws IOException
@@ -760,7 +760,7 @@ public class HttpConnection implements Connection
         }
 
         /*
-         * @see org.mortbay.jetty.server.server.HttpParser.EventHandler#parsedHeaderValue(org.mortbay.io.Buffer)
+         * @see org.mortbay.jetty.server.HttpParser.EventHandler#parsedHeaderValue(org.mortbay.io.Buffer)
          */
         public void parsedHeader(Buffer name, Buffer value)
         {
@@ -833,7 +833,7 @@ public class HttpConnection implements Connection
         }
 
         /*
-         * @see org.mortbay.jetty.server.server.HttpParser.EventHandler#headerComplete()
+         * @see org.mortbay.jetty.server.HttpParser.EventHandler#headerComplete()
          */
         public void headerComplete() throws IOException
         {
@@ -892,7 +892,7 @@ public class HttpConnection implements Connection
 
         /* ------------------------------------------------------------ */
         /*
-         * @see org.mortbay.jetty.server.server.HttpParser.EventHandler#content(int, org.mortbay.io.Buffer)
+         * @see org.mortbay.jetty.server.HttpParser.EventHandler#content(int, org.mortbay.io.Buffer)
          */
         public void content(Buffer ref) throws IOException
         {
@@ -906,7 +906,7 @@ public class HttpConnection implements Connection
         /*
          * (non-Javadoc)
          * 
-         * @see org.mortbay.jetty.server.server.HttpParser.EventHandler#messageComplete(int)
+         * @see org.mortbay.jetty.server.HttpParser.EventHandler#messageComplete(int)
          */
         public void messageComplete(long contentLength) throws IOException
         {
@@ -920,7 +920,7 @@ public class HttpConnection implements Connection
         /*
          * (non-Javadoc)
          * 
-         * @see org.mortbay.jetty.server.server.HttpParser.EventHandler#startResponse(org.mortbay.io.Buffer, int,
+         * @see org.mortbay.jetty.server.HttpParser.EventHandler#startResponse(org.mortbay.io.Buffer, int,
          *      org.mortbay.io.Buffer)
          */
         public void startResponse(Buffer version, int status, Buffer reason)

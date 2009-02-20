@@ -26,7 +26,7 @@ import org.mortbay.jetty.server.Request;
 
 /* ------------------------------------------------------------ */
 /** HandlerList.
- * This extension of {@link org.mortbay.jetty.server.server.handler.HandlerCollection} will call
+ * This extension of {@link org.mortbay.jetty.server.handler.HandlerCollection} will call
  * each contained handler in turn until either an exception is thrown, the response 
  * is committed or a positive response status is set.
  */
@@ -34,7 +34,7 @@ public class HandlerList extends HandlerCollection
 {
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.mortbay.jetty.server.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response) 
         throws IOException, ServletException

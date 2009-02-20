@@ -61,7 +61,7 @@ public class DumpHandler extends AbstractHandler
     
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
+     * @see org.mortbay.jetty.server.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
     {

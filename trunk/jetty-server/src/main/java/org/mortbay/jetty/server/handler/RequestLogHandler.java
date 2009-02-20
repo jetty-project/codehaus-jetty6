@@ -42,7 +42,7 @@ public class RequestLogHandler extends HandlerWrapper
     
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
+     * @see org.mortbay.jetty.server.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException
@@ -85,7 +85,7 @@ public class RequestLogHandler extends HandlerWrapper
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.handler.HandlerWrapper#setServer(org.mortbay.jetty.server.server.Server)
+     * @see org.mortbay.jetty.server.handler.HandlerWrapper#setServer(org.mortbay.jetty.server.Server)
      */
     public void setServer(Server server)
     {
@@ -109,7 +109,7 @@ public class RequestLogHandler extends HandlerWrapper
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.handler.HandlerWrapper#doStart()
+     * @see org.mortbay.jetty.server.handler.HandlerWrapper#doStart()
      */
     protected void doStart() throws Exception
     {
@@ -120,7 +120,7 @@ public class RequestLogHandler extends HandlerWrapper
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.handler.HandlerWrapper#doStop()
+     * @see org.mortbay.jetty.server.handler.HandlerWrapper#doStop()
      */
     protected void doStop() throws Exception
     {
