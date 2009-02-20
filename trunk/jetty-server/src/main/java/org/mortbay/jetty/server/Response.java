@@ -66,7 +66,7 @@ public class Response implements HttpServletResponse
      * can be set during include using only {@link #setHeader(String, String)} or
      * {@link #addHeader(String, String)}.
      */
-    public static String SET_INCLUDE_HEADER_PREFIX = "org.mortbay.jetty.server.server.include.";
+    public static String SET_INCLUDE_HEADER_PREFIX = "org.mortbay.jetty.server.include.";
 
     private static PrintWriter __nullPrintWriter;
     private static ServletOutputStream __nullServletOut;
