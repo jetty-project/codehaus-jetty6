@@ -6,7 +6,7 @@
 <!-- Configure the test-annotations webapp                           -->
 <!-- =============================================================== -->
 
-<Configure id='wac' class="org.mortbay.jetty.server.webapp.WebAppContext">
+<Configure id='wac' class="org.mortbay.jetty.server.server.webapp.WebAppContext">
 
   <!-- =========================================================== -->
   <!-- Configurations for WebAppContexts                          -->
@@ -14,11 +14,11 @@
   <!-- wants to use Annotations                                   -->
   <!-- ========================================================== -->
   <Array id="annotationConfig" type="java.lang.String">
-    <Item>org.mortbay.jetty.server.webapp.WebInfConfiguration</Item>
-    <Item>org.mortbay.jetty.server.plus.webapp.EnvConfiguration</Item>
-    <Item>org.mortbay.jetty.server.annotations.Configuration</Item>
-    <Item>org.mortbay.jetty.server.webapp.JettyWebXmlConfiguration</Item>
-    <Item>org.mortbay.jetty.server.webapp.TagLibConfiguration</Item>
+    <Item>org.mortbay.jetty.server.server.webapp.WebInfConfiguration</Item>
+    <Item>org.mortbay.jetty.server.server.plus.webapp.EnvConfiguration</Item>
+    <Item>org.mortbay.jetty.server.server.annotations.Configuration</Item>
+    <Item>org.mortbay.jetty.server.server.webapp.JettyWebXmlConfiguration</Item>
+    <Item>org.mortbay.jetty.server.server.webapp.TagLibConfiguration</Item>
   </Array>
 
 
@@ -31,7 +31,7 @@
 
   <Get name="securityHandler">
     <Set name="userRealm">
-      <New class="org.mortbay.jetty.server.security.HashUserRealm">
+      <New class="org.mortbay.jetty.server.server.security.HashUserRealm">
         <Set name="name">Test Realm</Set>
         <Set name="config"><SystemProperty name="jetty.home" default="."/>/etc/realm.properties</Set>
       </New>
@@ -53,7 +53,7 @@
   </Call>
 
 
-  <New id="maxAmount"  class="org.mortbay.jetty.server.plus.naming.EnvEntry">
+  <New id="maxAmount"  class="org.mortbay.jetty.server.server.plus.naming.EnvEntry">
     <Arg><Ref id='wac'/></Arg>
     <Arg>maxAmount</Arg>
     <Arg type="java.lang.Double">100</Arg>
@@ -71,7 +71,7 @@
   <!-- Atomikos        
   @ATOMIKOS-TRANSACTIONMANAGER@
 
-  <New id="tx" class="org.mortbay.jetty.server.plus.naming.Transaction">
+  <New id="tx" class="org.mortbay.jetty.server.server.plus.naming.Transaction">
    <Arg>
      @ATOMIKOS-USERTRANSACTION@
    </Arg>
@@ -81,7 +81,7 @@
   @ATOMIKOS-DATASOURCE1-PRE@
 
 
-  <New id="mydatasource" class="org.mortbay.jetty.server.plus.naming.Resource">
+  <New id="mydatasource" class="org.mortbay.jetty.server.server.plus.naming.Resource">
     <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource</Arg>
     <Arg>
@@ -93,7 +93,7 @@
   <!-- JOTM
   @JOTM-TRANSACTIONMANAGER@
 
-  <New id="tx" class="org.mortbay.jetty.server.plus.naming.Transaction">
+  <New id="tx" class="org.mortbay.jetty.server.server.plus.naming.Transaction">
    <Arg>
      @JOTM-USERTRANSACTION@
    </Arg>
@@ -103,7 +103,7 @@
   @JOTM-DATASOURCE1-PRE@
 
 
-  <New id="mydatasource" class="org.mortbay.jetty.server.plus.naming.Resource">
+  <New id="mydatasource" class="org.mortbay.jetty.server.server.plus.naming.Resource">
     <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource</Arg>
     <Arg>

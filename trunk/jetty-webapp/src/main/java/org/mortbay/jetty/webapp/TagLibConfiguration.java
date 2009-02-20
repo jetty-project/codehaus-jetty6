@@ -50,8 +50,8 @@ import org.mortbay.jetty.xml.XmlParser;
  */
 public class TagLibConfiguration implements Configuration
 {
-    public static final String __web_inf_pattern = "org.mortbay.jetty.server.webapp.WebInfIncludeTLDJarPattern";
-    public static final String __container_pattern = "org.mortbay.jetty.server.webapp.ContainerIncludeTLDJarPattern";
+    public static final String __web_inf_pattern = "org.mortbay.jetty.server.server.webapp.WebInfIncludeTLDJarPattern";
+    public static final String __container_pattern = "org.mortbay.jetty.server.server.webapp.ContainerIncludeTLDJarPattern";
     WebAppContext _context;
 
 
@@ -110,7 +110,7 @@ public class TagLibConfiguration implements Configuration
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.servlet.WebAppContext.Configuration#configureDefaults()
+     * @see org.mortbay.jetty.server.server.servlet.WebAppContext.Configuration#configureDefaults()
      */
     public void configureDefaults() throws Exception
     {
@@ -119,7 +119,7 @@ public class TagLibConfiguration implements Configuration
     
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.servlet.WebAppContext.Configuration#configureWebApp()
+     * @see org.mortbay.jetty.server.server.servlet.WebAppContext.Configuration#configureWebApp()
      */
     public void configureWebApp() throws Exception
     {   
@@ -168,8 +168,8 @@ public class TagLibConfiguration implements Configuration
         // Look for tlds in any jars
         //Use an opt-in style:
         //
-        //org.mortbay.jetty.server.webapp.WebInfIncludeTLDJarPattern and
-        //org.mortbay.jetty.server.webapp.ContainerIncludeTLDJarPattern
+        //org.mortbay.jetty.server.server.webapp.WebInfIncludeTLDJarPattern and
+        //org.mortbay.jetty.server.server.webapp.ContainerIncludeTLDJarPattern
         //
         //When examining jars in WEB-INF/lib:
         //   if WebInfIncludeTLDJarPattern is null

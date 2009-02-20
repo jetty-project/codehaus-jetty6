@@ -33,7 +33,7 @@ import org.mortbay.jetty.util.log.Log;
  */
 public class HashSessionIdManager extends AbstractLifeCycle implements SessionIdManager
 {
-    private final static String __NEW_SESSION_ID="org.mortbay.jetty.server.newSessionId";  
+    private final static String __NEW_SESSION_ID="org.mortbay.jetty.server.server.newSessionId";  
     protected final static String SESSION_ID_RANDOM_ALGORITHM = "SHA1PRNG";
     protected final static String SESSION_ID_RANDOM_ALGORITHM_ALT = "IBMSecureRandom";
 
@@ -150,7 +150,7 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
 
     /* ------------------------------------------------------------ */
     /*
-     * @see org.mortbay.jetty.server.SessionManager.MetaManager#idInUse(java.lang.String)
+     * @see org.mortbay.jetty.server.server.SessionManager.MetaManager#idInUse(java.lang.String)
      */
     public boolean idInUse(String id)
     {
@@ -159,7 +159,7 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
 
     /* ------------------------------------------------------------ */
     /*
-     * @see org.mortbay.jetty.server.SessionManager.MetaManager#addSession(javax.servlet.http.HttpSession)
+     * @see org.mortbay.jetty.server.server.SessionManager.MetaManager#addSession(javax.servlet.http.HttpSession)
      */
     public void addSession(HttpSession session)
     {
@@ -168,7 +168,7 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
 
     /* ------------------------------------------------------------ */
     /*
-     * @see org.mortbay.jetty.server.SessionManager.MetaManager#addSession(javax.servlet.http.HttpSession)
+     * @see org.mortbay.jetty.server.server.SessionManager.MetaManager#addSession(javax.servlet.http.HttpSession)
      */
     public void removeSession(HttpSession session)
     {
@@ -177,7 +177,7 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
 
     /* ------------------------------------------------------------ */
     /*
-     * @see org.mortbay.jetty.server.SessionManager.MetaManager#invalidateAll(java.lang.String)
+     * @see org.mortbay.jetty.server.server.SessionManager.MetaManager#invalidateAll(java.lang.String)
      */
     public void invalidateAll(String id)
     {

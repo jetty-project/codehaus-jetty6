@@ -4,16 +4,16 @@
 <!-- =============================================================== -->
 <!-- Configure the test-jndi webapp                                  -->
 <!-- =============================================================== -->
-<Configure id='wac' class="org.mortbay.jetty.server.webapp.WebAppContext">
+<Configure id='wac' class="org.mortbay.jetty.server.server.webapp.WebAppContext">
 
 <!-- Ensure Jetty Plus features are enabled for this webapp                      -->
   <Set name="configurationClasses">
     <Array type="java.lang.String">
-      <Item>org.mortbay.jetty.server.webapp.WebInfConfiguration</Item>
-      <Item>org.mortbay.jetty.server.plus.webapp.EnvConfiguration</Item>
-      <Item>org.mortbay.jetty.server.plus.webapp.Configuration</Item>
-      <Item>org.mortbay.jetty.server.webapp.JettyWebXmlConfiguration</Item>
-      <Item>org.mortbay.jetty.server.webapp.TagLibConfiguration</Item>
+      <Item>org.mortbay.jetty.server.server.webapp.WebInfConfiguration</Item>
+      <Item>org.mortbay.jetty.server.server.plus.webapp.EnvConfiguration</Item>
+      <Item>org.mortbay.jetty.server.server.plus.webapp.Configuration</Item>
+      <Item>org.mortbay.jetty.server.server.webapp.JettyWebXmlConfiguration</Item>
+      <Item>org.mortbay.jetty.server.server.webapp.TagLibConfiguration</Item>
     </Array>
   </Set>
 
@@ -37,7 +37,7 @@
   </Call>
 
   <!-- Define an env entry with Server scope for java:comp/env                   -->
-  <New id="woggle"  class="org.mortbay.jetty.server.plus.naming.EnvEntry">   
+  <New id="woggle"  class="org.mortbay.jetty.server.server.plus.naming.EnvEntry">   
     <Arg><Property name='server'/></Arg>
     <Arg>woggle</Arg>
     <Arg type="java.lang.Integer">4000</Arg> 
@@ -45,7 +45,7 @@
   </New>
 
   <!-- Define an env entry with webapp scope for java:comp/env                   -->
-  <New id="wiggle"  class="org.mortbay.jetty.server.plus.naming.EnvEntry">
+  <New id="wiggle"  class="org.mortbay.jetty.server.server.plus.naming.EnvEntry">
     <Arg><Ref id='wac'/></Arg>
     <Arg>wiggle</Arg>
     <Arg type="java.lang.Double">100</Arg>
@@ -53,7 +53,7 @@
   </New>
 
  <!-- Mail Session setup                                          -->
- <New id="xxxmail" class="org.mortbay.jetty.server.plus.naming.Resource">
+ <New id="xxxmail" class="org.mortbay.jetty.server.server.plus.naming.Resource">
     <Arg><Ref id='wac'/></Arg>
      <Arg>mail/Session</Arg>
      <Arg>
@@ -81,7 +81,7 @@
   <!-- Atomikos        
   @ATOMIKOS-TRANSACTIONMANAGER@
 
-  <New id="tx" class="org.mortbay.jetty.server.plus.naming.Transaction">
+  <New id="tx" class="org.mortbay.jetty.server.server.plus.naming.Transaction">
    <Arg>
      @ATOMIKOS-USERTRANSACTION@
    </Arg>
@@ -91,7 +91,7 @@
   @ATOMIKOS-DATASOURCE1-PRE@
 
 
-  <New id="mydatasource" class="org.mortbay.jetty.server.plus.naming.Resource">
+  <New id="mydatasource" class="org.mortbay.jetty.server.server.plus.naming.Resource">
     <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource</Arg>
     <Arg>
@@ -102,7 +102,7 @@
 
   @ATOMIKOS-DATASOURCE2-PRE@
 
-  <New id="mydatasource2" class="org.mortbay.jetty.server.plus.naming.Resource">
+  <New id="mydatasource2" class="org.mortbay.jetty.server.server.plus.naming.Resource">
     <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource2</Arg>
     <Arg>
@@ -114,7 +114,7 @@
   <!-- JOTM
   @JOTM-TRANSACTIONMANAGER@
 
-  <New id="tx" class="org.mortbay.jetty.server.plus.naming.Transaction">
+  <New id="tx" class="org.mortbay.jetty.server.server.plus.naming.Transaction">
    <Arg>
      @JOTM-USERTRANSACTION@
    </Arg>
@@ -124,7 +124,7 @@
   @JOTM-DATASOURCE1-PRE@
 
 
-  <New id="mydatasource" class="org.mortbay.jetty.server.plus.naming.Resource">
+  <New id="mydatasource" class="org.mortbay.jetty.server.server.plus.naming.Resource">
     <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource</Arg>
     <Arg>
@@ -135,7 +135,7 @@
 
   @JOTM-DATASOURCE2-PRE@
 
-  <New id="mydatasource2" class="org.mortbay.jetty.server.plus.naming.Resource">
+  <New id="mydatasource2" class="org.mortbay.jetty.server.server.plus.naming.Resource">
     <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource2</Arg>
     <Arg>
