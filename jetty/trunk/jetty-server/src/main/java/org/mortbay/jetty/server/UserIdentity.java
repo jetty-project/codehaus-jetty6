@@ -14,9 +14,9 @@
 
 package org.mortbay.jetty.server;
 import java.security.Principal;
+import java.util.Map;
 
 import org.mortbay.jetty.server.RunAsToken;
-import org.mortbay.jetty.server.servlet.ServletHolder;
 
 /* ------------------------------------------------------------ */
 /** User object that encapsulates user identity and operations such as run-as-role actions, checking isUserInRole and getUserPrincipal.
@@ -53,10 +53,10 @@ public interface UserIdentity
      *
      * Note: should not return null.
      *
-     * @param servletHolder new servlet holder
-     * @return previous servlet holder (so it can be reset on exit from the servlet).
+     * @param roleMap Role reference map
+     * @return previous rol reference map
      */
-    ServletHolder setServletHolder(ServletHolder servletHolder);
+    Map<String,String> setRoleRefMap(Map<String,String> roleMap);
 
     /* ------------------------------------------------------------ */
     /** logout a user Principal.
@@ -90,7 +90,7 @@ public interface UserIdentity
             return null;
         }
 
-        public ServletHolder setServletHolder(ServletHolder servletHolder)
+        public Map<String,String> setRoleRefMap(Map<String,String> roleMap)
         {
             return null;
         }

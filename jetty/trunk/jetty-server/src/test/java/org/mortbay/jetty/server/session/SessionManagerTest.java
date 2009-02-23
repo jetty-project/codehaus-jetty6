@@ -16,7 +16,7 @@
  * ------------------------------------------------------------------------
  */
 
-package org.mortbay.jetty.server.servlet;
+package org.mortbay.jetty.server.session;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -28,10 +28,10 @@ import junit.framework.TestCase;
 
 import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.handler.ContextHandler;
-import org.mortbay.jetty.server.servlet.HashSessionIdManager;
-import org.mortbay.jetty.server.servlet.HashSessionManager;
-import org.mortbay.jetty.server.servlet.SessionHandler;
-import org.mortbay.jetty.server.servlet.AbstractSessionManager.Session;
+import org.mortbay.jetty.server.session.HashSessionIdManager;
+import org.mortbay.jetty.server.session.HashSessionManager;
+import org.mortbay.jetty.server.session.SessionHandler;
+import org.mortbay.jetty.server.session.AbstractSessionManager.Session;
 
 /**
  * @version $Revision$

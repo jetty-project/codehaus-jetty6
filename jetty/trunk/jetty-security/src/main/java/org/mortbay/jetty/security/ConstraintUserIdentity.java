@@ -23,17 +23,14 @@ import java.security.Principal;
 import java.util.Map;
 
 import org.mortbay.jetty.server.RunAsToken;
-import org.mortbay.jetty.server.servlet.ServletHolder;
 
 /**
  * @version $Rev$ $Date$
  */
 public class ConstraintUserIdentity extends AbstractUserIdentity
 {
-
-    private ServletHolder _servletHolder;
-
     private RunAsToken _runAsRole;
+    private Map<String, String> _roleRefMap;
 
     public ConstraintUserIdentity(ServerAuthResult authResult)
     {
@@ -53,7 +50,8 @@ public class ConstraintUserIdentity extends AbstractUserIdentity
     public boolean isUserInRole(String role)
     {
         if (role == null) { throw new NullPointerException("role"); }
-        String actualRole = getRoleRefMap().get(role);
+        final Map<String,String> roleRefMap=getRoleRefMap();
+        String actualRole = roleRefMap==null?role:roleRefMap.get(role);
         if (actualRole == null)
         {
             actualRole = role;
@@ -63,8 +61,9 @@ public class ConstraintUserIdentity extends AbstractUserIdentity
             if (userRole.equals(actualRole)) { return true; }
         }
         return false;
-    }/* ------------------------------------------------------------ */
-
+    }
+    
+    /* ------------------------------------------------------------ */
     // jaspi called from ServletHolder.handle, initServlet, doStop and tests
     public RunAsToken setRunAsRole(RunAsToken newRunAsRole)
     {
@@ -73,11 +72,12 @@ public class ConstraintUserIdentity extends AbstractUserIdentity
         return oldRunAsRole;
     }
 
-    public ServletHolder setServletHolder(ServletHolder newServletHolder)
+    /* ------------------------------------------------------------ */
+    public Map<String,String> setRoleRefMap(Map<String,String> roleMap)
     {
-        ServletHolder oldServletHolder = _servletHolder;
-        this._servletHolder = newServletHolder;
-        return oldServletHolder;
+        Map<String,String> old = _roleRefMap;
+        _roleRefMap=roleMap;
+        return old;
     }
 
     // jaspi called from FormAuthenticator.valueUnbound (when session is
@@ -89,7 +89,6 @@ public class ConstraintUserIdentity extends AbstractUserIdentity
 
     public Map<String, String> getRoleRefMap()
     {
-        if (_servletHolder == null) { return ServletHolder.NO_MAPPED_ROLES; }
-        return _servletHolder.getRoleMap();
+        return _roleRefMap;
     }
 }

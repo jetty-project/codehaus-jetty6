@@ -35,7 +35,6 @@ import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.server.UserRealm;
 import org.mortbay.jetty.server.handler.HandlerWrapper;
 import org.mortbay.jetty.server.handler.SecurityHandler;
-import org.mortbay.jetty.server.servlet.FilterMapping;
 import org.mortbay.jetty.util.log.Log;
 
 /**
