@@ -41,6 +41,7 @@ import org.mortbay.jetty.io.EofException;
 import org.mortbay.jetty.io.HttpException;
 import org.mortbay.jetty.server.Dispatcher;
 import org.mortbay.jetty.server.HttpConnection;
+import org.mortbay.jetty.server.PathMap;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.RetryRequest;
 import org.mortbay.jetty.server.Server;
@@ -73,13 +74,6 @@ public class ServletHandler extends AbstractHandler
 {
     /* ------------------------------------------------------------ */
     public static final String __DEFAULT_SERVLET="default";
-    public static final String __J_S_CONTEXT_TEMPDIR="javax.servlet.context.tempdir";
-    public static final String __J_S_ERROR_EXCEPTION="javax.servlet.error.exception";
-    public static final String __J_S_ERROR_EXCEPTION_TYPE="javax.servlet.error.exception_type";
-    public static final String __J_S_ERROR_MESSAGE="javax.servlet.error.message";
-    public static final String __J_S_ERROR_REQUEST_URI="javax.servlet.error.request_uri";
-    public static final String __J_S_ERROR_SERVLET_NAME="javax.servlet.error.servlet_name";
-    public static final String __J_S_ERROR_STATUS_CODE="javax.servlet.error.status_code";
         
     /* ------------------------------------------------------------ */
     private ContextHandler _contextHandler;
@@ -461,8 +455,8 @@ public class ServletHandler extends AbstractHandler
             // TODO httpResponse.getHttpConnection().forceClose();
             if (!response.isCommitted())
             {
-                request.setAttribute(ServletHandler.__J_S_ERROR_EXCEPTION_TYPE,th.getClass());
-                request.setAttribute(ServletHandler.__J_S_ERROR_EXCEPTION,th);
+                request.setAttribute(RequestDispatcher.ERROR_EXCEPTION_TYPE,th.getClass());
+                request.setAttribute(RequestDispatcher.ERROR_EXCEPTION,th);
                 if (th instanceof UnavailableException)
                 {
                     UnavailableException ue = (UnavailableException)th;
@@ -487,8 +481,8 @@ public class ServletHandler extends AbstractHandler
             // TODO httpResponse.getHttpConnection().forceClose();
             if (!response.isCommitted())
             {
-                request.setAttribute(ServletHandler.__J_S_ERROR_EXCEPTION_TYPE,e.getClass());
-                request.setAttribute(ServletHandler.__J_S_ERROR_EXCEPTION,e);
+                request.setAttribute(RequestDispatcher.ERROR_EXCEPTION_TYPE,e.getClass());
+                request.setAttribute(RequestDispatcher.ERROR_EXCEPTION,e);
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage());
             }
             else

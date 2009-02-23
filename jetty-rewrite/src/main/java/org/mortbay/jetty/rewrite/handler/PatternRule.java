@@ -19,7 +19,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.server.servlet.PathMap;
+import org.mortbay.jetty.server.PathMap;
 
 /**
  * Abstract rule that use a {@link PathMap} for pattern matching. It uses the 
