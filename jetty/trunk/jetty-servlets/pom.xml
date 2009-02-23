@@ -6,9 +6,9 @@
     <version>7.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>jetty-servlet</artifactId>
-  <name>Jetty :: Servlet Handling</name>
-  <description>Jetty Servlet Container</description>
+  <artifactId>jetty-servlets</artifactId>
+  <name>Jetty :: Utility Servlets and Filters</name>
+  <description>Utility Servlets from Jetty</description>
   <build>
     <plugins>
       <plugin>
@@ -23,9 +23,9 @@
             </goals>
             <configuration>
               <instructions>
-                <Bundle-SymbolicName>org.mortbay.jetty.servlet</Bundle-SymbolicName>
+                <Bundle-SymbolicName>org.mortbay.jetty.servlets</Bundle-SymbolicName>
                 <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
-                <Export-Package>org.mortbay.jetty.servlet;version=${project.version}</Export-Package>
+                <Export-Package>org.mortbay.jetty.servlets;version=${project.version}</Export-Package>
                 <Bundle-DocURL>http://jetty.mortbay.org</Bundle-DocURL>
               </instructions>
             </configuration>
@@ -54,8 +54,30 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-server</artifactId>
+      <artifactId>jetty-webapp</artifactId>
       <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-client</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-servlet-tester</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

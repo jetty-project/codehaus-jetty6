@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.server.servlet;
+package org.mortbay.jetty.server;
 
 import java.io.Externalizable;
 import java.util.HashMap;

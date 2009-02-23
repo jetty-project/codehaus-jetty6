@@ -23,6 +23,7 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -608,7 +609,7 @@ public class WebAppContext extends Context
         //
         // I'm afraid that this is very much black magic.
         // but if you can think of better....
-        Object t = getAttribute(ServletHandler.__J_S_CONTEXT_TEMPDIR);
+        Object t = getAttribute(ServletContext.TEMPDIR);
 
         if (t!=null && (t instanceof File))
         {
@@ -626,7 +627,7 @@ public class WebAppContext extends Context
                 if (_tmpDir.isDirectory() && _tmpDir.canWrite())
                 {
                     if(Log.isDebugEnabled())Log.debug("Converted to File "+_tmpDir+" for "+this);
-                    setAttribute(ServletHandler.__J_S_CONTEXT_TEMPDIR,_tmpDir);
+                    setAttribute(ServletContext.TEMPDIR,_tmpDir);
                     return _tmpDir;
                 }
             }
@@ -721,7 +722,7 @@ public class WebAppContext extends Context
             }
         }
 
-        setAttribute(ServletHandler.__J_S_CONTEXT_TEMPDIR,_tmpDir);
+        setAttribute(ServletContext.TEMPDIR,_tmpDir);
         return _tmpDir;
     }
     
@@ -1140,7 +1141,7 @@ public class WebAppContext extends Context
             throw new IllegalArgumentException("Bad temp directory: "+dir);
 
         _tmpDir=dir;
-        setAttribute(ServletHandler.__J_S_CONTEXT_TEMPDIR,_tmpDir);
+        setAttribute(ServletContext.TEMPDIR,_tmpDir);
     }
     
     /* ------------------------------------------------------------ */
@@ -1209,8 +1210,8 @@ public class WebAppContext extends Context
                             && work.isDirectory()
                             && work.getFile() != null
                             && work.getFile().canWrite()
-                            && getAttribute(ServletHandler.__J_S_CONTEXT_TEMPDIR) == null)
-                setAttribute(ServletHandler.__J_S_CONTEXT_TEMPDIR, work.getFile());
+                            && getAttribute(ServletContext.TEMPDIR) == null)
+                setAttribute(ServletContext.TEMPDIR, work.getFile());
         }
         
         // Configure webapp

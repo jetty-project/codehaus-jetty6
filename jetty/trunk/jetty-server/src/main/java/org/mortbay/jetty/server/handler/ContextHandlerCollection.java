@@ -27,8 +27,8 @@ import org.mortbay.jetty.server.AsyncRequest;
 import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.HandlerContainer;
 import org.mortbay.jetty.server.HttpConnection;
+import org.mortbay.jetty.server.PathMap;
 import org.mortbay.jetty.server.Request;
-import org.mortbay.jetty.server.servlet.PathMap;
 import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.log.Log;
 

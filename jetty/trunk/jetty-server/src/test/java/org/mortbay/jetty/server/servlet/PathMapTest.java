@@ -14,7 +14,7 @@
 
 package org.mortbay.jetty.server.servlet;
 
-import org.mortbay.jetty.server.servlet.PathMap;
+import org.mortbay.jetty.server.PathMap;
 
 import junit.framework.TestCase;
 

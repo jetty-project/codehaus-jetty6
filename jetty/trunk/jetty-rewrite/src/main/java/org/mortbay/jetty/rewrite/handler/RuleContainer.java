@@ -20,8 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.server.HttpConnection;
+import org.mortbay.jetty.server.PathMap;
 import org.mortbay.jetty.server.Request;
-import org.mortbay.jetty.server.servlet.PathMap;
 import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.log.Log;
 

@@ -21,6 +21,7 @@ import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 
 import org.mortbay.jetty.server.Handler;
+import org.mortbay.jetty.server.PathMap;
 
 
 public class FilterMapping

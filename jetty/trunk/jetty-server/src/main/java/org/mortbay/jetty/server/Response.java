@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Locale;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -280,10 +281,10 @@ public class Response implements HttpServletResponse
             if (error_handler!=null)
             {
                 // TODO - probably should reset these after the request?
-                request.setAttribute(ServletHandler.__J_S_ERROR_STATUS_CODE,new Integer(code));
-                request.setAttribute(ServletHandler.__J_S_ERROR_MESSAGE, message);
-                request.setAttribute(ServletHandler.__J_S_ERROR_REQUEST_URI, request.getRequestURI());
-                request.setAttribute(ServletHandler.__J_S_ERROR_SERVLET_NAME,request.getServletName());
+                request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE,new Integer(code));
+                request.setAttribute(RequestDispatcher.ERROR_MESSAGE, message);
+                request.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, request.getRequestURI());
+                request.setAttribute(RequestDispatcher.ERROR_SERVLET_NAME,request.getServletName());
 
                 error_handler.handle(null,_connection.getRequest(),this);
             }
