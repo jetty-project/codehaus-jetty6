@@ -40,6 +40,11 @@ public class Classpath {
     {
         addClasspath(initial);
     }
+    
+    public File[] getElements()
+    {
+        return (File[])_elements.toArray(new File[_elements.size()]);
+    }
         
     public boolean addComponent(String component)
     {

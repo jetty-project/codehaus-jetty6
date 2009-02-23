@@ -29,10 +29,8 @@ import java.security.Policy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 /*-------------------------------------------*/
@@ -60,7 +58,8 @@ import java.util.StringTokenizer;
  * all other subjects are treated as files to be added to the classpath.
  * </PRE>
  * 
- * Subjects may include system properties with $(propertyname) syntax. File subjects starting with
+ * Subjects may include system properties with $(propertyname) syntax. The $(version) property is
+ * defined as the maven version of the start.jar. File subjects starting with
  * "/" are considered absolute, all others are relative to the home directory.
  * <P>
  * CONDITION is one of:
@@ -104,12 +103,16 @@ import java.util.StringTokenizer;
  */
 public class Main
 {
+    private static final String _version = (Main.class.getPackage()!=null && Main.class.getPackage().getImplementationVersion()!=null)
+        ?Main.class.getPackage().getImplementationVersion()
+        :"7.0-SNAPSHOT";
+        
     static boolean _debug=System.getProperty("DEBUG",null)!=null;
     private String _classname=null;
     private Classpath _classpath=new Classpath();
-    private String _config=System.getProperty("START","org/mortbay/start/start.config");
+    private String _config=System.getProperty("START","org/mortbay/jetty/start/start.config");
     private ArrayList _xml=new ArrayList();
-    private boolean _version=false;
+    private boolean _showVersions=false;
 
     public static void main(String[] args)
     {
@@ -128,7 +131,7 @@ public class Main
                 String[] nargs=new String[args.length-1];
                 System.arraycopy(args,1,nargs,0,nargs.length);
                 Main main=new Main();
-                main._version=true;
+                main._showVersions=true;
                 main.start(nargs);
             }
             else
@@ -200,12 +203,27 @@ public class Main
             NoSuchMethodException, ClassNotFoundException
     {
         Class invoked_class=null;
-        invoked_class=classloader.loadClass(classname);
-
-        if (_version)
+        
+        try
         {
-            System.err.println(invoked_class.getPackage().getImplementationTitle()+" "+invoked_class.getPackage().getImplementationVersion());
-            System.exit(0);
+            invoked_class=classloader.loadClass(classname);
+        }
+        catch(ClassNotFoundException e)
+        {
+            //ignored
+        }
+        
+        if (_debug || _showVersions || invoked_class==null)
+        {
+            if (invoked_class==null)
+                System.err.println("ClassNotFound: "+classname);
+            else
+                System.err.println(classname+" "+invoked_class.getPackage().getImplementationVersion());
+            File[] elements = _classpath.getElements();
+            for (int i=0;i<elements.length;i++)
+                System.err.println("  "+elements[i].getAbsolutePath());
+            if (_showVersions || invoked_class==null)
+                System.exit(0);
         }
 
         Class[] method_param_types=new Class[1];
@@ -231,7 +249,12 @@ public class Main
             i2=s.indexOf(")",i1+2);
             if (i2<0)
                 break;
-            String property=System.getProperty(s.substring(i1+2,i2),"");
+            String name=s.substring(i1+2,i2);
+            String property;
+            if ("version".equalsIgnoreCase(name))
+                property=_version;
+            else
+                property=System.getProperty(s.substring(i1+2,i2),"");
             s=s.substring(0,i1)+property+s.substring(i2+1);
         }
         return s;
