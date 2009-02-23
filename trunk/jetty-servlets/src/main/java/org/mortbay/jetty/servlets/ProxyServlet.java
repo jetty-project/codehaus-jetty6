@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.servlet;
+package org.mortbay.jetty.servlets;
 
 import java.io.IOException;
 import java.io.InputStream;

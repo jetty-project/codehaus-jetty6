@@ -22,11 +22,11 @@ import java.util.Set;
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.HttpConnection;
+import org.mortbay.jetty.server.PathMap;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Response;
 import org.mortbay.jetty.server.RunAsToken;
 import org.mortbay.jetty.server.UserIdentity;
-import org.mortbay.jetty.server.servlet.PathMap;
 import org.mortbay.jetty.util.LazyList;
 
 /* ------------------------------------------------------------ */
