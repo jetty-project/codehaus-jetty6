@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.server.servlet;
+package org.mortbay.jetty.server.session;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -372,7 +372,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
      * Makes necessary database tables and starts a Session
      * scavenger thread.
      * 
-     * @see org.mortbay.jetty.server.servlet.AbstractSessionIdManager#doStart()
+     * @see org.mortbay.jetty.server.session.AbstractSessionIdManager#doStart()
      */
     public void doStart()
     {

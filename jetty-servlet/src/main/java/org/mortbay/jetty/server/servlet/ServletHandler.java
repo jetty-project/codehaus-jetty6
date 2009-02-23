@@ -297,7 +297,7 @@ public class ServletHandler extends AbstractHandler
         final String old_servlet_name=base_request.getServletName();
         final String old_servlet_path=base_request.getServletPath();
         final String old_path_info=base_request.getPathInfo();
-        ServletHolder old_servlet_holder = null;
+        Map old_roleRefMap = null;
 
         final UserIdentity user_identity = base_request.getUserIdentity() ==null? UserIdentity.UNAUTHENTICATED_IDENTITY: base_request.getUserIdentity();
         DispatcherType type = request.getDispatcherType();
@@ -323,7 +323,7 @@ public class ServletHandler extends AbstractHandler
                     //for this it depends on whether a servlet's role-refs should work in filters.
                     if (user_identity != null)
                     {
-                        old_servlet_holder = user_identity.setServletHolder(servlet_holder);
+                        old_roleRefMap = user_identity.setRoleRefMap(servlet_holder.getRoleMap());
                     }
                     if(Log.isDebugEnabled())Log.debug("servlet="+servlet_holder);
                     
@@ -355,7 +355,7 @@ public class ServletHandler extends AbstractHandler
                     base_request.setServletName(servlet_holder.getName());
                     
                     //TODO added for jaspi == is this correct??
-                    old_servlet_holder = user_identity.setServletHolder(servlet_holder);
+                    old_roleRefMap = user_identity.setRoleRefMap(servlet_holder.getRoleMap());
                     if (_filterMappings!=null && _filterMappings.length>0)
                     {
 //                    chain=getFilterChain(type, null,servlet_holder,request.isInitial());
@@ -502,9 +502,8 @@ public class ServletHandler extends AbstractHandler
             base_request.setServletName(old_servlet_name);
 
             if (user_identity != null)
-
             {
-                user_identity.setServletHolder(old_servlet_holder);
+                user_identity.setRoleRefMap(old_roleRefMap);
             }
             if (!(DispatcherType.INCLUDE.equals(type)))
             {

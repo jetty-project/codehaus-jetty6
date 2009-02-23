@@ -20,7 +20,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.mortbay.jetty.server.servlet.SessionHandler;
+import org.mortbay.jetty.server.session.SessionHandler;
 import org.mortbay.jetty.util.component.LifeCycle;
 
 /* --------------------------------------------------------------------- */

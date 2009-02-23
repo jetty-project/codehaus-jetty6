@@ -40,8 +40,6 @@ import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.nio.AbstractNIOConnector;
-import org.mortbay.jetty.server.servlet.Context;
-import org.mortbay.jetty.server.servlet.ServletHolder;
 import org.mortbay.jetty.util.ajax.Continuation;
 import org.mortbay.jetty.util.log.Log;
 
@@ -337,37 +335,7 @@ public class RandomConnector extends AbstractNIOConnector
         {
             return false;
         }
-
-        
     }
     
-    public static void main(String[] arg)
-        throws Exception
-    {
-        // Just a little test main....
-
-        Server server = new Server();
-        server.addConnector(new RandomConnector());
-        Context context = new Context(server,"/",Context.SESSIONS);
-        context.addServlet(new ServletHolder(new HelloServlet()), "/*");
-        
-        server.start();
-        server.join();
-    }
-    
-    public static class HelloServlet extends HttpServlet
-    {
-        protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-        {
-            response.setContentType("text/html");
-            response.setStatus(HttpServletResponse.SC_OK);
-            PrintWriter out =  response.getWriter();
-            out.println("<h1>Hello SimpleServlet: "+request.getRequestURI()+"</h1><pre>");
-            int lines = random.nextInt(100);
-            for (int i=0;i<lines;i++)
-                out.println(i+" Blah blah blah. Now is the time for all good FSMs to work. Hoooo nooo broooon cooooo");
-            out.println("</pre>");       
-        }
-    }
 
 }
