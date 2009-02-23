@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.server.servlet;
+package org.mortbay.jetty.server.session;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;

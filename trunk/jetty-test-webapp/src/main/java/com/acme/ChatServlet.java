@@ -15,10 +15,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.server.Connector;
-import org.mortbay.jetty.server.Server;
-import org.mortbay.jetty.server.bio.SocketConnector;
-import org.mortbay.jetty.server.servlet.ServletHandler;
 
 
 // Simple asynchronous Chat room.

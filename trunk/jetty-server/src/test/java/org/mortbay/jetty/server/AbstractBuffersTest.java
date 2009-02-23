@@ -28,15 +28,16 @@ import junit.framework.TestCase;
 public class AbstractBuffersTest
     extends TestCase
 {
+    public boolean _stress = Boolean.getBoolean("STRESS");
     private int _headerBufferSize = 6 * 1024;
 
     InnerAbstractBuffers buffers;
 
     List<Thread> threadList = new ArrayList<Thread>();
 
-    int numThreads = 100;
+    int numThreads = _stress?100:10;
 
-    int runTestLength = 5000;
+    int runTestLength = _stress?5000:1000;
 
     int threadWaitTime = 5;
 

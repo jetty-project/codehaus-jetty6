@@ -32,13 +32,11 @@ import org.mortbay.jetty.http.HttpFields;
 import org.mortbay.jetty.http.HttpGenerator;
 import org.mortbay.jetty.http.HttpHeaderValues;
 import org.mortbay.jetty.http.HttpHeaders;
-import org.mortbay.jetty.http.HttpStatus;
 import org.mortbay.jetty.http.HttpVersions;
 import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.io.BufferCache.CachedBuffer;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.handler.ErrorHandler;
-import org.mortbay.jetty.server.servlet.ServletHandler;
 import org.mortbay.jetty.util.ByteArrayISO8859Writer;
 import org.mortbay.jetty.util.IO;
 import org.mortbay.jetty.util.QuotedStringTokenizer;
@@ -377,7 +375,7 @@ public class Response implements HttpServletResponse
             if (expect!=null && expect.startsWith("102") && generator.getVersion()>=HttpVersions.HTTP_1_1_ORDINAL)
             {
                 boolean was_persistent=generator.isPersistent();
-                generator.setResponse(HttpStatus.ORDINAL_102_Processing,null);
+                generator.setResponse(102,null);
                 generator.completeHeader(null,true);
                 generator.setPersistent(true);
                 generator.complete();

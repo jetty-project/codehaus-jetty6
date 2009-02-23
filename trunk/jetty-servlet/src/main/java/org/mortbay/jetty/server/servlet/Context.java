@@ -29,6 +29,7 @@ import org.mortbay.jetty.server.HandlerContainer;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.handler.ErrorHandler;
 import org.mortbay.jetty.server.handler.SecurityHandler;
+import org.mortbay.jetty.server.session.SessionHandler;
 import org.mortbay.jetty.util.Loader;
 
 

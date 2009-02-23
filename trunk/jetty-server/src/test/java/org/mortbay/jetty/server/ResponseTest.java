@@ -43,9 +43,9 @@ import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.bio.SocketConnector;
 import org.mortbay.jetty.server.handler.AbstractHandler;
 import org.mortbay.jetty.server.handler.ContextHandler;
-import org.mortbay.jetty.server.servlet.AbstractSessionManager;
-import org.mortbay.jetty.server.servlet.HashSessionIdManager;
-import org.mortbay.jetty.server.servlet.HashSessionManager;
+import org.mortbay.jetty.server.session.AbstractSessionManager;
+import org.mortbay.jetty.server.session.HashSessionIdManager;
+import org.mortbay.jetty.server.session.HashSessionManager;
 
 /**
  * @author gregw

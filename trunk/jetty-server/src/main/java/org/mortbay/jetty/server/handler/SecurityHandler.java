@@ -35,8 +35,8 @@ public interface SecurityHandler extends LifeCycle, Handler, HandlerContainer
 
     RunAsToken newRunAsToken(String runAsRole);
 
-    void setAuthenticationManager (AuthenticationManager authManager);
-    AuthenticationManager getAuthenticationManager();
+    void setAuthenticationManager (AuthenticationManager<?> authManager);
+    AuthenticationManager<?> getAuthenticationManager();
     
     UserRealm getUserRealm ();
     void setUserRealm (UserRealm realm);

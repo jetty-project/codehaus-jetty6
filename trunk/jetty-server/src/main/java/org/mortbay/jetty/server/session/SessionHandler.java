@@ -13,7 +13,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.server.servlet;
+package org.mortbay.jetty.server.session;
 
 import java.io.IOException;
 import java.util.EventListener;

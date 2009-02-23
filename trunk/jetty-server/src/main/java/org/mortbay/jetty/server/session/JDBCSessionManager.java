@@ -13,7 +13,7 @@
 // ========================================================================
 
 
-package org.mortbay.jetty.server.servlet;
+package org.mortbay.jetty.server.session;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -307,7 +307,7 @@ public class JDBCSessionManager extends AbstractSessionManager
          * Entry to session.
          * Called by SessionHandler on inbound request and the session already exists in this node's memory.
          * 
-         * @see org.mortbay.jetty.server.servlet.AbstractSessionManager.Session#access(long)
+         * @see org.mortbay.jetty.server.session.AbstractSessionManager.Session#access(long)
          */
         protected void access(long time)
         {
@@ -319,7 +319,7 @@ public class JDBCSessionManager extends AbstractSessionManager
 
         /** 
          * Exit from session
-         * @see org.mortbay.jetty.server.servlet.AbstractSessionManager.Session#complete()
+         * @see org.mortbay.jetty.server.session.AbstractSessionManager.Session#complete()
          */
         protected void complete()
         {
@@ -434,7 +434,7 @@ public class JDBCSessionManager extends AbstractSessionManager
      * NOTE: this method will go to the database, so if you only want to check 
      * for the existence of a Session in memory, use _sessions.get(id) instead.
      * 
-     * @see org.mortbay.jetty.server.servlet.AbstractSessionManager#getSession(java.lang.String)
+     * @see org.mortbay.jetty.server.session.AbstractSessionManager#getSession(java.lang.String)
      */
     public Session getSession(String idInCluster)
     {
@@ -501,7 +501,7 @@ public class JDBCSessionManager extends AbstractSessionManager
     /** 
      * Get all the sessions as a map of id to Session.
      * 
-     * @see org.mortbay.jetty.server.servlet.AbstractSessionManager#getSessionMap()
+     * @see org.mortbay.jetty.server.session.AbstractSessionManager#getSessionMap()
      */
     public Map getSessionMap()
     {
@@ -512,7 +512,7 @@ public class JDBCSessionManager extends AbstractSessionManager
     /** 
      * Get the number of sessions.
      * 
-     * @see org.mortbay.jetty.server.servlet.AbstractSessionManager#getSessions()
+     * @see org.mortbay.jetty.server.session.AbstractSessionManager#getSessions()
      */
     public int getSessions()
     {
@@ -528,7 +528,7 @@ public class JDBCSessionManager extends AbstractSessionManager
     /** 
      * Start the session manager.
      * 
-     * @see org.mortbay.jetty.server.servlet.AbstractSessionManager#doStart()
+     * @see org.mortbay.jetty.server.session.AbstractSessionManager#doStart()
      */
     public void doStart() throws Exception
     {
@@ -545,7 +545,7 @@ public class JDBCSessionManager extends AbstractSessionManager
     /** 
      * Stop the session manager.
      * 
-     * @see org.mortbay.jetty.server.servlet.AbstractSessionManager#doStop()
+     * @see org.mortbay.jetty.server.session.AbstractSessionManager#doStop()
      */
     public void doStop() throws Exception
     {
@@ -587,7 +587,7 @@ public class JDBCSessionManager extends AbstractSessionManager
      * Delete an existing session, both from the in-memory map and
      * the database.
      * 
-     * @see org.mortbay.jetty.server.servlet.AbstractSessionManager#removeSession(java.lang.String)
+     * @see org.mortbay.jetty.server.session.AbstractSessionManager#removeSession(java.lang.String)
      */
     protected void removeSession(String idInCluster)
     {
@@ -609,7 +609,7 @@ public class JDBCSessionManager extends AbstractSessionManager
     /** 
      * Add a newly created session to our in-memory list for this node and persist it.
      * 
-     * @see org.mortbay.jetty.server.servlet.AbstractSessionManager#addSession(org.mortbay.jetty.server.servlet.AbstractSessionManager.Session)
+     * @see org.mortbay.jetty.server.session.AbstractSessionManager#addSession(org.mortbay.jetty.server.session.AbstractSessionManager.Session)
      */
     protected void addSession(AbstractSessionManager.Session session)
     {
@@ -638,7 +638,7 @@ public class JDBCSessionManager extends AbstractSessionManager
     /** 
      * Make a new Session.
      * 
-     * @see org.mortbay.jetty.server.servlet.AbstractSessionManager#newSession(javax.servlet.http.HttpServletRequest)
+     * @see org.mortbay.jetty.server.session.AbstractSessionManager#newSession(javax.servlet.http.HttpServletRequest)
      */
     protected AbstractSessionManager.Session newSession(HttpServletRequest request)
     {

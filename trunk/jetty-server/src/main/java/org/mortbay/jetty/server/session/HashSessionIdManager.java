@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.server.servlet;
+package org.mortbay.jetty.server.session;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.mortbay.jetty.server.SessionIdManager;
-import org.mortbay.jetty.server.servlet.AbstractSessionManager.Session;
+import org.mortbay.jetty.server.session.AbstractSessionManager.Session;
 import org.mortbay.jetty.util.MultiMap;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
 import org.mortbay.jetty.util.log.Log;
