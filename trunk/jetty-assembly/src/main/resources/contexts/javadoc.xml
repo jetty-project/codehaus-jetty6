@@ -8,12 +8,12 @@ This context contains only a ServletHandler with a default servlet
 to serve static html files and images.
 -->
 
-<Configure class="org.mortbay.jetty.handler.ContextHandler">
-  <Call class="org.mortbay.log.Log" name="debug"><Arg>Configure javadoc.xml</Arg></Call>
+<Configure class="org.mortbay.jetty.server.handler.ContextHandler">
+  <Call class="org.mortbay.jetty.util.log.Log" name="debug"><Arg>Configure javadoc.xml</Arg></Call>
   <Set name="contextPath">/javadoc</Set>
   <Set name="resourceBase"><SystemProperty name="jetty.home" default="."/>/javadoc/</Set>
   <Set name="handler">
-    <New class="org.mortbay.jetty.handler.ResourceHandler">
+    <New class="org.mortbay.jetty.server.handler.ResourceHandler">
       <Set name="welcomeFiles">
         <Array type="String">
           <Item>index.html</Item>

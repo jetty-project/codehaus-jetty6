@@ -10,7 +10,7 @@
 <!-- =============================================================== -->
 
 
-<Configure id="Server" class="org.mortbay.jetty.Server">
+<Configure id="Server" class="org.mortbay.jetty.server.Server">
 
     <!-- =========================================================== -->
     <!-- Server Thread Pool                                          -->
@@ -18,11 +18,9 @@
     <Set name="ThreadPool">
       <!-- Default queued blocking threadpool 
       -->
-      <New class="org.mortbay.thread.QueuedThreadPool">
+      <New class="org.mortbay.jetty.util.thread.QueuedThreadPool">
         <Set name="minThreads">10</Set>
         <Set name="maxThreads">200</Set>
-        <Set name="lowThreads">20</Set>
-        <Set name="SpawnOrShrinkAt">2</Set>
       </New>
 
       <!-- Optional Java 5 bounded threadpool with job queue 
@@ -41,7 +39,7 @@
 
     <Call name="addConnector">
       <Arg>
-          <New class="org.mortbay.jetty.nio.SelectChannelConnector">
+          <New class="org.mortbay.jetty.server.nio.SelectChannelConnector">
             <Set name="host"><SystemProperty name="jetty.host" /></Set>
             <Set name="port"><SystemProperty name="jetty.port" default="8080"/></Set>
             <Set name="maxIdleTime">300000</Set>
@@ -78,17 +76,17 @@
     <!-- Set handler Collection Structure                            --> 
     <!-- =========================================================== -->
     <Set name="handler">
-      <New id="Handlers" class="org.mortbay.jetty.handler.HandlerCollection">
+      <New id="Handlers" class="org.mortbay.jetty.server.handler.HandlerCollection">
         <Set name="handlers">
-         <Array type="org.mortbay.jetty.Handler">
+         <Array type="org.mortbay.jetty.server.Handler">
            <Item>
-             <New id="Contexts" class="org.mortbay.jetty.handler.ContextHandlerCollection"/>
+             <New id="Contexts" class="org.mortbay.jetty.server.handler.ContextHandlerCollection"/>
            </Item>
            <Item>
-             <New id="DefaultHandler" class="org.mortbay.jetty.handler.DefaultHandler"/>
+             <New id="DefaultHandler" class="org.mortbay.jetty.server.handler.DefaultHandler"/>
            </Item>
            <Item>
-             <New id="RequestLog" class="org.mortbay.jetty.handler.RequestLogHandler"/>
+             <New id="RequestLog" class="org.mortbay.jetty.server.handler.RequestLogHandler"/>
            </Item>
          </Array>
         </Set>
@@ -108,7 +106,7 @@
     <!-- =========================================================== -->
     <Call name="addLifeCycle">
       <Arg>
-        <New class="org.mortbay.jetty.deployer.ContextDeployer">
+        <New class="org.mortbay.jetty.deploy.ContextDeployer">
           <Set name="contexts"><Ref id="Contexts"/></Set>
           <Set name="configurationDir"><SystemProperty name="jetty.home" default="."/>/contexts</Set>
           <Set name="scanInterval">5</Set>
@@ -131,7 +129,7 @@
     <!-- =========================================================== -->
     <Call name="addLifeCycle">
       <Arg>
-        <New class="org.mortbay.jetty.deployer.WebAppDeployer">
+        <New class="org.mortbay.jetty.deploy.WebAppDeployer">
           <Set name="contexts"><Ref id="Contexts"/></Set>
           <Set name="webAppDir"><SystemProperty name="jetty.home" default="."/>/webapps</Set>
 	  <Set name="parentLoaderPriority">false</Set>
@@ -149,7 +147,7 @@
     <!-- configuration (see $(jetty.home)/contexts/test.xml for an   -->
     <!-- example).                                                   -->
     <!-- =========================================================== -->
-    <Set name="UserRealms">
+    <!--<Set name="UserRealms">
       <Array type="org.mortbay.jetty.UserRealm">
         <Item>
           <New class="org.mortbay.jetty.security.HashLoginService">
@@ -159,7 +157,7 @@
           </New>
         </Item>
       </Array>
-    </Set>
+    </Set>-->
 
     <!-- =========================================================== -->
     <!-- Configure Request Log                                       -->
@@ -168,10 +166,11 @@
     <!-- contexts configuration (see $(jetty.home)/contexts/test.xml -->
     <!-- for an example).                                            -->
     <!-- =========================================================== -->
+    <!--
     <Ref id="RequestLog">
       <Set name="requestLog">
-        <New id="RequestLogImpl" class="org.mortbay.jetty.NCSARequestLog">
-          <Set name="filename"><SystemProperty name="jetty.logs" default="./logs"/>/yyyy_mm_dd.request.log</Set>
+        <New id="RequestLogImpl" class="org.mortbay.jetty.server.NCSARequestLog">
+          <Set name="filename"><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.request.log</Set>
           <Set name="filenameDateFormat">yyyy_MM_dd</Set>
           <Set name="retainDays">90</Set>
           <Set name="append">true</Set>
@@ -181,6 +180,7 @@
         </New>
       </Set>
     </Ref>
+    -->
 
     <!-- =========================================================== -->
     <!-- extra options                                               -->
