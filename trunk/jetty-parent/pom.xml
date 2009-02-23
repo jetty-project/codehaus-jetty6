@@ -342,6 +342,7 @@
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
+          <version>1.4.2</version>
         </plugin>
       </plugins>
     </pluginManagement>
