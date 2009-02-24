@@ -148,6 +148,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * that have been set on the command line or by the JVM. They WILL 
      * override System properties that have been set via systemPropertiesFile.
      * Optional.
+     * @parameter
      */
     protected SystemProperties systemProperties;
     
