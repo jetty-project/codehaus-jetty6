@@ -30,6 +30,8 @@ import javax.security.auth.message.callback.CallerPrincipalCallback;
 import javax.security.auth.message.callback.GroupPrincipalCallback;
 import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.config.ServerAuthContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -55,6 +57,7 @@ public class JaspiAuthenticator implements Authenticator
     private final Subject _serviceSubject;
     private final boolean _allowLazyAuthentication;
 
+    
     public JaspiAuthenticator(String authContextId, ServerAuthConfig authConfig, Map authProperties, ServletCallbackHandler callbackHandler,
             Subject serviceSubject, boolean allowLazyAuthentication)
     {
@@ -75,12 +78,26 @@ public class JaspiAuthenticator implements Authenticator
         return "JASPI";
     }
 
+    public ServerAuthResult validateRequest(ServletRequest request, ServletResponse response, boolean mandatory) throws ServerAuthException
+    {
+        if (_allowLazyAuthentication && !mandatory)
+            return new LazyAuthResult(this,request,response);
+        
+        JettyMessageInfo info = new JettyMessageInfo((HttpServletRequest)request,(HttpServletResponse)response,mandatory);
+        request.setAttribute("org.mortbay.jetty.security.jaspi.info",info);
+        return validateRequest(info);
+    }
+
+    // most likely validatedUser is not needed here.
+    public ServerAuthStatus secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, ServerAuthResult validatedUser) throws ServerAuthException
+    {
+        JettyMessageInfo info = (JettyMessageInfo)req.getAttribute("org.mortbay.jetty.security.jaspi.info");
+        if (info==null)info = new JettyMessageInfo((HttpServletRequest)req,(HttpServletResponse)res,mandatory);
+        return secureResponse(info,validatedUser);
+    }
+    
     public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
     {
-        if (_allowLazyAuthentication && !messageInfo.isAuthMandatory())
-        {
-            return new LazyAuthResult(this,messageInfo);
-        }
         try
         {
             ServerAuthContext authContext = _authConfig.getAuthContext(_authContextId,_serviceSubject,_authProperties);
@@ -114,7 +131,7 @@ public class JaspiAuthenticator implements Authenticator
             throw new ServerAuthException(e);
         }
     }
-
+    
     ServerAuthStatus toServerAuthStatus(AuthStatus authStatus) throws ServerAuthException
     {
         if (authStatus == AuthStatus.SEND_CONTINUE)

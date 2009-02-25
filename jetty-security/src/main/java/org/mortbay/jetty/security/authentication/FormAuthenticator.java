@@ -22,12 +22,13 @@ package org.mortbay.jetty.security.authentication;
 import java.io.IOException;
 
 import javax.security.auth.Subject;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.mortbay.jetty.http.security.Constraint;
-import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
@@ -103,11 +104,11 @@ public class FormAuthenticator extends LoginAuthenticator
         }
     }
 
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
+    public ServerAuthResult validateRequest(ServletRequest req, ServletResponse res, boolean mandatory) throws ServerAuthException
     {
-        HttpServletRequest request = messageInfo.getRequestMessage();
-        HttpServletResponse response = messageInfo.getResponseMessage();
-        HttpSession session = request.getSession(messageInfo.isAuthMandatory());
+        HttpServletRequest request = (HttpServletRequest)req;
+        HttpServletResponse response = (HttpServletResponse)res;
+        HttpSession session = request.getSession(mandatory);
         String uri = request.getPathInfo();
         // not mandatory and not authenticated
         if (session == null || isLoginOrErrorPage(uri)) 
@@ -161,7 +162,7 @@ public class FormAuthenticator extends LoginAuthenticator
             // Check if the session is already authenticated.
 
             // Don't authenticate authform or errorpage
-            if (!messageInfo.isAuthMandatory())
+            if (!mandatory)
             // TODO verify this is correct action
                 return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS;
 
@@ -186,7 +187,7 @@ public class FormAuthenticator extends LoginAuthenticator
         return pathInContext != null && (pathInContext.equals(_formErrorPath) || pathInContext.equals(_formLoginPath));
     }
 
-    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException
+    public ServerAuthStatus secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, ServerAuthResult validatedUser) throws ServerAuthException
     {
         return ServerAuthStatus.SUCCESS;
     }
