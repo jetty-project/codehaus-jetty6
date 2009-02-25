@@ -48,6 +48,7 @@ import org.mortbay.jetty.server.Response;
 import org.mortbay.jetty.server.RunAsToken;
 import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.server.handler.ContextHandler;
+import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.URIUtil;
 import org.mortbay.jetty.util.log.Log;
@@ -362,7 +363,7 @@ public class HTAccessHandler extends SecurityHandler
 
         Resource _groupResource;
 
-        HashMap<String, ArrayList<String>> _groups = null;
+        HashMap<String, String[]> _groups = null;
 
         long _groupModified;
 
@@ -568,11 +569,11 @@ public class HTAccessHandler extends SecurityHandler
             {
                 if (_requireEntities.contains(user)) success = true;
             }
-            ArrayList<String> gps = getUserGroups(user);
+            String[] gps = getUserGroups(user);
             if (success == null && _requireName.equalsIgnoreCase(GROUP))
             {
-                if (gps != null) for (int g = gps.size(); g-- > 0;)
-                    if (_requireEntities.contains(gps.get(g))) success = true;
+                if (gps != null) for (int g = gps.length; g-- > 0;)
+                    if (_requireEntities.contains(gps[g])) success = true;
             }
             else if (success == null && _requireName.equalsIgnoreCase(VALID_USER))
             {
@@ -649,7 +650,7 @@ public class HTAccessHandler extends SecurityHandler
         }
 
         /* ------------------------------------------------------------ */
-        private ArrayList<String> getUserGroups(String group)
+        private String[] getUserGroups(String group)
         {
             if (_groupResource == null) return null;
 
@@ -657,7 +658,7 @@ public class HTAccessHandler extends SecurityHandler
             {
                 if (log.isDebugEnabled()) log.debug("LOAD " + _groupResource, null, null);
 
-                _groups = new HashMap<String, ArrayList<String>>();
+                _groups = new HashMap<String, String[]>();
                 BufferedReader ufin = null;
                 try
                 {
@@ -677,13 +678,9 @@ public class HTAccessHandler extends SecurityHandler
                         while (tok.hasMoreTokens())
                         {
                             String u = tok.nextToken();
-                            ArrayList<String> gl = _groups.get(u);
-                            if (gl == null)
-                            {
-                                gl = new ArrayList<String>();
-                                _groups.put(u, gl);
-                            }
-                            gl.add(g);
+                            String[] gl = _groups.get(u);
+                            gl=(String[])LazyList.addToArray(gl,g,String.class);
+                            _groups.put(u,gl);
                         }
                     }
                 }
@@ -948,8 +945,7 @@ public class HTAccessHandler extends SecurityHandler
                     if (loginCallback.isSuccess())
                     {
                         CallerPrincipalCallback callerPrincipalCallback = new CallerPrincipalCallback(clientSubject, loginCallback.getUserPrincipal());
-                        GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject, loginCallback.getGroups()
-                                .toArray(new String[loginCallback.getGroups().size()]));
+                        GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject, loginCallback.getGroups());
                         callbackHandler.handle(new Callback[] { callerPrincipalCallback, groupPrincipalCallback });
                         messageInfo.getMap().put(JaspiMessageInfo.AUTH_METHOD_KEY, Constraint.__BASIC_AUTH);
                         return AuthStatus.SUCCESS;
