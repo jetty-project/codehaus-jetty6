@@ -135,7 +135,7 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
                             {
                                 if (!roles.contains(role))
                                     throw new IllegalArgumentException("Attempt to use undeclared role: " + role + ", known roles: " + roles);
-                                roleInfo.getRoles().add(role);
+                                roleInfo.addRole(role);
                             }
                         }
                     }
@@ -276,8 +276,7 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
         if (roleInfo.isAnyRole() && userIdentity.getAuthMethod()!=null)
             return true;
         
-        // TODO more efficient to avoid iterator creation here!
-        Set<String> roles = roleInfo.getRoles();
+        String[] roles = roleInfo.getRoles();
         for (String role : roles)
         {
             if (userIdentity.isUserInRole(role))
