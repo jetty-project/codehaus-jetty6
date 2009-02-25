@@ -36,7 +36,7 @@ import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.ServerAuthStatus;
-import org.mortbay.jetty.security.ServerAuthentication;
+import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.SimpleAuthResult;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.util.QuotedStringTokenizer;
@@ -47,25 +47,24 @@ import org.mortbay.jetty.util.log.Log;
 /**
  * @version $Rev$ $Date$
  */
-public class DigestServerAuthentication implements ServerAuthentication
+public class DigestAuthenticator extends LoginAuthenticator
 {
-
-    private final LoginService _loginService;
-
-    private final String _realmName;
-
     protected long _maxNonceAge = 0;
 
     protected long _nonceSecret = this.hashCode() ^ System.currentTimeMillis();
 
     protected boolean _useStale = false;
 
-    public DigestServerAuthentication(LoginService loginService, String realmName)
+    public DigestAuthenticator(LoginService loginService)
     {
-        this._loginService = loginService;
-        this._realmName = realmName;
+        super(loginService);
     }
 
+    public String getAuthMethod()
+    {
+        return Constraint.__DIGEST_AUTH;
+    }
+    
     public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException
     {
         return ServerAuthStatus.SUCCESS;
@@ -145,7 +144,7 @@ public class DigestServerAuthentication implements ServerAuthentication
             if (!messageInfo.isAuthMandatory()) { return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS; }
             String domain = request.getContextPath();
             if (domain == null) domain = "/";
-            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Digest realm=\"" + _realmName
+            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Digest realm=\"" + _loginService.getName()
                                                              + "\", domain=\""
                                                              + domain
                                                              + "\", nonce=\""

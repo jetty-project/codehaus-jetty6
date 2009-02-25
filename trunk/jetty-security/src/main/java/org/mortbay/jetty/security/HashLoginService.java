@@ -30,7 +30,7 @@ import org.mortbay.jetty.util.resource.Resource;
 
 /* ------------------------------------------------------------ */
 /**
- * HashMapped User Realm.
+ * Properties User Realm.
  * 
  * An implementation of UserRealm that stores users and roles in-memory in
  * HashMaps.
@@ -52,14 +52,11 @@ import org.mortbay.jetty.util.resource.Resource;
  * @see org.mortbay.jetty.security.Password
  * @author Greg Wilkins (gregw)
  */
-public class HashLoginService extends AbstractLoginService implements LoginService
+public class HashLoginService extends AbstractLoginService
 {
     private String _config;
-
     private Resource _configResource;
-
     private Scanner _scanner;
-
     private int _refreshInterval = 0;// default is not to reload
 
     /* ------------------------------------------------------------ */
@@ -81,13 +78,15 @@ public class HashLoginService extends AbstractLoginService implements LoginServi
         super(name);
     }
 
+    /* ------------------------------------------------------------ */
     public HashLoginService(String realmName, Map<String, User> _users)
     {
         super(realmName);
 
         this._users = _users;
-    }/* ------------------------------------------------------------ */
-
+    }
+    
+    /* ------------------------------------------------------------ */
     /**
      * Constructor.
      * 
@@ -101,11 +100,13 @@ public class HashLoginService extends AbstractLoginService implements LoginServi
         setConfig(config);
     }
 
+    /* ------------------------------------------------------------ */
     public String getConfig()
     {
         return _config;
     }
 
+    /* ------------------------------------------------------------ */
     public Resource getConfigResource()
     {
         return _configResource;
@@ -129,16 +130,19 @@ public class HashLoginService extends AbstractLoginService implements LoginServi
 
     }
 
+    /* ------------------------------------------------------------ */
     public void setRefreshInterval(int msec)
     {
         _refreshInterval = msec;
     }
 
+    /* ------------------------------------------------------------ */
     public int getRefreshInterval()
     {
         return _refreshInterval;
     }
 
+    /* ------------------------------------------------------------ */
     public void loadConfig() throws IOException
     {
         synchronized (this)
@@ -176,6 +180,7 @@ public class HashLoginService extends AbstractLoginService implements LoginServi
     }
 
 
+    /* ------------------------------------------------------------ */
     /**
      * @see org.mortbay.jetty.util.component.AbstractLifeCycle#doStart()
      */
@@ -230,6 +235,7 @@ public class HashLoginService extends AbstractLoginService implements LoginServi
         }
     }
 
+    /* ------------------------------------------------------------ */
     /**
      * @see org.mortbay.jetty.util.component.AbstractLifeCycle#doStop()
      */

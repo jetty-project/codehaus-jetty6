@@ -34,22 +34,24 @@ import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.ServerAuthStatus;
-import org.mortbay.jetty.security.ServerAuthentication;
+import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.SimpleAuthResult;
 
 /**
  * @version $Rev$ $Date$
  */
-public class ClientCertServerAuthentication implements ServerAuthentication
+public class ClientCertAuthenticator extends LoginAuthenticator
 {
-
-    private final LoginService _loginService;
-
-    public ClientCertServerAuthentication(LoginService loginService)
+    public ClientCertAuthenticator(LoginService loginService)
     {
-        this._loginService = loginService;
+        super(loginService);
     }
 
+    public String getAuthMethod()
+    {
+        return Constraint.__CERT_AUTH;
+    }
+    
     /**
      * TODO what should happen if an insecure page is accessed without a client
      * cert? Current code requires a client cert always but allows access to

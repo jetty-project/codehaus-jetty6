@@ -33,11 +33,12 @@ import javax.security.auth.message.config.ServerAuthContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.ServerAuthStatus;
-import org.mortbay.jetty.security.ServerAuthentication;
+import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.ServletCallbackHandler;
 import org.mortbay.jetty.security.SimpleAuthResult;
 import org.mortbay.jetty.security.LazyAuthResult;
@@ -45,27 +46,22 @@ import org.mortbay.jetty.security.LazyAuthResult;
 /**
  * @version $Rev$ $Date$
  */
-public class JaspiServerAuthentication implements ServerAuthentication
+public class JaspiAuthenticator implements Authenticator
 {
-
     private final String _authContextId;
-
     private final ServerAuthConfig _authConfig;
-
     private final Map _authProperties;
-
     private final ServletCallbackHandler _callbackHandler;
-
     private final Subject _serviceSubject;
-
     private final boolean _allowLazyAuthentication;
 
-    public JaspiServerAuthentication(String authContextId, ServerAuthConfig authConfig, 
-                                     Map authProperties, ServletCallbackHandler callbackHandler,
-                                     Subject serviceSubject, boolean allowLazyAuthentication)
+    public JaspiAuthenticator(String authContextId, ServerAuthConfig authConfig, Map authProperties, ServletCallbackHandler callbackHandler,
+            Subject serviceSubject, boolean allowLazyAuthentication)
     {
-        if (callbackHandler == null) throw new NullPointerException("No CallbackHandler");
-        if (authConfig == null) throw new NullPointerException("No AuthConfig");
+        if (callbackHandler == null)
+            throw new NullPointerException("No CallbackHandler");
+        if (authConfig == null)
+            throw new NullPointerException("No AuthConfig");
         this._authContextId = authContextId;
         this._authConfig = authConfig;
         this._authProperties = authProperties;
@@ -74,21 +70,29 @@ public class JaspiServerAuthentication implements ServerAuthentication
         this._allowLazyAuthentication = allowLazyAuthentication;
     }
 
+    public String getAuthMethod()
+    {
+        return "JASPI";
+    }
+
     public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
     {
-        if (_allowLazyAuthentication && !messageInfo.isAuthMandatory()) { return new LazyAuthResult(this, messageInfo); }
+        if (_allowLazyAuthentication && !messageInfo.isAuthMandatory())
+        {
+            return new LazyAuthResult(this,messageInfo);
+        }
         try
         {
-            ServerAuthContext authContext = _authConfig.getAuthContext(_authContextId, _serviceSubject, _authProperties);
+            ServerAuthContext authContext = _authConfig.getAuthContext(_authContextId,_serviceSubject,_authProperties);
             Subject clientSubject = new Subject();
 
-            AuthStatus authStatus = authContext.validateRequest(new MessageInfoAdapter(messageInfo), clientSubject, _serviceSubject);
-            String authMethod = (String) messageInfo.getMap().get(JettyMessageInfo.AUTH_METHOD_KEY);
+            AuthStatus authStatus = authContext.validateRequest(new MessageInfoAdapter(messageInfo),clientSubject,_serviceSubject);
+            String authMethod = (String)messageInfo.getMap().get(JettyMessageInfo.AUTH_METHOD_KEY);
             CallerPrincipalCallback principalCallback = _callbackHandler.getThreadCallerPrincipalCallback();
-            Principal principal = principalCallback == null ? null : principalCallback.getPrincipal();
+            Principal principal = principalCallback == null?null:principalCallback.getPrincipal();
             GroupPrincipalCallback groupPrincipalCallback = _callbackHandler.getThreadGroupPrincipalCallback();
-            String[] groups = groupPrincipalCallback == null ? null : groupPrincipalCallback.getGroups();
-            return new SimpleAuthResult(toServerAuthStatus(authStatus), clientSubject, principal, groups, authMethod);
+            String[] groups = groupPrincipalCallback == null?null:groupPrincipalCallback.getGroups();
+            return new SimpleAuthResult(toServerAuthStatus(authStatus),clientSubject,principal,groups,authMethod);
         }
         catch (AuthException e)
         {
@@ -100,10 +104,10 @@ public class JaspiServerAuthentication implements ServerAuthentication
     {
         try
         {
-            ServerAuthContext authContext = _authConfig.getAuthContext(_authContextId, _serviceSubject, _authProperties);
+            ServerAuthContext authContext = _authConfig.getAuthContext(_authContextId,_serviceSubject,_authProperties);
             MessageInfoAdapter adapter = new MessageInfoAdapter(messageInfo);
-            authContext.cleanSubject(adapter, validatedUser.getClientSubject());
-            return toServerAuthStatus(authContext.secureResponse(adapter, _serviceSubject));
+            authContext.cleanSubject(adapter,validatedUser.getClientSubject());
+            return toServerAuthStatus(authContext.secureResponse(adapter,_serviceSubject));
         }
         catch (AuthException e)
         {
@@ -113,10 +117,14 @@ public class JaspiServerAuthentication implements ServerAuthentication
 
     ServerAuthStatus toServerAuthStatus(AuthStatus authStatus) throws ServerAuthException
     {
-        if (authStatus == AuthStatus.SEND_CONTINUE) return ServerAuthStatus.SEND_CONTINUE;
-        if (authStatus == AuthStatus.SEND_FAILURE) return ServerAuthStatus.SEND_FAILURE;
-        if (authStatus == AuthStatus.SEND_SUCCESS) return ServerAuthStatus.SEND_SUCCESS;
-        if (authStatus == AuthStatus.SUCCESS) return ServerAuthStatus.SUCCESS;
+        if (authStatus == AuthStatus.SEND_CONTINUE)
+            return ServerAuthStatus.SEND_CONTINUE;
+        if (authStatus == AuthStatus.SEND_FAILURE)
+            return ServerAuthStatus.SEND_FAILURE;
+        if (authStatus == AuthStatus.SEND_SUCCESS)
+            return ServerAuthStatus.SEND_SUCCESS;
+        if (authStatus == AuthStatus.SUCCESS)
+            return ServerAuthStatus.SUCCESS;
         throw new ServerAuthException("Invalid server status: " + authStatus);
     }
 
@@ -146,14 +154,16 @@ public class JaspiServerAuthentication implements ServerAuthentication
 
         public void setRequestMessage(Object request)
         {
-            if (!(request instanceof HttpServletRequest)) throw new IllegalStateException("Not a HttpServletRequest: " + request);
-            delegate.setRequestMessage((HttpServletRequest) request);
+            if (!(request instanceof HttpServletRequest))
+                throw new IllegalStateException("Not a HttpServletRequest: " + request);
+            delegate.setRequestMessage((HttpServletRequest)request);
         }
 
         public void setResponseMessage(Object response)
         {
-            if (!(response instanceof HttpServletResponse)) throw new IllegalStateException("Not a HttpServletResponse: " + response);
-            delegate.setResponseMessage((HttpServletResponse) response);
+            if (!(response instanceof HttpServletResponse))
+                throw new IllegalStateException("Not a HttpServletResponse: " + response);
+            delegate.setResponseMessage((HttpServletResponse)response);
         }
     }
 }

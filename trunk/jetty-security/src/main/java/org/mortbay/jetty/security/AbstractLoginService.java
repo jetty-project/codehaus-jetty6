@@ -20,6 +20,7 @@ import java.io.PrintStream;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.security.auth.Subject;
 
@@ -32,7 +33,7 @@ import org.mortbay.jetty.util.component.AbstractLifeCycle;
 public abstract class AbstractLoginService extends AbstractLifeCycle implements LoginService
 {
     protected static final String[] NO_ROLES = new String[0];
-    protected Map<String, User> _users=new HashMap<String, User>();
+    protected Map<String, User> _users=new ConcurrentHashMap<String, User>();
     protected String _realmName;
    
     
@@ -61,11 +62,8 @@ public abstract class AbstractLoginService extends AbstractLifeCycle implements 
     /* ------------------------------------------------------------ */
     public void login(LoginCallback loginCallback) throws ServerAuthException
     {
-        KnownUser user;
-        synchronized (this)
-        {
-            user = getKnownUser(loginCallback.getUserName());
-        }
+        KnownUser user= getKnownUser(loginCallback.getUserName());
+        
         if (user != null && user.authenticate(loginCallback.getCredential()))
         {
             loginCallback.getSubject().getPrincipals().add(user);
@@ -129,13 +127,19 @@ public abstract class AbstractLoginService extends AbstractLifeCycle implements 
      */
     protected synchronized Object putUser(String userName, Object userInfo)
     {
+        final User user;
         if (userInfo instanceof User)
-            return _users.put(userName, (User)userInfo);
-        if (userInfo instanceof Password)
-            return _users.put(userName,new KnownUser(userName.toString(),(Password)userInfo));
-        if (userInfo != null)
-            return _users.put(userName,new KnownUser(userName.toString(),Credential.getCredential(userInfo.toString())));
-        return null;
+            user=(User)userInfo;
+        else if (userInfo instanceof Password)
+            user=new KnownUser(userName,(Password)userInfo);
+        else if (userInfo != null)
+            user=new KnownUser(userName,Credential.getCredential(userInfo.toString()));
+        else
+            user=null;
+        
+        _users.put(userName,user);
+        
+        return user;
     }
 
   

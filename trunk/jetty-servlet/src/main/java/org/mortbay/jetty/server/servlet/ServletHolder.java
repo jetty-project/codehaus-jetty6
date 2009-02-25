@@ -352,7 +352,7 @@ public class ServletHolder extends Holder
     public void checkServletType ()
         throws UnavailableException
     {
-        if (!javax.servlet.Servlet.class.isAssignableFrom(_class))
+        if (_class==null || !javax.servlet.Servlet.class.isAssignableFrom(_class))
         {
             throw new UnavailableException("Servlet "+_class+" is not a javax.servlet.Servlet");
         }

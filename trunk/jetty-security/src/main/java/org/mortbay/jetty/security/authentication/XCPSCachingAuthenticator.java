@@ -19,40 +19,43 @@
 
 package org.mortbay.jetty.security.authentication;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.mortbay.jetty.security.CrossContextPsuedoSession;
 import org.mortbay.jetty.security.JettyMessageInfo;
-import org.mortbay.jetty.security.LazyAuthResult;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.ServerAuthStatus;
-import org.mortbay.jetty.security.ServerAuthentication;
+import org.mortbay.jetty.security.Authenticator;
 
 /**
+ * Cross-context psuedo-session caching ServerAuthentication
+ * 
  * @version $Rev$ $Date$
  */
-public class LazyServerAuthentication implements ServerAuthentication
+public class XCPSCachingAuthenticator extends DelegateAuthenticator
 {
+    public final static String __J_AUTHENTICATED = "org.mortbay.jetty.server.Auth";
 
-    private final ServerAuthentication _delegate;
+    private final CrossContextPsuedoSession<ServerAuthResult> _xcps;
 
-    public LazyServerAuthentication(ServerAuthentication delegate)
+    public XCPSCachingAuthenticator(Authenticator delegate, CrossContextPsuedoSession<ServerAuthResult> xcps)
     {
-        this._delegate = delegate;
+        super(delegate);
+        this._xcps = xcps;
     }
 
-    /** 
-     * @see org.mortbay.jetty.security.ServerAuthentication#validateRequest(org.mortbay.jetty.security.JettyMessageInfo)
-     */
     public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
     {
-        if (!messageInfo.isAuthMandatory())
-        { 
-            return new LazyAuthResult(_delegate, messageInfo);
-        }
-        return _delegate.validateRequest(messageInfo);
+        HttpServletRequest request = messageInfo.getRequestMessage();
+
+        ServerAuthResult serverAuthResult = _xcps.fetch(request);
+        if (serverAuthResult != null) return serverAuthResult;
+
+        serverAuthResult = _delegate.validateRequest(messageInfo);
+        if (serverAuthResult != null) _xcps.store(serverAuthResult, messageInfo.getResponseMessage());
+
+        return serverAuthResult;
     }
 
-    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException
-    {
-        return _delegate.secureResponse(messageInfo, validatedUser);
-    }
 }

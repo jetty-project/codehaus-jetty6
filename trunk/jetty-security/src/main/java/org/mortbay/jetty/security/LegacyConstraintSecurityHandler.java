@@ -37,7 +37,7 @@ import org.mortbay.jetty.util.LazyList;
  * 
  * @author Greg Wilkins (gregw)
  */
-public class LegacyConstraintSecurityHandler extends AbstractSecurityHandler implements ConstraintAware
+public class LegacyConstraintSecurityHandler extends SecurityHandler implements ConstraintAware
 {
     private ConstraintMapping[] _constraintMappings;
 
@@ -106,17 +106,17 @@ public class LegacyConstraintSecurityHandler extends AbstractSecurityHandler imp
 
     protected UserIdentity newUserIdentity(ServerAuthResult authResult)
     {
-        return new ConstraintUserIdentity(authResult);
+        return new AuthResultUserIdentity(authResult);
     }
 
     protected UserIdentity newSystemUserIdentity()
     {
-        return new ConstraintUserIdentity();
+        return new AuthResultUserIdentity();
     }
 
     public RunAsToken newRunAsToken(String runAsRole)
     {
-        return new ConstraintRunAsToken(runAsRole);
+        return new RoleRunAsToken(runAsRole);
     }
 
     protected Object prepareConstraintInfo(String pathInContext, Request request)

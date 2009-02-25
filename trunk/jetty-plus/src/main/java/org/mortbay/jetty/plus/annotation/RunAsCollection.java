@@ -19,7 +19,7 @@ import java.util.HashMap;
 
 import javax.servlet.ServletException;
 
-import org.mortbay.jetty.server.handler.SecurityHandler;
+import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.server.servlet.ServletHolder;
 import org.mortbay.jetty.util.log.Log;
 

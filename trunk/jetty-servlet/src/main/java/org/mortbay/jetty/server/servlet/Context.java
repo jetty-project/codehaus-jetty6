@@ -25,10 +25,11 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
 
 import org.mortbay.jetty.server.Dispatcher;
+import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.HandlerContainer;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.handler.ErrorHandler;
-import org.mortbay.jetty.server.handler.SecurityHandler;
+import org.mortbay.jetty.server.handler.HandlerWrapper;
 import org.mortbay.jetty.server.session.SessionHandler;
 import org.mortbay.jetty.util.Loader;
 
@@ -51,7 +52,7 @@ public class Context extends ContextHandler
     public final static int NO_SESSIONS=0;
     public final static int NO_SECURITY=0;
     
-    protected SecurityHandler _securityHandler;
+    protected HandlerWrapper _securityHandler;
     protected ServletHandler _servletHandler;
     protected SessionHandler _sessionHandler;
     
@@ -86,13 +87,13 @@ public class Context extends ContextHandler
     }
 
     /* ------------------------------------------------------------ */
-    public Context(HandlerContainer parent, SessionHandler sessionHandler, SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    public Context(HandlerContainer parent, SessionHandler sessionHandler, HandlerWrapper securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {   
         this(parent,null,sessionHandler,securityHandler,servletHandler,errorHandler);
     }
 
     /* ------------------------------------------------------------ */
-    public Context(HandlerContainer parent, String contextPath, SessionHandler sessionHandler, SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    public Context(HandlerContainer parent, String contextPath, SessionHandler sessionHandler, HandlerWrapper securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {   
         super((ContextHandler.SContext)null);
         _scontext = new SContext();
@@ -135,13 +136,12 @@ public class Context extends ContextHandler
     }    
 
     /* ------------------------------------------------------------ */
-    //TODO jaspi doesn't this kinda suck?
-    static SecurityHandler newSecurityHandler()
+    static HandlerWrapper newSecurityHandler()
     {
         try
         {
-            Class<?> l = Loader.loadClass(Context.class,"org.mortbay.jetty.security.ConstraintSecurityHandler");
-            return (SecurityHandler)l.newInstance();
+            Class<?> l = Loader.loadClass(Context.class,"org.mortbay.jetty.security.LegacyConstraintSecurityHandler");
+            return (HandlerWrapper)l.newInstance();
         }
         catch(Exception e)
         {
@@ -166,7 +166,7 @@ public class Context extends ContextHandler
     /**
      * @return Returns the securityHandler.
      */
-    public SecurityHandler getSecurityHandler()
+    public Handler getSecurityHandler()
     {
         return _securityHandler;
     }
@@ -222,7 +222,7 @@ public class Context extends ContextHandler
     }
 
     /* ------------------------------------------------------------ */
-    /** conveniance method to add a filter
+    /** convenience method to add a filter
      */
     public FilterHolder addFilter(Class filterClass,String pathSpec,int dispatches)
     {
@@ -230,14 +230,12 @@ public class Context extends ContextHandler
     }
 
     /* ------------------------------------------------------------ */
-    /** conveniance method to add a filter
+    /** convenience method to add a filter
      */
     public FilterHolder addFilter(String filterClass,String pathSpec,int dispatches)
     {
         return _servletHandler.addFilterWithMapping(filterClass,pathSpec,dispatches);
     }
-    
-
 
     /* ------------------------------------------------------------ */
     /**
@@ -259,15 +257,13 @@ public class Context extends ContextHandler
             _sessionHandler.setHandler(_securityHandler);
         else if (_servletHandler!=null)
             _sessionHandler.setHandler(_servletHandler);
-            
-        
     }
 
     /* ------------------------------------------------------------ */
     /**
      * @param securityHandler The {@link org.mortbay.jetty.server.handler.SecurityHandler} to set on this context.
      */
-    public void setSecurityHandler(SecurityHandler securityHandler)
+    public void setSecurityHandler(HandlerWrapper securityHandler)
     {
         if(_securityHandler==securityHandler)
             return;
