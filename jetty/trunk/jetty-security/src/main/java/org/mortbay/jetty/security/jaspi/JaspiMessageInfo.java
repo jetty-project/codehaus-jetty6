@@ -18,15 +18,16 @@
  */
 
 
-package org.mortbay.jetty.security;
+package org.mortbay.jetty.security.jaspi;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collection;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.security.auth.message.MessageInfo;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 
 /**
@@ -34,15 +35,15 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @version $Rev$ $Date$
  */
-public class JettyMessageInfo
+public class JaspiMessageInfo implements MessageInfo
 {
     public static final String MANDATORY_KEY = "javax.security.auth.message.MessagePolicy.isMandatory";
     public static final String AUTH_METHOD_KEY = "javax.servlet.http.authType";
-    private HttpServletRequest request;
-    private HttpServletResponse response;
+    private ServletRequest request;
+    private ServletResponse response;
     private final MIMap map;
 
-    public JettyMessageInfo(HttpServletRequest request, HttpServletResponse response, boolean isAuthMandatory)
+    public JaspiMessageInfo(ServletRequest request, ServletResponse response, boolean isAuthMandatory)
     {
         this.request = request;
         this.response = response;
@@ -55,24 +56,24 @@ public class JettyMessageInfo
         return map;
     }
 
-    public HttpServletRequest getRequestMessage()
+    public Object getRequestMessage()
     {
         return request;
     }
 
-    public HttpServletResponse getResponseMessage()
+    public Object getResponseMessage()
     {
         return response;
     }
 
-    public void setRequestMessage(HttpServletRequest request)
+    public void setRequestMessage(Object request)
     {
-        this.request = request;
+        this.request = (ServletRequest)request;
     }
 
-    public void setResponseMessage(HttpServletResponse response)
+    public void setResponseMessage(Object response)
     {
-        this.response = response;
+        this.response = (ServletResponse)response;
     }
 
     public String getAuthMethod()
