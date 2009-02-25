@@ -221,7 +221,7 @@
       <url-pattern>/dump/auth/admin/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
-      <role-name>content-administrator</role-name>
+      <role-name>admin</role-name>
     </auth-constraint>
   </security-constraint>
 
@@ -292,10 +292,10 @@
   </session-config>
 
   <security-role>
-    <role-name>content-administrator</role-name>
+    <role-name>admin</role-name>
   </security-role>
   <security-role>
-    <role-name>admin</role-name>
+    <role-name>user</role-name>
   </security-role>
 
 </web-app>
