@@ -18,6 +18,8 @@ package org.mortbay.jetty.security;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -69,6 +71,7 @@ public class ConstraintTest extends TestCase
         _security.setHandler(_handler);
         
         _loginService.putUser("user",new Password("password"));
+        _loginService.putUser("user2",new HashLoginService.KnownUser("user2", new Password("password"), new String[] {"user"}));
         _loginService.putUser("admin",new HashLoginService.KnownUser("admin", new Password("password"), new String[] {"administrator"}));
 
         Constraint constraint0 = new Constraint();
@@ -101,12 +104,14 @@ public class ConstraintTest extends TestCase
         mapping3.setPathSpec("/admin/relax/*");
         mapping3.setConstraint(constraint3);
 
+        Set<String> knownRoles=new HashSet<String>();
+        knownRoles.add("user");
+        knownRoles.add("administrator");
         
         _security.setConstraintMappings(new ConstraintMapping[]
                 {
                         mapping0, mapping1, mapping2, mapping3
-                },
-                Collections.singleton("administrator"));
+                },knownRoles);
     }
 
     /*
@@ -160,6 +165,7 @@ public class ConstraintTest extends TestCase
             throws Exception
     {
         _security.setAuthenticator(new BasicAuthenticator(_loginService));
+        _security.setStrict(false);
         _server.start();
 
         String response;
@@ -227,7 +233,7 @@ public class ConstraintTest extends TestCase
     {
         _security.setAuthenticator(new SessionCachingAuthenticator(
                 new FormAuthenticator("/testLoginPage","/testErrorPage",_loginService)));
-        
+        _security.setStrict(false);
         _server.start();
 
         String response;
@@ -282,7 +288,209 @@ public class ConstraintTest extends TestCase
         assertTrue(response.startsWith("HTTP/1.1 403"));
         assertTrue(response.indexOf("User not in required role") > 0);
         
+    }
 
+    public void testStrictBasic()
+            throws Exception
+    {
+        _security.setAuthenticator(new BasicAuthenticator(_loginService));
+        _server.start();
+
+        String response;
+        response = _connector.getResponses("GET /ctx/noauth/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/forbid/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 403 Forbidden"));
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 401 Unauthorized"));
+        assertTrue(response.indexOf("WWW-Authenticate: basic realm=\"TestRealm\"") > 0);
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n" +
+                "Authorization: " + B64Code.encode("user:wrong") + "\r\n" +
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 401 Unauthorized"));
+        assertTrue(response.indexOf("WWW-Authenticate: basic realm=\"TestRealm\"") > 0);
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n" +
+                "Authorization: " + B64Code.encode("user:password") + "\r\n" +
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 403"));
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n" +
+                "Authorization: " + B64Code.encode("user2:password") + "\r\n" +
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+        
+
+        // test admin
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/admin/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 401 Unauthorized"));
+        assertTrue(response.indexOf("WWW-Authenticate: basic realm=\"TestRealm\"") > 0);
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/admin/info HTTP/1.0\r\n" +
+                "Authorization: " + B64Code.encode("admin:wrong") + "\r\n" +
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 401 Unauthorized"));
+        assertTrue(response.indexOf("WWW-Authenticate: basic realm=\"TestRealm\"") > 0);
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/admin/info HTTP/1.0\r\n" +
+                "Authorization: " + B64Code.encode("user:password") + "\r\n" +
+                "\r\n");
+
+        assertTrue(response.startsWith("HTTP/1.1 403 "));
+        assertTrue(response.indexOf("User not in required role") > 0);
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/admin/info HTTP/1.0\r\n" +
+                "Authorization: " + B64Code.encode("admin:password") + "\r\n" +
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+        
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/admin/relax/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+    }
+
+    public void testStrictForm()
+            throws Exception
+    {
+        _security.setAuthenticator(new SessionCachingAuthenticator(
+                new FormAuthenticator("/testLoginPage","/testErrorPage",_loginService)));
+        
+        _server.start();
+
+        String response;
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/noauth/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/forbid/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 403 Forbidden"));
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 302 "));
+        assertTrue(response.indexOf("testLoginPage") > 0);
+        String session = response.substring(response.indexOf("JSESSIONID=") + 11, response.indexOf(";Path=/ctx"));
+
+        _connector.reopen();
+        response = _connector.getResponses("POST /ctx/j_security_check HTTP/1.0\r\n" +
+                "Cookie: JSESSIONID=" + session + "\r\n" +
+                "Content-Type: application/x-www-form-urlencoded\r\n" +
+                "Content-Length: 31\r\n" +
+                "\r\n" +
+                "j_username=user&j_password=wrong\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 302 "));
+        assertTrue(response.indexOf("Location") > 0);
+        assertTrue(response.indexOf("testErrorPage") > 0);
+
+
+        _connector.reopen();
+        response = _connector.getResponses("POST /ctx/j_security_check HTTP/1.0\r\n" +
+                "Cookie: JSESSIONID=" + session + "\r\n" +
+                "Content-Type: application/x-www-form-urlencoded\r\n" +
+                "Content-Length: 35\r\n" +
+                "\r\n" +
+                "j_username=user&j_password=password\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 302 "));
+        assertTrue(response.indexOf("Location") > 0);
+        assertTrue(response.indexOf("/ctx/auth/info") > 0);
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n" +
+                "Cookie: JSESSIONID=" + session + "\r\n" +
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 403"));
+        assertTrue(response.indexOf("User not in required role") > 0);
+        
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/admin/info HTTP/1.0\r\n" +
+                "Cookie: JSESSIONID=" + session + "\r\n" +
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 403"));
+        assertTrue(response.indexOf("User not in required role") > 0);
+        
+        
+        
+        // log in again as user2
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 302 "));
+        assertTrue(response.indexOf("testLoginPage") > 0);
+        session = response.substring(response.indexOf("JSESSIONID=") + 11, response.indexOf(";Path=/ctx"));
+
+        _connector.reopen();
+        response = _connector.getResponses("POST /ctx/j_security_check HTTP/1.0\r\n" +
+                "Cookie: JSESSIONID=" + session + "\r\n" +
+                "Content-Type: application/x-www-form-urlencoded\r\n" +
+                "Content-Length: 36\r\n" +
+                "\r\n" +
+                "j_username=user2&j_password=password\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 302 "));
+        assertTrue(response.indexOf("Location") > 0);
+        assertTrue(response.indexOf("/ctx/auth/info") > 0);
+        
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n" +
+                "Cookie: JSESSIONID=" + session + "\r\n" +
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+        
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/admin/info HTTP/1.0\r\n" +
+                "Cookie: JSESSIONID=" + session + "\r\n" +
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 403"));
+        assertTrue(response.indexOf("User not in required role") > 0);
+        
+
+        
+        // log in again as admin
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 302 "));
+        assertTrue(response.indexOf("testLoginPage") > 0);
+        session = response.substring(response.indexOf("JSESSIONID=") + 11, response.indexOf(";Path=/ctx"));
+
+        _connector.reopen();
+        response = _connector.getResponses("POST /ctx/j_security_check HTTP/1.0\r\n" +
+                "Cookie: JSESSIONID=" + session + "\r\n" +
+                "Content-Type: application/x-www-form-urlencoded\r\n" +
+                "Content-Length: 36\r\n" +
+                "\r\n" +
+                "j_username=admin&j_password=password\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 302 "));
+        assertTrue(response.indexOf("Location") > 0);
+        assertTrue(response.indexOf("/ctx/auth/info") > 0);
+        
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n" +
+                "Cookie: JSESSIONID=" + session + "\r\n" +
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+        
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/admin/info HTTP/1.0\r\n" +
+                "Cookie: JSESSIONID=" + session + "\r\n" +
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+        
+        
     }
 
 
