@@ -30,6 +30,7 @@ import org.mortbay.jetty.http.security.Password;
 import org.mortbay.jetty.security.HashLoginService;
 import org.mortbay.jetty.security.authentication.BasicAuthenticator;
 import org.mortbay.jetty.security.authentication.FormAuthenticator;
+import org.mortbay.jetty.security.authentication.SessionCachingAuthenticator;
 import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.LocalConnector;
 import org.mortbay.jetty.server.Request;
@@ -143,10 +144,10 @@ public class ConstraintTest extends TestCase
         assertFalse(mappings[2].getConstraint().isAnyRole());
         assertFalse(mappings[3].getConstraint().isAnyRole());
 
-        assertFalse(mappings[0].getConstraint().hasRole("admin"));
-        assertTrue (mappings[1].getConstraint().hasRole("admin"));
-        assertTrue (mappings[2].getConstraint().hasRole("admin"));
-        assertFalse(mappings[3].getConstraint().hasRole("admin"));
+        assertFalse(mappings[0].getConstraint().hasRole("administrator"));
+        assertTrue (mappings[1].getConstraint().hasRole("administrator"));
+        assertTrue (mappings[2].getConstraint().hasRole("administrator"));
+        assertFalse(mappings[3].getConstraint().hasRole("administrator"));
         
         assertTrue (mappings[0].getConstraint().getAuthenticate());
         assertTrue (mappings[1].getConstraint().getAuthenticate());
@@ -224,10 +225,9 @@ public class ConstraintTest extends TestCase
     public void testForm()
             throws Exception
     {
-        _security.setAuthenticator(new FormAuthenticator("/testLoginPage","/testErrorPage",_loginService));
+        _security.setAuthenticator(new SessionCachingAuthenticator(
+                new FormAuthenticator("/testLoginPage","/testErrorPage",_loginService)));
         
-       // ServerAuthentication serverAuthentication = new SessionCachingServerAuthentication(new FormServerAuthentication("/testLoginPage", "/testErrorPage", _loginService));
-       // _security.setServerAuthentication(serverAuthentication);
         _server.start();
 
         String response;
@@ -242,7 +242,7 @@ public class ConstraintTest extends TestCase
 
         _connector.reopen();
         response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n\r\n");
-        assertTrue(response.startsWith("HTTP/1.1 200 "));
+        assertTrue(response.startsWith("HTTP/1.1 302 "));
         assertTrue(response.indexOf("testLoginPage") > 0);
         String session = response.substring(response.indexOf("JSESSIONID=") + 11, response.indexOf(";Path=/ctx"));
 
@@ -275,14 +275,13 @@ public class ConstraintTest extends TestCase
                 "\r\n");
         assertTrue(response.startsWith("HTTP/1.1 200 OK"));
         
-
-        System.err.println("failing ...");
         _connector.reopen();
         response = _connector.getResponses("GET /ctx/admin/info HTTP/1.0\r\n" +
                 "Cookie: JSESSIONID=" + session + "\r\n" +
                 "\r\n");
-        System.err.println(response);
         assertTrue(response.startsWith("HTTP/1.1 403"));
+        assertTrue(response.indexOf("User not in required role") > 0);
+        
 
     }
 

@@ -87,4 +87,9 @@ public class LazyAuthResult implements ServerAuthResult
     {
         return getDelegate().getAuthMethod();
     }
+
+    public String toString()
+    {
+        return "{Lazy,"+_delegate+"}";
+    }
 }

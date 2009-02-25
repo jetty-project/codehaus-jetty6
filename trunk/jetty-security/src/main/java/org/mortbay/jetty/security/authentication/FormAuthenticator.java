@@ -25,8 +25,6 @@ import javax.security.auth.Subject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
 
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.security.JettyMessageInfo;
@@ -35,7 +33,6 @@ import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.ServerAuthStatus;
-import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.SimpleAuthResult;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.URIUtil;
@@ -125,7 +122,6 @@ public class FormAuthenticator extends LoginAuthenticator
             // TODO perhaps j_securitycheck can be uri suffix?
             if (uri.endsWith(__J_SECURITY_CHECK))
             {
-
                 final String username = request.getParameter(__J_USERNAME);
                 final char[] password = request.getParameter(__J_PASSWORD).toCharArray();
                 LoginCallbackImpl loginCallback = new LoginCallbackImpl(new Subject(), username, password);
@@ -176,18 +172,13 @@ public class FormAuthenticator extends LoginAuthenticator
                                           + ":"
                                           + request.getServerPort()
                                           + URIUtil.addPaths(request.getContextPath(), uri));
-            response.setContentLength(0);
-            RequestDispatcher dispatcher = request.getRequestDispatcher(_formLoginPage);
-            dispatcher.forward(request, response);
+            response.sendRedirect(_formLoginPage);
             return SimpleAuthResult.SEND_CONTINUE_RESULTS;
         }
         catch (IOException e)
         {
             throw new ServerAuthException(e);
-        } catch (ServletException e) {
-            throw new ServerAuthException(e);
-        }
-
+        } 
     }
 
     public boolean isLoginOrErrorPage(String pathInContext)

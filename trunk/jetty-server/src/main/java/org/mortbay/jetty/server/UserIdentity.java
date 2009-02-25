@@ -90,5 +90,10 @@ public interface UserIdentity
         {
             return null;
         }
+        
+        public String toString()
+        {
+            return "UNAUTHENTICATED";
+        }
     };
 }
