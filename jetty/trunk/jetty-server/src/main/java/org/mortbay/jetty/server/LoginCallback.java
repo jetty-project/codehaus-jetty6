@@ -53,10 +53,7 @@ public interface LoginCallback
     public void setUserPrincipal(Principal userPrincipal);
   
 
-    public List<String> getGroups();
-  
-
-    public void setGroups(List<String> groups);
+    public String[] getGroups();
     
 
     public void setGroups(String[] groups);

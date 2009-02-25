@@ -37,7 +37,7 @@ import org.mortbay.jetty.server.LoginCallback;
 public class LoginCallbackImpl implements LoginCallback
 {
 
-    private final List<String> NO_GROUPS = Collections.emptyList();
+    private final String[] NO_GROUPS = {};
 
     // initial data
     private final Subject subject;
@@ -50,7 +50,7 @@ public class LoginCallbackImpl implements LoginCallback
 
     private Principal userPrincipal;
 
-    private List<String> groups = NO_GROUPS;
+    private String[] groups = NO_GROUPS;
 
     //TODO could use Credential instance instead of Object if Basic/Form create a Password object
     public LoginCallbackImpl (Subject subject, String userName, Object credential)
@@ -95,19 +95,14 @@ public class LoginCallbackImpl implements LoginCallback
         this.userPrincipal = userPrincipal;
     }
 
-    public List<String> getGroups()
+    public String[] getGroups()
     {
         return groups;
     }
 
-    public void setGroups(List<String> groups)
-    {
-        this.groups = groups == null ? NO_GROUPS : groups;
-    }
-
     public void setGroups(String[] groups)
     {
-        this.groups = groups == null ? NO_GROUPS : Arrays.asList(groups);
+        this.groups = groups;
     }
 
     public void clearPassword()
