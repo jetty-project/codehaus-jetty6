@@ -66,7 +66,8 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
      * Process the constraints following the combining rules in Servlet 3.0 EA
      * spec section 13.7.1 Note that much of the logic is in the RoleInfo class.
      * 
-     * @param constraintMappings The contraintMappings to set.
+     * @param constraintMappings
+     *            The contraintMappings to set.
      * @param roles
      */
     public void setConstraintMappings(ConstraintMapping[] constraintMappings, Set<String> roles)
@@ -79,25 +80,25 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
             this._constraintMappings = constraintMappings;
             _constraintMap.clear();
 
-            for (ConstraintMapping _constraintMapping : _constraintMappings)
+            for (ConstraintMapping mapping : _constraintMappings)
             {
-                Map<String, RoleInfo> mappings = (Map<String, RoleInfo>) _constraintMap.get(_constraintMapping.getPathSpec());
+                Map<String, RoleInfo> mappings = (Map<String, RoleInfo>)_constraintMap.get(mapping.getPathSpec());
                 if (mappings == null)
                 {
                     mappings = new StringMap();
-                    _constraintMap.put(_constraintMapping.getPathSpec(), mappings);
+                    _constraintMap.put(mapping.getPathSpec(),mappings);
                 }
                 RoleInfo allMethodsRoleInfo = mappings.get(null);
                 if (allMethodsRoleInfo != null && allMethodsRoleInfo.isForbidden())
                 {
                     continue;
                 }
-                String httpMethod = _constraintMapping.getMethod();
+                String httpMethod = mapping.getMethod();
                 RoleInfo roleInfo = mappings.get(httpMethod);
                 if (roleInfo == null)
                 {
                     roleInfo = new RoleInfo();
-                    mappings.put(httpMethod, roleInfo);
+                    mappings.put(httpMethod,roleInfo);
                     if (allMethodsRoleInfo != null)
                     {
                         roleInfo.combine(allMethodsRoleInfo);
@@ -107,7 +108,7 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
                 {
                     continue;
                 }
-                Constraint constraint = _constraintMapping.getConstraint();
+                Constraint constraint = mapping.getConstraint();
                 boolean forbidden = constraint.isForbidden();
                 roleInfo.setForbidden(forbidden);
                 if (forbidden)
@@ -115,7 +116,7 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
                     if (httpMethod == null)
                     {
                         mappings.clear();
-                        mappings.put(null, roleInfo);
+                        mappings.put(null,roleInfo);
                     }
                 }
                 else
@@ -129,7 +130,7 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
                     {
                         if (constraint.isAnyRole())
                         {
-                            roleInfo.getRoles().addAll(roles);
+                            roleInfo.setAnyRole(true);
                         }
                         else
                         {
@@ -176,7 +177,7 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
 
     protected Object prepareConstraintInfo(String pathInContext, Request request)
     {
-        Map<String, RoleInfo> mappings = (Map<String, RoleInfo>) _constraintMap.match(pathInContext);
+        Map<String, RoleInfo> mappings = (Map<String, RoleInfo>)_constraintMap.match(pathInContext);
 
         if (mappings != null)
         {
@@ -185,30 +186,43 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
             if (roleInfo == null)
             {
                 roleInfo = mappings.get(null);
-                if (roleInfo != null) { return roleInfo; }
+                if (roleInfo != null)
+                {
+                    return roleInfo;
+                }
             }
         }
         return null;
     }
 
-    protected boolean checkUserDataPermissions(String pathInContext, Request request, 
-                                               Response response, Object constraintInfo) throws IOException
+    protected boolean checkUserDataPermissions(String pathInContext, Request request, Response response, Object constraintInfo) throws IOException
     {
-        if (constraintInfo == null) { return true; }
-        RoleInfo roleInfo = (RoleInfo) constraintInfo;
-        if (roleInfo.isForbidden()) { return false; }
+        if (constraintInfo == null)
+        {
+            return true;
+        }
+        RoleInfo roleInfo = (RoleInfo)constraintInfo;
+        if (roleInfo.isForbidden())
+        {
+            return false;
+        }
         UserDataConstraint dataConstraint = roleInfo.getUserDataConstraint();
-        if (dataConstraint == null || dataConstraint == UserDataConstraint.None) { return true; }
+        if (dataConstraint == null || dataConstraint == UserDataConstraint.None)
+        {
+            return true;
+        }
         HttpConnection connection = HttpConnection.getCurrentConnection();
         Connector connector = connection.getConnector();
 
         if (dataConstraint == UserDataConstraint.Integral)
         {
-            if (connector.isIntegral(request)) return true;
+            if (connector.isIntegral(request))
+                return true;
             if (connector.getConfidentialPort() > 0)
             {
                 String url = connector.getIntegralScheme() + "://" + request.getServerName() + ":" + connector.getIntegralPort() + request.getRequestURI();
-                if (request.getQueryString() != null) url += "?" + request.getQueryString();
+                if (request.getQueryString() != null)
+                    url += "?" + request.getQueryString();
                 response.setContentLength(0);
                 response.sendRedirect(url);
                 request.setHandled(true);
@@ -217,16 +231,15 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
         }
         else if (dataConstraint == UserDataConstraint.Confidential)
         {
-            if (connector.isConfidential(request)) return true;
+            if (connector.isConfidential(request))
+                return true;
 
             if (connector.getConfidentialPort() > 0)
             {
-                String url = connector.getConfidentialScheme() + "://"
-                             + request.getServerName()
-                             + ":"
-                             + connector.getConfidentialPort()
-                             + request.getRequestURI();
-                if (request.getQueryString() != null) url += "?" + request.getQueryString();
+                String url = connector.getConfidentialScheme() + "://" + request.getServerName() + ":" + connector.getConfidentialPort()
+                        + request.getRequestURI();
+                if (request.getQueryString() != null)
+                    url += "?" + request.getQueryString();
 
                 response.setContentLength(0);
                 response.sendRedirect(url);
@@ -243,21 +256,38 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
 
     protected boolean isAuthMandatory(Request base_request, Response base_response, Object constraintInfo)
     {
-        if (constraintInfo == null) { return false; }
-        return !((RoleInfo) constraintInfo).isUnchecked();
+        if (constraintInfo == null)
+        {
+            return false;
+        }
+        return !((RoleInfo)constraintInfo).isUnchecked();
     }
 
-    protected boolean checkWebResourcePermissions(String pathInContext, Request request, 
-                                                  Response response, Object constraintInfo, 
-                                                  UserIdentity userIdentity) throws IOException
+    protected boolean checkWebResourcePermissions(String pathInContext, Request request, Response response, Object constraintInfo, UserIdentity userIdentity)
+            throws IOException
     {
-        if (constraintInfo == null) { return true; }
-        RoleInfo roleInfo = (RoleInfo) constraintInfo;
-        if (roleInfo.isUnchecked()) { return true; }
+        if (constraintInfo == null)
+        {
+            return true;
+        }
+        RoleInfo roleInfo = (RoleInfo)constraintInfo;
+
+        System.err.println("Check "+roleInfo+" against "+userIdentity);
+        
+        if (roleInfo.isUnchecked())
+        {
+            return true;
+        }
+        
+        if (roleInfo.isAnyRole() && userIdentity.getAuthMethod()!=null)
+            return true;
+        
+        // TODO more efficient to avoid iterator creation here!
         Set<String> roles = roleInfo.getRoles();
         for (String role : roles)
         {
-            if (userIdentity.isUserInRole(role)) { return true; }
+            if (userIdentity.isUserInRole(role))
+                return true;
         }
         return false;
     }

@@ -1,6 +1,5 @@
 //========================================================================
-//$Id: WebAppContext.java,v 1.5 2005/11/16 22:02:45 gregwilkins Exp $
-//Copyright 2004-2006 Mort Bay Consulting Pty. Ltd.
+//Copyright 2004-2009 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
@@ -52,9 +51,11 @@ public class Context extends ContextHandler
     public final static int NO_SESSIONS=0;
     public final static int NO_SECURITY=0;
     
+    protected String _defaultSecurityHandlerClass="org.mortbay.jetty.security.ConstraintSecurityHandler";
     protected HandlerWrapper _securityHandler;
     protected ServletHandler _servletHandler;
     protected SessionHandler _sessionHandler;
+    protected int _options;
     
     /* ------------------------------------------------------------ */
     public Context()
@@ -77,7 +78,8 @@ public class Context extends ContextHandler
     /* ------------------------------------------------------------ */
     public Context(HandlerContainer parent, String contextPath, int options)
     {
-        this(parent,contextPath,((options&SESSIONS)!=0)?new SessionHandler():null,((options&SECURITY)!=0)?newSecurityHandler():null,null,null);
+        this(parent,contextPath,null,null,null,null);
+        _options=options;
     }
     
     /* ------------------------------------------------------------ */
@@ -99,31 +101,7 @@ public class Context extends ContextHandler
         _scontext = new SContext();
         _sessionHandler = sessionHandler;
         _securityHandler = securityHandler;
-        _servletHandler = servletHandler!=null?servletHandler:new ServletHandler();
-        
-        if (_sessionHandler!=null)
-        {
-            setHandler(_sessionHandler);
-            
-            if (securityHandler!=null)
-            {
-                _sessionHandler.setHandler(_securityHandler);
-                _securityHandler.setHandler(_servletHandler);
-            }
-            else
-            {
-                _sessionHandler.setHandler(_servletHandler);
-            }
-        }
-        else if (_securityHandler!=null)
-        {
-            setHandler(_securityHandler);
-            _securityHandler.setHandler(_servletHandler);
-        }
-        else
-        {
-            setHandler(_servletHandler);
-        }
+        _servletHandler = servletHandler;
             
         if (errorHandler!=null)
             setErrorHandler(errorHandler);
@@ -135,12 +113,37 @@ public class Context extends ContextHandler
             parent.addHandler(this);
     }    
 
+    
     /* ------------------------------------------------------------ */
-    static HandlerWrapper newSecurityHandler()
+    /** Get the defaultSecurityHandlerClass.
+     * @return the defaultSecurityHandlerClass
+     */
+    public String getDefaultSecurityHandlerClass()
+    {
+        return _defaultSecurityHandlerClass;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the defaultSecurityHandlerClass.
+     * @param defaultSecurityHandlerClass the defaultSecurityHandlerClass to set
+     */
+    public void setDefaultSecurityHandlerClass(String defaultSecurityHandlerClass)
+    {
+        _defaultSecurityHandlerClass = defaultSecurityHandlerClass;
+    }
+
+    /* ------------------------------------------------------------ */
+    protected SessionHandler newSessionHandler()
+    {
+        return new SessionHandler();
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected HandlerWrapper newSecurityHandler()
     {
         try
         {
-            Class<?> l = Loader.loadClass(Context.class,"org.mortbay.jetty.security.LegacyConstraintSecurityHandler");
+            Class<?> l = Loader.loadClass(Context.class,_defaultSecurityHandlerClass);
             return (HandlerWrapper)l.newInstance();
         }
         catch(Exception e)
@@ -150,11 +153,39 @@ public class Context extends ContextHandler
     }
 
     /* ------------------------------------------------------------ */
+    protected ServletHandler newServletHandler()
+    {
+        return new ServletHandler();
+    }
+
+    /* ------------------------------------------------------------ */
     /**
+     * Finish constructing handlers and link them together.
+     * 
      * @see org.mortbay.jetty.server.handler.ContextHandler#startContext()
      */
     protected void startContext() throws Exception
     {
+        // force creation of missing handlers.
+        getSessionHandler();
+        getSecurityHandler();
+        getServletHandler();
+        
+        Handler handler = _servletHandler;
+        if (_securityHandler!=null)
+        {
+            _securityHandler.setHandler(handler);
+            handler=_securityHandler;
+        }
+        
+        if (_sessionHandler!=null)
+        {
+            _sessionHandler.setHandler(handler);
+            handler=_sessionHandler;
+        }
+        
+        setHandler(handler);
+        
     	super.startContext();
 
     	// OK to Initialize servlet handler now
@@ -168,6 +199,9 @@ public class Context extends ContextHandler
      */
     public Handler getSecurityHandler()
     {
+        if (_securityHandler==null && (_options&SECURITY)!=0 && !isStarted()) 
+            _securityHandler=newSecurityHandler();
+        
         return _securityHandler;
     }
 
@@ -177,6 +211,8 @@ public class Context extends ContextHandler
      */
     public ServletHandler getServletHandler()
     {
+        if (_servletHandler==null && !isStarted()) 
+            _servletHandler=newServletHandler();
         return _servletHandler;
     }
 
@@ -186,6 +222,8 @@ public class Context extends ContextHandler
      */
     public SessionHandler getSessionHandler()
     {
+        if (_sessionHandler==null && (_options&SESSIONS)!=0 && !isStarted()) 
+            _sessionHandler=newSessionHandler();
         return _sessionHandler;
     }
 
@@ -243,20 +281,10 @@ public class Context extends ContextHandler
      */
     public void setSessionHandler(SessionHandler sessionHandler)
     {
-        if (_sessionHandler==sessionHandler)
-            return;
+        if (isStarted())
+            throw new IllegalStateException("STARTED");
         
-        if (_sessionHandler!=null)
-            _sessionHandler.setHandler(null);
-
         _sessionHandler = sessionHandler;
-        
-        setHandler(_sessionHandler);
-        
-        if (_securityHandler!=null)
-            _sessionHandler.setHandler(_securityHandler);
-        else if (_servletHandler!=null)
-            _sessionHandler.setHandler(_servletHandler);
     }
 
     /* ------------------------------------------------------------ */
@@ -265,31 +293,10 @@ public class Context extends ContextHandler
      */
     public void setSecurityHandler(HandlerWrapper securityHandler)
     {
-        if(_securityHandler==securityHandler)
-            return;
-                    
-        if (_securityHandler!=null)
-            _securityHandler.setHandler(null);
+        if (isStarted())
+            throw new IllegalStateException("STARTED");
         
         _securityHandler = securityHandler;
-        
-        if (_securityHandler==null)
-        {
-            if (_sessionHandler!=null)
-                _sessionHandler.setHandler(_servletHandler);
-            else 
-                setHandler(_servletHandler);
-        }
-        else
-        {
-            if (_sessionHandler!=null)
-                _sessionHandler.setHandler(_securityHandler);
-            else 
-                setHandler(_securityHandler);
-
-            if (_servletHandler!=null)
-                _securityHandler.setHandler(_servletHandler);
-        }
     }
 
     /* ------------------------------------------------------------ */
@@ -298,18 +305,10 @@ public class Context extends ContextHandler
      */
     public void setServletHandler(ServletHandler servletHandler)
     {
-        if (_servletHandler==servletHandler)
-            return;
+        if (isStarted())
+            throw new IllegalStateException("STARTED");
         
         _servletHandler = servletHandler;
-
-        if (_securityHandler!=null)
-            _securityHandler.setHandler(_servletHandler);
-        else if (_sessionHandler!=null)
-            _sessionHandler.setHandler(_servletHandler);
-        else 
-            setHandler(_servletHandler);
-        
     }
 
     /* ------------------------------------------------------------ */

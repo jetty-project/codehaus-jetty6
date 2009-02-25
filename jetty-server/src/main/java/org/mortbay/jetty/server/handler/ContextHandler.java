@@ -551,6 +551,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             if (_errorHandler==null)
                 setErrorHandler(new ErrorHandler());
             
+            // defers the calling of super.doStart()
             startContext();
             
            
@@ -568,6 +569,15 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * Extensible startContext.
+     * this method is called from {@link ContextHandler#doStart()} instead of a 
+     * call to super.doStart().   This allows derived classes to insert additional
+     * handling (Eg configuration) before the call to super.doStart by this method
+     * will start contained handlers.
+     * @see org.mortbay.jetty.servlet.Context
+     * @see org.mortbay.jetty.webapp.WebAppContext
+     */
     protected void startContext()
     	throws Exception
     {

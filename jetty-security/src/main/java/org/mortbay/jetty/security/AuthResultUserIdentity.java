@@ -95,4 +95,9 @@ public class AuthResultUserIdentity implements UserIdentity
         return _roleRefMap;
     }
     
+    public String toString()
+    {
+        return "{"+_authResult+(_runAsRole!=null?_runAsRole.toString():"")+"}";
+    }
+    
 }
