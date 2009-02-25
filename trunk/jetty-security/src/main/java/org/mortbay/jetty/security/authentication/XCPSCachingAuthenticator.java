@@ -19,10 +19,12 @@
 
 package org.mortbay.jetty.security.authentication;
 
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
-import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.ServerAuthStatus;
@@ -45,15 +47,14 @@ public class XCPSCachingAuthenticator extends DelegateAuthenticator
         this._xcps = xcps;
     }
 
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
+    public ServerAuthResult validateRequest(ServletRequest request, ServletResponse response, boolean manditory) throws ServerAuthException
     {
-        HttpServletRequest request = messageInfo.getRequestMessage();
 
-        ServerAuthResult serverAuthResult = _xcps.fetch(request);
+        ServerAuthResult serverAuthResult = _xcps.fetch((HttpServletRequest)request);
         if (serverAuthResult != null) return serverAuthResult;
 
-        serverAuthResult = _delegate.validateRequest(messageInfo);
-        if (serverAuthResult != null) _xcps.store(serverAuthResult, messageInfo.getResponseMessage());
+        serverAuthResult = _delegate.validateRequest(request, response, manditory);
+        if (serverAuthResult != null) _xcps.store(serverAuthResult, (HttpServletResponse)response);
 
         return serverAuthResult;
     }

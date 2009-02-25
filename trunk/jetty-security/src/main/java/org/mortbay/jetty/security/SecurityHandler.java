@@ -278,22 +278,16 @@ public abstract class SecurityHandler extends HandlerWrapper implements Authenti
                 // the request/response passed to the resource(servlet) is
                 // realistic (i.e. this requires no wrapping between here and
                 // invocation)
+                // Gregw - this was realistic since security is not done on forwards and
+                // includes.  However the latest async spec can allow wrapped requests
+                // to be redispatched.  
+                
                 JettyMessageInfo messageInfo = new JettyMessageInfo(request, response, isAuthMandatory);
-                // String authContextID =
-                // authConfig.getAuthContextID(messageInfo);
-                // ServerAuthContext authContext =
-                // authConfig.getAuthContext(authContextID, serviceSubject,
-                // authProperties);
-
-                // JASPI 3.8.2
-                // Subject clientSubject = new Subject();
+                
                 try
                 {
                     final Authenticator serverAuthentication = _authenticator;
-                    ServerAuthResult authResult = serverAuthentication.validateRequest(messageInfo);
-                    // AuthStatus authStatus =
-                    // authContext.validateRequest(messageInfo, clientSubject,
-                    // serviceSubject);
+                    ServerAuthResult authResult = serverAuthentication.validateRequest(request, response, isAuthMandatory);
                     
                     if (authResult.getAuthStatus() == ServerAuthStatus.SUCCESS)
                     {
@@ -322,7 +316,7 @@ public abstract class SecurityHandler extends HandlerWrapper implements Authenti
                             boolean secureResponse = true;
                             if (secureResponse)
                             {
-                                serverAuthentication.secureResponse(messageInfo, authResult);
+                                serverAuthentication.secureResponse(request, response, isAuthMandatory, authResult);
                             }
                         }
                       

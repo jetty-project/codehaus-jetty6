@@ -1,6 +1,8 @@
 package org.mortbay.jetty.security.authentication;
 
-import org.mortbay.jetty.security.JettyMessageInfo;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.ServerAuthStatus;
@@ -25,14 +27,14 @@ public class DelegateAuthenticator implements Authenticator
         return _delegate;
     }
 
-    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException
+    public ServerAuthResult validateRequest(ServletRequest request, ServletResponse response, boolean manditory) throws ServerAuthException
     {
-        return _delegate.secureResponse(messageInfo,validatedUser);
+        return _delegate.validateRequest(request, response, manditory);
     }
 
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
+    public ServerAuthStatus secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, ServerAuthResult validatedUser) throws ServerAuthException
     {
-        return _delegate.validateRequest(messageInfo);
+        return _delegate.secureResponse(req,res, mandatory, validatedUser);
     }
     
 }

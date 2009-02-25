@@ -19,10 +19,11 @@
 
 package org.mortbay.jetty.security.authentication;
 
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.ServerAuthStatus;
@@ -42,10 +43,9 @@ public class SessionCachingAuthenticator extends DelegateAuthenticator
         super(delegate);
     }
 
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
+    public ServerAuthResult validateRequest(ServletRequest request, ServletResponse response, boolean mandatory) throws ServerAuthException
     {
-        HttpServletRequest request = messageInfo.getRequestMessage();
-        HttpSession session = request.getSession(messageInfo.isAuthMandatory());
+        HttpSession session = ((HttpServletRequest)request).getSession(mandatory);
         // not mandatory and not authenticated
         if (session == null) 
             return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS;
@@ -54,7 +54,7 @@ public class SessionCachingAuthenticator extends DelegateAuthenticator
         if (serverAuthResult != null) 
             return serverAuthResult;
 
-        serverAuthResult = _delegate.validateRequest(messageInfo);
+        serverAuthResult = _delegate.validateRequest(request, response, mandatory);
         if (serverAuthResult != null && serverAuthResult.getClientSubject() != null)
         {
             ServerAuthResult newServerAuthResult = new SimpleAuthResult(ServerAuthStatus.SUCCESS, serverAuthResult.getClientSubject(), 
