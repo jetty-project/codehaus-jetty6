@@ -38,10 +38,38 @@ import org.mortbay.jetty.util.StringMap;
 public class ConstraintSecurityHandler extends SecurityHandler implements ConstraintAware
 {
     private ConstraintMapping[] _constraintMappings;
-
     private Set<String> _roles;
-
     private PathMap _constraintMap = new PathMap();
+    private boolean _strict = true;
+
+    
+    /* ------------------------------------------------------------ */
+    /** Get the strict mode.
+     * @return true if the security handler is running in strict mode.
+     */
+    public boolean isStrict()
+    {
+        return _strict;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the strict mode of the security handler.
+     * <p>
+     * When in strict mode (the default), the full servlet specification
+     * will be implemented.
+     * If not in strict mode, some additional flexibility in configuration
+     * is allowed:<ul>
+     * <li>All users do not need to have a role defined in the deployment descriptor
+     * <li>The * role in a constraint applies to ANY role rather than all roles defined in
+     * the deployment descriptor.
+     * </ul>
+     * 
+     * @param strict the strict to set
+     */
+    public void setStrict(boolean strict)
+    {
+        _strict = strict;
+    }
 
     /* ------------------------------------------------------------ */
     /**
@@ -52,6 +80,7 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
         return _constraintMappings;
     }
 
+    /* ------------------------------------------------------------ */
     public Set<String> getRoles()
     {
         return _roles;
@@ -68,14 +97,23 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
      */
     public void setConstraintMappings(ConstraintMapping[] constraintMappings, Set<String> roles)
     {
+        if (isStarted())
+            throw new IllegalStateException("Started");
         _constraintMappings = constraintMappings;
         this._roles = roles;
 
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @see org.mortbay.jetty.security.SecurityHandler#doStart()
+     */
+    @Override
+    protected void doStart() throws Exception
+    {
+        _constraintMap.clear();
         if (_constraintMappings != null)
         {
-            this._constraintMappings = constraintMappings;
-            _constraintMap.clear();
-
             for (ConstraintMapping mapping : _constraintMappings)
             {
                 Map<String, RoleInfo> mappings = (Map<String, RoleInfo>)_constraintMap.get(mapping.getPathSpec());
@@ -126,15 +164,23 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
                     {
                         if (constraint.isAnyRole())
                         {
-                            roleInfo.setAnyRole(true);
+                            if (_strict)
+                            {
+                                // * means "all defined roles"
+                                for (String role : _roles)
+                                    roleInfo.addRole(role);
+                            }
+                            else
+                                // * means any role
+                                roleInfo.setAnyRole(true);
                         }
                         else
                         {
                             String[] newRoles = constraint.getRoles();
                             for (String role : newRoles)
                             {
-                                if (!roles.contains(role))
-                                    throw new IllegalArgumentException("Attempt to use undeclared role: " + role + ", known roles: " + roles);
+                                if (_strict &&!_roles.contains(role))
+                                    throw new IllegalArgumentException("Attempt to use undeclared role: " + role + ", known roles: " + _roles);
                                 roleInfo.addRole(role);
                             }
                         }
@@ -151,9 +197,9 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
                         }
                     }
                 }
-
             }
         }
+        super.doStart();
     }
 
     protected UserIdentity newUserIdentity(ServerAuthResult authResult)
