@@ -21,6 +21,7 @@
 package org.mortbay.jetty.security;
 
 import javax.security.auth.Subject;
+
 import org.mortbay.jetty.server.LoginCallback;
 
 /**

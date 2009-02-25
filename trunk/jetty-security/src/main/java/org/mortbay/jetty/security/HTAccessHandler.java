@@ -35,11 +35,11 @@ import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.http.security.UnixCrypt;
+import org.mortbay.jetty.security.jaspi.JaspiMessageInfo;
 import org.mortbay.jetty.security.jaspi.modules.BaseAuthModule;
 import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.LoginCallback;
@@ -951,7 +951,7 @@ public class HTAccessHandler extends SecurityHandler
                         GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject, loginCallback.getGroups()
                                 .toArray(new String[loginCallback.getGroups().size()]));
                         callbackHandler.handle(new Callback[] { callerPrincipalCallback, groupPrincipalCallback });
-                        messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__BASIC_AUTH);
+                        messageInfo.getMap().put(JaspiMessageInfo.AUTH_METHOD_KEY, Constraint.__BASIC_AUTH);
                         return AuthStatus.SUCCESS;
 
                     }

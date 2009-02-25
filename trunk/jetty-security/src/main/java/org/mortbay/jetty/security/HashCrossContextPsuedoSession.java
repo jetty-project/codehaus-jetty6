@@ -19,14 +19,14 @@
 
 package org.mortbay.jetty.security;
 
-import java.util.Random;
-import java.util.Map;
-import java.util.HashMap;
 import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Cookie;
 
 /**
  * @version $Rev$ $Date$

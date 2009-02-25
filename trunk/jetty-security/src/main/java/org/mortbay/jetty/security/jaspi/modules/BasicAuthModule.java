@@ -34,7 +34,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.http.security.Constraint;
-import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.util.log.Log;
 
 /**

@@ -21,11 +21,11 @@ package org.mortbay.jetty.security.jaspi;
 
 import java.util.Map;
 
-import javax.security.auth.message.config.ServerAuthConfig;
-import javax.security.auth.message.config.ServerAuthContext;
+import javax.security.auth.Subject;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.MessageInfo;
-import javax.security.auth.Subject;
+import javax.security.auth.message.config.ServerAuthConfig;
+import javax.security.auth.message.config.ServerAuthContext;
 
 /**
  * @version $Rev$ $Date$

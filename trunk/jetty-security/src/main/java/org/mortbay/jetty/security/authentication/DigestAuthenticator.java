@@ -37,7 +37,6 @@ import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.ServerAuthStatus;
-import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.SimpleAuthResult;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.util.QuotedStringTokenizer;

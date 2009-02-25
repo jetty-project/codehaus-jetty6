@@ -18,10 +18,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.HttpConnection;

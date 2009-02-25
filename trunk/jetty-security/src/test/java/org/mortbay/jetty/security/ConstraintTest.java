@@ -24,10 +24,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
+
 import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.http.security.Password;
-import org.mortbay.jetty.security.HashLoginService;
 import org.mortbay.jetty.security.authentication.BasicAuthenticator;
 import org.mortbay.jetty.security.authentication.FormAuthenticator;
 import org.mortbay.jetty.security.authentication.SessionCachingAuthenticator;
