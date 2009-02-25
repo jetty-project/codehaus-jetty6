@@ -272,8 +272,6 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
         }
         RoleInfo roleInfo = (RoleInfo)constraintInfo;
 
-        System.err.println("Check "+roleInfo+" against "+userIdentity);
-        
         if (roleInfo.isUnchecked())
         {
             return true;
