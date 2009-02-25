@@ -26,21 +26,20 @@ import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.ServerAuthStatus;
-import org.mortbay.jetty.security.ServerAuthentication;
+import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.SimpleAuthResult;
 
 /**
  * @version $Rev$ $Date$
  */
-public class SessionCachingServerAuthentication implements ServerAuthentication
+public class SessionCachingAuthenticator extends DelegateAuthenticator
 {
     public final static String __J_AUTHENTICATED = "org.mortbay.jetty.server.Auth";
 
-    private final ServerAuthentication _delegate;
 
-    public SessionCachingServerAuthentication(ServerAuthentication delegate)
+    public SessionCachingAuthenticator(Authenticator delegate)
     {
-        this._delegate = delegate;
+        super(delegate);
     }
 
     public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
@@ -64,12 +63,6 @@ public class SessionCachingServerAuthentication implements ServerAuthentication
             session.setAttribute(__J_AUTHENTICATED, newServerAuthResult);
         }
         return serverAuthResult;
-    }
-
-    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) 
-    throws ServerAuthException
-    {
-        return _delegate.secureResponse(messageInfo, validatedUser);
     }
 
 }

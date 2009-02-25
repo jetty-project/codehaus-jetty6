@@ -32,13 +32,13 @@ public class LazyAuthResult implements ServerAuthResult
 {
     private static final Subject unauthenticatedSubject = new Subject();
 
-    private final ServerAuthentication _serverAuthentication;
+    private final Authenticator _serverAuthentication;
 
     private final JettyMessageInfo _messageInfo;
 
     private ServerAuthResult _delegate;
 
-    public LazyAuthResult(ServerAuthentication serverAuthentication, JettyMessageInfo messageInfo)
+    public LazyAuthResult(Authenticator serverAuthentication, JettyMessageInfo messageInfo)
     {
         if (serverAuthentication == null) throw new NullPointerException("No ServerAuthentication");
         if (messageInfo == null) throw new NullPointerException("No JettyMessageInfo");

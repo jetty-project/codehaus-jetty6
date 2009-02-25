@@ -36,28 +36,26 @@ import javax.servlet.UnavailableException;
 
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
+import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.security.ServerAuthResult;
-import org.mortbay.jetty.security.ServerAuthentication;
+import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.security.ConstraintAware;
 import org.mortbay.jetty.security.ServletCallbackHandler;
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
 import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
-import org.mortbay.jetty.security.jaspi.JaspiServerAuthentication;
-import org.mortbay.jetty.security.authentication.FormServerAuthentication;
-import org.mortbay.jetty.security.authentication.XCPSCachingServerAuthentication;
-import org.mortbay.jetty.security.authentication.SessionCachingServerAuthentication;
-import org.mortbay.jetty.security.authentication.BasicServerAuthentication;
-import org.mortbay.jetty.security.authentication.DigestServerAuthentication;
-import org.mortbay.jetty.security.authentication.ClientCertServerAuthentication;
-import org.mortbay.jetty.security.authentication.LazyServerAuthentication;
-import org.mortbay.jetty.server.AuthenticationManager;
+import org.mortbay.jetty.security.jaspi.JaspiAuthenticator;
+import org.mortbay.jetty.security.authentication.FormAuthenticator;
+import org.mortbay.jetty.security.authentication.XCPSCachingAuthenticator;
+import org.mortbay.jetty.security.authentication.SessionCachingAuthenticator;
+import org.mortbay.jetty.security.authentication.BasicAuthenticator;
+import org.mortbay.jetty.security.authentication.DigestAuthenticator;
+import org.mortbay.jetty.security.authentication.ClientCertAuthenticator;
+import org.mortbay.jetty.security.authentication.LazyAuthenticator;
 import org.mortbay.jetty.server.Dispatcher;
 import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.RunAsToken;
-import org.mortbay.jetty.server.UserRealm;
 import org.mortbay.jetty.server.handler.ContextHandler;
-import org.mortbay.jetty.server.handler.SecurityHandler;
 import org.mortbay.jetty.server.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.server.servlet.FilterHolder;
 import org.mortbay.jetty.server.servlet.FilterMapping;
@@ -79,44 +77,27 @@ import org.mortbay.jetty.xml.XmlParser;
 public class WebXmlConfiguration implements Configuration
 {
     protected WebAppContext _context;
-
     protected XmlParser _xmlParser;
-
     protected Object _filters;
-
     protected Object _filterMappings;
-
     protected Object _servlets;
-
     protected Object _servletMappings;
-
     protected Object _welcomeFiles;
-
     protected Object _constraintMappings;
-
     protected final Set<String> _roles = new HashSet<String>();
-
     protected Object _listeners;
-
     protected Map _errorPages;
-
     protected boolean _hasJSP;
-
     protected String _jspServletName;
-
     protected String _jspServletClass;
-
     protected boolean _defaultWelcomeFileList;
-
-    protected ServletHandler _servletHandler;
-
     protected SecurityHandler _securityHandler;
-
+    protected ServletHandler _servletHandler;
     protected int _version;
-
     protected boolean _metaDataComplete = false;
-
-    private URL _webxml;
+    protected URL _webxml;
+    
+    
 
     public WebXmlConfiguration() throws ClassNotFoundException
     {
@@ -373,7 +354,8 @@ public class WebXmlConfiguration implements Configuration
         // TODO preserve any configuration that pre-existed.
 
         _servletHandler = getWebAppContext().getServletHandler();
-        _securityHandler = getWebAppContext().getSecurityHandler();
+        _securityHandler = (SecurityHandler)getWebAppContext().getSecurityHandler();
+       
         _servletHandler.setFilters(null);
         _servletHandler.setFilterMappings(null);
         _servletHandler.setServlets(null);
@@ -386,6 +368,7 @@ public class WebXmlConfiguration implements Configuration
         if (getWebAppContext().getErrorHandler() instanceof ErrorPageErrorHandler)
             ((ErrorPageErrorHandler) getWebAppContext().getErrorHandler()).setErrorPages(null);
 
+        
         // TODO remove classpaths from classloader
     }
 
@@ -420,7 +403,8 @@ public class WebXmlConfiguration implements Configuration
     protected void initialize(XmlParser.Node config) throws ClassNotFoundException, UnavailableException
     {
         _servletHandler = getWebAppContext().getServletHandler();
-        _securityHandler = getWebAppContext().getSecurityHandler();
+        _securityHandler = (SecurityHandler)getWebAppContext().getSecurityHandler();
+        
         // Get any existing servlets and mappings.
         _filters = LazyList.array2List(_servletHandler.getFilters());
         _filterMappings = LazyList.array2List(_servletHandler.getFilterMappings());
@@ -1028,65 +1012,32 @@ public class WebXmlConfiguration implements Configuration
         if (method != null)
         {
             XmlParser.Node name = node.get("realm-name");
-            String realmName = name == null ? "default" : name.toString(false, true);
-            UserRealm[] loginServices = ContextHandler.getCurrentContext().getContextHandler().getServer().getUserRealms();
+            _securityHandler.setRealmName(name == null ? "default" : name.toString(false, true));
+            _securityHandler.setAuthMethod(method.toString(false, true));
             
-            //use a specific LoginService set on this WebAppContext only
-            UserRealm loginService = getWebAppContext().getSecurityHandler().getUserRealm();
-
-            if (loginService == null)
-            {
-                //look for one that matches from the container environment
-                for (UserRealm test : loginServices)
-                {
-                    if (realmName.equals(test.getName())) loginService = test;
-                }
-                if (loginService == null)
-                {
-                    Log.warn("Unknown realm: " + realmName);
-                    return;
-                }
-                else
-                    getWebAppContext().getSecurityHandler().setUserRealm(loginService);
-            }
-
-           
-            String m = method.toString(false, true);
-            AuthenticationManager authenticationManager = _securityHandler.getAuthenticationManager();
-            authenticationManager.setAuthMethod(m);
-            if (Constraint.__FORM_AUTH.equals(m))
+            
+            if (Constraint.__FORM_AUTH.equals(_securityHandler.getAuthMethod()))
             {  
                 XmlParser.Node formConfig = node.get("form-login-config");
                 if (formConfig != null)
                 {
                     String loginPageName = null;
                     XmlParser.Node loginPage = formConfig.get("form-login-page");
-                    if (loginPage != null) loginPageName = loginPage.toString(false, true);
+                    if (loginPage != null) 
+                        loginPageName = loginPage.toString(false, true);
                     String errorPageName = null;
                     XmlParser.Node errorPage = formConfig.get("form-error-page");
-                    if (errorPage != null) errorPageName = errorPage.toString(false, true);
-                    
-                    authenticationManager.setLoginPage(loginPageName);
-                    authenticationManager.setErrorPage(errorPageName);
+                    if (errorPage != null) 
+                        errorPageName = errorPage.toString(false, true);
+                    _securityHandler.setInitParameter(FormAuthenticator.__FORM_LOGIN_PAGE,loginPageName);
+                    _securityHandler.setInitParameter(FormAuthenticator.__FORM_ERROR_PAGE,errorPageName);
                 }
                 else
                 {
-                    // TODO ?????
-                    throw new IllegalArgumentException("No form config given for form auth");
+                    throw new IllegalArgumentException("!form-login-config");
                 }
             }
-            //TODO what is server name??
-            String serverName = "server-name";
-            authenticationManager.setServerName(serverName);
-            authenticationManager.setContextRoot(getWebAppContext().getContextPath());
-            //TODO load these from server config???
-            Map authConfigProperties = Collections.emptyMap();
-            authenticationManager.setAuthConfigProperties(authConfigProperties);
-            //TODO figure out if this has a reasonable value??
-            Subject serviceSubject = null;
-            authenticationManager.setServiceSubject(serviceSubject);
         }
-
     }
 
     /* ------------------------------------------------------------ */

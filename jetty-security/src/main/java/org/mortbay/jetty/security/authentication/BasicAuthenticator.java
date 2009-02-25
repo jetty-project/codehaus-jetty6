@@ -34,24 +34,23 @@ import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.ServerAuthStatus;
-import org.mortbay.jetty.security.ServerAuthentication;
+import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.SimpleAuthResult;
 import org.mortbay.jetty.util.StringUtil;
 
 /**
  * @version $Rev$ $Date$
  */
-public class BasicServerAuthentication implements ServerAuthentication
+public class BasicAuthenticator extends LoginAuthenticator 
 {
-
-    private final LoginService _loginService;
-
-    private final String _realmName;
-
-    public BasicServerAuthentication(LoginService loginService, String realmName)
+    public BasicAuthenticator(LoginService loginService)
     {
-        this._loginService = loginService;
-        this._realmName = realmName;
+        super(loginService);
+    }
+    
+    public String getAuthMethod()
+    {
+        return Constraint.__BASIC_AUTH;
     }
 
     public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
@@ -87,7 +86,7 @@ public class BasicServerAuthentication implements ServerAuthentication
             {
                 return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS;
             }
-            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\"" + _realmName + '"');
+            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\"" + _loginService.getName() + '"');
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return SimpleAuthResult.SEND_CONTINUE_RESULTS;
         }

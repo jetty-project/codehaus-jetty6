@@ -23,7 +23,6 @@ import org.mortbay.jetty.server.RunAsToken;
  *
  * Some of this functionality was previously in UserRealm detached from the user identity.
  *
- * @author Greg Wilkins (gregw)
  */
 public interface UserIdentity
 {
@@ -36,7 +35,6 @@ public interface UserIdentity
      * @param role A role name.
      * @return True if the user can act in that role.
      */
-    //jaspi called from Request.isUserInRole and ConstraintSecurityHandler.check
     boolean isUserInRole(String role);
 
     /* ------------------------------------------------------------ */
@@ -45,7 +43,6 @@ public interface UserIdentity
      * @param newRunAsRole The role to set.
      * @return the previous run-as role so it can be reset on exit.
      */
-    //jaspi called from ServletHolder.handle, initServlet, doStop and tests
     RunAsToken setRunAsRole(RunAsToken newRunAsRole);
 
     /**
@@ -58,47 +55,40 @@ public interface UserIdentity
      */
     Map<String,String> setRoleRefMap(Map<String,String> roleMap);
 
-    /* ------------------------------------------------------------ */
-    /** logout a user Principal.
-     * Called by authentication mechanisms (eg FORM) that can detect logout.
-     * @param user A Principal previously returned from this realm
-     */
-    //jaspi called from FormAuthenticator.valueUnbound (when session is unbound)
-    //TODO usable???
-    void logout(Principal user);
 
+    /**
+     * get the role mapping for a particular servlet for role-refs. 
+     *
+     * @return previous role reference map
+     */
+    Map<String,String> getRoleRefMap();
+
+    
     public static final UserIdentity UNAUTHENTICATED_IDENTITY = new UserIdentity()
     {
         public Principal getUserPrincipal()
         {
             return null;
-        }/* ------------------------------------------------------------ */
-
-        public String getAuthMethod() {
+        }
+        public String getAuthMethod() 
+        {
             return null;
         }
-
-        //jaspi called from Request.isUserInRole and ConstraintSecurityHandler.check
         public boolean isUserInRole(String role)
         {
             return false;
-        }/* ------------------------------------------------------------ */
-
-        //jaspi called from ServletHolder.handle, initServlet, doStop and tests
+        }
         public RunAsToken setRunAsRole(RunAsToken newRunAsRole)
         {
             return null;
         }
-
         public Map<String,String> setRoleRefMap(Map<String,String> roleMap)
         {
             return null;
         }
-
-        //jaspi called from FormAuthenticator.valueUnbound (when session is unbound)
-        //TODO usable???
-        public void logout(Principal user)
+        public Map<String, String> getRoleRefMap()
         {
+            return null;
         }
     };
 }

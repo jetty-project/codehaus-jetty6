@@ -55,7 +55,6 @@ import org.mortbay.jetty.util.resource.Resource;
 public class JDBCLoginService extends AbstractLoginService
 {
     private String _config;
-    private Resource _configResource;
     private String _jdbcDriver;
     private String _url;
     private String _userName;
@@ -125,7 +124,6 @@ public class JDBCLoginService extends AbstractLoginService
     public void setConfig(String config) throws IOException
     {        
         _config=config;
-        _configResource=Resource.newResource(_config);
 
         Properties properties = new Properties();
         Resource resource = Resource.newResource(config);

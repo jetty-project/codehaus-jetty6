@@ -37,7 +37,7 @@ import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.HandlerContainer;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.handler.ErrorHandler;
-import org.mortbay.jetty.server.handler.SecurityHandler;
+import org.mortbay.jetty.server.handler.HandlerWrapper;
 import org.mortbay.jetty.server.servlet.Context;
 import org.mortbay.jetty.server.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.server.servlet.ServletHandler;
@@ -165,7 +165,7 @@ public class WebAppContext extends Context
     /* ------------------------------------------------------------ */
     /**
      */
-    public WebAppContext(SecurityHandler securityHandler,SessionHandler sessionHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    public WebAppContext(HandlerWrapper securityHandler,SessionHandler sessionHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {
         super(null,
               sessionHandler!=null?sessionHandler:new SessionHandler(),

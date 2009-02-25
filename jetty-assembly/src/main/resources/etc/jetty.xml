@@ -141,23 +141,21 @@
     </Call>
 
     <!-- =========================================================== -->
-    <!-- Configure Authentication Realms                             -->
+    <!-- Configure Authentication Login Service                      -->
     <!-- Realms may be configured for the entire server here, or     -->
     <!-- they can be configured for a specific web app in a context  -->
     <!-- configuration (see $(jetty.home)/contexts/test.xml for an   -->
     <!-- example).                                                   -->
     <!-- =========================================================== -->
-    <!--<Set name="UserRealms">
-      <Array type="org.mortbay.jetty.UserRealm">
-        <Item>
-          <New class="org.mortbay.jetty.security.HashLoginService">
-            <Set name="name">Test Realm</Set>
-            <Set name="config"><SystemProperty name="jetty.home" default="."/>/etc/realm.properties</Set>
-            <Set name="refreshInterval">0</Set>
-          </New>
-        </Item>
-      </Array>
-    </Set>-->
+    <Call name="addBean">
+      <Arg>
+        <New class="org.mortbay.jetty.security.HashLoginService">
+          <Set name="name">Test Realm</Set>
+          <Set name="config"><SystemProperty name="jetty.home" default="."/>/etc/realm.properties</Set>
+          <Set name="refreshInterval">0</Set>
+        </New>
+      </Arg>
+    </Call>
 
     <!-- =========================================================== -->
     <!-- Configure Request Log                                       -->

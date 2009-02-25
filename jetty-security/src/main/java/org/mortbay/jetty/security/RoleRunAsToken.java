@@ -19,43 +19,28 @@
 
 package org.mortbay.jetty.security;
 
-import org.mortbay.jetty.server.AuthenticationManager;
 import org.mortbay.jetty.server.RunAsToken;
-import org.mortbay.jetty.server.UserRealm;
-import org.mortbay.jetty.server.handler.HandlerWrapper;
-import org.mortbay.jetty.server.handler.SecurityHandler;
+
 
 /**
  * @version $Rev$ $Date$
  */
-public class NoSecurityHandler extends HandlerWrapper implements SecurityHandler
+public class RoleRunAsToken implements RunAsToken
 {
+    private final String _runAsRole;
 
-    public UserRealm getUserRealm()
+    public RoleRunAsToken(String runAsRole)
     {
-        return null;
+        this._runAsRole = runAsRole;
     }
 
-    public void setUserRealm(UserRealm realm)
-    {        
-    }
-
-    public RunAsToken newRunAsToken(String runAsRole)
+    public String getRunAsRole()
     {
-        return null;
+        return _runAsRole;
     }
 
-    public void setServerAuthentication(ServerAuthentication serverAuthentication)
+    public String toString()
     {
+        return "RoleRunAsToken("+_runAsRole+")";
     }
-
-    public AuthenticationManager getAuthenticationManager()
-    {
-        return null;
-    }
-
-    public void setAuthenticationManager(AuthenticationManager authManager)
-    {     
-    }
-
 }

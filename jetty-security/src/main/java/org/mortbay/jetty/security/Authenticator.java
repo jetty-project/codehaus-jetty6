@@ -19,17 +19,40 @@
 
 package org.mortbay.jetty.security;
 
+import java.util.Set;
+
+import javax.servlet.ServletContext;
+
+import org.mortbay.jetty.server.Server;
+import org.mortbay.jetty.server.handler.ContextHandler;
+
 /**
  * This is like the JASPI ServerAuthContext but is intended to be easier to use
  * and allow lazy auth.
  * 
  * @version $Rev$ $Date$
  */
-public interface ServerAuthentication
+public interface Authenticator
 {
-
+    String getAuthMethod();
+    
     ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException;
 
     // most likely validatedUser is not needed here.
     ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException;
+    
+    
+    interface Configuration
+    {
+        String getAuthMethod();
+        String getRealmName();
+        boolean isLazy();
+        String getInitParameter(String key);
+        Set<String> getInitParameterNames();
+    }
+    
+    interface Factory
+    {
+        Authenticator getAuthenticator(Server server, ServletContext context, Configuration configuration);
+    }
 }

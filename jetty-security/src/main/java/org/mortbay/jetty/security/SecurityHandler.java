@@ -21,91 +21,146 @@ package org.mortbay.jetty.security;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.server.AuthenticationManager;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Response;
+import org.mortbay.jetty.server.RunAsToken;
 import org.mortbay.jetty.server.UserIdentity;
-import org.mortbay.jetty.server.UserRealm;
+import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.handler.HandlerWrapper;
-import org.mortbay.jetty.server.handler.SecurityHandler;
+import org.mortbay.jetty.util.component.LifeCycle;
 import org.mortbay.jetty.util.log.Log;
 
 /**
- * @version $Rev$ $Date$
+ * Abstract SecurityHandler.
+ * Select and apply an {@link Authenticator} to a request.
+ * <p>
+ * The Authenticator may either be directly set on the handler
+ * or will be create during {@link #start()} with a call to
+ * either the default or set AuthenticatorFactory.
  */
-public abstract class AbstractSecurityHandler extends HandlerWrapper implements SecurityHandler
+public abstract class SecurityHandler extends HandlerWrapper implements Authenticator.Configuration
 {
-    private UserRealm _realm;
-
-    public UserRealm getUserRealm()
-    {
-        return _realm;
-    }
-
-    public void setUserRealm(UserRealm realm)
-    {
-        _realm = realm;
-    }
-
-
     /* ------------------------------------------------------------ */
-    // private UserRealm _userRealm;
-    // private NotChecked _notChecked = new NotChecked();
     private boolean _checkWelcomeFiles = false;
+    private Authenticator _authenticator;
+    private Authenticator.Factory _authenticatorFactory=new DefaultAuthenticatorFactory();
+    private boolean _isLazy=true;
+    private String _realmName;
+    private String _authMethod;
+    private final Map<String,String> _authParameters=new HashMap<String,String>();
 
-    // private ServerAuthConfig authConfig;
-    // private Subject serviceSubject;
-    // private Map authProperties;
-    // private ServletCallbackHandler servletCallbackHandler;
-
-    //private ServerAuthentication _serverAuthentication;
-    private AuthenticationManager<ServerAuthentication> _authManager = new DefaultAuthenticationManager();
-
-    public static Principal __NO_USER = new Principal()
+    /* ------------------------------------------------------------ */
+    public Authenticator getAuthenticator()
     {
-        public String getName()
-        {
-            return null;
-        }
-
-        public String toString()
-        {
-            return "No User";
-        }
-    };
+        return _authenticator;
+    }
 
     /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
+    /** Set the authenticator.
+     * @param authenticator
+     * @throws IllegalStateException if the SecurityHandler is running
+     */
+    public void setAuthenticator(Authenticator authenticator)
+    {
+        if (isRunning())
+            throw new IllegalStateException("running");
+        _authenticator = authenticator;
+        _authMethod=_authenticator.getAuthMethod();
+    }
+
     /* ------------------------------------------------------------ */
     /**
-     * Nobody user. The Nobody UserPrincipal is used to indicate a partial state
-     * of authentication. A request with a Nobody UserPrincipal will be allowed
-     * past all authentication constraints - but will not be considered an
-     * authenticated request. It can be used by Authenticators such as
-     * FormAuthenticator to allow access to logon and error pages within an
-     * authenticated URI tree.
+     * @return the authenticatorFactory
      */
-    public static Principal __NOBODY = new Principal()
+    public Authenticator.Factory getAuthenticatorFactory()
     {
-        public String getName()
-        {
-            return "Nobody";
-        }
+        return _authenticatorFactory;
+    }
 
-        public String toString()
-        {
-            return getName();
-        }
-    };
+    /* ------------------------------------------------------------ */
+    /**
+     * @param authenticatorFactory the authenticatorFactory to set
+     * @throws IllegalStateException if the SecurityHandler is running
+     */
+    public void setAuthenticatorFactory(Authenticator.Factory authenticatorFactory)
+    {
+        if (isRunning())
+            throw new IllegalStateException("running");
+        _authenticatorFactory = authenticatorFactory;
+    }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the isLazy
+     */
+    public boolean isLazy()
+    {
+        return _isLazy;
+    }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @param isLazy the isLazy to set
+     * @throws IllegalStateException if the SecurityHandler is running
+     */
+    public void setLazy(boolean isLazy)
+    {
+        if (isRunning())
+            throw new IllegalStateException("running");
+        _isLazy = isLazy;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the realmName
+     */
+    public String getRealmName()
+    {
+        return _realmName;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param realmName the realmName to set
+     * @throws IllegalStateException if the SecurityHandler is running
+     */
+    public void setRealmName(String realmName)
+    {
+        if (isRunning())
+            throw new IllegalStateException("running");
+        _realmName = realmName;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the authMethod
+     */
+    public String getAuthMethod()
+    {
+        return _authMethod;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param authMethod the authMethod to set
+     * @throws IllegalStateException if the SecurityHandler is running
+     */
+    public void setAuthMethod(String authMethod)
+    {
+        if (isRunning())
+            throw new IllegalStateException("running");
+        _authMethod = authMethod;
+    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -120,45 +175,72 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
     /**
      * @param authenticateWelcomeFiles True if forwards to welcome files are
      *                authenticated
+     * @throws IllegalStateException if the SecurityHandler is running
      */
     public void setCheckWelcomeFiles(boolean authenticateWelcomeFiles)
     {
+        if (isRunning())
+            throw new IllegalStateException("running");
         _checkWelcomeFiles = authenticateWelcomeFiles;
     }
 
-    public void setAuthenticationManager (AuthenticationManager authManager)
-    {
-        _authManager = authManager;
-    }
-    
-    public AuthenticationManager getAuthenticationManager ()
-    {
-        return _authManager;
-    }
-    
-    // set jaspi components
-
-  /*  public void setServerAuthentication(ServerAuthentication serverAuthentication)
-    {
-        this._serverAuthentication = serverAuthentication;
-    }
-*/
     /* ------------------------------------------------------------ */
-    public void doStart() throws Exception
+    public String getInitParameter(String key)
     {
-        super.doStart();
-        if (_authManager == null)
+        return _authParameters.get(key);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Set<String> getInitParameterNames()
+    {
+        return _authParameters.keySet();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set an initialization parameter.
+     * @param key
+     * @param value
+     * @return previous value
+     * @throws IllegalStateException if the SecurityHandler is running
+     */
+    public String setInitParameter(String key, String value)
+    {
+        if (isRunning())
+            throw new IllegalStateException("running");
+        return _authParameters.put(key,value);
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     */
+    protected void doStart()
+        throws Exception
+    {
+        if (_authenticator==null && _authenticatorFactory!=null)
         {
-            _authManager = new DefaultAuthenticationManager();
-            Log.warn ("Using DefaultAuthenticationManager");
+            _authenticator=_authenticatorFactory.getAuthenticator(getServer(),ContextHandler.getCurrentContext(),this);
+            if (_authenticator!=null)
+                _authMethod=_authenticator.getAuthMethod();
+        }
+
+        if (_authenticator==null)
+        {
+            Log.warn("No ServerAuthentication for "+this);
+            throw new IllegalStateException("No ServerAuthentication");
         }
         
-        _authManager.setSecurityHandler(this);
-        _authManager.start();
-        
-        //if (_serverAuthentication == null) throw new NullPointerException("No auth configuration configured");
-    }/* ------------------------------------------------------------ */
+        if (_authenticator instanceof LifeCycle)
+        {
+            final LifeCycle lc = (LifeCycle)_authenticator;
+            if (!lc.isRunning())
+                lc.start();
+        }
+        super.doStart();
+    }
 
+    
+    /* ------------------------------------------------------------ */
     /*
      * @see org.mortbay.jetty.server.Handler#handle(java.lang.String,
      *      javax.servlet.http.HttpServletRequest,
@@ -207,7 +289,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                 // Subject clientSubject = new Subject();
                 try
                 {
-                    ServerAuthentication serverAuthentication = _authManager.getServerAuthentication();
+                    final Authenticator serverAuthentication = _authenticator;
                     ServerAuthResult authResult = serverAuthentication.validateRequest(messageInfo);
                     // AuthStatus authStatus =
                     // authContext.validateRequest(messageInfo, clientSubject,
@@ -307,19 +389,31 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
         }
     }
 
+    /* ------------------------------------------------------------ */
+    public abstract RunAsToken newRunAsToken(String runAsRole);
+
+    /* ------------------------------------------------------------ */
     protected abstract UserIdentity newUserIdentity(ServerAuthResult authResult);
 
+    /* ------------------------------------------------------------ */
     protected abstract UserIdentity newSystemUserIdentity();
 
+    /* ------------------------------------------------------------ */
     protected abstract Object prepareConstraintInfo(String pathInContext, Request request);
 
+    /* ------------------------------------------------------------ */
     protected abstract boolean checkUserDataPermissions(String pathInContext, Request request, Response response, Object constraintInfo) throws IOException;
 
+    /* ------------------------------------------------------------ */
     protected abstract boolean isAuthMandatory(Request base_request, Response base_response, Object constraintInfo);
 
+    /* ------------------------------------------------------------ */
     protected abstract boolean checkWebResourcePermissions(String pathInContext, Request request, Response response, Object constraintInfo,
                                                            UserIdentity userIdentity) throws IOException;
 
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     public class NotChecked implements Principal
     {
         public String getName()
@@ -334,7 +428,48 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
 
         public SecurityHandler getSecurityHandler()
         {
-            return AbstractSecurityHandler.this;
+            return SecurityHandler.this;
         }
     }
+
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public static Principal __NO_USER = new Principal()
+    {
+        public String getName()
+        {
+            return null;
+        }
+
+        public String toString()
+        {
+            return "No User";
+        }
+    };
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /**
+     * Nobody user. The Nobody UserPrincipal is used to indicate a partial state
+     * of authentication. A request with a Nobody UserPrincipal will be allowed
+     * past all authentication constraints - but will not be considered an
+     * authenticated request. It can be used by Authenticators such as
+     * FormAuthenticator to allow access to logon and error pages within an
+     * authenticated URI tree.
+     */
+    public static Principal __NOBODY = new Principal()
+    {
+        public String getName()
+        {
+            return "Nobody";
+        }
+
+        public String toString()
+        {
+            return getName();
+        }
+    };
+
+
 }
