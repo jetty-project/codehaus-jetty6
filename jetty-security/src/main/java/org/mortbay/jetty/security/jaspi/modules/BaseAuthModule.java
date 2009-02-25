@@ -33,7 +33,6 @@ import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.callback.CallerPrincipalCallback;
 import javax.security.auth.message.callback.GroupPrincipalCallback;
-import javax.security.auth.message.callback.PasswordValidationCallback;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
@@ -42,8 +41,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.http.security.Credential;
 import org.mortbay.jetty.http.security.Password;
-import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.LoginCallbackImpl;
+import org.mortbay.jetty.security.jaspi.JaspiMessageInfo;
 import org.mortbay.jetty.security.jaspi.callback.CredentialValidationCallback;
 import org.mortbay.jetty.util.StringUtil;
 
@@ -111,7 +110,7 @@ public class BaseAuthModule implements ServerAuthModule, ServerAuthContext
      */
     protected boolean isMandatory(MessageInfo messageInfo)
     {
-        String mandatory = (String) messageInfo.getMap().get(JettyMessageInfo.MANDATORY_KEY);
+        String mandatory = (String) messageInfo.getMap().get(JaspiMessageInfo.MANDATORY_KEY);
         if (mandatory == null) return false;
         return Boolean.valueOf(mandatory);
     }
@@ -146,7 +145,7 @@ public class BaseAuthModule implements ServerAuthModule, ServerAuthContext
                         .toArray(new String[loginCallback.getGroups().size()]));
                 callbackHandler.handle(new Callback[] { callerPrincipalCallback, groupPrincipalCallback });
             }
-            messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, authMethod);
+            messageInfo.getMap().put(JaspiMessageInfo.AUTH_METHOD_KEY, authMethod);
         }
         return credValidationCallback.getResult();
 

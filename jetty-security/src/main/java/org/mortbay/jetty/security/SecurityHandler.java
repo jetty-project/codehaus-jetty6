@@ -282,8 +282,6 @@ public abstract class SecurityHandler extends HandlerWrapper implements Authenti
                 // includes.  However the latest async spec can allow wrapped requests
                 // to be redispatched.  
                 
-                JettyMessageInfo messageInfo = new JettyMessageInfo(request, response, isAuthMandatory);
-                
                 try
                 {
                     final Authenticator serverAuthentication = _authenticator;
@@ -310,7 +308,8 @@ public abstract class SecurityHandler extends HandlerWrapper implements Authenti
                             // jaspi 3.8.3 auth processing may wrap messages,
                             // use the modified versions
                             //getHandler().handle(pathInContext, messageInfo.getRequestMessage(), messageInfo.getResponseMessage(), dispatch);                           
-                            getHandler().handle(pathInContext, messageInfo.getRequestMessage(), messageInfo.getResponseMessage());
+                            getHandler().handle(pathInContext, request, response);
+                            
                             // TODO set secureResponse = false on error thrown
                             // by servlet to jetty
                             boolean secureResponse = true;

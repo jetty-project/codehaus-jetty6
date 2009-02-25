@@ -3,10 +3,10 @@ package org.mortbay.jetty.security.authentication;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.ServerAuthStatus;
-import org.mortbay.jetty.security.Authenticator;
 
 public class DelegateAuthenticator implements Authenticator
 {

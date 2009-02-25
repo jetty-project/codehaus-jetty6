@@ -19,8 +19,8 @@
 
 package org.mortbay.jetty.security;
 
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 

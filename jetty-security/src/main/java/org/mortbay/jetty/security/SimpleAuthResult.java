@@ -20,9 +20,9 @@
 package org.mortbay.jetty.security;
 
 import java.security.Principal;
-import java.util.List;
-import java.util.Collections;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javax.security.auth.Subject;
 

@@ -1,7 +1,7 @@
 package org.mortbay.jetty.security.authentication;
 
-import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.Authenticator;
+import org.mortbay.jetty.security.LoginService;
 
 public abstract class LoginAuthenticator implements Authenticator
 {

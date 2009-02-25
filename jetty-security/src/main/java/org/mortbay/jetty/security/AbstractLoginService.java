@@ -18,7 +18,6 @@ package org.mortbay.jetty.security;
 
 import java.io.PrintStream;
 import java.security.Principal;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

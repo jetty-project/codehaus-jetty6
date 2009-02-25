@@ -21,19 +21,18 @@ package org.mortbay.jetty.security;
 
 import java.io.IOException;
 
-import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.callback.CallerPrincipalCallback;
+import javax.security.auth.message.callback.CertStoreCallback;
 import javax.security.auth.message.callback.GroupPrincipalCallback;
 import javax.security.auth.message.callback.PasswordValidationCallback;
-import javax.security.auth.message.callback.CertStoreCallback;
 import javax.security.auth.message.callback.PrivateKeyCallback;
 import javax.security.auth.message.callback.SecretKeyCallback;
 import javax.security.auth.message.callback.TrustStoreCallback;
-import javax.security.auth.Subject;
 
-import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.security.jaspi.callback.CredentialValidationCallback;
 import org.mortbay.jetty.server.LoginCallback;
 
