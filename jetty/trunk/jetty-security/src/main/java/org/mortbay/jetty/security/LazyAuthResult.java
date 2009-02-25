@@ -23,6 +23,8 @@ import java.security.Principal;
 import java.util.List;
 
 import javax.security.auth.Subject;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 
 /**
@@ -33,17 +35,17 @@ public class LazyAuthResult implements ServerAuthResult
     private static final Subject unauthenticatedSubject = new Subject();
 
     private final Authenticator _serverAuthentication;
-
-    private final JettyMessageInfo _messageInfo;
+    private final ServletRequest _request;
+    private final ServletResponse _response;
 
     private ServerAuthResult _delegate;
 
-    public LazyAuthResult(Authenticator serverAuthentication, JettyMessageInfo messageInfo)
+    public LazyAuthResult(Authenticator serverAuthentication, ServletRequest request, ServletResponse response)
     {
         if (serverAuthentication == null) throw new NullPointerException("No ServerAuthentication");
-        if (messageInfo == null) throw new NullPointerException("No JettyMessageInfo");
         this._serverAuthentication = serverAuthentication;
-        this._messageInfo = messageInfo;
+        this._request=request;
+        this._response=response;   
     }
 
     private ServerAuthResult getDelegate()
@@ -52,7 +54,7 @@ public class LazyAuthResult implements ServerAuthResult
         {
             try
             {
-                _delegate = _serverAuthentication.validateRequest(_messageInfo);
+                _delegate = _serverAuthentication.validateRequest(_request, _response, false);
             }
             catch (ServerAuthException e)
             {

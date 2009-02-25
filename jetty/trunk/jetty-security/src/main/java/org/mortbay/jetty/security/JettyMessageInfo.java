@@ -88,7 +88,6 @@ public class JettyMessageInfo
     //TODO this has bugs in the view implementations.  Changing them will not affect the hardcoded values.
     private static class MIMap implements Map
     {
-
         private final boolean isMandatory;
         private String authMethod;
         private Map delegate;

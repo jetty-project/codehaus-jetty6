@@ -19,7 +19,9 @@
 
 package org.mortbay.jetty.security.authentication;
 
-import org.mortbay.jetty.security.JettyMessageInfo;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
 import org.mortbay.jetty.security.LazyAuthResult;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.ServerAuthResult;
@@ -37,14 +39,14 @@ public class LazyAuthenticator extends DelegateAuthenticator
     }
 
     /** 
-     * @see org.mortbay.jetty.security.Authenticator#validateRequest(org.mortbay.jetty.security.JettyMessageInfo)
+     * @see org.mortbay.jetty.security.Authenticator#validateRequest(ServletRequest, ServletResponse, boolean)
      */
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
+    public ServerAuthResult validateRequest(ServletRequest request, ServletResponse response, boolean mandatory) throws ServerAuthException
     {
-        if (!messageInfo.isAuthMandatory())
+        if (!mandatory)
         { 
-            return new LazyAuthResult(_delegate, messageInfo);
+            return new LazyAuthResult(_delegate,request,response);
         }
-        return _delegate.validateRequest(messageInfo);
+        return _delegate.validateRequest(request, response, mandatory);
     }
 }

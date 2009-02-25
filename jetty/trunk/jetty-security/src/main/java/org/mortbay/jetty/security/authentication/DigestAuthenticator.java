@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.security.MessageDigest;
 
 import javax.security.auth.Subject;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -31,7 +33,6 @@ import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.http.security.Credential;
 import org.mortbay.jetty.security.LoginCallbackImpl;
-import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.ServerAuthResult;
@@ -65,15 +66,15 @@ public class DigestAuthenticator extends LoginAuthenticator
         return Constraint.__DIGEST_AUTH;
     }
     
-    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException
+    public ServerAuthStatus secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, ServerAuthResult validatedUser) throws ServerAuthException
     {
         return ServerAuthStatus.SUCCESS;
     }
 
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
+    public ServerAuthResult validateRequest(ServletRequest req, ServletResponse res, boolean mandatory) throws ServerAuthException
     {
-        HttpServletRequest request = messageInfo.getRequestMessage();
-        HttpServletResponse response = messageInfo.getResponseMessage();
+        HttpServletRequest request = (HttpServletRequest)req;
+        HttpServletResponse response = (HttpServletResponse)res;
         String credentials = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         try
@@ -141,7 +142,7 @@ public class DigestAuthenticator extends LoginAuthenticator
 
             }
 
-            if (!messageInfo.isAuthMandatory()) { return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS; }
+            if (!mandatory) { return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS; }
             String domain = request.getContextPath();
             if (domain == null) domain = "/";
             response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Digest realm=\"" + _loginService.getName()

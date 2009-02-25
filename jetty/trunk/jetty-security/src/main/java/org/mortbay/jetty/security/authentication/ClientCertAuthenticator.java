@@ -23,12 +23,13 @@ import java.io.IOException;
 import java.security.Principal;
 
 import javax.security.auth.Subject;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.http.security.Constraint;
-import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
@@ -57,14 +58,13 @@ public class ClientCertAuthenticator extends LoginAuthenticator
      * cert? Current code requires a client cert always but allows access to
      * insecure pages if it is not recognized.
      * 
-     * @param messageInfo
      * @return
      * @throws ServerAuthException
      */
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException
+    public ServerAuthResult validateRequest(ServletRequest req, ServletResponse res, boolean mandatory) throws ServerAuthException
     {
-        HttpServletRequest request = messageInfo.getRequestMessage();
-        HttpServletResponse response = messageInfo.getResponseMessage();
+        HttpServletRequest request = (HttpServletRequest)req;
+        HttpServletResponse response = (HttpServletResponse)res;
         java.security.cert.X509Certificate[] certs = (java.security.cert.X509Certificate[]) request.getAttribute("javax.servlet.request.X509Certificate");
 
         try
@@ -91,7 +91,7 @@ public class ClientCertAuthenticator extends LoginAuthenticator
                                             loginCallback.getUserPrincipal(), loginCallback.getGroups(), Constraint.__CERT_AUTH2); 
             }
 
-            if (!messageInfo.isAuthMandatory()) 
+            if (!mandatory) 
             { 
                 return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS; 
             }
@@ -104,7 +104,7 @@ public class ClientCertAuthenticator extends LoginAuthenticator
         }
     }
 
-    public ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException
+    public ServerAuthStatus secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, ServerAuthResult validatedUser) throws ServerAuthException
     {
         return ServerAuthStatus.SUCCESS;
     }

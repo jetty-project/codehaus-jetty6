@@ -22,6 +22,8 @@ package org.mortbay.jetty.security;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.handler.ContextHandler;
@@ -36,10 +38,9 @@ public interface Authenticator
 {
     String getAuthMethod();
     
-    ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException;
+    ServerAuthResult validateRequest(ServletRequest request, ServletResponse response, boolean mandatory) throws ServerAuthException;
 
-    // most likely validatedUser is not needed here.
-    ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException;
+    ServerAuthStatus secureResponse(ServletRequest request, ServletResponse response, boolean mandatory, ServerAuthResult validatedUser) throws ServerAuthException;
     
     
     interface Configuration

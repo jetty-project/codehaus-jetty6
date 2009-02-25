@@ -232,7 +232,7 @@ public class Context extends ContextHandler
      */
     public ServletHolder addServlet(String className,String pathSpec)
     {
-        return _servletHandler.addServletWithMapping(className, pathSpec);
+        return getServletHandler().addServletWithMapping(className, pathSpec);
     }
 
     /* ------------------------------------------------------------ */
@@ -240,7 +240,7 @@ public class Context extends ContextHandler
      */
     public ServletHolder addServlet(Class servlet,String pathSpec)
     {
-        return _servletHandler.addServletWithMapping(servlet.getName(), pathSpec);
+        return getServletHandler().addServletWithMapping(servlet.getName(), pathSpec);
     }
     
     /* ------------------------------------------------------------ */
@@ -248,7 +248,7 @@ public class Context extends ContextHandler
      */
     public void addServlet(ServletHolder servlet,String pathSpec)
     {
-        _servletHandler.addServletWithMapping(servlet, pathSpec);
+        getServletHandler().addServletWithMapping(servlet, pathSpec);
     }
 
     /* ------------------------------------------------------------ */
@@ -256,7 +256,7 @@ public class Context extends ContextHandler
      */
     public void addFilter(FilterHolder holder,String pathSpec,int dispatches)
     {
-        _servletHandler.addFilterWithMapping(holder,pathSpec,dispatches);
+        getServletHandler().addFilterWithMapping(holder,pathSpec,dispatches);
     }
 
     /* ------------------------------------------------------------ */
@@ -264,7 +264,7 @@ public class Context extends ContextHandler
      */
     public FilterHolder addFilter(Class filterClass,String pathSpec,int dispatches)
     {
-        return _servletHandler.addFilterWithMapping(filterClass,pathSpec,dispatches);
+        return getServletHandler().addFilterWithMapping(filterClass,pathSpec,dispatches);
     }
 
     /* ------------------------------------------------------------ */
@@ -272,7 +272,7 @@ public class Context extends ContextHandler
      */
     public FilterHolder addFilter(String filterClass,String pathSpec,int dispatches)
     {
-        return _servletHandler.addFilterWithMapping(filterClass,pathSpec,dispatches);
+        return getServletHandler().addFilterWithMapping(filterClass,pathSpec,dispatches);
     }
 
     /* ------------------------------------------------------------ */
