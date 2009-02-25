@@ -32,10 +32,9 @@ import java.util.HashSet;
  */
 public class RoleInfo
 {
+    private boolean _isAnyRole;
     private boolean _unchecked;
-
     private boolean _forbidden;
-
     private UserDataConstraint _userDataConstraint;
 
     private final Set<String> _roles = new HashSet<String>();
@@ -47,13 +46,12 @@ public class RoleInfo
 
     public void setUnchecked(boolean unchecked)
     {
-        if (!_forbidden)
+        this._unchecked = unchecked;
+        if (unchecked)
         {
-            if (unchecked)
-            {
-                this._unchecked = unchecked;
-                _roles.clear();
-            }
+            _forbidden=false;
+            _roles.clear();
+            _isAnyRole=false;
         }
     }
 
@@ -64,11 +62,27 @@ public class RoleInfo
 
     public void setForbidden(boolean forbidden)
     {
+        this._forbidden = forbidden;
         if (forbidden)
         {
-            this._forbidden = forbidden;
             _unchecked = false;
             _userDataConstraint = null;
+            _isAnyRole=false;
+            _roles.clear();
+        }
+    }
+
+    public boolean isAnyRole()
+    {
+        return _isAnyRole;
+    }
+
+    public void setAnyRole(boolean anyRole)
+    {
+        this._isAnyRole=anyRole;
+        if (anyRole)
+        {
+            _unchecked = false;
             _roles.clear();
         }
     }
@@ -99,12 +113,19 @@ public class RoleInfo
     public void combine(RoleInfo other)
     {
         if (other._forbidden)
-        {
             setForbidden(true);
-        }
-        if (other._unchecked) setUnchecked(true);
-        _roles.addAll(other._roles);
-
+        else if (other._unchecked) 
+            setUnchecked(true);
+        else if (other._isAnyRole)
+            setAnyRole(true);
+        else if (!_isAnyRole)
+            _roles.addAll(other._roles);
+        
         setUserDataConstraint(other._userDataConstraint);
+    }
+    
+    public String toString()
+    {
+        return "{RoleInfo"+(_forbidden?",F":"")+(_unchecked?",U":"")+(_isAnyRole?",*":_roles.toString())+"}";
     }
 }

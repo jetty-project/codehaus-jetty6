@@ -91,4 +91,9 @@ public class SimpleAuthResult implements ServerAuthResult
     {
         return _authMethod;
     }
+    
+    public String toString()
+    {
+        return "{AuthRm,"+_authMethod+","+_authStatus+","+_userPrincipal+","+_groups+"}";
+    }
 }
