@@ -21,18 +21,14 @@
 package org.mortbay.jetty.security;
 
 import javax.security.auth.Subject;
-
 import org.mortbay.jetty.server.LoginCallback;
-import org.mortbay.jetty.server.UserRealm;
 
 /**
  * @version $Rev$ $Date$
  */
-public interface LoginService extends UserRealm
+public interface LoginService
 {
-    void login(LoginCallback loginCallback) throws ServerAuthException;
-
-    void logout(Subject subject) throws ServerAuthException;
-
     String getName();
+    void login(LoginCallback loginCallback) throws ServerAuthException;
+    void logout(Subject subject) throws ServerAuthException;
 }

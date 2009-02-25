@@ -66,13 +66,12 @@ public class Server extends HandlerWrapper implements Attributes
 
     private ThreadPool _threadPool;
     private Connector[] _connectors;
-    private UserRealm[] _realms;
     private Container _container=new Container();
     private SessionIdManager _sessionIdManager;
     private boolean _sendServerVersion = true; //send Server: header
     private boolean _sendDateHeader = false; //send Date: header 
     private AttributesMap _attributes = new AttributesMap();
-    private List _dependentLifeCycles=new ArrayList();
+    private List _dependentBeans=new ArrayList();
     private int _graceful=0;
     
     /* ------------------------------------------------------------ */
@@ -193,19 +192,15 @@ public class Server extends HandlerWrapper implements Attributes
         Log.info("jetty-"+_version);
         HttpGenerator.setServerVersion(_version);
         MultiException mex=new MultiException();
-      
-        for (int i=0; _realms !=null && i< _realms.length; i++)
-        {
-            if (_realms[i] instanceof LifeCycle)
-                ((LifeCycle) _realms[i]).start();
-        }
 
-        Iterator itor = _dependentLifeCycles.iterator();
+        Iterator itor = _dependentBeans.iterator();
         while (itor.hasNext())
         {   
             try
             {
-                ((LifeCycle)itor.next()).start(); 
+                Object o=itor.next();
+                if (o instanceof LifeCycle)
+                    ((LifeCycle)o).start(); 
             }
             catch (Throwable e) {mex.add(e);}
         }
@@ -254,12 +249,6 @@ public class Server extends HandlerWrapper implements Attributes
     {
         MultiException mex=new MultiException();
         
-        for (int i=0; _realms !=null && i< _realms.length; i++)
-        {
-            if (_realms[i] instanceof LifeCycle)
-                ((LifeCycle) _realms[i]).stop();
-        }
-        
         if (_graceful>0)
         {
             if (_connectors!=null)
@@ -299,14 +288,16 @@ public class Server extends HandlerWrapper implements Attributes
         }
         catch(Throwable e){mex.add(e);}
         
-        if (!_dependentLifeCycles.isEmpty())
+        if (!_dependentBeans.isEmpty())
         {
-            ListIterator itor = _dependentLifeCycles.listIterator(_dependentLifeCycles.size());
+            ListIterator itor = _dependentBeans.listIterator(_dependentBeans.size());
             while (itor.hasPrevious())
             {
                 try
                 {
-                    ((LifeCycle)itor.previous()).stop(); 
+                    Object o =itor.previous();
+                    if (o instanceof LifeCycle)
+                        ((LifeCycle)o).stop(); 
                 }
                 catch (Throwable e) {mex.add(e);}
             }
@@ -389,37 +380,6 @@ public class Server extends HandlerWrapper implements Attributes
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * @return UserRealm instances.
-     */
-    public UserRealm[] getUserRealms()
-    {
-        return _realms;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param loginServices
-     */
-    public void setUserRealms(UserRealm[] realms)
-    {
-        _container.update(this, realms, _realms, "userRealms",true);
-        _realms = realms;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void addLoginService(UserRealm realm)
-    {
-        setUserRealms((UserRealm[])LazyList.addToArray(getUserRealms(), realm, UserRealm.class));
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void removeLoginService(UserRealm realm)
-    {
-        setUserRealms((UserRealm[])LazyList.removeFromArray(getUserRealms(), realm));
-    }
-
-    /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the sessionIdManager.
@@ -467,43 +427,87 @@ public class Server extends HandlerWrapper implements Attributes
         return _sendDateHeader;
     }
     
-    
+
+    /* ------------------------------------------------------------ */
     /**
      * Add a LifeCycle object to be started/stopped
      * along with the Server.
+     * @deprecated Use {@link #addBean(LifeCycle)}
      * @param c
      */
     public void addLifeCycle (LifeCycle c)
     {
-        if (c == null)
+        addBean(c);
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Add an associated bean.
+     * The bean will be added to the servers {@link Container}
+     * and if it is a {@link LifeCycle} instance, it will be 
+     * started/stopped along with the Server.
+     * @param c
+     */
+    public void addBean(Object o)
+    {
+        if (o == null)
             return;
-        if (!_dependentLifeCycles.contains(c)) 
+        
+        if (!_dependentBeans.contains(o)) 
         {
-            _dependentLifeCycles.add(c);
-            _container.addBean(c);
+            _dependentBeans.add(o);
+            _container.addBean(o);
         }
+        
         try
         {
-            if (isStarted())
-                ((LifeCycle)c).start();
+            if (isStarted() && o instanceof LifeCycle)
+                ((LifeCycle)o).start();
         }
         catch (Exception e)
         {
             throw new RuntimeException (e);
         }
     }
+
+    /* ------------------------------------------------------------ */
+    /** Get dependent beans of a specific class
+     * @see #addBean(Object)
+     * @param clazz
+     * @return List of beans.
+     */
+    public List getBeans(Class clazz)
+    {
+        ArrayList beans = new ArrayList();
+        Iterator iter = _dependentBeans.iterator();
+        while (iter.hasNext())
+        {
+            Object o = iter.next();
+            if (clazz.isInstance(o))
+                beans.add(o);
+        }
+        return beans;
+    }
     
     /**
      * Remove a LifeCycle object to be started/stopped 
      * along with the Server
-     * @param c
+     * @deprecated Use {@link #removeBean(Object)}
      */
     public void removeLifeCycle (LifeCycle c)
     {
-        if (c == null)
+        removeBean(c);
+    }
+
+    /**
+     * Remove an associated bean.
+     */
+    public void removeBean (Object o)
+    {
+        if (o == null)
             return;
-        _dependentLifeCycles.remove(c);
-        _container.removeBean(c);
+        _dependentBeans.remove(o);
+        _container.removeBean(o);
     }
     
  

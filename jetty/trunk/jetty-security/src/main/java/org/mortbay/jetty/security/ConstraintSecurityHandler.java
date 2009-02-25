@@ -38,9 +38,8 @@ import org.mortbay.jetty.util.StringMap;
  * 2.4 compliant and precomputes the constraint combinations for runtime
  * efficiency.
  * 
- * @author Greg Wilkins (gregw)
  */
-public class ConstraintSecurityHandler extends AbstractSecurityHandler implements ConstraintAware
+public class ConstraintSecurityHandler extends SecurityHandler implements ConstraintAware
 {
     private ConstraintMapping[] _constraintMappings;
 
@@ -162,17 +161,17 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler implement
 
     protected UserIdentity newUserIdentity(ServerAuthResult authResult)
     {
-        return new ConstraintUserIdentity(authResult);
+        return new AuthResultUserIdentity(authResult);
     }
 
     protected UserIdentity newSystemUserIdentity()
     {
-        return new ConstraintUserIdentity();
+        return new AuthResultUserIdentity();
     }
 
     public RunAsToken newRunAsToken(String runAsRole)
     {
-        return new ConstraintRunAsToken(runAsRole);
+        return new RoleRunAsToken(runAsRole);
     }
 
     protected Object prepareConstraintInfo(String pathInContext, Request request)

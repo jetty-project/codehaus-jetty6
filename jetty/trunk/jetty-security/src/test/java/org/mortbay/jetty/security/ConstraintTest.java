@@ -28,6 +28,8 @@ import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.http.security.Password;
 import org.mortbay.jetty.security.HashLoginService;
+import org.mortbay.jetty.security.authentication.BasicAuthenticator;
+import org.mortbay.jetty.security.authentication.FormAuthenticator;
 import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.LocalConnector;
 import org.mortbay.jetty.server.Request;
@@ -64,7 +66,6 @@ public class ConstraintTest extends TestCase
         _context.setHandler(_session);
         _session.setHandler(_security);
         _security.setHandler(_handler);
-        _security.setAuthenticationManager(new DefaultAuthenticationManager());
 
         Constraint constraint0 = new Constraint();
         constraint0.setAuthenticate(true);
@@ -115,8 +116,7 @@ public class ConstraintTest extends TestCase
     public void testBasic()
             throws Exception
     {
-        _security.getAuthenticationManager().setAuthMethod(Constraint.__BASIC_AUTH);
-        _security.setUserRealm(_loginService);
+        _security.setAuthenticator(new BasicAuthenticator(_loginService));
         //ServerAuthentication serverAuthentication = new BasicServerAuthentication(_loginService, TEST_REALM);
         //_security.setServerAuthentication(serverAuthentication);
         _server.start();
@@ -154,10 +154,7 @@ public class ConstraintTest extends TestCase
     public void testForm()
             throws Exception
     {
-        _security.getAuthenticationManager().setAuthMethod(Constraint.__FORM_AUTH);
-        _security.getAuthenticationManager().setLoginPage("/testLoginPage");
-        _security.getAuthenticationManager().setErrorPage("/testErrorPage");
-        _security.setUserRealm(_loginService);
+        _security.setAuthenticator(new FormAuthenticator("/testLoginPage","/testErrorPage",_loginService));
         
        // ServerAuthentication serverAuthentication = new SessionCachingServerAuthentication(new FormServerAuthentication("/testLoginPage", "/testErrorPage", _loginService));
        // _security.setServerAuthentication(serverAuthentication);
@@ -215,7 +212,6 @@ public class ConstraintTest extends TestCase
 
     class RequestHandler extends AbstractHandler
     {
-
         public void handle(String target, HttpServletRequest request, HttpServletResponse response ) throws IOException, ServletException
         {
             ((Request) request).setHandled(true);

@@ -35,7 +35,7 @@ import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.ServerAuthStatus;
-import org.mortbay.jetty.security.ServerAuthentication;
+import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.SimpleAuthResult;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.URIUtil;
@@ -44,24 +44,30 @@ import org.mortbay.jetty.util.log.Log;
 /**
  * @version $Rev$ $Date$
  */
-public class FormServerAuthentication implements ServerAuthentication
+public class FormAuthenticator extends LoginAuthenticator
 {
+    public final static String __FORM_LOGIN_PAGE="org.mortbay.jetty.security.form_login_page";
+    public final static String __FORM_ERROR_PAGE="org.mortbay.jetty.security.form_error_page";
     public final static String __J_URI = "org.mortbay.jetty.util.URI";
     public final static String __J_AUTHENTICATED = "org.mortbay.jetty.server.Auth";
     public final static String __J_SECURITY_CHECK = "/j_security_check";
     public final static String __J_USERNAME = "j_username";
     public final static String __J_PASSWORD = "j_password";
-    private final LoginService _loginService;
     private String _formErrorPage;
     private String _formErrorPath;
     private String _formLoginPage;
     private String _formLoginPath;
 
-    public FormServerAuthentication(String loginPage, String errorPage, LoginService loginService)
+    public FormAuthenticator(String loginPage, String errorPage, LoginService loginService)
     {
+        super(loginService);
         setLoginPage(loginPage);
         setErrorPage(errorPage);
-        this._loginService = loginService;
+    }
+    
+    public String getAuthMethod()
+    {
+        return Constraint.__FORM_AUTH;
     }
 
     private void setLoginPage(String path)

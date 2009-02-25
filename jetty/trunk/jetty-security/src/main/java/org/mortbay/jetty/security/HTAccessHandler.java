@@ -64,7 +64,7 @@ import org.mortbay.jetty.util.resource.Resource;
  * @author Greg Wilkins
  * @author Konstantin Metlov
  */
-public class HTAccessHandler extends AbstractSecurityHandler
+public class HTAccessHandler extends SecurityHandler
 {
     private static final Logger log = Log.getLogger(HTAccessHandler.class.getName());
 
@@ -175,17 +175,17 @@ public class HTAccessHandler extends AbstractSecurityHandler
      */
     protected UserIdentity newUserIdentity(ServerAuthResult authResult)
     {
-        return new ConstraintUserIdentity(authResult);
+        return new AuthResultUserIdentity(authResult);
     }
 
     protected UserIdentity newSystemUserIdentity()
     {
-        return new ConstraintUserIdentity();
+        return new AuthResultUserIdentity();
     }
 
     public RunAsToken newRunAsToken(String runAsRole)
     {
-        return new ConstraintRunAsToken(runAsRole);
+        return new RoleRunAsToken(runAsRole);
     }
 
     protected Object prepareConstraintInfo(String pathInContext, Request request)
