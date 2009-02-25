@@ -51,8 +51,8 @@ public class ConstraintTest extends TestCase
     ContextHandler _context = new ContextHandler();
     SessionHandler _session = new SessionHandler();
     ConstraintSecurityHandler _security = new ConstraintSecurityHandler();
-    LoginService _loginService = new HashLoginService("TestRealm",
-                                                      Collections.<String, HashLoginService.User>singletonMap("user", new HashLoginService.KnownUser("user", new Password("pass"), new String[] {"user"})));
+    HashLoginService _loginService = new HashLoginService("TestRealm");
+                                                      
     final ServletCallbackHandler _callbackHandler = new ServletCallbackHandler(_loginService);
     RequestHandler _handler = new RequestHandler();
     private static final String APP_CONTEXT = "localhost /ctx";
@@ -66,6 +66,9 @@ public class ConstraintTest extends TestCase
         _context.setHandler(_session);
         _session.setHandler(_security);
         _security.setHandler(_handler);
+        
+        _loginService.putUser("user",new Password("password"));
+        _loginService.putUser("admin",new HashLoginService.KnownUser("admin", new Password("password"), new String[] {"administrator"}));
 
         Constraint constraint0 = new Constraint();
         constraint0.setAuthenticate(true);
@@ -81,17 +84,28 @@ public class ConstraintTest extends TestCase
         ConstraintMapping mapping1 = new ConstraintMapping();
         mapping1.setPathSpec("/auth/*");
         mapping1.setConstraint(constraint1);
+        
+        Constraint constraint2 = new Constraint();
+        constraint2.setAuthenticate(true);
+        constraint2.setName("admin");
+        constraint2.setRoles(new String[]{"administrator"});
+        ConstraintMapping mapping2 = new ConstraintMapping();
+        mapping2.setPathSpec("/admin/*");
+        mapping2.setConstraint(constraint2);
+        
+        Constraint constraint3 = new Constraint();
+        constraint3.setAuthenticate(false);
+        constraint3.setName("relax");
+        ConstraintMapping mapping3 = new ConstraintMapping();
+        mapping3.setPathSpec("/admin/relax/*");
+        mapping3.setConstraint(constraint3);
 
+        
         _security.setConstraintMappings(new ConstraintMapping[]
                 {
-                        mapping0, mapping1
+                        mapping0, mapping1, mapping2, mapping3
                 },
-                Collections.singleton("user"));
-    }
-
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(ConstraintTest.class);
+                Collections.singleton("administrator"));
     }
 
     /*
@@ -113,22 +127,46 @@ public class ConstraintTest extends TestCase
     }
 
 
+
+    public void testConstraints()
+            throws Exception
+    {
+        ConstraintMapping[] mappings =_security.getConstraintMappings();
+        
+        assertTrue (mappings[0].getConstraint().isForbidden());
+        assertFalse(mappings[1].getConstraint().isForbidden());
+        assertFalse(mappings[2].getConstraint().isForbidden());
+        assertFalse(mappings[3].getConstraint().isForbidden());
+        
+        assertFalse(mappings[0].getConstraint().isAnyRole());
+        assertTrue (mappings[1].getConstraint().isAnyRole());
+        assertFalse(mappings[2].getConstraint().isAnyRole());
+        assertFalse(mappings[3].getConstraint().isAnyRole());
+
+        assertFalse(mappings[0].getConstraint().hasRole("admin"));
+        assertTrue (mappings[1].getConstraint().hasRole("admin"));
+        assertTrue (mappings[2].getConstraint().hasRole("admin"));
+        assertFalse(mappings[3].getConstraint().hasRole("admin"));
+        
+        assertTrue (mappings[0].getConstraint().getAuthenticate());
+        assertTrue (mappings[1].getConstraint().getAuthenticate());
+        assertTrue (mappings[2].getConstraint().getAuthenticate());
+        assertFalse(mappings[3].getConstraint().getAuthenticate());
+    }
+    
+    
     public void testBasic()
             throws Exception
     {
         _security.setAuthenticator(new BasicAuthenticator(_loginService));
-        //ServerAuthentication serverAuthentication = new BasicServerAuthentication(_loginService, TEST_REALM);
-        //_security.setServerAuthentication(serverAuthentication);
         _server.start();
 
         String response;
-
         response = _connector.getResponses("GET /ctx/noauth/info HTTP/1.0\r\n\r\n");
         assertTrue(response.startsWith("HTTP/1.1 200 OK"));
 
         _connector.reopen();
         response = _connector.getResponses("GET /ctx/forbid/info HTTP/1.0\r\n\r\n");
-        System.out.println(response);
         assertTrue(response.startsWith("HTTP/1.1 403 Forbidden"));
 
         _connector.reopen();
@@ -145,10 +183,42 @@ public class ConstraintTest extends TestCase
 
         _connector.reopen();
         response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n" +
-                "Authorization: " + B64Code.encode("user:pass") + "\r\n" +
+                "Authorization: " + B64Code.encode("user:password") + "\r\n" +
                 "\r\n");
         assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+        
 
+        // test admin
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/admin/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 401 Unauthorized"));
+        assertTrue(response.indexOf("WWW-Authenticate: basic realm=\"TestRealm\"") > 0);
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/admin/info HTTP/1.0\r\n" +
+                "Authorization: " + B64Code.encode("admin:wrong") + "\r\n" +
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 401 Unauthorized"));
+        assertTrue(response.indexOf("WWW-Authenticate: basic realm=\"TestRealm\"") > 0);
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/admin/info HTTP/1.0\r\n" +
+                "Authorization: " + B64Code.encode("user:password") + "\r\n" +
+                "\r\n");
+
+        assertTrue(response.startsWith("HTTP/1.1 403 "));
+        assertTrue(response.indexOf("User not in required role") > 0);
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/admin/info HTTP/1.0\r\n" +
+                "Authorization: " + B64Code.encode("admin:password") + "\r\n" +
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+        
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/admin/relax/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
     }
 
     public void testForm()
@@ -172,9 +242,7 @@ public class ConstraintTest extends TestCase
 
         _connector.reopen();
         response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n\r\n");
-        System.err.println(response);
         assertTrue(response.startsWith("HTTP/1.1 200 "));
-//        assertTrue(response.indexOf("Location") > 0);
         assertTrue(response.indexOf("testLoginPage") > 0);
         String session = response.substring(response.indexOf("JSESSIONID=") + 11, response.indexOf(";Path=/ctx"));
 
@@ -194,9 +262,9 @@ public class ConstraintTest extends TestCase
         response = _connector.getResponses("POST /ctx/j_security_check HTTP/1.0\r\n" +
                 "Cookie: JSESSIONID=" + session + "\r\n" +
                 "Content-Type: application/x-www-form-urlencoded\r\n" +
-                "Content-Length: 31\r\n" +
+                "Content-Length: 35\r\n" +
                 "\r\n" +
-                "j_username=user&j_password=pass\r\n");
+                "j_username=user&j_password=password\r\n");
         assertTrue(response.startsWith("HTTP/1.1 302 "));
         assertTrue(response.indexOf("Location") > 0);
         assertTrue(response.indexOf("/ctx/auth/info") > 0);
@@ -206,6 +274,15 @@ public class ConstraintTest extends TestCase
                 "Cookie: JSESSIONID=" + session + "\r\n" +
                 "\r\n");
         assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+        
+
+        System.err.println("failing ...");
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/admin/info HTTP/1.0\r\n" +
+                "Cookie: JSESSIONID=" + session + "\r\n" +
+                "\r\n");
+        System.err.println(response);
+        assertTrue(response.startsWith("HTTP/1.1 403"));
 
     }
 

@@ -109,8 +109,9 @@ public class Constraint implements Cloneable, Serializable
     {
         _roles = roles;
         _anyRole = false;
-        if (roles != null) for (int i = roles.length; !_anyRole && i-- > 0;)
-            _anyRole = ANY_ROLE.equals(roles[i]);
+        if (roles != null) 
+            for (int i = roles.length; !_anyRole && i-- > 0;)
+                _anyRole |= ANY_ROLE.equals(roles[i]);
     }
 
     /* ------------------------------------------------------------ */
