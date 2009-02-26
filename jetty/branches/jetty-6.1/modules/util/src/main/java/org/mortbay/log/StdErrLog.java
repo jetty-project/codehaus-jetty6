@@ -66,7 +66,7 @@ public class StdErrLog implements Logger
     {
         String d=_dateCache.now();
         int ms=_dateCache.lastMs();
-        System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+name+":INFO:  "+format(msg,arg0,arg1));
+        System.err.println(d+(ms>99?".":(ms>9?".0":".00"))+ms+":"+name+":INFO:  "+format(msg,arg0,arg1));
     }
     
     public void debug(String msg,Throwable th)
@@ -75,7 +75,7 @@ public class StdErrLog implements Logger
         {
             String d=_dateCache.now();
             int ms=_dateCache.lastMs();
-            System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+name+":DEBUG: "+msg);
+            System.err.println(d+(ms>99?".":(ms>9?".0":".00"))+ms+":"+name+":DEBUG: "+msg);
             if (th!=null) th.printStackTrace();
         }
     }
@@ -86,7 +86,7 @@ public class StdErrLog implements Logger
         {
             String d=_dateCache.now();
             int ms=_dateCache.lastMs();
-            System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+name+":DEBUG: "+format(msg,arg0,arg1));
+            System.err.println(d+(ms>99?".":(ms>9?".0":".00"))+ms+":"+name+":DEBUG: "+format(msg,arg0,arg1));
         }
     }
     
@@ -94,14 +94,14 @@ public class StdErrLog implements Logger
     {
         String d=_dateCache.now();
         int ms=_dateCache.lastMs();
-        System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+name+":WARN:  "+format(msg,arg0,arg1));
+        System.err.println(d+(ms>99?".":(ms>9?".0":".00"))+ms+":"+name+":WARN:  "+format(msg,arg0,arg1));
     }
     
     public void warn(String msg, Throwable th)
     {
         String d=_dateCache.now();
         int ms=_dateCache.lastMs();
-        System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+name+":WARN:  "+msg);
+        System.err.println(d+(ms>99?".":(ms>9?".0":".00"))+ms+":"+name+":WARN:  "+msg);
         if (th!=null)
             th.printStackTrace();
     }
