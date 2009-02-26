@@ -71,7 +71,30 @@ Jetty-7.0-SNAPSHOT
  + JETTY-898 Allow jetty debs to start with custom java args provided by users
  + JETTY-890 merge jaspi branch to trunk
  + JETTY-909 Update useragents cache
+ + JETTY-917 Change for JETTY-811 breaks systemProperties config parameter in maven-jetty-plugin
  + JETTY-922 Fixed NPE on getRemoteHost when socket closed
+
+jetty-6.1.15.rc4 19 February 2009
+ + JETTY-496 Support inetd/xinetd through use of System.inheritedChannel()
+ + JETTY-713 Expose additional AbstractConnector methods via MBean
+ + JETTY-749 Improved ack extension
+ + JETTY-811 Allow configuration of system properties for the maven plugin using a file
+ + JETTY-840 add default mime types to *.htc and *.pps
+ + JETTY-848 Temporary folder not fully cleanup after stop (via Sweeper)
+ + JETTY-872 Handshake handler calls wrong extension callback
+ + JETTY-879 Support extra properties in jQuery comet implementation
+ + JETTY-802 Modify the default error pages to make association with Jetty clearer
+ + JETTY-869 NCSARequestLog locale config
+ + JETTY-870 NullPointerException in Response when performing redirect to wrong relative URL
+ + JETTY-878 Removed printStackTrace from WaitingContinuation
+ + JETTY-882 ChannelBayeuxListener called too many times
+ + JETTY-884 Use hashcode for threadpool ID
+ + JETTY-815 Add comet support to jQuery javascript library
+ + JETTY-887 Split configuration and handshaking in jquery comet
+ + JETTY-888 Fix abort in case of multiple outstanding connections
+ + JETTY-894 Add android .apk to mime types
+ + JETTY-898 Allow jetty debs to start with custom java args provided by users
+ + JETTY-909 Update useragents cache
 
  
 jetty-6.1.15.rc3 28 January 2009
