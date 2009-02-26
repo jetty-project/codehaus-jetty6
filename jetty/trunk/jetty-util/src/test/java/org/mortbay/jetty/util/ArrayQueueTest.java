@@ -128,7 +128,7 @@ public class ArrayQueueTest extends TestCase
             
     }
     
-    public void testFull() throws Exception
+    public void testFullEmpty() throws Exception
     {
         ArrayQueue<String> queue = new ArrayQueue<String>(2);
         assertTrue(queue.offer("one"));
@@ -144,7 +144,21 @@ public class ArrayQueueTest extends TestCase
         {
             
         }
-        
+
+        assertEquals("one",queue.peek());
+        assertEquals("one",queue.remove());
+        assertEquals("two",queue.remove());
+        try
+        {
+            assertEquals("three",queue.remove());
+            assertTrue(false);
+        }
+        catch(Exception e)
+        {
+            
+        }
+
+        assertEquals(null,queue.poll());
     }
         
 }
