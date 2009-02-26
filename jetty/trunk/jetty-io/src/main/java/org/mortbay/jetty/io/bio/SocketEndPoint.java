@@ -117,6 +117,8 @@ public class SocketEndPoint extends StreamEndPoint
     {
         if (_local==null)
             _local=(InetSocketAddress)_socket.getLocalSocketAddress();
+        if (_local==null)
+            return -1;
         return _local.getPort();
     }
 
@@ -128,7 +130,8 @@ public class SocketEndPoint extends StreamEndPoint
     {
         if (_remote==null)
             _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
-        
+        if (_remote==null)
+            return null;
         InetAddress addr = _remote.getAddress();
         return ( addr == null ? null : addr.getHostAddress() );
     }
@@ -141,7 +144,8 @@ public class SocketEndPoint extends StreamEndPoint
     {
         if (_remote==null)
             _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
-        
+        if (_remote==null)
+            return null;
         return _remote.getAddress().getCanonicalHostName();
     }
 
@@ -153,9 +157,10 @@ public class SocketEndPoint extends StreamEndPoint
     {
         if (_remote==null)
             _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
+        if (_remote==null)
+            return -1;
         return _remote.getPort();
     }
-
 
     /* ------------------------------------------------------------ */
     /* 

@@ -379,7 +379,9 @@ public class ChannelEndPoint implements EndPoint
         
         if (_remote==null)
             _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
-        
+
+        if (_remote==null)
+            return null;
         return _remote.getAddress().getCanonicalHostName();
     }
 
@@ -394,7 +396,9 @@ public class ChannelEndPoint implements EndPoint
         
         if (_remote==null)
             _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
-        
+
+        if (_remote==null)
+            return -1;
         return _remote==null?-1:_remote.getPort();
     }
 
