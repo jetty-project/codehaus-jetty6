@@ -2,6 +2,7 @@ jetty-6.1-SNAPSHOT
  +
 
 jetty-6.1.15 25 February 2009
+ + JETTY-811 fixed @parameter
  + JETTY-915 Incorrect/Duplicate Logger implementation printed out on initialization
  + JETTY-917 Change for JETTY-811 breaks systemProperties config parameter in maven-jetty-plugin
  + JETTY-920 JETTY-921 Fixed cometd unsubscribeAll deadlock
