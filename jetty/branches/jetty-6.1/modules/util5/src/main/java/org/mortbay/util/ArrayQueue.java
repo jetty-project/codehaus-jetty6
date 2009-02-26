@@ -123,7 +123,7 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
     {
         synchronized(_lock)
         {
-            if (_nextSlot==_nextE)
+            if (_size==0)
                 throw new NoSuchElementException();
             return (E)_elements[_nextE];
         }
@@ -134,7 +134,7 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
     {
         synchronized(_lock)
         {
-            if (_nextSlot==_nextE)
+            if (_size==0)
                 return null;
             return (E)_elements[_nextE];
         }
@@ -161,7 +161,7 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
     {
         synchronized(_lock)
         {
-            if (_nextSlot==_nextE)
+            if (_size==0)
                 throw new NoSuchElementException();
             E e = (E)_elements[_nextE];
             _elements[_nextE]=null;
