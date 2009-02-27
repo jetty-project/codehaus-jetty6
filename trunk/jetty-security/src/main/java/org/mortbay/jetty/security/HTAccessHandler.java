@@ -174,14 +174,14 @@ public class HTAccessHandler extends SecurityHandler
      * response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
      * base_request.setHandled(true); } } }
      */
-    protected UserIdentity newUserIdentity(Authentication authResult)
+    protected UserIdentity newUserIdentity(ServerAuthResult authResult)
     {
-        return new AuthenticatedUserIdentity(authResult);
+        return new AuthResultUserIdentity(authResult);
     }
 
     protected UserIdentity newSystemUserIdentity()
     {
-        return new AuthenticatedUserIdentity();
+        return new AuthResultUserIdentity();
     }
 
     public RunAsToken newRunAsToken(String runAsRole)
@@ -586,7 +586,7 @@ public class HTAccessHandler extends SecurityHandler
                 Principal userPrincipal = new HTAccessPrincipal(user);
                 subject.getPrincipals().add(userPrincipal);
                 loginCallback.setUserPrincipal(userPrincipal);
-                loginCallback.setRoles(gps);
+                loginCallback.setGroups(gps);
                 loginCallback.setSuccess(true);
             }
         }
@@ -945,7 +945,7 @@ public class HTAccessHandler extends SecurityHandler
                     if (loginCallback.isSuccess())
                     {
                         CallerPrincipalCallback callerPrincipalCallback = new CallerPrincipalCallback(clientSubject, loginCallback.getUserPrincipal());
-                        GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject, loginCallback.getRoles());
+                        GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject, loginCallback.getGroups());
                         callbackHandler.handle(new Callback[] { callerPrincipalCallback, groupPrincipalCallback });
                         messageInfo.getMap().put(JaspiMessageInfo.AUTH_METHOD_KEY, Constraint.__BASIC_AUTH);
                         return AuthStatus.SUCCESS;

@@ -17,49 +17,12 @@
  * under the License.
  */
 
-package org.mortbay.jetty.server;
-
-import java.security.Principal;
-import java.util.List;
-
-import javax.security.auth.Subject;
-
+package org.mortbay.jetty.security;
 
 /**
- * This is similar to the jaspi PasswordValidationCallback but includes user
- * principal and group info as well.
- * 
  * @version $Rev$ $Date$
  */
-public interface LoginCallback
+public enum ServerAuthStatus
 {
-    public Subject getSubject();
-
-    public String getUserName();
-
-    //TODO could return Credential type?
-    public Object getCredential();
- 
-
-    public boolean isSuccess();
-  
-
-    public void setSuccess(boolean success);
-  
-
-    public Principal getUserPrincipal();
-  
-
-    public void setUserPrincipal(Principal userPrincipal);
-  
-
-    public String[] getGroups();
-    
-
-    public void setGroups(String[] groups);
-  
-
-    public void clearPassword();
-   
-
+    SEND_FAILURE, SEND_SUCCESS, SEND_CONTINUE, SUCCESS
 }

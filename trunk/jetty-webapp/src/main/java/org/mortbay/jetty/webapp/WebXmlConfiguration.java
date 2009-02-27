@@ -37,7 +37,7 @@ import javax.servlet.UnavailableException;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
 import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.security.Authentication;
+import org.mortbay.jetty.security.ServerAuthResult;
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.security.ConstraintAware;
