@@ -34,13 +34,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.security.Authentication;
 import org.mortbay.jetty.security.Authenticator;
-import org.mortbay.jetty.security.LazyAuthResult;
+import org.mortbay.jetty.security.LazyAuthentication;
 import org.mortbay.jetty.security.ServerAuthException;
-import org.mortbay.jetty.security.ServerAuthResult;
-import org.mortbay.jetty.security.ServerAuthStatus;
 import org.mortbay.jetty.security.ServletCallbackHandler;
-import org.mortbay.jetty.security.SimpleAuthResult;
+import org.mortbay.jetty.security.SimpleAuthentication;
 
 /**
  * @version $Rev$ $Date$
@@ -75,10 +74,10 @@ public class JaspiAuthenticator implements Authenticator
         return "JASPI";
     }
 
-    public ServerAuthResult validateRequest(ServletRequest request, ServletResponse response, boolean mandatory) throws ServerAuthException
+    public Authentication validateRequest(ServletRequest request, ServletResponse response, boolean mandatory) throws ServerAuthException
     {
         if (_allowLazyAuthentication && !mandatory)
-            return new LazyAuthResult(this,request,response);
+            return new LazyAuthentication(this,request,response);
         
         JaspiMessageInfo info = new JaspiMessageInfo((HttpServletRequest)request,(HttpServletResponse)response,mandatory);
         request.setAttribute("org.mortbay.jetty.security.jaspi.info",info);
@@ -86,14 +85,14 @@ public class JaspiAuthenticator implements Authenticator
     }
 
     // most likely validatedUser is not needed here.
-    public ServerAuthStatus secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, ServerAuthResult validatedUser) throws ServerAuthException
+    public Authentication.Status secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, Authentication validatedUser) throws ServerAuthException
     {
         JaspiMessageInfo info = (JaspiMessageInfo)req.getAttribute("org.mortbay.jetty.security.jaspi.info");
         if (info==null)info = new JaspiMessageInfo((HttpServletRequest)req,(HttpServletResponse)res,mandatory);
         return secureResponse(info,validatedUser);
     }
     
-    public ServerAuthResult validateRequest(JaspiMessageInfo messageInfo) throws ServerAuthException
+    public Authentication validateRequest(JaspiMessageInfo messageInfo) throws ServerAuthException
     {
         try
         {
@@ -106,7 +105,7 @@ public class JaspiAuthenticator implements Authenticator
             Principal principal = principalCallback == null?null:principalCallback.getPrincipal();
             GroupPrincipalCallback groupPrincipalCallback = _callbackHandler.getThreadGroupPrincipalCallback();
             String[] groups = groupPrincipalCallback == null?null:groupPrincipalCallback.getGroups();
-            return new SimpleAuthResult(toServerAuthStatus(authStatus),clientSubject,principal,groups,authMethod);
+            return new SimpleAuthentication(toServerAuthStatus(authStatus),clientSubject,principal,groups,authMethod);
         }
         catch (AuthException e)
         {
@@ -114,7 +113,7 @@ public class JaspiAuthenticator implements Authenticator
         }
     }
 
-    public ServerAuthStatus secureResponse(JaspiMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException
+    public Authentication.Status secureResponse(JaspiMessageInfo messageInfo, Authentication validatedUser) throws ServerAuthException
     {
         try
         {
@@ -128,16 +127,16 @@ public class JaspiAuthenticator implements Authenticator
         }
     }
     
-    ServerAuthStatus toServerAuthStatus(AuthStatus authStatus) throws ServerAuthException
+    Authentication.Status toServerAuthStatus(AuthStatus authStatus) throws ServerAuthException
     {
         if (authStatus == AuthStatus.SEND_CONTINUE)
-            return ServerAuthStatus.SEND_CONTINUE;
+            return Authentication.Status.SEND_CONTINUE;
         if (authStatus == AuthStatus.SEND_FAILURE)
-            return ServerAuthStatus.SEND_FAILURE;
+            return Authentication.Status.SEND_FAILURE;
         if (authStatus == AuthStatus.SEND_SUCCESS)
-            return ServerAuthStatus.SEND_SUCCESS;
+            return Authentication.Status.SEND_SUCCESS;
         if (authStatus == AuthStatus.SUCCESS)
-            return ServerAuthStatus.SUCCESS;
+            return Authentication.Status.SUCCESS;
         throw new ServerAuthException("Invalid server status: " + authStatus);
     }
 

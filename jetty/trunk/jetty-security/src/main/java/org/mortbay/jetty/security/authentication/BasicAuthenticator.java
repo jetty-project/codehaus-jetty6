@@ -33,9 +33,8 @@ import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
-import org.mortbay.jetty.security.ServerAuthResult;
-import org.mortbay.jetty.security.ServerAuthStatus;
-import org.mortbay.jetty.security.SimpleAuthResult;
+import org.mortbay.jetty.security.Authentication;
+import org.mortbay.jetty.security.SimpleAuthentication;
 import org.mortbay.jetty.util.StringUtil;
 
 /**
@@ -43,17 +42,29 @@ import org.mortbay.jetty.util.StringUtil;
  */
 public class BasicAuthenticator extends LoginAuthenticator 
 {
+    /* ------------------------------------------------------------ */
+    /**
+     * @param loginService
+     */
     public BasicAuthenticator(LoginService loginService)
     {
         super(loginService);
     }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @see org.mortbay.jetty.security.Authenticator#getAuthMethod()
+     */
     public String getAuthMethod()
     {
         return Constraint.__BASIC_AUTH;
     }
 
-    public ServerAuthResult validateRequest(ServletRequest req, ServletResponse res, boolean mandatory) throws ServerAuthException
+    /* ------------------------------------------------------------ */
+    /**
+     * @see org.mortbay.jetty.security.Authenticator#validateRequest(javax.servlet.ServletRequest, javax.servlet.ServletResponse, boolean)
+     */
+    public Authentication validateRequest(ServletRequest req, ServletResponse res, boolean mandatory) throws ServerAuthException
     {
         HttpServletRequest request = (HttpServletRequest)req;
         HttpServletResponse response = (HttpServletResponse)res;
@@ -69,26 +80,25 @@ public class BasicAuthenticator extends LoginAuthenticator
                 String username = credentials.substring(0,i);
                 String password = credentials.substring(i+1);
 
-
                 LoginCallbackImpl loginCallback = new LoginCallbackImpl(new Subject(), username, password.toCharArray());
                 _loginService.login(loginCallback);
                 if (loginCallback.isSuccess())
                 { 
-                    return new SimpleAuthResult(ServerAuthStatus.SUCCESS, 
-                                                loginCallback.getSubject(), 
-                                                loginCallback.getUserPrincipal(), 
-                                                loginCallback.getGroups(), 
-                                                Constraint.__BASIC_AUTH); 
+                    return new SimpleAuthentication(Authentication.Status.SUCCESS, 
+                            loginCallback.getSubject(), 
+                            loginCallback.getUserPrincipal(), 
+                            loginCallback.getRoles(), 
+                            Constraint.__BASIC_AUTH); 
                 }
             }
 
             if (!mandatory) 
             {
-                return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS;
+                return SimpleAuthentication.SUCCESS_UNAUTH_RESULTS;
             }
             response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\"" + _loginService.getName() + '"');
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return SimpleAuthResult.SEND_CONTINUE_RESULTS;
+            return SimpleAuthentication.SEND_CONTINUE_RESULTS;
         }
         catch (IOException e)
         {
@@ -99,9 +109,9 @@ public class BasicAuthenticator extends LoginAuthenticator
     // most likely validatedUser is not needed here.
 
     // corrct?
-    public ServerAuthStatus secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, ServerAuthResult validatedUser) throws ServerAuthException
+    public Authentication.Status secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, Authentication validatedUser) throws ServerAuthException
     {
-        return ServerAuthStatus.SUCCESS;
+        return Authentication.Status.SUCCESS;
     }
 
 }

@@ -186,7 +186,7 @@ public class JAASLoginService implements LoginService
             JAASUserPrincipal userPrincipal = new JAASUserPrincipal(getUserName(callbackHandler), loginCallback.getSubject(), loginContext);
             subject.getPrincipals().add(userPrincipal);
             loginCallback.setUserPrincipal(userPrincipal);
-            loginCallback.setGroups(getGroups(subject));
+            loginCallback.setRoles(getGroups(subject));
             loginCallback.setSuccess(true);
         }
         catch (LoginException e)

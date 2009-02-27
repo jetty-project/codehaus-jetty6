@@ -20,7 +20,6 @@
 package org.mortbay.jetty.server;
 
 import java.security.Principal;
-import java.util.List;
 
 import javax.security.auth.Subject;
 
@@ -37,28 +36,20 @@ public interface LoginCallback
 
     public String getUserName();
 
-    //TODO could return Credential type?
     public Object getCredential();
  
-
     public boolean isSuccess();
-  
 
     public void setSuccess(boolean success);
-  
 
     public Principal getUserPrincipal();
-  
 
     public void setUserPrincipal(Principal userPrincipal);
-  
 
-    public String[] getGroups();
+    public String[] getRoles();
     
-
-    public void setGroups(String[] groups);
+    public void setRoles(String[] roles);
   
-
     public void clearPassword();
    
 

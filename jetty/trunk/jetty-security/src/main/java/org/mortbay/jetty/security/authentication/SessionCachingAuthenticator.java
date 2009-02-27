@@ -26,9 +26,8 @@ import javax.servlet.http.HttpSession;
 
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.ServerAuthException;
-import org.mortbay.jetty.security.ServerAuthResult;
-import org.mortbay.jetty.security.ServerAuthStatus;
-import org.mortbay.jetty.security.SimpleAuthResult;
+import org.mortbay.jetty.security.Authentication;
+import org.mortbay.jetty.security.SimpleAuthentication;
 
 /**
  * @version $Rev$ $Date$
@@ -43,22 +42,22 @@ public class SessionCachingAuthenticator extends DelegateAuthenticator
         super(delegate);
     }
 
-    public ServerAuthResult validateRequest(ServletRequest request, ServletResponse response, boolean mandatory) throws ServerAuthException
+    public Authentication validateRequest(ServletRequest request, ServletResponse response, boolean mandatory) throws ServerAuthException
     {
         HttpSession session = ((HttpServletRequest)request).getSession(mandatory);
         // not mandatory and not authenticated
         if (session == null) 
-            return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS;
+            return SimpleAuthentication.SUCCESS_UNAUTH_RESULTS;
 
-        ServerAuthResult serverAuthResult = (ServerAuthResult) session.getAttribute(__J_AUTHENTICATED);
+        Authentication serverAuthResult = (Authentication) session.getAttribute(__J_AUTHENTICATED);
         if (serverAuthResult != null) 
             return serverAuthResult;
 
         serverAuthResult = _delegate.validateRequest(request, response, mandatory);
         if (serverAuthResult != null && serverAuthResult.getClientSubject() != null)
         {
-            ServerAuthResult newServerAuthResult = new SimpleAuthResult(ServerAuthStatus.SUCCESS, serverAuthResult.getClientSubject(), 
-                                                                        serverAuthResult.getUserPrincipal(), serverAuthResult.getGroups(), 
+            Authentication newServerAuthResult = new SimpleAuthentication(Authentication.Status.SUCCESS, serverAuthResult.getClientSubject(), 
+                                                                        serverAuthResult.getUserPrincipal(), serverAuthResult.getRoles(), 
                                                                         serverAuthResult.getAuthMethod());
             session.setAttribute(__J_AUTHENTICATED, newServerAuthResult);
         }

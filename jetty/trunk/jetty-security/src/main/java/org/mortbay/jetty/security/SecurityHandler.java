@@ -285,9 +285,9 @@ public abstract class SecurityHandler extends HandlerWrapper implements Authenti
                 try
                 {
                     final Authenticator serverAuthentication = _authenticator;
-                    ServerAuthResult authResult = serverAuthentication.validateRequest(request, response, isAuthMandatory);
+                    Authentication authResult = serverAuthentication.validateRequest(request, response, isAuthMandatory);
                     
-                    if (authResult.getAuthStatus() == ServerAuthStatus.SUCCESS)
+                    if (authResult.getAuthStatus() == Authentication.Status.SUCCESS)
                     {
                         // JASPI 3.8. Supply the UserPrincipal and ClientSubject
                         // to the web resource permission check
@@ -386,7 +386,7 @@ public abstract class SecurityHandler extends HandlerWrapper implements Authenti
     public abstract RunAsToken newRunAsToken(String runAsRole);
 
     /* ------------------------------------------------------------ */
-    protected abstract UserIdentity newUserIdentity(ServerAuthResult authResult);
+    protected abstract UserIdentity newUserIdentity(Authentication authResult);
 
     /* ------------------------------------------------------------ */
     protected abstract UserIdentity newSystemUserIdentity();

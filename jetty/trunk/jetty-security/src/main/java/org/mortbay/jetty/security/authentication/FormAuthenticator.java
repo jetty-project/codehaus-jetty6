@@ -32,9 +32,8 @@ import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
-import org.mortbay.jetty.security.ServerAuthResult;
-import org.mortbay.jetty.security.ServerAuthStatus;
-import org.mortbay.jetty.security.SimpleAuthResult;
+import org.mortbay.jetty.security.Authentication;
+import org.mortbay.jetty.security.SimpleAuthentication;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.URIUtil;
 import org.mortbay.jetty.util.log.Log;
@@ -104,7 +103,7 @@ public class FormAuthenticator extends LoginAuthenticator
         }
     }
 
-    public ServerAuthResult validateRequest(ServletRequest req, ServletResponse res, boolean mandatory) throws ServerAuthException
+    public Authentication validateRequest(ServletRequest req, ServletResponse res, boolean mandatory) throws ServerAuthException
     {
         HttpServletRequest request = (HttpServletRequest)req;
         HttpServletResponse response = (HttpServletResponse)res;
@@ -113,7 +112,7 @@ public class FormAuthenticator extends LoginAuthenticator
         // not mandatory and not authenticated
         if (session == null || isLoginOrErrorPage(uri)) 
         {
-            return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS;
+            return SimpleAuthentication.SUCCESS_UNAUTH_RESULTS;
         }
             
 
@@ -140,8 +139,8 @@ public class FormAuthenticator extends LoginAuthenticator
                     session.removeAttribute(__J_URI); // Remove popped return URI.
                     response.setContentLength(0);   
                     response.sendRedirect(response.encodeRedirectURL(nuri));
-                    return new SimpleAuthResult(ServerAuthStatus.SEND_CONTINUE, loginCallback.getSubject(), loginCallback.getUserPrincipal(), loginCallback
-                            .getGroups(), Constraint.__FORM_AUTH);
+                    return new SimpleAuthentication(Authentication.Status.SEND_CONTINUE, loginCallback.getSubject(), loginCallback.getUserPrincipal(), loginCallback
+                            .getRoles(), Constraint.__FORM_AUTH);
                 }
                 // not authenticated
                 if (Log.isDebugEnabled()) Log.debug("Form authentication FAILED for " + StringUtil.printable(username));
@@ -157,14 +156,14 @@ public class FormAuthenticator extends LoginAuthenticator
                 }
                 // TODO is this correct response if isMandatory false??? Can
                 // that occur?
-                return SimpleAuthResult.SEND_FAILURE_RESULTS;
+                return SimpleAuthentication.SEND_FAILURE_RESULTS;
             }
             // Check if the session is already authenticated.
 
             // Don't authenticate authform or errorpage
             if (!mandatory)
             // TODO verify this is correct action
-                return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS;
+                return SimpleAuthentication.SUCCESS_UNAUTH_RESULTS;
 
             // redirect to login page
             if (request.getQueryString() != null) uri += "?" + request.getQueryString();
@@ -174,7 +173,7 @@ public class FormAuthenticator extends LoginAuthenticator
                                           + request.getServerPort()
                                           + URIUtil.addPaths(request.getContextPath(), uri));
             response.sendRedirect(_formLoginPage);
-            return SimpleAuthResult.SEND_CONTINUE_RESULTS;
+            return SimpleAuthentication.SEND_CONTINUE_RESULTS;
         }
         catch (IOException e)
         {
@@ -187,8 +186,8 @@ public class FormAuthenticator extends LoginAuthenticator
         return pathInContext != null && (pathInContext.equals(_formErrorPath) || pathInContext.equals(_formLoginPath));
     }
 
-    public ServerAuthStatus secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, ServerAuthResult validatedUser) throws ServerAuthException
+    public Authentication.Status secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, Authentication validatedUser) throws ServerAuthException
     {
-        return ServerAuthStatus.SUCCESS;
+        return Authentication.Status.SUCCESS;
     }
 }
