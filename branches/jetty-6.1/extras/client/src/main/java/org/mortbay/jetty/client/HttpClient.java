@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -47,6 +48,8 @@ import org.mortbay.resource.Resource;
 import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.thread.Timeout;
+import org.mortbay.util.Attributes;
+import org.mortbay.util.AttributesMap;
 
 /**
  * Http Client.
@@ -76,7 +79,7 @@ import org.mortbay.thread.Timeout;
  * @author Matthew Purland
  * @author Guillaume Nodet
  */
-public class HttpClient extends AbstractBuffers
+public class HttpClient extends AbstractBuffers implements Attributes
 {
     public static final int CONNECTOR_SOCKET=0;
     public static final int CONNECTOR_SELECT_CHANNEL=2;
@@ -115,7 +118,10 @@ public class HttpClient extends AbstractBuffers
     private String _secureRandomAlgorithm;
 
     private RealmResolver _realmResolver;
+    
+    private AttributesMap _attributes=new AttributesMap();
 
+    /* ------------------------------------------------------------------------------- */
     public void dump() throws IOException
     {
         for (Map.Entry<Address, HttpDestination> entry : _destinations.entrySet())
@@ -150,6 +156,58 @@ public class HttpClient extends AbstractBuffers
     public void setThreadPool(ThreadPool threadPool)
     {
         _threadPool=threadPool;
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param name
+     * @return Attribute associated with client
+     */
+    public Object getAttribute(String name)
+    {
+        return _attributes.getAttribute(name);
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return names of attributes associated with client
+     */
+    public Enumeration getAttributeNames()
+    {
+        return _attributes.getAttributeNames();
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param name
+     */
+    public void removeAttribute(String name)
+    {
+        _attributes.removeAttribute(name);
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set an attribute on the HttpClient.
+     * Attributes are not used by the client, but are provided for
+     * so that users of a shared HttpClient may share other structures.
+     * @param name
+     * @param attribute
+     */
+    public void setAttribute(String name, Object attribute)
+    {
+        _attributes.setAttribute(name,attribute);
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param name
+     * @return
+     */
+    public void clearAttributes()
+    {
+        _attributes.clearAttributes();
     }
 
     /* ------------------------------------------------------------------------------- */
