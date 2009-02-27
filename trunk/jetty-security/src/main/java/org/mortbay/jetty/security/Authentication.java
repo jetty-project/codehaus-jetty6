@@ -25,21 +25,26 @@ import java.util.List;
 import javax.security.auth.Subject;
 
 /**
- * This can evaluate results lazily.
+ * Authentication state of a user.
  * 
  * @version $Rev$ $Date$
  */
-public interface ServerAuthResult
+public interface Authentication
 {
+    final static String[] NO_ROLES = new String[]{}; 
+                        
+    public enum Status
+    {
+        SEND_FAILURE, SEND_SUCCESS, SEND_CONTINUE, SUCCESS
+    }
+    
+    Status getAuthStatus();
 
-    ServerAuthStatus getAuthStatus();
-
+    String getAuthMethod();
+    
     Subject getClientSubject();
 
     Principal getUserPrincipal();
 
-    List<String> getGroups();
-
-    String getAuthMethod();
-
+    String[] getRoles();
 }

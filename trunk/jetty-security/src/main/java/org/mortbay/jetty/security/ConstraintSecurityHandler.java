@@ -202,14 +202,18 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
         super.doStart();
     }
 
-    protected UserIdentity newUserIdentity(ServerAuthResult authResult)
+    /* ------------------------------------------------------------ */
+    /**
+     * @see org.mortbay.jetty.security.SecurityHandler#newUserIdentity(org.mortbay.jetty.security.Authentication)
+     */
+    protected UserIdentity newUserIdentity(Authentication authResult)
     {
-        return new AuthResultUserIdentity(authResult);
+        return new AuthenticatedUserIdentity(authResult);
     }
 
     protected UserIdentity newSystemUserIdentity()
     {
-        return new AuthResultUserIdentity();
+        return new AuthenticatedUserIdentity();
     }
 
     public RunAsToken newRunAsToken(String runAsRole)

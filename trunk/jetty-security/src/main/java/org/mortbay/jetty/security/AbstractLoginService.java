@@ -67,7 +67,7 @@ public abstract class AbstractLoginService extends AbstractLifeCycle implements 
         {
             loginCallback.getSubject().getPrincipals().add(user);
             loginCallback.setUserPrincipal(user);
-            loginCallback.setGroups(user.roles);
+            loginCallback.setRoles(user.roles);
             loginCallback.setSuccess(true);
         }
     }

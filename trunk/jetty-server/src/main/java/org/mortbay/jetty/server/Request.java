@@ -1102,20 +1102,7 @@ public class Request implements HttpServletRequest
      */
     public boolean isUserInRole(String role)
     {
-        return _userIdentity.isUserInRole(role);
-//        if (_roleMap!=null)
-//        {
-//            String r=(String)_roleMap.get(role);
-//            if (r!=null)
-//                role=r;
-//        }
-//
-//        Principal principal = getUserPrincipal();
-//
-//        if (_userRealm!=null && principal!=null)
-//            return _userRealm.isUserInRole(principal, role);
-//
-//        return false;
+        return _userIdentity!=null && _userIdentity.isUserInRoleRef(role);
     }
 
     /* ------------------------------------------------------------ */
