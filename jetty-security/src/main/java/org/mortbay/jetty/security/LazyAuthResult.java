@@ -30,7 +30,7 @@ import javax.servlet.ServletResponse;
 /**
  * @version $Rev$ $Date$
  */
-public class LazyAuthentication implements Authentication
+public class LazyAuthResult implements ServerAuthResult
 {
     private static final Subject unauthenticatedSubject = new Subject();
 
@@ -38,9 +38,9 @@ public class LazyAuthentication implements Authentication
     private final ServletRequest _request;
     private final ServletResponse _response;
 
-    private Authentication _delegate;
+    private ServerAuthResult _delegate;
 
-    public LazyAuthentication(Authenticator serverAuthentication, ServletRequest request, ServletResponse response)
+    public LazyAuthResult(Authenticator serverAuthentication, ServletRequest request, ServletResponse response)
     {
         if (serverAuthentication == null) throw new NullPointerException("No ServerAuthentication");
         this._serverAuthentication = serverAuthentication;
@@ -48,7 +48,7 @@ public class LazyAuthentication implements Authentication
         this._response=response;   
     }
 
-    private Authentication getDelegate()
+    private ServerAuthResult getDelegate()
     {
         if (_delegate == null)
         {
@@ -58,13 +58,13 @@ public class LazyAuthentication implements Authentication
             }
             catch (ServerAuthException e)
             {
-                _delegate = SimpleAuthentication.SEND_FAILURE_RESULTS;
+                _delegate = SimpleAuthResult.SEND_FAILURE_RESULTS;
             }
         }
         return _delegate;
     }
 
-    public Authentication.Status getAuthStatus()
+    public ServerAuthStatus getAuthStatus()
     {
         return getDelegate().getAuthStatus();
     }
@@ -80,9 +80,9 @@ public class LazyAuthentication implements Authentication
         return getDelegate().getUserPrincipal();
     }
 
-    public String[] getRoles()
+    public List<String> getGroups()
     {
-        return getDelegate().getRoles();
+        return getDelegate().getGroups();
     }
 
     public String getAuthMethod()

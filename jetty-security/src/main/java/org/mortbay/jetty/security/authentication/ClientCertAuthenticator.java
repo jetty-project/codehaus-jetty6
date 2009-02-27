@@ -33,8 +33,9 @@ import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
-import org.mortbay.jetty.security.Authentication;
-import org.mortbay.jetty.security.SimpleAuthentication;
+import org.mortbay.jetty.security.ServerAuthResult;
+import org.mortbay.jetty.security.ServerAuthStatus;
+import org.mortbay.jetty.security.SimpleAuthResult;
 
 /**
  * @version $Rev$ $Date$
@@ -59,7 +60,7 @@ public class ClientCertAuthenticator extends LoginAuthenticator
      * @return
      * @throws ServerAuthException
      */
-    public Authentication validateRequest(ServletRequest req, ServletResponse res, boolean mandatory) throws ServerAuthException
+    public ServerAuthResult validateRequest(ServletRequest req, ServletResponse res, boolean mandatory) throws ServerAuthException
     {
         HttpServletRequest request = (HttpServletRequest)req;
         HttpServletResponse response = (HttpServletResponse)res;
@@ -72,7 +73,7 @@ public class ClientCertAuthenticator extends LoginAuthenticator
             {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN,
                                    "A client certificate is required for accessing this web application but the server's listener is not configured for mutual authentication (or the client did not provide a certificate).");
-                return SimpleAuthentication.SEND_FAILURE_RESULTS;
+                return SimpleAuthResult.SEND_FAILURE_RESULTS;
             }
             Principal principal = certs[0].getSubjectDN();
             if (principal == null) principal = certs[0].getIssuerDN();
@@ -85,16 +86,16 @@ public class ClientCertAuthenticator extends LoginAuthenticator
             _loginService.login(loginCallback);
             if (loginCallback.isSuccess()) 
             { 
-                return new SimpleAuthentication(Authentication.Status.SUCCESS, loginCallback.getSubject(),
-                                            loginCallback.getUserPrincipal(), loginCallback.getRoles(), Constraint.__CERT_AUTH2); 
+                return new SimpleAuthResult(ServerAuthStatus.SUCCESS, loginCallback.getSubject(),
+                                            loginCallback.getUserPrincipal(), loginCallback.getGroups(), Constraint.__CERT_AUTH2); 
             }
 
             if (!mandatory) 
             { 
-                return SimpleAuthentication.SUCCESS_UNAUTH_RESULTS; 
+                return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS; 
             }
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "The provided client certificate does not correspond to a trusted user.");
-            return SimpleAuthentication.SEND_FAILURE_RESULTS;
+            return SimpleAuthResult.SEND_FAILURE_RESULTS;
         }
         catch (IOException e)
         {
@@ -102,8 +103,8 @@ public class ClientCertAuthenticator extends LoginAuthenticator
         }
     }
 
-    public Authentication.Status secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, Authentication validatedUser) throws ServerAuthException
+    public ServerAuthStatus secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, ServerAuthResult validatedUser) throws ServerAuthException
     {
-        return Authentication.Status.SUCCESS;
+        return ServerAuthStatus.SUCCESS;
     }
 }
