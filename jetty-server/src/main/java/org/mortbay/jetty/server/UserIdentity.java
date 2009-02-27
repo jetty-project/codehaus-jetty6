@@ -26,17 +26,38 @@ import org.mortbay.jetty.server.RunAsToken;
  */
 public interface UserIdentity
 {
-    Principal getUserPrincipal();
-
+    /* ------------------------------------------------------------ */
+    /**
+     * @return The method used to authenticate the user
+     */
     String getAuthMethod();
 
     /* ------------------------------------------------------------ */
+    /**
+     * @return The user principal
+     */
+    Principal getUserPrincipal();
+
+    
+    /* ------------------------------------------------------------ */
     /** Check if the user is in a role.
+     * This call is used to satisfy authorization calls from 
+     * container code which will be using translated role names.
      * @param role A role name.
      * @return True if the user can act in that role.
      */
     boolean isUserInRole(String role);
 
+    /* ------------------------------------------------------------ */
+    /** Check if the user is in a role or role ref.
+     * This call is used to satisfy authorization calls from application
+     * code which may be using untranslated role names.
+     * @param role A role name that has been untranslated via role refs
+     * @return True if the user can act in that role.
+     */
+    boolean isUserInRoleRef(String role);
+
+    
     /* ------------------------------------------------------------ */
     /** Push role onto a Principal.
      * This method is used to set the run-as role.
@@ -55,14 +76,6 @@ public interface UserIdentity
      */
     Map<String,String> setRoleRefMap(Map<String,String> roleMap);
 
-
-    /**
-     * get the role mapping for a particular servlet for role-refs. 
-     *
-     * @return previous role reference map
-     */
-    Map<String,String> getRoleRefMap();
-
     
     public static final UserIdentity UNAUTHENTICATED_IDENTITY = new UserIdentity()
     {
@@ -78,15 +91,15 @@ public interface UserIdentity
         {
             return false;
         }
+        public boolean isUserInRoleRef(String role)
+        {
+            return false;
+        }
         public RunAsToken setRunAsRole(RunAsToken newRunAsRole)
         {
             return null;
         }
         public Map<String,String> setRoleRefMap(Map<String,String> roleMap)
-        {
-            return null;
-        }
-        public Map<String, String> getRoleRefMap()
         {
             return null;
         }

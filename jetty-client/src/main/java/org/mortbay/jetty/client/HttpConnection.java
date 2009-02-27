@@ -100,7 +100,7 @@ public class HttpConnection implements Connection
                     Log.ignore(e);
                 }
 
-                if (ex.getStatus() < HttpExchange.STATUS_COMPLETED)
+                if (ex!=null && ex.getStatus() < HttpExchange.STATUS_COMPLETED)
                 {
                     ex.setStatus(HttpExchange.STATUS_EXPIRED);
                 }

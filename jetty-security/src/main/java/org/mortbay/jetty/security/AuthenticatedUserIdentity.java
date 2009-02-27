@@ -26,22 +26,22 @@ import org.mortbay.jetty.server.RunAsToken;
 import org.mortbay.jetty.server.UserIdentity;
 
 /**
- * {@link UserIdentity} based on a {@link ServerAuthResult}.
+ * {@link UserIdentity} based on a {@link Authentication}.
  */
-public class AuthResultUserIdentity implements UserIdentity
+public class AuthenticatedUserIdentity implements UserIdentity
 {
-    private final ServerAuthResult _authResult;
+    private final Authentication _authResult;
     private RunAsToken _runAsRole;
     private Map<String, String> _roleRefMap;
 
-    protected AuthResultUserIdentity(ServerAuthResult authResult)
+    protected AuthenticatedUserIdentity(Authentication authResult)
     {
         this._authResult = authResult;
     }
 
-    public AuthResultUserIdentity()
+    public AuthenticatedUserIdentity()
     {
-        this._authResult=SimpleAuthResult.SUCCESS_UNAUTH_RESULTS;
+        this._authResult=SimpleAuthentication.SUCCESS_UNAUTH_RESULTS;
     }
 
     public Principal getUserPrincipal()
@@ -54,7 +54,7 @@ public class AuthResultUserIdentity implements UserIdentity
         return _authResult.getAuthMethod();
     }
 
-    protected ServerAuthResult getAuthResult()
+    protected Authentication getAuthResult()
     {
         return _authResult;
     }
@@ -63,16 +63,28 @@ public class AuthResultUserIdentity implements UserIdentity
     {
         if (role == null) 
             throw new NullPointerException("role");
-        final Map<String,String> roleRefMap=getRoleRefMap();
+        
+        for (String userRole : getAuthResult().getRoles())
+            if (userRole.equals(role)) 
+                return true;
+        
+        return false;
+    }
+
+    public boolean isUserInRoleRef(String role)
+    {
+        if (role == null) 
+            throw new NullPointerException("role");
+        final Map<String,String> roleRefMap=_roleRefMap;
         String actualRole = roleRefMap==null?role:roleRefMap.get(role);
         if (actualRole == null)
         {
             actualRole = role;
         }
-        for (String userRole : getAuthResult().getGroups())
-        {
-            if (userRole.equals(actualRole)) { return true; }
-        }
+        for (String userRole : getAuthResult().getRoles())
+            if (userRole.equals(actualRole)) 
+                return true; 
+            
         return false;
     }
 
@@ -88,11 +100,6 @@ public class AuthResultUserIdentity implements UserIdentity
         RunAsToken oldRunAsRole = _runAsRole;
         _runAsRole = newRunAsRole;
         return oldRunAsRole;
-    }
-
-    public Map<String, String> getRoleRefMap()
-    {
-        return _roleRefMap;
     }
     
     public String toString()

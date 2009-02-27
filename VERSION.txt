@@ -73,6 +73,8 @@ Jetty-7.0-SNAPSHOT
  + JETTY-909 Update useragents cache
  + JETTY-917 Change for JETTY-811 breaks systemProperties config parameter in maven-jetty-plugin
  + JETTY-922 Fixed NPE on getRemoteHost when socket closed
+ + JETTY-923 Client supports attributes
+
 
 jetty-6.1.15.rc4 19 February 2009
  + JETTY-496 Support inetd/xinetd through use of System.inheritedChannel()
