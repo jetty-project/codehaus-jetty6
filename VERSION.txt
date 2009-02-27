@@ -1,5 +1,6 @@
 jetty-6.1-SNAPSHOT
  + JETTY-923 BayeuxClient uses message pools to reduce memory footprint
+ + JETTY-924 Improved BayeuxClient disconnect handling
 
 jetty-6.1.15.rc5 26 February 2009
  + JETTY-811 fixed @parameter
