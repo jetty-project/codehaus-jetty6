@@ -141,7 +141,7 @@ public class BaseAuthModule implements ServerAuthModule, ServerAuthContext
             {
                 LoginCallbackImpl loginCallback = loginCallbacks.iterator().next();
                 CallerPrincipalCallback callerPrincipalCallback = new CallerPrincipalCallback(clientSubject, loginCallback.getUserPrincipal());
-                GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject, loginCallback.getRoles());
+                GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject, loginCallback.getGroups());
                 callbackHandler.handle(new Callback[] { callerPrincipalCallback, groupPrincipalCallback });
             }
             messageInfo.getMap().put(JaspiMessageInfo.AUTH_METHOD_KEY, authMethod);

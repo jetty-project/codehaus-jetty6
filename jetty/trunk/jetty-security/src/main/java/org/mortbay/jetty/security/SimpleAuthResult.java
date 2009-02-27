@@ -30,35 +30,44 @@ import javax.security.auth.Subject;
 /**
  * @version $Rev$ $Date$
  */
-public class SimpleAuthentication implements Authentication
+public class SimpleAuthResult implements ServerAuthResult
 {
 
-    public static final Authentication SUCCESS_UNAUTH_RESULTS = new SimpleAuthentication(Authentication.Status.SUCCESS, null, null, Authentication.NO_ROLES, null);
-    public static final Authentication SEND_CONTINUE_RESULTS = new SimpleAuthentication(Authentication.Status.SEND_CONTINUE, null, null, Authentication.NO_ROLES, null);
-    public static final Authentication SEND_FAILURE_RESULTS = new SimpleAuthentication(Authentication.Status.SEND_FAILURE, null, null, Authentication.NO_ROLES, null);
+    public static final ServerAuthResult SUCCESS_UNAUTH_RESULTS = new SimpleAuthResult(ServerAuthStatus.SUCCESS, null, null, Collections.<String> emptyList(), null);
+    public static final ServerAuthResult SEND_CONTINUE_RESULTS = new SimpleAuthResult(ServerAuthStatus.SEND_CONTINUE, null, null, Collections.<String> emptyList(), null);
+    public static final ServerAuthResult SEND_FAILURE_RESULTS = new SimpleAuthResult(ServerAuthStatus.SEND_FAILURE, null, null, Collections.<String> emptyList(), null);
 
-    private final Authentication.Status _authStatus;
+    private final ServerAuthStatus _authStatus;
 
     private final Subject _clientSubject;
 
     private final Principal _userPrincipal;
 
-    private final String[] _roles;
+    private final List<String> _groups;
 
     private final String _authMethod;
 
-
-    public SimpleAuthentication(Authentication.Status authStatus, Subject clientSubject, 
-                            Principal userPrincipal, String[] roles, String authMethod)
+    public SimpleAuthResult(ServerAuthStatus authStatus, Subject clientSubject, 
+                            Principal userPrincipal, List<String> groups, String authMethod)
     {
         this._authStatus = authStatus;
         this._clientSubject = clientSubject;
         this._userPrincipal = userPrincipal;
-        this._roles = roles;
+        this._groups = groups;
         this._authMethod = userPrincipal == null ? null : authMethod;
     }
 
-    public Authentication.Status getAuthStatus()
+    public SimpleAuthResult(ServerAuthStatus authStatus, Subject clientSubject, 
+                            Principal userPrincipal, String[] groups, String authMethod)
+    {
+        this._authStatus = authStatus;
+        this._clientSubject = clientSubject;
+        this._userPrincipal = userPrincipal;
+        this._groups = groups == null ? Collections.<String> emptyList() : Arrays.asList(groups);
+        this._authMethod = userPrincipal == null ? null : authMethod;
+    }
+
+    public ServerAuthStatus getAuthStatus()
     {
         return _authStatus;
     }
@@ -73,9 +82,9 @@ public class SimpleAuthentication implements Authentication
         return _userPrincipal;
     }
 
-    public String[] getRoles()
+    public List<String> getGroups()
     {
-        return _roles;
+        return _groups;
     }
 
     public String getAuthMethod()
@@ -85,6 +94,6 @@ public class SimpleAuthentication implements Authentication
     
     public String toString()
     {
-        return "{Auth,"+_authMethod+","+_authStatus+","+_userPrincipal+","+Arrays.asList(_roles)+"}";
+        return "{AuthRm,"+_authMethod+","+_authStatus+","+_userPrincipal+","+_groups+"}";
     }
 }

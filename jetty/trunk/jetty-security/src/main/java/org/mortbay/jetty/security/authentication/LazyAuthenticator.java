@@ -23,9 +23,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.mortbay.jetty.security.Authenticator;
-import org.mortbay.jetty.security.LazyAuthentication;
+import org.mortbay.jetty.security.LazyAuthResult;
 import org.mortbay.jetty.security.ServerAuthException;
-import org.mortbay.jetty.security.Authentication;
+import org.mortbay.jetty.security.ServerAuthResult;
 
 /**
  * @version $Rev$ $Date$
@@ -40,11 +40,11 @@ public class LazyAuthenticator extends DelegateAuthenticator
     /** 
      * @see org.mortbay.jetty.security.Authenticator#validateRequest(ServletRequest, ServletResponse, boolean)
      */
-    public Authentication validateRequest(ServletRequest request, ServletResponse response, boolean mandatory) throws ServerAuthException
+    public ServerAuthResult validateRequest(ServletRequest request, ServletResponse response, boolean mandatory) throws ServerAuthException
     {
         if (!mandatory)
         { 
-            return new LazyAuthentication(_delegate,request,response);
+            return new LazyAuthResult(_delegate,request,response);
         }
         return _delegate.validateRequest(request, response, mandatory);
     }
