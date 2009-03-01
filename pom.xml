@@ -114,7 +114,9 @@
 
     <module>jetty-ajp</module>
     <module>jetty-annotations</module>
+<!--
     <module>jetty-assembly</module>
+-->
     <module>jetty-jmx</module>
     <module>jetty-jndi</module>
     <module>jetty-plus</module>
