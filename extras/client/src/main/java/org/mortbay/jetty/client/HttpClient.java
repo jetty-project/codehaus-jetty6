@@ -134,6 +134,8 @@ public class HttpClient extends AbstractBuffers implements Attributes
     /* ------------------------------------------------------------------------------- */
     public void send(HttpExchange exchange) throws IOException
     {
+        if (!isStarted())
+            throw new IllegalStateException("!started");
         boolean ssl=HttpSchemes.HTTPS_BUFFER.equalsIgnoreCase(exchange.getScheme());
         exchange.setStatus(HttpExchange.STATUS_WAITING_FOR_CONNECTION);
         HttpDestination destination=getDestination(exchange.getAddress(),ssl);
