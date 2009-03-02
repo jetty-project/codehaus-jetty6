@@ -112,7 +112,7 @@ public class JspcMojo extends AbstractMojo
     /**
      * The destination directory into which to put the compiled jsps.
      * 
-     * @parameter expression="${basedir}/target/classes"
+     * @parameter expression="${project.build.outputDirectory}"
      */
     private String generatedClasses;
 
