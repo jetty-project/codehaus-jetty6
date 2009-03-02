@@ -69,6 +69,7 @@ Jetty-7.0-SNAPSHOT
  + JETTY-894 Add android .apk to mime types
  + JETTY-897 Remove swing dependency in GzipFilter
  + JETTY-898 Allow jetty debs to start with custom java args provided by users
+ + JETTY-899 Standardize location and build process for configuration files which go into etc
  + JETTY-890 merge jaspi branch to trunk
  + JETTY-909 Update useragents cache
  + JETTY-917 Change for JETTY-811 breaks systemProperties config parameter in maven-jetty-plugin

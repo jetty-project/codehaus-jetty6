@@ -72,6 +72,7 @@
         <configuration>
            <descriptors>
             <descriptor>src/main/assembly/site-component.xml</descriptor>
+            <descriptor>src/main/assembly/config.xml</descriptor>
           </descriptors>
         </configuration>
         <executions>
