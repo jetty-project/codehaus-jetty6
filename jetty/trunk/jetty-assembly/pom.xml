@@ -133,7 +133,7 @@
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib/ext</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
@@ -142,63 +142,167 @@
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib/ext</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-annotations</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib/annotations</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-client</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib/ext</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-io</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
                   <outputDirectory>${assembly.directory}/lib</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>jetty-test-jaas-webapp</artifactId>
+                  <artifactId>jetty-http</artifactId>
                   <version>${project.version}</version>
-                  <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
                 </artifactItem>
+               
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
                   <artifactId>jetty-jmx</artifactId>
                   <version>${project.version}</version>
-                  <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib/jmx</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>jetty-util</artifactId>
+                  <artifactId>jetty-jndi</artifactId>
                   <version>${project.version}</version>
-                  <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib/jndi</outputDirectory>
                 </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jsp-api-2.1-glassfish</artifactId>
+                  <version>9.1.02.B04.p0</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib/jsp-2.1</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jsp-2.1-glassfish</artifactId>
+                  <version>9.1.02.B04.p0</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib/jsp-2.1</outputDirectory>
+                </artifactItem>
+                
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
                   <artifactId>jetty-plus</artifactId>
                   <version>${project.version}</version>
-                  <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib/plus</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
                   <artifactId>jetty-server</artifactId>
                   <version>${project.version}</version>
-                  <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
+                </artifactItem>    
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-servlet</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib/ext</outputDirectory>
+                </artifactItem>     
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-servlets</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib/ext</outputDirectory>
+                </artifactItem>           
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-security</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib/ext</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-util</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-webapp</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib/ext</outputDirectory>
+                </artifactItem>
+                 <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>servlet-api</artifactId>
+                  <version>${servlet-api-version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
+                </artifactItem>
+                 <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-test-jaas-webapp</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/webapps</outputDirectory>
                 </artifactItem>
                 <!--artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
                   <artifactId>jetty-setuid-java</artifactId>
                   <version>${project.version}</version>
-                  <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -208,7 +312,6 @@
                   <groupId>org.mortbay.jetty</groupId>
                   <artifactId>jetty-win32-service</artifactId>
                   <version>${project.version}</version>
-                  <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
