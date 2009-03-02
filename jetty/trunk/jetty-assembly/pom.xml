@@ -293,7 +293,7 @@
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
     	<artifactId>jetty-win32-service</artifactId>
-    	<version>${project.version}</version-->
-    </dependency>
+    	<version>${project.version}</version>
+    </dependency-->
   </dependencies>
 </project>
