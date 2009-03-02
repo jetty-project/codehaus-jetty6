@@ -60,6 +60,7 @@
           </archive>
         </configuration>
       </plugin>
+      <!--
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-remote-resources-plugin</artifactId>
@@ -77,6 +78,7 @@
           </execution>
         </executions>
       </plugin>
+      -->
     </plugins>
     <pluginManagement>
       <plugins>
@@ -95,36 +97,30 @@
     </pluginManagement>
   </build>
   <modules>
+    <!-- commented out because of missing servlet specific annotations
+    <module>jetty-test-annotation-webapp</module>
+    -->
     <module>jetty-util</module>
     <module>jetty-io</module>
     <module>jetty-http</module>
     <module>jetty-server</module>
-
     <module>jetty-client</module>
-
     <module>jetty-xml</module>
-
     <module>jetty-security</module>
     <module>jetty-servlet</module>
     <module>jetty-webapp</module>
-
     <module>jetty-servlets</module>
     <module>jetty-deploy</module>
-
-
     <module>jetty-ajp</module>
     <module>jetty-annotations</module>
-    <module>jetty-assembly</module>
     <module>jetty-jmx</module>
     <module>jetty-jndi</module>
     <module>jetty-plus</module>
     <module>jetty-rewrite</module>
     <module>jetty-servlet-tester</module>
     <module>jetty-start</module>
+    <module>jetty-assembly</module>
     <module>jetty-test-webapp</module>
-    <!-- commented out because of missing servlet specific annotations
-    <module>jetty-test-annotation-webapp</module>
-    -->
     <module>jetty-test-jaas-webapp</module>
     <module>jetty-test-jndi-webapp</module>
   </modules>
