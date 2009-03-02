@@ -74,6 +74,7 @@ Jetty-7.0-SNAPSHOT
  + JETTY-917 Change for JETTY-811 breaks systemProperties config parameter in maven-jetty-plugin
  + JETTY-922 Fixed NPE on getRemoteHost when socket closed
  + JETTY-923 Client supports attributes
+ + JETTY-926 default location for generatedClasses of jspc plugin is incorrect
 
 
 jetty-6.1.15.rc4 19 February 2009
