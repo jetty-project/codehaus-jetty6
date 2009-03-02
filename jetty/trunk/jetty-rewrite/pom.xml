@@ -46,13 +46,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <dependencies>
-          <dependency>
-            <groupId>org.mortbay.jetty</groupId>
-            <artifactId>jetty-assembly-descriptor</artifactId>
-            <version>${project.version}</version>
-          </dependency>
-        </dependencies>
         <executions>
           <execution>
             <phase>package</phase>
