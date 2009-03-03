@@ -1,3 +1,6 @@
+jetty-6.1-SNAPSHOT
+ + JETTY-931 Fix issue with jetty-rewrite.xml 
+
 jetty-6.1.15 2 March 2009
  + JETTY-923 BayeuxClient uses message pools to reduce memory footprint
  + JETTY-924 Improved BayeuxClient disconnect handling
