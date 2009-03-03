@@ -45,7 +45,6 @@ import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.LoginCallback;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Response;
-import org.mortbay.jetty.server.RunAsToken;
 import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.util.LazyList;
@@ -174,20 +173,6 @@ public class HTAccessHandler extends SecurityHandler
      * response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
      * base_request.setHandled(true); } } }
      */
-    protected UserIdentity newUserIdentity(ServerAuthResult authResult)
-    {
-        return new AuthResultUserIdentity(authResult);
-    }
-
-    protected UserIdentity newSystemUserIdentity()
-    {
-        return new AuthResultUserIdentity();
-    }
-
-    public RunAsToken newRunAsToken(String runAsRole)
-    {
-        return new RoleRunAsToken(runAsRole);
-    }
 
     protected Object prepareConstraintInfo(String pathInContext, Request request)
     {
@@ -586,7 +571,7 @@ public class HTAccessHandler extends SecurityHandler
                 Principal userPrincipal = new HTAccessPrincipal(user);
                 subject.getPrincipals().add(userPrincipal);
                 loginCallback.setUserPrincipal(userPrincipal);
-                loginCallback.setGroups(gps);
+                loginCallback.setRoles(gps);
                 loginCallback.setSuccess(true);
             }
         }
@@ -945,7 +930,7 @@ public class HTAccessHandler extends SecurityHandler
                     if (loginCallback.isSuccess())
                     {
                         CallerPrincipalCallback callerPrincipalCallback = new CallerPrincipalCallback(clientSubject, loginCallback.getUserPrincipal());
-                        GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject, loginCallback.getGroups());
+                        GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject, loginCallback.getRoles());
                         callbackHandler.handle(new Callback[] { callerPrincipalCallback, groupPrincipalCallback });
                         messageInfo.getMap().put(JaspiMessageInfo.AUTH_METHOD_KEY, Constraint.__BASIC_AUTH);
                         return AuthStatus.SUCCESS;

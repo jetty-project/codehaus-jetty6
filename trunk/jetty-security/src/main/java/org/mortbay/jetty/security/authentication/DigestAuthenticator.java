@@ -35,10 +35,10 @@ import org.mortbay.jetty.http.security.Credential;
 import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
-import org.mortbay.jetty.security.ServerAuthResult;
-import org.mortbay.jetty.security.ServerAuthStatus;
-import org.mortbay.jetty.security.SimpleAuthResult;
+import org.mortbay.jetty.security.Authentication;
+import org.mortbay.jetty.security.SimpleAuthentication;
 import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.util.QuotedStringTokenizer;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.TypeUtil;
@@ -50,14 +50,12 @@ import org.mortbay.jetty.util.log.Log;
 public class DigestAuthenticator extends LoginAuthenticator
 {
     protected long _maxNonceAge = 0;
-
     protected long _nonceSecret = this.hashCode() ^ System.currentTimeMillis();
-
     protected boolean _useStale = false;
 
-    public DigestAuthenticator(LoginService loginService)
+    public DigestAuthenticator()
     {
-        super(loginService);
+        super();
     }
 
     public String getAuthMethod()
@@ -65,12 +63,12 @@ public class DigestAuthenticator extends LoginAuthenticator
         return Constraint.__DIGEST_AUTH;
     }
     
-    public ServerAuthStatus secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, ServerAuthResult validatedUser) throws ServerAuthException
+    public Authentication.Status secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, Authentication validatedUser) throws ServerAuthException
     {
-        return ServerAuthStatus.SUCCESS;
+        return Authentication.Status.SUCCESS;
     }
 
-    public ServerAuthResult validateRequest(ServletRequest req, ServletResponse res, boolean mandatory) throws ServerAuthException
+    public Authentication validateRequest(ServletRequest req, ServletResponse res, boolean mandatory) throws ServerAuthException
     {
         HttpServletRequest request = (HttpServletRequest)req;
         HttpServletResponse response = (HttpServletResponse)res;
@@ -131,17 +129,15 @@ public class DigestAuthenticator extends LoginAuthenticator
 
                 if (n > 0)
                 {
-                    LoginCallbackImpl loginCallback = new LoginCallbackImpl(new Subject(), digest.username, digest);
-                    _loginService.login(loginCallback);
-                    if (loginCallback.isSuccess()) { return new SimpleAuthResult(ServerAuthStatus.SUCCESS, loginCallback.getSubject(), loginCallback
-                            .getUserPrincipal(), loginCallback.getGroups(), Constraint.__BASIC_AUTH); }
-
+                    UserIdentity user = _loginService.login(digest.username,digest);
+                    if (user!=null)
+                        return new SimpleAuthentication(Authentication.Status.SUCCESS,Constraint.__DIGEST_AUTH,user);
                 }
                 else if (n == 0) stale = true;
 
             }
 
-            if (!mandatory) { return SimpleAuthResult.SUCCESS_UNAUTH_RESULTS; }
+            if (!mandatory) { return SimpleAuthentication.SUCCESS_UNAUTH_RESULTS; }
             String domain = request.getContextPath();
             if (domain == null) domain = "/";
             response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Digest realm=\"" + _loginService.getName()
@@ -152,7 +148,7 @@ public class DigestAuthenticator extends LoginAuthenticator
                                                              + "\", algorithm=MD5, qop=\"auth\""
                                                              + (_useStale ? (" stale=" + stale) : ""));
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return SimpleAuthResult.SEND_CONTINUE_RESULTS;
+            return SimpleAuthentication.SEND_CONTINUE_RESULTS;
         }
         catch (IOException e)
         {

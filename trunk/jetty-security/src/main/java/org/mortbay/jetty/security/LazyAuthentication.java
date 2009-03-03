@@ -26,11 +26,13 @@ import javax.security.auth.Subject;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import org.mortbay.jetty.server.UserIdentity;
+
 
 /**
  * @version $Rev$ $Date$
  */
-public class LazyAuthResult implements ServerAuthResult
+public class LazyAuthentication implements Authentication
 {
     private static final Subject unauthenticatedSubject = new Subject();
 
@@ -38,9 +40,9 @@ public class LazyAuthResult implements ServerAuthResult
     private final ServletRequest _request;
     private final ServletResponse _response;
 
-    private ServerAuthResult _delegate;
+    private Authentication _delegate;
 
-    public LazyAuthResult(Authenticator serverAuthentication, ServletRequest request, ServletResponse response)
+    public LazyAuthentication(Authenticator serverAuthentication, ServletRequest request, ServletResponse response)
     {
         if (serverAuthentication == null) throw new NullPointerException("No ServerAuthentication");
         this._serverAuthentication = serverAuthentication;
@@ -48,7 +50,7 @@ public class LazyAuthResult implements ServerAuthResult
         this._response=response;   
     }
 
-    private ServerAuthResult getDelegate()
+    private Authentication getDelegate()
     {
         if (_delegate == null)
         {
@@ -58,31 +60,26 @@ public class LazyAuthResult implements ServerAuthResult
             }
             catch (ServerAuthException e)
             {
-                _delegate = SimpleAuthResult.SEND_FAILURE_RESULTS;
+                _delegate = SimpleAuthentication.SEND_FAILURE_RESULTS;
             }
         }
         return _delegate;
     }
 
-    public ServerAuthStatus getAuthStatus()
+    public Authentication.Status getAuthStatus()
     {
         return getDelegate().getAuthStatus();
     }
 
+    public boolean isSuccess()
+    {
+        return getDelegate().isSuccess();
+    }
+    
     // for cleaning in secureResponse
-    public Subject getClientSubject()
+    public UserIdentity getUserIdentity()
     {
-        return _delegate == null ? unauthenticatedSubject : _delegate.getClientSubject();
-    }
-
-    public Principal getUserPrincipal()
-    {
-        return getDelegate().getUserPrincipal();
-    }
-
-    public List<String> getGroups()
-    {
-        return getDelegate().getGroups();
+        return _delegate == null ? UserIdentity.UNAUTHENTICATED_IDENTITY: _delegate.getUserIdentity();
     }
 
     public String getAuthMethod()

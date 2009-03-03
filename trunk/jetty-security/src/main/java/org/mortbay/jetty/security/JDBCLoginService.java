@@ -26,6 +26,7 @@ import java.util.Properties;
 
 import org.mortbay.jetty.http.security.Password;
 import org.mortbay.jetty.server.LoginCallback;
+import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.util.Loader;
 import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.util.resource.Resource;
@@ -52,7 +53,7 @@ import org.mortbay.jetty.util.resource.Resource;
  * @author Ben Alex
  */
 
-public class JDBCLoginService extends AbstractLoginService
+public class JDBCLoginService extends MappedLoginService
 {
     private String _config;
     private String _jdbcDriver;
@@ -68,65 +69,47 @@ public class JDBCLoginService extends AbstractLoginService
     private String _userSql;
     private String _roleSql;
 
+
     /* ------------------------------------------------------------ */
-    /**
-     * Constructor.
-     */
     public JDBCLoginService()
+        throws IOException
     {
-        super();
     }
-
+    
     /* ------------------------------------------------------------ */
-    /**
-     * Constructor.
-     * 
-     * @param name name of login service
-     */
     public JDBCLoginService(String name)
+        throws IOException
     {
-        super(name);
+        setName(name);
     }
-
+    
     /* ------------------------------------------------------------ */
-    /**
-     * Constructor.
-     * 
-     * @param name Realm name
-     * @param config Filename or url of JDBC connection properties file.
-     * @exception java.io.IOException problem loading configuration
-     * @exception ClassNotFoundException problem loading driver
-     * @throws IllegalAccessException problem using driver
-     * @throws InstantiationException problem creating driver
-     */
-    public JDBCLoginService(String name, String config) 
-    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException
+    public JDBCLoginService(String name, String config)
+        throws IOException
     {
-        super(name);
+        setName(name);
         setConfig(config);
-        Loader.loadClass(this.getClass(), _jdbcDriver).newInstance();
-        connectDatabase();
     }
-
-
-    public String getConfig()
+    
+    /* ------------------------------------------------------------ */
+    public JDBCLoginService(String name, IdentityService identityService, String config)
+        throws IOException
     {
-        return _config;
+        setName(name);
+        setIdentityService(identityService);
+        setConfig(config);
     }
+
 
     /* ------------------------------------------------------------ */
     /**
-     * Load JDBC connection configuration from properties file.
-     * 
-     * @param config Filename or url of user properties file.
-     * @exception java.io.IOException
+     * @see org.mortbay.jetty.security.MappedLoginService#doStart()
      */
-    public void setConfig(String config) throws IOException
-    {        
-        _config=config;
-
+    @Override
+    protected void doStart() throws Exception
+    {
         Properties properties = new Properties();
-        Resource resource = Resource.newResource(config);
+        Resource resource = Resource.newResource(_config);
         properties.load(resource.getInputStream());
 
         _jdbcDriver = properties.getProperty("jdbcdriver");
@@ -170,6 +153,31 @@ public class JDBCLoginService extends AbstractLoginService
                    + _roleTableKey
                    + " = u."
                    + _userRoleTableRoleKey;
+        
+        Loader.loadClass(this.getClass(), _jdbcDriver).newInstance();
+        connectDatabase();
+        super.doStart();
+    }
+
+
+    /* ------------------------------------------------------------ */
+    public String getConfig()
+    {
+        return _config;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Load JDBC connection configuration from properties file.
+     * 
+     * @param config Filename or url of user properties file.
+     * @exception java.io.IOException
+     */
+    public void setConfig(String config)
+    {        
+        if (isRunning())
+            throw new IllegalStateException("Running");
+        _config=config;
     }
 
     /* ------------------------------------------------------------ */
@@ -195,41 +203,36 @@ public class JDBCLoginService extends AbstractLoginService
 
     /* ------------------------------------------------------------ */
     @Override
-    public void login(LoginCallback loginCallback) throws ServerAuthException
+    public UserIdentity login(String username, Object credentials)
     {
-        synchronized (this)
+        long now = System.currentTimeMillis();
+        if (now - _lastHashPurge > _cacheTime || _cacheTime == 0)
         {
-            long now = System.currentTimeMillis();
-            if (now - _lastHashPurge > _cacheTime || _cacheTime == 0)
-            {
-                _users.clear();
-                _lastHashPurge = now;
-            }
-            // TODO JASPI not sure if this should be in sync block. Was not in
-            // JDBCUserRealm
-            super.login(loginCallback);
+            _users.clear();
+            _lastHashPurge = now;
         }
+        
+        return super.login(username,credentials);
     }
 
-    @Override
-    protected KnownUser getKnownUser(String userName)
-    {
-        KnownUser user = super.getKnownUser(userName);
-        if (user == null)
-        {
-            user = loadUser(userName);
-        }
-        return user;
-    }
 
     /* ------------------------------------------------------------ */
-    private KnownUser loadUser(String username)
+    @Override
+    protected void loadUsers()
+    {   
+    }
+    
+    /* ------------------------------------------------------------ */
+    @Override
+    protected UserIdentity loadUser(String username)
     {
         try
         {
-            if (null == _con) connectDatabase();
+            if (null == _con) 
+                connectDatabase();
 
-            if (null == _con) throw new SQLException("Can't connect to database");
+            if (null == _con) 
+                throw new SQLException("Can't connect to database");
 
             PreparedStatement stat = _con.prepareStatement(_userSql);
             stat.setObject(1, username);
@@ -249,9 +252,7 @@ public class JDBCLoginService extends AbstractLoginService
                     roles.add(rs.getString(_roleTableRoleField));
 
                 stat.close();
-                KnownUser user = new KnownUser(username, new Password(credentials), roles.toArray(new String[roles.size()]));
-                putUser(username, user);
-                return user;
+                return putUser(username, new Password(credentials),roles.toArray(new String[roles.size()]));
             }
         }
         catch (SQLException e)

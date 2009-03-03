@@ -945,7 +945,8 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
             }
         }
         
-        connection.destroy();
+        if (connection!=null)
+            connection.destroy();
     }
 
     /* ------------------------------------------------------------ */

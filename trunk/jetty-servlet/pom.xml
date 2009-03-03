@@ -54,7 +54,7 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-server</artifactId>
+      <artifactId>jetty-security</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

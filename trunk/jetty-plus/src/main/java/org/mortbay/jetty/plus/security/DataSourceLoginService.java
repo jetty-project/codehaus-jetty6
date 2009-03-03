@@ -31,11 +31,12 @@ import javax.sql.DataSource;
 
 import org.mortbay.jetty.http.security.Password;
 import org.mortbay.jetty.plus.jndi.NamingEntryUtil;
-import org.mortbay.jetty.security.AbstractLoginService;
+import org.mortbay.jetty.security.MappedLoginService;
 import org.mortbay.jetty.security.HashLoginService;
+import org.mortbay.jetty.security.IdentityService;
 import org.mortbay.jetty.server.Server;
+import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.util.log.Log;
-
 
 
 /**
@@ -46,7 +47,7 @@ import org.mortbay.jetty.util.log.Log;
  * Obtain user/password/role information from a database
  * via jndi DataSource.
  */
-public class DataSourceUserRealm extends AbstractLoginService
+public class DataSourceLoginService extends MappedLoginService
 {
     private String _jndiName = "javax.sql.DataSource/default";
     private DataSource _datasource;
@@ -66,184 +67,223 @@ public class DataSourceUserRealm extends AbstractLoginService
     private String _userSql;
     private String _roleSql;
     private boolean _createTables = false;
-    
 
-
-    public DataSourceUserRealm (String realmName)
+    /* ------------------------------------------------------------ */
+    public DataSourceLoginService()
     {
-        super(realmName);
     }
     
-    
-    public DataSourceUserRealm()
+    /* ------------------------------------------------------------ */
+    public DataSourceLoginService(String name)
     {
-        super();
+        setName(name);
     }
     
+    /* ------------------------------------------------------------ */
+    public DataSourceLoginService(String name, IdentityService identityService)
+    {
+        setName(name);
+        setIdentityService(identityService);
+    }
+
+    /* ------------------------------------------------------------ */
     public void setJndiName (String jndi)
     {
         _jndiName = jndi;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public String getJndiName ()
     {
         return _jndiName;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void setServer (Server server)
     {
         _server=server;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public Server getServer()
     {
         return _server;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void setCreateTables(boolean createTables)
     {
         _createTables = createTables;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public boolean getCreateTables()
     {
         return _createTables;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void setUserTableName (String name)
     {
         _userTableName=name;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public String getUserTableName()
     {
         return _userTableName;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public String getUserTableKey()
     {
         return _userTableKey;
     }
 
 
+    /* ------------------------------------------------------------ */
     public void setUserTableKey(String tableKey)
     {
         _userTableKey = tableKey;
     }
 
 
+    /* ------------------------------------------------------------ */
     public String getUserTableUserField()
     {
         return _userTableUserField;
     }
 
 
+    /* ------------------------------------------------------------ */
     public void setUserTableUserField(String tableUserField)
     {
         _userTableUserField = tableUserField;
     }
 
 
+    /* ------------------------------------------------------------ */
     public String getUserTablePasswordField()
     {
         return _userTablePasswordField;
     }
 
 
+    /* ------------------------------------------------------------ */
     public void setUserTablePasswordField(String tablePasswordField)
     {
         _userTablePasswordField = tablePasswordField;
     }
 
 
+    /* ------------------------------------------------------------ */
     public String getRoleTableName()
     {
         return _roleTableName;
     }
 
 
+    /* ------------------------------------------------------------ */
     public void setRoleTableName(String tableName)
     {
         _roleTableName = tableName;
     }
 
 
+    /* ------------------------------------------------------------ */
     public String getRoleTableKey()
     {
         return _roleTableKey;
     }
 
 
+    /* ------------------------------------------------------------ */
     public void setRoleTableKey(String tableKey)
     {
         _roleTableKey = tableKey;
     }
 
 
+    /* ------------------------------------------------------------ */
     public String getRoleTableRoleField()
     {
         return _roleTableRoleField;
     }
 
 
+    /* ------------------------------------------------------------ */
     public void setRoleTableRoleField(String tableRoleField)
     {
         _roleTableRoleField = tableRoleField;
     }
 
 
+    /* ------------------------------------------------------------ */
     public String getUserRoleTableName()
     {
         return _userRoleTableName;
     }
 
 
+    /* ------------------------------------------------------------ */
     public void setUserRoleTableName(String roleTableName)
     {
         _userRoleTableName = roleTableName;
     }
 
 
+    /* ------------------------------------------------------------ */
     public String getUserRoleTableUserKey()
     {
         return _userRoleTableUserKey;
     }
 
 
+    /* ------------------------------------------------------------ */
     public void setUserRoleTableUserKey(String roleTableUserKey)
     {
         _userRoleTableUserKey = roleTableUserKey;
     }
 
 
+    /* ------------------------------------------------------------ */
     public String getUserRoleTableRoleKey()
     {
         return _userRoleTableRoleKey;
     }
 
 
+    /* ------------------------------------------------------------ */
     public void setUserRoleTableRoleKey(String roleTableRoleKey)
     {
         _userRoleTableRoleKey = roleTableRoleKey;
     }
 
+    /* ------------------------------------------------------------ */
     public void setCacheMs (int ms)
     {
         _cacheMs=ms;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public int getCacheMs ()
     {
         return _cacheMs;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    @Override
+    protected void loadUsers()
+    {
+    }
 
     /* ------------------------------------------------------------ */
     /** Load user's info from database.
      * 
      * @param user
      */
-    private void loadUser (String userName)
+    @Override
+    protected UserIdentity loadUser (String userName)
     {
         Connection connection = null;
         try
@@ -267,9 +307,8 @@ public class DataSourceUserRealm extends AbstractLoginService
                 List<String> roles = new ArrayList<String>();
                 while (rs.next())
                     roles.add(rs.getString(_roleTableRoleField));    
-                statement.close();            
-                KnownUser user = new KnownUser(userName, new Password(credentials), roles.toArray(new String[roles.size()]));
-                putUser(userName, user);
+                statement.close(); 
+                return putUser(userName,new Password(credentials), roles.toArray(new String[roles.size()]));
             }
         }
         catch (NamingException e)
@@ -298,6 +337,7 @@ public class DataSourceUserRealm extends AbstractLoginService
                 }
             }
         }
+        return null;
     }
    
     /* ------------------------------------------------------------ */

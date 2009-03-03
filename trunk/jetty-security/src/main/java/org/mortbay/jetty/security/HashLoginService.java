@@ -18,11 +18,16 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
+import org.mortbay.jetty.http.security.Credential;
 import org.mortbay.jetty.http.security.Password;
+import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.util.Scanner;
 import org.mortbay.jetty.util.Scanner.BulkListener;
 import org.mortbay.jetty.util.log.Log;
@@ -52,7 +57,7 @@ import org.mortbay.jetty.util.resource.Resource;
  * @see org.mortbay.jetty.security.Password
  * @author Greg Wilkins (gregw)
  */
-public class HashLoginService extends AbstractLoginService
+public class HashLoginService extends MappedLoginService
 {
     private String _config;
     private Resource _configResource;
@@ -60,50 +65,33 @@ public class HashLoginService extends AbstractLoginService
     private int _refreshInterval = 0;// default is not to reload
 
     /* ------------------------------------------------------------ */
-    /**
-     * Constructor.
-     */
     public HashLoginService()
     {
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * Constructor.
-     * 
-     * @param name Realm Name
-     */
     public HashLoginService(String name)
     {
-        super(name);
-    }
-
-    /* ------------------------------------------------------------ */
-    public HashLoginService(String realmName, Map<String, User> _users)
-    {
-        super(realmName);
-
-        this._users = _users;
+        setName(name);
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * Constructor.
-     * 
-     * @param name Realm name
-     * @param config Filename or url of user properties file.
-     * @throws java.io.IOException if user properties file could not be loaded
-     */
-    public HashLoginService(String name, String config) throws IOException
+    public HashLoginService(String name, String config)
     {
-        super(name);
+        setName(name);
         setConfig(config);
     }
-
+    
     /* ------------------------------------------------------------ */
     public String getConfig()
     {
         return _config;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void getConfig(String config)
+    {
+        _config=config;
     }
 
     /* ------------------------------------------------------------ */
@@ -122,12 +110,9 @@ public class HashLoginService extends AbstractLoginService
      * @exception java.io.IOException if user properties file could not be
      *                    loaded
      */
-    public void setConfig(String config) throws IOException
+    public void setConfig(String config)
     {
         _config = config;
-        _configResource = Resource.newResource(_config);
-        loadConfig();
-
     }
 
     /* ------------------------------------------------------------ */
@@ -143,39 +128,54 @@ public class HashLoginService extends AbstractLoginService
     }
 
     /* ------------------------------------------------------------ */
-    public void loadConfig() throws IOException
+    @Override
+    protected UserIdentity loadUser(String username)
     {
-        synchronized (this)
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    @Override
+    public void loadUsers() throws IOException
+    {
+        if (_config==null)
+            return;
+        _configResource = Resource.newResource(_config);
+        
+        if (Log.isDebugEnabled()) Log.debug("Load " + this + " from " + _config);
+        Properties properties = new Properties();
+        properties.load(_configResource.getInputStream());
+        Set<String> known = new HashSet<String>();
+
+        for (Map.Entry<Object, Object> entry : properties.entrySet())
         {
-            _users.clear();
-
-            if (Log.isDebugEnabled()) Log.debug("Load " + this + " from " + _config);
-            Properties properties = new Properties();
-            properties.load(_configResource.getInputStream());
-
-            for (Map.Entry<Object, Object> entry : properties.entrySet())
+            String username = ((String) entry.getKey()).trim();
+            String credentials = ((String) entry.getValue()).trim();
+            String roles = null;
+            int c = credentials.indexOf(',');
+            if (c > 0)
             {
-                String username = ((String) entry.getKey()).trim();
-                String credentials = ((String) entry.getValue()).trim();
-                String roles = null;
-                int c = credentials.indexOf(',');
-                if (c > 0)
-                {
-                    roles = credentials.substring(c + 1).trim();
-                    credentials = credentials.substring(0, c).trim();
-                }
-
-                if (username != null && username.length() > 0 && credentials != null && credentials.length() > 0)
-                {
-
-                    String[] roleArray = NO_ROLES;
-                    if (roles != null && roles.length() > 0)
-                    {
-                        roleArray = roles.split(",");
-                    }
-                    putUser(username, new KnownUser(username, new Password(credentials), roleArray));
-                }
+                roles = credentials.substring(c + 1).trim();
+                credentials = credentials.substring(0, c).trim();
             }
+
+            if (username != null && username.length() > 0 && credentials != null && credentials.length() > 0)
+            {
+                String[] roleArray = UserIdentity.NO_ROLES;
+                if (roles != null && roles.length() > 0)
+                    roleArray = roles.split(",");
+                known.add(username);
+                putUser(username,Credential.getCredential(credentials),roleArray);
+            }
+        }
+        
+        Iterator<String> users = _users.keySet().iterator();
+        while(users.hasNext())
+        {
+            String user=users.next();
+            if (!known.contains(user))
+                users.remove();
         }
     }
 
@@ -187,8 +187,7 @@ public class HashLoginService extends AbstractLoginService
     protected void doStart() throws Exception
     {
         super.doStart();
-        if (_scanner != null) _scanner.stop();
-
+        
         if (getRefreshInterval() > 0)
         {
             _scanner = new Scanner();
@@ -220,7 +219,7 @@ public class HashLoginService extends AbstractLoginService
                 {
                     if (filenames == null) return;
                     if (filenames.isEmpty()) return;
-                    if (filenames.size() == 1 && filenames.get(0).equals(_config)) loadConfig();
+                    if (filenames.size() == 1 && filenames.get(0).equals(_config)) loadUsers();
                 }
 
                 public String toString()
@@ -245,4 +244,6 @@ public class HashLoginService extends AbstractLoginService
         if (_scanner != null) _scanner.stop();
         _scanner = null;
     }
+
+
 }

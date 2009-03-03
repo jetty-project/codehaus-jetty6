@@ -35,7 +35,9 @@ import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.EofException;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
+import org.mortbay.jetty.security.DefaultIdentityService;
 import org.mortbay.jetty.security.HashLoginService;
+import org.mortbay.jetty.security.IdentityService;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.authentication.BasicAuthenticator;
 import org.mortbay.jetty.server.Connector;
@@ -280,7 +282,8 @@ public class SecurityListenerTest extends TestCase
 
          LoginService loginService = new HashLoginService("MyRealm","src/test/resources/realm.properties");
          ConstraintSecurityHandler sh = new ConstraintSecurityHandler();
-         sh.setAuthenticator(new BasicAuthenticator(loginService));
+         sh.setLoginService(loginService);
+         sh.setAuthenticator(new BasicAuthenticator());
          
          //ServerAuthentication serverAuthentication = new BasicServerAuthentication(loginService, "MyRealm");
          //sh.setServerAuthentication(serverAuthentication);
@@ -288,10 +291,9 @@ public class SecurityListenerTest extends TestCase
 
          Handler testHandler = new AbstractHandler()
          {
-
              public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
              {
-                 System.out.println("passed authentication!");
+                 // System.out.println("passed authentication!");
                  Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
                  base_request.setHandled(true);
                  response.setStatus(200);

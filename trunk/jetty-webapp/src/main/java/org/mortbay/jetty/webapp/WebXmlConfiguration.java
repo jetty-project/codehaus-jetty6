@@ -36,13 +36,14 @@ import javax.servlet.UnavailableException;
 
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
+import org.mortbay.jetty.security.RunAsToken;
 import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.security.ServerAuthResult;
+import org.mortbay.jetty.security.Authentication;
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.security.ConstraintAware;
-import org.mortbay.jetty.security.ServletCallbackHandler;
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
+import org.mortbay.jetty.security.jaspi.ServletCallbackHandler;
 import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
 import org.mortbay.jetty.security.jaspi.JaspiAuthenticator;
 import org.mortbay.jetty.security.authentication.FormAuthenticator;
@@ -54,7 +55,6 @@ import org.mortbay.jetty.security.authentication.ClientCertAuthenticator;
 import org.mortbay.jetty.security.authentication.LazyAuthenticator;
 import org.mortbay.jetty.server.Dispatcher;
 import org.mortbay.jetty.server.Handler;
-import org.mortbay.jetty.server.RunAsToken;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.server.servlet.FilterHolder;
@@ -744,10 +744,7 @@ public class WebXmlConfiguration implements Configuration
         {
             String roleName = run_as.getString("role-name", false, true);
             if (roleName != null)
-            {
-                RunAsToken runAsToken = _securityHandler.newRunAsToken(roleName);
-                holder.setRunAs(runAsToken);
-            }
+                holder.setRunAsRole(roleName);
         }
 
         String async=node.getString("async-support",false,true);

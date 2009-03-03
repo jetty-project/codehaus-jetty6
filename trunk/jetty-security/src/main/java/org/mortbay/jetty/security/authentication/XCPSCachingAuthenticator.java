@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
 import org.mortbay.jetty.security.ServerAuthException;
-import org.mortbay.jetty.security.ServerAuthResult;
+import org.mortbay.jetty.security.Authentication;
 
 /**
  * Cross-context psuedo-session caching ServerAuthentication
@@ -38,18 +38,18 @@ public class XCPSCachingAuthenticator extends DelegateAuthenticator
 {
     public final static String __J_AUTHENTICATED = "org.mortbay.jetty.server.Auth";
 
-    private final CrossContextPsuedoSession<ServerAuthResult> _xcps;
+    private final CrossContextPsuedoSession<Authentication> _xcps;
 
-    public XCPSCachingAuthenticator(Authenticator delegate, CrossContextPsuedoSession<ServerAuthResult> xcps)
+    public XCPSCachingAuthenticator(Authenticator delegate, CrossContextPsuedoSession<Authentication> xcps)
     {
         super(delegate);
         this._xcps = xcps;
     }
 
-    public ServerAuthResult validateRequest(ServletRequest request, ServletResponse response, boolean manditory) throws ServerAuthException
+    public Authentication validateRequest(ServletRequest request, ServletResponse response, boolean manditory) throws ServerAuthException
     {
 
-        ServerAuthResult serverAuthResult = _xcps.fetch((HttpServletRequest)request);
+        Authentication serverAuthResult = _xcps.fetch((HttpServletRequest)request);
         if (serverAuthResult != null) return serverAuthResult;
 
         serverAuthResult = _delegate.validateRequest(request, response, manditory);
