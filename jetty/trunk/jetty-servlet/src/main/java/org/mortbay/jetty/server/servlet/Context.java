@@ -24,6 +24,8 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
+import javax.servlet.SessionCookieConfig;
+import javax.servlet.SessionTrackingMode;
 
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.server.Dispatcher;
@@ -32,6 +34,7 @@ import org.mortbay.jetty.server.HandlerContainer;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.handler.ErrorHandler;
 import org.mortbay.jetty.server.session.SessionHandler;
+import org.mortbay.jetty.util.log.Log;
 
 
 /* ------------------------------------------------------------ */
@@ -328,121 +331,10 @@ public class Context extends ContextHandler
         }
 
 
-
-        /* ------------------------------------------------------------ */
-        public FilterRegistration addFilter(String filterName, String className)
-        {
-            if (!isStarting())
-                    throw new IllegalStateException();
-            
-            final ServletHandler handler = Context.this.getServletHandler();
-            final FilterHolder holder= handler.newFilterHolder();
-            holder.setClassName(className);
-            holder.setName(filterName);
-            handler.addFilter(holder);
-            
-            return new FilterRegistration()
-            {
-                public void setInitParameter(String name, String value)
-                {
-                    holder.setInitParameter(name,value);
-                }
-
-                public void setAsyncSupported(boolean isAsyncSupported)
-                {
-                    holder.setAsyncSupported(isAsyncSupported);
-                }
-
-                public void addMappingForServletNames(EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... servletNames)
-                {
-                    FilterMapping mapping = new FilterMapping();
-                    mapping.setFilterHolder(holder);
-                    mapping.setDispatcherTypes(dispatcherTypes);
-                    mapping.setServletNames(servletNames);
-                    
-                    if (isMatchAfter)
-                        handler.addFilterMapping(mapping);
-                    else
-                        handler.prependFilterMapping(mapping);
-                }
-
-                public void addMappingForUrlPatterns(EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... urlPatterns)
-                {
-                    FilterMapping mapping = new FilterMapping();
-                    mapping.setFilterHolder(holder);
-                    mapping.setDispatcherTypes(dispatcherTypes);
-                    mapping.setPathSpecs(urlPatterns);
-                    
-                    if (isMatchAfter)
-                        handler.addFilterMapping(mapping);
-                    else
-                        handler.prependFilterMapping(mapping);
-                }
-
-                public void setDescription(String description)
-                {   
-                }
-
-                public void setInitParameters(Map<String, String> initParameters)
-                {
-                    holder.setInitParameters(initParameters);
-                }
-            };
-        }
-
-        /* ------------------------------------------------------------ */
-        public ServletRegistration addServlet(String servletName, String className)
-        {
-            if (!isStarting())
-                throw new IllegalStateException();
-
-            final ServletHandler handler = Context.this.getServletHandler();
-            final ServletHolder holder= handler.newServletHolder();
-            holder.setClassName(className);
-            holder.setName(servletName);
-            handler.addServlet(holder);
-
-            return new ServletRegistration()
-            {
-                public void setAsyncSupported(boolean isAsyncSupported)
-                {
-                    holder.setAsyncSupported(isAsyncSupported);
-                }
-
-                public void setLoadOnStartup(int loadOnStartup)
-                {
-                    holder.setInitOrder(loadOnStartup);
-                }
-
-                public void setInitParameter(String name, String value)
-                {
-                    holder.setInitParameter(name,value);
-                }
-
-                public void addMapping(String... urlPatterns)
-                {
-                    ServletMapping mapping = new ServletMapping();
-                    mapping.setServletName(holder.getName());
-                    mapping.setPathSpecs(urlPatterns);
-                    handler.addServletMapping(mapping);
-                }
-
-                public void setDescription(String description)
-                {
-                }
-
-                public void setInitParameters(Map<String, String> initParameters)
-                {
-                    holder.setInitParameters(initParameters);
-                }
-            };
-            
-        }
-
         /* ------------------------------------------------------------ */
         public void addFilterMappingForServletNames(String filterName, EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... servletNames)
         {
-            if (!isStarting())
+            if (isStarted())
                 throw new IllegalStateException();
             ServletHandler handler = Context.this.getServletHandler();
             FilterMapping mapping = new FilterMapping();
@@ -453,22 +345,9 @@ public class Context extends ContextHandler
         }
 
         /* ------------------------------------------------------------ */
-        public void addFilterMappingForUrlPatterns(String filterName, EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... urlPatterns)
-        {
-            if (!isStarting())
-                throw new IllegalStateException();
-            ServletHandler handler = Context.this.getServletHandler();
-            FilterMapping mapping = new FilterMapping();
-            mapping.setFilterName(filterName);
-            mapping.setPathSpecs(urlPatterns);
-            mapping.setDispatcherTypes(dispatcherTypes);
-            handler.addFilterMapping(mapping);
-        }
-
-        /* ------------------------------------------------------------ */
         public void addServletMapping(String servletName, String[] urlPatterns)
         {
-            if (!isStarting())
+            if (isStarted())
                 throw new IllegalStateException();
             ServletHandler handler = Context.this.getServletHandler();
             ServletHolder holder= handler.newServletHolder();
@@ -476,7 +355,133 @@ public class Context extends ContextHandler
             handler.addServlet(holder);
         }
         
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#addFilter(java.lang.String, java.lang.Class)
+         */
+        public FilterRegistration addFilter(String filterName, Class<? extends Filter> filterClass)
+        {
+            if (isStarted())
+                throw new IllegalStateException();
 
+            final ServletHandler handler = Context.this.getServletHandler();
+            final FilterHolder holder= handler.newFilterHolder();
+            holder.setHeldClass(filterClass);
+            holder.setName(filterName);
+            handler.addFilter(holder);
+            return holder.getRegistration();
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#addFilter(java.lang.String, java.lang.String)
+         */
+        public FilterRegistration addFilter(String filterName, String className)
+        {
+            if (isStarted())
+                throw new IllegalStateException();
+
+            final ServletHandler handler = Context.this.getServletHandler();
+            final FilterHolder holder= handler.newFilterHolder();
+            holder.setClassName(className);
+            holder.setName(filterName);
+            handler.addFilter(holder);
+            return holder.getRegistration();
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#addServlet(java.lang.String, java.lang.Class)
+         */
+        public ServletRegistration addServlet(String servletName, Class<? extends Servlet> servletClass)
+        {
+            if (!isStarting())
+                throw new IllegalStateException();
+
+            final ServletHandler handler = Context.this.getServletHandler();
+            final ServletHolder holder= handler.newServletHolder();
+            holder.setHeldClass(servletClass);
+            holder.setName(servletName);
+            handler.addServlet(holder);
+            return holder.getRegistration();
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#addServlet(java.lang.String, java.lang.String)
+         */
+        public ServletRegistration addServlet(String servletName, String className)
+        {
+            if (!isStarting())
+                throw new IllegalStateException();
+
+            final ServletHandler handler = Context.this.getServletHandler();
+            final ServletHolder holder= handler.newServletHolder();
+            holder.setClassName(className);
+            holder.setName(servletName);
+            handler.addServlet(holder);
+            return holder.getRegistration();
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#findFilterRegistration(java.lang.String)
+         */
+        public FilterRegistration findFilterRegistration(String filterName)
+        {
+            final ServletHandler handler = Context.this.getServletHandler();
+            final FilterHolder holder=handler.getFilter(filterName);
+            return (holder==null)?null:holder.getRegistration();
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#findServletRegistration(java.lang.String)
+         */
+        public ServletRegistration findServletRegistration(String servletName)
+        {
+            final ServletHandler handler = Context.this.getServletHandler();
+            final ServletHolder holder=handler.getServlet(servletName);
+            return (holder==null)?null:holder.getRegistration();
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#getDefaultSessionTrackingModes()
+         */
+        public EnumSet<SessionTrackingMode> getDefaultSessionTrackingModes()
+        {
+            return SessionHandler.DEFAULT_TRACKING;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#getEffectiveSessionTrackingModes()
+         */
+        public EnumSet<SessionTrackingMode> getEffectiveSessionTrackingModes()
+        {
+            Log.warn("Not Implemented");
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#getSessionCookieConfig()
+         */
+        public SessionCookieConfig getSessionCookieConfig()
+        {
+            Log.warn("Not Implemented");
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#setSessionTrackingModes(java.util.EnumSet)
+         */
+        public void setSessionTrackingModes(EnumSet<SessionTrackingMode> sessionTrackingModes)
+        {
+            Log.warn("Not Implemented");
+        }
 
     }
 }

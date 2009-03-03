@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
@@ -61,6 +62,7 @@ import org.mortbay.jetty.server.HandlerContainer;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Server;
+import org.mortbay.jetty.server.session.SessionHandler;
 import org.mortbay.jetty.util.Attributes;
 import org.mortbay.jetty.util.AttributesMap;
 import org.mortbay.jetty.util.LazyList;
@@ -1745,9 +1747,6 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         }
 
         /* ------------------------------------------------------------ */
-        /**
-         * @return Returns the _contextPath.
-         */
         public String getContextPath()
         {
             if ((_contextPath != null) && _contextPath.equals(URIUtil.SLASH))
@@ -1762,48 +1761,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             return "ServletContext@"+Integer.toHexString(hashCode())+"{"+(getContextPath().equals("")?URIUtil.SLASH:getContextPath())+","+getBaseResource()+"}";
         }
 
-        public FilterRegistration addFilter(String filterName, String className)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        public ServletRegistration addServlet(String servletName, String className)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        public FilterRegistration findFilterRegistration(String filterName)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        public ServletRegistration findServletRegistration(String servletName)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        public EnumSet<SessionTrackingMode> getDefaultSessionTrackingModes()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        public EnumSet<SessionTrackingMode> getEffectiveSessionTrackingModes()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        public SessionCookieConfig getSessionCookieConfig()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
+        /* ------------------------------------------------------------ */
         public boolean setInitParameter(String name, String value)
         {
             if (ContextHandler.this.getInitParameter(name)!=null)
@@ -1812,16 +1770,105 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             return true;
         }
 
-        public void setSessionCookieConfig(SessionCookieConfig sessionCookieConfig)
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#addFilter(java.lang.String, java.lang.Class)
+         */
+        public FilterRegistration addFilter(String filterName, Class<? extends Filter> filterClass)
         {
-            // TODO Auto-generated method stub
+            Log.warn("Use servlet Context");
+            return null;
         }
 
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#addFilter(java.lang.String, java.lang.String)
+         */
+        public FilterRegistration addFilter(String filterName, String className)
+        {
+            Log.warn("Use servlet Context");
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#addServlet(java.lang.String, java.lang.Class)
+         */
+        public ServletRegistration addServlet(String servletName, Class<? extends Servlet> servletClass)
+        {
+            Log.warn("Use servlet Context");
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#addServlet(java.lang.String, java.lang.String)
+         */
+        public ServletRegistration addServlet(String servletName, String className)
+        {
+            Log.warn("Use servlet Context");
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#findFilterRegistration(java.lang.String)
+         */
+        public FilterRegistration findFilterRegistration(String filterName)
+        {
+            Log.warn("Use servlet Context");
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#findServletRegistration(java.lang.String)
+         */
+        public ServletRegistration findServletRegistration(String servletName)
+        {
+            Log.warn("Use servlet Context");
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#getDefaultSessionTrackingModes()
+         */
+        public EnumSet<SessionTrackingMode> getDefaultSessionTrackingModes()
+        {
+            Log.warn("Use servlet Context");
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#getEffectiveSessionTrackingModes()
+         */
+        public EnumSet<SessionTrackingMode> getEffectiveSessionTrackingModes()
+        {
+            Log.warn("Use servlet Context");
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#getSessionCookieConfig()
+         */
+        public SessionCookieConfig getSessionCookieConfig()
+        {
+            Log.warn("Use servlet Context");
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#setSessionTrackingModes(java.util.EnumSet)
+         */
         public void setSessionTrackingModes(EnumSet<SessionTrackingMode> sessionTrackingModes)
         {
-            // TODO Auto-generated method stub
-            
+            Log.warn("Use servlet Context");
         }
+
     }
 
 }
