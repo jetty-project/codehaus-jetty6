@@ -27,6 +27,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.SingleThreadModel;
@@ -576,6 +577,68 @@ public class ServletHolder extends Holder implements UserIdentity.Context, Compa
         }
     }
 
+
+    public ServletRegistration getRegistration()
+    {
+        return new ServletRegistration()
+        {
+
+            public boolean addMapping(String... urlPatterns)
+            {
+                if (_servletHandler.isStarted())
+                    throw new IllegalStateException();
+                ServletMapping mapping = new ServletMapping();
+                mapping.setServletName(ServletHolder.this.getName());
+                mapping.setPathSpecs(urlPatterns);
+                _servletHandler.addServletMapping(mapping);
+                return true;
+            }
+
+            public boolean setAsyncSupported(boolean isAsyncSupported)
+            {
+                if (_servletHandler.isStarted())
+                    throw new IllegalStateException();
+                ServletHolder.this.setAsyncSupported(isAsyncSupported);
+                return true;
+            }
+
+            public boolean setDescription(String description)
+            {
+                return true;
+            }
+
+            public boolean setInitParameter(String name, String value)
+            {
+                if (_servletHandler.isStarted())
+                    throw new IllegalStateException();
+                if (ServletHolder.this.getInitParameter(name)!=null)
+                    return false;
+                ServletHolder.this.setInitParameter(name,value);
+                return true;
+            }
+
+            public boolean setInitParameters(Map<String, String> initParameters)
+            {
+                if (_servletHandler.isStarted())
+                    throw new IllegalStateException();
+                for (String name : initParameters.keySet())
+                    if (ServletHolder.this.getInitParameter(name)!=null)
+                        return false;
+                ServletHolder.this.setInitParameters(initParameters);
+                return true;
+            }
+            
+            public boolean setLoadOnStartup(int loadOnStartup)
+            {
+                if (_servletHandler.isStarted())
+                    throw new IllegalStateException();
+                ServletHolder.this.setInitOrder(loadOnStartup);
+                return false;
+            }
+            
+        };
+    }
+    
     /* -------------------------------------------------------- */
     /* -------------------------------------------------------- */
     /* -------------------------------------------------------- */
