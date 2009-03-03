@@ -16,6 +16,8 @@
 package org.mortbay.jetty.server.handler;
 
 
+import java.lang.reflect.Array;
+
 import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.HandlerContainer;
 import org.mortbay.jetty.util.LazyList;
@@ -31,9 +33,6 @@ import org.mortbay.jetty.util.LazyList;
 public abstract class AbstractHandlerContainer extends AbstractHandler implements HandlerContainer
 {
     /* ------------------------------------------------------------ */
-    /**
-     * 
-     */
     public AbstractHandlerContainer()
     {
     }
@@ -49,7 +48,7 @@ public abstract class AbstractHandlerContainer extends AbstractHandler implement
     public Handler[] getChildHandlersByClass(Class<?> byclass)
     {
         Object list = expandChildren(null,byclass);
-        return (Handler[])LazyList.toArray(list, Handler.class);
+        return (Handler[])LazyList.toArray(list, byclass);
     }
     
     /* ------------------------------------------------------------ */
@@ -69,7 +68,7 @@ public abstract class AbstractHandlerContainer extends AbstractHandler implement
     }
 
     /* ------------------------------------------------------------ */
-    protected Object expandHandler(Handler handler, Object list, Class<?> byClass)
+    protected Object expandHandler(Handler handler, Object list, Class<Handler> byClass)
     {
         if (handler==null)
             return list;

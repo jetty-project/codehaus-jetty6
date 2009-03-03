@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.mortbay.jetty.security;
+package org.mortbay.jetty.security.jaspi;
 
 import java.io.IOException;
 
@@ -33,8 +33,12 @@ import javax.security.auth.message.callback.PrivateKeyCallback;
 import javax.security.auth.message.callback.SecretKeyCallback;
 import javax.security.auth.message.callback.TrustStoreCallback;
 
+import org.mortbay.jetty.security.IdentityService;
+import org.mortbay.jetty.security.LoginCallbackImpl;
+import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.jaspi.callback.CredentialValidationCallback;
 import org.mortbay.jetty.server.LoginCallback;
+import org.mortbay.jetty.server.UserIdentity;
 
 /**
  * 
@@ -45,17 +49,14 @@ import org.mortbay.jetty.server.LoginCallback;
  */
 public class ServletCallbackHandler implements CallbackHandler
 {
-
     private final LoginService _loginService;
 
     private final ThreadLocal<CallerPrincipalCallback> _callerPrincipals = new ThreadLocal<CallerPrincipalCallback>();
-
     private final ThreadLocal<GroupPrincipalCallback> _groupPrincipals = new ThreadLocal<GroupPrincipalCallback>();
 
     public ServletCallbackHandler(LoginService loginService)
     {
-        if (loginService == null) throw new NullPointerException("No login service provided");
-        this._loginService = loginService;
+        _loginService = loginService;
     }
 
     public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException
@@ -75,37 +76,33 @@ public class ServletCallbackHandler implements CallbackHandler
             {
                 PasswordValidationCallback passwordValidationCallback = (PasswordValidationCallback) callback;
                 Subject subject = passwordValidationCallback.getSubject();
-                LoginCallback loginCallback = new LoginCallbackImpl(subject, 
-                                                                passwordValidationCallback.getUsername(), 
-                                                                passwordValidationCallback.getPassword());
-                try
+
+                UserIdentity user = _loginService.login(passwordValidationCallback.getUsername(),passwordValidationCallback.getPassword());
+                
+                if (user!=null)
                 {
-                    _loginService.login(loginCallback);
+                    passwordValidationCallback.setResult(true);
+                    passwordValidationCallback.getSubject().getPrincipals().addAll(user.getSubject().getPrincipals());
+                    passwordValidationCallback.getSubject().getPrivateCredentials().add(user);
                 }
-                catch (ServerAuthException e)
-                {
-                    throw (IOException) new IOException("Could not login").initCause(e);
-                }
-                passwordValidationCallback.setResult(loginCallback.isSuccess());
-                subject.getPrivateCredentials().add(loginCallback);
             }
             else if (callback instanceof CredentialValidationCallback)
             {
                 CredentialValidationCallback credentialValidationCallback = (CredentialValidationCallback) callback;
                 Subject subject = credentialValidationCallback.getSubject();
                 LoginCallback loginCallback = new LoginCallbackImpl(subject,
-                                                                credentialValidationCallback.getUsername(),
-                                                                credentialValidationCallback.getCredential());
-                try
+                        credentialValidationCallback.getUsername(),
+                        credentialValidationCallback.getCredential());
+
+                UserIdentity user = _loginService.login(credentialValidationCallback.getUsername(),credentialValidationCallback.getCredential());
+
+                if (user!=null)
                 {
-                    _loginService.login(loginCallback);
+                    credentialValidationCallback.setResult(true);
+
+                    credentialValidationCallback.getSubject().getPrincipals().addAll(user.getSubject().getPrincipals());
+                    credentialValidationCallback.getSubject().getPrivateCredentials().add(user);
                 }
-                catch (ServerAuthException e)
-                {
-                    throw (IOException) new IOException("Could not login").initCause(e);
-                }
-                credentialValidationCallback.setResult(loginCallback.isSuccess());
-                subject.getPrivateCredentials().add(loginCallback);
             }
             // server to jaspi communication
             // TODO implement these

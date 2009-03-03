@@ -39,6 +39,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.io.EofException;
 import org.mortbay.jetty.io.HttpException;
+import org.mortbay.jetty.security.IdentityService;
+import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.server.Dispatcher;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.PathMap;
@@ -83,6 +85,7 @@ public class ServletHandler extends AbstractHandler
     private boolean _filterChainsCached=true;
     private int _maxFilterChainsCacheSize=1000;
     private boolean _startWithUnavailable=true;
+    private IdentityService _identityService;
     
     private ServletHolder[] _servlets;
     private ServletMapping[] _servletMappings;
@@ -125,7 +128,6 @@ public class ServletHandler extends AbstractHandler
             server.getContainer().update(this, null, _servletMappings, "servletMapping",true);
         }
         super.setServer(server);
-        
     }
 
     /* ----------------------------------------------------------------- */
@@ -135,6 +137,13 @@ public class ServletHandler extends AbstractHandler
         _servletContext=ContextHandler.getCurrentContext();
         _contextHandler=_servletContext==null?null:_servletContext.getContextHandler();
 
+        if (_contextHandler!=null)
+        {
+            SecurityHandler security_handler = (SecurityHandler)_contextHandler.getChildHandlerByClass(SecurityHandler.class);
+            if (security_handler!=null)
+                _identityService=security_handler.getIdentityService();
+        }
+        
         updateNameMappings();
         updateMappings();
         
@@ -178,6 +187,11 @@ public class ServletHandler extends AbstractHandler
         _chainCache=null;
     }
 
+    /* ------------------------------------------------------------ */
+    IdentityService getIdentityService()
+    {
+        return _identityService;
+    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -187,6 +201,7 @@ public class ServletHandler extends AbstractHandler
     {
         return null;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the filterMappings.
@@ -287,113 +302,111 @@ public class ServletHandler extends AbstractHandler
      * @see org.mortbay.jetty.server.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
     public void handle(String target, HttpServletRequest request,HttpServletResponse response)
-         throws IOException, ServletException
+        throws IOException, ServletException
     {
         if (!isStarted())
             return;
-        
+
         // Get the base requests
         final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
         final String old_servlet_name=base_request.getServletName();
         final String old_servlet_path=base_request.getServletPath();
         final String old_path_info=base_request.getPathInfo();
-        Map old_roleRefMap = null;
+        final UserIdentity old_user_identity = base_request.getUserIdentity();
 
-        final UserIdentity user_identity = base_request.getUserIdentity() ==null? UserIdentity.UNAUTHENTICATED_IDENTITY: base_request.getUserIdentity();
         DispatcherType type = request.getDispatcherType();
         Object request_listeners=null;
         ServletRequestEvent request_event=null;
-        
+        ServletHolder servlet_holder=null;
+        FilterChain chain=null;
+        boolean associated=false;
+
+        // find the servlet
+        if (target.startsWith("/"))
+        {
+            // Look for the servlet by path
+            PathMap.Entry entry=getHolderEntry(target);
+            if (entry!=null)
+            {
+                servlet_holder=(ServletHolder)entry.getValue();
+
+                if(Log.isDebugEnabled())Log.debug("servlet="+servlet_holder);
+
+                String servlet_path_spec=(String)entry.getKey(); 
+                String servlet_path=entry.getMapped()!=null?entry.getMapped():PathMap.pathMatch(servlet_path_spec,target);
+                String path_info=PathMap.pathInfo(servlet_path_spec,target);
+
+                if (DispatcherType.INCLUDE.equals(type))
+                {
+                    base_request.setAttribute(Dispatcher.__INCLUDE_SERVLET_PATH,servlet_path);
+                    base_request.setAttribute(Dispatcher.__INCLUDE_PATH_INFO, path_info);
+                }
+                else
+                {
+                    base_request.setServletPath(servlet_path);
+                    base_request.setPathInfo(path_info);
+                }
+
+                if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
+                    chain=getFilterChain(base_request, target, servlet_holder);
+            }      
+        }
+        else
+        {
+            // look for a servlet by name!
+            servlet_holder=(ServletHolder)_servletNameMap.get(target);
+            if (servlet_holder!=null)
+            {
+                if (_filterMappings!=null && _filterMappings.length>0)
+                {
+                    chain=getFilterChain(base_request, null,servlet_holder);
+                }
+            }
+        }
+
+        if (Log.isDebugEnabled()) 
+        {
+            Log.debug("chain="+chain);
+            Log.debug("servlet holder="+servlet_holder);
+        }
+
         try
         {
-            ServletHolder servlet_holder=null;
-            FilterChain chain=null;
-            
-            // find the servlet
-            if (target.startsWith("/"))
+            // Do the filter/handling thang
+            if (servlet_holder==null)
             {
-                // Look for the servlet by path
-                PathMap.Entry entry=getHolderEntry(target);
-                if (entry!=null)
-                {
-                    servlet_holder=(ServletHolder)entry.getValue();
-                    //TODO shouldn't these parameters be set in ServletHolder??
-                    //what servlet name should the filters see?
-                    base_request.setServletName(servlet_holder.getName());
-                    //for this it depends on whether a servlet's role-refs should work in filters.
-                    if (user_identity != null)
-                    {
-                        old_roleRefMap = user_identity.setRoleRefMap(servlet_holder.getRoleMap());
-                    }
-                    if(Log.isDebugEnabled())Log.debug("servlet="+servlet_holder);
-                    
-                    String servlet_path_spec=(String)entry.getKey(); 
-                    String servlet_path=entry.getMapped()!=null?entry.getMapped():PathMap.pathMatch(servlet_path_spec,target);
-                    String path_info=PathMap.pathInfo(servlet_path_spec,target);
-                    
-                    if (DispatcherType.INCLUDE.equals(type))
-                    {
-                        base_request.setAttribute(Dispatcher.__INCLUDE_SERVLET_PATH,servlet_path);
-                        base_request.setAttribute(Dispatcher.__INCLUDE_PATH_INFO, path_info);
-                    }
-                    else
-                    {
-                        base_request.setServletPath(servlet_path);
-                        base_request.setPathInfo(path_info);
-                    }
-                    
-                    if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
-                        chain=getFilterChain(base_request, target, servlet_holder);
-                }      
+                notFound(request, response);
             }
             else
             {
-                // look for a servlet by name!
-                servlet_holder=(ServletHolder)_servletNameMap.get(target);
-                if (servlet_holder!=null)
+                base_request.setServletName(servlet_holder.getName());
+                if (_identityService!=null)
                 {
-                    base_request.setServletName(servlet_holder.getName());
-                    
-                    //TODO added for jaspi == is this correct??
-                    old_roleRefMap = user_identity.setRoleRefMap(servlet_holder.getRoleMap());
-                    if (_filterMappings!=null && _filterMappings.length>0)
+                    associated=true;
+                    UserIdentity user_identity=_identityService.associate(old_user_identity,servlet_holder);
+                    base_request.setUserIdentity(user_identity);
+                }
+
+                // Handle context listeners
+                request_listeners = base_request.takeRequestListeners();
+                if (request_listeners!=null)
+                {
+                    request_event = new ServletRequestEvent(getServletContext(),request);
+                    final int s=LazyList.size(request_listeners);
+                    for(int i=0;i<s;i++)
                     {
-//                    chain=getFilterChain(type, null,servlet_holder,request.isInitial());
-                      chain=getFilterChain(base_request, null,servlet_holder);
+                        final ServletRequestListener listener = (ServletRequestListener)LazyList.get(request_listeners,i);
+                        listener.requestInitialized(request_event);
                     }
                 }
-            }
 
-            if (Log.isDebugEnabled()) 
-            {
-                Log.debug("chain="+chain);
-                Log.debug("servlet holder="+servlet_holder);
-            }
-
-            // Handle context listeners
-            request_listeners = base_request.takeRequestListeners();
-            if (request_listeners!=null)
-            {
-                request_event = new ServletRequestEvent(getServletContext(),request);
-                final int s=LazyList.size(request_listeners);
-                for(int i=0;i<s;i++)
-                {
-                    final ServletRequestListener listener = (ServletRequestListener)LazyList.get(request_listeners,i);
-                    listener.requestInitialized(request_event);
-                }
-            }
-            
-            // Do the filter/handling thang
-            if (servlet_holder!=null)
-            {
                 base_request.setHandled(true);
+
                 if (chain!=null)
                     chain.doFilter(request, response);
                 else 
                     servlet_holder.handle(base_request,request,response);
             }
-            else
-                notFound(request, response);
         }
         catch(RetryRequest e)
         {
@@ -414,8 +427,8 @@ public class ServletHandler extends AbstractHandler
                 if (e instanceof ServletException)
                     throw (ServletException)e;
             }
-            
-            
+
+
             // unwrap cause
             Throwable th=e;
             if (th instanceof UnavailableException)
@@ -429,15 +442,17 @@ public class ServletHandler extends AbstractHandler
                 if (cause!=th && cause!=null)
                     th=cause;
             }
-            
-            // hnndle or log exception
+
+            // handle or log exception
             if (th instanceof RetryRequest)
             {
                 base_request.setHandled(false);
                 throw (RetryRequest)th;  
             }
             else if (th instanceof HttpException)
+            {
                 throw (HttpException)th;
+            }
             else if (Log.isDebugEnabled())
             {
                 Log.warn(request.getRequestURI(), th); 
@@ -451,7 +466,7 @@ public class ServletHandler extends AbstractHandler
             {
                 Log.warn(request.getRequestURI(),th);
             }
-            
+
             // TODO httpResponse.getHttpConnection().forceClose();
             if (!response.isCommitted())
             {
@@ -477,7 +492,7 @@ public class ServletHandler extends AbstractHandler
                 throw e;
             Log.warn("Error for "+request.getRequestURI(),e);
             if(Log.isDebugEnabled())Log.debug(request.toString());
-            
+
             // TODO httpResponse.getHttpConnection().forceClose();
             if (!response.isCommitted())
             {
@@ -498,20 +513,20 @@ public class ServletHandler extends AbstractHandler
                     listener.requestDestroyed(request_event);
                 }
             }
-            
+
+            if (associated)
+            {
+                _identityService.disassociate(old_user_identity);
+                base_request.setUserIdentity(old_user_identity);
+            }
             base_request.setServletName(old_servlet_name);
 
-            if (user_identity != null)
-            {
-                user_identity.setRoleRefMap(old_roleRefMap);
-            }
             if (!(DispatcherType.INCLUDE.equals(type)))
             {
                 base_request.setServletPath(old_servlet_path);
                 base_request.setPathInfo(old_path_info); 
             }
         }
-        return;
     }
 
     /* ------------------------------------------------------------ */
@@ -1066,7 +1081,6 @@ public class ServletHandler extends AbstractHandler
             throw new RuntimeException(e);
         }
     }
-
 
     /* ------------------------------------------------------------ */
     protected void notFound(HttpServletRequest request,

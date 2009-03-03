@@ -33,9 +33,10 @@ import javax.servlet.SingleThreadModel;
 import javax.servlet.UnavailableException;
 
 
+import org.mortbay.jetty.security.IdentityService;
+import org.mortbay.jetty.security.RunAsToken;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.Request;
-import org.mortbay.jetty.server.RunAsToken;
 import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.util.log.Log;
 
@@ -51,16 +52,16 @@ import org.mortbay.jetty.util.log.Log;
  *
  * @author Greg Wilkins
  */
-public class ServletHolder extends Holder
-    implements Comparable
+public class ServletHolder extends Holder implements UserIdentity.Context, Comparable
 {
     /* ---------------------------------------------------------------- */
     private int _initOrder;
     private boolean _initOnStartup=false;
     private Map<String, String> _roleMap;
     private String _forcedPath;
-    private RunAsToken _runAs;
-    private UserIdentity _systemUserIdentity;
+    private String _runAsRole;
+    private RunAsToken _runAsToken;
+    private IdentityService _identityService;
     
     private transient Servlet _servlet;
     private transient Config _config;
@@ -202,22 +203,6 @@ public class ServletHolder extends Holder
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @param role Role name that is added to UserPrincipal when this servlet
-     * is called. 
-     */
-    public void setRunAs(RunAsToken role)
-    {
-        _runAs=role;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public RunAsToken getRunAs()
-    {
-        return _runAs;
-    }
-    
-    /* ------------------------------------------------------------ */
     /**
      * @return Returns the forcedPath.
      */
@@ -250,12 +235,11 @@ public class ServletHolder extends Holder
             makeUnavailable(ue);
         }
 
+        _identityService = _servletHandler.getIdentityService();
+        if (_identityService!=null && _runAsRole!=null)
+            _runAsToken=_identityService.newRunAsToken(_runAsRole);
+        
         _config=new Config();
-
-//        if (_runAs!=null)
-        //TODO jaspi this is ridiculously fragile
-//            _realm=((AbstractSecurityHandler)(ContextHandler.getCurrentContext()
-//                    .getContextHandler().getChildHandlerByClass(ConstraintSecurityHandler.class))).getUserRealm();
 
         if (javax.servlet.SingleThreadModel.class.isAssignableFrom(_class))
             _servlet = new SingleThreadedWrapper();
@@ -279,37 +263,32 @@ public class ServletHolder extends Holder
     /* ------------------------------------------------------------ */
     public void doStop()
     {
-        RunAsToken oldRunAs = null;
-        try
-        {
-            // Handle run as
-            if (_runAs!=null && _systemUserIdentity!=null)
-                oldRunAs = _systemUserIdentity.setRunAsRole(_runAs);
-
-            if (_servlet!=null)
-            {                  
-                try
-                {
-                    destroyInstance(_servlet);
-                }
-                catch (Exception e)
-                {
-                    Log.warn(e);
-                }
-            }
-            
-            if (!_extInstance)
-                _servlet=null;
+        RunAsToken old_run_as = null;
+        if (_servlet!=null)
+        {       
            
-            _config=null;
+            try
+            {
+                if (_identityService!=null && _runAsToken!=null)
+                    old_run_as=_identityService.associateRunAs(_runAsToken);
+
+                destroyInstance(_servlet);
+            }
+            catch (Exception e)
+            {
+                Log.warn(e);
+            }
+            finally
+            {
+                if (_identityService!=null && _runAsToken!=null)
+                    _identityService.disassociateRunAs(old_run_as);
+            }
         }
-        finally
-        {
-            super.doStop();
-            // pop run-as role
-            if (_runAs!=null && _systemUserIdentity!=null)
-                _systemUserIdentity.setRunAsRole(oldRunAs);
-        }
+
+        if (!_extInstance)
+            _servlet=null;
+
+        _config=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -418,7 +397,7 @@ public class ServletHolder extends Holder
     private void initServlet()
     	throws ServletException
     {
-        RunAsToken oldRunAs = null;
+        RunAsToken old_run_as = null;
         try
         {
             if (_servlet==null)
@@ -431,8 +410,8 @@ public class ServletHolder extends Holder
                 _servlet = getServletHandler().customizeServlet(_servlet);
             
             // Handle run as
-            if (_runAs!=null && _systemUserIdentity!=null)
-                oldRunAs = _systemUserIdentity.setRunAsRole(_runAs);
+            if (_identityService!=null && _runAsToken!=null)
+                old_run_as=_identityService.associateRunAs(_runAsToken);
 
             _servlet.init(_config);
         }
@@ -460,11 +439,48 @@ public class ServletHolder extends Holder
         finally
         {
             // pop run-as role
-            if (_runAs!=null && _systemUserIdentity!=null)
-                _systemUserIdentity.setRunAsRole(oldRunAs);
+            if (_identityService!=null && _runAsToken!=null)
+                _identityService.disassociateRunAs(old_run_as);
         }
     }
     
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @see org.mortbay.jetty.server.UserIdentity.Context#getContextPath()
+     */
+    public String getContextPath()
+    {
+        return _config.getServletContext().getContextPath();
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @see org.mortbay.jetty.server.UserIdentity.Context#getRoleRefMap()
+     */
+    public Map<String, String> getRoleRefMap()
+    {
+        return _roleMap;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @see org.mortbay.jetty.server.UserIdentity.Context#getRunAs()
+     */
+    public String getRunAsRole()
+    {
+        return _runAsRole;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @see org.mortbay.jetty.server.UserIdentity.Context#getRunAs()
+     */
+    public void setRunAsRole(String role)
+    {
+        _runAsRole=role;
+    }
+
     /* ------------------------------------------------------------ */
     /** Service a request with this servlet.
      */
@@ -489,7 +505,7 @@ public class ServletHolder extends Holder
         
         // Service the request
         boolean servlet_error=true;
-        RunAsToken oldRunAs = null;
+        RunAsToken old_run_as = null;
         UserIdentity userIdentity = null;
         Principal user=null;
         boolean suspendable = baseRequest.isAsyncSupported();
@@ -501,11 +517,8 @@ public class ServletHolder extends Holder
                 request.setAttribute("org.apache.catalina.jsp_file",_forcedPath);
 
             // Handle run as
-            if (_runAs!=null)
-            {
-                userIdentity = baseRequest.getUserIdentity();
-                oldRunAs = userIdentity.setRunAsRole(_runAs);
-            }
+            if (_identityService!=null && _runAsToken!=null)
+                old_run_as=_identityService.associateRunAs(_runAsToken);
             
             if (!isAsyncSupported())
                 baseRequest.setAsyncSupported(false);
@@ -523,10 +536,8 @@ public class ServletHolder extends Holder
             baseRequest.setAsyncSupported(suspendable);
             
             // pop run-as role
-            if (_runAs!=null && userIdentity!=null)
-            {
-                userIdentity.setRunAsRole(oldRunAs);
-            }
+            if (_identityService!=null && _runAsToken!=null)
+                _identityService.disassociateRunAs(old_run_as);
 
             // Handle error params.
             if (servlet_error)

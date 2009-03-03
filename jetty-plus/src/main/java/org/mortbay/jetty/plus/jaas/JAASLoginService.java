@@ -34,26 +34,21 @@ import javax.security.auth.login.LoginException;
 
 
 import org.mortbay.jetty.plus.jaas.callback.ObjectCallback;
+import org.mortbay.jetty.security.DefaultIdentityService;
+import org.mortbay.jetty.security.IdentityService;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.server.LoginCallback;
+import org.mortbay.jetty.server.UserIdentity;
+import org.mortbay.jetty.util.component.AbstractLifeCycle;
 import org.mortbay.jetty.util.log.Log;
 
 /* ---------------------------------------------------- */
 /** JAASLoginService
- * <p>
- *
- * <p><h4>Notes</h4>
- * <p>
- *
- * <p><h4>Usage</h4>
- * 
- *
- *
  * 
  * @org.apache.xbean.XBean element="jaasUserRealm" description="Creates a UserRealm suitable for use with JAAS"
  */
-public class JAASLoginService implements LoginService
+public class JAASLoginService extends AbstractLifeCycle implements LoginService
 {
     public static String DEFAULT_ROLE_CLASS_NAME = "org.mortbay.jetty.plus.jaas.JAASRole";
     public static String[] DEFAULT_ROLE_CLASS_NAMES = {DEFAULT_ROLE_CLASS_NAME};
@@ -63,9 +58,8 @@ public class JAASLoginService implements LoginService
     protected String _realmName;
     protected String _loginModuleName;
     protected JAASUserPrincipal _defaultUser = new JAASUserPrincipal(null, null, null);
-    
+    protected IdentityService _identityService;
  
-
     /* ---------------------------------------------------- */
     /**
      * Constructor.
@@ -115,6 +109,26 @@ public class JAASLoginService implements LoginService
 
 
 
+    /* ------------------------------------------------------------ */
+    /** Get the identityService.
+     * @return the identityService
+     */
+    public IdentityService getIdentityService()
+    {
+        return _identityService;
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /** Set the identityService.
+     * @param identityService the identityService to set
+     */
+    public void setIdentityService(IdentityService identityService)
+    {
+        _identityService = identityService;
+    }
+
+
     /**
      * Set the name to use to index into the config
      * file of LoginModules.
@@ -149,7 +163,19 @@ public class JAASLoginService implements LoginService
         return _roleClassNames;
     }
 
-    public void login(final LoginCallback loginCallback) throws ServerAuthException
+    /* ------------------------------------------------------------ */
+    /**
+     * @see org.mortbay.jetty.util.component.AbstractLifeCycle#doStart()
+     */
+    protected void doStart() throws Exception
+    {
+        if (_identityService==null)
+            _identityService=new DefaultIdentityService();
+        super.doStart();
+    }
+
+    /* ------------------------------------------------------------ */
+    public UserIdentity login(final String username,final Object credentials)
     {
         try
         {
@@ -162,49 +188,45 @@ public class JAASLoginService implements LoginService
                     {
                         if (callback instanceof NameCallback)
                         {
-                            ((NameCallback)callback).setName(loginCallback.getUserName());
+                            ((NameCallback)callback).setName(username);
                         }
                         else if (callback instanceof PasswordCallback)
                         {
-                            ((PasswordCallback)callback).setPassword((char[]) loginCallback.getCredential());
+                            ((PasswordCallback)callback).setPassword((char[]) credentials.toString().toCharArray());
                         }
                         else if (callback instanceof ObjectCallback)
                         {
-                            ((ObjectCallback)callback).setObject(loginCallback.getCredential());
+                            ((ObjectCallback)callback).setObject(credentials);
                         }
                     }
                 }
             };
             //set up the login context
             //TODO jaspi requires we provide the Configuration parameter
-            Subject subject = loginCallback.getSubject();
+            Subject subject = new Subject();
             LoginContext loginContext = new LoginContext(_loginModuleName, subject, callbackHandler);
 
             loginContext.login();
 
             //login success
-            JAASUserPrincipal userPrincipal = new JAASUserPrincipal(getUserName(callbackHandler), loginCallback.getSubject(), loginContext);
+            JAASUserPrincipal userPrincipal = new JAASUserPrincipal(getUserName(callbackHandler), subject, loginContext);
             subject.getPrincipals().add(userPrincipal);
-            loginCallback.setUserPrincipal(userPrincipal);
-            loginCallback.setGroups(getGroups(subject));
-            loginCallback.setSuccess(true);
+            
+            return _identityService.newUserIdentity(subject,userPrincipal,getGroups(subject));
         }
         catch (LoginException e)
         {
             Log.warn(e);
-            loginCallback.setSuccess(false);
         }
         catch (IOException e)
         {
             Log.warn(e);
-            loginCallback.setSuccess(false);
         }
         catch (UnsupportedCallbackException e)
         {
            Log.warn(e);
-           loginCallback.setSuccess(false);
         }
-       
+        return null;
     }
 
     private String getUserName(CallbackHandler callbackHandler) throws IOException, UnsupportedCallbackException

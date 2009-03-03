@@ -18,19 +18,20 @@ import java.util.EnumSet;
 import java.util.Map;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
 
+import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.server.Dispatcher;
 import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.HandlerContainer;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.handler.ErrorHandler;
-import org.mortbay.jetty.server.handler.HandlerWrapper;
 import org.mortbay.jetty.server.session.SessionHandler;
-import org.mortbay.jetty.util.Loader;
 
 
 /* ------------------------------------------------------------ */
@@ -51,10 +52,10 @@ public class Context extends ContextHandler
     public final static int NO_SESSIONS=0;
     public final static int NO_SECURITY=0;
     
-    protected String _defaultSecurityHandlerClass="org.mortbay.jetty.security.ConstraintSecurityHandler";
-    protected HandlerWrapper _securityHandler;
-    protected ServletHandler _servletHandler;
+    protected Class<? extends SecurityHandler> _defaultSecurityHandlerClass=org.mortbay.jetty.security.ConstraintSecurityHandler.class;
     protected SessionHandler _sessionHandler;
+    protected SecurityHandler _securityHandler;
+    protected ServletHandler _servletHandler;
     protected int _options;
     
     /* ------------------------------------------------------------ */
@@ -89,13 +90,13 @@ public class Context extends ContextHandler
     }
 
     /* ------------------------------------------------------------ */
-    public Context(HandlerContainer parent, SessionHandler sessionHandler, HandlerWrapper securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    public Context(HandlerContainer parent, SessionHandler sessionHandler, SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {   
         this(parent,null,sessionHandler,securityHandler,servletHandler,errorHandler);
     }
 
     /* ------------------------------------------------------------ */
-    public Context(HandlerContainer parent, String contextPath, SessionHandler sessionHandler, HandlerWrapper securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    public Context(HandlerContainer parent, String contextPath, SessionHandler sessionHandler, SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {   
         super((ContextHandler.SContext)null);
         _scontext = new SContext();
@@ -118,7 +119,7 @@ public class Context extends ContextHandler
     /** Get the defaultSecurityHandlerClass.
      * @return the defaultSecurityHandlerClass
      */
-    public String getDefaultSecurityHandlerClass()
+    public Class<? extends SecurityHandler> getDefaultSecurityHandlerClass()
     {
         return _defaultSecurityHandlerClass;
     }
@@ -127,7 +128,7 @@ public class Context extends ContextHandler
     /** Set the defaultSecurityHandlerClass.
      * @param defaultSecurityHandlerClass the defaultSecurityHandlerClass to set
      */
-    public void setDefaultSecurityHandlerClass(String defaultSecurityHandlerClass)
+    public void setDefaultSecurityHandlerClass(Class<? extends SecurityHandler> defaultSecurityHandlerClass)
     {
         _defaultSecurityHandlerClass = defaultSecurityHandlerClass;
     }
@@ -139,12 +140,11 @@ public class Context extends ContextHandler
     }
     
     /* ------------------------------------------------------------ */
-    protected HandlerWrapper newSecurityHandler()
+    protected SecurityHandler newSecurityHandler()
     {
         try
         {
-            Class<?> l = Loader.loadClass(Context.class,_defaultSecurityHandlerClass);
-            return (HandlerWrapper)l.newInstance();
+            return (SecurityHandler)_defaultSecurityHandlerClass.newInstance();
         }
         catch(Exception e)
         {
@@ -197,7 +197,7 @@ public class Context extends ContextHandler
     /**
      * @return Returns the securityHandler.
      */
-    public Handler getSecurityHandler()
+    public SecurityHandler getSecurityHandler()
     {
         if (_securityHandler==null && (_options&SECURITY)!=0 && !isStarted()) 
             _securityHandler=newSecurityHandler();
@@ -238,7 +238,7 @@ public class Context extends ContextHandler
     /* ------------------------------------------------------------ */
     /** conveniance method to add a servlet.
      */
-    public ServletHolder addServlet(Class servlet,String pathSpec)
+    public ServletHolder addServlet(Class<? extends Servlet> servlet,String pathSpec)
     {
         return getServletHandler().addServletWithMapping(servlet.getName(), pathSpec);
     }
@@ -262,7 +262,7 @@ public class Context extends ContextHandler
     /* ------------------------------------------------------------ */
     /** convenience method to add a filter
      */
-    public FilterHolder addFilter(Class filterClass,String pathSpec,int dispatches)
+    public FilterHolder addFilter(Class<? extends Filter> filterClass,String pathSpec,int dispatches)
     {
         return getServletHandler().addFilterWithMapping(filterClass,pathSpec,dispatches);
     }
@@ -291,7 +291,7 @@ public class Context extends ContextHandler
     /**
      * @param securityHandler The {@link org.mortbay.jetty.server.handler.SecurityHandler} to set on this context.
      */
-    public void setSecurityHandler(HandlerWrapper securityHandler)
+    public void setSecurityHandler(SecurityHandler securityHandler)
     {
         if (isStarted())
             throw new IllegalStateException("STARTED");

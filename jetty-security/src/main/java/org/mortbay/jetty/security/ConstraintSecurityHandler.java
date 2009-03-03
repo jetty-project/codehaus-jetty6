@@ -24,7 +24,6 @@ import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.PathMap;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Response;
-import org.mortbay.jetty.server.RunAsToken;
 import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.util.StringMap;
 
@@ -202,21 +201,6 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
         super.doStart();
     }
 
-    protected UserIdentity newUserIdentity(ServerAuthResult authResult)
-    {
-        return new AuthResultUserIdentity(authResult);
-    }
-
-    protected UserIdentity newSystemUserIdentity()
-    {
-        return new AuthResultUserIdentity();
-    }
-
-    public RunAsToken newRunAsToken(String runAsRole)
-    {
-        return new RoleRunAsToken(runAsRole);
-    }
-
     protected Object prepareConstraintInfo(String pathInContext, Request request)
     {
         Map<String, RoleInfo> mappings = (Map<String, RoleInfo>)_constraintMap.match(pathInContext);
@@ -319,7 +303,7 @@ public class ConstraintSecurityHandler extends SecurityHandler implements Constr
             return true;
         }
         
-        if (roleInfo.isAnyRole() && userIdentity.getAuthMethod()!=null)
+        if (roleInfo.isAnyRole() && request.getAuthType()!=null)
             return true;
         
         String[] roles = roleInfo.getRoles();

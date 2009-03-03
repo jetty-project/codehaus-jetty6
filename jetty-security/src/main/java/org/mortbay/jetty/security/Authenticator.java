@@ -26,6 +26,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.mortbay.jetty.server.Server;
+import org.mortbay.jetty.server.UserIdentity;
 
 /**
  * This is like the JASPI ServerAuthContext but is intended to be easier to use
@@ -35,12 +36,11 @@ import org.mortbay.jetty.server.Server;
  */
 public interface Authenticator
 {
+    void setConfiguration(Configuration configuration);
     String getAuthMethod();
     
-    ServerAuthResult validateRequest(ServletRequest request, ServletResponse response, boolean mandatory) throws ServerAuthException;
-
-    ServerAuthStatus secureResponse(ServletRequest request, ServletResponse response, boolean mandatory, ServerAuthResult validatedUser) throws ServerAuthException;
-    
+    Authentication validateRequest(ServletRequest request, ServletResponse response, boolean mandatory) throws ServerAuthException;
+    Authentication.Status secureResponse(ServletRequest request, ServletResponse response, boolean mandatory, Authentication validatedUser) throws ServerAuthException;
     
     interface Configuration
     {
@@ -49,6 +49,8 @@ public interface Authenticator
         boolean isLazy();
         String getInitParameter(String key);
         Set<String> getInitParameterNames();
+        LoginService getLoginService();
+        IdentityService getIdentityService();
     }
     
     interface Factory

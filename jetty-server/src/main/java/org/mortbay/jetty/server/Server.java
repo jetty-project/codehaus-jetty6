@@ -71,7 +71,7 @@ public class Server extends HandlerWrapper implements Attributes
     private boolean _sendServerVersion = true; //send Server: header
     private boolean _sendDateHeader = false; //send Date: header 
     private AttributesMap _attributes = new AttributesMap();
-    private List _dependentBeans=new ArrayList();
+    private List<Object> _dependentBeans=new ArrayList<Object>();
     private int _graceful=0;
     
     /* ------------------------------------------------------------ */
@@ -476,15 +476,15 @@ public class Server extends HandlerWrapper implements Attributes
      * @param clazz
      * @return List of beans.
      */
-    public List getBeans(Class clazz)
+    public <T> List<T> getBeans(Class<T> clazz)
     {
-        ArrayList beans = new ArrayList();
-        Iterator iter = _dependentBeans.iterator();
+        ArrayList<T> beans = new ArrayList<T>();
+        Iterator<?> iter = _dependentBeans.iterator();
         while (iter.hasNext())
         {
             Object o = iter.next();
             if (clazz.isInstance(o))
-                beans.add(o);
+                beans.add((T)o);
         }
         return beans;
     }
@@ -772,10 +772,11 @@ public class Server extends HandlerWrapper implements Attributes
 
 
     /* ------------------------------------------------------------ */
-    /* A component that can be gracefully shutdown.
+    /* A handler that can be gracefully shutdown.
      * Called by doStop if a {@link #setGracefulShutdown} period is set.
+     * TODO move this somewhere better
      */
-    public interface Graceful
+    public interface Graceful extends Handler
     {
         public void setShutdown(boolean shutdown);
     }

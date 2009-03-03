@@ -15,9 +15,7 @@
 
 package org.mortbay.jetty.security;
 
-
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,6 +31,7 @@ import org.mortbay.jetty.http.security.Password;
 import org.mortbay.jetty.security.authentication.BasicAuthenticator;
 import org.mortbay.jetty.security.authentication.FormAuthenticator;
 import org.mortbay.jetty.security.authentication.SessionCachingAuthenticator;
+import org.mortbay.jetty.security.jaspi.ServletCallbackHandler;
 import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.LocalConnector;
 import org.mortbay.jetty.server.Request;
@@ -40,13 +39,13 @@ import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.handler.AbstractHandler;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.session.SessionHandler;
+import org.omg.CORBA._IDLTypeStub;
 
 /**
  * @author gregw
  */
 public class ConstraintTest extends TestCase
 {
-
     private static final String TEST_REALM = "TestRealm";
 
     Server _server = new Server();
@@ -54,15 +53,13 @@ public class ConstraintTest extends TestCase
     ContextHandler _context = new ContextHandler();
     SessionHandler _session = new SessionHandler();
     ConstraintSecurityHandler _security = new ConstraintSecurityHandler();
-    HashLoginService _loginService = new HashLoginService("TestRealm");
+    HashLoginService _loginService = new HashLoginService(TEST_REALM);
                                                       
     final ServletCallbackHandler _callbackHandler = new ServletCallbackHandler(_loginService);
     RequestHandler _handler = new RequestHandler();
     private static final String APP_CONTEXT = "localhost /ctx";
 
-    public ConstraintTest(String arg0)
     {
-        super(arg0);
         _server.setConnectors(new Connector[]{_connector});
         _context.setContextPath("/ctx");
         _server.setHandler(_context);
@@ -71,9 +68,14 @@ public class ConstraintTest extends TestCase
         _security.setHandler(_handler);
         
         _loginService.putUser("user",new Password("password"));
-        _loginService.putUser("user2",new HashLoginService.KnownUser("user2", new Password("password"), new String[] {"user"}));
-        _loginService.putUser("admin",new HashLoginService.KnownUser("admin", new Password("password"), new String[] {"administrator"}));
-
+        _loginService.putUser("user2",new Password("password"), new String[] {"user"});
+        _loginService.putUser("admin",new Password("password"), new String[] {"user","administrator"});
+        _server.addBean(_loginService);
+    }
+    
+    public ConstraintTest(String arg0)
+    {
+        super(arg0);
         Constraint constraint0 = new Constraint();
         constraint0.setAuthenticate(true);
         constraint0.setName("forbid");
@@ -164,7 +166,7 @@ public class ConstraintTest extends TestCase
     public void testBasic()
             throws Exception
     {
-        _security.setAuthenticator(new BasicAuthenticator(_loginService));
+        _security.setAuthenticator(new BasicAuthenticator());
         _security.setStrict(false);
         _server.start();
 
@@ -232,7 +234,7 @@ public class ConstraintTest extends TestCase
             throws Exception
     {
         _security.setAuthenticator(new SessionCachingAuthenticator(
-                new FormAuthenticator("/testLoginPage","/testErrorPage",_loginService)));
+                new FormAuthenticator("/testLoginPage","/testErrorPage")));
         _security.setStrict(false);
         _server.start();
 
@@ -293,7 +295,7 @@ public class ConstraintTest extends TestCase
     public void testStrictBasic()
             throws Exception
     {
-        _security.setAuthenticator(new BasicAuthenticator(_loginService));
+        _security.setAuthenticator(new BasicAuthenticator());
         _server.start();
 
         String response;
@@ -366,7 +368,7 @@ public class ConstraintTest extends TestCase
             throws Exception
     {
         _security.setAuthenticator(new SessionCachingAuthenticator(
-                new FormAuthenticator("/testLoginPage","/testErrorPage",_loginService)));
+                new FormAuthenticator("/testLoginPage","/testErrorPage")));
         
         _server.start();
 
@@ -500,7 +502,6 @@ public class ConstraintTest extends TestCase
         {
             ((Request) request).setHandled(true);
             response.setStatus(200);
-            response.getOutputStream().println(request.getRequestURI());
         }
 	
     }
