@@ -16,10 +16,12 @@
 package org.mortbay.jetty.server.session;
 
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.EventListener;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
+import javax.servlet.SessionTrackingMode;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,6 +43,8 @@ import org.mortbay.jetty.util.log.Log;
  */
 public class SessionHandler extends HandlerWrapper
 {
+    public final static EnumSet<SessionTrackingMode> DEFAULT_TRACKING = EnumSet.of(SessionTrackingMode.COOKIE,SessionTrackingMode.URL);
+    
     /* -------------------------------------------------------------- */
     private SessionManager _sessionManager;
 

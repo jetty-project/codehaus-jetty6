@@ -14,10 +14,14 @@
 
 package org.mortbay.jetty.server.servlet;
 
+import java.util.EnumSet;
 import java.util.Enumeration;
+import java.util.Map;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
+import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 
 import org.mortbay.jetty.server.Handler;
@@ -27,8 +31,7 @@ import org.mortbay.jetty.util.log.Log;
 /** 
  * @author Greg Wilkins
  */
-public class FilterHolder
-    extends Holder
+public class FilterHolder extends Holder
 {    
     /* ------------------------------------------------------------ */
     private transient Filter _filter;
@@ -134,6 +137,78 @@ public class FilterHolder
         return getName();
     }
     
+    public FilterRegistration getRegistration()
+    {
+        return new FilterRegistration()
+        {
+            /* ------------------------------------------------------------ */
+            public boolean addMappingForServletNames(EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... servletNames)
+            {
+                if (_servletHandler.isStarted())
+                    throw new IllegalStateException();
+                FilterMapping mapping = new FilterMapping();
+                mapping.setFilterHolder(FilterHolder.this);
+                mapping.setServletNames(servletNames);
+                mapping.setDispatcherTypes(dispatcherTypes);
+                if (isMatchAfter)
+                    _servletHandler.addFilterMapping(mapping);
+                else
+                    _servletHandler.prependFilterMapping(mapping);
+
+                return true;
+            }
+
+            public boolean addMappingForUrlPatterns(EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... urlPatterns)
+            {
+                if (_servletHandler.isStarted())
+                    throw new IllegalStateException();
+                FilterMapping mapping = new FilterMapping();
+                mapping.setFilterHolder(FilterHolder.this);
+                mapping.setPathSpecs(urlPatterns);
+                mapping.setDispatcherTypes(dispatcherTypes);
+                if (isMatchAfter)
+                    _servletHandler.addFilterMapping(mapping);
+                else
+                    _servletHandler.prependFilterMapping(mapping);
+                return true;
+            }
+
+            public boolean setAsyncSupported(boolean isAsyncSupported)
+            {
+                if (_servletHandler.isStarted())
+                    throw new IllegalStateException();
+                FilterHolder.this.setAsyncSupported(isAsyncSupported);
+                return true;
+            }
+
+            public boolean setDescription(String description)
+            {
+                return true;
+            }
+
+            public boolean setInitParameter(String name, String value)
+            {
+                if (_servletHandler.isStarted())
+                    throw new IllegalStateException();
+                if (FilterHolder.this.getInitParameter(name)!=null)
+                    return false;
+                FilterHolder.this.setInitParameter(name,value);
+                return true;
+            }
+
+            public boolean setInitParameters(Map<String, String> initParameters)
+            {
+                if (_servletHandler.isStarted())
+                    throw new IllegalStateException();
+                for (String name : initParameters.keySet())
+                    if (FilterHolder.this.getInitParameter(name)!=null)
+                        return false;
+                FilterHolder.this.setInitParameters(initParameters);
+                return true;
+            }
+        };
+    }
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -150,13 +225,13 @@ public class FilterHolder
         {
             return _servletHandler.getServletContext();
         }
-        
+
         /* -------------------------------------------------------- */
         public String getInitParameter(String param)
         {
             return FilterHolder.this.getInitParameter(param);
         }
-    
+
         /* -------------------------------------------------------- */
         public Enumeration getInitParameterNames()
         {
