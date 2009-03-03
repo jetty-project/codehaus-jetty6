@@ -16,8 +16,8 @@ import javax.servlet.ServletContext;
 
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.DefaultAuthenticatorFactory;
+import org.mortbay.jetty.security.IdentityService;
 import org.mortbay.jetty.security.LoginService;
-import org.mortbay.jetty.security.ServletCallbackHandler;
 import org.mortbay.jetty.security.Authenticator.Configuration;
 import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.util.log.Log;

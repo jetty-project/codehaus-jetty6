@@ -20,9 +20,7 @@
 
 package org.mortbay.jetty.security;
 
-import javax.security.auth.Subject;
-
-import org.mortbay.jetty.server.LoginCallback;
+import org.mortbay.jetty.server.UserIdentity;
 
 /**
  * @version $Rev$ $Date$
@@ -30,6 +28,8 @@ import org.mortbay.jetty.server.LoginCallback;
 public interface LoginService
 {
     String getName();
-    void login(LoginCallback loginCallback) throws ServerAuthException;
-    void logout(Subject subject) throws ServerAuthException;
+    UserIdentity login(String username,Object credentials);
+    
+    IdentityService getIdentityService();
+    void setIdentityService(IdentityService service);
 }

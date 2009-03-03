@@ -27,6 +27,7 @@ import java.util.List;
 import javax.security.auth.Subject;
 
 import org.mortbay.jetty.server.LoginCallback;
+import org.mortbay.jetty.server.UserIdentity;
 
 /**
  * This is similar to the jaspi PasswordValidationCallback but includes user
@@ -36,9 +37,6 @@ import org.mortbay.jetty.server.LoginCallback;
  */
 public class LoginCallbackImpl implements LoginCallback
 {
-
-    private final String[] NO_GROUPS = {};
-
     // initial data
     private final Subject subject;
 
@@ -50,7 +48,7 @@ public class LoginCallbackImpl implements LoginCallback
 
     private Principal userPrincipal;
 
-    private String[] groups = NO_GROUPS;
+    private String[] roles = UserIdentity.NO_ROLES;
 
     //TODO could use Credential instance instead of Object if Basic/Form create a Password object
     public LoginCallbackImpl (Subject subject, String userName, Object credential)
@@ -95,14 +93,14 @@ public class LoginCallbackImpl implements LoginCallback
         this.userPrincipal = userPrincipal;
     }
 
-    public String[] getGroups()
+    public String[] getRoles()
     {
-        return groups;
+        return roles;
     }
 
-    public void setGroups(String[] groups)
+    public void setRoles(String[] groups)
     {
-        this.groups = groups;
+        this.roles = groups;
     }
 
     public void clearPassword()

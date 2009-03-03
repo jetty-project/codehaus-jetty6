@@ -5,12 +5,17 @@ import javax.servlet.ServletResponse;
 
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.ServerAuthException;
-import org.mortbay.jetty.security.ServerAuthResult;
-import org.mortbay.jetty.security.ServerAuthStatus;
+import org.mortbay.jetty.security.Authentication;
+import org.mortbay.jetty.security.Authenticator.Configuration;
 
 public class DelegateAuthenticator implements Authenticator
 {
     protected final Authenticator _delegate;
+
+    public void setConfiguration(Configuration configuration)
+    {
+        _delegate.setConfiguration(configuration);
+    }
 
     public String getAuthMethod()
     {
@@ -27,12 +32,12 @@ public class DelegateAuthenticator implements Authenticator
         return _delegate;
     }
 
-    public ServerAuthResult validateRequest(ServletRequest request, ServletResponse response, boolean manditory) throws ServerAuthException
+    public Authentication validateRequest(ServletRequest request, ServletResponse response, boolean manditory) throws ServerAuthException
     {
         return _delegate.validateRequest(request, response, manditory);
     }
 
-    public ServerAuthStatus secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, ServerAuthResult validatedUser) throws ServerAuthException
+    public Authentication.Status secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, Authentication validatedUser) throws ServerAuthException
     {
         return _delegate.secureResponse(req,res, mandatory, validatedUser);
     }

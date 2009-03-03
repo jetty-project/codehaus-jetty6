@@ -15,8 +15,7 @@
 package org.mortbay.jetty.server;
 import java.security.Principal;
 import java.util.Map;
-
-import org.mortbay.jetty.server.RunAsToken;
+import javax.security.auth.Subject;
 
 /* ------------------------------------------------------------ */
 /** User object that encapsulates user identity and operations such as run-as-role actions, checking isUserInRole and getUserPrincipal.
@@ -26,69 +25,95 @@ import org.mortbay.jetty.server.RunAsToken;
  */
 public interface UserIdentity
 {
+    final static String[] NO_ROLES = new String[]{}; 
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return The user subject
+     */
+    Subject getSubject();
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return The user principal
+     */
     Principal getUserPrincipal();
 
-    String getAuthMethod();
+    /* ------------------------------------------------------------ */
+    /**
+     * @return The users roles
+     */
+    String[] getRoles();
 
     /* ------------------------------------------------------------ */
     /** Check if the user is in a role.
+     * This call is used to satisfy authorization calls from 
+     * container code which will be using translated role names.
      * @param role A role name.
      * @return True if the user can act in that role.
      */
     boolean isUserInRole(String role);
+    
 
     /* ------------------------------------------------------------ */
-    /** Push role onto a Principal.
-     * This method is used to set the run-as role.
-     * @param newRunAsRole The role to set.
-     * @return the previous run-as role so it can be reset on exit.
-     */
-    RunAsToken setRunAsRole(RunAsToken newRunAsRole);
-
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     /**
-     * set the role mapping for a particular servlet for role-refs.  Returns the preexisting value.
-     *
-     * Note: should not return null.
-     *
-     * @param roleMap Role reference map
-     * @return previous rol reference map
+     * A UserIdentity Context.
+     * A Context is the environment in which a User Identity is to 
+     * be interpreted. Typically it is set by the target servlet of 
+     * a request.
+     * @see org.mortbay.jetty.servlet.ServletHolder
      */
-    Map<String,String> setRoleRefMap(Map<String,String> roleMap);
-
-
-    /**
-     * get the role mapping for a particular servlet for role-refs. 
-     *
-     * @return previous role reference map
-     */
-    Map<String,String> getRoleRefMap();
-
+    interface Context
+    {
+        /* ------------------------------------------------------------ */
+        /**
+         * @return The context path that the identity is being considered within
+         */
+        String getContextPath();
+        
+        /* ------------------------------------------------------------ */
+        /**
+         * @return The name of the identity context. Typically this is the servlet name.
+         */
+        String getName();
+        
+        /* ------------------------------------------------------------ */
+        /**
+         * @return The name of a runAs entity. Typically this is a runAs role applied to a servlet.
+         */
+        String getRunAsRole();
+        
+        /* ------------------------------------------------------------ */
+        /**
+         * @return A map of role reference names that converts from names used by application code
+         * to names used by the context deployment.
+         */
+        Map<String,String> getRoleRefMap();
+    }
     
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     public static final UserIdentity UNAUTHENTICATED_IDENTITY = new UserIdentity()
     {
+        public Subject getSubject()
+        {
+            return null;
+        }
+        
         public Principal getUserPrincipal()
         {
             return null;
         }
-        public String getAuthMethod() 
+        public String[] getRoles()
         {
-            return null;
+            return NO_ROLES;
         }
         public boolean isUserInRole(String role)
         {
             return false;
-        }
-        public RunAsToken setRunAsRole(RunAsToken newRunAsRole)
-        {
-            return null;
-        }
-        public Map<String,String> setRoleRefMap(Map<String,String> roleMap)
-        {
-            return null;
-        }
-        public Map<String, String> getRoleRefMap()
-        {
-            return null;
         }
         
         public String toString()

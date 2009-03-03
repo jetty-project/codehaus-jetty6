@@ -63,7 +63,7 @@ public class RunAs
         String className = getServletClassNameForHolder(holder);
 
         if (className.equals(_targetClass.getName()))
-            holder.setRunAs(securityHandler.newRunAsToken(_roleName));
+            holder.setRunAsRole(_roleName);
     }
 
     public static String getServletClassNameForHolder (ServletHolder holder)

@@ -38,7 +38,6 @@ import org.mortbay.jetty.io.EofException;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
 import org.mortbay.jetty.security.HashLoginService;
-import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.authentication.BasicAuthenticator;
 import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.Handler;
@@ -103,7 +102,7 @@ public class SslSecurityListenerTest extends TestCase
     {
         final CyclicBarrier barrier = new CyclicBarrier(2);
         
-        ContentExchange httpExchange = new ContentExchange()
+        ContentExchange httpExchange = new ContentExchange(true)
         {
             protected void onResponseComplete() throws IOException
             {
@@ -119,8 +118,8 @@ public class SslSecurityListenerTest extends TestCase
 
         _httpClient.send(httpExchange);
         
-        barrier.await(10,TimeUnit.SECONDS);
-
+        barrier.await(10000,TimeUnit.SECONDS);
+        
         assertEquals(HttpServletResponse.SC_OK,httpExchange.getResponseStatus());
 
         // System.err.println(httpExchange.getResponseContent());
@@ -155,9 +154,14 @@ public class SslSecurityListenerTest extends TestCase
         cm.setConstraint(constraint);
         cm.setPathSpec("/*");
 
-        LoginService loginService = new HashLoginService("MyRealm","src/test/resources/realm.properties");
+        HashLoginService loginService = new HashLoginService("MyRealm","src/test/resources/realm.properties");
+        _server.addBean(loginService);
+        
+        BasicAuthenticator authenticator = new BasicAuthenticator();
+        
         ConstraintSecurityHandler sh = new ConstraintSecurityHandler();
-        sh.setAuthenticator(new BasicAuthenticator(loginService));
+        sh.setAuthenticator(authenticator);
+        
         Set<String> roles = new HashSet<String>(Arrays.asList(new String[]{"user", "admin"}));
         sh.setConstraintMappings(new ConstraintMapping[] { cm }, roles);
         _server.setHandler(sh);
@@ -167,7 +171,7 @@ public class SslSecurityListenerTest extends TestCase
 
             public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
             {
-                System.err.println("passed authentication!\n"+((Request)request).getConnection().getRequestFields());
+                // System.err.println("passed authentication!\n"+((Request)request).getConnection().getRequestFields());
                 
                 Request base_request = (request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
                 base_request.setHandled(true);

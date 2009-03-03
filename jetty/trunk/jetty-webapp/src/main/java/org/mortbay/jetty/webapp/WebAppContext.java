@@ -33,6 +33,7 @@ import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
 
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
+import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.HandlerContainer;
 import org.mortbay.jetty.server.handler.ContextHandler;
@@ -133,7 +134,7 @@ public class WebAppContext extends Context
     /* ------------------------------------------------------------ */
     public WebAppContext()
     {
-        this(null,null,null,null);
+        super(SESSIONS|SECURITY);
     }
     
     /* ------------------------------------------------------------ */
@@ -165,13 +166,9 @@ public class WebAppContext extends Context
     /* ------------------------------------------------------------ */
     /**
      */
-    public WebAppContext(HandlerWrapper securityHandler,SessionHandler sessionHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    public WebAppContext(SessionHandler sessionHandler, SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {
-        super(null,
-              sessionHandler!=null?sessionHandler:new SessionHandler(),
-              securityHandler!=null?securityHandler:new ConstraintSecurityHandler(),
-              servletHandler!=null?servletHandler:new ServletHandler(),
-              null);
+        super(null,sessionHandler,securityHandler,servletHandler,errorHandler);
         
         setErrorHandler(errorHandler!=null?errorHandler:new ErrorPageErrorHandler());
     }    

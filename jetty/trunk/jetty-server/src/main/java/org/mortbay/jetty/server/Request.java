@@ -62,7 +62,6 @@ import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.io.nio.DirectNIOBuffer;
 import org.mortbay.jetty.io.nio.IndirectNIOBuffer;
 import org.mortbay.jetty.io.nio.NIOBuffer;
-import org.mortbay.jetty.server.handler.CompleteHandler;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.handler.ContextHandler.SContext;
 import org.mortbay.jetty.util.Attributes;
@@ -110,61 +109,70 @@ import org.mortbay.jetty.util.log.Log;
  */
 public class Request implements HttpServletRequest
 {
+    private static final String __ASYNC_FWD="org.mortbay.asyncfwd";
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
     private static final int __NONE=0, _STREAM=1, __READER=2;
-    private static final String __ASYNC_FWD="org.mortbay.asyncfwd";
 
-    protected HttpConnection _connection;
+    /* ------------------------------------------------------------ */
+    public static Request getRequest(HttpServletRequest request)
+    {
+        if (request instanceof Request)
+            return (Request) request;
+
+        return HttpConnection.getCurrentConnection().getRequest();
+    }
     protected final AsyncRequest _async = new AsyncRequest();
-    private boolean _handled =false;
-    private Map _roleMap;
-    private EndPoint _endp;
     private boolean _asyncSupported=true;
     private Attributes _attributes;
+    private String _authType;
+    private MultiMap<String> _baseParameters;
     private String _characterEncoding;
-    private String _queryEncoding;
-    private String _serverName;
-    private String _remoteAddr;
-    private String _remoteHost;
+    protected HttpConnection _connection;
+    private ContextHandler.SContext _context;
+    private String _contextPath;
+    private Continuation _continuation;
+    private CookieCutter _cookies;
+    private boolean _cookiesExtracted=false;
+    private DispatcherType _dispatcherType;
+    private boolean _dns=false;
+    private EndPoint _endp;
+    private boolean _handled =false;
+    private int _inputState=__NONE;
     private String _method;
+    private MultiMap<String> _parameters;
+    private boolean _paramsExtracted;
     private String _pathInfo;
     private int _port;
     private String _protocol=HttpVersions.HTTP_1_1;
+    private String _queryEncoding;
     private String _queryString;
-    private String _requestedSessionId;
-    private boolean _requestedSessionIdFromCookie=false;
-    private String _requestURI;
-    private String _scheme=URIUtil.HTTP;
-    private String _contextPath;
-    private String _servletPath;
-    private String _servletName;
-    private HttpURI _uri;
-    private MultiMap<String> _parameters;
-    private MultiMap<String> _baseParameters;
-    private boolean _paramsExtracted;
-    private int _inputState=__NONE;
     private BufferedReader _reader;
     private String _readerEncoding;
-    private boolean _dns=false;
-    private ContextHandler.SContext _context;
+    private String _remoteAddr;
+    private String _remoteHost;
+    private Object _requestAttributeListeners;
+    private String _requestedSessionId;
+    private boolean _requestedSessionIdFromCookie=false;
+    private Object _requestListeners;
+    private String _requestURI;
+    private Map<Object,HttpSession> _savedNewSessions;
+    private String _scheme=URIUtil.HTTP;
+    private String _serverName;
+    private String _servletName;
+    private String _servletPath;
     private HttpSession _session;
     private SessionManager _sessionManager;
-    private boolean _cookiesExtracted=false;
     private long _timeStamp;
     private Buffer _timeStampBuffer;
-    private Continuation _continuation;
-    private Object _requestAttributeListeners;
-    private Object _requestListeners;
-    private Map<Object,HttpSession> _savedNewSessions;
-    private CookieCutter _cookies;
-    private UserIdentity _userIdentity = UserIdentity.UNAUTHENTICATED_IDENTITY;
-    private DispatcherType _dispatcherType;
+    private HttpURI _uri;
 
+    private UserIdentity _userIdentity = UserIdentity.UNAUTHENTICATED_IDENTITY;
+    
     /* ------------------------------------------------------------ */
     public Request()
     {
     }
-    
+
     /* ------------------------------------------------------------ */
     public Request(HttpConnection connection)
     {
@@ -172,13 +180,147 @@ public class Request implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
-    //final so we can safely call this from constructor
-    protected final void setConnection(HttpConnection connection)
+    public void addAsyncListener(AsyncListener listener)
     {
-        _connection=connection;
-    	_async.setConnection(connection);
-        _endp=connection.getEndPoint();
-        _dns=connection.getResolveNames();
+        _async._listeners=LazyList.add(_async._listeners,listener);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void addAsyncListener(final AsyncListener listener, ServletRequest servletRequest, ServletResponse servletResponse)
+    {
+        final AsyncEvent event = new AsyncEvent(servletRequest,servletResponse);
+        
+        _async._listeners=LazyList.add(_async._listeners,new AsyncListener()
+        {
+            public void onComplete(AsyncEvent ev) throws IOException
+            {
+                listener.onComplete(event);
+            }
+
+            public void onTimeout(AsyncEvent ev) throws IOException
+            {
+                listener.onComplete(event);
+            }
+        });
+    }
+
+    /* ------------------------------------------------------------ */
+    public void addEventListener(final EventListener listener) 
+    {
+        if (listener instanceof ServletRequestAttributeListener)
+            _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
+    }
+
+    /* ------------------------------------------------------------ */
+    /*
+     * Extract Paramters from query string and/or form _content.
+     */
+    private void extractParameters()
+    {
+        if (_baseParameters == null) 
+            _baseParameters = new MultiMap(16);
+        
+        if (_paramsExtracted) 
+        {
+            if (_parameters==null)
+                _parameters=_baseParameters;
+            return;
+        }
+        
+        _paramsExtracted = true;
+
+        // Handle query string
+        if (_uri!=null && _uri.hasQuery())
+        {
+            if (_queryEncoding==null)
+                _uri.decodeQueryTo(_baseParameters);
+            else
+            {
+                try
+                {
+                    _uri.decodeQueryTo(_baseParameters,_queryEncoding);
+
+                }
+                catch (UnsupportedEncodingException e)
+                {
+                    if (Log.isDebugEnabled())
+                        Log.warn(e);
+                    else
+                        Log.warn(e.toString());
+                }
+            }
+
+        }
+
+        // handle any _content.
+        String encoding = getCharacterEncoding();
+        String content_type = getContentType();
+        if (content_type != null && content_type.length() > 0)
+        {
+            content_type = HttpFields.valueParameters(content_type, null);
+            
+            if (MimeTypes.FORM_ENCODED.equalsIgnoreCase(content_type) &&
+                    (HttpMethods.POST.equals(getMethod()) || HttpMethods.PUT.equals(getMethod())))
+            {
+                int content_length = getContentLength();
+                if (content_length != 0)
+                {
+                    try
+                    {
+                        int maxFormContentSize=-1;
+                        
+                        if (_context!=null)
+                            maxFormContentSize=_context.getContextHandler().getMaxFormContentSize();
+                        else
+                        {
+                            Integer size = (Integer)_connection.getConnector().getServer().getAttribute("org.mortbay.jetty.server.Request.maxFormContentSize");
+                            if (size!=null)
+                                maxFormContentSize =size.intValue();
+                        }
+                        
+                        if (content_length>maxFormContentSize && maxFormContentSize > 0)
+                        {
+                            throw new IllegalStateException("Form too large"+content_length+">"+maxFormContentSize);
+                        }
+                        InputStream in = getInputStream();
+                       
+                        // Add form params to query params
+                        UrlEncoded.decodeTo(in, _baseParameters, encoding,content_length<0?maxFormContentSize:-1);
+                    }
+                    catch (IOException e)
+                    {
+                        if (Log.isDebugEnabled())
+                            Log.warn(e);
+                        else
+                            Log.warn(e.toString());
+                    }
+                }
+            }
+        }
+        
+        if (_parameters==null)
+            _parameters=_baseParameters;
+        else if (_parameters!=_baseParameters)
+        {
+            // Merge parameters (needed if parameters extracted after a forward).
+            Iterator iter = _baseParameters.entrySet().iterator();
+            while (iter.hasNext())
+            {
+                Map.Entry entry = (Map.Entry)iter.next();
+                String name=(String)entry.getKey();
+                Object values=entry.getValue();
+                for (int i=0;i<LazyList.size(values);i++)
+                    _parameters.add(name, LazyList.get(values, i));
+            }
+        }   
+    }
+
+    /* ------------------------------------------------------------ */
+    public AsyncContext getAsyncContext()
+    {
+        if (_async.isInitial() && !isAsyncStarted())
+            throw new IllegalStateException(_async.getStatusString());
+        return _async;
     }
 
     /* ------------------------------------------------------------ */
@@ -186,98 +328,7 @@ public class Request implements HttpServletRequest
     {
         return _async;
     }
-    
-    /* ------------------------------------------------------------ */
-    protected void recycle()
-    {
-    	_async.recycle();
-        _asyncSupported=true;
-        _handled=false;
-        if (_context!=null)
-            throw new IllegalStateException("Request in context!");
-        if(_attributes!=null)
-            _attributes.clearAttributes();
-        _characterEncoding=null;
-        _queryEncoding=null;
-        _context=null;
-        _serverName=null;
-        _method=null;
-        _pathInfo=null;
-        _port=0;
-        _protocol=HttpVersions.HTTP_1_1;
-        _queryString=null;
-        _requestedSessionId=null;
-        _requestedSessionIdFromCookie=false;
-        _session=null;
-        _requestURI=null;
-        _scheme=URIUtil.HTTP;
-        _servletPath=null;
-        _timeStamp=0;
-        _timeStampBuffer=null;
-        _uri=null;
-        _userIdentity=UserIdentity.UNAUTHENTICATED_IDENTITY;
-        if (_baseParameters!=null)
-            _baseParameters.clear();
-        _parameters=null;
-        _paramsExtracted=false;
-        _inputState=__NONE;
-        
-        _cookiesExtracted=false;
-        if (_savedNewSessions!=null)
-            _savedNewSessions.clear();
-        _savedNewSessions=null;
-        if (_continuation!=null && _continuation.isPending())
-            _continuation.reset();
-    }
 
-    /* ------------------------------------------------------------ */
-    public Response getResponse()
-    {
-        return _connection._response;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Get Request TimeStamp
-     * 
-     * @return The time that the request was received.
-     */
-    public Buffer getTimeStampBuffer()
-    {
-        if (_timeStampBuffer == null && _timeStamp > 0)
-                _timeStampBuffer = HttpFields.__dateCache.formatBuffer(_timeStamp);
-        return _timeStampBuffer;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Get Request TimeStamp
-     * 
-     * @return The time that the request was received.
-     */
-    public long getTimeStamp()
-    {
-        return _timeStamp;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setTimeStamp(long ts)
-    {
-        _timeStamp = ts;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isHandled()
-    {
-        return _handled;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setHandled(boolean h)
-    {
-        _handled=h;
-    }
-    
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.ServletRequest#getAttribute(java.lang.String)
@@ -312,6 +363,16 @@ public class Request implements HttpServletRequest
             return Collections.enumeration(Collections.EMPTY_LIST);
         return AttributesMap.getAttributeNamesCopy(_attributes);
     }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     */
+    public Attributes getAttributes()
+    {
+        if (_attributes==null)
+            _attributes=new AttributesMap();
+        return _attributes;
+    }
 
     /* ------------------------------------------------------------ */
     /* 
@@ -319,7 +380,7 @@ public class Request implements HttpServletRequest
      */
     public String getAuthType()
     {
-        return _userIdentity.getAuthMethod();
+        return _authType;
     }
 
     /* ------------------------------------------------------------ */
@@ -329,6 +390,24 @@ public class Request implements HttpServletRequest
     public String getCharacterEncoding()
     {
         return _characterEncoding;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the connection.
+     */
+    public HttpConnection getConnection()
+    {
+        return _connection;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see javax.servlet.ServletRequest#getContentLength()
+     */
+    public int getContentLength()
+    {
+        return (int)_connection.getRequestFields().getLongField(HttpHeaders.CONTENT_LENGTH_BUFFER);
     }
     
     public long getContentRead()
@@ -341,15 +420,6 @@ public class Request implements HttpServletRequest
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see javax.servlet.ServletRequest#getContentLength()
-     */
-    public int getContentLength()
-    {
-        return (int)_connection.getRequestFields().getLongField(HttpHeaders.CONTENT_LENGTH_BUFFER);
-    }
-
-    /* ------------------------------------------------------------ */
-    /* 
      * @see javax.servlet.ServletRequest#getContentType()
      */
     public String getContentType()
@@ -358,13 +428,13 @@ public class Request implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
-    /* 
-     * @see javax.servlet.ServletRequest#getContentType()
+    /**
+     * @return The current {@link SContext context} used for this request, or <code>null</code> if {@link #setContext} has not yet
+     * been called. 
      */
-    public void setContentType(String contentType)
+    public SContext getContext()
     {
-        _connection.getRequestFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,contentType);
-        
+        return _context;
     }
 
     /* ------------------------------------------------------------ */
@@ -375,6 +445,27 @@ public class Request implements HttpServletRequest
     {
         return _contextPath;
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @deprecated
+     */
+    public Continuation getContinuation()
+    {
+        return _continuation;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @deprecated
+     */
+    public Continuation getContinuation(boolean create)
+    {
+        if (_continuation==null && create)
+            _continuation=new Servlet3Continuation(this); 
+        return _continuation;
+    }
+
 
     /* ------------------------------------------------------------ */
     /* 
@@ -408,7 +499,6 @@ public class Request implements HttpServletRequest
         return _cookies.getCookies();
     }
 
-
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.http.HttpServletRequest#getDateHeader(java.lang.String)
@@ -416,6 +506,12 @@ public class Request implements HttpServletRequest
     public long getDateHeader(String name)
     {
         return _connection.getRequestFields().getDateField(name);
+    }
+
+    /* ------------------------------------------------------------ */
+    public DispatcherType getDispatcherType()
+    {
+    	return _dispatcherType;
     }
 
     /* ------------------------------------------------------------ */
@@ -446,6 +542,15 @@ public class Request implements HttpServletRequest
         if (e==null)
             return Collections.enumeration(Collections.EMPTY_LIST);
         return e;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the inputState.
+     */
+    public int getInputState()
+    {
+        return _inputState;
     }
 
     /* ------------------------------------------------------------ */
@@ -624,6 +729,15 @@ public class Request implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the parameters.
+     */
+    public MultiMap getParameters()
+    {
+        return _parameters;
+    }
+
+    /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.ServletRequest#getParameterValues(java.lang.String)
      */
@@ -664,6 +778,28 @@ public class Request implements HttpServletRequest
     public String getProtocol()
     {
         return _protocol;
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getQueryEncoding()
+    {
+        return _queryEncoding;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see javax.servlet.http.HttpServletRequest#getQueryString()
+     */
+    public String getQueryString()
+    {
+        if (_queryString==null && _uri!=null)
+        {
+            if (_queryEncoding==null)
+                _queryString=_uri.getQuery();
+            else
+                _queryString=_uri.getQuery(_queryEncoding);
+        }
+        return _queryString;
     }
 
     /* ------------------------------------------------------------ */
@@ -790,7 +926,7 @@ public class Request implements HttpServletRequest
     {
         return _requestedSessionId;
     }
-
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.http.HttpServletRequest#getRequestURI()
@@ -830,6 +966,42 @@ public class Request implements HttpServletRequest
         }
     }
 
+    /* ------------------------------------------------------------ */
+    public Response getResponse()
+    {
+        return _connection._response;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Reconstructs the URL the client used to make the request. The returned URL contains a
+     * protocol, server name, port number, and, but it does not include a path.
+     * <p>
+     * Because this method returns a <code>StringBuffer</code>, not a string, you can modify the
+     * URL easily, for example, to append path and query parameters.
+     * 
+     * This method is useful for creating redirect messages and for reporting errors.
+     * 
+     * @return "scheme://host:port"
+     */
+    public StringBuilder getRootURL()
+    {
+        StringBuilder url = new StringBuilder(48);
+        String scheme = getScheme();
+        int port = getServerPort();
+
+        url.append(scheme);
+        url.append("://");
+        url.append(getServerName());
+
+        if (port > 0 && ((scheme.equalsIgnoreCase("http") && port != 80) || (scheme.equalsIgnoreCase("https") && port != 443)))
+        {
+            url.append(':');
+            url.append(port);
+        }
+        return url;
+    }
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.ServletRequest#getScheme()
@@ -928,6 +1100,20 @@ public class Request implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
+    public ServletContext getServletContext()
+    {
+        return _context;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     */
+    public String getServletName()
+    {
+        return _servletName;
+    }
+
+    /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.http.HttpServletRequest#getServletPath()
      */
@@ -937,13 +1123,11 @@ public class Request implements HttpServletRequest
             _servletPath="";
         return _servletPath;
     }
-    
+
     /* ------------------------------------------------------------ */
-    /* 
-     */
-    public String getServletName()
+    public ServletResponse getServletResponse()
     {
-        return _servletName;
+        return _connection.getResponse();
     }
 
     /* ------------------------------------------------------------ */
@@ -990,6 +1174,54 @@ public class Request implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the sessionManager.
+     */
+    public SessionManager getSessionManager()
+    {
+        return _sessionManager;
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Get Request TimeStamp
+     * 
+     * @return The time that the request was received.
+     */
+    public long getTimeStamp()
+    {
+        return _timeStamp;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Get Request TimeStamp
+     * 
+     * @return The time that the request was received.
+     */
+    public Buffer getTimeStampBuffer()
+    {
+        if (_timeStampBuffer == null && _timeStamp > 0)
+                _timeStampBuffer = HttpFields.__dateCache.formatBuffer(_timeStamp);
+        return _timeStampBuffer;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the uri.
+     */
+    public HttpURI getUri()
+    {
+        return _uri;
+    }
+    
+    public UserIdentity getUserIdentity()
+    {
+        return _userIdentity;
+    }
+    
+    /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.http.HttpServletRequest#getUserPrincipal()
      */
@@ -1030,21 +1262,23 @@ public class Request implements HttpServletRequest
         return _userIdentity.getUserPrincipal();
 
     }
-
+    
     /* ------------------------------------------------------------ */
-    /* 
-     * @see javax.servlet.http.HttpServletRequest#getQueryString()
-     */
-    public String getQueryString()
+    public boolean isAsyncStarted()
     {
-        if (_queryString==null && _uri!=null)
-        {
-            if (_queryEncoding==null)
-                _queryString=_uri.getQuery();
-            else
-                _queryString=_uri.getQuery(_queryEncoding);
-        }
-        return _queryString;
+        return _async.isAsyncStarted();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isAsyncSupported()
+    {
+        return _asyncSupported;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isHandled()
+    {
+        return _handled;
     }
     
     /* ------------------------------------------------------------ */
@@ -1064,7 +1298,7 @@ public class Request implements HttpServletRequest
     {
         return _requestedSessionId!=null && !_requestedSessionIdFromCookie;
     }
-
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdFromURL()
@@ -1073,7 +1307,7 @@ public class Request implements HttpServletRequest
     {
         return _requestedSessionId!=null && !_requestedSessionIdFromCookie;
     }
-
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdValid()
@@ -1086,7 +1320,7 @@ public class Request implements HttpServletRequest
         HttpSession session=getSession(false);
         return (session==null?false:_sessionManager.getIdManager().getClusterId(_requestedSessionId).equals(_sessionManager.getClusterId(session)));
     }
-
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.ServletRequest#isSecure()
@@ -1095,29 +1329,68 @@ public class Request implements HttpServletRequest
     {
         return _connection.isConfidential(this);
     }
-
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.http.HttpServletRequest#isUserInRole(java.lang.String)
      */
     public boolean isUserInRole(String role)
     {
-        return _userIdentity.isUserInRole(role);
-//        if (_roleMap!=null)
-//        {
-//            String r=(String)_roleMap.get(role);
-//            if (r!=null)
-//                role=r;
-//        }
-//
-//        Principal principal = getUserPrincipal();
-//
-//        if (_userRealm!=null && principal!=null)
-//            return _userRealm.isUserInRole(principal, role);
-//
-//        return false;
+        return _userIdentity!=null && _userIdentity.isUserInRole(role);
     }
-
+    
+    /* ------------------------------------------------------------ */
+    public HttpSession recoverNewSession(Object key)
+    {
+        if (_savedNewSessions==null)
+            return null;
+        return (HttpSession) _savedNewSessions.get(key);
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected void recycle()
+    {
+        _authType=null;
+    	_async.recycle();
+        _asyncSupported=true;
+        _handled=false;
+        if (_context!=null)
+            throw new IllegalStateException("Request in context!");
+        if(_attributes!=null)
+            _attributes.clearAttributes();
+        _characterEncoding=null;
+        _queryEncoding=null;
+        _context=null;
+        _serverName=null;
+        _method=null;
+        _pathInfo=null;
+        _port=0;
+        _protocol=HttpVersions.HTTP_1_1;
+        _queryString=null;
+        _requestedSessionId=null;
+        _requestedSessionIdFromCookie=false;
+        _session=null;
+        _requestURI=null;
+        _scheme=URIUtil.HTTP;
+        _servletPath=null;
+        _timeStamp=0;
+        _timeStampBuffer=null;
+        _uri=null;
+        _userIdentity=UserIdentity.UNAUTHENTICATED_IDENTITY;
+        if (_baseParameters!=null)
+            _baseParameters.clear();
+        _parameters=null;
+        _paramsExtracted=false;
+        _inputState=__NONE;
+        
+        _cookiesExtracted=false;
+        if (_savedNewSessions!=null)
+            _savedNewSessions.clear();
+        _savedNewSessions=null;
+        if (_continuation!=null && _continuation.isPending())
+            _continuation.reset();
+    }
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.ServletRequest#removeAttribute(java.lang.String)
@@ -1148,7 +1421,31 @@ public class Request implements HttpServletRequest
             }
         }
     }
-
+    
+    /* ------------------------------------------------------------ */
+    public void removeEventListener(final EventListener listener) 
+    {
+        _requestAttributeListeners= LazyList.remove(_requestAttributeListeners, listener);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void saveNewSession(Object key,HttpSession session)
+    {
+        if (_savedNewSessions==null)
+            _savedNewSessions=new HashMap<Object,HttpSession>();
+        _savedNewSessions.put(key,session);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setAsyncSupported(boolean supported)
+    {
+        _asyncSupported=supported;
+    }
+    /* ------------------------------------------------------------ */
+    public void setAsyncTimeout(long timeout)
+    {
+        _async.setAsyncTimeout(timeout);
+    }
     /* ------------------------------------------------------------ */
     /* 
      * Set a request attribute.
@@ -1222,6 +1519,22 @@ public class Request implements HttpServletRequest
             }
         }
     }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     */
+    public void setAttributes(Attributes attributes)
+    {
+        _attributes=attributes;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setAuthType(String authType)
+    {
+        _authType=authType;
+    }
+    
+    /* ------------------------------------------------------------ */
 
     /* ------------------------------------------------------------ */
     /* 
@@ -1247,182 +1560,50 @@ public class Request implements HttpServletRequest
     {
         _characterEncoding=encoding;
     }
-    
 
     /* ------------------------------------------------------------ */
-    /*
-     * Extract Paramters from query string and/or form _content.
-     */
-    private void extractParameters()
+    //final so we can safely call this from constructor
+    protected final void setConnection(HttpConnection connection)
     {
-        if (_baseParameters == null) 
-            _baseParameters = new MultiMap(16);
+        _connection=connection;
+    	_async.setConnection(connection);
+        _endp=connection.getEndPoint();
+        _dns=connection.getResolveNames();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see javax.servlet.ServletRequest#getContentType()
+     */
+    public void setContentType(String contentType)
+    {
+        _connection.getRequestFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,contentType);
         
-        if (_paramsExtracted) 
-        {
-            if (_parameters==null)
-                _parameters=_baseParameters;
-            return;
-        }
-        
-        _paramsExtracted = true;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param context
+     */
+    public void setContext(SContext context)
+    {
+        _context=context;
+    }
 
-        // Handle query string
-        if (_uri!=null && _uri.hasQuery())
-        {
-            if (_queryEncoding==null)
-                _uri.decodeQueryTo(_baseParameters);
-            else
-            {
-                try
-                {
-                    _uri.decodeQueryTo(_baseParameters,_queryEncoding);
-
-                }
-                catch (UnsupportedEncodingException e)
-                {
-                    if (Log.isDebugEnabled())
-                        Log.warn(e);
-                    else
-                        Log.warn(e.toString());
-                }
-            }
-
-        }
-
-        // handle any _content.
-        String encoding = getCharacterEncoding();
-        String content_type = getContentType();
-        if (content_type != null && content_type.length() > 0)
-        {
-            content_type = HttpFields.valueParameters(content_type, null);
-            
-            if (MimeTypes.FORM_ENCODED.equalsIgnoreCase(content_type) &&
-                    (HttpMethods.POST.equals(getMethod()) || HttpMethods.PUT.equals(getMethod())))
-            {
-                int content_length = getContentLength();
-                if (content_length != 0)
-                {
-                    try
-                    {
-                        int maxFormContentSize=-1;
-                        
-                        if (_context!=null)
-                            maxFormContentSize=_context.getContextHandler().getMaxFormContentSize();
-                        else
-                        {
-                            Integer size = (Integer)_connection.getConnector().getServer().getAttribute("org.mortbay.jetty.server.Request.maxFormContentSize");
-                            if (size!=null)
-                                maxFormContentSize =size.intValue();
-                        }
-                        
-                        if (content_length>maxFormContentSize && maxFormContentSize > 0)
-                        {
-                            throw new IllegalStateException("Form too large"+content_length+">"+maxFormContentSize);
-                        }
-                        InputStream in = getInputStream();
-                       
-                        // Add form params to query params
-                        UrlEncoded.decodeTo(in, _baseParameters, encoding,content_length<0?maxFormContentSize:-1);
-                    }
-                    catch (IOException e)
-                    {
-                        if (Log.isDebugEnabled())
-                            Log.warn(e);
-                        else
-                            Log.warn(e.toString());
-                    }
-                }
-            }
-        }
-        
-        if (_parameters==null)
-            _parameters=_baseParameters;
-        else if (_parameters!=_baseParameters)
-        {
-            // Merge parameters (needed if parameters extracted after a forward).
-            Iterator iter = _baseParameters.entrySet().iterator();
-            while (iter.hasNext())
-            {
-                Map.Entry entry = (Map.Entry)iter.next();
-                String name=(String)entry.getKey();
-                Object values=entry.getValue();
-                for (int i=0;i<LazyList.size(values);i++)
-                    _parameters.add(name, LazyList.get(values, i));
-            }
-        }   
+    /* ------------------------------------------------------------ */
+    /**
+     * Sets the "context path" for this request
+     * @see HttpServletRequest#getContextPath
+     */
+    public void setContextPath(String contextPath)
+    {
+        _contextPath = contextPath;
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * @param host The host to set.
-     */
-    public void setServerName(String host)
+    void setContinuation(Continuation cont)
     {
-        _serverName = host;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param port The port to set.
-     */
-    public void setServerPort(int port)
-    {
-        _port = port;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param addr The address to set.
-     */
-    public void setRemoteAddr(String addr)
-    {
-        _remoteAddr = addr;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param host The host to set.
-     */
-    public void setRemoteHost(String host)
-    {
-        _remoteHost = host;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the uri.
-     */
-    public HttpURI getUri()
-    {
-        return _uri;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param uri The uri to set.
-     */
-    public void setUri(HttpURI uri)
-    {
-        _uri = uri;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the connection.
-     */
-    public HttpConnection getConnection()
-    {
-        return _connection;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the inputState.
-     */
-    public int getInputState()
-    {
-        return _inputState;
+        _continuation=cont;
     }
 
     /* ------------------------------------------------------------ */
@@ -1437,244 +1618,24 @@ public class Request implements HttpServletRequest
     }
     
     /* ------------------------------------------------------------ */
+    public void setDispatcherType(DispatcherType type)
+    {
+    	_dispatcherType=type;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setHandled(boolean h)
+    {
+        _handled=h;
+    }
+
+    /* ------------------------------------------------------------ */
     /**
      * @param method The method to set.
      */
     public void setMethod(String method)
     {
         _method = method;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param pathInfo The pathInfo to set.
-     */
-    public void setPathInfo(String pathInfo)
-    {
-        _pathInfo = pathInfo;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param protocol The protocol to set.
-     */
-    public void setProtocol(String protocol)
-    {
-        _protocol = protocol;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param requestedSessionId The requestedSessionId to set.
-     */
-    public void setRequestedSessionId(String requestedSessionId)
-    {
-        _requestedSessionId = requestedSessionId;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the sessionManager.
-     */
-    public SessionManager getSessionManager()
-    {
-        return _sessionManager;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param sessionManager The sessionManager to set.
-     */
-    public void setSessionManager(SessionManager sessionManager)
-    {
-        _sessionManager = sessionManager;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param requestedSessionIdCookie The requestedSessionIdCookie to set.
-     */
-    public void setRequestedSessionIdFromCookie(boolean requestedSessionIdCookie)
-    {
-        _requestedSessionIdFromCookie = requestedSessionIdCookie;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param session The session to set.
-     */
-    public void setSession(HttpSession session)
-    {
-        _session = session;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param scheme The scheme to set.
-     */
-    public void setScheme(String scheme)
-    {
-        _scheme = scheme;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param queryString The queryString to set.
-     */
-    public void setQueryString(String queryString)
-    {
-        _queryString = queryString;
-    }
-    /* ------------------------------------------------------------ */
-    /**
-     * @param requestURI The requestURI to set.
-     */
-    public void setRequestURI(String requestURI)
-    {
-        _requestURI = requestURI;
-    }
-    /* ------------------------------------------------------------ */
-    /**
-     * Sets the "context path" for this request
-     * @see HttpServletRequest#getContextPath
-     */
-    public void setContextPath(String contextPath)
-    {
-        _contextPath = contextPath;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param servletPath The servletPath to set.
-     */
-    public void setServletPath(String servletPath)
-    {
-        _servletPath = servletPath;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param name The servletName to set.
-     */
-    public void setServletName(String name)
-    {
-        _servletName = name;
-    }
-    
-    /* ------------------------------------------------------------ */
-
-    public UserIdentity getUserIdentity()
-    {
-        return _userIdentity;
-    }
-
-    public void setUserIdentity(UserIdentity userIdentity)
-    {
-        if (userIdentity == null)
-            throw new NullPointerException("No UserIdentity");
-        this._userIdentity = userIdentity;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param context
-     */
-    public void setContext(SContext context)
-    {
-        _context=context;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The current {@link SContext context} used for this request, or <code>null</code> if {@link #setContext} has not yet
-     * been called. 
-     */
-    public SContext getContext()
-    {
-        return _context;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * Reconstructs the URL the client used to make the request. The returned URL contains a
-     * protocol, server name, port number, and, but it does not include a path.
-     * <p>
-     * Because this method returns a <code>StringBuffer</code>, not a string, you can modify the
-     * URL easily, for example, to append path and query parameters.
-     * 
-     * This method is useful for creating redirect messages and for reporting errors.
-     * 
-     * @return "scheme://host:port"
-     */
-    public StringBuilder getRootURL()
-    {
-        StringBuilder url = new StringBuilder(48);
-        String scheme = getScheme();
-        int port = getServerPort();
-
-        url.append(scheme);
-        url.append("://");
-        url.append(getServerName());
-
-        if (port > 0 && ((scheme.equalsIgnoreCase("http") && port != 80) || (scheme.equalsIgnoreCase("https") && port != 443)))
-        {
-            url.append(':');
-            url.append(port);
-        }
-        return url;
-    }
-
-    /* ------------------------------------------------------------ */
-    /* 
-     */
-    public Attributes getAttributes()
-    {
-        if (_attributes==null)
-            _attributes=new AttributesMap();
-        return _attributes;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /* 
-     */
-    public void setAttributes(Attributes attributes)
-    {
-        _attributes=attributes;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @deprecated
-     */
-    public Continuation getContinuation()
-    {
-        return _continuation;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @deprecated
-     */
-    public Continuation getContinuation(boolean create)
-    {
-        if (_continuation==null && create)
-            _continuation=new Servlet3Continuation(this); 
-        return _continuation;
-    }
-    
-    /* ------------------------------------------------------------ */
-    void setContinuation(Continuation cont)
-    {
-        _continuation=cont;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the parameters.
-     */
-    public MultiMap getParameters()
-    {
-        return _parameters;
     }
 
     /* ------------------------------------------------------------ */
@@ -1689,74 +1650,23 @@ public class Request implements HttpServletRequest
     }
     
     /* ------------------------------------------------------------ */
-    public String toString()
+    /**
+     * @param pathInfo The pathInfo to set.
+     */
+    public void setPathInfo(String pathInfo)
     {
-        return (_handled?"[":"(")+getMethod()+" "+_uri+(_handled?"]@":")@")+hashCode()+" "+super.toString();
-    }
-
-    /* ------------------------------------------------------------ */
-    public static Request getRequest(HttpServletRequest request)
-    {
-        if (request instanceof Request)
-            return (Request) request;
-
-        return HttpConnection.getCurrentConnection().getRequest();
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void addEventListener(final EventListener listener) 
-    {
-        if (listener instanceof ServletRequestAttributeListener)
-            _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void removeEventListener(final EventListener listener) 
-    {
-        _requestAttributeListeners= LazyList.remove(_requestAttributeListeners, listener);
+        _pathInfo = pathInfo;
     }
 
     /* ------------------------------------------------------------ */
     /**
-     * @param requestListeners {@link LazyList} of {@link ServletRequestListener}s
+     * @param protocol The protocol to set.
      */
-    public void setRequestListeners(Object requestListeners)
+    public void setProtocol(String protocol)
     {
-        _requestListeners=requestListeners;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return {@link LazyList} of {@link ServletRequestListener}s
-     */
-    public Object takeRequestListeners()
-    {
-        final Object listeners=_requestListeners;
-        _requestListeners=null;
-        return listeners;
+        _protocol = protocol;
     }
     
-    /* ------------------------------------------------------------ */
-    public void saveNewSession(Object key,HttpSession session)
-    {
-        if (_savedNewSessions==null)
-            _savedNewSessions=new HashMap<Object,HttpSession>();
-        _savedNewSessions.put(key,session);
-    }
-    /* ------------------------------------------------------------ */
-    public HttpSession recoverNewSession(Object key)
-    {
-        if (_savedNewSessions==null)
-            return null;
-        return (HttpSession) _savedNewSessions.get(key);
-    }
-
-    /* ------------------------------------------------------------ */
-    public String getQueryEncoding()
-    {
-        return _queryEncoding;
-    }
-
     /* ------------------------------------------------------------ */
     /** Set the character encoding used for the query string.
      * This call will effect the return of getQueryString and getParamaters.
@@ -1772,82 +1682,154 @@ public class Request implements HttpServletRequest
         _queryEncoding=queryEncoding;
         _queryString=null;
     }
-
+    
     /* ------------------------------------------------------------ */
-    public void setRoleMap(Map map)
+    /**
+     * @param queryString The queryString to set.
+     */
+    public void setQueryString(String queryString)
     {
-        _roleMap=map;
+        _queryString = queryString;
     }
 
     /* ------------------------------------------------------------ */
-    public Map getRoleMap()
+    /**
+     * @param addr The address to set.
+     */
+    public void setRemoteAddr(String addr)
     {
-        return _roleMap;
+        _remoteAddr = addr;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param host The host to set.
+     */
+    public void setRemoteHost(String host)
+    {
+        _remoteHost = host;
     }
     
     /* ------------------------------------------------------------ */
-    public ServletContext getServletContext()
+    /**
+     * @param requestedSessionId The requestedSessionId to set.
+     */
+    public void setRequestedSessionId(String requestedSessionId)
     {
-        return _context;
+        _requestedSessionId = requestedSessionId;
+    }
+    /* ------------------------------------------------------------ */
+    /**
+     * @param requestedSessionIdCookie The requestedSessionIdCookie to set.
+     */
+    public void setRequestedSessionIdFromCookie(boolean requestedSessionIdCookie)
+    {
+        _requestedSessionIdFromCookie = requestedSessionIdCookie;
     }
 
     /* ------------------------------------------------------------ */
-    public ServletResponse getServletResponse()
+    /**
+     * @param requestListeners {@link LazyList} of {@link ServletRequestListener}s
+     */
+    public void setRequestListeners(Object requestListeners)
     {
-        return _connection.getResponse();
+        _requestListeners=requestListeners;
     }
 
     /* ------------------------------------------------------------ */
-    public void addAsyncListener(AsyncListener listener)
+    /**
+     * @param requestURI The requestURI to set.
+     */
+    public void setRequestURI(String requestURI)
     {
-        _async._listeners=LazyList.add(_async._listeners,listener);
+        _requestURI = requestURI;
     }
 
     /* ------------------------------------------------------------ */
-    public void addAsyncListener(final AsyncListener listener, ServletRequest servletRequest, ServletResponse servletResponse)
+    /**
+     * @param scheme The scheme to set.
+     */
+    public void setScheme(String scheme)
     {
-        final AsyncEvent event = new AsyncEvent(servletRequest,servletResponse);
-        
-        _async._listeners=LazyList.add(_async._listeners,new AsyncListener()
-        {
-            public void onComplete(AsyncEvent ev) throws IOException
-            {
-                listener.onComplete(event);
-            }
-
-            public void onTimeout(AsyncEvent ev) throws IOException
-            {
-                listener.onComplete(event);
-            }
-        });
-    }
-
-    /* ------------------------------------------------------------ */
-    public AsyncContext getAsyncContext()
-    {
-        if (_async.isInitial() && !isAsyncStarted())
-            throw new IllegalStateException(_async.getStatusString());
-        return _async;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isAsyncSupported()
-    {
-        return _asyncSupported;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isAsyncStarted()
-    {
-        return _async.isAsyncStarted();
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setAsyncTimeout(long timeout)
-    {
-        _async.setAsyncTimeout(timeout);
+        _scheme = scheme;
     }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @param host The host to set.
+     */
+    public void setServerName(String host)
+    {
+        _serverName = host;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param port The port to set.
+     */
+    public void setServerPort(int port)
+    {
+        _port = port;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param name The servletName to set.
+     */
+    public void setServletName(String name)
+    {
+        _servletName = name;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param servletPath The servletPath to set.
+     */
+    public void setServletPath(String servletPath)
+    {
+        _servletPath = servletPath;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param session The session to set.
+     */
+    public void setSession(HttpSession session)
+    {
+        _session = session;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param sessionManager The sessionManager to set.
+     */
+    public void setSessionManager(SessionManager sessionManager)
+    {
+        _sessionManager = sessionManager;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setTimeStamp(long ts)
+    {
+        _timeStamp = ts;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param uri The uri to set.
+     */
+    public void setUri(HttpURI uri)
+    {
+        _uri = uri;
+    }
+    
+    public void setUserIdentity(UserIdentity userIdentity)
+    {
+        if (userIdentity == null)
+            throw new NullPointerException("No UserIdentity");
+        _userIdentity = userIdentity;
+    }
+
     /* ------------------------------------------------------------ */
     public AsyncContext startAsync() throws IllegalStateException
     {
@@ -1867,21 +1849,20 @@ public class Request implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
-    public void setAsyncSupported(boolean supported)
+    /**
+     * @return {@link LazyList} of {@link ServletRequestListener}s
+     */
+    public Object takeRequestListeners()
     {
-        _asyncSupported=supported;
+        final Object listeners=_requestListeners;
+        _requestListeners=null;
+        return listeners;
     }
 
     /* ------------------------------------------------------------ */
-    public DispatcherType getDispatcherType()
+    public String toString()
     {
-    	return _dispatcherType;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setDispatcherType(DispatcherType type)
-    {
-    	_dispatcherType=type;
+        return (_handled?"[":"(")+getMethod()+" "+_uri+(_handled?"]@":")@")+hashCode()+" "+super.toString();
     }
     
     

@@ -19,7 +19,6 @@
 
 package org.mortbay.jetty.security;
 
-import org.mortbay.jetty.server.RunAsToken;
 
 
 /**
