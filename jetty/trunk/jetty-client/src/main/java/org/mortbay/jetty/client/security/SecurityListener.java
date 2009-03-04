@@ -25,7 +25,7 @@ import org.mortbay.jetty.client.HttpDestination;
 import org.mortbay.jetty.client.HttpEventListenerWrapper;
 import org.mortbay.jetty.client.HttpExchange;
 import org.mortbay.jetty.http.HttpHeaders;
-import org.mortbay.jetty.http.HttpStatus;
+import org.mortbay.jetty.http.HttpStatusCode;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.log.Log;
@@ -118,7 +118,7 @@ public class SecurityListener extends HttpEventListenerWrapper
         if (Log.isDebugEnabled())
             Log.debug("SecurityListener:Response Status: " + status );
 
-        if ( status == HttpStatus.ORDINAL_401_Unauthorized && _attempts<_destination.getHttpClient().maxRetries()) 
+        if ( status == HttpStatusCode.UNAUTHORIZED.getOrdinal() && _attempts<_destination.getHttpClient().maxRetries()) 
         {
             // Let's absorb events until we have done some retries
             setDelegatingResponses(false);
