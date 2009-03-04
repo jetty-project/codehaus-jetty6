@@ -452,7 +452,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
         }
 
         EventListener[] listeners = getWebAppContext().getEventListeners();
-        for (int i=0;i<listeners.length;i++)
+        for (int i=0;listeners!=null && i<listeners.length;i++)
         {
             _injections.inject(listeners[i]);
             _callbacks.callPostConstructCallback(listeners[i]);
@@ -464,7 +464,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
     throws Exception
     {
         EventListener[] listeners = getWebAppContext().getEventListeners();
-        for (int i=0;i<listeners.length;i++)
+        for (int i=0; listeners!=null && i<listeners.length;i++)
         {
             _callbacks.callPreDestroyCallback(listeners[i]);
         }
