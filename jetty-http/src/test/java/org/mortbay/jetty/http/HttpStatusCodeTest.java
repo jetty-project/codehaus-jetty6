@@ -13,11 +13,8 @@
 // ========================================================================
 package org.mortbay.jetty.http;
 
-import java.io.UnsupportedEncodingException;
-
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.io.Buffer;
 
 public class HttpStatusCodeTest extends TestCase
 {
@@ -27,29 +24,4 @@ public class HttpStatusCodeTest extends TestCase
         assertNull("Invalid code: 190", HttpStatusCode.getCode(190));
     }
 
-    public void testGetResponseLine() throws UnsupportedEncodingException
-    {
-        assertResponseLine("404 Not Found", 404);
-        assertResponseLine("507 Insufficient Storage", 507);
-    }
-
-    public void testGetResponseLineDirect() throws UnsupportedEncodingException
-    {
-        assertResponseLine("404 Not Found", HttpStatusCode.NOT_FOUND);
-        assertResponseLine("507 Insufficient Storage", HttpStatusCode.INSUFFICIENT_STORAGE);
-    }
-
-    private void assertResponseLine(String expected, HttpStatusCode code) throws UnsupportedEncodingException
-    {
-        String actual = new String(code.getResponseLine().array(), "UTF-8");
-        assertEquals("Response Line for " + code, expected, actual);
-    }
-
-    private void assertResponseLine(String expected, int ordinal) throws UnsupportedEncodingException
-    {
-        Buffer buf = HttpStatusCode.getResponseLine(ordinal);
-        assertNotNull("Response Line for code [" + ordinal + "] should not be null", buf);
-        String actual = new String(buf.array(), "UTF-8");
-        assertEquals("Response Line for code [" + ordinal + "]", expected, actual);
-    }
 }
