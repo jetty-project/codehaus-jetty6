@@ -803,15 +803,13 @@ public enum HttpStatusCode
     INSUFFICIENT_STORAGE(507, "Insufficient Storage");
 
     private static final int ORDINAL_MAX = 508;
-    private int ordinal;
-    private Buffer messageBuffer;
-    private Buffer responseBuffer;
+    private final int ordinal;
+    private final Buffer messageBuffer;
 
     private HttpStatusCode(int ordinal, String message)
     {
         this.ordinal = ordinal;
         this.messageBuffer = new ByteArrayBuffer(message.getBytes());
-        this.responseBuffer = new ByteArrayBuffer(String.format("%03d %s", ordinal, message).getBytes());
     }
 
     public int getOrdinal()
@@ -1035,29 +1033,4 @@ public enum HttpStatusCode
         return HttpStatusCode.isServerError(this.ordinal);
     }
 
-    /**
-     * Return a response line, suitable for HTTP protocol responses.
-     * 
-     * @param ordinal the ordinal to look up.
-     * @return the response line as a Buffer
-     */
-    public static Buffer getResponseLine(int ordinal)
-    {
-        HttpStatusCode code = getCode(ordinal);
-        if (code == null)
-        {
-            return null;
-        }
-        return code.responseBuffer;
-    }
-
-    /**
-     * Return a response line, suitable for HTTP protocol responses.
-     * 
-     * @return the response linen as a Buffer
-     */
-    public Buffer getResponseLine()
-    {
-        return this.responseBuffer;
-    }
 }
