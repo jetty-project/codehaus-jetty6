@@ -1,5 +1,6 @@
 jetty-6.1.5z5.0 - 19 Feb 2009
  + JETTY-439 Fixed 100 continues clash with Connection:close
+ + JETTY-939 NPE in AbstractConfiguration.callPreDestroyCallbacks
 
 jetty-6.1.5z5.0 - 21 Feb 2008
  + Allow code ranges on ErrorPageErrorHandler
