@@ -77,7 +77,8 @@ Jetty-7.0-SNAPSHOT
  + JETTY-923 Client supports attributes
  + JETTY-926 default location for generatedClasses of jspc plugin is incorrect
  + JETTY-939 NPE in AbstractConfiguration.callPreDestroyCallbacks
-
+ + JETTY-938 Deadlock in the TerracottaSessionManager
+ 
 jetty-6.1.15 2 March 2009
  + JETTY-923 BayeuxClient uses message pools to reduce memory footprint
  + JETTY-924 Improved BayeuxClient disconnect handling
@@ -106,7 +107,7 @@ jetty-6.1.15.rc4 19 February 2009
  + JETTY-898 Allow jetty debs to start with custom java args provided by users
  + JETTY-909 Update useragents cache
 
- 
+
 jetty-6.1.15.rc3 28 January 2009
  + JETTY-691 System.getProperty() calls ... wrap them in doPrivileged
  + JETTY-844 Replace reflection with direct invocation in Slf4jLog
