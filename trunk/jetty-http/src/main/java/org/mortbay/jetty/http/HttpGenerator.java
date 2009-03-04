@@ -22,6 +22,7 @@ import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.BufferUtil;
 import org.mortbay.jetty.io.Buffers;
+import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.io.EofException;
 import org.mortbay.jetty.io.BufferCache.CachedBuffer;
@@ -37,6 +38,33 @@ import org.mortbay.jetty.util.log.Log;
  */
 public class HttpGenerator extends AbstractGenerator
 {
+    // Build cache of response lines for status
+    private static Buffer[] __responseLine = new Buffer[600];
+    static
+    {
+        int versionLength=HttpVersions.HTTP_1_1_BUFFER.length();
+        
+        for (int i=0;i<__responseLine.length;i++)
+        {
+            HttpStatusCode code = HttpStatusCode.getCode(i);
+            if (code==null)
+                continue;
+            String reason=code.getMessage();
+            byte[] bytes=new byte[versionLength+5+reason.length()+2];
+            HttpVersions.HTTP_1_1_BUFFER.peek(0,bytes, 0, versionLength);
+            bytes[versionLength+0]=' ';
+            bytes[versionLength+1]=(byte)('0'+i/100);
+            bytes[versionLength+2]=(byte)('0'+(i%100)/10);
+            bytes[versionLength+3]=(byte)('0'+(i%10));
+            bytes[versionLength+4]=' ';
+            for (int j=0;j<reason.length();j++)
+                bytes[versionLength+5+j]=(byte)reason.charAt(j);;
+            bytes[versionLength+5+reason.length()]=HttpTokens.CARRIAGE_RETURN;
+            bytes[versionLength+6+reason.length()]=HttpTokens.LINE_FEED;
+            __responseLine[i]=new ByteArrayBuffer(bytes,0,bytes.length,Buffer.IMMUTABLE);
+        }
+    }
+    
     // common _content
     private static byte[] LAST_CHUNK =
     { (byte) '0', (byte) '\015', (byte) '\012', (byte) '\015', (byte) '\012'};
@@ -324,8 +352,7 @@ public class HttpGenerator extends AbstractGenerator
                     _close = true;
 
                 // add response line
-                Buffer line = HttpStatus.getResponseLine(_status);
-
+                Buffer line = (_status<__responseLine.length)?__responseLine[_status]:null;
                 
                 if (line==null)
                 {
