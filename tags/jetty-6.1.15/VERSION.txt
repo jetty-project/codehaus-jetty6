@@ -1,10 +1,8 @@
-jetty-6.1-SNAPSHOT
+jetty-6.1.15 4 March 2009
  + JETTY-931 Fix issue with jetty-rewrite.xml
  + JETTY-934 fixed stop/start of Bayeux Client
  + JETTY-938 Deadlock in the TerracottaSessionManager
  + JETTY-939 NPE in AbstractConfiguration.callPreDestroyCallbacks
-
-jetty-6.1.15 2 March 2009
  + JETTY-923 BayeuxClient uses message pools to reduce memory footprint
  + JETTY-924 Improved BayeuxClient disconnect handling
  + JETTY-925 Lazy bayeux messages
