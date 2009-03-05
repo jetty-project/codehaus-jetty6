@@ -34,7 +34,7 @@ import org.mortbay.jetty.http.HttpHeaderValues;
 import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.http.HttpMethods;
 import org.mortbay.jetty.http.HttpParser;
-import org.mortbay.jetty.http.HttpStatusCode;
+import org.mortbay.jetty.http.HttpStatus;
 import org.mortbay.jetty.http.HttpURI;
 import org.mortbay.jetty.http.HttpVersions;
 import org.mortbay.jetty.http.MimeTypes;
@@ -320,7 +320,7 @@ public class HttpConnection implements Connection
         {
             if (((HttpParser)_parser).getHeaderBuffer()==null || ((HttpParser)_parser).getHeaderBuffer().length()<2)
             {
-                _generator.setResponse(HttpStatusCode.CONTINUE.getOrdinal(), null);
+                _generator.setResponse(HttpStatus.CONTINUE_100, null);
                 _generator.completeHeader(null, true);
                 _generator.complete();
                 _generator.reset(false);
@@ -755,7 +755,7 @@ public class HttpConnection implements Connection
             }
             catch (Exception e)
             {
-                throw new HttpException(HttpStatusCode.BAD_REQUEST.getOrdinal(),null,e);
+                throw new HttpException(HttpStatus.BAD_REQUEST_400,null,e);
             }
         }
 
@@ -854,7 +854,7 @@ public class HttpConnection implements Connection
                     
                     if (!_host)
                     {
-                        _generator.setResponse(HttpStatusCode.BAD_REQUEST.getOrdinal(), null);
+                        _generator.setResponse(HttpStatus.BAD_REQUEST_400, null);
                         _responseFields.put(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
                         _generator.completeHeader(_responseFields, true);
                         _generator.complete();
@@ -871,7 +871,7 @@ public class HttpConnection implements Connection
                         }
                         else
                         {
-                            _generator.sendError(HttpStatusCode.EXPECTATION_FAILED.getOrdinal(), null, null, true);
+                            _generator.sendError(HttpStatus.EXPECTATION_FAILED_417, null, null, true);
                             return;
                         }
                     }

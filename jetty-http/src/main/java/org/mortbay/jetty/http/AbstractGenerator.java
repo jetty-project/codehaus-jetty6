@@ -60,20 +60,6 @@ public abstract class AbstractGenerator implements Generator
     private static byte[] NO_BYTES = {};
     private static int MAX_OUTPUT_CHARS = 512; 
 
-    protected static Buffer getReasonBuffer(int code)
-    {
-        return HttpStatusCode.getMessageBuffer(code);
-    }
-    
-    public static String getReason(int code)
-    {
-        String message = HttpStatusCode.getMessage(code);
-        if(message != null) {
-            return message;
-        } 
-        return TypeUtil.toString(code);
-    }
-
     // data
     protected int _state = STATE_HEADER;
     
