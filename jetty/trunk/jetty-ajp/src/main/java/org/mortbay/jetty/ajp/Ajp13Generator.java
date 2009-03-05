@@ -20,6 +20,8 @@ import java.util.Iterator;
 
 import org.mortbay.jetty.http.AbstractGenerator;
 import org.mortbay.jetty.http.HttpFields;
+import org.mortbay.jetty.http.HttpGenerator;
+import org.mortbay.jetty.http.HttpStatus;
 import org.mortbay.jetty.http.HttpTokens;
 import org.mortbay.jetty.http.HttpVersions;
 import org.mortbay.jetty.http.HttpFields.Field;
@@ -359,7 +361,7 @@ public class Ajp13Generator extends AbstractGenerator
             _buffer.put((byte) 0x4);
             addInt(_status);
             if (_reason == null)
-                _reason = getReasonBuffer(_status);
+                _reason=HttpGenerator.getReasonBuffer(_status);
             if (_reason == null)
                 _reason = new ByteArrayBuffer(TypeUtil.toString(_status));
             addBuffer(_reason);

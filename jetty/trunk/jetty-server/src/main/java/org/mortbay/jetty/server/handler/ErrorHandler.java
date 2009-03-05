@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.http.HttpGenerator;
 import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.http.HttpMethods;
+import org.mortbay.jetty.http.HttpStatus;
 import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.util.ByteArrayISO8859Writer;
@@ -74,7 +75,7 @@ public class ErrorHandler extends AbstractHandler
         throws IOException
     {
         if (message == null)
-            message=HttpGenerator.getReason(code);
+            message=HttpStatus.getCode(code).getMessage();
         else
         {
             message= StringUtil.replace(message, "&", "&amp;");
