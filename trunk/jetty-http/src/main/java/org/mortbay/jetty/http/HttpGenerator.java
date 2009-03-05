@@ -39,14 +39,20 @@ import org.mortbay.jetty.util.log.Log;
 public class HttpGenerator extends AbstractGenerator
 {
     // Build cache of response lines for status
-    private static Buffer[] __responseLine = new Buffer[600];
+    private static class Status
+    {
+        Buffer _reason;
+        Buffer _schemeCode;
+        Buffer _responseLine;
+    }
+    private static Status[] __status = new Status[HttpStatus.MAX_CODE+1];
     static
     {
         int versionLength=HttpVersions.HTTP_1_1_BUFFER.length();
         
-        for (int i=0;i<__responseLine.length;i++)
+        for (int i=0;i<__status.length;i++)
         {
-            HttpStatusCode code = HttpStatusCode.getCode(i);
+            HttpStatus.Code code = HttpStatus.getCode(i);
             if (code==null)
                 continue;
             String reason=code.getMessage();
@@ -61,9 +67,23 @@ public class HttpGenerator extends AbstractGenerator
                 bytes[versionLength+5+j]=(byte)reason.charAt(j);;
             bytes[versionLength+5+reason.length()]=HttpTokens.CARRIAGE_RETURN;
             bytes[versionLength+6+reason.length()]=HttpTokens.LINE_FEED;
-            __responseLine[i]=new ByteArrayBuffer(bytes,0,bytes.length,Buffer.IMMUTABLE);
+            
+            __status[i] = new Status();
+            __status[i]._reason=new ByteArrayBuffer(bytes,versionLength+5,bytes.length-versionLength-7,Buffer.IMMUTABLE);
+            __status[i]._schemeCode=new ByteArrayBuffer(bytes,0,versionLength+5,Buffer.IMMUTABLE);
+            __status[i]._responseLine=new ByteArrayBuffer(bytes,0,bytes.length,Buffer.IMMUTABLE);
         }
     }
+
+    /* ------------------------------------------------------------------------------- */
+    public static Buffer getReasonBuffer(int code)
+    {
+        Status status = code<__status.length?__status[code]:null;
+        if (status!=null)
+            return status._reason;
+        return null;
+    }
+    
     
     // common _content
     private static byte[] LAST_CHUNK =
@@ -352,13 +372,10 @@ public class HttpGenerator extends AbstractGenerator
                     _close = true;
 
                 // add response line
-                Buffer line = (_status<__responseLine.length)?__responseLine[_status]:null;
+                Status status = _status<__status.length?__status[_status]:null;
                 
-                if (line==null)
+                if (status==null)
                 {
-                    if (_reason==null)
-                        _reason=getReasonBuffer(_status);
-
                     _header.put(HttpVersions.HTTP_1_1_BUFFER);
                     _header.put((byte) ' ');
                     _header.put((byte) ('0' + _status / 100));
@@ -378,10 +395,10 @@ public class HttpGenerator extends AbstractGenerator
                 else
                 {
                     if (_reason==null)
-                        _header.put(line);
+                        _header.put(status._responseLine);
                     else
                     {
-                        _header.put(line.array(), 0, HttpVersions.HTTP_1_1_BUFFER.length() + 5);
+                        _header.put(status._schemeCode);
                         _header.put(_reason);
                         _header.put(HttpTokens.CRLF);
                     }

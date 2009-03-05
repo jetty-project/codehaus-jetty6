@@ -20,8 +20,8 @@ public class HttpStatusCodeTest extends TestCase
 {
     public void testInvalidGetCode()
     {
-        assertNull("Invalid code: 800", HttpStatusCode.getCode(800));
-        assertNull("Invalid code: 190", HttpStatusCode.getCode(190));
+        assertNull("Invalid code: 800", HttpStatus.getCode(800));
+        assertNull("Invalid code: 190", HttpStatus.getCode(190));
     }
 
 }

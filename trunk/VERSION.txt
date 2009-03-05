@@ -1,5 +1,15 @@
-Jetty-7.0-SNAPSHOT
 
+jetty-6.1.15 4 March 2009
+ + JETTY-931 Fix issue with jetty-rewrite.xml
+ + JETTY-934 fixed stop/start of Bayeux Client
+ + JETTY-938 Deadlock in the TerracottaSessionManager
+ + JETTY-939 NPE in AbstractConfiguration.callPreDestroyCallbacks
+ + JETTY-923 BayeuxClient uses message pools to reduce memory footprint
+ + JETTY-924 Improved BayeuxClient disconnect handling
+ + JETTY-925 Lazy bayeux messages
+ + JETTY-926 default location for generatedClasses of jspc plugin is incorrect
+
+Jetty-7.0-SNAPSHOT
  + JETTY-496 Support inetd/xinetd through use of System.inheritedChannel()
  + JETTY-540 Merged 3.0 Public Review changes
  + JETTY-567 Delay in initial TLS Handshake With FireFox 3 beta5 and SslSelectChannelConnector

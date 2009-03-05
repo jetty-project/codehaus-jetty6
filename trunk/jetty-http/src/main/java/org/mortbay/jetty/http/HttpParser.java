@@ -273,7 +273,7 @@ public class HttpParser implements Parser
             }
                 
             if (_buffer.markIndex() == 0 && _buffer.putIndex() == _buffer.capacity())
-                    throw new HttpException(HttpStatusCode.REQUEST_ENTITY_TOO_LARGE.getOrdinal(), "FULL");
+                    throw new HttpException(HttpStatus.REQUEST_ENTITY_TOO_LARGE_413, "FULL");
             
             IOException ioex=null;
             
@@ -285,7 +285,7 @@ public class HttpParser implements Parser
                     _buffer.compact();
 
                 if (_buffer.space() == 0) 
-                    throw new HttpException(HttpStatusCode.REQUEST_ENTITY_TOO_LARGE.getOrdinal(), "FULL "+(_buffer==_body?"body":"head"));                
+                    throw new HttpException(HttpStatus.REQUEST_ENTITY_TOO_LARGE_413, "FULL "+(_buffer==_body?"body":"head"));                
                 try
                 {
                     if (total_filled<0)
@@ -361,7 +361,7 @@ public class HttpParser implements Parser
                     }
                     else if (ch < HttpTokens.SPACE && ch>=0)
                     {
-                        throw new HttpException(HttpStatusCode.BAD_REQUEST.getOrdinal());
+                        throw new HttpException(HttpStatus.BAD_REQUEST_400);
                     }
                     break;
 
@@ -373,7 +373,7 @@ public class HttpParser implements Parser
                     }
                     else if (ch < HttpTokens.SPACE)
                     {
-                        throw new HttpException(HttpStatusCode.BAD_REQUEST.getOrdinal());
+                        throw new HttpException(HttpStatus.BAD_REQUEST_400);
                     }
                     break;
 
@@ -866,7 +866,7 @@ public class HttpParser implements Parser
         
         // Fill buffer if we can
         if (space == 0) 
-            throw new HttpException(HttpStatusCode.REQUEST_ENTITY_TOO_LARGE.getOrdinal(), "FULL "+(_buffer==_body?"body":"head"));
+            throw new HttpException(HttpStatus.REQUEST_ENTITY_TOO_LARGE_413, "FULL "+(_buffer==_body?"body":"head"));
         else
         {
             int filled=-1;

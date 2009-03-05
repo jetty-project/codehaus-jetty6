@@ -24,7 +24,7 @@ import org.mortbay.jetty.client.HttpEventListenerWrapper;
 import org.mortbay.jetty.client.HttpExchange;
 import org.mortbay.jetty.client.security.SecurityListener;
 import org.mortbay.jetty.http.HttpMethods;
-import org.mortbay.jetty.http.HttpStatusCode;
+import org.mortbay.jetty.http.HttpStatus;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.util.URIUtil;
 import org.mortbay.jetty.util.log.Log;
@@ -74,7 +74,7 @@ public class WebdavListener extends HttpEventListenerWrapper
 
         // The dav spec says that CONFLICT should be returned when the parent collection doesn't exist but I am seeing
         // FORBIDDEN returned instead so running with that.
-        if ( status == HttpStatusCode.FORBIDDEN.getOrdinal() || status == HttpStatusCode.CONFLICT.getOrdinal() )
+        if ( status == HttpStatus.FORBIDDEN_403 || status == HttpStatus.CONFLICT_409 )
         {
             if ( _webdavEnabled )
             {

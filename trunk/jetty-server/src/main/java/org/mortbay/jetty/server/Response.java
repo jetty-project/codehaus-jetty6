@@ -32,6 +32,7 @@ import org.mortbay.jetty.http.HttpFields;
 import org.mortbay.jetty.http.HttpGenerator;
 import org.mortbay.jetty.http.HttpHeaderValues;
 import org.mortbay.jetty.http.HttpHeaders;
+import org.mortbay.jetty.http.HttpStatus;
 import org.mortbay.jetty.http.HttpVersions;
 import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.io.BufferCache.CachedBuffer;
@@ -262,7 +263,7 @@ public class Response implements HttpServletResponse
         setStatus(code,message);
 
         if (message==null)
-            message=HttpGenerator.getReason(code);
+            message=HttpStatus.getCode(code).getMessage();
 
         // If we are allowed to have a body
         if (code!=SC_NO_CONTENT &&
@@ -310,7 +311,7 @@ public class Response implements HttpServletResponse
                 writer.write(Integer.toString(code));
                 writer.write(' ');
                 if (message==null)
-                    message=HttpGenerator.getReason(code);
+                    message=HttpStatus.getCode(code).getMessage();
                 writer.write(message);
                 writer.write("</title>\n</head>\n<body>\n<h2>HTTP ERROR: ");
                 writer.write(Integer.toString(code));
