@@ -27,7 +27,7 @@ import javax.servlet.http.HttpSession;
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.Authentication;
-import org.mortbay.jetty.security.SimpleAuthentication;
+import org.mortbay.jetty.security.DefaultAuthentication;
 
 /**
  * @version $Rev$ $Date$
@@ -47,7 +47,7 @@ public class SessionCachingAuthenticator extends DelegateAuthenticator
         HttpSession session = ((HttpServletRequest)request).getSession(mandatory);
         // not mandatory and not authenticated
         if (session == null) 
-            return SimpleAuthentication.SUCCESS_UNAUTH_RESULTS;
+            return DefaultAuthentication.SUCCESS_UNAUTH_RESULTS;
 
         Authentication authentication = (Authentication) session.getAttribute(__J_AUTHENTICATED);
         if (authentication != null) 
@@ -56,7 +56,7 @@ public class SessionCachingAuthenticator extends DelegateAuthenticator
         authentication = _delegate.validateRequest(request, response, mandatory);
         if (authentication != null && authentication.isSuccess())
         {
-            Authentication next=new SimpleAuthentication(Authentication.Status.SUCCESS,authentication.getAuthMethod(),authentication.getUserIdentity());
+            Authentication next=new DefaultAuthentication(Authentication.Status.SUCCESS,authentication.getAuthMethod(),authentication.getUserIdentity());
             session.setAttribute(__J_AUTHENTICATED, next);
         }
         return authentication;

@@ -34,7 +34,7 @@ import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.Authentication;
-import org.mortbay.jetty.security.SimpleAuthentication;
+import org.mortbay.jetty.security.DefaultAuthentication;
 import org.mortbay.jetty.server.UserIdentity;
 
 /**
@@ -73,7 +73,7 @@ public class ClientCertAuthenticator extends LoginAuthenticator
             {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN,
                                    "A client certificate is required for accessing this web application but the server's listener is not configured for mutual authentication (or the client did not provide a certificate).");
-                return SimpleAuthentication.SEND_FAILURE_RESULTS;
+                return DefaultAuthentication.SEND_FAILURE_RESULTS;
             }
             
             Principal principal = certs[0].getSubjectDN();
@@ -85,14 +85,14 @@ public class ClientCertAuthenticator extends LoginAuthenticator
 
             UserIdentity user = _loginService.login(username,credential);
             if (user!=null)
-                return new SimpleAuthentication(Authentication.Status.SUCCESS,Constraint.__CERT_AUTH2,user);
+                return new DefaultAuthentication(Authentication.Status.SUCCESS,Constraint.__CERT_AUTH2,user);
 
             if (!mandatory) 
             { 
-                return SimpleAuthentication.SUCCESS_UNAUTH_RESULTS; 
+                return DefaultAuthentication.SUCCESS_UNAUTH_RESULTS; 
             }
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "The provided client certificate does not correspond to a trusted user.");
-            return SimpleAuthentication.SEND_FAILURE_RESULTS;
+            return DefaultAuthentication.SEND_FAILURE_RESULTS;
         }
         catch (IOException e)
         {

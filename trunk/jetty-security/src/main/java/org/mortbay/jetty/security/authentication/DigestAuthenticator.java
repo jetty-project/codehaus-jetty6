@@ -32,11 +32,12 @@ import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.http.security.Credential;
+import org.mortbay.jetty.security.DefaultUserIdentity;
 import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.Authentication;
-import org.mortbay.jetty.security.SimpleAuthentication;
+import org.mortbay.jetty.security.DefaultAuthentication;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.util.QuotedStringTokenizer;
@@ -131,13 +132,17 @@ public class DigestAuthenticator extends LoginAuthenticator
                 {
                     UserIdentity user = _loginService.login(digest.username,digest);
                     if (user!=null)
-                        return new SimpleAuthentication(Authentication.Status.SUCCESS,Constraint.__DIGEST_AUTH,user);
+                    {
+                        if (user instanceof DefaultUserIdentity)
+                            return ((DefaultUserIdentity)user).SUCCESSFUL_BASIC;
+                        return new DefaultAuthentication(Authentication.Status.SUCCESS,Constraint.__DIGEST_AUTH,user);
+                    }
                 }
                 else if (n == 0) stale = true;
 
             }
 
-            if (!mandatory) { return SimpleAuthentication.SUCCESS_UNAUTH_RESULTS; }
+            if (!mandatory) { return DefaultAuthentication.SUCCESS_UNAUTH_RESULTS; }
             String domain = request.getContextPath();
             if (domain == null) domain = "/";
             response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Digest realm=\"" + _loginService.getName()
@@ -148,7 +153,7 @@ public class DigestAuthenticator extends LoginAuthenticator
                                                              + "\", algorithm=MD5, qop=\"auth\""
                                                              + (_useStale ? (" stale=" + stale) : ""));
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return SimpleAuthentication.SEND_CONTINUE_RESULTS;
+            return DefaultAuthentication.SEND_CONTINUE_RESULTS;
         }
         catch (IOException e)
         {

@@ -18,9 +18,11 @@ import java.util.Map;
 import javax.security.auth.Subject;
 
 /* ------------------------------------------------------------ */
-/** User object that encapsulates user identity and operations such as run-as-role actions, checking isUserInRole and getUserPrincipal.
+/** User object that encapsulates user identity and operations such as run-as-role actions, 
+ * checking isUserInRole and getUserPrincipal.
  *
- * Some of this functionality was previously in UserRealm detached from the user identity.
+ * Implementations of UserIdentity should be immutable so that they may be
+ * cached by Authenticators and LoginServices.
  *
  */
 public interface UserIdentity
@@ -59,13 +61,13 @@ public interface UserIdentity
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /**
-     * A UserIdentity Context.
-     * A Context is the environment in which a User Identity is to 
+     * A UserIdentity Scope.
+     * A scope is the environment in which a User Identity is to 
      * be interpreted. Typically it is set by the target servlet of 
      * a request.
      * @see org.mortbay.jetty.servlet.ServletHolder
      */
-    interface Context
+    interface Scope
     {
         /* ------------------------------------------------------------ */
         /**
