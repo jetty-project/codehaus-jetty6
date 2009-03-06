@@ -27,7 +27,7 @@ import javax.servlet.ServletResponse;
 import org.mortbay.jetty.io.AsyncEndPoint;
 import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.server.handler.ContextHandler;
-import org.mortbay.jetty.server.handler.ContextHandler.SContext;
+import org.mortbay.jetty.server.handler.ContextHandler.Context;
 import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.util.thread.Timeout;
@@ -647,7 +647,7 @@ public class AsyncRequest implements AsyncContext
     /* ------------------------------------------------------------ */
     public void start(Runnable run)
     {
-        ((SContext)_event.getServletContext()).getContextHandler().handle(run);
+        ((Context)_event.getServletContext()).getContextHandler().handle(run);
     }
 
     /* ------------------------------------------------------------ */
@@ -660,7 +660,7 @@ public class AsyncRequest implements AsyncContext
     public ContextHandler getContextHandler()
     {
         if (_event!=null)
-            return ((SContext)_event.getServletContext()).getContextHandler();
+            return ((Context)_event.getServletContext()).getContextHandler();
         return null;
     }
     

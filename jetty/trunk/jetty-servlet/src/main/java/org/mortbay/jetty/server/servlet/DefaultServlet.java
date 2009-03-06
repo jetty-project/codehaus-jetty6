@@ -140,9 +140,9 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         throws UnavailableException
     {
         _servletContext=getServletContext();
-        ContextHandler.SContext scontext=ContextHandler.getCurrentContext();
+        ContextHandler.Context scontext=ContextHandler.getCurrentContext();
         if (scontext==null)
-            _contextHandler=((ContextHandler.SContext)_servletContext).getContextHandler();
+            _contextHandler=((ContextHandler.Context)_servletContext).getContextHandler();
         else
             _contextHandler = ContextHandler.getCurrentContext().getContextHandler();
         

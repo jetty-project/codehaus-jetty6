@@ -32,7 +32,7 @@ import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.SessionIdManager;
 import org.mortbay.jetty.server.SessionManager;
 import org.mortbay.jetty.server.handler.ContextHandlerCollection;
-import org.mortbay.jetty.server.servlet.Context;
+import org.mortbay.jetty.server.servlet.ServletContextHandler;
 import org.mortbay.jetty.server.servlet.ServletHolder;
 
 /**
@@ -334,14 +334,14 @@ public abstract class SessionTestServer extends Server
         setHandler(contextsA);
         setSessionIdManager(_sessionIdMgr);
 
-        Context contextA1 = new Context(contextsA,"/contextA",Context.SESSIONS);
+        ServletContextHandler contextA1 = new ServletContextHandler(contextsA,"/contextA",ServletContextHandler.SESSIONS);
         contextA1.addServlet(new ServletHolder(new SessionActionServlet()), "/session/*");
         contextA1.addServlet(new ServletHolder(new ForwardingServlet()), "/dispatch/*");  
         contextA1.getSessionHandler().setSessionManager(_sessionMgr1);
         _sessionMgr1.setIdManager(_sessionIdMgr);
 
 
-        Context contextA2 = new Context(contextsA, "/contextB", Context.SESSIONS);
+        ServletContextHandler contextA2 = new ServletContextHandler(contextsA, "/contextB", ServletContextHandler.SESSIONS);
         contextA2.addServlet(new ServletHolder(new SessionForwardedServlet()), "/session/*");
         contextA2.addServlet(new ServletHolder(new SessionActionServlet()), "/action/session/*");
         contextA2.getSessionHandler().setSessionManager(_sessionMgr2);

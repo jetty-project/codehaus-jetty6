@@ -25,7 +25,7 @@ import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.server.LocalConnector;
 import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.bio.SocketConnector;
-import org.mortbay.jetty.server.servlet.Context;
+import org.mortbay.jetty.server.servlet.ServletContextHandler;
 import org.mortbay.jetty.server.servlet.FilterHolder;
 import org.mortbay.jetty.server.servlet.ServletHolder;
 import org.mortbay.jetty.util.Attributes;
@@ -57,7 +57,7 @@ public class ServletTester
     LocalConnector _connector = new LocalConnector();
 //    Context _context = new Context(Context.SESSIONS|Context.SECURITY);
     //jaspi why security if it is not set up?
-    Context _context = new Context(Context.SESSIONS);
+    ServletContextHandler _context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 
     public ServletTester()
     {
@@ -94,7 +94,7 @@ public class ServletTester
     }
 
     /* ------------------------------------------------------------ */
-    public Context getContext()
+    public ServletContextHandler getContext()
     {
         return _context;
     }

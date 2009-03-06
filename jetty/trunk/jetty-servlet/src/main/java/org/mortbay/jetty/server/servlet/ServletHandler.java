@@ -66,7 +66,7 @@ import org.mortbay.jetty.util.log.Log;
  * be used when a full web application is not required.  Specifically filters
  * and request wrapping are not supported.
  * 
- * Unless run as part of a {@link Context} or derivative, the {@link #initialize()}
+ * Unless run as part of a {@link ServletContextHandler} or derivative, the {@link #initialize()}
  * method must be called manually after start().
  * 
  * @see org.mortbay.jetty.webapp.WebAppContext
@@ -79,7 +79,7 @@ public class ServletHandler extends AbstractHandler
         
     /* ------------------------------------------------------------ */
     private ContextHandler _contextHandler;
-    private ContextHandler.SContext _servletContext;
+    private ContextHandler.Context _servletContext;
     private FilterHolder[] _filters;
     private FilterMapping[] _filterMappings;
     private boolean _filterChainsCached=true;
@@ -152,7 +152,7 @@ public class ServletHandler extends AbstractHandler
 
         super.doStart();
         
-        if (_contextHandler==null || !(_contextHandler instanceof Context))
+        if (_contextHandler==null || !(_contextHandler instanceof ServletContextHandler))
             initialize();
     }   
     

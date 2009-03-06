@@ -577,7 +577,9 @@ public class ServletHolder extends Holder implements UserIdentity.Scope, Compara
         }
     }
 
-
+    /* -------------------------------------------------------- */
+    /* -------------------------------------------------------- */
+    /* -------------------------------------------------------- */
     public ServletRegistration getRegistration()
     {
         return new ServletRegistration()
@@ -585,8 +587,7 @@ public class ServletHolder extends Holder implements UserIdentity.Scope, Compara
 
             public boolean addMapping(String... urlPatterns)
             {
-                if (_servletHandler.isStarted())
-                    throw new IllegalStateException();
+                illegalStateIfContextStarted();
                 ServletMapping mapping = new ServletMapping();
                 mapping.setServletName(ServletHolder.this.getName());
                 mapping.setPathSpecs(urlPatterns);
@@ -596,8 +597,7 @@ public class ServletHolder extends Holder implements UserIdentity.Scope, Compara
 
             public boolean setAsyncSupported(boolean isAsyncSupported)
             {
-                if (_servletHandler.isStarted())
-                    throw new IllegalStateException();
+                illegalStateIfContextStarted();
                 ServletHolder.this.setAsyncSupported(isAsyncSupported);
                 return true;
             }
@@ -609,8 +609,7 @@ public class ServletHolder extends Holder implements UserIdentity.Scope, Compara
 
             public boolean setInitParameter(String name, String value)
             {
-                if (_servletHandler.isStarted())
-                    throw new IllegalStateException();
+                illegalStateIfContextStarted();
                 if (ServletHolder.this.getInitParameter(name)!=null)
                     return false;
                 ServletHolder.this.setInitParameter(name,value);
@@ -619,8 +618,7 @@ public class ServletHolder extends Holder implements UserIdentity.Scope, Compara
 
             public boolean setInitParameters(Map<String, String> initParameters)
             {
-                if (_servletHandler.isStarted())
-                    throw new IllegalStateException();
+                illegalStateIfContextStarted();
                 for (String name : initParameters.keySet())
                     if (ServletHolder.this.getInitParameter(name)!=null)
                         return false;
@@ -630,8 +628,7 @@ public class ServletHolder extends Holder implements UserIdentity.Scope, Compara
             
             public boolean setLoadOnStartup(int loadOnStartup)
             {
-                if (_servletHandler.isStarted())
-                    throw new IllegalStateException();
+                illegalStateIfContextStarted();
                 ServletHolder.this.setInitOrder(loadOnStartup);
                 return false;
             }

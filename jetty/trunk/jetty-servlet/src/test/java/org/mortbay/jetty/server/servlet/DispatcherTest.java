@@ -32,20 +32,20 @@ import junit.framework.TestCase;
 import org.mortbay.jetty.server.Dispatcher;
 import org.mortbay.jetty.server.LocalConnector;
 import org.mortbay.jetty.server.Server;
-import org.mortbay.jetty.server.servlet.Context;
+import org.mortbay.jetty.server.servlet.ServletContextHandler;
 
 public class DispatcherTest extends TestCase
 {
     private Server _server = new Server();
     private LocalConnector _connector;
-    private Context _context;
+    private ServletContextHandler _context;
 
     protected void setUp() throws Exception
     {
         _server = new Server();
         _server.setSendServerVersion(false);
         _connector = new LocalConnector();
-        _context = new Context();
+        _context = new ServletContextHandler();
         _context.setContextPath("/context");
         _server.addHandler(_context);
         _server.addConnector( _connector );

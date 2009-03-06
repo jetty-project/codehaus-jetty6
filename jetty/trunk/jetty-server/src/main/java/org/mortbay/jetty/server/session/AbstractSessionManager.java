@@ -82,7 +82,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     protected Object _sessionListeners;
 
     protected ClassLoader _loader;
-    protected ContextHandler.SContext _context;
+    protected ContextHandler.Context _context;
     protected String _sessionCookie=__DefaultSessionCookie;
     protected String _sessionIdPathParameterName = __DefaultSessionIdPathParameterName;
     protected String _sessionIdPathParameterNamePrefix =";"+ _sessionIdPathParameterName +"=";

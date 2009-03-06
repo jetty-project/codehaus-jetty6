@@ -1051,7 +1051,7 @@ public class JDBCSessionManager extends AbstractSessionManager
      * 
      * @return 0.0.0.0 if no virtual host is defined
      */
-    private String getVirtualHost (ContextHandler.SContext context)
+    private String getVirtualHost (ContextHandler.Context context)
     {
         String vhost = "0.0.0.0";
         

@@ -45,7 +45,7 @@ public class StatisticsServlet extends HttpServlet
         _memoryBean = ManagementFactory.getMemoryMXBean();
 
         ServletContext context = getServletContext();
-        ContextHandler.SContext scontext = (ContextHandler.SContext) context;
+        ContextHandler.Context scontext = (ContextHandler.Context) context;
         _server = scontext.getContextHandler().getServer();
 
         Handler handler = _server.getChildHandlerByClass(StatisticsHandler.class);
