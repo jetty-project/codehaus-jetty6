@@ -63,7 +63,7 @@ import org.mortbay.jetty.io.nio.DirectNIOBuffer;
 import org.mortbay.jetty.io.nio.IndirectNIOBuffer;
 import org.mortbay.jetty.io.nio.NIOBuffer;
 import org.mortbay.jetty.server.handler.ContextHandler;
-import org.mortbay.jetty.server.handler.ContextHandler.SContext;
+import org.mortbay.jetty.server.handler.ContextHandler.Context;
 import org.mortbay.jetty.util.Attributes;
 import org.mortbay.jetty.util.AttributesMap;
 import org.mortbay.jetty.util.LazyList;
@@ -128,7 +128,7 @@ public class Request implements HttpServletRequest
     private MultiMap<String> _baseParameters;
     private String _characterEncoding;
     protected HttpConnection _connection;
-    private ContextHandler.SContext _context;
+    private ContextHandler.Context _context;
     private String _contextPath;
     private Continuation _continuation;
     private CookieCutter _cookies;
@@ -429,10 +429,10 @@ public class Request implements HttpServletRequest
 
     /* ------------------------------------------------------------ */
     /**
-     * @return The current {@link SContext context} used for this request, or <code>null</code> if {@link #setContext} has not yet
+     * @return The current {@link Context context} used for this request, or <code>null</code> if {@link #setContext} has not yet
      * been called. 
      */
-    public SContext getContext()
+    public Context getContext()
     {
         return _context;
     }
@@ -1585,7 +1585,7 @@ public class Request implements HttpServletRequest
     /**
      * @param context
      */
-    public void setContext(SContext context)
+    public void setContext(Context context)
     {
         _context=context;
     }

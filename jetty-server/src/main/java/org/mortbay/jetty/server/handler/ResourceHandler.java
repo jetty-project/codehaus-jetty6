@@ -32,7 +32,7 @@ import org.mortbay.jetty.io.WriterOutputStream;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Response;
-import org.mortbay.jetty.server.handler.ContextHandler.SContext;
+import org.mortbay.jetty.server.handler.ContextHandler.Context;
 import org.mortbay.jetty.util.TypeUtil;
 import org.mortbay.jetty.util.URIUtil;
 import org.mortbay.jetty.util.log.Log;
@@ -78,7 +78,7 @@ public class ResourceHandler extends AbstractHandler
     public void doStart()
     throws Exception
     {
-        SContext scontext = ContextHandler.getCurrentContext();
+        Context scontext = ContextHandler.getCurrentContext();
         _context = (scontext==null?null:scontext.getContextHandler());
         super.doStart();
     }

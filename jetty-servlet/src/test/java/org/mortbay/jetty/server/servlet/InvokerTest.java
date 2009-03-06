@@ -26,7 +26,7 @@ import junit.framework.TestCase;
 
 import org.mortbay.jetty.server.LocalConnector;
 import org.mortbay.jetty.server.Server;
-import org.mortbay.jetty.server.servlet.Context;
+import org.mortbay.jetty.server.servlet.ServletContextHandler;
 import org.mortbay.jetty.server.servlet.Invoker;
 import org.mortbay.jetty.server.servlet.ServletHolder;
 
@@ -38,14 +38,14 @@ public class InvokerTest extends TestCase
 {
     Server _server;
     LocalConnector _connector;
-    Context _context;
+    ServletContextHandler _context;
     
     protected void setUp() throws Exception
     {
         super.setUp();
         _server = new Server();
         _connector = new LocalConnector();
-        _context = new Context(Context.SESSIONS);
+        _context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         
         _server.setSendServerVersion(false);
         _server.addConnector(_connector);

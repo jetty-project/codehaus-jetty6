@@ -104,7 +104,7 @@
     <!-- in the $JETTY_HOME/contexts directory                       -->
     <!--                                                             -->
     <!-- =========================================================== -->
-    <Call name="addLifeCycle">
+    <Call name="addBean">
       <Arg>
         <New class="org.mortbay.jetty.deploy.ContextDeployer">
           <Set name="contexts"><Ref id="Contexts"/></Set>
@@ -127,7 +127,7 @@
     <!-- Normally only one type of deployer need be used.            -->
     <!--                                                             -->
     <!-- =========================================================== -->
-    <Call name="addLifeCycle">
+    <Call name="addBean">
       <Arg>
         <New class="org.mortbay.jetty.deploy.WebAppDeployer">
           <Set name="contexts"><Ref id="Contexts"/></Set>

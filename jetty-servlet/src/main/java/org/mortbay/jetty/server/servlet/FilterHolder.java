@@ -144,8 +144,7 @@ public class FilterHolder extends Holder
             /* ------------------------------------------------------------ */
             public boolean addMappingForServletNames(EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... servletNames)
             {
-                if (_servletHandler.isStarted())
-                    throw new IllegalStateException();
+                illegalStateIfContextStarted();
                 FilterMapping mapping = new FilterMapping();
                 mapping.setFilterHolder(FilterHolder.this);
                 mapping.setServletNames(servletNames);
@@ -160,8 +159,7 @@ public class FilterHolder extends Holder
 
             public boolean addMappingForUrlPatterns(EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... urlPatterns)
             {
-                if (_servletHandler.isStarted())
-                    throw new IllegalStateException();
+                illegalStateIfContextStarted();
                 FilterMapping mapping = new FilterMapping();
                 mapping.setFilterHolder(FilterHolder.this);
                 mapping.setPathSpecs(urlPatterns);
@@ -175,21 +173,20 @@ public class FilterHolder extends Holder
 
             public boolean setAsyncSupported(boolean isAsyncSupported)
             {
-                if (_servletHandler.isStarted())
-                    throw new IllegalStateException();
+                illegalStateIfContextStarted();
                 FilterHolder.this.setAsyncSupported(isAsyncSupported);
                 return true;
             }
 
             public boolean setDescription(String description)
             {
+                illegalStateIfContextStarted();
                 return true;
             }
 
             public boolean setInitParameter(String name, String value)
             {
-                if (_servletHandler.isStarted())
-                    throw new IllegalStateException();
+                illegalStateIfContextStarted();
                 if (FilterHolder.this.getInitParameter(name)!=null)
                     return false;
                 FilterHolder.this.setInitParameter(name,value);
@@ -198,8 +195,7 @@ public class FilterHolder extends Holder
 
             public boolean setInitParameters(Map<String, String> initParameters)
             {
-                if (_servletHandler.isStarted())
-                    throw new IllegalStateException();
+                illegalStateIfContextStarted();
                 for (String name : initParameters.keySet())
                     if (FilterHolder.this.getInitParameter(name)!=null)
                         return false;
