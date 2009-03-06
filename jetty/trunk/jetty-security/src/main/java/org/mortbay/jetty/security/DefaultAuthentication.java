@@ -32,13 +32,13 @@ import org.mortbay.jetty.server.UserIdentity;
 /**
  * @version $Rev$ $Date$
  */
-public class SimpleAuthentication implements Authentication
+public class DefaultAuthentication implements Authentication
 {
     private final Authentication.Status _authStatus;
     private final String _authMethod;
     private final UserIdentity _userIdentity;
 
-    public SimpleAuthentication(Authentication.Status authStatus, String authMethod, UserIdentity userIdentity)
+    public DefaultAuthentication(Authentication.Status authStatus, String authMethod, UserIdentity userIdentity)
     {
         _authStatus = authStatus;
         _authMethod = authMethod;

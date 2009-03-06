@@ -224,7 +224,7 @@ public class ServletTester
      * @param pathSpec
      * @param dispatches
      * @return
-     * @see org.mortbay.jetty.servlet.Context#addFilter(java.lang.Class, java.lang.String, int)
+     * @see org.mortbay.jetty.servlet.Scope#addFilter(java.lang.Class, java.lang.String, int)
      */
     public FilterHolder addFilter(Class filterClass, String pathSpec, int dispatches)
     {
@@ -237,7 +237,7 @@ public class ServletTester
      * @param pathSpec
      * @param dispatches
      * @return
-     * @see org.mortbay.jetty.servlet.Context#addFilter(java.lang.String, java.lang.String, int)
+     * @see org.mortbay.jetty.servlet.Scope#addFilter(java.lang.String, java.lang.String, int)
      */
     public FilterHolder addFilter(String filterClass, String pathSpec, int dispatches)
     {
@@ -249,7 +249,7 @@ public class ServletTester
      * @param servlet
      * @param pathSpec
      * @return
-     * @see org.mortbay.jetty.servlet.Context#addServlet(java.lang.Class, java.lang.String)
+     * @see org.mortbay.jetty.servlet.Scope#addServlet(java.lang.Class, java.lang.String)
      */
     public ServletHolder addServlet(Class servlet, String pathSpec)
     {
@@ -261,7 +261,7 @@ public class ServletTester
      * @param className
      * @param pathSpec
      * @return
-     * @see org.mortbay.jetty.servlet.Context#addServlet(java.lang.String, java.lang.String)
+     * @see org.mortbay.jetty.servlet.Scope#addServlet(java.lang.String, java.lang.String)
      */
     public ServletHolder addServlet(String className, String pathSpec)
     {

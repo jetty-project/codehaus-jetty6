@@ -577,7 +577,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
      * call to super.doStart().   This allows derived classes to insert additional
      * handling (Eg configuration) before the call to super.doStart by this method
      * will start contained handlers.
-     * @see org.mortbay.jetty.servlet.Context
+     * @see org.mortbay.jetty.Scope.Context
      * @see org.mortbay.jetty.webapp.WebAppContext
      */
     protected void startContext()
