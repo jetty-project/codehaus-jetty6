@@ -15,18 +15,7 @@
 
 package org.mortbay.jetty.security;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import junit.framework.TestCase;
-
 import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.http.security.Password;
@@ -34,16 +23,20 @@ import org.mortbay.jetty.security.authentication.BasicAuthenticator;
 import org.mortbay.jetty.security.authentication.FormAuthenticator;
 import org.mortbay.jetty.security.authentication.SessionCachingAuthenticator;
 import org.mortbay.jetty.security.jaspi.ServletCallbackHandler;
-import org.mortbay.jetty.server.Connector;
-import org.mortbay.jetty.server.LocalConnector;
-import org.mortbay.jetty.server.Request;
-import org.mortbay.jetty.server.Server;
-import org.mortbay.jetty.server.UserIdentity;
+import org.mortbay.jetty.server.*;
 import org.mortbay.jetty.server.handler.AbstractHandler;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.handler.HandlerWrapper;
 import org.mortbay.jetty.server.session.SessionHandler;
-import org.omg.CORBA._IDLTypeStub;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author gregw
@@ -556,41 +549,43 @@ public class ConstraintTest extends TestCase
         public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
             UserIdentity old = ((Request)request).getUserIdentity();
-            try
+            UserIdentity.Source source = _security.getIdentityService().associate(((Request) request).getUserIdentity(),
+                    new UserIdentity.Scope()
+                    {
+
+                        public String getContextPath()
+                        {
+                            return "/";
+                        }
+
+                        public String getName()
+                        {
+                            return "someServlet";
+                        }
+
+                        public Map<String, String> getRoleRefMap()
+                        {
+                            Map<String, String> map = new HashMap<String, String>();
+                            map.put("untranslated", "user");
+                            return map;
+                        }
+
+                        public String getRunAsRole()
+                        {
+                            return null;
+                        }
+
+                    });
+            ((Request)request).setUserIdentity(
+                    source.getUserIdentity());
+
+              try
             {
-                ((Request)request).setUserIdentity(
-                _security.getIdentityService().associate(((Request)request).getUserIdentity(),
-                        new UserIdentity.Scope()
-                {
-
-                    public String getContextPath()
-                    {
-                        return "/";
-                    }
-
-                    public String getName()
-                    {
-                        return "someServlet";
-                    }
-
-                    public Map<String, String> getRoleRefMap()
-                    {
-                        Map<String,String> map = new HashMap<String, String>();
-                        map.put("untranslated","user");
-                        return map;
-                    }
-
-                    public String getRunAsRole()
-                    {
-                        return null;
-                    }
-                    
-                }));
-                
-                super.handle(target,request,response);
+              super.handle(target,request,response);
             }
             finally
             {
+                _security.getIdentityService().disassociate(source);
                 ((Request)request).setUserIdentity(old);
             }
         }
