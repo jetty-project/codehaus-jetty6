@@ -91,7 +91,7 @@ import org.mortbay.jetty.util.resource.Resource;
  */
 public class ContextHandler extends HandlerWrapper implements Attributes, Server.Graceful, CompleteHandler
 {
-    private static ThreadLocal<SContext> __context=new ThreadLocal<SContext>();
+    private static ThreadLocal<Context> __context=new ThreadLocal<Context>();
     public static final String MANAGED_ATTRIBUTES = "org.mortbay.jetty.server.servlet.ManagedAttributes";
     
     /* ------------------------------------------------------------ */
@@ -101,13 +101,13 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
      * 
      * @return ServletContext implementation
      */
-    public static SContext getCurrentContext()
+    public static Context getCurrentContext()
     {
-        SContext context = __context.get();
+        Context context = __context.get();
         return context;
     }
 
-    protected SContext _scontext;
+    protected Context _scontext;
     
     private AttributesMap _attributes;
     private AttributesMap _contextAttributes;
@@ -144,7 +144,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     public ContextHandler()
     {
         super();
-        _scontext=new SContext();
+        _scontext=new Context();
         _attributes=new AttributesMap();
         _initParams=new HashMap<String,String>();
     }
@@ -153,7 +153,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     /**
      * 
      */
-    protected ContextHandler(SContext context)
+    protected ContextHandler(Context context)
     {
         super();
         _scontext=context;
@@ -183,7 +183,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     }
 
     /* ------------------------------------------------------------ */
-    public SContext getServletContext()
+    public Context getServletContext()
     {
         return _scontext;
     }
@@ -529,7 +529,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         _logger=Log.getLogger(getDisplayName()==null?getContextPath():getDisplayName());
         ClassLoader old_classloader=null;
         Thread current_thread=null;
-        SContext old_context=null;
+        Context old_context=null;
 
         _contextAttributes=new AttributesMap();
         try
@@ -625,7 +625,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         ClassLoader old_classloader=null;
         Thread current_thread=null;
 
-        SContext old_context=__context.get();
+        Context old_context=__context.get();
         __context.set(_scontext);
         try
         {
@@ -749,7 +749,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             throws IOException, ServletException
     {   
         boolean new_context=false;
-        SContext old_context=null;
+        Context old_context=null;
         String old_context_path=null;
         String old_servlet_path=null;
         String old_path_info=null;
@@ -1355,15 +1355,16 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     /* ------------------------------------------------------------ */
     /** Context.
      * <p>
-     * Implements {@link javax.servlet.ServletContext} from the {@link javax.servlet} package.   
+     * A partial implementation of  {@link javax.servlet.ServletContext}.
+     * A complete implementation is provided by the derived {@link org.mortbay.jetty.servlet.ServletContextHandler.Context}.   
      * </p>
      * @author gregw
      *
      */
-    public class SContext implements ServletContext
+    public class Context implements ServletContext
     {
         /* ------------------------------------------------------------ */
-        protected SContext()
+        protected Context()
         {
         }
 

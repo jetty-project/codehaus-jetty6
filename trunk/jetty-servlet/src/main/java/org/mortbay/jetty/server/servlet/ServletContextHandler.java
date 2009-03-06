@@ -39,7 +39,7 @@ import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /** Servlet Context.
- * This conveniance extention to the ContextHandler allows for
+ * This extension to the ContextHandler allows for
  * simple construction of a context with ServletHandler and optionally
  * session and security handlers, et.<pre>
  *   new ServletContext("/context",Context.SESSIONS|Context.NO_SECURITY);
@@ -48,7 +48,7 @@ import org.mortbay.jetty.util.log.Log;
  * This class should have been called ServletContext, but this would have
  * cause confusion with {@link ServletContext}.
  */
-public class Context extends ContextHandler
+public class ServletContextHandler extends ContextHandler
 {   
     public final static int SESSIONS=1;
     public final static int SECURITY=2;
@@ -62,47 +62,47 @@ public class Context extends ContextHandler
     protected int _options;
     
     /* ------------------------------------------------------------ */
-    public Context()
+    public ServletContextHandler()
     {
         this(null,null,null,null,null);
     }
     
     /* ------------------------------------------------------------ */
-    public Context(int options)
+    public ServletContextHandler(int options)
     {
         this(null,null,options);
     }
     
     /* ------------------------------------------------------------ */
-    public Context(HandlerContainer parent, String contextPath)
+    public ServletContextHandler(HandlerContainer parent, String contextPath)
     {
         this(parent,contextPath,null,null,null,null);
     }
     
     /* ------------------------------------------------------------ */
-    public Context(HandlerContainer parent, String contextPath, int options)
+    public ServletContextHandler(HandlerContainer parent, String contextPath, int options)
     {
         this(parent,contextPath,null,null,null,null);
         _options=options;
     }
     
     /* ------------------------------------------------------------ */
-    public Context(HandlerContainer parent, String contextPath, boolean sessions, boolean security)
+    public ServletContextHandler(HandlerContainer parent, String contextPath, boolean sessions, boolean security)
     {
         this(parent,contextPath,(sessions?SESSIONS:0)|(security?SECURITY:0));
     }
 
     /* ------------------------------------------------------------ */
-    public Context(HandlerContainer parent, SessionHandler sessionHandler, SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    public ServletContextHandler(HandlerContainer parent, SessionHandler sessionHandler, SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {   
         this(parent,null,sessionHandler,securityHandler,servletHandler,errorHandler);
     }
 
     /* ------------------------------------------------------------ */
-    public Context(HandlerContainer parent, String contextPath, SessionHandler sessionHandler, SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    public ServletContextHandler(HandlerContainer parent, String contextPath, SessionHandler sessionHandler, SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {   
-        super((ContextHandler.SContext)null);
-        _scontext = new SContext();
+        super((ContextHandler.Context)null);
+        _scontext = new Context();
         _sessionHandler = sessionHandler;
         _securityHandler = securityHandler;
         _servletHandler = servletHandler;
@@ -315,7 +315,7 @@ public class Context extends ContextHandler
     }
 
     /* ------------------------------------------------------------ */
-    public class SContext extends ContextHandler.SContext
+    public class Context extends ContextHandler.Context
     {
 
         /* ------------------------------------------------------------ */
@@ -324,7 +324,7 @@ public class Context extends ContextHandler
          */
         public RequestDispatcher getNamedDispatcher(String name)
         {
-            ContextHandler context=org.mortbay.jetty.server.servlet.Context.this;
+            ContextHandler context=org.mortbay.jetty.server.servlet.ServletContextHandler.this;
             if (_servletHandler==null || _servletHandler.getServlet(name)==null)
                 return null;
             return new Dispatcher(context, name);
@@ -336,7 +336,7 @@ public class Context extends ContextHandler
         {
             if (isStarted())
                 throw new IllegalStateException();
-            ServletHandler handler = Context.this.getServletHandler();
+            ServletHandler handler = ServletContextHandler.this.getServletHandler();
             FilterMapping mapping = new FilterMapping();
             mapping.setFilterName(filterName);
             mapping.setServletNames(servletNames);
@@ -349,7 +349,7 @@ public class Context extends ContextHandler
         {
             if (isStarted())
                 throw new IllegalStateException();
-            ServletHandler handler = Context.this.getServletHandler();
+            ServletHandler handler = ServletContextHandler.this.getServletHandler();
             ServletHolder holder= handler.newServletHolder();
             holder.setName(servletName);
             handler.addServlet(holder);
@@ -364,7 +364,7 @@ public class Context extends ContextHandler
             if (isStarted())
                 throw new IllegalStateException();
 
-            final ServletHandler handler = Context.this.getServletHandler();
+            final ServletHandler handler = ServletContextHandler.this.getServletHandler();
             final FilterHolder holder= handler.newFilterHolder();
             holder.setHeldClass(filterClass);
             holder.setName(filterName);
@@ -381,7 +381,7 @@ public class Context extends ContextHandler
             if (isStarted())
                 throw new IllegalStateException();
 
-            final ServletHandler handler = Context.this.getServletHandler();
+            final ServletHandler handler = ServletContextHandler.this.getServletHandler();
             final FilterHolder holder= handler.newFilterHolder();
             holder.setClassName(className);
             holder.setName(filterName);
@@ -398,7 +398,7 @@ public class Context extends ContextHandler
             if (!isStarting())
                 throw new IllegalStateException();
 
-            final ServletHandler handler = Context.this.getServletHandler();
+            final ServletHandler handler = ServletContextHandler.this.getServletHandler();
             final ServletHolder holder= handler.newServletHolder();
             holder.setHeldClass(servletClass);
             holder.setName(servletName);
@@ -415,7 +415,7 @@ public class Context extends ContextHandler
             if (!isStarting())
                 throw new IllegalStateException();
 
-            final ServletHandler handler = Context.this.getServletHandler();
+            final ServletHandler handler = ServletContextHandler.this.getServletHandler();
             final ServletHolder holder= handler.newServletHolder();
             holder.setClassName(className);
             holder.setName(servletName);
@@ -429,7 +429,7 @@ public class Context extends ContextHandler
          */
         public FilterRegistration findFilterRegistration(String filterName)
         {
-            final ServletHandler handler = Context.this.getServletHandler();
+            final ServletHandler handler = ServletContextHandler.this.getServletHandler();
             final FilterHolder holder=handler.getFilter(filterName);
             return (holder==null)?null:holder.getRegistration();
         }
@@ -440,7 +440,7 @@ public class Context extends ContextHandler
          */
         public ServletRegistration findServletRegistration(String servletName)
         {
-            final ServletHandler handler = Context.this.getServletHandler();
+            final ServletHandler handler = ServletContextHandler.this.getServletHandler();
             final ServletHolder holder=handler.getServlet(servletName);
             return (holder==null)?null:holder.getRegistration();
         }

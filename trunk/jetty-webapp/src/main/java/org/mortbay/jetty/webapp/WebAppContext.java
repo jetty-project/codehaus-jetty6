@@ -39,7 +39,7 @@ import org.mortbay.jetty.server.HandlerContainer;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.handler.ErrorHandler;
 import org.mortbay.jetty.server.handler.HandlerWrapper;
-import org.mortbay.jetty.server.servlet.Context;
+import org.mortbay.jetty.server.servlet.ServletContextHandler;
 import org.mortbay.jetty.server.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.server.servlet.ServletHandler;
 import org.mortbay.jetty.server.session.SessionHandler;
@@ -67,7 +67,7 @@ import org.mortbay.jetty.util.resource.Resource;
  * @author gregw
  *
  */
-public class WebAppContext extends Context
+public class WebAppContext extends ServletContextHandler
 {   
     public final static String WEB_DEFAULTS_XML="org/mortbay/jetty/webapp/webdefault.xml";
     public final static String ERROR_PAGE="org.mortbay.jetty.server.error_page";
@@ -121,7 +121,7 @@ public class WebAppContext extends Context
 
     public static ContextHandler getCurrentWebAppContext()
     {
-        ContextHandler.SContext context=ContextHandler.getCurrentContext();
+        ContextHandler.Context context=ContextHandler.getCurrentContext();
         if (context!=null)
         {
             ContextHandler handler = context.getContextHandler();

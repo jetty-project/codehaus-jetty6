@@ -20,8 +20,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
 import javax.servlet.UnavailableException;
 
+import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.util.Loader;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
 import org.mortbay.jetty.util.log.Log;
@@ -238,7 +240,17 @@ public class Holder extends AbstractLifeCycle implements Serializable
     {
         return _name;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    protected void illegalStateIfContextStarted()
+    {
+        if (_servletHandler!=null)
+        {
+            ContextHandler.Context context=(ContextHandler.Context)_servletHandler.getServletContext();
+            if (context!=null && context.getContextHandler().isStarted())
+                throw new IllegalStateException("Started");
+        }
+    }
 
 }
 
