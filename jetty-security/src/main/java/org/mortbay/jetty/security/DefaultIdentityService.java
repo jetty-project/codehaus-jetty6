@@ -1,15 +1,12 @@
 package org.mortbay.jetty.security;
 
 import java.security.Principal;
-import java.util.List;
 import java.util.Map;
 
 import javax.security.auth.Subject;
 
-import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.server.UserIdentity.Scope;
-import org.mortbay.jetty.util.component.AbstractLifeCycle;
 
 
 /* ------------------------------------------------------------ */
@@ -22,7 +19,7 @@ import org.mortbay.jetty.util.component.AbstractLifeCycle;
  * implementation. All other operations are effectively noops.
  *
  */
-public class DefaultIdentityService implements IdentityService
+public class DefaultIdentityService implements IdentityService<UserIdentity.Source, RoleRunAsToken>
 {
     public DefaultIdentityService()
     {
@@ -33,30 +30,35 @@ public class DefaultIdentityService implements IdentityService
      * If there are roles refs present in the scope, then wrap the UserIdentity 
      * with one that uses the role references in the {@link UserIdentity#isUserInRole(String)}
      */
-    public UserIdentity associate(UserIdentity user, Scope scope)
+    public UserIdentity.Source associate(UserIdentity user, Scope scope)
     {
         Map<String,String> roleRefMap=scope.getRoleRefMap();
         if (roleRefMap!=null && roleRefMap.size()>0)
             return new RoleRefUserIdentity(user,roleRefMap);
-        return user;
+        return (UserIdentity.Source)user;
     }
 
-    public void disassociate(UserIdentity lastUser)
+    public void disassociate(UserIdentity.Source previous)
     {
     }
 
-    public RunAsToken associateRunAs(RunAsToken token)
+    public RoleRunAsToken associateRunAs(RunAsToken token)
     {
         return null;
     }
 
-    public void disassociateRunAs(RunAsToken lastToken)
+    public void disassociateRunAs(RoleRunAsToken lastToken)
     {
     }
     
     public RunAsToken newRunAsToken(String runAsName)
     {
         return new RoleRunAsToken(runAsName);
+    }
+
+    public UserIdentity newSystemUserIdentity()
+    {
+        return null;
     }
 
     public UserIdentity newUserIdentity(final Subject subject, final Principal userPrincipal, final String[] roles)
@@ -69,7 +71,7 @@ public class DefaultIdentityService implements IdentityService
      * Wrapper UserIdentity used to apply RoleRef map.
      *
      */
-    public static class RoleRefUserIdentity implements UserIdentity
+    public static class RoleRefUserIdentity implements UserIdentity, UserIdentity.Source
     {
         final private UserIdentity _delegate;
         final private Map<String,String> _roleRefMap;
@@ -100,6 +102,10 @@ public class DefaultIdentityService implements IdentityService
             String link=_roleRefMap.get(role);
             return _delegate.isUserInRole(link==null?role:link);
         }
-        
+
+        public UserIdentity getUserIdentity()
+        {
+            return this;
+        }
     }
 }

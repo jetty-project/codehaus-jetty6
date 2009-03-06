@@ -55,6 +55,11 @@ public interface UserIdentity
      * @return True if the user can act in that role.
      */
     boolean isUserInRole(String role);
+
+    interface Source
+    {
+        UserIdentity getUserIdentity();
+    }
     
 
     /* ------------------------------------------------------------ */

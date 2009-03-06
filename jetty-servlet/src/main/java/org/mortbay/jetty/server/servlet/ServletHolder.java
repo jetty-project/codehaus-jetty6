@@ -21,8 +21,6 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.Collections;
 
-import java.security.Principal;
-
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -36,7 +34,6 @@ import javax.servlet.UnavailableException;
 
 import org.mortbay.jetty.security.IdentityService;
 import org.mortbay.jetty.security.RunAsToken;
-import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.util.log.Log;
@@ -264,10 +261,9 @@ public class ServletHolder extends Holder implements UserIdentity.Scope, Compara
     /* ------------------------------------------------------------ */
     public void doStop()
     {
-        RunAsToken old_run_as = null;
+        Object old_run_as = null;
         if (_servlet!=null)
         {       
-           
             try
             {
                 if (_identityService!=null && _runAsToken!=null)
@@ -398,7 +394,7 @@ public class ServletHolder extends Holder implements UserIdentity.Scope, Compara
     private void initServlet()
     	throws ServletException
     {
-        RunAsToken old_run_as = null;
+        Object old_run_as = null;
         try
         {
             if (_servlet==null)
@@ -412,7 +408,9 @@ public class ServletHolder extends Holder implements UserIdentity.Scope, Compara
             
             // Handle run as
             if (_identityService!=null && _runAsToken!=null)
+            {
                 old_run_as=_identityService.associateRunAs(_runAsToken);
+            }
 
             _servlet.init(_config);
         }
@@ -506,9 +504,7 @@ public class ServletHolder extends Holder implements UserIdentity.Scope, Compara
         
         // Service the request
         boolean servlet_error=true;
-        RunAsToken old_run_as = null;
-        UserIdentity userIdentity = null;
-        Principal user=null;
+        Object old_run_as = null;
         boolean suspendable = baseRequest.isAsyncSupported();
         try
         {

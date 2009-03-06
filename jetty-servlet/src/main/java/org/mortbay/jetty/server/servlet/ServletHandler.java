@@ -234,6 +234,7 @@ public class ServletHandler extends AbstractHandler
     
     /* ------------------------------------------------------------ */
     /**
+     * @param uriInContext uri to get dispatcher for
      * @return A {@link RequestDispatcher dispatcher} wrapping the resource at <code>uriInContext</code>,
      *  or <code>null</code> if the specified uri cannot be dispatched to.
      */
@@ -248,7 +249,7 @@ public class ServletHandler extends AbstractHandler
         try
         {
             String query=null;
-            int q=0;
+            int q;
             if ((q=uriInContext.indexOf('?'))>0)
             {
                 query=uriInContext.substring(q+1);
@@ -313,6 +314,7 @@ public class ServletHandler extends AbstractHandler
         final String old_servlet_path=base_request.getServletPath();
         final String old_path_info=base_request.getPathInfo();
         final UserIdentity old_user_identity = base_request.getUserIdentity();
+        UserIdentity.Source identity_source = null;
 
         DispatcherType type = request.getDispatcherType();
         Object request_listeners=null;
@@ -383,8 +385,8 @@ public class ServletHandler extends AbstractHandler
                 if (_identityService!=null)
                 {
                     associated=true;
-                    UserIdentity user_identity=_identityService.associate(old_user_identity,servlet_holder);
-                    base_request.setUserIdentity(user_identity);
+                    identity_source=_identityService.associate(old_user_identity,servlet_holder);
+                    base_request.setUserIdentity(identity_source.getUserIdentity());
                 }
 
                 // Handle context listeners
@@ -516,7 +518,7 @@ public class ServletHandler extends AbstractHandler
 
             if (associated)
             {
-                _identityService.disassociate(old_user_identity);
+                _identityService.disassociate(identity_source);
                 base_request.setUserIdentity(old_user_identity);
             }
             base_request.setServletName(old_servlet_name);
