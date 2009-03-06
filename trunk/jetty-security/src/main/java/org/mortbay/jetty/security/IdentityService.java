@@ -9,7 +9,7 @@ import org.mortbay.jetty.server.UserIdentity;
  * Associates UserIdentities from with threads and UserIdentity.Contexts.
  * 
  */
-public interface IdentityService
+public interface IdentityService <T extends UserIdentity.Source, U>
 {
     /* ------------------------------------------------------------ */
     /**
@@ -19,15 +19,15 @@ public interface IdentityService
      * @param context The new scope.
      * @return A scoped {@link UserIdentity}.
      */
-    UserIdentity associate(UserIdentity user, UserIdentity.Scope context);
+    T associate(UserIdentity user, UserIdentity.Scope context);
     
     /* ------------------------------------------------------------ */
     /**
      * Disassociate the current UserIdentity and reinstate the 
      * previousUser identity.
-     * @param previousUser
+     * @param previous
      */
-    void disassociate(UserIdentity previousUser);
+    void disassociate(T previous);
     
     /* ------------------------------------------------------------ */
     /**
@@ -35,7 +35,7 @@ public interface IdentityService
      * @param token The runAsToken to associate.
      * @return The previous runAsToken or null.
      */
-    RunAsToken associateRunAs(RunAsToken token);
+    U associateRunAs(RunAsToken token);
     
     /* ------------------------------------------------------------ */
     /**
@@ -43,7 +43,7 @@ public interface IdentityService
      * and reassociate the previous token.
      * @param previousToken
      */
-    void disassociateRunAs(RunAsToken previousToken);
+    void disassociateRunAs(U previousToken);
 
     /* ------------------------------------------------------------ */
     /**
@@ -64,4 +64,6 @@ public interface IdentityService
      * @return A new immutable RunAsToken
      */
     RunAsToken newRunAsToken(String runAsName);
+
+    UserIdentity newSystemUserIdentity();
 }
