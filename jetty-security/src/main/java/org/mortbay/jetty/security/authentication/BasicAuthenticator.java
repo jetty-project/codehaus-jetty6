@@ -30,11 +30,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.http.security.Constraint;
+import org.mortbay.jetty.security.DefaultUserIdentity;
 import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.Authentication;
-import org.mortbay.jetty.security.SimpleAuthentication;
+import org.mortbay.jetty.security.DefaultAuthentication;
 import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.util.StringUtil;
 
@@ -82,16 +83,20 @@ public class BasicAuthenticator extends LoginAuthenticator
                 
                 UserIdentity user = _loginService.login(username,password);
                 if (user!=null)
-                    return new SimpleAuthentication(Authentication.Status.SUCCESS,Constraint.__BASIC_AUTH,user);
+                {
+                    if (user instanceof DefaultUserIdentity)
+                        return ((DefaultUserIdentity)user).SUCCESSFUL_BASIC;
+                    return new DefaultAuthentication(Authentication.Status.SUCCESS,Constraint.__BASIC_AUTH,user);
+                }
             }
 
             if (!mandatory) 
             {
-                return SimpleAuthentication.SUCCESS_UNAUTH_RESULTS;
+                return DefaultAuthentication.SUCCESS_UNAUTH_RESULTS;
             }
             response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\"" + _loginService.getName() + '"');
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return SimpleAuthentication.SEND_CONTINUE_RESULTS;
+            return DefaultAuthentication.SEND_CONTINUE_RESULTS;
         }
         catch (IOException e)
         {

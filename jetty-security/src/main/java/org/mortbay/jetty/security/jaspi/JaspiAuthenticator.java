@@ -39,7 +39,7 @@ import org.mortbay.jetty.security.Authentication;
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.LazyAuthentication;
 import org.mortbay.jetty.security.ServerAuthException;
-import org.mortbay.jetty.security.SimpleAuthentication;
+import org.mortbay.jetty.security.DefaultAuthentication;
 import org.mortbay.jetty.security.Authenticator.Configuration;
 import org.mortbay.jetty.server.UserIdentity;
 
@@ -117,7 +117,7 @@ public class JaspiAuthenticator implements Authenticator
             
             Set<UserIdentity> ids = clientSubject.getPrivateCredentials(UserIdentity.class);
             if (ids.size()>0)
-                return new SimpleAuthentication(toServerAuthStatus(authStatus),authMethod,ids.iterator().next());
+                return new DefaultAuthentication(toServerAuthStatus(authStatus),authMethod,ids.iterator().next());
             return Authentication.SEND_FAILURE_RESULTS;
         }
         catch (AuthException e)

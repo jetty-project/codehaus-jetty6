@@ -33,7 +33,7 @@ import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.Authentication;
-import org.mortbay.jetty.security.SimpleAuthentication;
+import org.mortbay.jetty.security.DefaultAuthentication;
 import org.mortbay.jetty.security.Authenticator.Configuration;
 import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.util.StringUtil;
@@ -138,7 +138,7 @@ public class FormAuthenticator extends LoginAuthenticator
         // not mandatory and not authenticated
         if (session == null || isLoginOrErrorPage(uri)) 
         {
-            return SimpleAuthentication.SUCCESS_UNAUTH_RESULTS;
+            return DefaultAuthentication.SUCCESS_UNAUTH_RESULTS;
         }
             
 
@@ -165,7 +165,7 @@ public class FormAuthenticator extends LoginAuthenticator
                     session.removeAttribute(__J_URI); // Remove popped return URI.
                     response.setContentLength(0);   
                     response.sendRedirect(response.encodeRedirectURL(nuri));
-                    return new SimpleAuthentication(Authentication.Status.SEND_SUCCESS,Constraint.__FORM_AUTH,user);
+                    return new DefaultAuthentication(Authentication.Status.SEND_SUCCESS,Constraint.__FORM_AUTH,user);
                 }
                 
                 // not authenticated
@@ -182,14 +182,14 @@ public class FormAuthenticator extends LoginAuthenticator
                 }
                 // TODO is this correct response if isMandatory false??? Can
                 // that occur?
-                return SimpleAuthentication.SEND_FAILURE_RESULTS;
+                return DefaultAuthentication.SEND_FAILURE_RESULTS;
             }
             // Check if the session is already authenticated.
 
             // Don't authenticate authform or errorpage
             if (!mandatory)
             // TODO verify this is correct action
-                return SimpleAuthentication.SUCCESS_UNAUTH_RESULTS;
+                return DefaultAuthentication.SUCCESS_UNAUTH_RESULTS;
 
             // redirect to login page
             if (request.getQueryString() != null) uri += "?" + request.getQueryString();
@@ -199,7 +199,7 @@ public class FormAuthenticator extends LoginAuthenticator
                                           + request.getServerPort()
                                           + URIUtil.addPaths(request.getContextPath(), uri));
             response.sendRedirect(_formLoginPage);
-            return SimpleAuthentication.SEND_CONTINUE_RESULTS;
+            return DefaultAuthentication.SEND_CONTINUE_RESULTS;
         }
         catch (IOException e)
         {

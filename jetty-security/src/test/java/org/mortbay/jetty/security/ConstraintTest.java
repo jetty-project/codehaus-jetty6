@@ -16,7 +16,9 @@
 package org.mortbay.jetty.security;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -36,8 +38,10 @@ import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.LocalConnector;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Server;
+import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.server.handler.AbstractHandler;
 import org.mortbay.jetty.server.handler.ContextHandler;
+import org.mortbay.jetty.server.handler.HandlerWrapper;
 import org.mortbay.jetty.server.session.SessionHandler;
 import org.omg.CORBA._IDLTypeStub;
 
@@ -495,14 +499,113 @@ public class ConstraintTest extends TestCase
         
     }
 
+    public void testRoleRef()
+    throws Exception
+    {
+        RoleCheckHandler check=new RoleCheckHandler();
+        _security.setHandler(check);
+        _security.setAuthenticator(new BasicAuthenticator());
+        _security.setStrict(false);
+        _server.start();
+
+        String response;
+        response = _connector.getResponses("GET /ctx/noauth/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n" +
+                "Authorization: " + B64Code.encode("user2:password") + "\r\n" +
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 500 "));
+
+        _server.stop();
+        
+        RoleRefHandler roleref = new RoleRefHandler();
+        _security.setHandler(roleref);
+        roleref.setHandler(check);
+        
+        _server.start();
+        
+        _connector.reopen();
+        response = _connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n" +
+                "Authorization: " + B64Code.encode("user2:password") + "\r\n" +
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+    }
 
     class RequestHandler extends AbstractHandler
     {
         public void handle(String target, HttpServletRequest request, HttpServletResponse response ) throws IOException, ServletException
         {
             ((Request) request).setHandled(true);
-            response.setStatus(200);
+            if (request.getAuthType()==null || "user".equals(request.getRemoteUser()) || request.isUserInRole("user"))
+                response.setStatus(200);
+            else
+                response.sendError(500);
         }
-	
+    }
+
+    class RoleRefHandler extends HandlerWrapper
+    {
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see org.mortbay.jetty.server.handler.HandlerWrapper#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+         */
+        @Override
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+        {
+            UserIdentity old = ((Request)request).getUserIdentity();
+            try
+            {
+                ((Request)request).setUserIdentity(
+                _security.getIdentityService().associate(((Request)request).getUserIdentity(),
+                        new UserIdentity.Scope()
+                {
+
+                    public String getContextPath()
+                    {
+                        return "/";
+                    }
+
+                    public String getName()
+                    {
+                        return "someServlet";
+                    }
+
+                    public Map<String, String> getRoleRefMap()
+                    {
+                        Map<String,String> map = new HashMap<String, String>();
+                        map.put("untranslated","user");
+                        return map;
+                    }
+
+                    public String getRunAsRole()
+                    {
+                        return null;
+                    }
+                    
+                }));
+                
+                super.handle(target,request,response);
+            }
+            finally
+            {
+                ((Request)request).setUserIdentity(old);
+            }
+        }
+        
+    }
+    
+    class RoleCheckHandler extends AbstractHandler
+    {
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response ) throws IOException, ServletException
+        {
+            ((Request) request).setHandled(true);
+            if (request.getAuthType()==null || "user".equals(request.getRemoteUser()) || request.isUserInRole("untranslated"))
+                response.setStatus(200);
+            else
+                response.sendError(500);
+        }
     }
 }

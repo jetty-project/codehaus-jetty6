@@ -53,7 +53,7 @@ import org.mortbay.jetty.util.log.Log;
  *
  * @author Greg Wilkins
  */
-public class ServletHolder extends Holder implements UserIdentity.Context, Comparable
+public class ServletHolder extends Holder implements UserIdentity.Scope, Comparable
 {
     /* ---------------------------------------------------------------- */
     private int _initOrder;
@@ -448,7 +448,7 @@ public class ServletHolder extends Holder implements UserIdentity.Context, Compa
     
     /* ------------------------------------------------------------ */
     /**
-     * @see org.mortbay.jetty.server.UserIdentity.Context#getContextPath()
+     * @see org.mortbay.jetty.server.UserIdentity.Scope#getContextPath()
      */
     public String getContextPath()
     {
@@ -457,7 +457,7 @@ public class ServletHolder extends Holder implements UserIdentity.Context, Compa
 
     /* ------------------------------------------------------------ */
     /**
-     * @see org.mortbay.jetty.server.UserIdentity.Context#getRoleRefMap()
+     * @see org.mortbay.jetty.server.UserIdentity.Scope#getRoleRefMap()
      */
     public Map<String, String> getRoleRefMap()
     {
@@ -466,7 +466,7 @@ public class ServletHolder extends Holder implements UserIdentity.Context, Compa
 
     /* ------------------------------------------------------------ */
     /**
-     * @see org.mortbay.jetty.server.UserIdentity.Context#getRunAs()
+     * @see org.mortbay.jetty.server.UserIdentity.Scope#getRunAs()
      */
     public String getRunAsRole()
     {
@@ -475,7 +475,7 @@ public class ServletHolder extends Holder implements UserIdentity.Context, Compa
 
     /* ------------------------------------------------------------ */
     /**
-     * @see org.mortbay.jetty.server.UserIdentity.Context#getRunAs()
+     * @see org.mortbay.jetty.server.UserIdentity.Scope#getRunAs()
      */
     public void setRunAsRole(String role)
     {

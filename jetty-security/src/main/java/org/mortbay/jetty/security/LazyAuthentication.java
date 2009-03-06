@@ -60,7 +60,7 @@ public class LazyAuthentication implements Authentication
             }
             catch (ServerAuthException e)
             {
-                _delegate = SimpleAuthentication.SEND_FAILURE_RESULTS;
+                _delegate = DefaultAuthentication.SEND_FAILURE_RESULTS;
             }
         }
         return _delegate;
