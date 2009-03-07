@@ -9,8 +9,22 @@ import org.mortbay.jetty.server.UserIdentity;
  * Associates UserIdentities from with threads and UserIdentity.Contexts.
  * 
  */
-public interface IdentityService <T extends UserIdentity.Source, U>
+public interface IdentityService <SCOPED extends UserIdentity, RUNAS>
 {
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /** A scoped UserIdentity.
+     * 
+     * An interface used to ob
+     *
+     */
+    interface Scoped
+    {
+        UserIdentity getScopedUserIdentity();
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * Associate the {@link UserIdentity} and {@link UserIdentity.Scope}
@@ -19,15 +33,15 @@ public interface IdentityService <T extends UserIdentity.Source, U>
      * @param context The new scope.
      * @return A scoped {@link UserIdentity}.
      */
-    T associate(UserIdentity user, UserIdentity.Scope context);
+    SCOPED associate(UserIdentity user, UserIdentity.Scope context);
     
     /* ------------------------------------------------------------ */
     /**
      * Disassociate the current UserIdentity and reinstate the 
      * previousUser identity.
-     * @param previous
+     * @param scoped
      */
-    void disassociate(T previous);
+    void disassociate(SCOPED scoped);
     
     /* ------------------------------------------------------------ */
     /**
@@ -35,7 +49,7 @@ public interface IdentityService <T extends UserIdentity.Source, U>
      * @param token The runAsToken to associate.
      * @return The previous runAsToken or null.
      */
-    U associateRunAs(RunAsToken token);
+    RUNAS associateRunAs(RunAsToken token);
     
     /* ------------------------------------------------------------ */
     /**
@@ -43,7 +57,7 @@ public interface IdentityService <T extends UserIdentity.Source, U>
      * and reassociate the previous token.
      * @param previousToken
      */
-    void disassociateRunAs(U previousToken);
+    void disassociateRunAs(RUNAS token);
 
     /* ------------------------------------------------------------ */
     /**

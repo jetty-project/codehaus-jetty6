@@ -26,18 +26,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.security.Authenticator.Configuration;
-import org.mortbay.jetty.security.authentication.LoginAuthenticator;
 import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Response;
-import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.handler.HandlerWrapper;
@@ -64,7 +60,7 @@ public abstract class SecurityHandler extends HandlerWrapper implements Authenti
     private final Map<String,String> _initParameters=new HashMap<String,String>();
     private LoginService _loginService;
     private boolean _loginServiceShared;
-    private IdentityService _identityService;
+    private IdentityService<UserIdentity,?> _identityService;
 
     /* ------------------------------------------------------------ */
     protected SecurityHandler()
@@ -75,7 +71,7 @@ public abstract class SecurityHandler extends HandlerWrapper implements Authenti
     /** Get the identityService.
      * @return the identityService
      */
-    public IdentityService getIdentityService()
+    public IdentityService<UserIdentity,?> getIdentityService()
     {
         return _identityService;
     }
@@ -84,7 +80,7 @@ public abstract class SecurityHandler extends HandlerWrapper implements Authenti
     /** Set the identityService.
      * @param identityService the identityService to set
      */
-    public void setIdentityService(IdentityService identityService)
+    public void setIdentityService(IdentityService<UserIdentity,?> identityService)
     {
         if (isStarted())
             throw new IllegalStateException("Started");
@@ -278,7 +274,7 @@ public abstract class SecurityHandler extends HandlerWrapper implements Authenti
     }
     
     /* ------------------------------------------------------------ */
-    protected IdentityService findIdentityService()
+    protected IdentityService<UserIdentity,?> findIdentityService()
     {
         List<IdentityService> services = getServer().getBeans(IdentityService.class);
         if (services!=null && services.size()>0)
