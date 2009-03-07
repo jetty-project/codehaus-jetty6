@@ -85,16 +85,16 @@ public class ServletHandler extends AbstractHandler
     private boolean _filterChainsCached=true;
     private int _maxFilterChainsCacheSize=1000;
     private boolean _startWithUnavailable=true;
-    private IdentityService _identityService;
+    private IdentityService<UserIdentity,?> _identityService;
     
     private ServletHolder[] _servlets;
     private ServletMapping[] _servletMappings;
     
-    private transient Map _filterNameMap= new HashMap();
-    private transient List _filterPathMappings;
-    private transient MultiMap _filterNameMappings;
+    private transient Map<String,FilterHolder> _filterNameMap= new HashMap<String,FilterHolder>();
+    private transient List<FilterMapping> _filterPathMappings;
+    private transient MultiMap<String> _filterNameMappings;
     
-    private transient Map _servletNameMap=new HashMap();
+    private transient Map<String,ServletHolder> _servletNameMap=new HashMap();
     private transient PathMap _servletPathMap;
     
     protected transient ConcurrentHashMap _chainCache[];
@@ -141,7 +141,7 @@ public class ServletHandler extends AbstractHandler
         {
             SecurityHandler security_handler = (SecurityHandler)_contextHandler.getChildHandlerByClass(SecurityHandler.class);
             if (security_handler!=null)
-                _identityService=security_handler.getIdentityService();
+                _identityService=(IdentityService<UserIdentity,?>)security_handler.getIdentityService();
         }
         
         updateNameMappings();
@@ -313,15 +313,14 @@ public class ServletHandler extends AbstractHandler
         final String old_servlet_name=base_request.getServletName();
         final String old_servlet_path=base_request.getServletPath();
         final String old_path_info=base_request.getPathInfo();
-        final UserIdentity old_user_identity = base_request.getUserIdentity();
-        UserIdentity.Source identity_source = null;
+        UserIdentity scoped_identity = null;
 
         DispatcherType type = request.getDispatcherType();
         Object request_listeners=null;
         ServletRequestEvent request_event=null;
         ServletHolder servlet_holder=null;
         FilterChain chain=null;
-        boolean associated=false;
+        UserIdentity old_identity=null;
 
         // find the servlet
         if (target.startsWith("/"))
@@ -384,9 +383,9 @@ public class ServletHandler extends AbstractHandler
                 base_request.setServletName(servlet_holder.getName());
                 if (_identityService!=null)
                 {
-                    associated=true;
-                    identity_source=_identityService.associate(old_user_identity,servlet_holder);
-                    base_request.setUserIdentity(identity_source.getUserIdentity());
+                    old_identity=base_request.getUserIdentity();
+                    scoped_identity=_identityService.associate(old_identity,servlet_holder);
+                    base_request.setUserIdentity(scoped_identity);
                 }
 
                 // Handle context listeners
@@ -516,10 +515,9 @@ public class ServletHandler extends AbstractHandler
                 }
             }
 
-            if (associated)
+            if (scoped_identity!=null)
             {
-                _identityService.disassociate(identity_source);
-                base_request.setUserIdentity(old_user_identity);
+                base_request.setUserIdentity(old_identity);
             }
             base_request.setServletName(old_servlet_name);
 
@@ -747,7 +745,7 @@ public class ServletHandler extends AbstractHandler
     /** conveniance method to add a servlet.
      * @return The servlet holder.
      */
-    public ServletHolder addServletWithMapping (Class servlet,String pathSpec)
+    public ServletHolder addServletWithMapping (Class<? extends Servlet> servlet,String pathSpec)
     {
         ServletHolder holder = newServletHolder(servlet);
         setServlets((ServletHolder[])LazyList.addToArray(getServlets(), holder, ServletHolder.class));
@@ -818,7 +816,7 @@ public class ServletHandler extends AbstractHandler
     }
     
     /* ------------------------------------------------------------ */
-    public FilterHolder newFilterHolder(Class filter)
+    public FilterHolder newFilterHolder(Class<? extends Filter> filter)
     {
         return new FilterHolder(filter);
     }
@@ -845,7 +843,7 @@ public class ServletHandler extends AbstractHandler
      * @param dispatches see {@link FilterMapping#setDispatches(int)}
      * @return The filter holder.
      */
-    public FilterHolder addFilterWithMapping (Class filter,String pathSpec,int dispatches)
+    public FilterHolder addFilterWithMapping (Class<? extends Filter> filter,String pathSpec,int dispatches)
     {
         FilterHolder holder = newFilterHolder(filter);
         addFilterWithMapping(holder,pathSpec,dispatches);
