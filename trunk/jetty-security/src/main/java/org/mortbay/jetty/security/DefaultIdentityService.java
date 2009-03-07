@@ -19,7 +19,7 @@ import org.mortbay.jetty.server.UserIdentity.Scope;
  * implementation. All other operations are effectively noops.
  *
  */
-public class DefaultIdentityService implements IdentityService<UserIdentity.Source, RoleRunAsToken>
+public class DefaultIdentityService implements IdentityService<UserIdentity, RoleRunAsToken>
 {
     public DefaultIdentityService()
     {
@@ -30,15 +30,15 @@ public class DefaultIdentityService implements IdentityService<UserIdentity.Sour
      * If there are roles refs present in the scope, then wrap the UserIdentity 
      * with one that uses the role references in the {@link UserIdentity#isUserInRole(String)}
      */
-    public UserIdentity.Source associate(UserIdentity user, Scope scope)
+    public UserIdentity associate(UserIdentity user, Scope scope)
     {
         Map<String,String> roleRefMap=scope.getRoleRefMap();
         if (roleRefMap!=null && roleRefMap.size()>0)
             return new RoleRefUserIdentity(user,roleRefMap);
-        return (UserIdentity.Source)user;
+        return user;
     }
 
-    public void disassociate(UserIdentity.Source previous)
+    public void disassociate(UserIdentity scoped)
     {
     }
 
@@ -71,7 +71,7 @@ public class DefaultIdentityService implements IdentityService<UserIdentity.Sour
      * Wrapper UserIdentity used to apply RoleRef map.
      *
      */
-    public static class RoleRefUserIdentity implements UserIdentity, UserIdentity.Source
+    public static class RoleRefUserIdentity implements UserIdentity
     {
         final private UserIdentity _delegate;
         final private Map<String,String> _roleRefMap;
@@ -101,11 +101,6 @@ public class DefaultIdentityService implements IdentityService<UserIdentity.Sour
         {
             String link=_roleRefMap.get(role);
             return _delegate.isUserInRole(link==null?role:link);
-        }
-
-        public UserIdentity getUserIdentity()
-        {
-            return this;
         }
     }
 }

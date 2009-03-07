@@ -30,6 +30,6 @@ public interface LoginService
     String getName();
     UserIdentity login(String username,Object credentials);
     
-    IdentityService getIdentityService();
-    void setIdentityService(IdentityService service);
+    IdentityService<UserIdentity,?> getIdentityService();
+    void setIdentityService(IdentityService<UserIdentity,?> service);
 }

@@ -28,7 +28,7 @@ import org.mortbay.jetty.server.UserIdentity;
  * The default implementation of UserIdentity.
  *
  */
-public class DefaultUserIdentity implements UserIdentity, UserIdentity.Source
+public class DefaultUserIdentity implements UserIdentity
 {
     /* Cache successful authentications for BASIC and DIGEST to avoid creation on every request */
     public final Authentication SUCCESSFUL_BASIC = new DefaultAuthentication(Status.SUCCESS,Constraint.__BASIC_AUTH,this);
@@ -68,9 +68,5 @@ public class DefaultUserIdentity implements UserIdentity, UserIdentity.Source
         return false;
     }
 
-    public UserIdentity getUserIdentity()
-    {
-        return this;
-    }
     
 }

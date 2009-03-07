@@ -540,7 +540,6 @@ public class ConstraintTest extends TestCase
 
     class RoleRefHandler extends HandlerWrapper
     {
-
         /* ------------------------------------------------------------ */
         /**
          * @see org.mortbay.jetty.server.handler.HandlerWrapper#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -548,8 +547,8 @@ public class ConstraintTest extends TestCase
         @Override
         public void handle(String target, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
         {
-            UserIdentity old = ((Request)request).getUserIdentity();
-            UserIdentity.Source source = _security.getIdentityService().associate(((Request) request).getUserIdentity(),
+            UserIdentity old = ((Request) request).getUserIdentity();
+            UserIdentity scoped = _security.getIdentityService().associate(old,
                     new UserIdentity.Scope()
                     {
 
@@ -576,20 +575,18 @@ public class ConstraintTest extends TestCase
                         }
 
                     });
-            ((Request)request).setUserIdentity(
-                    source.getUserIdentity());
+            ((Request)request).setUserIdentity(scoped);
 
-              try
+            try
             {
-              super.handle(target,request,response);
+                super.handle(target,request,response);
             }
             finally
             {
-                _security.getIdentityService().disassociate(source);
+                _security.getIdentityService().disassociate(scoped);
                 ((Request)request).setUserIdentity(old);
             }
         }
-        
     }
     
     class RoleCheckHandler extends AbstractHandler
