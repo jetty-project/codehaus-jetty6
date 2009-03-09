@@ -24,6 +24,8 @@ import java.io.IOException;
 import javax.security.auth.Subject;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -198,13 +200,19 @@ public class FormAuthenticator extends LoginAuthenticator
                                           + ":"
                                           + request.getServerPort()
                                           + URIUtil.addPaths(request.getContextPath(), uri));
-            response.sendRedirect(_formLoginPage);
+//            response.setContentLength(0);//???? previous code had this
+            RequestDispatcher dispatcher = request.getRequestDispatcher(_formLoginPage);
+            dispatcher.forward(request, response);
             return DefaultAuthentication.SEND_CONTINUE_RESULTS;
         }
         catch (IOException e)
         {
             throw new ServerAuthException(e);
-        } 
+        }
+        catch (ServletException e)
+        {
+            throw new ServerAuthException(e);
+        }
     }
 
     public boolean isLoginOrErrorPage(String pathInContext)
