@@ -54,7 +54,7 @@ public class SessionCachingAuthenticator extends DelegateAuthenticator
             return authentication;
 
         authentication = _delegate.validateRequest(request, response, mandatory);
-        if (authentication != null && authentication.isSuccess())
+        if (authentication != null && authentication.getUserIdentity().getSubject() != null)
         {
             Authentication next=new DefaultAuthentication(Authentication.Status.SUCCESS,authentication.getAuthMethod(),authentication.getUserIdentity());
             session.setAttribute(__J_AUTHENTICATED, next);
