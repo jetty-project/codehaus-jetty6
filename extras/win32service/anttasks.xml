@@ -29,7 +29,7 @@
         <copy failonerror="true" file="target/unziped/wrapper-windows-x86-32-${serviceWrapperVersion}/lib/wrapper.dll" todir="../../lib/win32" />
 
         <copy failonerror="true" file="target/${project.artifactId}-${project.version}.${project.packaging}" todir="../../lib/win32" />
-        <copy failonerror="true" file="src/main/resources/jetty-win32-service.xml" todir="../../etc" />
+        <copy failonerror="true" file="src/main/config/etc/jetty-win32-service.xml" todir="../../etc" />
         <copy failonerror="true" file="src/main/resources/jetty-service.conf" todir="../../bin" />
     </target>
 

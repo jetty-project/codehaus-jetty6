@@ -48,6 +48,19 @@
                 <delete includeemptydirs="true" failonerror="false">
                   <fileset dir="../../lib/management/" includes="**/**" />
                 </delete>
+                <delete failonerror="false" file="../../etc/jetty-jmx.xml" />
+              </tasks>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy</id>
+            <phase>install</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <copy failonerror="false" file="src/main/config/etc/jetty-jmx.xml" todir="../../etc" />
               </tasks>
             </configuration>
           </execution>

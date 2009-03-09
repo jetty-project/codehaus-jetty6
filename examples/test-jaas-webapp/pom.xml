@@ -44,12 +44,12 @@
                 <delete quiet="true" dir="../../webapps/test-jaas/" />
                 <unjar src="target/${project.artifactId}-${project.version}.${project.packaging}" dest="../../webapps/test-jaas/" />
                 <copy todir="../../etc">
-                 <fileset dir="src/etc"> 
-                   <include name="jetty-jaas.xml"/>
-                   <include name="login.conf"/>
-                   <include name="login.properties"/>
-                 </fileset>
-                </copy> 
+                  <fileset dir="src/main/config/etc">
+                    <include name="jetty-jaas.xml"/>
+                    <include name="login.conf"/>
+                    <include name="login.properties"/>
+                  </fileset>
+                </copy>
               </tasks>
             </configuration>
           </execution>

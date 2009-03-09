@@ -49,7 +49,17 @@
                 <delete includeemptydirs="true">
                   <fileset dir="../../lib/" includes="${project.artifactId}-${project.version}.${project.packaging}" />
                   <fileset dir="../../lib/" includes="servlet-api-${servlet-version}.jar" />
-                  <fileset dir="../../etc/" includes="webdefault.xml" />
+                  <fileset dir="../../etc/" >
+                    <include name="webdefault.xml"/>
+                    <include name="jetty.xml"/>
+                    <include name="jetty-bio.xml"/>
+                    <include name="jetty-ssl.xml"/>
+                    <include name="keystore"/>
+                    <include name="jetty-stats.xml"/>
+                    <include name="jetty-xinetd.xml"/>
+                    <include name="realm.properties"/>
+                    <include name="jdbcRealm.properties"/>
+                  </fileset>
                 </delete>
               </tasks>
             </configuration>
@@ -64,6 +74,19 @@
               <tasks>
                 <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/${project.artifactId}-${project.version}.${project.packaging}" />
                 <copy failonerror="false" file="src/main/resources/org/mortbay/jetty/webapp/webdefault.xml" tofile="../../etc/webdefault.xml" />
+                <copy failonerror="false" includeEmptyDirs="false" todir="../../etc">
+                  <flattenmapper />
+                  <fileset dir="src/main/config/etc">
+                    <include name="jetty.xml"/>
+                    <include name="jetty-bio.xml"/>
+                    <include name="jetty-xinetd.xml"/>
+                    <include name="jetty-ssl.xml"/>
+                    <include name="keystore"/>
+                    <include name="jetty-stats.xml"/>
+                    <include name="realm.properties"/>
+                    <include name="jdbcRealm.properties"/>
+                  </fileset>
+                </copy>
               </tasks>
             </configuration>
           </execution>
