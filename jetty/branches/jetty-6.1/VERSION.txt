@@ -1,4 +1,5 @@
 jetty-6.1-SNAPSHOT
+ + JETTY-899 Standardize location for configuration files which go into etc
  + JETTY-944 Lazy messages don't prevent long polls waiting
 
 

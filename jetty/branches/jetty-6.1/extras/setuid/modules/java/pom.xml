@@ -29,12 +29,12 @@
                                 <copy failonerror="false"
                                       file="target/${project.artifactId}-${project.version}.jar"
                                       tofile="../../target/jetty-setuid-${project.version}.jar"/>
-                                <copy failonerror="false" file="etc/jetty-setuid.xml" todir="../../target"/>
+                                <copy failonerror="false" file="src/main/config/etc/jetty-setuid.xml" todir="../../target"/>
                                 
                                 <copy failonerror="false"
                                       file="target/${project.artifactId}-${project.version}.jar"
                                       tofile="../../../../lib/ext/jetty-setuid-${project.version}.jar"/>
-                                <copy failonerror="false" file="etc/jetty-setuid.xml" todir="../../../../etc"/>
+                                <copy failonerror="false" file="src/main/config/etc/jetty-setuid.xml" todir="../../../../etc"/>
                             </tasks>
                         </configuration>
                     </execution>
