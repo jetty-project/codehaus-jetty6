@@ -464,7 +464,7 @@ public class ServletHolder extends Holder implements UserIdentity.Scope, Compara
 
     /* ------------------------------------------------------------ */
     /**
-     * @see org.mortbay.jetty.server.UserIdentity.Scope#getRunAs()
+     * @see org.mortbay.jetty.server.UserIdentity.Scope#getRunAsRole()
      */
     public String getRunAsRole()
     {
@@ -473,7 +473,8 @@ public class ServletHolder extends Holder implements UserIdentity.Scope, Compara
 
     /* ------------------------------------------------------------ */
     /**
-     * @see org.mortbay.jetty.server.UserIdentity.Scope#getRunAs()
+     * Set the run-as role for this servlet
+     * @param role run-as role for this servlet
      */
     public void setRunAsRole(String role)
     {

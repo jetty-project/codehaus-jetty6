@@ -39,7 +39,8 @@ public interface IdentityService <SCOPED extends UserIdentity, RUNAS>
     /**
      * Disassociate the current UserIdentity and reinstate the 
      * previousUser identity.
-     * @param scoped
+     * TODO this might not be necessary.  Both existing implementations are no-ops
+     * @param scoped SCOPED returned from previous associate call
      */
     void disassociate(SCOPED scoped);
     
@@ -55,7 +56,7 @@ public interface IdentityService <SCOPED extends UserIdentity, RUNAS>
     /**
      * Disassociate the current runAsToken from the thread
      * and reassociate the previous token.
-     * @param previousToken
+     * @param token RUNAS returned from previous associateRunAs call
      */
     void disassociateRunAs(RUNAS token);
 
@@ -64,9 +65,9 @@ public interface IdentityService <SCOPED extends UserIdentity, RUNAS>
      * Create a new UserIdentity for use with this identity service.
      * The UserIdentity should be immutable and able to be cached.
      * 
-     * @param subject
-     * @param userPrincipal
-     * @param roles
+     * @param subject Subject to include in UserIdentity
+     * @param userPrincipal Principal to include in UserIdentity.  This will be returned from getUserPrincipal calls
+     * @param roles set of roles to include in UserIdentity.
      * @return A new immutable UserIdententity
      */
     UserIdentity newUserIdentity(Subject subject, Principal userPrincipal, String[] roles);
