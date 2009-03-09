@@ -36,6 +36,7 @@
             <configuration>
               <tasks>
                 <delete failonerror="false" file="../../lib/${project.artifactId}-${project.version}.${project.packaging}" />
+                <delete failonerror="false" file="../../etc/jetty-logging.xml" />
               </tasks>
             </configuration>
           </execution>
@@ -48,6 +49,7 @@
             <configuration>
               <tasks>
                 <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}" todir="../../lib/" />
+                <copy failonerror="false" file="src/main/config/etc/jetty-logging.xml" todir="../../etc" />
               </tasks>
             </configuration>
           </execution>
