@@ -382,23 +382,24 @@ public class Ajp13Generator extends AbstractGenerator
             if (fields != null)
             { 
                 // Add headers
-                Iterator i = fields.getFields();
-
-                while (i.hasNext())
+                int s=fields.size();
+                for (int f=0;f<s;f++)
                 {
+                    HttpFields.Field field = fields.getField(f);
+                    if (field==null)
+                        continue;
                     num_fields++;
-                    Field f = (Field) i.next();
-
-                    byte[] codes = (byte[]) __headerHash.get(f.getName());
+                    
+                    byte[] codes = (byte[]) __headerHash.get(field.getName());
                     if (codes != null)
                     {
                         _buffer.put(codes);
                     }
                     else
                     {
-                        addString(f.getName());
+                        addString(field.getName());
                     }
-                    addString(f.getValue());
+                    addString(field.getValue());
                 }
             }
 

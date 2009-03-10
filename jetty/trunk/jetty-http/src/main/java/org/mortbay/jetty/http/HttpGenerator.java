@@ -437,12 +437,12 @@ public class HttpGenerator extends AbstractGenerator
 
         if (fields != null)
         {
-            Iterator iter = fields.getFields();
-
-            while (iter.hasNext())
+            int s=fields.size();
+            for (int f=0;f<s;f++)
             {
-                HttpFields.Field field = (HttpFields.Field) iter.next();
-
+                HttpFields.Field field = fields.getField(f);
+                if (field==null)
+                    continue;
                 switch (field.getNameOrdinal())
                 {
                     case HttpHeaders.CONTENT_LENGTH_ORDINAL:
