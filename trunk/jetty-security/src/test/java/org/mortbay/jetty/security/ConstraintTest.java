@@ -258,9 +258,10 @@ public class ConstraintTest extends TestCase
                 "Content-Length: 31\r\n" +
                 "\r\n" +
                 "j_username=user&j_password=wrong\r\n");
-        assertTrue(response.startsWith("HTTP/1.1 302 "));
-        assertTrue(response.indexOf("Location") > 0);
-        assertTrue(response.indexOf("testErrorPage") > 0);
+        //TODO we are forwarded to the error page now.  Is there any way to verify the contents?
+        assertTrue(response.startsWith("HTTP/1.1 200 "));
+//        assertTrue(response.indexOf("Location") > 0);
+//        assertTrue(response.indexOf("testErrorPage") > 0);
 
 
         _connector.reopen();
@@ -392,9 +393,10 @@ public class ConstraintTest extends TestCase
                 "Content-Length: 31\r\n" +
                 "\r\n" +
                 "j_username=user&j_password=wrong\r\n");
-        assertTrue(response.startsWith("HTTP/1.1 302 "));
-        assertTrue(response.indexOf("Location") > 0);
-        assertTrue(response.indexOf("testErrorPage") > 0);
+        //TODO we are forwarded to the error page now.  Is there any way to verify the contents?
+        assertTrue(response.startsWith("HTTP/1.1 200 "));
+//        assertTrue(response.indexOf("Location") > 0);
+//        assertTrue(response.indexOf("testErrorPage") > 0);
 
 
         _connector.reopen();
