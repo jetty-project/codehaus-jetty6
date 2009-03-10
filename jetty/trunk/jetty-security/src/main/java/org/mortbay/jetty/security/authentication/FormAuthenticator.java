@@ -179,8 +179,9 @@ public class FormAuthenticator extends LoginAuthenticator
                 }
                 else
                 {
-                    response.setContentLength(0);
-                    response.sendRedirect(response.encodeRedirectURL(URIUtil.addPaths(request.getContextPath(), _formErrorPage)));
+//                    response.setContentLength(0); //????
+                    RequestDispatcher dispatcher = request.getRequestDispatcher(_formErrorPage);
+                    dispatcher.forward(request, response);
                 }
                 // TODO is this correct response if isMandatory false??? Can
                 // that occur?
@@ -194,13 +195,14 @@ public class FormAuthenticator extends LoginAuthenticator
                 return DefaultAuthentication.SUCCESS_UNAUTH_RESULTS;
 
             // redirect to login page
-            if (request.getQueryString() != null) uri += "?" + request.getQueryString();
+            if (request.getQueryString() != null)
+                uri += "?" + request.getQueryString();
+            //TODO is this safe if the client is sending several requests concurrently in the same session to secured resources?
             session.setAttribute(__J_URI, request.getScheme() + "://"
                                           + request.getServerName()
                                           + ":"
                                           + request.getServerPort()
                                           + URIUtil.addPaths(request.getContextPath(), uri));
-//            response.setContentLength(0);//???? previous code had this
             RequestDispatcher dispatcher = request.getRequestDispatcher(_formLoginPage);
             dispatcher.forward(request, response);
             return DefaultAuthentication.SEND_CONTINUE_RESULTS;
