@@ -70,7 +70,7 @@ public class LazyList
      * @return The lazylist created or added to.
      */
     @SuppressWarnings("unchecked")
-    public static<E> Object add(Object list, E item)
+    public static Object add(Object list, Object item)
     {
         if (list==null)
         {
@@ -283,31 +283,32 @@ public class LazyList
     /* ------------------------------------------------------------ */
     /** Convert a lazylist to an array
      * @param list The list to convert
-     * @param aClass The class of the array, which may be a primitive type
+     * @param clazz The class of the array, which may be a primitive type
      * @return
      */
-    public static Object toArray(Object list,Class<?> aClass)
+    @SuppressWarnings("unchecked")
+    public static Object toArray(Object list,Class<?> clazz)
     {
         if (list==null)
-            return (Object[])Array.newInstance(aClass,0);
+            return Array.newInstance(clazz,0);
         
         if (list instanceof List)
         {
             List<?> l = (List<?>)list;
-            if (aClass.isPrimitive())
+            if (clazz.isPrimitive())
             {
-                Object a = Array.newInstance(aClass,l.size());
+                Object a = Array.newInstance(clazz,l.size());
                 for (int i=0;i<l.size();i++)
                     Array.set(a,i,l.get(i));
                 return a;
             }
-            return l.toArray((Object[])Array.newInstance(aClass,l.size()));
+            return l.toArray((Object[])Array.newInstance(clazz,l.size()));
             
         }
         
-        Object a = Array.newInstance(aClass,1);
+        Object a = Array.newInstance(clazz,1);
         Array.set(a,0,list);
-        return (Object[])a;
+        return a;
     }
 
     /* ------------------------------------------------------------ */
