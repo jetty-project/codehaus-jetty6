@@ -395,7 +395,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                 _cachedSize+=_buffer.length();
             _cachedFiles++;
             if (_lastModified!=-1)
-                _lastModifiedBytes=new ByteArrayBuffer(HttpFields.formatDate(_lastModified,false));
+                _lastModifiedBytes=new ByteArrayBuffer(HttpFields.formatDate(_lastModified));
         }
 
         /* ------------------------------------------------------------ */
