@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.server.servlet;
+package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
 import java.util.Enumeration;
@@ -239,7 +239,7 @@ public class ServletHolder extends Holder implements UserIdentity.Scope, Compara
         
         _config=new Config();
 
-        if (javax.servlet.SingleThreadModel.class.isAssignableFrom(_class))
+        if (_class!=null && javax.servlet.SingleThreadModel.class.isAssignableFrom(_class))
             _servlet = new SingleThreadedWrapper();
 
         if (_extInstance || _initOnStartup)

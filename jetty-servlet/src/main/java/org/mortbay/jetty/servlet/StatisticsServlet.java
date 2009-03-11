@@ -1,4 +1,4 @@
-package org.mortbay.jetty.server.servlet;
+package org.mortbay.jetty.servlet;
 
 //========================================================================
 //Copyright 2008 Mort Bay Consulting Pty. Ltd.

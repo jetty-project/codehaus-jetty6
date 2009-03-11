@@ -26,9 +26,9 @@ import junit.framework.TestCase;
 
 import org.mortbay.jetty.server.LocalConnector;
 import org.mortbay.jetty.server.Server;
-import org.mortbay.jetty.server.servlet.ServletContextHandler;
-import org.mortbay.jetty.server.servlet.Invoker;
-import org.mortbay.jetty.server.servlet.ServletHolder;
+import org.mortbay.jetty.servlet.Invoker;
+import org.mortbay.jetty.servlet.ServletContextHandler;
+import org.mortbay.jetty.servlet.ServletHolder;
 
 /**
  * @author athena

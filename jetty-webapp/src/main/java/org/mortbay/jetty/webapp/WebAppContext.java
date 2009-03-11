@@ -39,10 +39,10 @@ import org.mortbay.jetty.server.HandlerContainer;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.handler.ErrorHandler;
 import org.mortbay.jetty.server.handler.HandlerWrapper;
-import org.mortbay.jetty.server.servlet.ServletContextHandler;
-import org.mortbay.jetty.server.servlet.ErrorPageErrorHandler;
-import org.mortbay.jetty.server.servlet.ServletHandler;
 import org.mortbay.jetty.server.session.SessionHandler;
+import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
+import org.mortbay.jetty.servlet.ServletContextHandler;
+import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.util.IO;
 import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.Loader;
@@ -57,7 +57,7 @@ import org.mortbay.jetty.util.resource.Resource;
  * The WebAppContext handler is an extension of ContextHandler that
  * coordinates the construction and configuration of nested handlers:
  * {@link org.mortbay.jetty.server.server.security.ConstraintSecurityHandler}, {@link org.mortbay.jetty.server.session.server.servlet.SessionHandler}
- * and {@link org.mortbay.jetty.server.server.servlet.ServletHandler}.
+ * and {@link org.mortbay.jetty.servlet.server.servlet.ServletHandler}.
  * The handlers are configured by pluggable configuration classes, with
  * the default being  {@link org.mortbay.jetty.server.server.webapp.WebXmlConfiguration} and 
  * {@link org.mortbay.jetty.server.server.webapp.JettyWebXmlConfiguration}.
