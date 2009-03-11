@@ -20,10 +20,10 @@ import java.util.EventListener;
 import java.util.Iterator;
 import java.util.List;
 
-import org.mortbay.jetty.server.servlet.FilterHolder;
-import org.mortbay.jetty.server.servlet.FilterMapping;
-import org.mortbay.jetty.server.servlet.ServletHolder;
-import org.mortbay.jetty.server.servlet.ServletMapping;
+import org.mortbay.jetty.servlet.FilterHolder;
+import org.mortbay.jetty.servlet.FilterMapping;
+import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.log.Log;
 

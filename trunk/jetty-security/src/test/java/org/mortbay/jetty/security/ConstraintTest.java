@@ -22,7 +22,6 @@ import org.mortbay.jetty.http.security.Password;
 import org.mortbay.jetty.security.authentication.BasicAuthenticator;
 import org.mortbay.jetty.security.authentication.FormAuthenticator;
 import org.mortbay.jetty.security.authentication.SessionCachingAuthenticator;
-import org.mortbay.jetty.security.jaspi.ServletCallbackHandler;
 import org.mortbay.jetty.server.*;
 import org.mortbay.jetty.server.handler.AbstractHandler;
 import org.mortbay.jetty.server.handler.ContextHandler;
@@ -52,7 +51,6 @@ public class ConstraintTest extends TestCase
     ConstraintSecurityHandler _security = new ConstraintSecurityHandler();
     HashLoginService _loginService = new HashLoginService(TEST_REALM);
                                                       
-    final ServletCallbackHandler _callbackHandler = new ServletCallbackHandler(_loginService);
     RequestHandler _handler = new RequestHandler();
     private static final String APP_CONTEXT = "localhost /ctx";
 

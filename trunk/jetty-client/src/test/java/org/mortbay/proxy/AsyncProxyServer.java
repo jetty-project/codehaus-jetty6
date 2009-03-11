@@ -3,9 +3,9 @@ package org.mortbay.proxy;
 import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.nio.SelectChannelConnector;
-import org.mortbay.jetty.server.servlet.FilterHolder;
-import org.mortbay.jetty.server.servlet.ServletHandler;
-import org.mortbay.jetty.server.servlet.ServletHolder;
+import org.mortbay.jetty.servlet.FilterHolder;
+import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.jetty.servlet.ServletHolder;
 
 public class AsyncProxyServer
 {
