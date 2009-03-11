@@ -2,6 +2,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-899 Standardize location for configuration files which go into etc
  + JETTY-944 Lazy messages don't prevent long polls waiting
  + JETTY-949 Move cometd source to cometd.org project
+ + JETTY-948 ConcurrentModificationException in TerracottaSessionManager scavenger
 
 jetty-6.1.15 4 March 2009
  + JETTY-931 Fix issue with jetty-rewrite.xml
