@@ -25,9 +25,9 @@ import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.server.LocalConnector;
 import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.bio.SocketConnector;
-import org.mortbay.jetty.server.servlet.ServletContextHandler;
-import org.mortbay.jetty.server.servlet.FilterHolder;
-import org.mortbay.jetty.server.servlet.ServletHolder;
+import org.mortbay.jetty.servlet.FilterHolder;
+import org.mortbay.jetty.servlet.ServletContextHandler;
+import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.util.Attributes;
 
 

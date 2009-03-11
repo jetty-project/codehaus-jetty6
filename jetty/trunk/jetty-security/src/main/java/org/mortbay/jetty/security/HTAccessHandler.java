@@ -25,13 +25,6 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.auth.message.AuthException;
-import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
-import javax.security.auth.message.callback.CallerPrincipalCallback;
-import javax.security.auth.message.callback.GroupPrincipalCallback;
-import javax.security.auth.message.config.ServerAuthContext;
-import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,8 +32,6 @@ import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.http.security.UnixCrypt;
-import org.mortbay.jetty.security.jaspi.JaspiMessageInfo;
-import org.mortbay.jetty.security.jaspi.modules.BaseAuthModule;
 import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.LoginCallback;
 import org.mortbay.jetty.server.Request;
@@ -885,79 +876,6 @@ public class HTAccessHandler extends SecurityHandler
         }
     }
 
-    // TODO move to jaspi.modules package and configure something to set it up.
-    public static class HTServerAuthModule extends BaseAuthModule implements ServerAuthModule, ServerAuthContext
-    {
-        private static final String HT_ACCESS_KEY = "org.mortbay.jetty.security.HTAccess";
-
-        private final CallbackHandler callbackHandler;
-
-        public HTServerAuthModule(CallbackHandler callbackHandler)
-        {
-            this.callbackHandler = callbackHandler;
-        }
-
-        public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException
-        {
-        }
-
-        public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) throws AuthException
-        {
-            return AuthStatus.SUCCESS;
-        }
-
-        public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) throws AuthException
-        {
-            HTAccess ht = (HTAccess) messageInfo.getMap().get(HT_ACCESS_KEY);
-            if (ht == null) { return isMandatory(messageInfo) ? AuthStatus.SEND_FAILURE : AuthStatus.SUCCESS; }
-            HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-            HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
-            String credentials = request.getHeader(HttpHeaders.AUTHORIZATION);
-
-            try
-            {
-                if (credentials != null)
-                {   
-                    credentials=credentials.substring(credentials.indexOf(' ')+1);
-                credentials=B64Code.decode(credentials,StringUtil.__ISO_8859_1);
-                int i=credentials.indexOf(':');
-                String user=credentials.substring(0,i);
-                String password=credentials.substring(i+1);
-
-                    
-                    LoginCallbackImpl loginCallback = new LoginCallbackImpl(clientSubject, user, credentials.toCharArray());
-                    ht.checkAuth(loginCallback);
-                    if (loginCallback.isSuccess())
-                    {
-                        CallerPrincipalCallback callerPrincipalCallback = new CallerPrincipalCallback(clientSubject, loginCallback.getUserPrincipal());
-                        GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject, loginCallback.getRoles());
-                        callbackHandler.handle(new Callback[] { callerPrincipalCallback, groupPrincipalCallback });
-                        messageInfo.getMap().put(JaspiMessageInfo.AUTH_METHOD_KEY, Constraint.__BASIC_AUTH);
-                        return AuthStatus.SUCCESS;
-
-                    }
-                }
-                if (!isMandatory(messageInfo)) { return AuthStatus.SUCCESS; }
-                // TODO what is realm name?
-                response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\"htaccess\"");
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                return AuthStatus.SEND_CONTINUE;
-            }
-            catch (UnsupportedEncodingException e)
-            {
-                throw new AuthException(e.getMessage());
-            }
-            catch (IOException e)
-            {
-                throw new AuthException(e.getMessage());
-            }
-            catch (UnsupportedCallbackException e)
-            {
-                throw new AuthException(e.getMessage());
-            }
-        }
-
-    }
 
     /**
      * Getter for property protegee.

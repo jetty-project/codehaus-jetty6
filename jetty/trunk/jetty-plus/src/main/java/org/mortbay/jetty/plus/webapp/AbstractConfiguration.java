@@ -30,7 +30,7 @@ import org.mortbay.jetty.plus.annotation.PreDestroyCallback;
 import org.mortbay.jetty.plus.annotation.RunAsCollection;           
 import org.mortbay.jetty.plus.servlet.ServletHandler;
 import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.server.servlet.ServletHolder;
+import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.util.TypeUtil;
 import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.webapp.WebAppContext;
@@ -78,7 +78,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
         //set up our special ServletHandler to remember injections and lifecycle callbacks
         ServletHandler servletHandler = new ServletHandler();
         _securityHandler = getWebAppContext().getSecurityHandler();
-        org.mortbay.jetty.server.servlet.ServletHandler existingHandler = getWebAppContext().getServletHandler();       
+        org.mortbay.jetty.servlet.ServletHandler existingHandler = getWebAppContext().getServletHandler();       
         servletHandler.setFilterMappings(existingHandler.getFilterMappings());
         servletHandler.setFilters(existingHandler.getFilters());
         servletHandler.setServlets(existingHandler.getServlets());

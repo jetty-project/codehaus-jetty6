@@ -26,7 +26,7 @@ import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
  *
  *
  */
-public class ServletHandler extends org.mortbay.jetty.server.servlet.ServletHandler
+public class ServletHandler extends org.mortbay.jetty.servlet.ServletHandler
 {
 
     private InjectionCollection _injections = null;
@@ -73,7 +73,7 @@ public class ServletHandler extends org.mortbay.jetty.server.servlet.ServletHand
     }
     
     /** 
-     * @see org.mortbay.jetty.server.servlet.ServletHandler#customizeFilter(javax.servlet.Filter)
+     * @see org.mortbay.jetty.servlet.ServletHandler#customizeFilter(javax.servlet.Filter)
      */
     public Filter customizeFilter(Filter filter) throws Exception
     {
@@ -88,7 +88,7 @@ public class ServletHandler extends org.mortbay.jetty.server.servlet.ServletHand
     
 
     /** 
-     * @see org.mortbay.jetty.server.servlet.ServletHandler#customizeServlet(javax.servlet.Servlet)
+     * @see org.mortbay.jetty.servlet.ServletHandler#customizeServlet(javax.servlet.Servlet)
      */
     public Servlet customizeServlet(Servlet servlet) throws Exception
     {      
@@ -102,7 +102,7 @@ public class ServletHandler extends org.mortbay.jetty.server.servlet.ServletHand
 
 
     /** 
-     * @see org.mortbay.jetty.server.server.servlet.ServletHandler#cusomizeFilterDestroy(javax.servlet.Filter)
+     * @see org.mortbay.jetty.servlet.server.servlet.ServletHandler#cusomizeFilterDestroy(javax.servlet.Filter)
      */
     public Filter customizeFilterDestroy(Filter filter) throws Exception
     {
@@ -114,7 +114,7 @@ public class ServletHandler extends org.mortbay.jetty.server.servlet.ServletHand
 
 
     /** 
-     * @see org.mortbay.jetty.server.server.servlet.ServletHandler#customizeServletDestroy(javax.servlet.Servlet)
+     * @see org.mortbay.jetty.servlet.server.servlet.ServletHandler#customizeServletDestroy(javax.servlet.Servlet)
      */
     public Servlet customizeServletDestroy(Servlet servlet) throws Exception
     {

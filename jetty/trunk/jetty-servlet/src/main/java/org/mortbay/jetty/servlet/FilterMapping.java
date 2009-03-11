@@ -13,7 +13,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.server.servlet;
+package org.mortbay.jetty.servlet;
 
 import java.util.Arrays;
 import java.util.EnumSet;

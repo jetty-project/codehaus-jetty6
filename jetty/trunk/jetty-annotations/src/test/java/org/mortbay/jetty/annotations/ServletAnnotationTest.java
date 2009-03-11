@@ -33,10 +33,10 @@ import org.mortbay.jetty.plus.annotation.PojoServlet;
 import org.mortbay.jetty.plus.annotation.RunAs;
 import org.mortbay.jetty.plus.annotation.RunAsCollection;
 import org.mortbay.jetty.server.Server;
-import org.mortbay.jetty.server.servlet.FilterHolder;
-import org.mortbay.jetty.server.servlet.FilterMapping;
-import org.mortbay.jetty.server.servlet.ServletHolder;
-import org.mortbay.jetty.server.servlet.ServletMapping;
+import org.mortbay.jetty.servlet.FilterHolder;
+import org.mortbay.jetty.servlet.FilterMapping;
+import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.jetty.webapp.WebAppContext;
 
 public class ServletAnnotationTest extends TestCase

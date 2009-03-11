@@ -22,7 +22,7 @@ import java.net.URL;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.server.servlet.FilterHolder;
+import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlets.PutFilter;
 import org.mortbay.jetty.testing.HttpTester;
 import org.mortbay.jetty.testing.ServletTester;
@@ -47,7 +47,7 @@ public class PutFilterTest extends TestCase
         tester=new ServletTester();
         tester.setContextPath("/context");
         tester.setResourceBase(_dir.getCanonicalPath());
-        tester.addServlet(org.mortbay.jetty.server.servlet.DefaultServlet.class, "/");
+        tester.addServlet(org.mortbay.jetty.servlet.DefaultServlet.class, "/");
         FilterHolder holder = tester.addFilter(PutFilter.class,"/*",0);
         holder.setInitParameter("delAllowed","true");
         tester.start();

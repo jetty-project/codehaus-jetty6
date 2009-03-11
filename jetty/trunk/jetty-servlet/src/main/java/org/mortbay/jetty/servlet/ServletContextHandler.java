@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.server.servlet;
+package org.mortbay.jetty.servlet;
 
 import java.util.EnumSet;
 import java.util.Map;
@@ -324,7 +324,7 @@ public class ServletContextHandler extends ContextHandler
          */
         public RequestDispatcher getNamedDispatcher(String name)
         {
-            ContextHandler context=org.mortbay.jetty.server.servlet.ServletContextHandler.this;
+            ContextHandler context=org.mortbay.jetty.servlet.ServletContextHandler.this;
             if (_servletHandler==null || _servletHandler.getServlet(name)==null)
                 return null;
             return new Dispatcher(context, name);
