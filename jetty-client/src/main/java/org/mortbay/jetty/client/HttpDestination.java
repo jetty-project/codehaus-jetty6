@@ -26,9 +26,9 @@ import javax.servlet.http.Cookie;
 import org.mortbay.jetty.client.security.Authorization;
 import org.mortbay.jetty.client.security.SecurityListener;
 import org.mortbay.jetty.http.HttpHeaders;
+import org.mortbay.jetty.http.PathMap;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
-import org.mortbay.jetty.server.PathMap;
 import org.mortbay.jetty.util.log.Log;
 
 /**

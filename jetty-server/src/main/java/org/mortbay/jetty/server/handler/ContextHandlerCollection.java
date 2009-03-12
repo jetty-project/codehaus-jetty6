@@ -23,11 +23,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.http.PathMap;
 import org.mortbay.jetty.server.AsyncRequest;
 import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.HandlerContainer;
 import org.mortbay.jetty.server.HttpConnection;
-import org.mortbay.jetty.server.PathMap;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.log.Log;
@@ -36,7 +36,7 @@ import org.mortbay.jetty.util.log.Log;
 /** ContextHandlerCollection.
  * 
  * This {@link org.mortbay.jetty.server.handler.HandlerCollection} is creates a 
- * {@link org.mortbay.jetty.servlet.PathMap} to it's contained handlers based
+ * {@link org.mortbay.jetty.http.servlet.PathMap} to it's contained handlers based
  * on the context path and virtual hosts of any contained {@link org.mortbay.jetty.server.handler.ContextHandler}s.
  * The contexts do not need to be directly contained, only children of the contained handlers.
  * Multiple contexts may have the same context path and they are called in order until one

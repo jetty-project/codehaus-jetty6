@@ -15,8 +15,6 @@
 package org.mortbay.jetty.client.security;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.mortbay.jetty.client.HttpDestination;
 
