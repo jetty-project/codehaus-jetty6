@@ -133,10 +133,10 @@ public class BufferCache
                 return null;
             return (CachedBuffer)_associateMap.get(key);
         }
-        
+
+        // TODO Replace Associate with a mime encoding specific solution
         public void setAssociate(Object key, CachedBuffer associate)
         {
-            // TODO should be synchronized - but lets try without
             if (_associateMap==null)
                 _associateMap=new HashMap();
             _associateMap.put(key,associate);

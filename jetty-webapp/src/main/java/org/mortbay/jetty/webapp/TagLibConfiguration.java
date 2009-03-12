@@ -110,7 +110,7 @@ public class TagLibConfiguration implements Configuration
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.servlet.WebAppContext.Configuration#configureDefaults()
+     * @see org.mortbay.jetty.servlet.WebAppContext.Configuration#configureDefaults()
      */
     public void configureDefaults() throws Exception
     {
@@ -119,7 +119,7 @@ public class TagLibConfiguration implements Configuration
     
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.server.server.servlet.WebAppContext.Configuration#configureWebApp()
+     * @see org.mortbay.jetty.servlet.WebAppContext.Configuration#configureWebApp()
      */
     public void configureWebApp() throws Exception
     {   

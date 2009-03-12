@@ -51,7 +51,7 @@ import org.mortbay.jetty.util.StringUtil;
  * <p>
  * Compressing the content can greatly improve the network bandwidth usage, but at a cost of memory and
  * CPU cycles.   If this filter is mapped for static content, then use of efficient direct NIO may be 
- * prevented, thus use of the gzip mechanism of the {@link org.mortbay.jetty.servlet.server.servlet.DefaultServlet} is 
+ * prevented, thus use of the gzip mechanism of the {@link org.mortbay.jetty.servlet.DefaultServlet} is 
  * advised instead.
  * </p>
  * <p>

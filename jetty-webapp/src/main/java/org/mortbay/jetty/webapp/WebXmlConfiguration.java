@@ -648,7 +648,7 @@ public class WebXmlConfiguration implements Configuration
             {
                 Log.info("NO JSP Support for {}, did not find {}", _context.getContextPath(), servlet_class);
                 _hasJSP = false;
-                _jspServletClass = servlet_class = "org.mortbay.jetty.server.servlet.NoJspServlet";
+                _jspServletClass = servlet_class = "org.mortbay.jetty.servlet.NoJspServlet";
             }
             if (holder.getInitParameter("scratchdir") == null)
             {

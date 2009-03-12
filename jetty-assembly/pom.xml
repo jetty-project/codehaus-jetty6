@@ -11,6 +11,7 @@
   <properties>
     <assembly.directory>target/assembly-prep</assembly.directory>
     <slf4j-version>1.5.6</slf4j-version>
+    <jsp-2-1-version>9.1.02.B04.p0</jsp-2-1-version>
   </properties>
    <build>
     <plugins>
@@ -48,7 +49,7 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>jetty-test-jaas-webapp</artifactId>
+                  <artifactId>jetty-test-webapp</artifactId>
                   <version>${project.version}</version>
                   <classifier>config</classifier>
                   <type>jar</type>
@@ -69,6 +70,16 @@
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
                   <artifactId>jetty-util</artifactId>
+                  <version>${project.version}</version>
+                  <classifier>config</classifier>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-webapp</artifactId>
                   <version>${project.version}</version>
                   <classifier>config</classifier>
                   <type>jar</type>
@@ -134,7 +145,7 @@
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib/ext</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
@@ -143,7 +154,7 @@
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib/ext</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
@@ -152,7 +163,7 @@
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib/annotations</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
@@ -161,7 +172,7 @@
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib/ext</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
@@ -189,7 +200,7 @@
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib/jmx</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
@@ -198,12 +209,12 @@
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib/jndi</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
                   <artifactId>jsp-api-2.1-glassfish</artifactId>
-                  <version>9.1.02.B04.p0</version>
+                  <version>${jsp-2-1-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -212,7 +223,7 @@
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
                   <artifactId>jsp-2.1-glassfish</artifactId>
-                  <version>9.1.02.B04.p0</version>
+                  <version>${jsp-2-1-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -226,7 +237,7 @@
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib/plus</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
@@ -244,7 +255,7 @@
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib/ext</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
                 </artifactItem>     
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
@@ -253,7 +264,7 @@
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib/ext</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
                 </artifactItem>           
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
@@ -262,7 +273,7 @@
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib/ext</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
@@ -280,7 +291,7 @@
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib/ext</outputDirectory>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
                 </artifactItem>
                  <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
@@ -293,7 +304,7 @@
                 </artifactItem>
                  <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>jetty-test-jaas-webapp</artifactId>
+                  <artifactId>jetty-test-webapp</artifactId>
                   <version>${project.version}</version>
                   <type>war</type>
                   <overWrite>true</overWrite>
@@ -359,7 +370,46 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>      
+      
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <executions>
+            <execution>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>ant</groupId>
+                  <artifactId>ant</artifactId>
+                  <version>${ant-version}</version>
+                </artifactItem>
+               <artifactItem>
+                  <groupId>org.eclipse.jdt</groupId>
+                  <artifactId>core</artifactId>
+                  <version>${eclipse-compiler-version}</version>
+                </artifactItem>
+               <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jsp-api-2.1-glassfish</artifactId>
+                  <version>${jsp-2-1-version}</version>
+                </artifactItem>
+               <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jsp-2.1-glassfish</artifactId>
+                  <version>${jsp-2-1-version}</version>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${assembly.directory}/lib/jsp-2.1</outputDirectory>
+            </configuration>
+          </execution>
+          </executions>
       </plugin>
+      
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -397,9 +447,9 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-    	<artifactId>jetty-test-jaas-webapp</artifactId>
-    	<type>war</type>
-    	<version>${project.version}</version>
+        <artifactId>jetty-test-webapp</artifactId>
+        <type>war</type>
+        <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
