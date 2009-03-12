@@ -29,8 +29,10 @@ import java.security.Policy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 /*-------------------------------------------*/
@@ -113,6 +115,7 @@ public class Main
     private String _config=System.getProperty("START","org/mortbay/jetty/start/start.config");
     private ArrayList _xml=new ArrayList();
     private boolean _showVersions=false;
+    private Set _options = new HashSet();
 
     public static void main(String[] args)
     {
@@ -126,7 +129,7 @@ public class Main
             {
                 new Main().stop();
             }
-            else if (args.length>0&&args[0].equalsIgnoreCase("--version"))
+            else if (args.length>0&&(args[0].equalsIgnoreCase("--version")||args[0].equalsIgnoreCase("--info")))
             {
                 String[] nargs=new String[args.length-1];
                 System.arraycopy(args,1,nargs,0,nargs.length);
@@ -148,7 +151,7 @@ public class Main
     
     private static void usage()
     {
-        System.err.println("Usage: java [-DDEBUG] [-DSTART=start.config] [-DOPTIONS=opts] [-Dmain.class=org.MyMain] -jar start.jar [--help|--stop|--version] [config ...]");        
+        System.err.println("Usage: java [-DDEBUG] [-DSTART=start.config] [-DOPTIONS=opts] [-Dmain.class=org.MyMain] -jar start.jar [--help|--stop|--version|--info] [config ...]");        
         System.exit(1);
     }
 
@@ -223,7 +226,10 @@ public class Main
             for (int i=0;i<elements.length;i++)
                 System.err.println("  "+elements[i].getAbsolutePath());
             if (_showVersions || invoked_class==null)
+            {
+                System.err.println("OPTIONS: "+_options);
                 System.exit(0);
+            }
         }
 
         Class[] method_param_types=new Class[1];
@@ -298,7 +304,10 @@ public class Main
             
             // handle options
             if (trim.startsWith("[") && trim.endsWith("]"))
+            {
                 section = Arrays.asList(trim.substring(1,trim.length()-1).split("[ ,]"));  
+                _options.addAll(section);
+            }
             
             if (section!=null && Collections.disjoint(section,options))
                 continue;
