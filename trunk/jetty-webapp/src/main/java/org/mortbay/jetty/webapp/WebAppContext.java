@@ -56,8 +56,8 @@ import org.mortbay.jetty.util.resource.Resource;
 /** Web Application Context Handler.
  * The WebAppContext handler is an extension of ContextHandler that
  * coordinates the construction and configuration of nested handlers:
- * {@link org.mortbay.jetty.server.server.security.ConstraintSecurityHandler}, {@link org.mortbay.jetty.server.session.server.servlet.SessionHandler}
- * and {@link org.mortbay.jetty.servlet.server.servlet.ServletHandler}.
+ * {@link org.mortbay.jetty.security.ConstraintSecurityHandler}, {@link org.mortbay.jetty.server.session.SessionHandler}
+ * and {@link org.mortbay.jetty.servlet.ServletHandler}.
  * The handlers are configured by pluggable configuration classes, with
  * the default being  {@link org.mortbay.jetty.server.server.webapp.WebXmlConfiguration} and 
  * {@link org.mortbay.jetty.server.server.webapp.JettyWebXmlConfiguration}.
@@ -98,7 +98,7 @@ public class WebAppContext extends ServletContextHandler
             "org.w3c.", 
             "org.apache.commons.logging.", 
             "org.apache.log4j.",
-            "org.mortbay.jetty.server.servlet.", // webapp cannot change default servlets
+            "org.mortbay.jetty.servlet.", // webapp cannot change default servlets
             "org.mortbay.util.ajax.",     // webapp cannot change continuation classes
             "org.mortbay.naming."         // webapp cannot change naming classes
             };

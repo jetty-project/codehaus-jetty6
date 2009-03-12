@@ -13,7 +13,7 @@
 // ========================================================================
 
 
-package org.mortbay.jetty.server.servlet;
+package org.mortbay.jetty.servlet;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

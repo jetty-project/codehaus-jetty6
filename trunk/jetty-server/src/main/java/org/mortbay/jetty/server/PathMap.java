@@ -77,9 +77,9 @@ public class PathMap extends HashMap implements Externalizable
     }
     
     /* --------------------------------------------------------------- */
-    StringMap _prefixMap=new StringMap();
-    StringMap _suffixMap=new StringMap();
-    StringMap _exactMap=new StringMap();
+    final StringMap _prefixMap=new StringMap();
+    final StringMap _suffixMap=new StringMap();
+    final StringMap _exactMap=new StringMap();
 
     List _defaultSingletonList=null;
     Entry _prefixDefault=null;
@@ -355,9 +355,9 @@ public class PathMap extends HashMap implements Externalizable
     /* --------------------------------------------------------------- */
     public void clear()
     {
-        _exactMap=new StringMap();
-        _prefixMap=new StringMap();
-        _suffixMap=new StringMap();
+        _exactMap.clear();
+        _prefixMap.clear();
+        _suffixMap.clear();
         _default=null;
         _defaultSingletonList=null;
         super.clear();

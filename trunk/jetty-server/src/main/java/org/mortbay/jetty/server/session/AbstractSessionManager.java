@@ -52,7 +52,7 @@ import org.mortbay.jetty.util.component.AbstractLifeCycle;
  * Map.
  * <p>
  * If the property
- * org.mortbay.jetty.server.server.servlet.AbstractSessionManager.23Notifications is set to
+ * org.mortbay.jetty.servlet.AbstractSessionManager.23Notifications is set to
  * true, the 2.3 servlet spec notification style will be used.
  * <p>
  *

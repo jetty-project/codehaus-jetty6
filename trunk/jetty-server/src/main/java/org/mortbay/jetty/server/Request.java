@@ -91,11 +91,11 @@ import org.mortbay.jetty.util.log.Log;
  * 
  * <li>the HTTP session methods
  * will all return null sessions until such time as a request has been passed to
- * a {@link org.mortbay.jetty.server.server.servlet.SessionHandler} which checks for session cookies
+ * a {@link org.mortbay.jetty.servlet.SessionHandler} which checks for session cookies
  * and enables the ability to create new sessions.</li>
  * 
  * <li>The {@link Request#getServletPath} method will return null until the request has been
- * passed to a {@link org.mortbay.jetty.server.server.servlet.ServletHandler} and the pathInfo matched
+ * passed to a {@link org.mortbay.jetty.servlet.ServletHandler} and the pathInfo matched
  * against the servlet URL patterns and {@link Request#setServletPath} called as a result.</li>
  * </ul>
  * 
