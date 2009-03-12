@@ -12,9 +12,9 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.server;
+package org.mortbay.jetty.http;
 
-import org.mortbay.jetty.server.PathMap;
+import org.mortbay.jetty.http.PathMap;
 
 import junit.framework.TestCase;
 

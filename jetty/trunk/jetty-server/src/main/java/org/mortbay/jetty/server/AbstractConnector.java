@@ -25,6 +25,7 @@ import javax.servlet.ServletRequest;
 import org.mortbay.jetty.http.HttpFields;
 import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.http.HttpSchemes;
+import org.mortbay.jetty.io.AbstractBuffers;
 import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.io.EofException;
 import org.mortbay.jetty.util.component.LifeCycle;
