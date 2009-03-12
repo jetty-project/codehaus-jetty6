@@ -37,13 +37,13 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.http.PathMap;
 import org.mortbay.jetty.io.EofException;
 import org.mortbay.jetty.io.HttpException;
 import org.mortbay.jetty.security.IdentityService;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.server.Dispatcher;
 import org.mortbay.jetty.server.HttpConnection;
-import org.mortbay.jetty.server.PathMap;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.RetryRequest;
 import org.mortbay.jetty.server.Server;

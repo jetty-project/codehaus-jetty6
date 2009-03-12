@@ -1,5 +1,5 @@
 //========================================================================
-//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
+//Copyright 2004-2009 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
@@ -12,18 +12,13 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.server;
+package org.mortbay.jetty.io;
 
-import java.util.ArrayList;
-
-import org.mortbay.jetty.io.Buffer;
-import org.mortbay.jetty.io.Buffers;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
 
 /* ------------------------------------------------------------ */
 /** Abstract Buffer pool.
- * simple unbounded pool of buffers.
- * @author gregw
+ * simple unbounded pool of buffers for header, request and response sizes.
  *
  */
 public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffers

@@ -1,4 +1,4 @@
-package org.mortbay.jetty.server;
+package org.mortbay.jetty.io;
 
 //========================================================================
 //Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
@@ -19,9 +19,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.mortbay.jetty.io.AbstractBuffers;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
-import org.mortbay.jetty.server.AbstractBuffers;
 
 import junit.framework.TestCase;
 

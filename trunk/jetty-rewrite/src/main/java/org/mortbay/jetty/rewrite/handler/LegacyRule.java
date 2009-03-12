@@ -14,7 +14,7 @@
 //========================================================================
 package org.mortbay.jetty.rewrite.handler;
 
-import org.mortbay.jetty.server.PathMap;
+import org.mortbay.jetty.http.PathMap;
 import org.mortbay.jetty.util.URIUtil;
 
 import java.util.Map;
