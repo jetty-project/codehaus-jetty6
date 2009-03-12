@@ -130,6 +130,9 @@
               </artifactItems>
             </configuration>
           </execution>
+          
+          
+          
           <execution>
             <id>copy</id>
             <phase>generate-resources</phase>
@@ -138,6 +141,108 @@
             </goals>
             <configuration>
               <artifactItems>
+              
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-util</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-io</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-http</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-server</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-security</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-servlet</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-servlets</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-xml</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-webapp</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-deploy</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
+                </artifactItem>
+                
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-jmx</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
+                </artifactItem>
+              
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
                   <artifactId>jetty-rewrite</artifactId>
@@ -174,34 +279,7 @@
                   <includes>**</includes>
                   <outputDirectory>${assembly.directory}/lib</outputDirectory>
                 </artifactItem>
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>jetty-io</artifactId>
-                  <version>${project.version}</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>jetty-http</artifactId>
-                  <version>${project.version}</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
-                </artifactItem>
                
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>jetty-jmx</artifactId>
-                  <version>${project.version}</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
-                </artifactItem>
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
                   <artifactId>jetty-jndi</artifactId>
@@ -238,61 +316,7 @@
                   <overWrite>true</overWrite>
                   <includes>**</includes>
                   <outputDirectory>${assembly.directory}/lib</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>jetty-server</artifactId>
-                  <version>${project.version}</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
-                </artifactItem>    
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>jetty-servlet</artifactId>
-                  <version>${project.version}</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
-                </artifactItem>     
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>jetty-servlets</artifactId>
-                  <version>${project.version}</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
-                </artifactItem>           
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>jetty-security</artifactId>
-                  <version>${project.version}</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>jetty-util</artifactId>
-                  <version>${project.version}</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>jetty-webapp</artifactId>
-                  <version>${project.version}</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
-                </artifactItem>
+                </artifactItem>  
                  <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
                   <artifactId>servlet-api</artifactId>
@@ -433,6 +457,11 @@
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty-deploy</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
     	<artifactId>jetty-rewrite</artifactId>
     	<version>${project.version}</version>
     </dependency>
@@ -464,38 +493,8 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-    	<artifactId>jetty-io</artifactId>
-    	<version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-    	<artifactId>jetty-http</artifactId>
-    	<version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-    	<artifactId>jetty-util</artifactId>
-    	<version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
     	<artifactId>jetty-plus</artifactId>
     	<version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-    	<artifactId>jetty-server</artifactId>
-    	<version>${project.version}</version>
-    </dependency>
-    <!--dependency>
-      <groupId>org.mortbay.jetty</groupId>
-    	<artifactId>jetty-setuid-java</artifactId>
-    	<version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-    	<artifactId>jetty-win32-service</artifactId>
-    	<version>${project.version}</version>
-    </dependency-->
   </dependencies>
 </project>
