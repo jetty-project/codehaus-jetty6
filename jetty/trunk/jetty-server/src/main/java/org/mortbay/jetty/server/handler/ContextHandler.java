@@ -79,7 +79,7 @@ import org.mortbay.jetty.util.resource.Resource;
  * servlet path, plus setting the context classloader.
  * 
  * <p>
- * If the context init parameter "org.mortbay.jetty.server.servlet.ManagedAttributes"
+ * If the context init parameter "org.mortbay.jetty.servlet.ManagedAttributes"
  * is set to a coma separated list of names, then they are treated as context
  * attribute names, which if set as attributes are passed to the servers Container
  * so that they may be managed with JMX.

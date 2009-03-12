@@ -62,7 +62,7 @@
     <!-- =========================================================== -->
     <!--
     <Set name="sessionIdManager">
-      <New class="org.mortbay.jetty.server.servlet.HashSessionIdManager">
+      <New class="org.mortbay.jetty.servlet.HashSessionIdManager">
         <Set name="workerName">node1</Set>
       </New>
     </Set>

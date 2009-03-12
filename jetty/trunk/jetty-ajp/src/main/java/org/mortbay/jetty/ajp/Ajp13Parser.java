@@ -390,7 +390,7 @@ public class Ajp13Parser implements Parser
                         // XXX Using old Jetty 5 key,
                         // should change!
                         // Note used in
-                        // org.mortbay.jetty.server.servlet.HashSessionIdManager
+                        // org.mortbay.jetty.servlet.HashSessionIdManager
                         _handler.parsedRequestAttribute("org.mortbay.http.ajp.JVMRoute", Ajp13RequestPacket.getString(_buffer, _tok1));
                         break;
 

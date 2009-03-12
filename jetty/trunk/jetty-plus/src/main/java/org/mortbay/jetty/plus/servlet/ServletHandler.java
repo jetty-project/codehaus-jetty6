@@ -102,7 +102,7 @@ public class ServletHandler extends org.mortbay.jetty.servlet.ServletHandler
 
 
     /** 
-     * @see org.mortbay.jetty.servlet.server.servlet.ServletHandler#cusomizeFilterDestroy(javax.servlet.Filter)
+     * @see org.mortbay.jetty.servlet.servlet.ServletHandler#cusomizeFilterDestroy(javax.servlet.Filter)
      */
     public Filter customizeFilterDestroy(Filter filter) throws Exception
     {
@@ -114,7 +114,7 @@ public class ServletHandler extends org.mortbay.jetty.servlet.ServletHandler
 
 
     /** 
-     * @see org.mortbay.jetty.servlet.server.servlet.ServletHandler#customizeServletDestroy(javax.servlet.Servlet)
+     * @see org.mortbay.jetty.servlet.servlet.ServletHandler#customizeServletDestroy(javax.servlet.Servlet)
      */
     public Servlet customizeServletDestroy(Servlet servlet) throws Exception
     {

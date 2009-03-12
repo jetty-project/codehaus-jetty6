@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.server.servlet;
+package org.mortbay.jetty.servlet;
 
 import junit.framework.TestCase;
 

@@ -42,7 +42,7 @@ public class ServletTest extends TestCase
         tester.setContextPath("/context");
         tester.addServlet(TestServlet.class, "/servlet/*");
         tester.addServlet(HelloServlet.class, "/hello/*");
-        tester.addServlet("org.mortbay.jetty.server.servlet.DefaultServlet", "/");
+        tester.addServlet("org.mortbay.jetty.servlet.DefaultServlet", "/");
         tester.start();
     }
 
