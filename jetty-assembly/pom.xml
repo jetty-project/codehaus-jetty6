@@ -310,6 +310,7 @@
                   <overWrite>true</overWrite>
                   <includes>**</includes>
                   <outputDirectory>${assembly.directory}/webapps</outputDirectory>
+                  <destFileName>test.war</destFileName>
                 </artifactItem>
                 <!--artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
