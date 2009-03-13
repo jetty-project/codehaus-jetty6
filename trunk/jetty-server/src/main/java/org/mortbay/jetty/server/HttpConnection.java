@@ -536,6 +536,13 @@ public class HttpConnection implements Connection
                 Thread.currentThread().setName(threadName+" - "+_uri);
             }
             
+            // Loop here to handle async request redispatches.  
+            // The loop is controlled by the call to async.unhandle in the
+            // finally block below.  If call is from a non-blocking connector,
+            // then the unhandle will return false only if an async dispatch has
+            // already happened when unhandle is called.   For a blocking connector,
+            // the wait for the asynchronous dispatch or timeout actually happens
+            // within the call to unhandle().
             while (handling)
             {
                 _request.setHandled(false);
