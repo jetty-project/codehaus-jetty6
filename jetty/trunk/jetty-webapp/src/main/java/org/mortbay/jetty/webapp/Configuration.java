@@ -25,7 +25,7 @@ import java.io.Serializable;
  * 
  * @author gregw
  */
-public interface Configuration extends Serializable
+public interface Configuration 
 {
     /* ------------------------------------------------------------------------------- */
     /** Set up a context on which to perform the configuration.
