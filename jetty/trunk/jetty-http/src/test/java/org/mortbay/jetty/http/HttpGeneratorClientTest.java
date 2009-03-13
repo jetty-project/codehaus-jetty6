@@ -37,12 +37,7 @@ public class HttpGeneratorClientTest extends TestCase
     {
         super(arg0);
     }
-
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(HttpGeneratorTest.class);
-    }
-
+    
     public void testContentLength()
         throws Exception
     {
@@ -63,9 +58,9 @@ public class HttpGeneratorClientTest extends TestCase
         generator.completeHeader(fields,false);
         
         generator.addContent(new ByteArrayBuffer(content),true);
-        generator.flush();
+        generator.flushBuffer();
         generator.complete();
-        generator.flush();
+        generator.flushBuffer();
         
         String result=endp.getOut().toString().replace("\r\n","|").replace('\r','|').replace('\n','|');
         assertEquals("GET /usr HTTP/1.1|Header: Value|Content-Type: text/plain|Content-Length: 44||"+content,result);
@@ -90,9 +85,9 @@ public class HttpGeneratorClientTest extends TestCase
         generator.addContent(new ByteArrayBuffer(content),true);
         generator.completeHeader(fields,true);
         
-        generator.flush();
+        generator.flushBuffer();
         generator.complete();
-        generator.flush();
+        generator.flushBuffer();
         
         String result=endp.getOut().toString().replace("\r\n","|").replace('\r','|').replace('\n','|');
         assertEquals("GET /usr HTTP/1.1|Header: Value|Content-Type: text/plain|Content-Length: 44||"+content,result);
@@ -117,9 +112,9 @@ public class HttpGeneratorClientTest extends TestCase
         generator.completeHeader(fields,false);
         
         generator.addContent(new ByteArrayBuffer(content),false);
-        generator.flush();
+        generator.flushBuffer();
         generator.complete();
-        generator.flush();
+        generator.flushBuffer();
         
         String result=endp.getOut().toString().replace("\r\n","|").replace('\r','|').replace('\n','|');
         assertEquals("GET /usr HTTP/1.1|Header: Value|Content-Type: text/plain|Transfer-Encoding: chunked||2C|"+content+"|0||",result);
@@ -257,7 +252,7 @@ public class HttpGeneratorClientTest extends TestCase
                                 fields.addLongField("Content-Length",body.length());
                             hb.completeHeader(fields, HttpGenerator.MORE);
                         }
-                        hb.flush();
+                        hb.flushBuffer();
                     }
                 }
                 view.setPutIndex(buf.putIndex());

@@ -30,8 +30,6 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
-import javax.servlet.http.Cookie;
-
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.BufferCache;
 import org.mortbay.jetty.io.BufferDateCache;
@@ -928,12 +926,17 @@ public class HttpFields
      * @param cookie The cookie.
      * @param cookie2 If true, use the alternate cookie 2 header
      */
-    public void addSetCookie(Cookie cookie)
+    public void addSetCookie(
+            final String name, 
+            final String value, 
+            final int version,
+            final String domain, 
+            final String path,
+            final String comment, 
+            final long maxAge,
+            final boolean isSecure, 
+            final boolean isHttpOnly)
     {
-        String name = cookie.getName();
-        String value = cookie.getValue();
-        int version = cookie.getVersion();
-
         // Check arguments
         if (name == null || name.length() == 0) throw new IllegalArgumentException("Bad cookie name");
 
@@ -949,27 +952,23 @@ public class HttpFields
         {
             buf.append(";Version=");
             buf.append(version);
-            String comment = cookie.getComment();
             if (comment != null && comment.length() > 0)
             {
                 buf.append(";Comment=");
                 QuotedStringTokenizer.quoteIfNeeded(buf, comment);
             }
         }
-        String path = cookie.getPath();
         if (path != null && path.length() > 0)
         {
             buf.append(";Path=");
             buf.append(URIUtil.encodePath(path));
         }
-        String domain = cookie.getDomain();
         if (domain != null && domain.length() > 0)
         {
             buf.append(";Domain=");
             buf.append(domain.toLowerCase());// lowercase for IE
         }
 
-        long maxAge = cookie.getMaxAge();
         if (maxAge >= 0)
         {
             if (version == 0)
@@ -991,11 +990,9 @@ public class HttpFields
             buf.append(";Discard");
         }
 
-        if (cookie.getSecure())
-        {
+        if (isSecure)
             buf.append(";Secure");
-        }
-        if (cookie.isHttpOnly()) 
+        if (isHttpOnly) 
             buf.append(";HttpOnly");
 
         // TODO - straight to Buffer?

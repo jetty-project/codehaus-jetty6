@@ -329,7 +329,7 @@ public class HttpConnection implements Connection
         }
 
         if (_in == null) 
-            _in = new HttpParser.Input(((HttpParser)_parser),_connector.getMaxIdleTime());
+            _in = new HttpInput(((HttpParser)_parser),_connector.getMaxIdleTime());
         return _in;
     }
 
@@ -411,7 +411,7 @@ public class HttpConnection implements Connection
                             progress|=_parser.parseAvailable()>0;
                         
                         if (_generator.isCommitted() && !_generator.isComplete())
-                            _generator.flush();
+                            _generator.flushBuffer();
                         if (_endp.isBufferingOutput())
                             _endp.flush();
                     }
@@ -427,7 +427,7 @@ public class HttpConnection implements Connection
                         // next loop.
                         while (_generator.isCommitted() && !_generator.isComplete())
                         {
-                            long written=_generator.flush();
+                            long written=_generator.flushBuffer();
                             if (written<=0)
                                 break;
                             progress=true;
@@ -669,7 +669,7 @@ public class HttpConnection implements Connection
         try
         {
             commitResponse(HttpGenerator.MORE);
-            _generator.flush();
+            _generator.flushBuffer();
         }
         catch(IOException e)
         {
@@ -934,7 +934,7 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public class Output extends AbstractGenerator.Output 
+    public class Output extends HttpOutput 
     {
         Output()
         {
@@ -1098,7 +1098,7 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public class OutputWriter extends AbstractGenerator.OutputWriter
+    public class OutputWriter extends HttpWriter
     {
         OutputWriter()
         {

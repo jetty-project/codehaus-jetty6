@@ -496,5 +496,10 @@
     	<artifactId>jetty-plus</artifactId>
     	<version>${project.version}</version>
     </dependency>
+    <dependency>
+    	<groupId>org.mortbay.jetty</groupId>
+    	<artifactId>jetty-client</artifactId>
+    	<version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>

@@ -129,7 +129,15 @@ public class Response implements HttpServletResponse
      */
     public void addCookie(Cookie cookie)
     {
-        _connection.getResponseFields().addSetCookie(cookie);
+        _connection.getResponseFields().addSetCookie(cookie.getName(),
+                cookie.getValue(),
+                cookie.getVersion(),
+                cookie.getDomain(),
+                cookie.getPath(),
+                cookie.getComment(),
+                cookie.getMaxAge(),
+                cookie.getSecure(),
+                cookie.isHttpOnly());
     }
 
     /* ------------------------------------------------------------ */
@@ -380,7 +388,7 @@ public class Response implements HttpServletResponse
                 generator.completeHeader(null,true);
                 generator.setPersistent(true);
                 generator.complete();
-                generator.flush();
+                generator.flushBuffer();
                 generator.reset(false);
                 generator.setPersistent(was_persistent);
             }
