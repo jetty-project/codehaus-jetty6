@@ -254,8 +254,11 @@ public class AsyncRequest implements AsyncContext
 
     /* ------------------------------------------------------------ */
     /**
+     * Signal that the HttpConnection has finished handling the request.
+     * For blocking connectors, this call may block if the request has
+     * been suspended (startAsync called).
      * @return true if handling is complete, false if the request should 
-     * be handled again (eg because of a resume)
+     * be handled again (eg because of a resume that happened before unhandle was called)
      */
     protected boolean unhandle()
     {
