@@ -168,7 +168,7 @@ public class HttpGenerator extends AbstractGenerator
         {
             if (!_endp.isOpen())
                 throw new EofException();
-            flush();
+            flushBuffer();
             if (_content != null && _content.length()>0 || _bufferChunked) 
                 throw new IllegalStateException("FULL");
         }
@@ -246,7 +246,7 @@ public class HttpGenerator extends AbstractGenerator
         // Handle any unfinished business?
         if (_content != null && _content.length()>0 || _bufferChunked)
         {
-            flush();
+            flushBuffer();
             if (_content != null && _content.length()>0 || _bufferChunked) 
                 throw new IllegalStateException("FULL");
         }
@@ -285,7 +285,7 @@ public class HttpGenerator extends AbstractGenerator
         Buffer content = _content;
         if (content != null && content.length()>0 || _bufferChunked)
         {
-            flush();
+            flushBuffer();
             if (content != null && content.length()>0 || _bufferChunked) 
                 throw new IllegalStateException("FULL");
         }
@@ -717,11 +717,11 @@ public class HttpGenerator extends AbstractGenerator
                 _needEOC = true;
         }
         
-        flush();
+        flushBuffer();
     }
 
     /* ------------------------------------------------------------ */
-    public long flush() throws IOException
+    public long flushBuffer() throws IOException
     {
         try
         {   

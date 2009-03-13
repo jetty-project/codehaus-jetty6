@@ -16,8 +16,6 @@ package org.mortbay.jetty.http;
 
 import java.io.IOException;
 
-import javax.servlet.ServletInputStream;
-
 import org.mortbay.jetty.http.Parser;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.BufferUtil;
@@ -58,24 +56,23 @@ public class HttpParser implements Parser
     public static final int STATE_CHUNK_SIZE=4;
     public static final int STATE_CHUNK_PARAMS=5;
     public static final int STATE_CHUNK=6;
-    
-    private Buffers _buffers; // source of buffers
-    private EndPoint _endp;
+
+    private final EventHandler _handler;
+    private final Buffers _buffers; // source of buffers
+    private final EndPoint _endp;
     private Buffer _header; // Buffer for header data (and small _content)
     private Buffer _body; // Buffer for large content
     private Buffer _buffer; // The current buffer in use (either _header or _content)
-    private View _contentView=new View(); // View of the content in the buffer for {@link Input}
+    private final View  _contentView=new View(); // View of the content in the buffer for {@link Input}
     private int _headerBufferSize;
 
     private int _contentBufferSize;
-    private EventHandler _handler;
     private CachedBuffer _cached;
     private View.CaseInsensitive _tok0; // Saved token: header name, request method or response version
     private View.CaseInsensitive _tok1; // Saved token: header value, request URI or response code
     private String _multiLineValue;
     private int _responseStatus; // If >0 then we are parsing a response
     private boolean _forceContentBuffer;
-    private Input _input;
     
     /* ------------------------------------------------------------------------------- */
     protected int _state=STATE_START;
@@ -92,9 +89,11 @@ public class HttpParser implements Parser
      */
     public HttpParser(Buffer buffer, EventHandler handler)
     {
-        this._header=buffer;
-        this._buffer=buffer;
-        this._handler=handler;
+        _endp=null;
+        _buffers=null;
+        _header=buffer;
+        _buffer=buffer;
+        _handler=handler;
 
         if (buffer != null)
         {
@@ -705,8 +704,6 @@ public class HttpParser implements Parser
         
         // Handle _content
         length=_buffer.length();
-        if (_input!=null)
-            _input._contentView=_contentView;
         Buffer chunk; 
         while (_state > STATE_END && length > 0)
         {
@@ -926,8 +923,13 @@ public class HttpParser implements Parser
     {   
         synchronized (this) 
         {
-            if (_input!=null && _contentView.length()>0)
-                _input._contentView=_contentView.duplicate(Buffer.READWRITE);
+            if (_contentView.length()>0)
+            {
+                // TODO why was this code here ?
+                // Surely if we reset, we discard unconsumed content?
+                //_input._contentView=_contentView.duplicate(Buffer.READWRITE);
+                Log.warn("TODO unconsumed input");
+            }
             
             _state=STATE_START;
             _contentLength=HttpTokens.UNKNOWN_CONTENT;
@@ -1033,6 +1035,75 @@ public class HttpParser implements Parser
         _forceContentBuffer=force;
     } 
     
+
+    
+    /* ------------------------------------------------------------ */
+    public Buffer blockForContent(long maxIdleTime) throws IOException
+    {
+        if (_contentView.length()>0)
+            return _contentView;
+        if (getState() <= HttpParser.STATE_END) 
+            return null;
+        
+        // Handle simple end points.
+        if (_endp==null)
+            parseNext();
+        
+        // Handle blocking end points
+        else if (_endp.isBlocking())
+        {
+            try
+            {
+                parseNext();
+
+                // parse until some progress is made (or IOException thrown for timeout)
+                while(_contentView.length() == 0 && !isState(HttpParser.STATE_END))
+                {
+                    // Try to get more _parser._content
+                    parseNext();
+                }
+            }
+            catch(IOException e)
+            {
+                _endp.close();
+                throw e;
+            }
+        }
+        else // Handle non-blocking end point
+        {
+            parseNext();
+            
+            // parse until some progress is made (or IOException thrown for timeout)
+            while(_contentView.length() == 0 && !isState(HttpParser.STATE_END))
+            {
+                if (!_endp.blockReadable(maxIdleTime))
+                {
+                    _endp.close();
+                    throw new EofException("timeout");
+                }
+
+                // Try to get more _parser._content
+                parseNext();
+            }
+        }
+        
+        return _contentView.length()>0?_contentView:null; 
+    }   
+
+    /* ------------------------------------------------------------ */
+    /* (non-Javadoc)
+     * @see java.io.InputStream#available()
+     */
+    public int available() throws IOException
+    {
+        if (_contentView!=null && _contentView.length()>0)
+            return _contentView.length();
+        if (!_endp.isBlocking())
+            parseNext();
+        
+        return _contentView==null?0:_contentView.length();
+    }
+    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -1066,120 +1137,6 @@ public class HttpParser implements Parser
          */
         public abstract void startResponse(Buffer version, int status, Buffer reason)
                 throws IOException;
-    }
-    
-    
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    public static class Input extends ServletInputStream
-    {
-        protected HttpParser _parser;
-        protected EndPoint _endp;
-        protected long _maxIdleTime;
-        protected Buffer _contentView;
-        
-        /* ------------------------------------------------------------ */
-        public Input(HttpParser parser, long maxIdleTime)
-        {
-            _parser=parser;
-            _endp=parser._endp;
-            _maxIdleTime=maxIdleTime;
-            _contentView=_parser._contentView;
-            _parser._input=this;
-        }
-        
-        /* ------------------------------------------------------------ */
-        /*
-         * @see java.io.InputStream#read()
-         */
-        public int read() throws IOException
-        {
-            int c=-1;
-            if (blockForContent())
-                c= 0xff & _contentView.get();
-            return c;
-        }
-        
-        /* ------------------------------------------------------------ */
-        /* 
-         * @see java.io.InputStream#read(byte[], int, int)
-         */
-        public int read(byte[] b, int off, int len) throws IOException
-        {
-            int l=-1;
-            if (blockForContent())
-                l= _contentView.get(b, off, len);
-            return l;
-        }
-        
-        /* ------------------------------------------------------------ */
-        private boolean blockForContent() throws IOException
-        {
-            if (_contentView.length()>0)
-                return true;
-            if (_parser.getState() <= HttpParser.STATE_END) 
-                return false;
-            
-            // Handle simple end points.
-            if (_endp==null)
-                _parser.parseNext();
-            
-            // Handle blocking end points
-            else if (_endp.isBlocking())
-            {
-                try
-                {
-                    _parser.parseNext();
-
-                    // parse until some progress is made (or IOException thrown for timeout)
-                    while(_contentView.length() == 0 && !_parser.isState(HttpParser.STATE_END))
-                    {
-                        // Try to get more _parser._content
-                        _parser.parseNext();
-                    }
-                }
-                catch(IOException e)
-                {
-                    _endp.close();
-                    throw e;
-                }
-            }
-            else // Handle non-blocking end point
-            {
-                _parser.parseNext();
-                
-                // parse until some progress is made (or IOException thrown for timeout)
-                while(_contentView.length() == 0 && !_parser.isState(HttpParser.STATE_END))
-                {
-                    if (!_endp.blockReadable(_maxIdleTime))
-                    {
-                        _endp.close();
-                        throw new EofException("timeout");
-                    }
-
-                    // Try to get more _parser._content
-                    _parser.parseNext();
-                }
-            }
-            
-            return _contentView.length()>0; 
-        }   
-
-        /* ------------------------------------------------------------ */
-        /* (non-Javadoc)
-         * @see java.io.InputStream#available()
-         */
-        public int available() throws IOException
-        {
-            if (_contentView!=null && _contentView.length()>0)
-                return _contentView.length();
-            if (!_endp.isBlocking())
-                _parser.parseNext();
-            
-            return _contentView==null?0:_contentView.length();
-        }
     }
 
 

@@ -200,7 +200,7 @@ public class Ajp13Generator extends AbstractGenerator
         if (_content != null && _content.length() > 0)
         {
 
-            flush();
+            flushBuffer();
             if (_content != null && _content.length() > 0)
                 throw new IllegalStateException("FULL");
         }
@@ -266,7 +266,7 @@ public class Ajp13Generator extends AbstractGenerator
         // Handle any unfinished business?
         if (_content != null && _content.length() > 0)
         {
-            flush();
+            flushBuffer();
             if (_content != null && _content.length() > 0)
                 throw new IllegalStateException("FULL");
         }
@@ -314,7 +314,7 @@ public class Ajp13Generator extends AbstractGenerator
         Buffer content = _content;
         if (content != null && content.length() > 0)
         {
-            flush();
+            flushBuffer();
             if (content != null && content.length() > 0)
                 throw new IllegalStateException("FULL");
         }
@@ -456,11 +456,11 @@ public class Ajp13Generator extends AbstractGenerator
             _needEOC = true;
         }
 
-        flush();
+        flushBuffer();
     }
 
     /* ------------------------------------------------------------ */
-    public long flush() throws IOException
+    public long flushBuffer() throws IOException
     {
         try
         {
@@ -772,7 +772,7 @@ public class Ajp13Generator extends AbstractGenerator
     {
         _needMore = true;
         _expectMore = true;
-        flush();
+        flushBuffer();
     }
 
     /* ------------------------------------------------------------ */

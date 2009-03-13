@@ -241,7 +241,7 @@ public class HttpConnection implements Connection
                     {
                         if (_exchange == null)
                             continue;
-                        flushed = _generator.flush();
+                        flushed = _generator.flushBuffer();
                         io += flushed;
                     }
 
@@ -257,7 +257,7 @@ public class HttpConnection implements Connection
                                     _generator.addContent(_requestContentChunk,false);
                                 else
                                     _generator.complete();
-                                io += _generator.flush();
+                                io += _generator.flushBuffer();
                             }
                         }
                         else
@@ -280,7 +280,7 @@ public class HttpConnection implements Connection
                     // SSL may need an extra flush as it may have made "no progress" while actually doing a handshake.
                     if (_endp instanceof SslSelectChannelEndPoint && !_generator.isComplete() && !_generator.isEmpty())
                     {
-                        if (_generator.flush()>0)
+                        if (_generator.flushBuffer()>0)
                             continue;
                     }
                     return;

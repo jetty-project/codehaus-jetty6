@@ -44,11 +44,6 @@ public class HttpGeneratorTest extends TestCase
     {
         super(arg0);
     }
-
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(HttpGeneratorTest.class);
-    }
     
     public void testHTTP()
     	throws Exception
@@ -171,7 +166,7 @@ public class HttpGeneratorTest extends TestCase
                     {
                         if (hb.isState(HttpGenerator.STATE_HEADER))
                             hb.completeHeader(fields, HttpGenerator.MORE);
-                        hb.flush();
+                        hb.flushBuffer();
                     }
                 }
                 view.setPutIndex(buf.putIndex());
