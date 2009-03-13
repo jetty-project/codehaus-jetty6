@@ -600,7 +600,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         keyStore.load(keystoreInputStream,_password==null?null:_password.toString().toCharArray());
 
         KeyManagerFactory keyManagerFactory=KeyManagerFactory.getInstance(_sslKeyManagerFactoryAlgorithm);
-        keyManagerFactory.init(keyStore,_keyPassword==null?null:_keyPassword.toString().toCharArray());
+        keyManagerFactory.init(keyStore,_keyPassword==null?(_password==null?null:_password.toString().toCharArray()):_keyPassword.toString().toCharArray());
         keyManagers=keyManagerFactory.getKeyManagers();
 
 
