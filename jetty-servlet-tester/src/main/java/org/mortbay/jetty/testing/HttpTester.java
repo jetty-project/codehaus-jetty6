@@ -173,7 +173,7 @@ public class HttpTester
         }
         
         generator.complete();
-        generator.flush();
+        generator.flushBuffer();
         return endp.getOutput();
     }
     
@@ -320,7 +320,16 @@ public class HttpTester
      */
     public void addSetCookie(Cookie cookie)
     {
-        _fields.addSetCookie(cookie);
+        _fields.addSetCookie(
+                cookie.getName(),
+                cookie.getValue(),
+                cookie.getVersion(),
+                cookie.getDomain(),
+                cookie.getPath(),
+                cookie.getComment(),
+                cookie.getMaxAge(),
+                cookie.getSecure(),
+                cookie.isHttpOnly());
     }
 
     /* ------------------------------------------------------------ */

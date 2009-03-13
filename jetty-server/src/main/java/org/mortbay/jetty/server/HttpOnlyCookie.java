@@ -13,7 +13,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.http;
+package org.mortbay.jetty.server;
 
 import javax.servlet.http.Cookie;
 

@@ -16,11 +16,7 @@
 package org.mortbay.jetty.http;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 
-import javax.servlet.ServletOutputStream;
-//import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.http.Generator;
 import org.mortbay.jetty.http.HttpFields;
@@ -33,9 +29,6 @@ import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.io.EofException;
 import org.mortbay.jetty.io.View;
-import org.mortbay.jetty.util.ByteArrayOutputStream2;
-import org.mortbay.jetty.util.StringUtil;
-import org.mortbay.jetty.util.TypeUtil;
 import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
@@ -57,10 +50,16 @@ public abstract class AbstractGenerator implements Generator
     public final static int STATE_FLUSHING = 3;
     public final static int STATE_END = 4;
     
-    private static byte[] NO_BYTES = {};
-    private static int MAX_OUTPUT_CHARS = 512; 
+    public static final byte[] NO_BYTES = {};
+    public static final int MAX_OUTPUT_CHARS = 512; 
 
     // data
+
+    protected final Buffers _buffers; // source of buffers
+    protected final EndPoint _endp;
+    protected final int _headerBufferSize;
+    protected int _contentBufferSize;
+    
     protected int _state = STATE_HEADER;
     
     protected int _status = 0;
@@ -76,11 +75,6 @@ public abstract class AbstractGenerator implements Generator
     protected boolean _noContent = false;
     protected boolean _close = false;
 
-    protected Buffers _buffers; // source of buffers
-    protected EndPoint _endp;
-
-    protected int _headerBufferSize;
-    protected int _contentBufferSize;
     
     protected Buffer _header; // Buffer for HTTP header (and maybe small _content)
     protected Buffer _buffer; // Buffer for copy of passed _content
@@ -105,6 +99,12 @@ public abstract class AbstractGenerator implements Generator
         _contentBufferSize=contentBufferSize;
     }
 
+    /* ------------------------------------------------------------------------------- */
+    public boolean isOpen()
+    {
+        return _endp.isOpen();
+    }
+    
     /* ------------------------------------------------------------------------------- */
     public void reset(boolean returnBuffers)
     {
@@ -416,8 +416,23 @@ public abstract class AbstractGenerator implements Generator
     }
 
     /* ------------------------------------------------------------ */
-    public abstract long flush() throws IOException;
+    public abstract long flushBuffer() throws IOException;
+
     
+    /* ------------------------------------------------------------ */
+    public void flush(long maxIdleTime) throws IOException
+    {
+        // block until everything is flushed
+        Buffer content = _content;
+        Buffer buffer = _buffer;
+        if (content!=null && content.length()>0 || buffer!=null && buffer.length()>0 || isBufferFull())
+        {
+            flushBuffer();
+            
+            while ((content!=null && content.length()>0 ||buffer!=null && buffer.length()>0) && _endp.isOpen())
+                blockForOutput(maxIdleTime);
+        }
+    }
 
     /* ------------------------------------------------------------ */
     /**
@@ -451,439 +466,34 @@ public abstract class AbstractGenerator implements Generator
     {
         return _contentWritten;
     }
+    
 
 
     /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /** Output.
-     * 
-     * <p>
-     * Implements  {@link javax.servlet.ServletOutputStream} from the {@link javax.servlet} package.   
-     * </p>
-     * A {@link ServletOutputStream} implementation that writes content
-     * to a {@link AbstractGenerator}.   The class is designed to be reused
-     * and can be reopened after a close.
-     */
-    public static class Output extends ServletOutputStream 
+    public void  blockForOutput(long maxIdleTime) throws IOException
     {
-        protected AbstractGenerator _generator;
-        protected long _maxIdleTime;
-        protected ByteArrayBuffer _buf = new ByteArrayBuffer(NO_BYTES);
-        protected boolean _closed;
-        
-        // These are held here for reuse by Writer
-        String _characterEncoding;
-        Writer _converter;
-        char[] _chars;
-        ByteArrayOutputStream2 _bytes;
-        
-
-        /* ------------------------------------------------------------ */
-        public Output(AbstractGenerator generator, long maxIdleTime)
+        if (_endp.isBlocking())
         {
-            _generator=generator;
-            _maxIdleTime=maxIdleTime;
-        }
-        
-        /* ------------------------------------------------------------ */
-        /*
-         * @see java.io.OutputStream#close()
-         */
-        public void close() throws IOException
-        {
-            _closed=true;
-        }
-
-        /* ------------------------------------------------------------ */
-        void  blockForOutput() throws IOException
-        {
-            if (_generator._endp.isBlocking())
+            try
             {
-                try
-                {
-                    flush();
-                }
-                catch(IOException e)
-                {
-                    _generator._endp.close();
-                    throw e;
-                }
+                flushBuffer();
             }
-            else
+            catch(IOException e)
             {
-                if (!_generator._endp.blockWritable(_maxIdleTime))
-                {
-                    _generator._endp.close();
-                    throw new EofException("timeout");
-                }
-                
-                _generator.flush();
+                _endp.close();
+                throw e;
             }
         }
-        
-        /* ------------------------------------------------------------ */
-        public void reopen()
+        else
         {
-            _closed=false;
-        }
-        
-        /* ------------------------------------------------------------ */
-        public void flush() throws IOException
-        {
-            // block until everything is flushed
-            Buffer content = _generator._content;
-            Buffer buffer = _generator._buffer;
-            if (content!=null && content.length()>0 || buffer!=null && buffer.length()>0 || _generator.isBufferFull())
+            if (!_endp.blockWritable(maxIdleTime))
             {
-                _generator.flush();
-                
-                while ((content!=null && content.length()>0 ||buffer!=null && buffer.length()>0) && _generator._endp.isOpen())
-                    blockForOutput();
+                _endp.close();
+                throw new EofException("timeout");
             }
-        }
-
-        /* ------------------------------------------------------------ */
-        public void write(byte[] b, int off, int len) throws IOException
-        {
-            _buf.wrap(b, off, len);
-            write(_buf);
-        }
-
-        /* ------------------------------------------------------------ */
-        /*
-         * @see java.io.OutputStream#write(byte[])
-         */
-        public void write(byte[] b) throws IOException
-        {
-            _buf.wrap(b);
-            write(_buf);
-        }
-
-        /* ------------------------------------------------------------ */
-        /*
-         * @see java.io.OutputStream#write(int)
-         */
-        public void write(int b) throws IOException
-        {
-            if (_closed)
-                throw new IOException("Closed");
-            if (!_generator._endp.isOpen())
-                throw new EofException();
             
-            // Block until we can add _content.
-            while (_generator.isBufferFull())
-            {
-                blockForOutput();
-                if (_closed)
-                    throw new IOException("Closed");
-                if (!_generator._endp.isOpen())
-                    throw new EofException();
-            }
-
-            // Add the _content
-            if (_generator.addContent((byte)b))
-                // Buffers are full so flush.
-                flush();
-           
-            if (_generator.isContentWritten())
-            {
-                flush();
-                close();
-            }
-        }
-
-        /* ------------------------------------------------------------ */
-        private void write(Buffer buffer) throws IOException
-        {
-            if (_closed)
-                throw new IOException("Closed");
-            if (!_generator._endp.isOpen())
-                throw new EofException();
-            
-            // Block until we can add _content.
-            while (_generator.isBufferFull())
-            {
-                blockForOutput();
-                if (_closed)
-                    throw new IOException("Closed");
-                if (!_generator._endp.isOpen())
-                    throw new EofException();
-            }
-
-            // Add the _content
-            _generator.addContent(buffer, Generator.MORE);
-
-            // Have to flush and complete headers?
-            if (_generator.isBufferFull())
-                flush();
-            
-            if (_generator.isContentWritten())
-            {
-                flush();
-                close();
-            }
-
-            // Block until our buffer is free
-            while (buffer.length() > 0 && _generator._endp.isOpen())
-                blockForOutput();
-        }
-
-        /* ------------------------------------------------------------ */
-        /* 
-         * @see javax.servlet.ServletOutputStream#print(java.lang.String)
-         */
-        public void print(String s) throws IOException
-        {
-            write(s.getBytes());
+            flushBuffer();
         }
     }
     
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /** OutputWriter.
-     * A writer that can wrap a {@link Output} stream and provide
-     * character encodings.
-     *
-     * The UTF-8 encoding is done by this class and no additional 
-     * buffers or Writers are used.
-     * The UTF-8 code was inspired by http://javolution.org
-     */
-    public static class OutputWriter extends Writer
-    {
-        private static final int WRITE_CONV = 0;
-        private static final int WRITE_ISO1 = 1;
-        private static final int WRITE_UTF8 = 2;
-        
-        Output _out;
-        AbstractGenerator _generator;
-        int _writeMode;
-        int _surrogate;
-
-        /* ------------------------------------------------------------ */
-        public OutputWriter(Output out)
-        {
-            _out=out;
-            _generator=_out._generator;
-             
-        }
-
-        /* ------------------------------------------------------------ */
-        public void setCharacterEncoding(String encoding)
-        {
-            if (encoding == null || StringUtil.__ISO_8859_1.equalsIgnoreCase(encoding))
-            {
-                _writeMode = WRITE_ISO1;
-            }
-            else if (StringUtil.__UTF8.equalsIgnoreCase(encoding))
-            {
-                _writeMode = WRITE_UTF8;
-            }
-            else
-            {
-                _writeMode = WRITE_CONV;
-                if (_out._characterEncoding == null || !_out._characterEncoding.equalsIgnoreCase(encoding))
-                    _out._converter = null; // Set lazily in getConverter()
-            }
-            
-            _out._characterEncoding = encoding;
-            if (_out._bytes==null)
-                _out._bytes = new ByteArrayOutputStream2(MAX_OUTPUT_CHARS);
-        }
-
-        /* ------------------------------------------------------------ */
-        public void close() throws IOException
-        {
-            _out.close();
-        }
-
-        /* ------------------------------------------------------------ */
-        public void flush() throws IOException
-        {
-            _out.flush();
-        }
-
-        /* ------------------------------------------------------------ */
-        public void write (String s,int offset, int length) throws IOException
-        {   
-            while (length > MAX_OUTPUT_CHARS)
-            {
-                write(s, offset, MAX_OUTPUT_CHARS);
-                offset += MAX_OUTPUT_CHARS;
-                length -= MAX_OUTPUT_CHARS;
-            }
-
-            if (_out._chars==null)
-            {
-                _out._chars = new char[MAX_OUTPUT_CHARS]; 
-            }
-            char[] chars = _out._chars;
-            s.getChars(offset, offset + length, chars, 0);
-            write(chars, 0, length);
-        }
-
-        /* ------------------------------------------------------------ */
-        public void write (char[] s,int offset, int length) throws IOException
-        {              
-            Output out = _out; 
-            
-            while (length > 0)
-            {  
-                out._bytes.reset();
-                int chars = length>MAX_OUTPUT_CHARS?MAX_OUTPUT_CHARS:length;
-
-                switch (_writeMode)
-                {
-                    case WRITE_CONV:
-                    {
-                        Writer converter=getConverter();
-                        converter.write(s, offset, chars);
-                        converter.flush();
-                    }
-                    break;
-
-                    case WRITE_ISO1:
-                    {
-                        byte[] buffer=out._bytes.getBuf();
-                        int bytes=out._bytes.getCount();
-                        
-                        if (chars>buffer.length-bytes)
-                            chars=buffer.length-bytes;
-
-                        for (int i = 0; i < chars; i++)
-                        {
-                            int c = s[offset+i];
-                            buffer[bytes++]=(byte)(c<256?c:'?'); // ISO-1 and UTF-8 match for 0 - 255
-                        }
-                        if (bytes>=0)
-                            out._bytes.setCount(bytes);
-
-                        break;
-                    }
-
-                    case WRITE_UTF8:
-                    {
-                        byte[] buffer=out._bytes.getBuf();
-                        int bytes=out._bytes.getCount();
-         
-                        if (bytes+chars>buffer.length)
-                            chars=buffer.length-bytes;
-                        
-                        for (int i = 0; i < chars; i++)
-                        {
-                            int code = s[offset+i];
-
-                            if ((code & 0xffffff80) == 0) 
-                            {
-                                // 1b
-                                buffer[bytes++]=(byte)(code);
-                            }
-                            else if((code&0xfffff800)==0)
-                            {
-                                // 2b
-                                if (bytes+2>buffer.length)
-                                {
-                                    chars=i;
-                                    break;
-                                }
-                                buffer[bytes++]=(byte)(0xc0|(code>>6));
-                                buffer[bytes++]=(byte)(0x80|(code&0x3f));
-
-                                if (bytes+chars-i-1>buffer.length)
-                                    chars-=1;
-                            }
-                            else if((code&0xffff0000)==0)
-                            {
-                                // 3b
-                                if (bytes+3>buffer.length)
-                                {
-                                    chars=i;
-                                    break;
-                                }
-                                buffer[bytes++]=(byte)(0xe0|(code>>12));
-                                buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|(code&0x3f));
-
-                                if (bytes+chars-i-1>buffer.length)
-                                    chars-=2;
-                            }
-                            else if((code&0xff200000)==0)
-                            {
-                                // 4b
-                                if (bytes+4>buffer.length)
-                                {
-                                    chars=i;
-                                    break;
-                                }
-                                buffer[bytes++]=(byte)(0xf0|(code>>18));
-                                buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|(code&0x3f));
-
-                                if (bytes+chars-i-1>buffer.length)
-                                    chars-=3;
-                            }
-                            else if((code&0xf4000000)==0)
-                            {
-                                // 5b
-                                if (bytes+5>buffer.length)
-                                {
-                                    chars=i;
-                                    break;
-                                }
-                                buffer[bytes++]=(byte)(0xf8|(code>>24));
-                                buffer[bytes++]=(byte)(0x80|((code>>18)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|(code&0x3f));
-
-                                if (bytes+chars-i-1>buffer.length)
-                                    chars-=4;
-                            }
-                            else if((code&0x80000000)==0)
-                            {
-                                // 6b
-                                if (bytes+6>buffer.length)
-                                {
-                                    chars=i;
-                                    break;
-                                }
-                                buffer[bytes++]=(byte)(0xfc|(code>>30));
-                                buffer[bytes++]=(byte)(0x80|((code>>24)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|((code>>18)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|(code&0x3f));
-
-                                if (bytes+chars-i-1>buffer.length)
-                                    chars-=5;
-                            }
-                            else
-                            {
-                                buffer[bytes++]=(byte)('?');
-                            }
-                        }
-                        out._bytes.setCount(bytes);
-                        break;
-                    }
-                    default:
-                        throw new IllegalStateException();
-                }
-                
-                out._bytes.writeTo(out);
-                length-=chars;
-                offset+=chars;
-            }
-        }
-
-        /* ------------------------------------------------------------ */
-        private Writer getConverter() throws IOException
-        {
-            if (_out._converter == null)
-                _out._converter = new OutputStreamWriter(_out._bytes, _out._characterEncoding);
-            return _out._converter;
-        }   
-    }
 }
