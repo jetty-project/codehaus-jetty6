@@ -121,8 +121,6 @@
     <module>jetty-start</module>
     <module>jetty-assembly</module>
     <module>jetty-test-webapp</module>
-    <module>jetty-test-jaas-webapp</module>
-    <module>jetty-test-jndi-webapp</module>
   </modules>
   <repositories>
     <repository>
