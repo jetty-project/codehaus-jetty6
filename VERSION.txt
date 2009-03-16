@@ -89,6 +89,7 @@ Jetty-7.0-SNAPSHOT
  + JETTY-939 NPE in AbstractConfiguration.callPreDestroyCallbacks
  + JETTY-938 Deadlock in the TerracottaSessionManager
  + JETTY-950 Fix double-printing of request URI in request log
+ + JETTY-953 SSL keystore file input stream is not being closed directly
 
 jetty-6.1.15 2 March 2009
  + JETTY-923 BayeuxClient uses message pools to reduce memory footprint
