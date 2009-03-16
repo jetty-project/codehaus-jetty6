@@ -10,7 +10,7 @@
 <!-- =============================================================== -->
 
 
-<Configure id="Proxy" class="org.mortbay.jetty.Server">
+<Configure id="Proxy" class="org.mortbay.jetty.server.Server">
 
     <!-- =========================================================== -->
     <!-- Server Thread Pool                                          -->
@@ -18,11 +18,9 @@
     <Set name="ThreadPool">
       <!-- Default queued blocking threadpool 
       -->
-      <New class="org.mortbay.thread.QueuedThreadPool">
+      <New class="org.mortbay.jetty.util.thread.QueuedThreadPool">
         <Set name="minThreads">10</Set>
         <Set name="maxThreads">50</Set>
-        <Set name="lowThreads">5</Set>
-        <Set name="SpawnOrShrinkAt">2</Set>
       </New>
     </Set>
 
@@ -33,7 +31,7 @@
 
     <Call name="addConnector">
       <Arg>
-          <New class="org.mortbay.jetty.nio.SelectChannelConnector">
+          <New class="org.mortbay.jetty.server.nio.SelectChannelConnector">
             <Set name="host"><SystemProperty name="jetty.host" /></Set>
             <Set name="port"><SystemProperty name="jetty.port" default="8888"/></Set>
             <Set name="maxIdleTime">300000</Set>
@@ -49,7 +47,7 @@
     <Set name="handler">
       <New id="Servlets" class="org.mortbay.jetty.servlet.ServletHandler">
         <Call name="addServletWithMapping">
-	  <Arg>org.mortbay.proxy.AsyncProxyServlet</Arg>
+	  <Arg>org.mortbay.jetty.servlets..AsyncProxyServlet</Arg>
 	  <Arg>/</Arg>
 	</Call>
       </New>

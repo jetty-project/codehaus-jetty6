@@ -6,7 +6,7 @@
 <!-- =============================================================== -->
 
 
-<Configure id="Server" class="org.mortbay.jetty.Server">
+<Configure id="Server" class="org.mortbay.jetty.server.Server">
 
     <!-- =========================================================== -->
     <!-- configure rewrite handler                                   --> 
@@ -14,7 +14,7 @@
     <Get id="oldhandler" name="handler"/>
 
     <Set name="handler">
-     <New id="Rewrite" class="org.mortbay.jetty.handler.rewrite.RewriteHandler">
+     <New id="Rewrite" class="org.mortbay.jetty.rewrite.handler.RewriteHandler">
       <Set name="handler"><Ref id="oldhandler"/></Set>
       <Set name="rewriteRequestURI">true</Set>
       <Set name="rewritePathInfo">false</Set>
@@ -23,14 +23,14 @@
       <!-- Add rule to protect against IE ssl bug -->
       <Call name="addRule">
         <Arg>
-          <New class="org.mortbay.jetty.handler.rewrite.MsieSslRule"/>
+          <New class="org.mortbay.jetty.rewrite.handler.MsieSslRule"/>
         </Arg>
       </Call>
 
       <!-- protect favicon handling -->
       <Call name="addRule">
         <Arg>
-          <New class="org.mortbay.jetty.handler.rewrite.HeaderPatternRule">
+          <New class="org.mortbay.jetty.rewrite.handler.HeaderPatternRule">
 	    <Set name="pattern">/favicon.ico</Set>
 	    <Set name="name">Cache-Control</Set>
 	    <Set name="value">Max-Age=3600,public</Set>
@@ -65,7 +65,7 @@
       <!-- add a regex rule -->
       <Call name="addRule">
         <Arg>
-          <New class="org.mortbay.jetty.handler.rewrite.RewriteRegexRule">
+          <New class="org.mortbay.jetty.rewrite.handler.RewriteRegexRule">
             <Set name="regex">/test/dump/regex/([^/]*)/(.*)</Set>
             <Set name="replacement">/test/dump/$2/$1</Set>
           </New>

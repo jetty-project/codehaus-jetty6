@@ -32,11 +32,11 @@ service jetty
 
 -->
 
-<Configure id="Server" class="org.mortbay.jetty.Server">
+<Configure id="Server" class="org.mortbay.jetty.server.Server">
     <Call name="addConnector">
       <Arg>
           <!-- Inherited channel (from inetd/xinetd) -->
-          <New class="org.mortbay.jetty.nio.InheritedChannelConnector">
+          <New class="org.mortbay.jetty.server.nio.InheritedChannelConnector">
 
 
             <!-- Optional. Fallback in case System.inheritedChannel() does not give a ServerSocketChannel 
