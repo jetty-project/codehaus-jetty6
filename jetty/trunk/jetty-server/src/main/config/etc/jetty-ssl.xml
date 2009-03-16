@@ -9,7 +9,7 @@
 <!-- =============================================================== -->
 <Configure id="Server" class="org.mortbay.jetty.server.Server">
 
-  <!-- if NIO is not available, use org.mortbay.jetty.security.SslSocketConnector -->
+  <!-- if NIO is not available, use org.mortbay.jetty.server.ssl.SslSocketConnector -->
 
   <Call name="addConnector">
     <Arg>
