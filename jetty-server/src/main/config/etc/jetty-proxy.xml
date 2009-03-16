@@ -47,7 +47,7 @@
     <Set name="handler">
       <New id="Servlets" class="org.mortbay.jetty.servlet.ServletHandler">
         <Call name="addServletWithMapping">
-	  <Arg>org.mortbay.jetty.servlets..AsyncProxyServlet</Arg>
+	  <Arg>org.mortbay.jetty.servlets.AsyncProxyServlet</Arg>
 	  <Arg>/</Arg>
 	</Call>
       </New>
