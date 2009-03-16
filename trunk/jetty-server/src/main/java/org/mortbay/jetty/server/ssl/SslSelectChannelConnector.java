@@ -615,12 +615,24 @@ public class SslSelectChannelConnector extends SelectChannelConnector
             _truststoreType=_keystoreType;
         }
 
-        KeyManager[] keyManagers=null;
         InputStream keystoreInputStream = null;
-        if (_keystore!=null)
-            keystoreInputStream=Resource.newResource(_keystore).getInputStream();
-        KeyStore keyStore=KeyStore.getInstance(_keystoreType);
-        keyStore.load(keystoreInputStream,_password==null?null:_password.toString().toCharArray());
+
+        KeyManager[] keyManagers=null;
+        KeyStore keyStore = null;
+        try
+        {
+            if (_keystore!=null)
+            {
+                keystoreInputStream=Resource.newResource(_keystore).getInputStream();
+                keyStore = KeyStore.getInstance(_keystoreType);
+                keyStore.load(keystoreInputStream,_password==null?null:_password.toString().toCharArray());
+            }
+        }
+        finally
+        {
+            if (keystoreInputStream != null)
+                keystoreInputStream.close();
+        }
 
         KeyManagerFactory keyManagerFactory=KeyManagerFactory.getInstance(_sslKeyManagerFactoryAlgorithm);
         keyManagerFactory.init(keyStore,_keyPassword==null?null:_keyPassword.toString().toCharArray());
@@ -629,10 +641,22 @@ public class SslSelectChannelConnector extends SelectChannelConnector
 
         TrustManager[] trustManagers=null;
         InputStream truststoreInputStream = null;
-        if (_truststore!=null)
-            truststoreInputStream = Resource.newResource(_truststore).getInputStream();
-        KeyStore trustStore=KeyStore.getInstance(_truststoreType);
-        trustStore.load(truststoreInputStream,_trustPassword==null?null:_trustPassword.toString().toCharArray());
+        KeyStore trustStore = null;
+        try
+        {
+            if (_truststore!=null)
+            {
+                truststoreInputStream = Resource.newResource(_truststore).getInputStream();
+                trustStore=KeyStore.getInstance(_truststoreType);
+                trustStore.load(truststoreInputStream,_trustPassword==null?null:_trustPassword.toString().toCharArray());
+            }
+        }
+        finally
+        {
+            if (truststoreInputStream != null)
+                truststoreInputStream.close();
+        }
+
 
         TrustManagerFactory trustManagerFactory=TrustManagerFactory.getInstance(_sslTrustManagerFactoryAlgorithm);
         trustManagerFactory.init(trustStore);
