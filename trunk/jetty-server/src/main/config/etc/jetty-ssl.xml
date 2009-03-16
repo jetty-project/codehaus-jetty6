@@ -7,13 +7,13 @@
 <!-- other configuration files.  e.g.                                -->
 <!--    java -jar start.jar etc/jetty.xml etc/jetty-ssl.xml          -->
 <!-- =============================================================== -->
-<Configure id="Server" class="org.mortbay.jetty.Server">
+<Configure id="Server" class="org.mortbay.jetty.server.Server">
 
   <!-- if NIO is not available, use org.mortbay.jetty.security.SslSocketConnector -->
 
   <Call name="addConnector">
     <Arg>
-      <New class="org.mortbay.jetty.ssl.SslSelectChannelConnector">
+      <New class="org.mortbay.jetty.server.ssl.SslSelectChannelConnector">
 	<Set name="Port">8443</Set>
 	<Set name="maxIdleTime">30000</Set>
         <Set name="Acceptors">2</Set>

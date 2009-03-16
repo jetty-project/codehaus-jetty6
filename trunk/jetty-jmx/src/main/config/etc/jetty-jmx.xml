@@ -8,7 +8,7 @@
 <!-- other configuration files.  e.g.                                -->
 <!--    java -DOPTIONS=jmx -jar start.jar etc/jetty-jmx.xml etc/jetty.xml  -->
 <!-- =============================================================== -->
-<Configure id="Server" class="org.mortbay.jetty.Server">
+<Configure id="Server" class="org.mortbay.jetty.server.Server">
 
     <!-- =========================================================== -->
     <!-- Initialize an mbean server                                  -->
@@ -18,7 +18,7 @@
     <!-- =========================================================== -->
     <!-- Initialize the Jetty MBean container                        -->
     <!-- =========================================================== -->
-    <New id="MBeanContainer" class="org.mortbay.management.MBeanContainer">
+    <New id="MBeanContainer" class="org.mortbay.jetty.jmx.MBeanContainer">
       <Arg><Ref id="MBeanServer"/></Arg>
     </New>
 
@@ -36,7 +36,7 @@
     </Call>
 
     <!-- Add the static log -->
-    <Get id="Logger" class="org.mortbay.log.Log" name="log"/>
+    <Get id="Logger" class="org.mortbay.jetty.util.log.Log" name="log"/>
     <Ref id="MBeanContainer">
       <Call name="addBean">
           <Arg><Ref id="Logger"/></Arg>

@@ -8,7 +8,7 @@
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addConnector">
     <Arg>
-       <New class="org.mortbay.jetty.server.ajp.Ajp13SocketConnector">
+       <New class="org.mortbay.jetty.ajp.Ajp13SocketConnector">
          <Set name="port">8009</Set>
        </New>
     </Arg>

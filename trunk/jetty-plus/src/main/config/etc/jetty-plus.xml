@@ -17,7 +17,7 @@
 <!-- For more information about Jetty Plus, see the Jetty wiki at    -->
 <!-- http://docs.codehaus.org/display/JETTY/Jetty+Wiki               -->
 <!-- =============================================================== -->
-<Configure id="Server" class="org.mortbay.jetty.Server">
+<Configure id="Server" class="org.mortbay.jetty.server.Server">
 
   <!-- =========================================================== -->
   <!-- Example JAAS realm setup.                                   -->
@@ -57,7 +57,7 @@
   <!--
     <Call name="addLifeCycle">
       <Arg>
-        <New class="org.mortbay.jetty.deployer.WebAppDeployer">
+        <New class="org.mortbay.jetty.deploy.WebAppDeployer">
           <Set name="contexts"><Ref id="Contexts"/></Set>
           <Set name="webAppDir"><SystemProperty name="jetty.home" default="."/>/webapps-plus</Set>
           <Set name="parentLoaderPriority">false</Set>

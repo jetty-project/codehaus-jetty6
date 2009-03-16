@@ -6,7 +6,7 @@
 <!-- =============================================================== -->
 
 
-<Configure id="Server" class="org.mortbay.jetty.Server">
+<Configure id="Server" class="org.mortbay.jetty.server.Server">
 
     <!-- =========================================================== -->
     <!-- configure rewrite handler                                   --> 
@@ -14,7 +14,7 @@
     <Get id="oldhandler" name="handler"/>
 
     <Set name="handler">
-     <New id="StatsHandler" class="org.mortbay.jetty.handler.StatisticsHandler">
+     <New id="StatsHandler" class="org.mortbay.jetty.server.handler.StatisticsHandler">
       <Set name="handler"><Ref id="oldhandler"/></Set>
      </New>
     </Set>
