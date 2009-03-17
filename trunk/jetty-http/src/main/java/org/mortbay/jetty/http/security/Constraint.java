@@ -20,7 +20,7 @@ import java.io.Serializable;
 /**
  * Describe an auth and/or data constraint.
  * 
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class Constraint implements Cloneable, Serializable
 {

@@ -28,7 +28,7 @@ import org.mortbay.jetty.util.log.Log;
  * call to {@link #getCookies()}.
  * If the added fields are identical to those last added (as strings), then the 
  * cookies are not re parsed.
- * @author gregw
+ * 
  *
  */
 public class CookieCutter

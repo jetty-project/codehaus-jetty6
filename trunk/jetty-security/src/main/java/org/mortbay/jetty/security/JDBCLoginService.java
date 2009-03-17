@@ -47,10 +47,10 @@ import org.mortbay.jetty.util.resource.Resource;
  * $JETTY_HOME/etc/jdbcRealm.properties
  * 
  * @version $Id$
- * @author Arkadi Shishlov (arkadi)
- * @author Fredrik Borgh
- * @author Greg Wilkins (gregw)
- * @author Ben Alex
+ * 
+ * 
+ * 
+ * 
  */
 
 public class JDBCLoginService extends MappedLoginService

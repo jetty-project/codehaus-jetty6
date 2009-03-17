@@ -33,7 +33,7 @@ import org.mortbay.jetty.util.log.Log;
  * This class includes an implementation for unix Crypt an MD5 digest.
  * 
  * @see Password
- * @author Greg Wilkins (gregw)
+ * 
  */
 public abstract class Credential
 {

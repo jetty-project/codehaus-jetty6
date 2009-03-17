@@ -21,7 +21,7 @@ import org.mortbay.jetty.io.Buffer;
 
 /**
  * 
- * @author jesse
+ * 
  * 
  */
 public interface HttpEventListener

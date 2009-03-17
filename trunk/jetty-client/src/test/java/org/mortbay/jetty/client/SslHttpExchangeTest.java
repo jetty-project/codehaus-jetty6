@@ -23,8 +23,8 @@ import org.mortbay.jetty.server.ssl.SslSocketConnector;
 /**
  * Functional testing for HttpExchange.
  * 
- * @author Matthew Purland
- * @author Greg Wilkins
+ * 
+ * 
  */
 public class SslHttpExchangeTest extends HttpExchangeTest
 {

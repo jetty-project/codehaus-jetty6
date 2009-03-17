@@ -32,8 +32,8 @@ import org.mortbay.jetty.server.Server;
 /**
  * Functional testing for HttpExchange.
  *
- * @author Matthew Purland
- * @author Greg Wilkins
+ * 
+ * 
  */
 public class WebdavListenerTest extends TestCase//extends HttpExchangeTest
 {

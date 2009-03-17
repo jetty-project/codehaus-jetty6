@@ -23,7 +23,7 @@ import java.util.List;
  *
  * Allows multiple exceptions to be thrown as a single exception.
  *
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class MultiException extends Exception
 {

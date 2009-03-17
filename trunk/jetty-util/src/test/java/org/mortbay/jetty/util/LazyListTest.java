@@ -24,7 +24,7 @@ import org.mortbay.jetty.util.LazyList;
 import junit.framework.TestCase;
 
 /**
- * @author gregw
+ * 
  *
  */
 public class LazyListTest extends TestCase

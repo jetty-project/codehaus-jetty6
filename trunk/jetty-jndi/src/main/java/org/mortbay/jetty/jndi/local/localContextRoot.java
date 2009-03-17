@@ -31,7 +31,7 @@ import org.mortbay.jetty.jndi.NamingContext;
  * 
  * localContext
  * 
- * @author janb
+ * 
  * @version $Revision$ $Date$
  * 
  */

@@ -27,7 +27,7 @@ import javax.servlet.http.Cookie;
  * that the microsoft httponly extension should be used.
  * The addSetCookie method on HttpFields checks for this type.
  * @deprecated use {@link javax.servlet.Cookie#setHttpOnly(boolean)}
- * @author gregw
+ * 
  *
  */
 public class HttpOnlyCookie extends Cookie

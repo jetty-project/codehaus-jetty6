@@ -48,7 +48,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * By default, the parser is created as a validating parser only if xerces is present. This can be 
  * configured by setting the "org.mortbay.jetty.xml.XmlParser.Validating" system property.
  * 
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class XmlParser
 {

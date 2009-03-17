@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentMap;
  * Implemented as a map of LazyList values
  *
  * @see LazyList
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class MultiMap<K> implements ConcurrentMap<K,Object>
 {

@@ -51,7 +51,7 @@ import org.mortbay.jetty.util.log.Log;
  * Implements {@link javax.servlet.HttpServletResponse} from the {@link javax.servlet} package.
  * </p>
  *
- * @author gregw
+ * 
  *
  */
 public class Response implements HttpServletResponse

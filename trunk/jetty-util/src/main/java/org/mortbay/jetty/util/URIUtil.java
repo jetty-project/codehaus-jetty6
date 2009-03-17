@@ -27,7 +27,7 @@ import java.io.UnsupportedEncodingException;
  * <P>UTF-8 encoding is used by default for % encoded characters. This
  * may be overridden with the org.mortbay.util.URI.charset system property.
  * @see UrlEncoded
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class URIUtil
     implements Cloneable

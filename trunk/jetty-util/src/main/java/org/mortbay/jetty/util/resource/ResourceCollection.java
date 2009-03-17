@@ -33,7 +33,7 @@ import org.mortbay.jetty.util.URIUtil;
  * If a resource is not found in the main resource, it looks it up in 
  * the order the resources were constructed.
  * 
- * @author dyu
+ * 
  *
  */
 public class ResourceCollection extends Resource

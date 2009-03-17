@@ -48,7 +48,7 @@ import org.mortbay.jetty.util.log.Log;
  * This class will organise the loading of the servlet when needed or
  * requested.
  *
- * @author Greg Wilkins
+ * 
  */
 public class ServletHolder extends Holder implements UserIdentity.Scope, Comparable
 {

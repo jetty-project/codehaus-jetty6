@@ -56,7 +56,7 @@ import org.mortbay.jetty.util.component.AbstractLifeCycle;
  * true, the 2.3 servlet spec notification style will be used.
  * <p>
  *
- * @author Greg Wilkins (gregw)
+ * 
  */
 public abstract class AbstractSessionManager extends AbstractLifeCycle implements SessionManager
 {
@@ -673,7 +673,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     /**
      * Null returning implementation of HttpSessionContext
      *
-     * @author Greg Wilkins (gregw)
+     * 
      */
     public static class NullSessionContext implements HttpSessionContext
     {
@@ -722,7 +722,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
      * <p>
      * Implements {@link javax.servlet.HttpSession} from the {@link javax.servlet} package.
      * </p>
-     * @author gregw
+     * 
      *
      */
     public abstract class Session implements SessionIf, Serializable

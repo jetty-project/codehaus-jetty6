@@ -38,7 +38,7 @@ import org.mortbay.jetty.util.log.Log;
  * insensitivity).  By default this is turned on, or it can be controlled with the
  * "org.mortbay.util.FileResource.checkAliases" system parameter.
  *
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class FileResource extends URLResource
 {

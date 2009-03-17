@@ -17,7 +17,7 @@ package org.mortbay.jetty.ajp;
 import org.mortbay.jetty.io.BufferCache;
 
 /**
- * @author Markus Kobler
+ * 
  */
 public class Ajp13Packet
 {

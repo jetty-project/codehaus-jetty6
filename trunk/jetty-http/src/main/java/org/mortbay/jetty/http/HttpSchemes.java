@@ -20,7 +20,7 @@ import org.mortbay.jetty.io.ByteArrayBuffer;
 /* ------------------------------------------------------------------------------- */
 /** 
  * 
- * @author gregw
+ * 
  */
 public class HttpSchemes
 {

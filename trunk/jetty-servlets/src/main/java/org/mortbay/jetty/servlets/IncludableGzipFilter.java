@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletResponse;
  * This allows the gzip filter to function correct during includes and to make a decision to gzip or not
  * at the time the buffer fills and on the basis of all response headers.
  * 
- * @author gregw
+ * 
  *
  */
 public class IncludableGzipFilter extends GzipFilter

@@ -55,7 +55,7 @@ import javax.servlet.http.HttpServletResponse;
  * appropriate. This means that when not in development mode, the servlet must be 
  * restarted before changed content will be served.
  * 
- * @author gregw
+ * 
  *
  */
 public class ConcatServlet extends HttpServlet

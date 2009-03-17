@@ -36,8 +36,8 @@ import org.mortbay.jetty.server.Server;
  * Connection implementation of the Ajp13 protocol. <p/> XXX Refactor to remove
  * duplication of HttpConnection
  * 
- * @author Markus Kobler markus(at)inquisitive-mind.com
- * @author Greg Wilkins
+ * 
+ * 
  */
 public class Ajp13Connection extends HttpConnection
 {

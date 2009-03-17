@@ -25,7 +25,7 @@ import java.io.IOException;
 
 /**
  * Rule implementing the legacy API of RewriteHandler
- * @author gregw
+ * 
  *
  */
 public class LegacyRule extends Rule

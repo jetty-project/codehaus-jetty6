@@ -29,7 +29,7 @@ import org.mortbay.jetty.util.log.Log;
  * Base container to group rules. Can be extended so that the contained rules
  * will only be applied under certain conditions
  * 
- * @author Athena Yao
+ * 
  */
 
 public class RuleContainer extends Rule

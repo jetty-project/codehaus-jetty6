@@ -31,7 +31,7 @@ import org.mortbay.jetty.util.log.Log;
 
 /* --------------------------------------------------------------------- */
 /** 
- * @author Greg Wilkins
+ * 
  */
 public class Holder extends AbstractLifeCycle implements Serializable
 {

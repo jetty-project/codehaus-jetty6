@@ -29,7 +29,7 @@ import javax.servlet.http.HttpSession;
 /* ------------------------------------------------------------ */
 /** Test Servlet Sessions.
  *
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class SessionDump extends HttpServlet
 {

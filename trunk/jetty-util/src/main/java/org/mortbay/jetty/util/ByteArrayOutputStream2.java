@@ -18,7 +18,7 @@ import java.io.ByteArrayOutputStream;
 /* ------------------------------------------------------------ */
 /** ByteArrayOutputStream with public internals
 
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class ByteArrayOutputStream2 extends ByteArrayOutputStream
 {

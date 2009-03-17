@@ -40,7 +40,7 @@ import org.mortbay.jetty.util.log.Log;
  * 
  * Based on RFC2616 3.12, 14.16, 14.35.1, 14.35.2
  * @version $version$
- * @author Helmut Hissen
+ * 
  */
 public class InclusiveByteRange 
 {

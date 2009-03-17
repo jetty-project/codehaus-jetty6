@@ -36,7 +36,7 @@ import org.mortbay.jetty.server.handler.HandlerCollection;
 import org.mortbay.jetty.util.IO;
 
 /**
- * @author gregw
+ * 
  *
  * To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Generation - Code and Comments

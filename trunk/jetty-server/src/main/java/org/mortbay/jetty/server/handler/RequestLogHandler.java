@@ -33,7 +33,7 @@ import org.mortbay.jetty.util.log.Log;
  * RequestLogHandler.
  * This handler can be used to wrap an individual context for context logging.
  * 
- * @author Nigel Canonizado
+ * 
  * @org.apache.xbean.XBean
  */
 public class RequestLogHandler extends HandlerWrapper

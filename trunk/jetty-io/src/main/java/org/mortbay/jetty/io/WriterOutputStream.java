@@ -24,7 +24,7 @@ import java.io.Writer;
  * When all you have is a Writer and only an OutputStream will do.
  * Try not to use this as it indicates that your design is a dogs
  * breakfast (JSP made me write it).
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class WriterOutputStream extends OutputStream
 {

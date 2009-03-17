@@ -25,8 +25,8 @@ import org.mortbay.jetty.server.Request;
 /**
  * Set the scheme for the request 
  *
- * @author Ervin Varga
- * @author Athena Yao
+ * 
+ * 
  */
 public class ForwardedSchemeHeaderRule extends HeaderRule {
     private String _scheme="https";

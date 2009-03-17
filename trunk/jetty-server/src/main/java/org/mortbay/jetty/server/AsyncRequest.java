@@ -35,7 +35,7 @@ import org.mortbay.jetty.util.thread.Timeout;
 /* ------------------------------------------------------------ */
 /** Asyncrhonous Request.
  * 
- * @author gregw
+ * 
  *
  */
 public class AsyncRequest implements AsyncContext

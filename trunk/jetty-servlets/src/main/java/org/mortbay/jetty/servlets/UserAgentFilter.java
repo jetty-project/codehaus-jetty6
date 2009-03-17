@@ -50,7 +50,7 @@ import javax.servlet.http.HttpServletRequest;
  * An example value for pattern is <code>(?:Mozilla[^\(]*\(compatible;\s*+([^;]*);.*)|(?:.*?([^\s]+/[^\s]+).*)</code>. These two
  * pattern match the common compatibility user-agent strings and extract the real user agent, failing that, the first
  * element of the agent string is returned. 
- * @author gregw
+ * 
  *
  */
 public class UserAgentFilter implements Filter

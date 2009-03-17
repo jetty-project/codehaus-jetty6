@@ -53,8 +53,8 @@ import org.mortbay.jetty.util.log.Log;
  * variable with the name stripped of the leading ENV_ and using the init
  * parameter value.
  * 
- * @author Julian Gosnell
- * @author Thanassis Papathanasiou - Some minor modifications for Jetty6 port
+ * 
+ * 
  */
 public class CGI extends HttpServlet
 {

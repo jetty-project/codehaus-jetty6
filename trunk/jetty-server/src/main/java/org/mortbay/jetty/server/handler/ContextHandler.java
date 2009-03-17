@@ -86,7 +86,7 @@ import org.mortbay.jetty.util.resource.Resource;
  * 
  * @org.apache.xbean.XBean description="Creates a basic HTTP context"
  *
- * @author gregw
+ * 
  *
  */
 public class ContextHandler extends HandlerWrapper implements Attributes, Server.Graceful, CompleteHandler
@@ -1358,7 +1358,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
      * A partial implementation of  {@link javax.servlet.ServletContext}.
      * A complete implementation is provided by the derived {@link org.mortbay.jetty.servlet.ServletContextHandler.Context}.   
      * </p>
-     * @author gregw
+     * 
      *
      */
     public class Context implements ServletContext

@@ -35,7 +35,7 @@ import java.util.ArrayList;
  * Strings.  Other objects added to the Composite are converted to Strings
  * @see Element
  * @version $Id: Composite.java,v 1.6 2004/05/09 20:31:28 gregwilkins Exp $
- * @author Greg Wilkins
+ * 
 */
 public class Composite extends Element
 {

@@ -45,7 +45,7 @@ import org.mortbay.jetty.util.log.Log;
  * 
  * @org.apache.xbean.XBean element="bioConnector" description="Creates a BIO based socket connector"
  * 
- * @author gregw
+ * 
  */
 public class SocketConnector extends AbstractConnector
 {

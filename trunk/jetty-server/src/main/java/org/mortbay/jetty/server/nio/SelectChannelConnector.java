@@ -57,7 +57,7 @@ import org.mortbay.jetty.util.thread.Timeout.Task;
  * 
  * @org.apache.xbean.XBean element="nioConnector" description="Creates an NIO based socket connector"
  * 
- * @author gregw
+ * 
  *
  */
 public class SelectChannelConnector extends AbstractNIOConnector 

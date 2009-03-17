@@ -36,7 +36,7 @@ import org.mortbay.jetty.util.thread.Timeout;
  * The Selector Manager manages and number of SelectSets to allow
  * NIO scheduling to scale to large numbers of connections.
  * 
- * @author gregw
+ * 
  *
  */
 public abstract class SelectorManager extends AbstractLifeCycle

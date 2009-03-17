@@ -33,7 +33,7 @@ import java.util.ResourceBundle;
  *          ...
  *     }
  * </PRE>          
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class Loader
 {

@@ -31,7 +31,7 @@ import org.mortbay.jetty.io.Buffer;
 /* ------------------------------------------------------------------------------- */
 /** 
  * 
- * @author gregw
+ * 
  */
 public class DirectNIOBuffer extends AbstractBuffer implements NIOBuffer
 { 	

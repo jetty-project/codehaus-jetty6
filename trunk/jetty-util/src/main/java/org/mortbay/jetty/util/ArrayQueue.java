@@ -27,7 +27,7 @@ import java.util.Queue;
  * This partial Queue implementation (also with {@link #pop()} for stack operation)
  * is backed by a growable circular array.
  * 
- * @author gregw
+ * 
  *
  * @param <E>
  */

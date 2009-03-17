@@ -31,7 +31,7 @@ import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------------------------- */
 /**
- * @author gregw
+ * 
  */
 public class HttpParser implements Parser
 {

@@ -22,7 +22,7 @@ import org.mortbay.jetty.util.StringUtil;
 /* ------------------------------------------------------------------------------- */
 /** Buffer utility methods.
  * 
- * @author gregw
+ * 
  */
 public class BufferUtil
 {

@@ -45,7 +45,7 @@ import org.mortbay.jetty.xml.XmlParser;
  * feature in the first place!
  * &lt;/bile&gt;
  * 
- * @author gregw
+ * 
  *
  */
 public class TagLibConfiguration implements Configuration

@@ -24,7 +24,7 @@ import junit.framework.TestSuite;
 
 /* ------------------------------------------------------------ */
 /** Util meta Tests.
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class DateCacheTest extends junit.framework.TestCase
 {

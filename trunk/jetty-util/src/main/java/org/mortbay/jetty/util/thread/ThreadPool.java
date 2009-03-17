@@ -19,7 +19,7 @@ import org.mortbay.jetty.util.component.LifeCycle;
 
 /* ------------------------------------------------------------ */
 /** ThreadPool.
- * @author gregw
+ * 
  *
  */
 public interface ThreadPool

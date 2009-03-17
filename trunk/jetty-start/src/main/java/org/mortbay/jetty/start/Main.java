@@ -100,8 +100,8 @@ import java.util.StringTokenizer;
  * applied.
  *
  * 
- * @author Jan Hlavaty (hlavac@code.cz)
- * @author Greg Wilkins
+ * 
+ * 
  */
 public class Main
 {

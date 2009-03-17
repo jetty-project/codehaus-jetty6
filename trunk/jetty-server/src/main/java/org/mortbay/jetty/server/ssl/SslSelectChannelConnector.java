@@ -66,8 +66,8 @@ import org.mortbay.jetty.util.resource.Resource;
  * 
  * @org.apache.xbean.XBean element="sslConnector" description="Creates an NIO ssl connector"
  *
- * @author Nik Gonzalez <ngonzalez@exist.com>
- * @author Greg Wilkins <gregw@mortbay.com>
+ * 
+ * 
  */
 public class SslSelectChannelConnector extends SelectChannelConnector
 {
@@ -316,7 +316,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
      * 
      * @deprecated As of Java Servlet API 2.0, with no replacement.
      * 
-     * @author Tony Jiang
+     * 
      */
     public void setCipherSuites(String[] cipherSuites)
     {

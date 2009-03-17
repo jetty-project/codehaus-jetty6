@@ -21,7 +21,7 @@ package org.mortbay.html;
  * @see Tag
  * @see Form
  * @version $Id: Input.java,v 1.3 2004/05/09 20:31:28 gregwilkins Exp $
- * @author Greg Wilkins
+ * 
  */
 public class Input extends Tag
 {

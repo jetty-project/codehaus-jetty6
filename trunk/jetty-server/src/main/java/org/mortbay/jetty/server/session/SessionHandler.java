@@ -38,7 +38,7 @@ import org.mortbay.jetty.util.log.Log;
 /* ------------------------------------------------------------ */
 /** SessionHandler.
  *
- * @author gregw
+ * 
  *
  */
 public class SessionHandler extends HandlerWrapper

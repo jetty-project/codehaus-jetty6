@@ -23,7 +23,7 @@ import junit.framework.TestCase;
 /**
  * Top level test harness.
  * 
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class PathMapTest extends TestCase
 {

@@ -25,7 +25,7 @@ import org.mortbay.jetty.util.LazyList;
  * Classes implementing this interface have a defined life cycle
  * defined by the methods of this interface.
  *
- * @author Greg Wilkins (gregw)
+ * 
  */
 public interface LifeCycle
 {

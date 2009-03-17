@@ -52,7 +52,7 @@ import org.mortbay.jetty.util.log.Log;
  * 
  * Created: Fri Jun 27 09:26:40 2003
  *
- * @author <a href="mailto:janb@mortbay.com">Jan Bartel</a>
+ * 
  * 
  */
 public class ContextFactory implements ObjectFactory

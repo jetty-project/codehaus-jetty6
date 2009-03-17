@@ -35,8 +35,8 @@ import org.mortbay.jetty.util.TypeUtil;
 import org.mortbay.jetty.util.log.Log;
 
 /**
- * @author lagdeppa (at) exist.com
- * @author Greg Wilkins
+ * 
+ * 
  */                                                                                                       
 public class Ajp13Generator extends AbstractGenerator
 {

@@ -39,7 +39,7 @@ import org.mortbay.jetty.util.log.Log;
  * 
  * @org.apache.xbean.XBean element="blockingNioConnector" description="Creates a blocking NIO based socket connector"
  * 
- * @author gregw
+ * 
  *
  */
 public class BlockingChannelConnector extends AbstractNIOConnector 
