@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 
 /* ------------------------------------------------------------ */
 /** TestFilter.
- * @author gregw
+ * 
  *
  */
 public class TestFilter implements Filter

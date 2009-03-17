@@ -36,7 +36,7 @@ import org.mortbay.jetty.util.log.Log;
  * @see Page
  * @see Composite
  * @version $Id: Element.java,v 1.10 2005/08/13 00:01:23 gregwilkins Exp $
- * @author Greg Wilkins
+ * 
 */
 public abstract class Element
 {

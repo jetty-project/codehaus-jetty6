@@ -26,7 +26,7 @@ import org.mortbay.jetty.util.log.Log;
 /** HTML Image Tag.
  * @see org.mortbay.html.Block
  * @version $Id: Image.java,v 1.8 2005/08/13 00:01:23 gregwilkins Exp $
- * @author Greg Wilkins
+ * 
 */
 public class Image extends Tag
 {

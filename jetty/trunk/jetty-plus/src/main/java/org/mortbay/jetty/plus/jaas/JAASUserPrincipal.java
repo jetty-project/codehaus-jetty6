@@ -28,7 +28,7 @@ import javax.security.auth.login.LoginContext;
  *  org.mortbay.http.UserPrincipal interface.
  *
  * @version $Id$
- * @author Jan Bartel (janb)
+ * 
  */
 public class JAASUserPrincipal implements Principal 
 {

@@ -20,7 +20,7 @@ import java.util.Enumeration;
 /* ------------------------------------------------------------ */
 /** Attributes.
  * Interface commonly used for storing attributes.
- * @author gregw
+ * 
  *
  */
 public interface Attributes

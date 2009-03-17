@@ -23,7 +23,7 @@ import java.util.Map;
 
 /* ------------------------------------------------------------ */
 /** AttributesMap.
- * @author gregw
+ * 
  *
  */
 public class AttributesMap implements Attributes

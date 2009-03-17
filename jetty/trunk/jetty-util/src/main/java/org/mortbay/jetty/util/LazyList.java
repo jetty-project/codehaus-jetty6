@@ -52,7 +52,7 @@ import java.util.ListIterator;
  * An ArrayList of default size is used as the initial LazyList.
  *
  * @see java.util.List
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class LazyList
     implements Cloneable, Serializable

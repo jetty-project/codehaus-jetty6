@@ -29,7 +29,7 @@ import org.mortbay.jetty.server.Server;
 import junit.framework.TestCase;
 
 /**
- * @author gregw
+ * 
  *
  */
 public class HttpConnectionTest extends TestCase

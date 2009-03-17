@@ -46,7 +46,7 @@ import org.mortbay.jetty.util.resource.Resource;
  * No caching is done.
  * Requests that cannot be handled are let pass (Eg no 404's)
  * 
- * @author Greg Wilkins (gregw)
+ * 
  * @org.apache.xbean.XBean
  */
 public class ResourceHandler extends AbstractHandler

@@ -30,7 +30,7 @@ import org.mortbay.jetty.io.View;
 import org.mortbay.jetty.util.log.Log;
 
 /**
- * @author Markus Kobler
+ * 
  */
 public class Ajp13Parser implements Parser
 {

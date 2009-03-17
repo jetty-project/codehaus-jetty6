@@ -65,10 +65,10 @@ import org.mortbay.jetty.util.resource.Resource;
  * 
  * @org.apache.xbean.XBean element="sslSocketConnector" description="Creates an ssl socket connector"
  *
- * @author Greg Wilkins (gregw@mortbay.com)
- * @author Court Demas (court@kiwiconsulting.com)
- * @author Forge Research Pty Ltd ACN 003 491 576
- * @author Jan Hlavat�
+ * 
+ * 
+ * 
+ * 
  */
 public class SslSocketConnector extends SocketConnector
 {
@@ -466,7 +466,7 @@ public class SslSocketConnector extends SocketConnector
 
     /* ------------------------------------------------------------ */
     /** 
-     * @author Tony Jiang
+     * 
      */
     public void setExcludeCipherSuites(String[] cipherSuites) {
         this._excludeCipherSuites = cipherSuites;

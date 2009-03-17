@@ -18,9 +18,9 @@ import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.View;
 
 /**
- * @author Markus Kobler
- * @author Greg Wilkins
- * @author Jason Jenkins <jj@aol.net>
+ * 
+ * 
+ * 
  */
 public class Ajp13RequestPacket
 {

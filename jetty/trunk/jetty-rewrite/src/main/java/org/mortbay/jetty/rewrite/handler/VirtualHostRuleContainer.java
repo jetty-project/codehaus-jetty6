@@ -25,7 +25,7 @@ import org.mortbay.jetty.util.LazyList;
  * Groups rules that apply only to a specific virtual host
  * or sets of virtual hosts
  * 
- *  @author Athena Yao
+ *  
  */
 
 public class VirtualHostRuleContainer extends RuleContainer

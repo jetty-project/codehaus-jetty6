@@ -27,7 +27,7 @@ import org.mortbay.jetty.io.bio.StringEndPoint;
 import org.mortbay.jetty.util.StringUtil;
 
 /**
- * @author gregw
+ * 
  *
  * To change this generated comment edit the template variable "typecomment":
  * Window>Preferences>Java>Templates.

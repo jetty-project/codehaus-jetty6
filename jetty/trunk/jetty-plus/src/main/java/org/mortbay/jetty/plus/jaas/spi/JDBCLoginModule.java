@@ -44,7 +44,7 @@ import org.mortbay.jetty.util.log.Log;
  *
  * @see 
  * @version 1.0 Tue Apr 15 2003
- * @author Jan Bartel (janb)
+ * 
  */
 public class JDBCLoginModule extends AbstractDatabaseLoginModule
 {

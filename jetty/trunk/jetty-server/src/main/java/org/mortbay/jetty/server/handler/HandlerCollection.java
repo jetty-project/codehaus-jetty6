@@ -35,7 +35,7 @@ import org.mortbay.jetty.util.MultiException;
  * the response status or exceptions.
  * <p>
  *  
- * @author gregw
+ * 
  * @org.apache.xbean.XBean
  */
 public class HandlerCollection extends AbstractHandlerContainer

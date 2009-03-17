@@ -34,7 +34,7 @@ import org.mortbay.jetty.util.URIUtil;
 /* ------------------------------------------------------------ */
 /** Test Servlet RequestDispatcher.
  * 
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class DispatchServlet extends HttpServlet
 {

@@ -20,7 +20,7 @@ import org.mortbay.jetty.io.BufferCache;
 /**
  * XXX Should this implement the Buffer interface?
  * 
- * @author Markus Kobler
+ * 
  */
 public class Ajp13RequestHeaders extends BufferCache
 {

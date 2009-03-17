@@ -36,7 +36,7 @@ import org.mortbay.jetty.util.log.Log;
  * Factory for the default InitialContext.
  * Created: Tue Jul  1 19:08:08 2003
  *
- * @author <a href="mailto:janb@mortbay.com">Jan Bartel</a>
+ * 
  * @version 1.0
  */
 public class InitialContextFactory implements javax.naming.spi.InitialContextFactory

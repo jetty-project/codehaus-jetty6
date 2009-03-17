@@ -59,8 +59,8 @@ import org.mortbay.jetty.util.log.Log;
  * may insert their own HttpExchangeListener to intercept and filter the call backs intended for the
  * HttpExchange.
  *
- * @author gregw
- * @author Guillaume Nodet
+ * 
+ * 
  */
 public class HttpExchange
 {

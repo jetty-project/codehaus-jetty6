@@ -48,7 +48,7 @@ import org.mortbay.jetty.util.Attributes;
  * </pre>
  * 
  * @see org.mortbay.jetty.testing.HttpTester
- * @author gregw
+ * 
  *
  */
 public class ServletTester

@@ -70,7 +70,7 @@ import org.mortbay.jetty.util.log.Log;
  * method must be called manually after start().
  * 
  * @see org.mortbay.jetty.webapp.WebAppContext
- * @author Greg Wilkins
+ * 
  */
 public class ServletHandler extends AbstractHandler
 {

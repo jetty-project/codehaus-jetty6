@@ -49,7 +49,7 @@ import org.mortbay.jetty.xml.XmlConfiguration;
  *  There is a <a href="run-mojo.html">reference guide</a> to the configuration parameters for this plugin, and more detailed information
  *  with examples in the <a href="http://docs.codehaus.org/display/JETTY/Maven+Jetty+Plugin">Configuration Guide</a>.
  *  </p>
- * @author janb
+ * 
  * 
  * @goal run
  * @requiresDependencyResolution runtime

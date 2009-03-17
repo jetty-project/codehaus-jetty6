@@ -27,7 +27,7 @@ import org.mortbay.jetty.util.LazyList;
 /** Abstract Handler Container.
  * This is the base class for handlers that may contain other handlers.
  *  
- * @author gregw
+ * 
  *
  */
 public abstract class AbstractHandlerContainer extends AbstractHandler implements HandlerContainer

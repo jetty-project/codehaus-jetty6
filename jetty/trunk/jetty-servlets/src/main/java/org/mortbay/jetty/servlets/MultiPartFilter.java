@@ -56,8 +56,8 @@ import org.mortbay.jetty.util.TypeUtil;
  * If the init paramter "delete" is set to "true", any files created will be deleted when the
  * current request returns.
  * 
- * @author Greg Wilkins
- * @author Jim Crossley
+ * 
+ * 
  */
 public class MultiPartFilter implements Filter
 {

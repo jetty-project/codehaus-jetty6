@@ -31,7 +31,7 @@ import org.mortbay.jetty.util.component.LifeCycle;
  * will set itself as both the ThreadPool and the Handler.  Note that a connector
  * can be used without a Server if a thread pool and handler are directly provided.
  * 
- * @author gregw
+ * 
  * 
  */
 public interface Connector extends LifeCycle, Buffers

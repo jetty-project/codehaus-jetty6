@@ -56,7 +56,7 @@ import org.mortbay.jetty.util.log.Log;
 *
 * @see
 *
-* @author <a href="mailto:janb@mortbay.com">Jan Bartel</a>
+* 
 * @version 1.0
 */
 public class NamingContext implements Context, Cloneable

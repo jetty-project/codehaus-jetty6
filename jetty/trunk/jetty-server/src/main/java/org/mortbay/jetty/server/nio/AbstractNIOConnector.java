@@ -25,7 +25,7 @@ import org.mortbay.jetty.server.AbstractConnector;
 
 /* ------------------------------------------------------------ */
 /**
- * @author gregw
+ * 
  *
  */
 public abstract class AbstractNIOConnector extends AbstractConnector implements NIOConnector

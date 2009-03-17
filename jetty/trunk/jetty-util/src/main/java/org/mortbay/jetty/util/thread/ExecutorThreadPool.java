@@ -34,7 +34,7 @@ import org.mortbay.jetty.util.log.Log;
  * This class wraps a {@link ExecutorService} as a {@link ThreadPool} and 
  * {@link LifeCycle} interfaces so that it may be used by the Jetty {@link org.mortbay.jetty.Server}
  * 
- * @author gregw
+ * 
  *
  */
 public class ExecutorThreadPool extends AbstractLifeCycle implements ThreadPool, LifeCycle

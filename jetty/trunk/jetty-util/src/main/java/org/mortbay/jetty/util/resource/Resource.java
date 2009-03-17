@@ -35,8 +35,8 @@ import org.mortbay.jetty.util.log.Log;
 /* ------------------------------------------------------------ */
 /** Abstract resource class.
  *
- * @author Nuno Pregui�a
- * @author Greg Wilkins (gregw)
+ * 
+ * 
  */
 public abstract class Resource implements Serializable
 {

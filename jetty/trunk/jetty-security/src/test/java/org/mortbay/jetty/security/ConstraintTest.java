@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @author gregw
+ * 
  */
 public class ConstraintTest extends TestCase
 {

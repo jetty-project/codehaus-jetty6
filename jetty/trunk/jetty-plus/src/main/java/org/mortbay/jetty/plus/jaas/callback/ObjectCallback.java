@@ -37,7 +37,7 @@ import javax.security.auth.callback.Callback;
  *
  * @see
  * @version 1.0 Tue Apr 15 2003
- * @author Jan Bartel (janb)
+ * 
  */
 public class ObjectCallback implements Callback
 {

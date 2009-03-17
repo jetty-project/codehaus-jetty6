@@ -24,7 +24,7 @@ import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /** AbstractHandler.
- * @author gregw
+ * 
  *
  */
 public abstract class AbstractHandler extends AbstractLifeCycle implements Handler

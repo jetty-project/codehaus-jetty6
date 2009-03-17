@@ -75,9 +75,9 @@ import org.mortbay.jetty.util.log.Log;
  *    };
  *  </pre>
  *
- * @author Jesse McConnell <jesse@codehaus.org>
- * @author Frederic Nizery <frederic.nizery@alcatel-lucent.fr>
- * @author Trygve Laugstol <trygvis@codehaus.org>
+ * 
+ * 
+ * 
  */
 public class LdapLoginModule extends AbstractLoginModule
 {

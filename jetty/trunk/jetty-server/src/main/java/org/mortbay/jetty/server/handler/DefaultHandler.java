@@ -44,7 +44,7 @@ import org.mortbay.jetty.util.log.Log;
  * For all other requests a normal 404 is served.
  * TODO Implement OPTIONS and TRACE methods for the server.
  * 
- * @author Greg Wilkins (gregw)
+ * 
  * @org.apache.xbean.XBean
  */
 public class DefaultHandler extends AbstractHandler

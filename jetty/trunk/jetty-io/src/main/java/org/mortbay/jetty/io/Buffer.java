@@ -31,7 +31,7 @@ import java.io.OutputStream;
  *
  * For this buffer it is always true that:
  *  markValue <= getIndex <= putIndex <= capacity
- *  @author gregw
+ *  
  *
  * @version 1.0
  */

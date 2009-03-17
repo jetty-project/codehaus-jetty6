@@ -36,7 +36,7 @@ import org.mortbay.jetty.util.log.Log;
  *   }
  * </pre>
  *   
- * @author gregw
+ * 
  *
  */
 public class Container

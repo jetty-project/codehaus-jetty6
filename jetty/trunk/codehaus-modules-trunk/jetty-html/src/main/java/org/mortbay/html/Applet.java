@@ -35,7 +35,7 @@ import java.util.Hashtable;
  *
  * @see org.mortbay.html.Block
  * @version $Id: Applet.java,v 1.7 2004/07/19 13:12:58 hlavac Exp $
- * @author Matthew Watson
+ * 
 */
 public class Applet extends Block
 {

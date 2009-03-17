@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * Quotes can be escaped with '\'.
  *
  * @see java.util.StringTokenizer
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class QuotedStringTokenizer
     extends StringTokenizer

@@ -24,7 +24,7 @@ package org.mortbay.jetty.server.ssl;
  * <p>
  * Used by the SSL listener classes.
  * 
- * @author Brett Sealey
+ * 
  */
 public class ServletSSL
 {

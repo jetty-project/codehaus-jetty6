@@ -21,7 +21,7 @@ import org.mortbay.jetty.io.Buffer;
 /* ------------------------------------------------------------------------------- */
 /** 
  * 
- * @author gregw
+ * 
  */
 public interface NIOBuffer extends Buffer
 {

@@ -27,7 +27,7 @@ import org.mortbay.jetty.util.ajax.JSON.Output;
 /**
  * Convert an Object to JSON using reflection on getters methods.
  * 
- * @author gregw
+ * 
  *
  */
 public class JSONObjectConvertor implements JSON.Convertor

@@ -28,7 +28,7 @@ import javax.security.auth.callback.Callback;
  * This means that a LoginModule can access form fields other than the j_username and j_password
  * fields, and use it, for example, to authenticate a user.
  *
- * @author janb
+ * 
  * @version $Revision$ $Date$
  *
  */

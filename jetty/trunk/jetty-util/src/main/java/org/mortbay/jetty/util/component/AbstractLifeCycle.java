@@ -21,7 +21,7 @@ import org.mortbay.jetty.util.log.Log;
 /**
  * Basic implementation of the life cycle interface for components.
  * 
- * @author gregw
+ * 
  */
 public abstract class AbstractLifeCycle implements LifeCycle
 {

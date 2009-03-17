@@ -22,7 +22,7 @@ package org.mortbay.jetty.io;
  * of specific types of buffers (eg NIO).   The concept of big and little buffers
  * is supported, but these terms have no absolute meaning and must be determined by context.
  * 
- * @author gregw
+ * 
  *
  */
 public interface Buffers

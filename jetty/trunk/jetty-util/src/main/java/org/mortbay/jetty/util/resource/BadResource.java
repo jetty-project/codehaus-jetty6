@@ -27,7 +27,7 @@ import java.net.URL;
  * A Resource that is returned for a bade URL.  Acts as a resource
  * that does not exist and throws appropriate exceptions.
  *
- * @author Greg Wilkins (gregw)
+ * 
  */
 class BadResource extends URLResource
 {

@@ -42,7 +42,7 @@ import org.mortbay.jetty.util.log.Log;
 /* ------------------------------------------------------------ */
 /** An in-memory implementation of SessionManager.
  *
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class HashSessionManager extends AbstractSessionManager
 {

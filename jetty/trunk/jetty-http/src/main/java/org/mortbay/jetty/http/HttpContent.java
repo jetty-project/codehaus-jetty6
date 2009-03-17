@@ -23,7 +23,7 @@ import org.mortbay.jetty.util.resource.Resource;
 
 /* ------------------------------------------------------------ */
 /** HttpContent.
- * @author gregw
+ * 
  *
  */
 public interface HttpContent

@@ -22,8 +22,8 @@ import java.io.Writer;
 /* ================================================================ */
 /** Handle a multipart MIME response.
  *
- * @author Greg Wilkins
- * @author Jim Crossley
+ * 
+ * 
 */
 public class MultiPartWriter extends FilterWriter
 {

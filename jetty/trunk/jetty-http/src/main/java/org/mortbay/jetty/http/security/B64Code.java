@@ -26,8 +26,8 @@ import org.mortbay.jetty.util.StringUtil;
  * <p> Note that in a web context the usual case is to not want
  * linebreaks or other white space in the encoded output.
  *
- * @author Brett Sealey (bretts)
- * @author Greg Wilkins (gregw)
+ * 
+ * 
  */
 public class B64Code
 {

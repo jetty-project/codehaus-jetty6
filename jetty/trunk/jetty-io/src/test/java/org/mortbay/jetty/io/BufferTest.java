@@ -27,7 +27,7 @@ import org.mortbay.jetty.io.nio.RandomAccessFileBuffer;
 import org.mortbay.jetty.util.StringUtil;
 
 /**
- * @author gregw
+ * 
  *
  * To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Generation - Code and Comments

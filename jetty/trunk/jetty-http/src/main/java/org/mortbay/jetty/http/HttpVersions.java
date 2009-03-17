@@ -20,7 +20,7 @@ import org.mortbay.jetty.io.BufferCache;
 /* ------------------------------------------------------------------------------- */
 /** 
  * 
- * @author gregw
+ * 
  */
 public class HttpVersions
 {

@@ -50,7 +50,7 @@ import org.mortbay.jetty.util.URIUtil;
  * <p>This class is not synchronized as it is expected that modifications will only be performed by a
  * single thread.
  * 
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class HttpFields
 {    

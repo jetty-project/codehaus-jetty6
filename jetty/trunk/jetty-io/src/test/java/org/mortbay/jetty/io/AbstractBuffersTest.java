@@ -135,7 +135,7 @@ public class AbstractBuffersTest
     /**
      * generic buffer peeper
      * 
-     * @author jesse
+     * 
      */
     class BufferPeeper
         extends Thread

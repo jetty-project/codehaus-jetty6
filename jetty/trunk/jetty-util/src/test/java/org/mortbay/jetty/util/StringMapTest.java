@@ -27,7 +27,7 @@ import junit.framework.TestCase;
 
 
 /**
- * @author gregw
+ * 
  *
  */
 public class StringMapTest extends TestCase

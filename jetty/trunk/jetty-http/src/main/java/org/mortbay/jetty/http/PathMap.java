@@ -55,7 +55,7 @@ import org.mortbay.jetty.util.URIUtil;
  * This class is not synchronized for get's.  If concurrent modifications are
  * possible then it should be synchronized at a higher level.
  *
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class PathMap extends HashMap implements Externalizable
 {

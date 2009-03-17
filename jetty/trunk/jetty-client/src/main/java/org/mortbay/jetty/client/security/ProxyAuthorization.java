@@ -27,7 +27,7 @@ import org.mortbay.jetty.util.StringUtil;
 /**
  * Sets proxy authentication headers for BASIC authentication challenges
  * 
- * @author jesse
+ * 
  */
 public class ProxyAuthorization implements Authorization
 {

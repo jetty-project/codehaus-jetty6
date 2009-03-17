@@ -23,7 +23,7 @@ import org.mortbay.jetty.handler.ResourceHandler;
 /* ------------------------------------------------------------ */
 /** File server
  * Usage - java org.mortbay.jetty.example.FileServer [ port [ docroot ]]
- * @author gregw
+ * 
  *
  */
 public class FileServer

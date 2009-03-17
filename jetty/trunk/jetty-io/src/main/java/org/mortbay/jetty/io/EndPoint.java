@@ -20,7 +20,7 @@ import java.io.IOException;
 
 
 /**
- * @author gregw
+ * 
  * A transport EndPoint
  */
 public interface EndPoint

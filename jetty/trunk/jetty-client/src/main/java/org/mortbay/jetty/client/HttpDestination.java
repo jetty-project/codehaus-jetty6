@@ -32,8 +32,8 @@ import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.util.log.Log;
 
 /**
- * @author Greg Wilkins
- * @author Guillaume Nodet
+ * 
+ * 
  */
 public class HttpDestination
 {

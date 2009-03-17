@@ -73,9 +73,9 @@ import org.mortbay.jetty.util.AttributesMap;
  * be allocated from a destination, so that multiple request sources are not multiplexed
  * over the same connection.
  *
- * @author Greg Wilkins
- * @author Matthew Purland
- * @author Guillaume Nodet
+ * 
+ * 
+ * 
  * @see {@link HttpExchange}
  * @see {@link HttpDestination}
  */

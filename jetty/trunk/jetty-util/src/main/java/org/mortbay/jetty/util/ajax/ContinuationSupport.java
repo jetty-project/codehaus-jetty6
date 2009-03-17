@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 /* ------------------------------------------------------------ */
 /** ContinuationSupport.
  * Conveniance class to avoid classloading visibility issues.
- * @author gregw
+ * 
  *
  */
 public class ContinuationSupport

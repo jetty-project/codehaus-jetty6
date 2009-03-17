@@ -28,7 +28,7 @@ import org.mortbay.jetty.util.component.LifeCycle;
  * Session Manager.
  * The API required to manage sessions for a servlet context.
  *
- * @author Greg Wilkins
+ * 
  */
 public interface SessionManager extends LifeCycle
 {

@@ -19,7 +19,7 @@ import org.mortbay.jetty.util.resource.Resource;
 /**
  * Configure class path from a WEB-INF directory found within a contexts resource base.
  * 
- * @author gregw
+ * 
  */
 public class WebInfConfiguration implements Configuration
 {

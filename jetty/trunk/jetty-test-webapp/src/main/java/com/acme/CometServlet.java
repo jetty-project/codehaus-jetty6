@@ -27,7 +27,7 @@ import org.mortbay.jetty.util.ajax.ContinuationSupport;
 /** CometServlet
  * This servlet implements the Comet API from tc6.x with the exception of the read method.
  * 
- * @author gregw
+ * 
  *
  */
 public class CometServlet extends HttpServlet

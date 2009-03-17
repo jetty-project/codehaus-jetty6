@@ -37,7 +37,7 @@ import org.mortbay.jetty.util.IO;
  * This will be converted to the local directory separator.
  * @see Element
  * @version $Id: Include.java,v 1.6 2005/08/13 00:01:23 gregwilkins Exp $
- * @author Greg Wilkins
+ * 
 */
 public class Include extends Element
 {

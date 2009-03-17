@@ -24,7 +24,7 @@ import org.mortbay.jetty.util.StringMap;
 /** 
  * Stores a collection of {@link Buffer} objects.
  * Buffers are stored in an ordered collection and can retreived by index or value
- * @author gregw
+ * 
  */
 public class BufferCache
 {

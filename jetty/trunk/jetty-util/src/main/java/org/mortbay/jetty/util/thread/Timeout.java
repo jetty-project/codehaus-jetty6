@@ -27,7 +27,7 @@ import org.mortbay.jetty.util.log.Log;
  * The nested class Task should be extended by users of this class to obtain call back notification of 
  * expiries. 
  * 
- * @author gregw
+ * 
  *
  */
 public class Timeout
@@ -260,7 +260,7 @@ public class Timeout
      * extended to implement the expire() method, which is called if the
      * timeout expires.
      * 
-     * @author gregw
+     * 
      *
      */
     public static class Task

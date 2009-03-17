@@ -51,7 +51,7 @@ import org.mortbay.jetty.xml.XmlParser;
 /**
  * Configure by parsing default web.xml and web.xml
  * 
- * @author gregw
+ * 
  */
 public class WebXmlConfiguration implements Configuration
 {

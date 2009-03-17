@@ -51,8 +51,8 @@ import org.mortbay.jetty.server.nio.SelectChannelConnector;
 /**
  * Functional testing for HttpExchange.
  *
- * @author Matthew Purland
- * @author Greg Wilkins
+ * 
+ * 
  */
 public class SecurityListenerTest extends TestCase
 {

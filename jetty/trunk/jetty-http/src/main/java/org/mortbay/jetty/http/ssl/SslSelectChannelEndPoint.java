@@ -36,8 +36,8 @@ import org.mortbay.jetty.util.log.Log;
 /**
  * SslHttpChannelEndPoint.
  * 
- * @author Nik Gonzalez <ngonzalez@exist.com>
- * @author Greg Wilkins <gregw@mortbay.com>
+ * 
+ * 
  */
 public class SslSelectChannelEndPoint extends SelectChannelEndPoint
 {

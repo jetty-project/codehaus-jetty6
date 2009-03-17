@@ -44,7 +44,7 @@ import java.util.Hashtable;
  * @deprecated Unless somebody steps forward to update and maintain this package
  * @see Composite
  * @version $Id: Page.java,v 1.5 2004/09/23 02:15:15 gregwilkins Exp $
- * @author Greg Wilkins
+ * 
  */
 public class Page extends Composite
 {

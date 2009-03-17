@@ -42,8 +42,8 @@ import org.mortbay.jetty.util.log.Log;
  * servers, and almost all web log analysis software can understand these
  * formats.
  * 
- * @author Greg Wilkins
- * @author Nigel Canonizado
+ * 
+ * 
  * 
  * @org.apache.xbean.XBean element="ncsaLog"
  */

@@ -31,7 +31,7 @@ import org.mortbay.jetty.util.log.Log;
  * string representations.
  *
  * @since Jetty 4.1
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class TypeUtil
 {

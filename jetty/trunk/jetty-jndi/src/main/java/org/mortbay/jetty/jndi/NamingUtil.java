@@ -35,7 +35,7 @@ import org.mortbay.jetty.util.log.Log;
  *
  * Created: Tue Jul  1 18:26:17 2003
  *
- * @author <a href="mailto:janb@mortbay.com">Jan Bartel</a>
+ * 
  * @version 1.0
  */
 public class NamingUtil 

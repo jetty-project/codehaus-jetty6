@@ -19,7 +19,7 @@ import java.io.Writer;
 
 /** FrameSet.
  * @version $Id: Frame.java,v 1.3 2004/05/09 20:31:28 gregwilkins Exp $
- * @author Greg Wilkins
+ * 
 */
 public class Frame
 {

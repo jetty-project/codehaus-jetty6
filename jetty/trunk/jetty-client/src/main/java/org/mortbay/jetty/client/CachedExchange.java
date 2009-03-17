@@ -21,7 +21,7 @@ import org.mortbay.jetty.io.Buffer;
 /**
  * An exchange that caches response status and fields for later use.
  * 
- * @author gregw
+ * 
  *
  */
 public class CachedExchange extends HttpExchange

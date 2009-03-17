@@ -21,7 +21,7 @@ import org.mortbay.jetty.client.HttpDestination;
 /**
  * Simple Realm Resolver.
  * <p> A Realm Resolver that wraps a single realm.
- * @author gregw
+ * 
  *
  */
 public class SimpleRealmResolver implements RealmResolver

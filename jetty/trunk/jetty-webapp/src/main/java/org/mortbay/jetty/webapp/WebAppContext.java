@@ -64,7 +64,7 @@ import org.mortbay.jetty.util.resource.Resource;
  *      
  * @org.apache.xbean.XBean description="Creates a servlet web application at a given context from a resource base"
  * 
- * @author gregw
+ * 
  *
  */
 public class WebAppContext extends ServletContextHandler

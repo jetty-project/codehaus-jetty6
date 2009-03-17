@@ -58,7 +58,7 @@ import org.mortbay.jetty.util.log.Log;
  *                           each dynamic servlet as init parameters    
  * </PRE>
  * @version $Id$
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class Invoker extends HttpServlet
 {

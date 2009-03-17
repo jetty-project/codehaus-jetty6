@@ -26,7 +26,7 @@ import org.mortbay.jetty.util.log.Log;
  * main aim of the optimizations is to avoid object creation unless
  * absolutely required.
  *
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class StringUtil
 {

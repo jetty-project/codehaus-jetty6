@@ -33,7 +33,7 @@ import org.mortbay.jetty.util.log.Log;
 /**
  * HttpGenerator. Builds HTTP Messages.
  * 
- * @author gregw
+ * 
  * 
  */
 public class HttpGenerator extends AbstractGenerator
