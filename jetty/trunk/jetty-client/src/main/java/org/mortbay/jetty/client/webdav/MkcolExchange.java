@@ -16,9 +16,9 @@ package org.mortbay.jetty.client.webdav;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.client.CachedExchange;
+import org.mortbay.jetty.http.HttpStatus;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.util.log.Log;
 
@@ -35,13 +35,13 @@ public class MkcolExchange extends CachedExchange
     /* ------------------------------------------------------------ */
     protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
     {
-        if ( status == HttpServletResponse.SC_CREATED )
+        if ( status == HttpStatus.CREATED_201 )
         {
             Log.debug( "MkcolExchange:Status: Successfully created resource" );
             exists = true;
         }
 
-        if ( status == HttpServletResponse.SC_METHOD_NOT_ALLOWED ) // returned when resource exists
+        if ( status == HttpStatus.METHOD_NOT_ALLOWED_405 ) // returned when resource exists
         {
             Log.debug( "MkcolExchange:Status: Resource must exist" );
             exists = true;

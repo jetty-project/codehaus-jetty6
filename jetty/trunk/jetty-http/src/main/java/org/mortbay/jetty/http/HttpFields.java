@@ -926,16 +926,36 @@ public class HttpFields
      * @param cookie The cookie.
      * @param cookie2 If true, use the alternate cookie 2 header
      */
+    public void addSetCookie(HttpCookie cookie)
+    {
+        addSetCookie(
+                cookie.getName(),
+                cookie.getValue(),
+                cookie.getDomain(),
+                cookie.getPath(),
+                cookie.getMaxAge(),
+                cookie.getComment(),
+                cookie.isSecure(),
+                cookie.isHttpOnly(),
+                cookie.getVersion());
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Format a set cookie value
+     * @param cookie The cookie.
+     * @param cookie2 If true, use the alternate cookie 2 header
+     */
     public void addSetCookie(
             final String name, 
             final String value, 
-            final int version,
-            final String domain, 
-            final String path,
-            final String comment, 
+            final String domain,
+            final String path, 
             final long maxAge,
-            final boolean isSecure, 
-            final boolean isHttpOnly)
+            final String comment, 
+            final boolean isSecure,
+            final boolean isHttpOnly, 
+            final int version)
     {
         // Check arguments
         if (name == null || name.length() == 0) throw new IllegalArgumentException("Bad cookie name");

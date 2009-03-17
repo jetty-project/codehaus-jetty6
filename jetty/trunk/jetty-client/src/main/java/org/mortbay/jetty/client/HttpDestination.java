@@ -21,10 +21,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import javax.servlet.http.Cookie;
-
 import org.mortbay.jetty.client.security.Authorization;
 import org.mortbay.jetty.client.security.SecurityListener;
+import org.mortbay.jetty.http.HttpCookie;
 import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.http.PathMap;
 import org.mortbay.jetty.io.Buffer;
@@ -50,7 +49,7 @@ public class HttpDestination
     private Address _proxy;
     private Authorization _proxyAuthentication;
     private PathMap _authorizations;
-    private List<Cookie> _cookies;
+    private List<HttpCookie> _cookies;
 
     public void dump() throws IOException
     {
@@ -121,12 +120,12 @@ public class HttpDestination
     }
 
     /* ------------------------------------------------------------------------------- */
-    public void addCookie(Cookie cookie)
+    public void addCookie(HttpCookie cookie)
     {
         synchronized (this)
         {
             if (_cookies == null)
-                _cookies = new ArrayList<Cookie>();
+                _cookies = new ArrayList<HttpCookie>();
             _cookies.add(cookie);
         }
 
@@ -434,7 +433,7 @@ public class HttpDestination
         if (_cookies != null)
         {
             StringBuilder buf = null;
-            for (Cookie cookie : _cookies)
+            for (HttpCookie cookie : _cookies)
             {
                 if (buf == null)
                     buf = new StringBuilder();
