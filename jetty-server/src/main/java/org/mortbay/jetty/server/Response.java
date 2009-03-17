@@ -131,13 +131,13 @@ public class Response implements HttpServletResponse
     {
         _connection.getResponseFields().addSetCookie(cookie.getName(),
                 cookie.getValue(),
-                cookie.getVersion(),
                 cookie.getDomain(),
                 cookie.getPath(),
-                cookie.getComment(),
                 cookie.getMaxAge(),
+                cookie.getComment(),
                 cookie.getSecure(),
-                cookie.isHttpOnly());
+                cookie.isHttpOnly(),
+                cookie.getVersion());
     }
 
     /* ------------------------------------------------------------ */
