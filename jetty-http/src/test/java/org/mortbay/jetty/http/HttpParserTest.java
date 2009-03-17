@@ -247,7 +247,7 @@ public class HttpParserTest extends TestCase
         io.setInput(
             "GET /mp HTTP/1.0\015\012"
                 + "Header1: value1\015\012"
-				+ "Transfer-Encoding: chunked\015\012"
+		+ "Transfer-Encoding: chunked\015\012"
                 + "\015\012"
                 + "a;\015\012"
                 + "0123456789\015\012"
@@ -256,11 +256,11 @@ public class HttpParserTest extends TestCase
                 + "0\015\012"
                 + "POST /foo HTTP/1.0\015\012"
                 + "Header2: value2\015\012"
-				+ "Content-Length: 0\015\012"
+		+ "Content-Length: 0\015\012"
                 + "\015\012"
                 + "PUT /doodle HTTP/1.0\015\012"
                 + "Header3: value3\015\012"
-				+ "Content-Length: 10\015\012"
+		+ "Content-Length: 10\015\012"
                 + "\015\012"
                 + "0123456789\015\012");
 
@@ -296,6 +296,7 @@ public class HttpParserTest extends TestCase
         assertEquals("Header3", hdr[0]);
         assertEquals("value3", val[0]);
         assertEquals("0123456789", _content);
+        
     }
 
     public void testStreamParse() throws Exception
@@ -316,7 +317,7 @@ public class HttpParserTest extends TestCase
                 + "\015\012"
                 + "PUT /doodle HTTP/1.0\015\012"
                 + "Header3: value3\015\012"
-				+ "Content-Length: 10\015\012"
+		+ "Content-Length: 10\015\012"
                 + "\015\012"
                 + "0123456789\015\012";
 
