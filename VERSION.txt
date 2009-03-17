@@ -1,6 +1,7 @@
 jetty-6.1-SNAPSHOT
  + JETTY-899 Standardize location for configuration files which go into etc
  + JETTY-944 Lazy messages don't prevent long polls waiting
+ + JETTY-946 Redeploys with maven jetty plugin of webapps with overlays don't work
  + JETTY-949 Move cometd source to cometd.org project
  + JETTY-948 ConcurrentModificationException in TerracottaSessionManager scavenger
  + JETTY-953 SSL keystore file input stream is not being closed directly
