@@ -134,6 +134,11 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
      * Extra scan targets as a list
      */
     private List extraScanTargets;
+    
+    /**
+     * overlays (resources)
+     */
+    private List _overlays;
 
     public File getWebXml()
     {
@@ -472,11 +477,11 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
                 getLog().debug( "Adding artifact " + artifact.getFile().getName() + " for WEB-INF/lib " );   
             }
         }
-        if(!overlays.isEmpty())
+        if(!overlays.isEmpty() && !isEqual(overlays, _overlays))
         {
             try
             {
-                Resource resource = webAppConfig.getBaseResource();
+                Resource resource = _overlays==null ? webAppConfig.getBaseResource() : null;
                 ResourceCollection rc = new ResourceCollection();
                 if(resource==null)
                 {
@@ -527,6 +532,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
                     }
                 }
                 webAppConfig.setBaseResource(rc);
+                _overlays = overlays;
             }
             catch(Exception e)
             {
@@ -562,6 +568,19 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
             }
         }
         return classPathFiles;
+    }
+    
+    static boolean isEqual(List overlays1, List overlays2)
+    {
+        if(overlays2==null || overlays1.size()!=overlays2.size())
+            return false;
+        
+        for(int i=0; i<overlays1.size(); i++)
+        {
+            if(!overlays1.get(i).equals(overlays2.get(i)))
+                return false;
+        }
+        return true;
     }
 
 }
