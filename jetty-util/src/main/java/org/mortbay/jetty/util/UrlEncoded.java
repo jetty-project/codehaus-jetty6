@@ -38,7 +38,7 @@ import org.mortbay.jetty.util.log.Log;
  * get operations are not protected from concurrent updates.
  *
  * @see java.net.URLEncoder
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class UrlEncoded extends MultiMap
 {

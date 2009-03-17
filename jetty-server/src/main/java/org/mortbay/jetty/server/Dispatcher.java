@@ -38,7 +38,7 @@ import org.mortbay.jetty.util.UrlEncoded;
 /* ------------------------------------------------------------ */
 /** Servlet RequestDispatcher.
  * 
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class Dispatcher implements RequestDispatcher
 {

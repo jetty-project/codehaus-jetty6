@@ -19,7 +19,7 @@ import org.mortbay.jetty.util.QuotedStringTokenizer;
 import junit.framework.TestCase;
 
 /**
- * @author gregw
+ * 
  *
  */
 public class QuotedStringTokenizerTest extends TestCase

@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
  * element is provided for JDK 1.2 JVMs, which do not provide
  * the Collections.singletonList method.
  *
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class SingletonList extends AbstractList
 {

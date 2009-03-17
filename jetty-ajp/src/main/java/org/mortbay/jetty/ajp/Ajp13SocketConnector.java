@@ -28,8 +28,8 @@ import org.mortbay.jetty.server.nio.SelectChannelConnector;
 import org.mortbay.jetty.util.log.Log;
 
 /**
- * @author Greg Wilkins
- * @author Markus Kobler markus(at)inquisitive-mind.com
+ * 
+ * 
  * 
  */
 public class Ajp13SocketConnector extends SocketConnector

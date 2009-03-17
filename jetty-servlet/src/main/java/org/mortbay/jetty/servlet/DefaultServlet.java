@@ -111,8 +111,8 @@ import org.mortbay.jetty.util.resource.ResourceFactory;
  * </PRE>
  *                                                                    
  *
- * @author Greg Wilkins (gregw)
- * @author Nigel Canonizado
+ * 
+ * 
  */
 public class DefaultServlet extends HttpServlet implements ResourceFactory
 {   

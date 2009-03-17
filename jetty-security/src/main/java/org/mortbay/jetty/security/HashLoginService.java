@@ -55,7 +55,7 @@ import org.mortbay.jetty.util.resource.Resource;
  * format, either plain text or OBF:.
  * 
  * @see org.mortbay.jetty.security.Password
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class HashLoginService extends MappedLoginService
 {

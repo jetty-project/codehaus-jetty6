@@ -27,7 +27,7 @@ import org.mortbay.jetty.util.log.Log;
  * If fromJSON is true in the constructor, the JSON generated will
  * be of the form {class="com.acme.TrafficLight",value="Green"}
  * If fromJSON is false, then only the string value of the enum is generated.
- * @author gregw
+ * 
  *
  */
 public class JSONEnumConvertor implements JSON.Convertor

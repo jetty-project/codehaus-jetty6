@@ -21,7 +21,7 @@ import java.io.OutputStream;
 import org.mortbay.jetty.util.log.Log;
 
 /**
- * @author gregw
+ * 
  *  
  */
 public abstract class AbstractBuffer implements Buffer

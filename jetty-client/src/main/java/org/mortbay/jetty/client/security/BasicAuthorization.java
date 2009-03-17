@@ -27,7 +27,7 @@ import org.mortbay.jetty.util.StringUtil;
 /**
  * Sets authentication headers for BASIC authentication challenges
  * 
- * @author jesse
+ * 
  */
 public class BasicAuthorization implements Authorization
 {

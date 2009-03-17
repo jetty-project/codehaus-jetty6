@@ -21,7 +21,7 @@ import junit.framework.TestCase;
 /* ------------------------------------------------------------------------------- */
 /**
  * 
- * @author gregw
+ * 
  */
 public class BufferCacheTest extends TestCase
 {

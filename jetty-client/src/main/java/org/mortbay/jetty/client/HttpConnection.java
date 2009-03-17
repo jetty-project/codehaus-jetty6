@@ -38,8 +38,8 @@ import org.mortbay.jetty.util.thread.Timeout;
 
 /**
  * 
- * @author Greg Wilkins
- * @author Guillaume Nodet
+ * 
+ * 
  */
 public class HttpConnection implements Connection
 {

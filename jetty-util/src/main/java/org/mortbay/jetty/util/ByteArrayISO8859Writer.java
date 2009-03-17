@@ -26,7 +26,7 @@ import java.io.Writer;
  * many inefficiencies associated with these standard library classes.
  * It has been optimized for standard ASCII characters.
  * 
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class ByteArrayISO8859Writer extends Writer
 {

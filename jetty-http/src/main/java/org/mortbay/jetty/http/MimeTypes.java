@@ -30,7 +30,7 @@ import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------ */
 /** 
- * @author Greg Wilkins
+ * 
  */
 public class MimeTypes
 {

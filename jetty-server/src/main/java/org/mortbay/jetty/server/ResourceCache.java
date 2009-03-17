@@ -34,7 +34,7 @@ import org.mortbay.jetty.util.resource.ResourceFactory;
 
 /* ------------------------------------------------------------ */
 /** 
- * @author Greg Wilkins
+ * 
  */
 public class ResourceCache extends AbstractLifeCycle implements Serializable
 {   

@@ -35,7 +35,7 @@ import java.security.Principal;
  *
  * @see
  * @version 1.0 Tue Apr 15 2003
- * @author Jan Bartel (janb)
+ * 
  */
 public class JAASPrincipal implements Principal, Serializable
 {

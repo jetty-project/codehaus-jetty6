@@ -104,7 +104,7 @@ import org.mortbay.jetty.util.log.Log;
  * to avoid reparsing headers and cookies that are likely to be the same for 
  * requests from the same connection.
  * 
- * @author gregw
+ * 
  *
  */
 public class Request implements HttpServletRequest

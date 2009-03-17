@@ -35,7 +35,7 @@ import org.mortbay.jetty.util.log.Log;
  * number of threads is less than the maximum pool size, a new thread 
  * is spawned.
  * <p>
- * @author Greg Wilkins <gregw@mortbay.com>
+ * 
  */
 public class OldQueuedThreadPool extends AbstractLifeCycle implements Serializable, ThreadPool
 {

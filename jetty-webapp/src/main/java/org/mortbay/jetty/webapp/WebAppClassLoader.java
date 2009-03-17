@@ -50,7 +50,7 @@ import org.mortbay.jetty.util.resource.Resource;
  * context classloader will be used.  If that is null then the 
  * classloader that loaded this class is used as the parent.
  * 
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class WebAppClassLoader extends URLClassLoader 
 {

@@ -37,7 +37,7 @@ import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.util.log.StdErrLog;
 
 /**
- * @author gregw
+ * 
  * 
  */
 public class RFC2616Test extends TestCase

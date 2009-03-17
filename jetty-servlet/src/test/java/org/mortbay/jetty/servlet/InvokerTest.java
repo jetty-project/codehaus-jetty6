@@ -31,7 +31,7 @@ import org.mortbay.jetty.servlet.ServletContextHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 
 /**
- * @author athena
+ * 
  *
  */
 public class InvokerTest extends TestCase

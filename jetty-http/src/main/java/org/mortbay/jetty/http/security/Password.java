@@ -45,7 +45,7 @@ import org.mortbay.jetty.util.log.Log;
  * recovered. Note that it is not strong security - specially if simple
  * passwords are used.
  * 
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class Password extends Credential
 {

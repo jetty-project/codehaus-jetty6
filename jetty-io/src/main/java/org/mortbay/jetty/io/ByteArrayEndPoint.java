@@ -21,7 +21,7 @@ import java.io.IOException;
 
 /* ------------------------------------------------------------ */
 /** ByteArrayEndPoint.
- * @author gregw
+ * 
  *
  */
 public class ByteArrayEndPoint implements EndPoint

@@ -51,7 +51,7 @@ import org.mortbay.jetty.util.log.Log;
 
 /**
  * EXPERIMENTAL Proxy servlet.
- * @author gregw
+ * 
  *
  */
 public class AsyncProxyServlet implements Servlet

@@ -43,7 +43,7 @@ import org.mortbay.jetty.util.thread.ThreadPool;
  * <li>Optional reverse proxy headers checking</li>
  * </ul>
  * 
- * @author gregw
+ * 
  */
 public abstract class AbstractConnector extends AbstractBuffers implements Connector
 {

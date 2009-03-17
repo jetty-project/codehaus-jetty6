@@ -18,7 +18,7 @@ import java.io.IOException;
 
 /**
  * Abstract interface for a connection Parser for use by Jetty.
- * @author gregw
+ * 
  *
  */
 public interface Parser

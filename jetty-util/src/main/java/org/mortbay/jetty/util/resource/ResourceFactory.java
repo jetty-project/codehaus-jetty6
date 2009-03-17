@@ -18,7 +18,7 @@ package org.mortbay.jetty.util.resource;
 
 /* ------------------------------------------------------------ */
 /** ResourceFactory.
- * @author gregw
+ * 
  *
  */
 public interface ResourceFactory

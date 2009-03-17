@@ -29,7 +29,7 @@ import org.mortbay.jetty.util.log.Log;
  * The resource "/org/mortbay/jetty/useragents" is checked for a list of common user agents, so that repeated
  * creation of strings for these agents can be avoided.
  * 
- * @author gregw
+ * 
  */
 public class HttpHeaderValues extends BufferCache
 {

@@ -33,7 +33,7 @@ import org.mortbay.jetty.util.thread.Timeout;
 /**
  * An Endpoint that can be scheduled by {@link SelectorManager}.
  * 
- * @author gregw
+ * 
  *
  */
 public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, AsyncEndPoint

@@ -45,7 +45,7 @@ import org.xml.sax.SAXException;
  * Configure Objects from XML. This class reads an XML file conforming to the configure.dtd DTD and
  * uses it to configure and object by calling set, put or other methods on the object.
  *
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class XmlConfiguration
 {

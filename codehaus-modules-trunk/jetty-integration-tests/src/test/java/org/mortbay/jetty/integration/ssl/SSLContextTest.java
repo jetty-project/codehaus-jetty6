@@ -62,7 +62,7 @@ import junit.framework.TestCase;
  * Testing setSslContext using jSSLutils. (Some code was borrowed from
  * SSLEngineTest.)
  * 
- * @author Bruno Harbulot.
+ * 
  * 
  */
 public class SSLContextTest extends TestCase {

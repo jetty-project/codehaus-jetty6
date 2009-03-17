@@ -20,7 +20,7 @@ package org.mortbay.html;
 /** CSS Style LINK.
  *
  * @version $Id: StyleLink.java,v 1.3 2004/05/09 20:31:28 gregwilkins Exp $
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class StyleLink extends Tag
 {

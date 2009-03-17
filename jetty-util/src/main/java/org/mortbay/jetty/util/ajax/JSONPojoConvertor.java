@@ -35,7 +35,7 @@ import org.mortbay.jetty.util.log.Log;
  *  - the getters/setters are resolved at initialization (JSONObjectConverter resolves it at runtime)
  *  - correctly sets the number fields
  * 
- * @author dyu
+ * 
  *
  */
 public class JSONPojoConvertor implements JSON.Convertor

@@ -21,12 +21,12 @@ import org.mortbay.jetty.util.component.LifeCycle;
 
 /** Session ID Manager.
  * Manages session IDs across multiple contexts.
- * @author gregw
+ * 
  *
  */
 /* ------------------------------------------------------------ */
 /**
- * @author gregw
+ * 
  *
  */
 public interface SessionIdManager extends LifeCycle

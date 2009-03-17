@@ -38,7 +38,7 @@ import javax.servlet.ServletRequest;
  * With the appropriate HTTP Connector, this allows threadless waiting
  * for events (see {@link org.mortbay.jetty.nio.SelectChannelConnector}).
  * 
- * @author gregw
+ * 
  * @deprecated use {@link ServletRequest#suspend()}
  *
  */

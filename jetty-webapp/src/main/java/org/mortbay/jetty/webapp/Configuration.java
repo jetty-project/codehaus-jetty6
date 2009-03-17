@@ -23,7 +23,7 @@ import java.io.Serializable;
  * of the WebApplicationContext.  If WebApplicationContext.setConfiguration is not
  * called, then an XMLConfiguration instance is created.
  * 
- * @author gregw
+ * 
  */
 public interface Configuration 
 {

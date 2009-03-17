@@ -21,7 +21,7 @@ import junit.framework.TestCase;
 /**
  * Test to converts POJOs to JSON and vice versa.
  * 
- * @author dyu
+ * 
  *
  */
 public class JSONPojoConvertorTest extends TestCase

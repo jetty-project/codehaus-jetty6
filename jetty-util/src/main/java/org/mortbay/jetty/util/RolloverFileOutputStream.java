@@ -40,7 +40,7 @@ import java.util.TimerTask;
  * 
  * Old files are retained for a number of days before being deleted.
  * 
- * @author Greg Wilkins 
+ * 
  */
 public class RolloverFileOutputStream extends FilterOutputStream
 {

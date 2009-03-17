@@ -18,7 +18,7 @@ package org.mortbay.jetty.io;
 /* ------------------------------------------------------------ */
 /** SimpleBuffers.
  * Simple implementation of Buffers holder.
- * @author gregw
+ * 
  *
  */
 public class SimpleBuffers implements Buffers

@@ -60,7 +60,7 @@ import java.util.List;
  * Guide</a> for instructions on using this plugin.
  * </p>
  * 
- * @author janb
+ * 
  * 
  * @goal jspc
  * @phase process-classes

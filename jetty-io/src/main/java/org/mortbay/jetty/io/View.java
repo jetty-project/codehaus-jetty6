@@ -19,7 +19,7 @@ package org.mortbay.jetty.io;
  * A View on another buffer.  Allows operations that do not change the _content or
  * indexes of the backing buffer.
  * 
- * @author gregw
+ * 
  * 
  */
 public class View extends AbstractBuffer

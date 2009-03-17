@@ -21,7 +21,7 @@ import org.mortbay.jetty.util.Utf8StringBuffer;
 import junit.framework.TestCase;
 
 /**
- * @author gregw
+ * 
  *
  */
 public class StringUtilTest extends TestCase

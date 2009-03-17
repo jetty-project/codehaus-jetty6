@@ -45,7 +45,7 @@ import org.mortbay.jetty.util.log.Log;
 
 /* ------------------------------------------------------------------------------- */
 /**
- * @author gregw
+ * 
  *
  */
 public class RandomConnector extends AbstractNIOConnector 

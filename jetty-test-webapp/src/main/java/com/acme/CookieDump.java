@@ -30,7 +30,7 @@ import javax.servlet.http.HttpSession;
 /* ------------------------------------------------------------ */
 /** Test Servlet Cookies.
  *
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class CookieDump extends HttpServlet
 {

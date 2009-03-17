@@ -26,7 +26,7 @@ import org.apache.maven.plugin.MojoFailureException;
 
 /**
  * 
- * @author David Yu
+ * 
  * 
  * @goal stop
  * @description Stops jetty that is configured with &lt;stopKey&gt; and &lt;stopPort&gt;.

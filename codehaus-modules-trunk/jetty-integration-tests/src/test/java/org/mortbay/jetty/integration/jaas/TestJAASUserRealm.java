@@ -57,7 +57,7 @@ import org.mortbay.jetty.security.LoginCallbackImpl;
  *
  * @see
  * @version 1.0 Mon Apr 28 2003
- * @author Jan Bartel (janb)
+ * 
  */
 public class TestJAASUserRealm extends TestCase
 

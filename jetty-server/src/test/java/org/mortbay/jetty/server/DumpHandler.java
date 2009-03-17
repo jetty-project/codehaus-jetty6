@@ -44,7 +44,7 @@ import org.mortbay.jetty.util.log.Log;
  * Useful for testing and debugging.
  * 
  * @version $Id: DumpHandler.java,v 1.14 2005/08/13 00:01:26 gregwilkins Exp $
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class DumpHandler extends AbstractHandler
 {

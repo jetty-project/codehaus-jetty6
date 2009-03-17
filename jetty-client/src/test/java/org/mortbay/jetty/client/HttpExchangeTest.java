@@ -45,8 +45,8 @@ import org.mortbay.jetty.util.thread.QueuedThreadPool;
 /**
  * Functional testing for HttpExchange.
  *
- * @author Matthew Purland
- * @author Greg Wilkins
+ * 
+ * 
  */
 public class HttpExchangeTest extends TestCase
 {

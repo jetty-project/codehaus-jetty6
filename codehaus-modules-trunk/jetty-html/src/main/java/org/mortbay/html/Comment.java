@@ -21,7 +21,7 @@ import java.io.Writer;
 /* ------------------------------------------------------------ */
 /** HTML Comment.
  * @version $Id: Comment.java,v 1.2 2004/05/09 20:31:28 gregwilkins Exp $
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class Comment extends Composite
 {

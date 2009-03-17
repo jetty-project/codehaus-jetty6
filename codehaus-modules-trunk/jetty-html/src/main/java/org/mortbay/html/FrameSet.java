@@ -33,7 +33,7 @@ import java.util.Vector;
  *      set.write(new Writer(res.getOutputStream()));
  * </pre>
  * @version $Id: FrameSet.java,v 1.4 2004/11/20 13:32:33 gregwilkins Exp $
- * @author Greg Wilkins
+ * 
 */
 public class FrameSet extends Page
 {

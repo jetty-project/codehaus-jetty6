@@ -24,7 +24,7 @@ import org.mortbay.jetty.util.IO;
 
 /* ------------------------------------------------------------ */
 /** Util meta Tests.
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class IOTest extends junit.framework.TestCase
 {

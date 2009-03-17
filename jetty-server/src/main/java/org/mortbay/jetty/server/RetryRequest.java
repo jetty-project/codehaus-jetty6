@@ -23,7 +23,7 @@ package org.mortbay.jetty.server;
  * It extends ThreadDeath so as to be an Error that will not be caught
  * by most frameworks.
  * 
- * @author gregw
+ * 
  *
  */
 public class RetryRequest extends ThreadDeath

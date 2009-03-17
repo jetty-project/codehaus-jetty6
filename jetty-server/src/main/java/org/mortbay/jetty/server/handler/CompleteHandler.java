@@ -29,7 +29,7 @@ import org.mortbay.jetty.server.Request;
  * then when the {@link ServletRequest#complete()} method is called, then 
  * the {@link #complete(Request)} method is called for each CompleteHandler.
  * 
- * @author ayao
+ * 
  *
  */
 public interface CompleteHandler

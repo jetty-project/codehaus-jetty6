@@ -41,7 +41,7 @@ import org.mortbay.jetty.util.IO;
 
 /**
  * EXPERIMENTAL Proxy servlet.
- * @author gregw
+ * 
  *
  */
 public class ProxyServlet implements Servlet

@@ -26,7 +26,7 @@ import junit.framework.TestSuite;
 
 /* ------------------------------------------------------------ */
 /** Util meta Tests.
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class URLEncodedTest extends junit.framework.TestCase
 {

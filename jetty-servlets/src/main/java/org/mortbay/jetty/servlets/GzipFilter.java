@@ -59,7 +59,7 @@ import org.mortbay.jetty.util.StringUtil;
  * is set to a comma separated list of user agents, then these agents will be excluded from gzip content.
  * </p>
  *  
- * @author gregw
+ * 
  *
  */
 public class GzipFilter extends UserAgentFilter

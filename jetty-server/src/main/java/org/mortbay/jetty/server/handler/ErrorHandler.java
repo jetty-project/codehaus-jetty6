@@ -36,7 +36,7 @@ import org.mortbay.jetty.util.StringUtil;
  * context attributed and called by the HttpResponse.sendError method to write a
  * error page.
  * 
- * @author Greg Wilkins (gregw)
+ * 
  */
 public class ErrorHandler extends AbstractHandler
 {

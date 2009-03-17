@@ -29,7 +29,7 @@ import org.mortbay.jetty.util.component.LifeCycle;
 /* ------------------------------------------------------------ */
 /** A <code>HandlerWrapper</code> acts as a {@link Handler} but delegates the {@link Handler#handle handle} method and
  * {@link LifeCycle life cycle} events to a delegate. This is primarily used to implement the <i>Decorator</i> pattern.
- * @author gregw
+ * 
  */
 public class HandlerWrapper extends AbstractHandlerContainer
 {

@@ -53,7 +53,7 @@ import org.mortbay.jetty.util.ByteArrayOutputStream2;
  *      System.err.println(tester.getContent());
  * </pre>      
  * 
- * @author gregw
+ * 
  * @see org.mortbay.jetty.testing.ServletTester
  */
 public class HttpTester

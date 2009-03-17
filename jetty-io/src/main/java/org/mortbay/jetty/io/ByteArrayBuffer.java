@@ -24,7 +24,7 @@ import org.mortbay.jetty.util.StringUtil;
 
 /* ------------------------------------------------------------------------------- */
 /**
- * @author gregw
+ * 
  */
 public class ByteArrayBuffer extends AbstractBuffer
 {

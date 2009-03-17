@@ -59,7 +59,7 @@ import org.mortbay.jetty.util.ArrayQueue;
  * avoided if the semaphore is shortly available.  If the semaphore cannot be obtained, the request will be suspended
  * for the default suspend period of the container or the valued set as the "suspendMs" init parameter.
  * 
- * @author gregw
+ * 
  *
  */
 public class QoSFilter implements Filter

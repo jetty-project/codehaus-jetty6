@@ -67,7 +67,7 @@ import org.mortbay.jetty.util.log.Log;
  * with {@link #registerConvertor(Class, org.mortbay.util.ajax.JSON.Convertor)}. These convertors are looked up by class, interface and
  * super class by {@link #getConvertor(Class)}.
  * </p>
- * @author gregw
+ * 
  *
  */
 public class JSON

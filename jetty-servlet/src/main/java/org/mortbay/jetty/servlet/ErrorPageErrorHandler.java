@@ -38,7 +38,7 @@ import org.mortbay.jetty.util.log.Log;
  * 
  * An ErrorHandler that maps exceptions and status codes to URIs for dispatch using
  * the internal ERROR style of dispatch.
- * @author gregw
+ * 
  *
  */
 public class ErrorPageErrorHandler extends ErrorHandler
