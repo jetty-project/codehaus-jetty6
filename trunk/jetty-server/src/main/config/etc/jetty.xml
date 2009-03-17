@@ -164,7 +164,6 @@
     <!-- contexts configuration (see $(jetty.home)/contexts/test.xml -->
     <!-- for an example).                                            -->
     <!-- =========================================================== -->
-    <!--
     <Ref id="RequestLog">
       <Set name="requestLog">
         <New id="RequestLogImpl" class="org.mortbay.jetty.server.NCSARequestLog">
@@ -178,7 +177,6 @@
         </New>
       </Set>
     </Ref>
-    -->
 
     <!-- =========================================================== -->
     <!-- extra options                                               -->
