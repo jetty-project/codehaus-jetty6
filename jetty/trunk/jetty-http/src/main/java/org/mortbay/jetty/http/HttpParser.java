@@ -923,13 +923,7 @@ public class HttpParser implements Parser
     {   
         synchronized (this) 
         {
-            if (_contentView.length()>0)
-            {
-                // TODO why was this code here ?
-                // Surely if we reset, we discard unconsumed content?
-                //_input._contentView=_contentView.duplicate(Buffer.READWRITE);
-                Log.warn("TODO unconsumed input");
-            }
+            _contentView.setGetIndex(_contentView.putIndex());
             
             _state=STATE_START;
             _contentLength=HttpTokens.UNKNOWN_CONTENT;
