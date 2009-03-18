@@ -17,8 +17,6 @@ package org.mortbay.jetty.util;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.mortbay.jetty.util.DateCache;
-
 import junit.framework.TestSuite;
 
 

@@ -23,15 +23,12 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.Name;
 import javax.naming.NameNotFoundException;
-import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 
 import org.mortbay.jetty.jndi.NamingUtil;
 import org.mortbay.jetty.plus.jndi.EnvEntry;
 import org.mortbay.jetty.plus.jndi.NamingEntry;
 import org.mortbay.jetty.plus.jndi.NamingEntryUtil;
-import org.mortbay.jetty.plus.jndi.Resource;
-import org.mortbay.jetty.plus.jndi.Transaction;
 import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.jetty.webapp.WebAppContext;

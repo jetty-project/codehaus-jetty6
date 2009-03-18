@@ -19,9 +19,6 @@
 
 package org.mortbay.jetty.security;
 
-import java.security.Principal;
-import java.util.List;
-
 import javax.security.auth.Subject;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;

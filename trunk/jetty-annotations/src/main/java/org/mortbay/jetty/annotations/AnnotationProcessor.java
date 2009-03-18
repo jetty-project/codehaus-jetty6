@@ -48,8 +48,6 @@ import org.mortbay.jetty.plus.annotation.PojoServlet;
 import org.mortbay.jetty.plus.annotation.PostConstructCallback;
 import org.mortbay.jetty.plus.annotation.PreDestroyCallback;
 import org.mortbay.jetty.plus.annotation.RunAsCollection;
-import org.mortbay.jetty.server.Dispatcher;
-import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHolder;

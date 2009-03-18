@@ -14,8 +14,6 @@
 
 package org.mortbay.jetty.util;
 
-import org.mortbay.jetty.util.StringUtil;
-import org.mortbay.jetty.util.Utf8StringBuilder;
 
 public class Utf8StringBuilderTest extends junit.framework.TestCase
 {

@@ -14,8 +14,6 @@
 
 package org.mortbay.jetty.http;
 
-import org.mortbay.jetty.http.PathMap;
-
 import junit.framework.TestCase;
 
 

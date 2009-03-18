@@ -14,8 +14,6 @@
 
 package org.mortbay.jetty.util;
 
-import org.mortbay.jetty.util.QuotedStringTokenizer;
-
 import junit.framework.TestCase;
 
 /**

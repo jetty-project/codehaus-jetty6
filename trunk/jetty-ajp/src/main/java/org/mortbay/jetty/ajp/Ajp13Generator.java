@@ -16,21 +16,17 @@ package org.mortbay.jetty.ajp;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import org.mortbay.jetty.http.AbstractGenerator;
 import org.mortbay.jetty.http.HttpFields;
 import org.mortbay.jetty.http.HttpGenerator;
-import org.mortbay.jetty.http.HttpStatus;
 import org.mortbay.jetty.http.HttpTokens;
 import org.mortbay.jetty.http.HttpVersions;
-import org.mortbay.jetty.http.HttpFields.Field;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.Buffers;
 import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.io.EofException;
-import org.mortbay.jetty.server.*;
 import org.mortbay.jetty.util.TypeUtil;
 import org.mortbay.jetty.util.log.Log;
 

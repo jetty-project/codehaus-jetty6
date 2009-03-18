@@ -14,10 +14,6 @@
 
 package org.mortbay.jetty.testing;
 
-import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.URL;
 import java.util.Enumeration;
 import java.util.EventListener;
 

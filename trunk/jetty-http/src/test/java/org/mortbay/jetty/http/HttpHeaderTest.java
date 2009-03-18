@@ -20,9 +20,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.http.HttpFields;
-import org.mortbay.jetty.http.HttpHeaderValues;
-import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.io.View;

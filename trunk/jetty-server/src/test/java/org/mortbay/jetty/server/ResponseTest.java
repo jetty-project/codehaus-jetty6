@@ -34,12 +34,6 @@ import javax.servlet.http.HttpSessionContext;
 import junit.framework.TestCase;
 
 import org.mortbay.jetty.http.HttpHeaders;
-import org.mortbay.jetty.server.Connector;
-import org.mortbay.jetty.server.HttpConnection;
-import org.mortbay.jetty.server.LocalConnector;
-import org.mortbay.jetty.server.Request;
-import org.mortbay.jetty.server.Response;
-import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.bio.SocketConnector;
 import org.mortbay.jetty.server.handler.AbstractHandler;
 import org.mortbay.jetty.server.handler.ContextHandler;

@@ -14,7 +14,6 @@
 
 package org.mortbay.jetty.rewrite.handler;
 
-import org.mortbay.jetty.rewrite.handler.LegacyRule;
 
 public class LegacyRuleTest extends AbstractRuleTestCase
 {

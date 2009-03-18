@@ -17,7 +17,6 @@ package org.mortbay.jetty.rewrite.handler;
 import org.mortbay.jetty.http.HttpFields;
 import org.mortbay.jetty.http.HttpHeaderValues;
 import org.mortbay.jetty.http.HttpHeaders;
-import org.mortbay.jetty.rewrite.handler.MsieSslRule;
 
 
 public class MsieSslRuleTest extends AbstractRuleTestCase

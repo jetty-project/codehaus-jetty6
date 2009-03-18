@@ -16,7 +16,6 @@ package org.mortbay.jetty.http;
 
 import java.io.IOException;
 
-import org.mortbay.jetty.http.Parser;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.BufferUtil;
 import org.mortbay.jetty.io.Buffers;

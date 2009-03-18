@@ -27,8 +27,6 @@ import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.LocalConnector;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Server;
-import org.mortbay.jetty.server.handler.HandlerWrapper;
-import org.mortbay.jetty.server.handler.StatisticsHandler;
 
 public class StatisticsHandlerTest extends TestCase
 {

@@ -15,7 +15,11 @@
 
 package org.mortbay.jetty.plus.jndi;
 
-import javax.naming.*;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.LinkRef;
+import javax.naming.NameNotFoundException;
+import javax.naming.NamingException;
 import javax.transaction.UserTransaction;
 
 import org.mortbay.jetty.jndi.NamingUtil;

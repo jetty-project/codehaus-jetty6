@@ -14,9 +14,10 @@
 //========================================================================
 package org.mortbay.jetty.rewrite.handler;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * Redirects the response whenever the rule finds a match.

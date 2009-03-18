@@ -15,27 +15,33 @@
 
 package org.mortbay.jetty.security;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import junit.framework.TestCase;
+
 import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.http.security.Password;
 import org.mortbay.jetty.security.authentication.BasicAuthenticator;
 import org.mortbay.jetty.security.authentication.FormAuthenticator;
 import org.mortbay.jetty.security.authentication.SessionCachingAuthenticator;
-import org.mortbay.jetty.server.*;
+import org.mortbay.jetty.server.Connector;
+import org.mortbay.jetty.server.LocalConnector;
+import org.mortbay.jetty.server.Request;
+import org.mortbay.jetty.server.Server;
+import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.server.handler.AbstractHandler;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.handler.HandlerWrapper;
 import org.mortbay.jetty.server.session.SessionHandler;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * 

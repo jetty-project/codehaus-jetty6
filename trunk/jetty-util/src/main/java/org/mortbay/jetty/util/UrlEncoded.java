@@ -17,12 +17,9 @@ package org.mortbay.jetty.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Map;
-
-import org.mortbay.jetty.util.log.Log;
 
 
 /* ------------------------------------------------------------ */

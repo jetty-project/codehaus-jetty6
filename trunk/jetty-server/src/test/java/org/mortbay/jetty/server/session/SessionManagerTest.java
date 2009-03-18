@@ -28,9 +28,6 @@ import junit.framework.TestCase;
 
 import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.handler.ContextHandler;
-import org.mortbay.jetty.server.session.HashSessionIdManager;
-import org.mortbay.jetty.server.session.HashSessionManager;
-import org.mortbay.jetty.server.session.SessionHandler;
 import org.mortbay.jetty.server.session.AbstractSessionManager.Session;
 
 /**

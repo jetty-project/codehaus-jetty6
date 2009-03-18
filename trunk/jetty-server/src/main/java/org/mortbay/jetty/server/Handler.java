@@ -16,9 +16,7 @@
 package org.mortbay.jetty.server;
 
 import java.io.IOException;
-import java.util.EnumSet;
 
-import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

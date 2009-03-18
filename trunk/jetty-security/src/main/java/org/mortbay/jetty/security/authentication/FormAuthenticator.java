@@ -21,18 +21,18 @@ package org.mortbay.jetty.security.authentication;
 
 import java.io.IOException;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.mortbay.jetty.http.security.Constraint;
-import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.Authentication;
 import org.mortbay.jetty.security.DefaultAuthentication;
+import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.URIUtil;

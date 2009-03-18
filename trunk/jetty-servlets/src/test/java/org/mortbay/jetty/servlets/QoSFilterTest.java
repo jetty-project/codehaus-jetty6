@@ -16,11 +16,8 @@ package org.mortbay.jetty.servlets;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -31,15 +28,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.LocalConnector;
-import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.FilterMapping;
-import org.mortbay.jetty.servlets.QoSFilter;
 import org.mortbay.jetty.testing.HttpTester;
 import org.mortbay.jetty.testing.ServletTester;
-import org.mortbay.jetty.util.IO;
 import org.mortbay.jetty.util.log.Log;
 
 public class QoSFilterTest extends TestCase 

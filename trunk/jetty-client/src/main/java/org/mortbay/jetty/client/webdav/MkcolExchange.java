@@ -16,7 +16,6 @@ package org.mortbay.jetty.client.webdav;
 
 import java.io.IOException;
 
-
 import org.mortbay.jetty.client.CachedExchange;
 import org.mortbay.jetty.http.HttpStatus;
 import org.mortbay.jetty.io.Buffer;

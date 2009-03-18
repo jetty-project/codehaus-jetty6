@@ -1,7 +1,9 @@
 package org.mortbay.jetty.security;
 
 import java.security.Principal;
+
 import javax.security.auth.Subject;
+
 import org.mortbay.jetty.server.UserIdentity;
 
 /* ------------------------------------------------------------ */

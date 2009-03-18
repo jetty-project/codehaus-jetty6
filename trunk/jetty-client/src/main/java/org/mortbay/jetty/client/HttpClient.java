@@ -42,14 +42,14 @@ import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.io.nio.DirectNIOBuffer;
 import org.mortbay.jetty.io.nio.IndirectNIOBuffer;
+import org.mortbay.jetty.util.Attributes;
+import org.mortbay.jetty.util.AttributesMap;
 import org.mortbay.jetty.util.component.LifeCycle;
 import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.util.resource.Resource;
 import org.mortbay.jetty.util.thread.QueuedThreadPool;
 import org.mortbay.jetty.util.thread.ThreadPool;
 import org.mortbay.jetty.util.thread.Timeout;
-import org.mortbay.jetty.util.Attributes;
-import org.mortbay.jetty.util.AttributesMap;
 
 /**
  * Http Client.

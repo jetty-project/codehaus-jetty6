@@ -18,7 +18,6 @@ package org.mortbay.jetty.plus.annotation;
 import java.io.IOException;
 import java.lang.reflect.Method;
 
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;

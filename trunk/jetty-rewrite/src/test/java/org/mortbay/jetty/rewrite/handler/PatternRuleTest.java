@@ -18,10 +18,9 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.rewrite.handler.PatternRule;
-import org.mortbay.jetty.server.Request;
-
 import junit.framework.TestCase;
+
+import org.mortbay.jetty.server.Request;
 
 public class PatternRuleTest extends TestCase
 {

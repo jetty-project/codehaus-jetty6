@@ -31,9 +31,8 @@ import javax.sql.DataSource;
 
 import org.mortbay.jetty.http.security.Password;
 import org.mortbay.jetty.plus.jndi.NamingEntryUtil;
-import org.mortbay.jetty.security.MappedLoginService;
-import org.mortbay.jetty.security.HashLoginService;
 import org.mortbay.jetty.security.IdentityService;
+import org.mortbay.jetty.security.MappedLoginService;
 import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.util.log.Log;

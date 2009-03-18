@@ -37,10 +37,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.security.Authentication;
 import org.mortbay.jetty.security.Authenticator;
+import org.mortbay.jetty.security.DefaultAuthentication;
 import org.mortbay.jetty.security.LazyAuthentication;
 import org.mortbay.jetty.security.ServerAuthException;
-import org.mortbay.jetty.security.DefaultAuthentication;
-import org.mortbay.jetty.security.Authenticator.Configuration;
 import org.mortbay.jetty.server.UserIdentity;
 
 /**

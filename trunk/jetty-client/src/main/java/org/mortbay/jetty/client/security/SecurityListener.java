@@ -19,8 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-//import javax.servlet.http.HttpServletResponse;
-
 import org.mortbay.jetty.client.HttpDestination;
 import org.mortbay.jetty.client.HttpEventListenerWrapper;
 import org.mortbay.jetty.client.HttpExchange;

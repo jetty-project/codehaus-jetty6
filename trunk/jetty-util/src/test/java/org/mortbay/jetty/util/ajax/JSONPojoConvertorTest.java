@@ -14,9 +14,6 @@
 
 package org.mortbay.jetty.util.ajax;
 
-import org.mortbay.jetty.util.ajax.JSON;
-import org.mortbay.jetty.util.ajax.JSONPojoConvertor;
-
 import junit.framework.TestCase;
 /**
  * Test to converts POJOs to JSON and vice versa.

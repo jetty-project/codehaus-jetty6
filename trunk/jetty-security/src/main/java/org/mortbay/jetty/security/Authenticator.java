@@ -26,7 +26,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.mortbay.jetty.server.Server;
-import org.mortbay.jetty.server.UserIdentity;
 
 /**
  * This is like the JASPI ServerAuthContext but is intended to be easier to use

@@ -27,7 +27,6 @@ import javax.security.auth.Subject;
 import org.mortbay.jetty.http.security.Credential;
 import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
-import org.mortbay.jetty.util.component.LifeCycle;
 
 
 

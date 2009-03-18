@@ -33,9 +33,6 @@ import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.LocalConnector;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Server;
-import org.mortbay.jetty.server.handler.AbstractHandler;
-import org.mortbay.jetty.server.handler.ContextHandler;
-import org.mortbay.jetty.server.handler.HandlerCollection;
 import org.mortbay.jetty.util.resource.Resource;
 
 /**

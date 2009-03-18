@@ -26,7 +26,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.mortbay.jetty.http.security.Credential;
-import org.mortbay.jetty.http.security.Password;
 import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.util.Scanner;
 import org.mortbay.jetty.util.Scanner.BulkListener;

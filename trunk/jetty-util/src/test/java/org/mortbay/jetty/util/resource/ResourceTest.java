@@ -24,7 +24,6 @@ import java.util.jar.JarInputStream;
 import junit.framework.TestSuite;
 
 import org.mortbay.jetty.util.IO;
-import org.mortbay.jetty.util.resource.Resource;
 
 public class ResourceTest extends junit.framework.TestCase
 {

@@ -14,10 +14,6 @@
 
 package org.mortbay.jetty.rewrite.handler;
 
-import org.mortbay.jetty.rewrite.handler.RewriteHandler;
-import org.mortbay.jetty.rewrite.handler.RewritePatternRule;
-import org.mortbay.jetty.rewrite.handler.Rule;
-import org.mortbay.jetty.rewrite.handler.VirtualHostRuleContainer;
 
 
 public class VirtualHostRuleContainerTest extends AbstractRuleTestCase

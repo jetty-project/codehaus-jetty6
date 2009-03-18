@@ -18,7 +18,6 @@ import java.util.Random;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.handler.DefaultHandler;
 
 /**

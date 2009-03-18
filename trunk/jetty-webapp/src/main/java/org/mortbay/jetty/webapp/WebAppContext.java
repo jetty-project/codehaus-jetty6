@@ -32,13 +32,11 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
 
-import org.mortbay.jetty.security.ConstraintSecurityHandler;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.HandlerContainer;
 import org.mortbay.jetty.server.handler.ContextHandler;
 import org.mortbay.jetty.server.handler.ErrorHandler;
-import org.mortbay.jetty.server.handler.HandlerWrapper;
 import org.mortbay.jetty.server.session.SessionHandler;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.servlet.ServletContextHandler;

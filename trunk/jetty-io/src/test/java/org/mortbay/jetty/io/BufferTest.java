@@ -19,10 +19,8 @@ import java.io.File;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.io.ByteArrayBuffer.CaseInsensitive;
 import org.mortbay.jetty.io.nio.DirectNIOBuffer;
 import org.mortbay.jetty.io.nio.IndirectNIOBuffer;
-import org.mortbay.jetty.io.nio.NIOBuffer;
 import org.mortbay.jetty.io.nio.RandomAccessFileBuffer;
 import org.mortbay.jetty.util.StringUtil;
 

@@ -15,10 +15,7 @@
 
 package org.mortbay.jetty.annotations;
 
-import java.util.ArrayList;
 import java.util.EventListener;
-import java.util.Iterator;
-import java.util.List;
 
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.FilterMapping;

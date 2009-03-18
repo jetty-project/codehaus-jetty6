@@ -14,8 +14,6 @@
 
 package org.mortbay.jetty.io;
 
-import org.mortbay.jetty.io.BufferCache.CachedBuffer;
-
 import junit.framework.TestCase;
 
 /* ------------------------------------------------------------------------------- */

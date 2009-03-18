@@ -16,8 +16,6 @@ package org.mortbay.jetty.util.ajax;
 import java.io.StringReader;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
-import java.text.DateFormatSymbols;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -27,10 +25,6 @@ import java.util.TimeZone;
 import junit.framework.TestCase;
 
 import org.mortbay.jetty.util.DateCache;
-import org.mortbay.jetty.util.ajax.JSON;
-import org.mortbay.jetty.util.ajax.JSONDateConvertor;
-import org.mortbay.jetty.util.ajax.JSONEnumConvertor;
-import org.mortbay.jetty.util.ajax.JSONObjectConvertor;
 import org.mortbay.jetty.util.ajax.JSON.Output;
 
 public class JSONTest extends TestCase

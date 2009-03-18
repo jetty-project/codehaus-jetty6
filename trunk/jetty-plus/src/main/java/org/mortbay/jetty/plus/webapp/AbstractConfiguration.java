@@ -27,7 +27,7 @@ import org.mortbay.jetty.plus.annotation.LifeCycleCallback;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
 import org.mortbay.jetty.plus.annotation.PostConstructCallback;
 import org.mortbay.jetty.plus.annotation.PreDestroyCallback;
-import org.mortbay.jetty.plus.annotation.RunAsCollection;           
+import org.mortbay.jetty.plus.annotation.RunAsCollection;
 import org.mortbay.jetty.plus.servlet.ServletHandler;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.ServletHolder;

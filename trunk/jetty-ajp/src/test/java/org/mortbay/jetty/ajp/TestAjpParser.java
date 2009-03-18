@@ -16,14 +16,14 @@ package org.mortbay.jetty.ajp;
 
 import java.io.IOException;
 
+import junit.framework.TestCase;
+
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.io.ByteArrayEndPoint;
 import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.io.SimpleBuffers;
 import org.mortbay.jetty.util.TypeUtil;
-
-import junit.framework.TestCase;
 
 public class TestAjpParser extends TestCase
 {

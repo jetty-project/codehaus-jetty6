@@ -21,7 +21,6 @@ package org.mortbay.jetty.security.authentication;
 
 import java.io.IOException;
 
-import javax.security.auth.Subject;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -30,11 +29,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.http.security.Constraint;
-import org.mortbay.jetty.security.DefaultUserIdentity;
-import org.mortbay.jetty.security.LoginService;
-import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.Authentication;
 import org.mortbay.jetty.security.DefaultAuthentication;
+import org.mortbay.jetty.security.DefaultUserIdentity;
+import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.util.StringUtil;
 

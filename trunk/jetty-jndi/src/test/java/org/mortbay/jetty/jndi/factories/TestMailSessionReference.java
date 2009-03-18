@@ -24,10 +24,9 @@ import javax.naming.LinkRef;
 import javax.naming.Name;
 import javax.naming.NameParser;
 
-import org.mortbay.jetty.jndi.NamingUtil;
-import org.mortbay.jetty.jndi.factories.MailSessionReference;
-
 import junit.framework.TestCase;
+
+import org.mortbay.jetty.jndi.NamingUtil;
 
 /**
  * TestMailSessionReference

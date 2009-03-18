@@ -16,18 +16,7 @@
 package org.mortbay.jetty.plus.jndi;
 
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.naming.Binding;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NameNotFoundException;
-import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-
-import org.mortbay.jetty.jndi.NamingUtil;
-import org.mortbay.jetty.util.log.Log;
 
 
 /**

@@ -24,7 +24,7 @@ import org.mortbay.jetty.io.AsyncEndPoint;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.Connection;
 import org.mortbay.jetty.io.EofException;
-import org.mortbay.jetty.io.HttpException; // FIXME shouldn't have http exception, here, should be in jetty-http
+import org.mortbay.jetty.io.HttpException;
 import org.mortbay.jetty.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.util.log.Log;
 import org.mortbay.jetty.util.thread.Timeout;

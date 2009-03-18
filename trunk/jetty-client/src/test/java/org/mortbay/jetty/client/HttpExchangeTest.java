@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
-import junit.framework.TestResult;
 
 import org.mortbay.jetty.client.security.ProxyAuthorization;
 import org.mortbay.jetty.http.HttpHeaders;
@@ -40,7 +39,6 @@ import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.handler.AbstractHandler;
 import org.mortbay.jetty.server.nio.SelectChannelConnector;
-import org.mortbay.jetty.util.thread.QueuedThreadPool;
 
 /**
  * Functional testing for HttpExchange.

@@ -16,8 +16,6 @@
 package org.mortbay.jetty.server.handler;
 
 
-import java.lang.reflect.Array;
-
 import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.HandlerContainer;
 import org.mortbay.jetty.util.LazyList;

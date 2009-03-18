@@ -27,11 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.server.Connector;
-import org.mortbay.jetty.server.HttpConnection;
-import org.mortbay.jetty.server.LocalConnector;
-import org.mortbay.jetty.server.Request;
-import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.handler.HandlerWrapper;
 
 public class AsyncContextTest extends TestCase

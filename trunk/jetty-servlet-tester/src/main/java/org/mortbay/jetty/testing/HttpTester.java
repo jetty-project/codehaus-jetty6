@@ -27,7 +27,6 @@ import org.mortbay.jetty.http.HttpVersions;
 import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
-import org.mortbay.jetty.io.ByteArrayEndPoint;
 import org.mortbay.jetty.io.SimpleBuffers;
 import org.mortbay.jetty.io.View;
 import org.mortbay.jetty.io.bio.StringEndPoint;

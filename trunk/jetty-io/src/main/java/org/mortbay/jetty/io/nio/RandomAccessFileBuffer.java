@@ -3,10 +3,7 @@ package org.mortbay.jetty.io.nio;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.nio.channels.ByteChannel;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 

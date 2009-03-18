@@ -16,7 +16,6 @@ package org.mortbay.jetty.rewrite.handler;
 import java.io.IOException;
 
 import org.mortbay.jetty.http.HttpHeaders;
-import org.mortbay.jetty.rewrite.handler.RedirectPatternRule;
 
 
 public class RedirectPatternRuleTest extends AbstractRuleTestCase

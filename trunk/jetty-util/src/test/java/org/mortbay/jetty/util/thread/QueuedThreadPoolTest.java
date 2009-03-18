@@ -17,8 +17,6 @@ package org.mortbay.jetty.util.thread;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.mortbay.jetty.util.thread.QueuedThreadPool;
-
 import junit.framework.TestCase;
 
 public class QueuedThreadPoolTest extends TestCase
