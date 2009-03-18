@@ -19,15 +19,9 @@ package org.mortbay.jetty.server;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.ClosedChannelException;
 import java.util.Random;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.EndPoint;
@@ -36,9 +30,6 @@ import org.mortbay.jetty.io.HttpException;
 import org.mortbay.jetty.io.nio.ChannelEndPoint;
 import org.mortbay.jetty.io.nio.IndirectNIOBuffer;
 import org.mortbay.jetty.io.nio.NIOBuffer;
-import org.mortbay.jetty.server.HttpConnection;
-import org.mortbay.jetty.server.Request;
-import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.nio.AbstractNIOConnector;
 import org.mortbay.jetty.util.ajax.Continuation;
 import org.mortbay.jetty.util.log.Log;

@@ -29,7 +29,6 @@ import org.mortbay.jetty.io.EofException;
 import org.mortbay.jetty.io.HttpException;
 import org.mortbay.jetty.io.bio.SocketEndPoint;
 import org.mortbay.jetty.server.AbstractConnector;
-import org.mortbay.jetty.server.AsyncRequest;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.util.log.Log;

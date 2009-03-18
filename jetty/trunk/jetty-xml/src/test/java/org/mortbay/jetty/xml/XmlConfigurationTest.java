@@ -18,9 +18,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mortbay.jetty.xml.XmlConfiguration;
-import org.mortbay.jetty.xml.XmlParser;
-
 import junit.framework.TestCase;
 
 public class XmlConfigurationTest extends TestCase

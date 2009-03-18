@@ -17,11 +17,8 @@ package org.mortbay.jetty.server;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestAttributeListener;
-import javax.servlet.ServletRequestWrapper;
 import javax.servlet.ServletResponse;
 
 import org.mortbay.jetty.io.AsyncEndPoint;

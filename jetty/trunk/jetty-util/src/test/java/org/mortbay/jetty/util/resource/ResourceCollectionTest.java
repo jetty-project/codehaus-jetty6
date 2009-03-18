@@ -17,9 +17,6 @@ package org.mortbay.jetty.util.resource;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import org.mortbay.jetty.util.resource.Resource;
-import org.mortbay.jetty.util.resource.ResourceCollection;
-
 import junit.framework.TestCase;
 
 public class ResourceCollectionTest extends TestCase

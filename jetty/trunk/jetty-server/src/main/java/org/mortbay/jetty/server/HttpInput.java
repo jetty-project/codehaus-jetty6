@@ -17,12 +17,9 @@ package org.mortbay.jetty.server;
 import java.io.IOException;
 
 import javax.servlet.ServletInputStream;
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
 
 import org.mortbay.jetty.http.HttpParser;
 import org.mortbay.jetty.io.Buffer;
-import org.mortbay.jetty.io.EndPoint;
-import org.mortbay.jetty.io.EofException;
 
 public class HttpInput extends ServletInputStream
 {

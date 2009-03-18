@@ -15,7 +15,6 @@
 
 package org.mortbay.jetty.webapp;
 
-import java.io.Serializable;
 
 /* ------------------------------------------------------------------------------- */
 /** Base Class for WebApplicationContext Configuration.

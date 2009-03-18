@@ -8,9 +8,6 @@ import javax.naming.Name;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
-import org.mortbay.jetty.plus.jndi.NamingEntry;
-import org.mortbay.jetty.plus.jndi.NamingEntryUtil;
-
 import junit.framework.TestCase;
 
 public class TestNamingEntryUtil extends TestCase

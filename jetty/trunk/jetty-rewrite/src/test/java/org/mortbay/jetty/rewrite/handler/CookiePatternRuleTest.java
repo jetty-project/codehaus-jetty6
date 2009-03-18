@@ -18,7 +18,6 @@ import java.util.Enumeration;
 
 import org.mortbay.jetty.http.HttpFields;
 import org.mortbay.jetty.http.HttpHeaders;
-import org.mortbay.jetty.rewrite.handler.CookiePatternRule;
 
 
 public class CookiePatternRuleTest extends AbstractRuleTestCase

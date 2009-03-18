@@ -23,8 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.client.ContentExchange;
-import org.mortbay.jetty.client.HttpClient;
 import org.mortbay.jetty.server.Connector;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Server;

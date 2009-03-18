@@ -15,7 +15,6 @@
 package org.mortbay.jetty.servlet;
 
 import java.util.EnumSet;
-import java.util.Map;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -24,7 +23,6 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
-import javax.servlet.SessionCookieConfig;
 import javax.servlet.SessionTrackingMode;
 
 import org.mortbay.jetty.security.SecurityHandler;

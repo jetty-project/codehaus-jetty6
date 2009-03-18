@@ -20,8 +20,6 @@
 package org.mortbay.jetty.security;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.mortbay.jetty.util.LazyList;
 

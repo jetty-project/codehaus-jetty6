@@ -22,13 +22,12 @@ import java.net.URL;
 
 import javax.servlet.http.HttpServletResponse;
 
+import junit.framework.TestCase;
+
 import org.mortbay.jetty.servlet.FilterHolder;
-import org.mortbay.jetty.servlets.PutFilter;
 import org.mortbay.jetty.testing.HttpTester;
 import org.mortbay.jetty.testing.ServletTester;
 import org.mortbay.jetty.util.IO;
-
-import junit.framework.TestCase;
 
 public class PutFilterTest extends TestCase
 {

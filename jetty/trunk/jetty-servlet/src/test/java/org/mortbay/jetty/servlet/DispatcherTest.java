@@ -32,7 +32,6 @@ import junit.framework.TestCase;
 import org.mortbay.jetty.server.Dispatcher;
 import org.mortbay.jetty.server.LocalConnector;
 import org.mortbay.jetty.server.Server;
-import org.mortbay.jetty.servlet.ServletContextHandler;
 
 public class DispatcherTest extends TestCase
 {

@@ -16,8 +16,6 @@ package org.mortbay.jetty.rewrite.handler;
 import java.io.IOException;
 import java.util.Enumeration;
 
-import org.mortbay.jetty.rewrite.handler.HeaderPatternRule;
-
 
 public class HeaderPatternRuleTest extends AbstractRuleTestCase
 {

@@ -29,9 +29,9 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.annotation.FilterMapping;
 import javax.servlet.http.annotation.InitParam;
 import javax.servlet.http.annotation.Servlet;
-import javax.servlet.http.annotation.jaxrs.POST;
-import javax.servlet.http.annotation.jaxrs.GET;
 import javax.servlet.http.annotation.ServletFilter;
+import javax.servlet.http.annotation.jaxrs.GET;
+import javax.servlet.http.annotation.jaxrs.POST;
 
 
 @Servlet(urlMappings = { "/foo/*", "/bah/*" }, name="CServlet", initParams={@InitParam(name="x", value="y")})

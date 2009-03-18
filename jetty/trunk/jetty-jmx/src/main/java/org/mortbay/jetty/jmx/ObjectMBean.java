@@ -49,7 +49,6 @@ import org.mortbay.jetty.util.LazyList;
 import org.mortbay.jetty.util.Loader;
 import org.mortbay.jetty.util.TypeUtil;
 import org.mortbay.jetty.util.log.Log;
-import org.mortbay.jetty.util.log.StdErrLog;
 
 /* ------------------------------------------------------------ */
 /** ObjectMBean.

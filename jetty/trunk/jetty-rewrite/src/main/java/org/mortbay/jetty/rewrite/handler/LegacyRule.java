@@ -14,14 +14,14 @@
 //========================================================================
 package org.mortbay.jetty.rewrite.handler;
 
-import org.mortbay.jetty.http.PathMap;
-import org.mortbay.jetty.util.URIUtil;
-
+import java.io.IOException;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.mortbay.jetty.http.PathMap;
+import org.mortbay.jetty.util.URIUtil;
 
 /**
  * Rule implementing the legacy API of RewriteHandler

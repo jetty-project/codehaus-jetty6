@@ -1229,40 +1229,7 @@ public class Request implements HttpServletRequest
      */
     public Principal getUserPrincipal()
     {
-
-        /* JASPI requires that all requests go through authentication before being processed, so this code should never apply
-        if (_userPrincipal != null && _userPrincipal instanceof ConstraintSecurityHandler.NotChecked)
-
-        {
-            _userPrincipal = UserRealm.NO_USER;
-            
-            SecurityHandler securityHandler =(SecurityHandler)_context.getContextHandler().getChildHandlerByClass(SecurityHandler.class);
-            if (securityHandler!=null)
-            {
-                Authenticator auth=securityHandler.getAuthenticator();
-                UserRealm realm=securityHandler.getUserRealm();
-                String pathInContext=getPathInfo()==null?getServletPath():(getServletPath()+getPathInfo());
-
-                if (realm != null && auth != null)
-                {
-                    try
-                    {
-                        auth.authenticate(realm, pathInContext, this, null);
-                    }
-                    catch (Exception e)
-                    {
-                        Log.ignore(e);
-                    }
-                }
-            }
-        }
-        */
-        
-
-//        if (_userPrincipal == AbstractSecurityHandler.__NO_USER)
-//            return null;
         return _userIdentity.getUserPrincipal();
-
     }
     
     /* ------------------------------------------------------------ */

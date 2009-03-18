@@ -15,8 +15,6 @@
 
 package org.mortbay.jetty.util.thread;
 
-import org.mortbay.jetty.util.thread.Timeout;
-
 import junit.framework.TestCase;
 
 public class TimeoutTest extends TestCase

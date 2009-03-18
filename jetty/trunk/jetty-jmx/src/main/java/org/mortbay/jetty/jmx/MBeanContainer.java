@@ -14,7 +14,6 @@
 
 package org.mortbay.jetty.jmx;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,11 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import javax.management.Attribute;
 import javax.management.MBeanServer;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
-import javax.management.loading.PrivateMLet;
 
 import org.mortbay.jetty.util.MultiMap;
 import org.mortbay.jetty.util.TypeUtil;
@@ -34,7 +31,6 @@ import org.mortbay.jetty.util.component.AbstractLifeCycle;
 import org.mortbay.jetty.util.component.Container;
 import org.mortbay.jetty.util.component.Container.Relationship;
 import org.mortbay.jetty.util.log.Log;
-import org.mortbay.jetty.util.log.Logger;
 
 public class MBeanContainer extends AbstractLifeCycle implements Container.Listener
 {

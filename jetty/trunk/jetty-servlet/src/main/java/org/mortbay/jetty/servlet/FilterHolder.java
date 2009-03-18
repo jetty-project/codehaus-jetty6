@@ -15,16 +15,12 @@
 package org.mortbay.jetty.servlet;
 
 import java.util.EnumSet;
-import java.util.Enumeration;
-import java.util.Map;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.FilterRegistration;
-import javax.servlet.ServletContext;
 
-import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.util.log.Log;
 
 /* --------------------------------------------------------------------- */

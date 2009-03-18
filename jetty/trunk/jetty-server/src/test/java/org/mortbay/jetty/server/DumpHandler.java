@@ -16,7 +16,6 @@ package org.mortbay.jetty.server;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -30,8 +29,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.http.MimeTypes;
-import org.mortbay.jetty.server.HttpConnection;
-import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.handler.AbstractHandler;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.ajax.Continuation;

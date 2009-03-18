@@ -15,15 +15,13 @@
 package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
-import java.util.Enumeration;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
-import java.util.Collections;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 import javax.servlet.ServletRequest;
@@ -31,12 +29,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.SingleThreadModel;
 import javax.servlet.UnavailableException;
 
-
 import org.mortbay.jetty.security.IdentityService;
 import org.mortbay.jetty.security.RunAsToken;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.UserIdentity;
-import org.mortbay.jetty.util.Attributes;
 import org.mortbay.jetty.util.log.Log;
 
 

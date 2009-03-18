@@ -24,10 +24,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.security.Authentication;
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
 import org.mortbay.jetty.security.ServerAuthException;
-import org.mortbay.jetty.security.Authentication;
 
 /**
  * Cross-context psuedo-session caching ServerAuthentication

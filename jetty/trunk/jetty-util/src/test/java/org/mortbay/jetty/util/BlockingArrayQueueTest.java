@@ -15,14 +15,10 @@
 package org.mortbay.jetty.util;
 
 import java.util.HashSet;
-import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.mortbay.jetty.util.BlockingArrayQueue;
 
 import junit.framework.TestCase;
 

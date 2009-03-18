@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.Iterator;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletResponse;

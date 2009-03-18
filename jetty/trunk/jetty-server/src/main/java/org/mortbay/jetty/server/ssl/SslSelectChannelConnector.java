@@ -42,6 +42,7 @@ import javax.net.ssl.TrustManagerFactory;
 
 import org.mortbay.jetty.http.HttpParser;
 import org.mortbay.jetty.http.HttpSchemes;
+import org.mortbay.jetty.http.security.Password;
 import org.mortbay.jetty.http.ssl.SslSelectChannelEndPoint;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.Connection;
@@ -52,7 +53,6 @@ import org.mortbay.jetty.io.nio.IndirectNIOBuffer;
 import org.mortbay.jetty.io.nio.NIOBuffer;
 import org.mortbay.jetty.io.nio.SelectChannelEndPoint;
 import org.mortbay.jetty.io.nio.SelectorManager.SelectSet;
-import org.mortbay.jetty.http.security.Password;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.nio.SelectChannelConnector;

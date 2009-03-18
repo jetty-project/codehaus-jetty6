@@ -1,7 +1,5 @@
 package org.mortbay.jetty.security;
 
-import java.util.List;
-
 import javax.servlet.ServletContext;
 
 import org.mortbay.jetty.http.security.Constraint;

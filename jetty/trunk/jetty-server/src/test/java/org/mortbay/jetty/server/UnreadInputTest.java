@@ -23,13 +23,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.server.Connector;
-import org.mortbay.jetty.server.Request;
-import org.mortbay.jetty.server.Server;
+import junit.framework.TestCase;
+
 import org.mortbay.jetty.server.bio.SocketConnector;
 import org.mortbay.jetty.server.handler.AbstractHandler;
-
-import junit.framework.TestCase;
 
 public class UnreadInputTest extends TestCase
 {

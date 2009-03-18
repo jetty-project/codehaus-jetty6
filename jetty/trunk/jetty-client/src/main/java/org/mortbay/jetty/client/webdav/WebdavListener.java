@@ -17,8 +17,6 @@ package org.mortbay.jetty.client.webdav;
 
 import java.io.IOException;
 
-//import javax.servlet.http.HttpServletResponse;
-
 import org.mortbay.jetty.client.HttpDestination;
 import org.mortbay.jetty.client.HttpEventListenerWrapper;
 import org.mortbay.jetty.client.HttpExchange;

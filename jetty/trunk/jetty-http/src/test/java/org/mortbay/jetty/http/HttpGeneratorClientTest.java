@@ -18,10 +18,6 @@ import java.io.IOException;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.http.HttpFields;
-import org.mortbay.jetty.http.HttpGenerator;
-import org.mortbay.jetty.http.HttpMethods;
-import org.mortbay.jetty.http.HttpParser;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.ByteArrayBuffer;
 import org.mortbay.jetty.io.ByteArrayEndPoint;

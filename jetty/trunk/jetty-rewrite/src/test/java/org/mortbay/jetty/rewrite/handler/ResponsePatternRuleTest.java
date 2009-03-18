@@ -15,8 +15,6 @@ package org.mortbay.jetty.rewrite.handler;
 
 import java.io.IOException;
 
-import org.mortbay.jetty.rewrite.handler.ResponsePatternRule;
-
 public class ResponsePatternRuleTest extends AbstractRuleTestCase
 {
     private ResponsePatternRule _rule;

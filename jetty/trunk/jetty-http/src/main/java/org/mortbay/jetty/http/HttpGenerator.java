@@ -16,9 +16,7 @@
 package org.mortbay.jetty.http;
 
 import java.io.IOException;
-import java.util.Iterator;
 
-import org.mortbay.jetty.http.MimeTypes;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.BufferUtil;
 import org.mortbay.jetty.io.Buffers;

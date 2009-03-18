@@ -20,7 +20,6 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.http.HttpGenerator;
 import org.mortbay.jetty.http.HttpHeaders;
 import org.mortbay.jetty.http.HttpMethods;
 import org.mortbay.jetty.http.HttpStatus;

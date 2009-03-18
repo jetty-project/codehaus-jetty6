@@ -15,9 +15,6 @@
 package org.mortbay.jetty.util;
 
 
-import org.mortbay.jetty.util.StringUtil;
-import org.mortbay.jetty.util.Utf8StringBuffer;
-
 import junit.framework.TestCase;
 
 /**

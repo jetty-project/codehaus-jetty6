@@ -1,14 +1,12 @@
 package org.mortbay.jetty.util.component;
 
-import org.mortbay.jetty.util.component.AbstractLifeCycle;
-import org.mortbay.jetty.util.component.LifeCycle;
-import org.mortbay.jetty.util.log.Log;
-import org.mortbay.jetty.util.log.StdErrLog;
-
+import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import junit.framework.Test;
 import junit.textui.TestRunner;
+
+import org.mortbay.jetty.util.log.Log;
+import org.mortbay.jetty.util.log.StdErrLog;
 
 public class LifeCycleListenerTest extends TestCase
 {

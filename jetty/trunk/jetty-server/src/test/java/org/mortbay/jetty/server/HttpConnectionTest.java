@@ -20,12 +20,6 @@
  */
 package org.mortbay.jetty.server;
 
-import java.nio.charset.Charset;
-
-import org.mortbay.jetty.server.Connector;
-import org.mortbay.jetty.server.LocalConnector;
-import org.mortbay.jetty.server.Server;
-
 import junit.framework.TestCase;
 
 /**

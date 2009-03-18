@@ -6,19 +6,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import junit.framework.TestCase;
+
 import org.mortbay.jetty.server.Connector;
-import org.mortbay.jetty.server.Handler;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.LocalConnector;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.Server;
-import org.mortbay.jetty.server.handler.AbstractHandler;
-import org.mortbay.jetty.server.handler.ContextHandler;
-import org.mortbay.jetty.server.handler.ContextHandlerCollection;
-import org.mortbay.jetty.server.handler.ContextHandlerTest.IsHandledHandler;
-import org.mortbay.jetty.server.nio.SelectChannelConnector;
-
-import junit.framework.TestCase;
 
 public class ContextHandlerCollectionTest extends TestCase
 {

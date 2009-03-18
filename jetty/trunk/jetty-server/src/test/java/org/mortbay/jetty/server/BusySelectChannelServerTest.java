@@ -23,7 +23,6 @@ import org.mortbay.jetty.io.nio.IndirectNIOBuffer;
 import org.mortbay.jetty.io.nio.NIOBuffer;
 import org.mortbay.jetty.io.nio.SelectChannelEndPoint;
 import org.mortbay.jetty.io.nio.SelectorManager.SelectSet;
-import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.nio.SelectChannelConnector;
 import org.mortbay.jetty.util.thread.QueuedThreadPool;
 

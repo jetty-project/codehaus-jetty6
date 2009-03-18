@@ -18,9 +18,6 @@ package org.mortbay.jetty.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import org.mortbay.jetty.util.IntrospectionUtil;
-
-
 import junit.framework.TestCase;
 
 /**

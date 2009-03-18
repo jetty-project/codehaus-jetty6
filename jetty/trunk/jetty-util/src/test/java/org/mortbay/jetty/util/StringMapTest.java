@@ -21,8 +21,6 @@ import java.io.ObjectOutputStream;
 import java.util.Map;
 import java.util.Set;
 
-import org.mortbay.jetty.util.StringMap;
-
 import junit.framework.TestCase;
 
 

@@ -21,10 +21,6 @@ import org.mortbay.jetty.io.EndPoint;
 import org.mortbay.jetty.server.HttpConnection;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.bio.SocketConnector;
-import org.mortbay.jetty.server.handler.ContextHandlerCollection;
-import org.mortbay.jetty.server.handler.DefaultHandler;
-import org.mortbay.jetty.server.handler.HandlerCollection;
-import org.mortbay.jetty.server.nio.SelectChannelConnector;
 import org.mortbay.jetty.util.log.Log;
 
 /**

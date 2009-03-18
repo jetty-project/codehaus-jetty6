@@ -20,13 +20,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletRegistration;
 import javax.servlet.UnavailableException;
 
 import org.mortbay.jetty.server.handler.ContextHandler;
-import org.mortbay.jetty.util.Attributes;
 import org.mortbay.jetty.util.AttributesMap;
 import org.mortbay.jetty.util.Loader;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;

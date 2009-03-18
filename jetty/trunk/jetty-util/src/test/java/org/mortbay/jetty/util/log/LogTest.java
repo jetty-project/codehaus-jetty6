@@ -14,10 +14,6 @@
 
 package org.mortbay.jetty.util.log;
 
-import org.mortbay.jetty.util.log.Log;
-import org.mortbay.jetty.util.log.Logger;
-import org.mortbay.jetty.util.log.LoggerLog;
-
 import junit.framework.TestCase;
 
 public class LogTest extends TestCase

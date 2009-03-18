@@ -33,7 +33,6 @@ import javax.security.auth.message.callback.PrivateKeyCallback;
 import javax.security.auth.message.callback.SecretKeyCallback;
 import javax.security.auth.message.callback.TrustStoreCallback;
 
-import org.mortbay.jetty.security.IdentityService;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.authentication.LoginCallback;
 import org.mortbay.jetty.security.authentication.LoginCallbackImpl;

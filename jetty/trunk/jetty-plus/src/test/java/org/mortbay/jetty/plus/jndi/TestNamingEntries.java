@@ -29,12 +29,6 @@ import javax.naming.Referenceable;
 import javax.naming.StringRefAddr;
 import javax.naming.spi.ObjectFactory;
 
-import org.mortbay.jetty.plus.jndi.EnvEntry;
-import org.mortbay.jetty.plus.jndi.Link;
-import org.mortbay.jetty.plus.jndi.NamingEntry;
-import org.mortbay.jetty.plus.jndi.NamingEntryUtil;
-import org.mortbay.jetty.plus.jndi.Resource;
-
 import junit.framework.TestCase;
 
 /**

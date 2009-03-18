@@ -15,8 +15,6 @@ package org.mortbay.jetty.rewrite.handler;
 
 import java.io.IOException;
 
-import org.mortbay.jetty.rewrite.handler.RewriteRegexRule;
-
 public class RewriteRegexRuleTest extends AbstractRuleTestCase
 {
     private RewriteRegexRule _rule;

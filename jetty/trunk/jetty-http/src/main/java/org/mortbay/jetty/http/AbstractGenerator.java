@@ -17,12 +17,6 @@ package org.mortbay.jetty.http;
 
 import java.io.IOException;
 
-
-import org.mortbay.jetty.http.Generator;
-import org.mortbay.jetty.http.HttpFields;
-import org.mortbay.jetty.http.HttpMethods;
-import org.mortbay.jetty.http.HttpTokens;
-import org.mortbay.jetty.http.HttpVersions;
 import org.mortbay.jetty.io.Buffer;
 import org.mortbay.jetty.io.Buffers;
 import org.mortbay.jetty.io.ByteArrayBuffer;

@@ -32,8 +32,6 @@ import org.mortbay.jetty.server.Server;
 import org.mortbay.jetty.server.SessionIdManager;
 import org.mortbay.jetty.server.SessionManager;
 import org.mortbay.jetty.server.handler.ContextHandlerCollection;
-import org.mortbay.jetty.servlet.ServletContextHandler;
-import org.mortbay.jetty.servlet.ServletHolder;
 
 /**
  * SessionTestServer

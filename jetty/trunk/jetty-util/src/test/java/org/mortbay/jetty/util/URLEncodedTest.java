@@ -17,10 +17,6 @@ package org.mortbay.jetty.util;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 
-import org.mortbay.jetty.util.MultiMap;
-import org.mortbay.jetty.util.StringUtil;
-import org.mortbay.jetty.util.UrlEncoded;
-
 import junit.framework.TestSuite;
 
 
