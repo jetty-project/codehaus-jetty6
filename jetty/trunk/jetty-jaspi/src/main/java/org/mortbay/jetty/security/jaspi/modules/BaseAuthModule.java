@@ -41,7 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.http.security.Credential;
 import org.mortbay.jetty.http.security.Password;
-import org.mortbay.jetty.security.LoginCallbackImpl;
+import org.mortbay.jetty.security.authentication.LoginCallbackImpl;
 import org.mortbay.jetty.security.jaspi.JaspiMessageInfo;
 import org.mortbay.jetty.security.jaspi.callback.CredentialValidationCallback;
 import org.mortbay.jetty.util.StringUtil;

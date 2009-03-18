@@ -20,10 +20,14 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletRegistration;
 import javax.servlet.UnavailableException;
 
 import org.mortbay.jetty.server.handler.ContextHandler;
+import org.mortbay.jetty.util.Attributes;
+import org.mortbay.jetty.util.AttributesMap;
 import org.mortbay.jetty.util.Loader;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
 import org.mortbay.jetty.util.log.Log;
@@ -41,6 +45,7 @@ public class Holder extends AbstractLifeCycle implements Serializable
     protected Map _initParams;
     protected boolean _extInstance;
     protected boolean _asyncSupported;
+    protected AttributesMap _initAttributes;
 
     /* ---------------------------------------------------------------- */
     protected String _name;
@@ -252,6 +257,124 @@ public class Holder extends AbstractLifeCycle implements Serializable
         }
     }
 
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    protected class HolderConfig 
+    {   
+        
+        /* -------------------------------------------------------- */
+        public ServletContext getServletContext()
+        {
+            return _servletHandler.getServletContext();
+        }
+
+        /* -------------------------------------------------------- */
+        public String getInitParameter(String param)
+        {
+            return Holder.this.getInitParameter(param);
+        }
+    
+        /* -------------------------------------------------------- */
+        public Enumeration getInitParameterNames()
+        {
+            return Holder.this.getInitParameterNames();
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletConfig#getInitAttribute(java.lang.String)
+         */
+        public Object getInitAttribute(String name)
+        {
+            return (Holder.this._initAttributes==null)?null:Holder.this._initAttributes.getAttribute(name);
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletConfig#getInitAttributeNames()
+         */
+        public Iterable<String> getInitAttributeNames()
+        {
+            if (Holder.this._initAttributes!=null)
+                return Holder.this._initAttributes.keySet();
+            return Collections.emptySet();    
+        }
+        
+    }
+
+    /* -------------------------------------------------------- */
+    /* -------------------------------------------------------- */
+    /* -------------------------------------------------------- */
+    protected class HolderRegistration
+    {
+        public boolean setAsyncSupported(boolean isAsyncSupported)
+        {
+            illegalStateIfContextStarted();
+            Holder.this.setAsyncSupported(isAsyncSupported);
+            return true;
+        }
+
+        public boolean setDescription(String description)
+        {
+            return true;
+        }
+
+        public boolean setInitParameter(String name, String value)
+        {
+            illegalStateIfContextStarted();
+            if (Holder.this.getInitParameter(name)!=null)
+                return false;
+            Holder.this.setInitParameter(name,value);
+            return true;
+        }
+
+        public boolean setInitParameters(Map<String, String> initParameters)
+        {
+            illegalStateIfContextStarted();
+            for (String name : initParameters.keySet())
+                if (Holder.this.getInitParameter(name)!=null)
+                    return false;
+            Holder.this.setInitParameters(initParameters);
+            return true;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletRegistration#setInitAttribute(java.lang.String, java.lang.Object)
+         */
+        public boolean setInitAttribute(String name, Object value)
+        {
+            illegalStateIfContextStarted();
+            if (_initAttributes==null)
+                _initAttributes=new AttributesMap();
+            else if (_initAttributes.getAttribute(name)!=null)
+                return false;
+            _initAttributes.setAttribute(name,value);
+            return true;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletRegistration#setInitAttributes(java.util.Map)
+         */
+        public boolean setInitAttributes(Map<String, Object> initAttributes)
+        {
+            illegalStateIfContextStarted();
+            if (_initAttributes==null)
+                _initAttributes=new AttributesMap();
+            else
+            {
+                for (String name : initAttributes.keySet())
+                    if (_initAttributes.getAttribute(name)!=null)
+                        return false;
+            }
+            for (String name : initAttributes.keySet())
+                _initAttributes.setAttribute(name,initAttributes.get(name));
+            
+            return true;
+        };
+    }
 }
 
 

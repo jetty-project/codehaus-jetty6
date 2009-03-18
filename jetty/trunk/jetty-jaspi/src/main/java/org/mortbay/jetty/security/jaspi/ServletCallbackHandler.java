@@ -34,10 +34,10 @@ import javax.security.auth.message.callback.SecretKeyCallback;
 import javax.security.auth.message.callback.TrustStoreCallback;
 
 import org.mortbay.jetty.security.IdentityService;
-import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.security.LoginService;
+import org.mortbay.jetty.security.authentication.LoginCallback;
+import org.mortbay.jetty.security.authentication.LoginCallbackImpl;
 import org.mortbay.jetty.security.jaspi.callback.CredentialValidationCallback;
-import org.mortbay.jetty.server.LoginCallback;
 import org.mortbay.jetty.server.UserIdentity;
 
 /**

@@ -30,7 +30,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.http.security.B64Code;
 import org.mortbay.jetty.http.security.Constraint;
-import org.mortbay.jetty.security.LoginCallbackImpl;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
 import org.mortbay.jetty.security.Authentication;

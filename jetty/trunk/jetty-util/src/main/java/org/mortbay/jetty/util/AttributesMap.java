@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /* ------------------------------------------------------------ */
 /** AttributesMap.
@@ -111,5 +112,10 @@ public class AttributesMap implements Attributes
         return _map.toString();
     }
     
+    /* ------------------------------------------------------------ */
+    public Set<String> keySet()
+    {
+        return _map.keySet();
+    }
 
 }

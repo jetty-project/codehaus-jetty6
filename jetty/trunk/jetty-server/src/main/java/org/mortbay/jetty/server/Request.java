@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.security.auth.login.LoginException;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
@@ -47,6 +48,7 @@ import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.mortbay.jetty.http.HttpFields;
@@ -1865,6 +1867,35 @@ public class Request implements HttpServletRequest
         return (_handled?"[":"(")+getMethod()+" "+_uri+(_handled?"]@":")@")+hashCode()+" "+super.toString();
     }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @see javax.servlet.http.HttpServletRequest#login(javax.servlet.http.HttpServletResponse)
+     */
+    public boolean login(HttpServletResponse response) throws IOException, LoginException
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @see javax.servlet.http.HttpServletRequest#login(java.lang.String, java.lang.String)
+     */
+    public void login(String username, String password) throws LoginException
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @see javax.servlet.http.HttpServletRequest#logout()
+     */
+    public void logout() throws LoginException
+    {
+        // TODO Auto-generated method stub
+        
+    }    
     
 }
 

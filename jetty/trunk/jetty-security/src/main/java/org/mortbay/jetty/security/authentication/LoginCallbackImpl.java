@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.mortbay.jetty.security;
+package org.mortbay.jetty.security.authentication;
 
 import java.security.Principal;
 import java.util.Arrays;
@@ -26,7 +26,6 @@ import java.util.List;
 
 import javax.security.auth.Subject;
 
-import org.mortbay.jetty.server.LoginCallback;
 import org.mortbay.jetty.server.UserIdentity;
 
 /**

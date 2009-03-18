@@ -42,7 +42,7 @@ import javax.servlet.http.HttpSessionBindingListener;
 import org.mortbay.jetty.http.security.Constraint;
 import org.mortbay.jetty.http.security.Password;
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
-import org.mortbay.jetty.security.LoginCallbackImpl;
+import org.mortbay.jetty.security.authentication.LoginCallbackImpl;
 import org.mortbay.jetty.util.StringUtil;
 import org.mortbay.jetty.util.URIUtil;
 import org.mortbay.jetty.util.log.Log;
