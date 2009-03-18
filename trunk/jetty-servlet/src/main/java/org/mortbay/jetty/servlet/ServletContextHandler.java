@@ -366,8 +366,8 @@ public class ServletContextHandler extends ContextHandler
 
             final ServletHandler handler = ServletContextHandler.this.getServletHandler();
             final FilterHolder holder= handler.newFilterHolder();
-            holder.setHeldClass(filterClass);
             holder.setName(filterName);
+            holder.setHeldClass(filterClass);
             handler.addFilter(holder);
             return holder.getRegistration();
         }
@@ -383,12 +383,30 @@ public class ServletContextHandler extends ContextHandler
 
             final ServletHandler handler = ServletContextHandler.this.getServletHandler();
             final FilterHolder holder= handler.newFilterHolder();
-            holder.setClassName(className);
             holder.setName(filterName);
+            holder.setClassName(className);
             handler.addFilter(holder);
             return holder.getRegistration();
         }
 
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#addFilter(java.lang.String, javax.servlet.Filter)
+         */
+        public FilterRegistration addFilter(String filterName, Filter filter)
+        {
+            if (isStarted())
+                throw new IllegalStateException();
+
+            final ServletHandler handler = ServletContextHandler.this.getServletHandler();
+            final FilterHolder holder= handler.newFilterHolder();
+            holder.setName(filterName);
+            holder.setFilter(filter);
+            handler.addFilter(holder);
+            return holder.getRegistration();
+        }
+        
         /* ------------------------------------------------------------ */
         /**
          * @see javax.servlet.ServletContext#addServlet(java.lang.String, java.lang.Class)
@@ -400,8 +418,8 @@ public class ServletContextHandler extends ContextHandler
 
             final ServletHandler handler = ServletContextHandler.this.getServletHandler();
             final ServletHolder holder= handler.newServletHolder();
-            holder.setHeldClass(servletClass);
             holder.setName(servletName);
+            holder.setHeldClass(servletClass);
             handler.addServlet(holder);
             return holder.getRegistration();
         }
@@ -417,8 +435,25 @@ public class ServletContextHandler extends ContextHandler
 
             final ServletHandler handler = ServletContextHandler.this.getServletHandler();
             final ServletHolder holder= handler.newServletHolder();
-            holder.setClassName(className);
             holder.setName(servletName);
+            holder.setClassName(className);
+            handler.addServlet(holder);
+            return holder.getRegistration();
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#addServlet(java.lang.String, javax.servlet.Servlet)
+         */
+        public ServletRegistration addServlet(String servletName, Servlet servlet)
+        {
+            if (!isStarting())
+                throw new IllegalStateException();
+
+            final ServletHandler handler = ServletContextHandler.this.getServletHandler();
+            final ServletHolder holder= handler.newServletHolder();
+            holder.setName(servletName);
+            holder.setServlet(servlet);
             handler.addServlet(holder);
             return holder.getRegistration();
         }
@@ -463,25 +498,8 @@ public class ServletContextHandler extends ContextHandler
             Log.warn("Not Implemented");
             return null;
         }
+        
 
-        /* ------------------------------------------------------------ */
-        /**
-         * @see javax.servlet.ServletContext#getSessionCookieConfig()
-         */
-        public SessionCookieConfig getSessionCookieConfig()
-        {
-            Log.warn("Not Implemented");
-            return null;
-        }
-
-        /* ------------------------------------------------------------ */
-        /**
-         * @see javax.servlet.ServletContext#setSessionTrackingModes(java.util.EnumSet)
-         */
-        public void setSessionTrackingModes(EnumSet<SessionTrackingMode> sessionTrackingModes)
-        {
-            Log.warn("Not Implemented");
-        }
 
     }
 }

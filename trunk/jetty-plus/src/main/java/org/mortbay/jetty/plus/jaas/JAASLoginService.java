@@ -38,7 +38,6 @@ import org.mortbay.jetty.security.DefaultIdentityService;
 import org.mortbay.jetty.security.IdentityService;
 import org.mortbay.jetty.security.LoginService;
 import org.mortbay.jetty.security.ServerAuthException;
-import org.mortbay.jetty.server.LoginCallback;
 import org.mortbay.jetty.server.UserIdentity;
 import org.mortbay.jetty.util.component.AbstractLifeCycle;
 import org.mortbay.jetty.util.log.Log;

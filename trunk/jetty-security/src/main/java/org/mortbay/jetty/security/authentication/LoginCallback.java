@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.mortbay.jetty.server;
+package org.mortbay.jetty.security.authentication;
 
 import java.security.Principal;
 

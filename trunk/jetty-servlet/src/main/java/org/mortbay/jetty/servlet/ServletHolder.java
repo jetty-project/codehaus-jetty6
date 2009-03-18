@@ -36,6 +36,7 @@ import org.mortbay.jetty.security.IdentityService;
 import org.mortbay.jetty.security.RunAsToken;
 import org.mortbay.jetty.server.Request;
 import org.mortbay.jetty.server.UserIdentity;
+import org.mortbay.jetty.util.Attributes;
 import org.mortbay.jetty.util.log.Log;
 
 
@@ -60,6 +61,7 @@ public class ServletHolder extends Holder implements UserIdentity.Scope, Compara
     private String _runAsRole;
     private RunAsToken _runAsToken;
     private IdentityService _identityService;
+    
     
     private transient Servlet _servlet;
     private transient Config _config;
@@ -547,7 +549,7 @@ public class ServletHolder extends Holder implements UserIdentity.Scope, Compara
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    class Config implements ServletConfig
+    protected class Config extends HolderConfig implements ServletConfig
     {   
         /* -------------------------------------------------------- */
         public String getServletName()
@@ -555,82 +557,34 @@ public class ServletHolder extends Holder implements UserIdentity.Scope, Compara
             return getName();
         }
         
-        /* -------------------------------------------------------- */
-        public ServletContext getServletContext()
-        {
-            return _servletHandler.getServletContext();
-        }
-
-        /* -------------------------------------------------------- */
-        public String getInitParameter(String param)
-        {
-            return ServletHolder.this.getInitParameter(param);
-        }
-    
-        /* -------------------------------------------------------- */
-        public Enumeration getInitParameterNames()
-        {
-            return ServletHolder.this.getInitParameterNames();
-        }
     }
 
     /* -------------------------------------------------------- */
     /* -------------------------------------------------------- */
     /* -------------------------------------------------------- */
+    protected class Registration extends HolderRegistration implements ServletRegistration
+    {
+        public boolean addMapping(String... urlPatterns)
+        {
+            illegalStateIfContextStarted();
+            ServletMapping mapping = new ServletMapping();
+            mapping.setServletName(ServletHolder.this.getName());
+            mapping.setPathSpecs(urlPatterns);
+            _servletHandler.addServletMapping(mapping);
+            return true;
+        }
+        
+        public boolean setLoadOnStartup(int loadOnStartup)
+        {
+            illegalStateIfContextStarted();
+            ServletHolder.this.setInitOrder(loadOnStartup);
+            return false;
+        }
+    }
+    
     public ServletRegistration getRegistration()
     {
-        return new ServletRegistration()
-        {
-
-            public boolean addMapping(String... urlPatterns)
-            {
-                illegalStateIfContextStarted();
-                ServletMapping mapping = new ServletMapping();
-                mapping.setServletName(ServletHolder.this.getName());
-                mapping.setPathSpecs(urlPatterns);
-                _servletHandler.addServletMapping(mapping);
-                return true;
-            }
-
-            public boolean setAsyncSupported(boolean isAsyncSupported)
-            {
-                illegalStateIfContextStarted();
-                ServletHolder.this.setAsyncSupported(isAsyncSupported);
-                return true;
-            }
-
-            public boolean setDescription(String description)
-            {
-                return true;
-            }
-
-            public boolean setInitParameter(String name, String value)
-            {
-                illegalStateIfContextStarted();
-                if (ServletHolder.this.getInitParameter(name)!=null)
-                    return false;
-                ServletHolder.this.setInitParameter(name,value);
-                return true;
-            }
-
-            public boolean setInitParameters(Map<String, String> initParameters)
-            {
-                illegalStateIfContextStarted();
-                for (String name : initParameters.keySet())
-                    if (ServletHolder.this.getInitParameter(name)!=null)
-                        return false;
-                ServletHolder.this.setInitParameters(initParameters);
-                return true;
-            }
-            
-            public boolean setLoadOnStartup(int loadOnStartup)
-            {
-                illegalStateIfContextStarted();
-                ServletHolder.this.setInitOrder(loadOnStartup);
-                return false;
-            }
-            
-        };
+        return new Registration();
     }
     
     /* -------------------------------------------------------- */

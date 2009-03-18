@@ -1870,6 +1870,38 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             Log.warn("Use servlet Context");
         }
 
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#addFilter(java.lang.String, javax.servlet.Filter)
+         */
+        public FilterRegistration addFilter(String filterName, Filter filter)
+        {
+            Log.warn("Use servlet Context");
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#addServlet(java.lang.String, javax.servlet.Servlet)
+         */
+        public ServletRegistration addServlet(String servletName, Servlet servlet)
+        {
+            Log.warn("Use servlet Context");
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @see javax.servlet.ServletContext#setSessionTrackingModes(java.util.Set)
+         */
+        public void setSessionTrackingModes(Set<SessionTrackingMode> sessionTrackingModes)
+        {
+            // TODO Auto-generated method stub
+            Log.warn("Not implemented");
+            
+        }
+
+        
     }
 
 }

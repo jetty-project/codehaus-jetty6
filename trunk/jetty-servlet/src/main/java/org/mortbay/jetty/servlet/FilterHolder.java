@@ -137,101 +137,58 @@ public class FilterHolder extends Holder
         return getName();
     }
     
+
     public FilterRegistration getRegistration()
     {
-        return new FilterRegistration()
+        return new Registration();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    protected class Registration extends HolderRegistration implements FilterRegistration
+    {
+        /* ------------------------------------------------------------ */
+        public boolean addMappingForServletNames(EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... servletNames)
         {
-            /* ------------------------------------------------------------ */
-            public boolean addMappingForServletNames(EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... servletNames)
-            {
-                illegalStateIfContextStarted();
-                FilterMapping mapping = new FilterMapping();
-                mapping.setFilterHolder(FilterHolder.this);
-                mapping.setServletNames(servletNames);
-                mapping.setDispatcherTypes(dispatcherTypes);
-                if (isMatchAfter)
-                    _servletHandler.addFilterMapping(mapping);
-                else
-                    _servletHandler.prependFilterMapping(mapping);
+            illegalStateIfContextStarted();
+            FilterMapping mapping = new FilterMapping();
+            mapping.setFilterHolder(FilterHolder.this);
+            mapping.setServletNames(servletNames);
+            mapping.setDispatcherTypes(dispatcherTypes);
+            if (isMatchAfter)
+                _servletHandler.addFilterMapping(mapping);
+            else
+                _servletHandler.prependFilterMapping(mapping);
 
-                return true;
-            }
+            return true;
+        }
 
-            public boolean addMappingForUrlPatterns(EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... urlPatterns)
-            {
-                illegalStateIfContextStarted();
-                FilterMapping mapping = new FilterMapping();
-                mapping.setFilterHolder(FilterHolder.this);
-                mapping.setPathSpecs(urlPatterns);
-                mapping.setDispatcherTypes(dispatcherTypes);
-                if (isMatchAfter)
-                    _servletHandler.addFilterMapping(mapping);
-                else
-                    _servletHandler.prependFilterMapping(mapping);
-                return true;
-            }
+        public boolean addMappingForUrlPatterns(EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... urlPatterns)
+        {
+            illegalStateIfContextStarted();
+            FilterMapping mapping = new FilterMapping();
+            mapping.setFilterHolder(FilterHolder.this);
+            mapping.setPathSpecs(urlPatterns);
+            mapping.setDispatcherTypes(dispatcherTypes);
+            if (isMatchAfter)
+                _servletHandler.addFilterMapping(mapping);
+            else
+                _servletHandler.prependFilterMapping(mapping);
+            return true;
+        }
 
-            public boolean setAsyncSupported(boolean isAsyncSupported)
-            {
-                illegalStateIfContextStarted();
-                FilterHolder.this.setAsyncSupported(isAsyncSupported);
-                return true;
-            }
-
-            public boolean setDescription(String description)
-            {
-                illegalStateIfContextStarted();
-                return true;
-            }
-
-            public boolean setInitParameter(String name, String value)
-            {
-                illegalStateIfContextStarted();
-                if (FilterHolder.this.getInitParameter(name)!=null)
-                    return false;
-                FilterHolder.this.setInitParameter(name,value);
-                return true;
-            }
-
-            public boolean setInitParameters(Map<String, String> initParameters)
-            {
-                illegalStateIfContextStarted();
-                for (String name : initParameters.keySet())
-                    if (FilterHolder.this.getInitParameter(name)!=null)
-                        return false;
-                FilterHolder.this.setInitParameters(initParameters);
-                return true;
-            }
-        };
     }
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    class Config implements FilterConfig
+    class Config extends HolderConfig implements FilterConfig
     {
         /* ------------------------------------------------------------ */
         public String getFilterName()
         {
             return _name;
-        }
-
-        /* ------------------------------------------------------------ */
-        public ServletContext getServletContext()
-        {
-            return _servletHandler.getServletContext();
-        }
-
-        /* -------------------------------------------------------- */
-        public String getInitParameter(String param)
-        {
-            return FilterHolder.this.getInitParameter(param);
-        }
-
-        /* -------------------------------------------------------- */
-        public Enumeration getInitParameterNames()
-        {
-            return FilterHolder.this.getInitParameterNames();
         }
     }
 }
