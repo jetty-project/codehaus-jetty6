@@ -1,0 +1,38 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.mortbay.jetty</groupId>
+    <artifactId>jetty-enhanced-parent</artifactId>
+    <version>7.0-SNAPSHOT</version>
+  </parent>  
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.mortbay.jetty.example</groupId>
+  <artifactId>async-rest-example-webapp</artifactId>
+  <packaging>war</packaging>
+  <name>Jetty Example :: Async Rest Webapp</name>
+  <dependencies>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-client</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <finalName>async-rest-example-webapp</finalName>
+     <plugins>
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>${project.version}</version>
+        <configuration>
+          <contextPath>/</contextPath>
+          <scanIntervalSeconds>10</scanIntervalSeconds>
+        </configuration>
+  	  </plugin>
+  	</plugins>  
+  </build>
+</project>
