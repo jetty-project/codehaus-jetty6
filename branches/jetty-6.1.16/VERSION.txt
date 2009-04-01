@@ -1,4 +1,4 @@
-jetty-6.1-SNAPSHOT
+jetty-6.1.16 1 April 2009
  + JETTY-702 Create "jetty-tasks.xml" for the Ant plugin
  + JETTY-899 Standardize location for configuration files which go into etc
  + JETTY-944 Lazy messages don't prevent long polls waiting
