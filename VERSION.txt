@@ -12,6 +12,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-959 CGI servlet doesn't kill the CGI in case the client disconnects
  + JETTY-964 Typo in Jetty 6.1.15 Manifest - Bundle-RequiredExcutionEnvironment
  + JETTY-972 Move cometd code back from cometd.org project (temporarily)
+ + JETTY-973 Deliver same message to a collection of cometd Clients
 
 jetty-6.1.15 4 March 2009
  + JETTY-931 Fix issue with jetty-rewrite.xml
