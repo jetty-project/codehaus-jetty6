@@ -1,6 +1,7 @@
 jetty-6.1.16 1 April 2009
  + JETTY-702 Create "jetty-tasks.xml" for the Ant plugin
  + JETTY-899 Standardize location for configuration files which go into etc
+ + JETTY-936 Allow dispatch to welcome files that are servlets
  + JETTY-944 Lazy messages don't prevent long polls waiting
  + JETTY-946 Redeploys with maven jetty plugin of webapps with overlays don't work
  + JETTY-947 Exception stops terracotta session scavenger
