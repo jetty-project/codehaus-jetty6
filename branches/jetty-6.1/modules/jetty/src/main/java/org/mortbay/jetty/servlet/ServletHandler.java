@@ -221,6 +221,15 @@ public class ServletHandler extends AbstractHandler
     }
     
     /* ------------------------------------------------------------ */
+    /** Whether there is a ServletHolder that matches this path
+     * @param pathInContext Path within _context.
+     * @return whether there is a ServletHolder that matches this path
+     */
+    public boolean matchesPath(String pathInContext)
+    {
+        return _servletPathMap.containsMatch(pathInContext);
+    }
+    /* ------------------------------------------------------------ */
     /**
      * @return A {@link RequestDispatcher dispatcher} wrapping the resource at <code>uriInContext</code>,
      *  or <code>null</code> if the specified uri cannot be dispatched to.
