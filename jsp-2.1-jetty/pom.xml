@@ -129,8 +129,8 @@
     </dependency>
   </dependencies>
   <properties>
-     <!-- matches glassfish version SJSAS-9_1_1-B51-18_Sept_2008 -->
-     <glassfish-version-tag>9.1.1.B51.p0</glassfish-version-tag>
+     <!-- matches glassfish version SJSAS-9_1_1-B60E-23_Dec_2008 -->
+     <glassfish-version-tag>9.1.1.B60.25.p0</glassfish-version-tag>
      <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
   </properties>
 </project>
