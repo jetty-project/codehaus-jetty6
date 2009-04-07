@@ -20,7 +20,6 @@
     <module>jaas-example-webapp</module>
     <module>jetty-ajp</module>
     <module>jetty-annotation-example-webapp</module>
-    <module>jetty-embedded</module>
     <module>jetty-example-webapp</module>
     <module>jetty-extra-example-webapp</module>
     <module>jetty-html</module>
