@@ -16,20 +16,22 @@
 package org.mortbay.jetty.plugin;
 
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.RequestLog;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.UserRealm;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.handler.DefaultHandler;
-import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.handler.RequestLogHandler;
-import org.mortbay.jetty.nio.SelectChannelConnector;
+import java.util.Arrays;
+
+import org.eclipse.jetty.security.LoginService;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.RequestLog;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.RequestLogHandler;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.PluginLog;
-import org.mortbay.jetty.util.resource.Resource;
-import org.mortbay.jetty.webapp.WebAppContext;
 
 /**
  * Jetty6PluginServer
@@ -51,7 +53,7 @@ public class Jetty6PluginServer implements JettyPluginServer
     
     
     /**
-     * @see org.mortbay.jetty.plugin.util.JettyPluginServer#create()
+     * @see org.eclipse.jetty.server.plugin.JettyPluginServer#create()
      */
     public Jetty6PluginServer()
     {
@@ -62,7 +64,7 @@ public class Jetty6PluginServer implements JettyPluginServer
     }
 
     /**
-     * @see org.mortbay.jetty.plugin.util.JettyPluginServer#setConnectorNames(org.mortbay.jetty.plugin.util.JettyPluginConnector[])
+     * @see org.eclipse.jetty.server.plugin.JettyPluginServer#setConnectorNames(org.mortbay.jetty.plugin.util.JettyPluginConnector[])
      */
     public void setConnectors(Object[] connectors)
     {
@@ -82,7 +84,7 @@ public class Jetty6PluginServer implements JettyPluginServer
     /**
      *
      * 
-     * @see org.mortbay.jetty.plugin.util.JettyPluginServer#getConnectors()
+     * @see org.eclipse.jetty.server.plugin.JettyPluginServer#getConnectors()
      */
     public Object[] getConnectors()
     {
@@ -92,24 +94,27 @@ public class Jetty6PluginServer implements JettyPluginServer
     /**
      * 
      * 
-     * @see org.mortbay.jetty.plugin.JettyPluginServer#setLoginServices(java.Object[])
+     * @see org.eclipse.jetty.server.plugin.JettyPluginServer#setLoginServices(java.Object[])
      */
     public void setUserRealms(Object[] realms) throws Exception
     {
         if (realms == null)
             return;
- 
+        
+        for (Object o : this.server.getBeans(LoginService.class))
+            this.server.removeBean(o);
+        
          for (int i=0; i<realms.length;i++)
-             this.server.addLoginService((UserRealm)realms[i]);
+             this.server.addBean(realms[i]);
     }
 
     /**
      * 
-     * @see org.mortbay.jetty.plugin.util.JettyPluginServer#getLoginServices()
+     * @see org.eclipse.jetty.server.plugin.JettyPluginServer#getLoginServices()
      */
     public Object[] getUserRealms()
     {
-        return this.server.getUserRealms();
+        return this.server.getBeans(LoginService.class).toArray();
     }
 
     
@@ -124,7 +129,7 @@ public class Jetty6PluginServer implements JettyPluginServer
     }
 
     /**
-     * @see org.mortbay.jetty.plugin.util.JettyPluginServer#start()
+     * @see org.eclipse.jetty.server.plugin.JettyPluginServer#start()
      */
     public void start() throws Exception
     {
@@ -133,7 +138,7 @@ public class Jetty6PluginServer implements JettyPluginServer
     }
 
     /**
-     * @see org.mortbay.jetty.plugin.util.Proxy#getProxiedObject()
+     * @see org.eclipse.jetty.server.plugin.Proxy#getProxiedObject()
      */
     public Object getProxiedObject()
     { 
@@ -141,7 +146,7 @@ public class Jetty6PluginServer implements JettyPluginServer
     }
 
     /**
-     * @see org.mortbay.jetty.plugin.util.JettyPluginServer#addWebApplication(java.lang.Object)
+     * @see org.eclipse.jetty.server.plugin.JettyPluginServer#addWebApplication(java.lang.Object)
      */
     public void addWebApplication(WebAppContext webapp) throws Exception
     {  
@@ -185,7 +190,7 @@ public class Jetty6PluginServer implements JettyPluginServer
     
     
     /**
-     * @see org.mortbay.jetty.plugin.JettyPluginServer#createDefaultConnector()
+     * @see org.eclipse.jetty.server.plugin.JettyPluginServer#createDefaultConnector()
      */
     public Object createDefaultConnector(String portnum) throws Exception
     {

@@ -24,15 +24,12 @@ import java.net.URLClassLoader;
 import java.util.Iterator;
 import java.util.List;
 
-import org.mortbay.jetty.plus.annotation.InjectionCollection;
-import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
-import org.mortbay.jetty.plus.annotation.RunAsCollection;
-import org.mortbay.jetty.annotations.Configuration;
-import org.mortbay.jetty.servlet.FilterHolder;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.util.LazyList;
-import org.mortbay.jetty.util.log.Log;
-import org.mortbay.jetty.webapp.WebAppClassLoader;
+import org.eclipse.jetty.annotations.Configuration;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.LazyList;
+import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.webapp.WebAppClassLoader;
 
 public class Jetty6MavenConfiguration extends Configuration 
 {
@@ -56,7 +53,7 @@ public class Jetty6MavenConfiguration extends Configuration
     
     
     /** Set up the classloader for the webapp, using the various parts of the Maven project
-     * @see org.mortbay.jetty.webapp.Configuration#configureClassLoader()
+     * @see org.eclipse.jetty.webapp.Configuration#configureClassLoader()
      */
     public void configureClassLoader() throws Exception 
     {
