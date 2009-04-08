@@ -18,12 +18,12 @@ package org.mortbay.jetty.plugin;
 import java.io.File;
 import java.util.List;
 
-import org.mortbay.jetty.plus.webapp.EnvConfiguration;
-import org.mortbay.jetty.webapp.Configuration;
-import org.mortbay.jetty.webapp.JettyWebXmlConfiguration;
-import org.mortbay.jetty.webapp.TagLibConfiguration;
-import org.mortbay.jetty.webapp.WebAppContext;
-import org.mortbay.jetty.webapp.WebInfConfiguration;
+import org.eclipse.jetty.plus.webapp.EnvConfiguration;
+import org.eclipse.jetty.webapp.Configuration;
+import org.eclipse.jetty.webapp.JettyWebXmlConfiguration;
+import org.eclipse.jetty.webapp.TagLibConfiguration;
+import org.eclipse.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.webapp.WebInfConfiguration;
 
 /**
  * Jetty6PluginWebAppContext

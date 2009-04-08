@@ -29,13 +29,14 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-import org.mortbay.jetty.Server;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.util.Scanner;
 import org.mortbay.jetty.plugin.util.ConsoleScanner;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
+import org.mortbay.jetty.plugin.util.Monitor;
 import org.mortbay.jetty.plugin.util.PluginLog;
 import org.mortbay.jetty.plugin.util.SystemProperties;
 import org.mortbay.jetty.plugin.util.SystemProperty;
-import org.mortbay.jetty.util.Scanner;
 
 
 
@@ -444,7 +445,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             
             if(stopPort>0 && stopKey!=null)
             {
-                org.mortbay.jetty.plugin.util.Monitor monitor = new org.mortbay.jetty.plugin.util.Monitor(stopPort, stopKey, new Server[]{(Server)server.getProxiedObject()}, !daemon);
+                Monitor monitor = new Monitor(stopPort, stopKey, new Server[]{(Server)server.getProxiedObject()}, !daemon);
                 monitor.start();
             }
             
