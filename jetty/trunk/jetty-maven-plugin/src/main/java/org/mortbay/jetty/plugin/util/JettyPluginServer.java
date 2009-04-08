@@ -15,7 +15,7 @@
 
 package org.mortbay.jetty.plugin.util;
 
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
  * JettyPluginServer

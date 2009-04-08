@@ -24,7 +24,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import org.mortbay.jetty.Server;
+import org.eclipse.jetty.server.Server;
 
 
 

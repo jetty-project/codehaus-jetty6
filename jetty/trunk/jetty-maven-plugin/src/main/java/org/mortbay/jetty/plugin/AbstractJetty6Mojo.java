@@ -15,11 +15,11 @@
 
 package org.mortbay.jetty.plugin;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.RequestLog;
+import org.eclipse.jetty.security.LoginService;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.RequestLog;
+import org.eclipse.jetty.xml.XmlConfiguration;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
-import org.mortbay.jetty.xml.XmlConfiguration;
-import org.mortbay.jetty.UserRealm;
 
 /**
  * AbstractJetty6Mojo
@@ -43,7 +43,7 @@ public abstract class AbstractJetty6Mojo extends AbstractJettyMojo
      * List of security realms to set up. Optional.
      * @parameter
      */
-    private UserRealm[] loginServices;
+    private LoginService[] loginServices;
     
     
 
@@ -65,7 +65,7 @@ public abstract class AbstractJetty6Mojo extends AbstractJettyMojo
     }
 
     /**
-     * @see org.mortbay.jetty.plugin.AbstractJettyMojo#getConfiguredConnectors()
+     * @see org.eclipse.jetty.server.plugin.AbstractJettyMojo#getConfiguredConnectors()
      */
     public Object[] getConfiguredConnectors()
     {
@@ -92,7 +92,7 @@ public abstract class AbstractJetty6Mojo extends AbstractJettyMojo
 
    
     /**
-     * @see org.mortbay.jetty.plugin.AbstractJettyMojo#createServer()
+     * @see org.eclipse.jetty.server.plugin.AbstractJettyMojo#createServer()
      */
     public JettyPluginServer createServer() throws Exception
     {

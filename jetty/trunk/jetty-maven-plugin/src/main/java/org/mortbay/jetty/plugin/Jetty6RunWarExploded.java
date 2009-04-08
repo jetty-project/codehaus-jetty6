@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.mortbay.jetty.util.Scanner;
+import org.eclipse.jetty.util.Scanner;
 
 /**
  * 
@@ -63,7 +63,7 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
 
     /**
      * 
-     * @see org.mortbay.jetty.plugin.AbstractJettyMojo#checkPomConfiguration()
+     * @see org.eclipse.jetty.server.plugin.AbstractJettyMojo#checkPomConfiguration()
      */
     public void checkPomConfiguration() throws MojoExecutionException
     {
@@ -71,7 +71,7 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
     }
 
     /**
-     * @see org.mortbay.jetty.plugin.AbstractJettyMojo#configureScanner()
+     * @see org.eclipse.jetty.server.plugin.AbstractJettyMojo#configureScanner()
      */
     public void configureScanner() throws MojoExecutionException
     {
@@ -149,7 +149,7 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
 
         
     /* (non-Javadoc)
-     * @see org.mortbay.jetty.plugin.util.AbstractJettyMojo#finishConfigurationBeforeStart()
+     * @see org.eclipse.jetty.server.plugin.AbstractJettyMojo#finishConfigurationBeforeStart()
      */
     public void finishConfigurationBeforeStart() throws Exception
     {

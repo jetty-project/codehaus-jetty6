@@ -17,16 +17,16 @@ package org.mortbay.jetty.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.RequestLog;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.UserRealm;
-import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.handler.HandlerCollection;
+import org.eclipse.jetty.security.LoginService;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.RequestLog;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.xml.XmlConfiguration;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
-import org.mortbay.jetty.xml.XmlConfiguration;
 
 /**
  *  <p>
@@ -82,7 +82,7 @@ public class Jetty6RunMojo extends AbstractJettyRunMojo
      * List of security realms to set up. Optional.
      * @parameter
      */
-    private UserRealm[] loginServices;
+    private LoginService[] loginServices;
     
 
 
@@ -104,7 +104,7 @@ public class Jetty6RunMojo extends AbstractJettyRunMojo
     /**
      * 
      * 
-     * @see org.mortbay.jetty.plugin.AbstractJettyRunMojo#getConfiguredConnectors()
+     * @see org.eclipse.jetty.server.plugin.AbstractJettyRunMojo#getConfiguredConnectors()
      */
     public Object[] getConfiguredConnectors()
     {
@@ -137,7 +137,7 @@ public class Jetty6RunMojo extends AbstractJettyRunMojo
     /**
      *
      * 
-     * @see org.mortbay.jetty.plugin.AbstractJettyRunMojo#createServer()
+     * @see org.eclipse.jetty.server.plugin.AbstractJettyRunMojo#createServer()
      */
     public JettyPluginServer createServer()
     {

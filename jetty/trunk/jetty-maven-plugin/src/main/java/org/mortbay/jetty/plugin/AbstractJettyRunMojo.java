@@ -27,10 +27,10 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.util.FileUtils;
+import org.eclipse.jetty.util.Scanner;
+import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.resource.ResourceCollection;
 import org.mortbay.jetty.plugin.util.ScanTargetPattern;
-import org.mortbay.jetty.util.Scanner;
-import org.mortbay.jetty.util.resource.Resource;
-import org.mortbay.jetty.util.resource.ResourceCollection;
 
 /**
  * AbstractJettyRunMojo
@@ -214,7 +214,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
     /**
      * Verify the configuration given in the pom.
      * 
-     * @see org.mortbay.jetty.plugin.AbstractJettyMojo#checkPomConfiguration()
+     * @see org.eclipse.jetty.server.plugin.AbstractJettyMojo#checkPomConfiguration()
      */
     public void checkPomConfiguration () throws MojoExecutionException
     {
