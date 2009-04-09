@@ -15,7 +15,7 @@
 /**
  * 
  */
-package org.mortbay.jetty.plugin.util;
+package org.mortbay.jetty.plugin;
 
 import java.io.IOException;
 

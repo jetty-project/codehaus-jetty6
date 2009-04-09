@@ -1,5 +1,5 @@
 //========================================================================
-//$Id: Jetty6DeployWar.java 2301 2008-01-04 05:19:03Z janb $
+//$Id: $
 //Copyright 2000-2009 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,6 +38,6 @@ package org.mortbay.jetty.plugin;
  * @description Deploy a pre-assembled war
  * 
  */
-public class Jetty6DeployWar extends Jetty6RunWar
+public class JettyDeployWar extends JettyRunWarMojo
 {
 }

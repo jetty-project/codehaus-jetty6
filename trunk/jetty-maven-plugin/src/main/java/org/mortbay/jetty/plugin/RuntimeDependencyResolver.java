@@ -1,6 +1,6 @@
 //========================================================================
 //$Id$
-//Copyright 2000-2004 Mort Bay Consulting Pty. Ltd.
+//Copyright 2000-2009 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.apache.maven.project.artifact.MavenMetadataSource;
-import org.mortbay.jetty.plugin.util.PluginLog;
 
 /**
  * RuntimeDependencyResolver
