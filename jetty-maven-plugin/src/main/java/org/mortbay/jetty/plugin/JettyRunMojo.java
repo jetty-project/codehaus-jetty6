@@ -1,6 +1,6 @@
 //========================================================================
 //$Id$
-//Copyright 2000-2004 Mort Bay Consulting Pty. Ltd.
+//Copyright 2000-2009 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.mortbay.jetty.plugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -27,20 +26,45 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.util.FileUtils;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.util.Scanner;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceCollection;
-import org.mortbay.jetty.plugin.util.ScanTargetPattern;
+import org.eclipse.jetty.xml.XmlConfiguration;
 
 /**
- * AbstractJettyRunMojo
+ *  <p>
+ *  This goal is used in-situ on a Maven project without first requiring that the project 
+ *  is assembled into a war, saving time during the development cycle.
+ *  The plugin forks a parallel lifecycle to ensure that the "compile" phase has been completed before invoking Jetty. This means
+ *  that you do not need to explicity execute a "mvn compile" first. It also means that a "mvn clean jetty:run" will ensure that
+ *  a full fresh compile is done before invoking Jetty.
+ *  </p>
+ *  <p>
+ *  Once invoked, the plugin can be configured to run continuously, scanning for changes in the project and automatically performing a 
+ *  hot redeploy when necessary. This allows the developer to concentrate on coding changes to the project using their IDE of choice and have those changes
+ *  immediately and transparently reflected in the running web container, eliminating development time that is wasted on rebuilding, reassembling and redeploying.
+ *  </p>
+ *  <p>
+ *  You may also specify the location of a jetty.xml file whose contents will be applied before any plugin configuration.
+ *  This can be used, for example, to deploy a static webapp that is not part of your maven build. 
+ *  </p>
+ *  <p>
+ *  There is a <a href="run-mojo.html">reference guide</a> to the configuration parameters for this plugin, and more detailed information
+ *  with examples in the <a href="http://docs.codehaus.org/display/JETTY/Maven+Jetty+Plugin">Configuration Guide</a>.
+ *  </p>
  * 
  * 
- * Base class for all jetty versions for the "run" mojo.
- * 
+ * @goal run
+ * @requiresDependencyResolution runtime
+ * @execute phase="test-compile"
+ * @description Runs jetty6 directly from a maven project
  */
-public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
+public class JettyRunMojo extends AbstractJettyMojo
 {
+
+   
 
     /**
      * If true, the &lt;testOutputDirectory&gt;
@@ -139,6 +163,22 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
      * overlays (resources)
      */
     private List _overlays;
+    
+   
+    
+    static boolean isEqual(List list1, List list2)
+    {
+        if(list2==null || list1.size()!=list2.size())
+            return false;
+        
+        for(int i=0; i<list1.size(); i++)
+        {
+            if(!list1.get(i).equals(list2.get(i)))
+                return false;
+        }
+        return true;
+    }
+    
 
     public File getWebXml()
     {
@@ -200,15 +240,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
     {
         this.extraScanTargets = list;
     }
-
-    /**
-     * Run the mojo
-     * @see org.apache.maven.plugin.Mojo#execute()
-     */
-    public void execute() throws MojoExecutionException, MojoFailureException
-    {
-       super.execute();
-    }
+    
     
     
     /**
@@ -356,8 +388,6 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
                     throw new MojoExecutionException(e.getMessage());
                 }
             }
-            
-           
         }
     }
 
@@ -569,18 +599,37 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
         }
         return classPathFiles;
     }
-    
-    static boolean isEqual(List overlays1, List overlays2)
+  
+
+    public void finishConfigurationBeforeStart() throws Exception
     {
-        if(overlays2==null || overlays1.size()!=overlays2.size())
-            return false;
+        HandlerCollection contexts = (HandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
+        if (contexts==null)
+            contexts = (HandlerCollection)server.getChildHandlerByClass(HandlerCollection.class);
         
-        for(int i=0; i<overlays1.size(); i++)
+        for (int i=0; (this.contextHandlers != null) && (i < this.contextHandlers.length); i++)
         {
-            if(!overlays1.get(i).equals(overlays2.get(i)))
-                return false;
+            contexts.addHandler(this.contextHandlers[i]);
         }
-        return true;
     }
 
+   
+ 
+    
+    public void applyJettyXml() throws Exception
+    {
+        if (getJettyXmlFile() == null)
+            return;
+        
+        getLog().info( "Configuring Jetty from xml configuration file = " + getJettyXmlFile() );        
+        XmlConfiguration xmlConfiguration = new XmlConfiguration(getJettyXmlFile().toURL());
+        xmlConfiguration.configure(this.server);   
+    }
+
+
+    
+    public void execute() throws MojoExecutionException, MojoFailureException
+    {
+        super.execute();
+    }
 }

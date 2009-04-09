@@ -31,12 +31,12 @@ import org.eclipse.jetty.util.LazyList;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.webapp.WebAppClassLoader;
 
-public class Jetty6MavenConfiguration extends Configuration 
+public class JettyMavenConfiguration extends Configuration 
 {
     private List classPathFiles;
     private File webXmlFile;
    
-    public Jetty6MavenConfiguration() throws ClassNotFoundException
+    public JettyMavenConfiguration() throws ClassNotFoundException
     {
         super();
     }

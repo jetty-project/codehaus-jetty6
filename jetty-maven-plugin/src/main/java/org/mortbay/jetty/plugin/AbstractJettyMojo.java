@@ -29,14 +29,12 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.eclipse.jetty.security.LoginService;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.RequestLog;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.util.Scanner;
-import org.mortbay.jetty.plugin.util.ConsoleScanner;
-import org.mortbay.jetty.plugin.util.JettyPluginServer;
-import org.mortbay.jetty.plugin.util.Monitor;
-import org.mortbay.jetty.plugin.util.PluginLog;
-import org.mortbay.jetty.plugin.util.SystemProperties;
-import org.mortbay.jetty.plugin.util.SystemProperty;
 
 
 
@@ -48,16 +46,50 @@ import org.mortbay.jetty.plugin.util.SystemProperty;
 public abstract class AbstractJettyMojo extends AbstractMojo
 {
     /**
-     * The proxy for the Server object
+     * A wrapper for the Server object
      */
-    protected JettyPluginServer server;
+    protected JettyServer server;
+    
+    /**
+     * List of connectors to use. If none are configured
+     * then the default is a single SelectChannelConnector at port 8080. You can
+     * override this default port number by using the system property jetty.port
+     * on the command line, eg:  mvn -Djetty.port=9999 jetty:run
+     * 
+     * @parameter 
+     */
+    protected Connector[] connectors;
+    
+    
+    /**
+     * List of other contexts to set up. Optional.
+     * @parameter
+     */
+    protected ContextHandler[] contextHandlers;
+    
+    
+    /**
+     * List of security realms to set up. Optional.
+     * @parameter
+     */
+    protected LoginService[] loginServices;
+    
 
+
+    /**
+     * A RequestLog implementation to use for the webapp at runtime.
+     * Optional.
+     * @parameter
+     */
+    protected RequestLog requestLog;
+    
+    
 
     /**
      * The "virtual" webapp created by the plugin
      * @parameter
      */
-    protected Jetty6PluginWebAppContext webAppConfig;
+    protected JettyWebAppContext webAppConfig;
 
 
 
@@ -177,20 +209,20 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     protected String stopKey;
 
     /**
- 	 * <p>
- 	 * Determines whether or not the server blocks when started. The default
- 	 * behavior (daemon = false) will cause the server to pause other processes
- 	 * while it continues to handle web requests. This is useful when starting the
- 	 * server with the intent to work with it interactively.
- 	 * </p><p>
- 	 * Often, it is desirable to let the server start and continue running subsequent
- 	 * processes in an automated build environment. This can be facilitated by setting
- 	 * daemon to true.
- 	 * </p>
- 	 * @parameter expression="${jetty.daemon}" default-value="false"
- 	 */
- 	protected boolean daemon;
-    
+     * <p>
+     * Determines whether or not the server blocks when started. The default
+     * behavior (daemon = false) will cause the server to pause other processes
+     * while it continues to handle web requests. This is useful when starting the
+     * server with the intent to work with it interactively.
+     * </p><p>
+     * Often, it is desirable to let the server start and continue running subsequent
+     * processes in an automated build environment. This can be facilitated by setting
+     * daemon to true.
+     * </p>
+     * @parameter expression="${jetty.daemon}" default-value="false"
+     */
+    protected boolean daemon;
+
     /**
      * A scanner to check for changes to the webapp
      */
@@ -214,36 +246,13 @@ public abstract class AbstractJettyMojo extends AbstractMojo
 
     
     public String PORT_SYSPROPERTY = "jetty.port";
-    
-    /**
-     * @return Returns the realms configured in the pom
-     */
-    public abstract Object[] getConfiguredUserRealms();
-    
-    /**
-     * @return Returns the connectors configured in the pom
-     */
-    public abstract Object[] getConfiguredConnectors();
-
-    public abstract Object getConfiguredRequestLog();
-    
+     
 
     public abstract void checkPomConfiguration() throws MojoExecutionException;
     
-    
-    
     public abstract void configureScanner () throws MojoExecutionException;
     
-    
     public abstract void applyJettyXml () throws Exception;
-    
-    
-    /**
-     * create a proxy that wraps a particular jetty version Server object
-     * @return
-     */
-    public abstract JettyPluginServer createServer() throws Exception;
-    
     
     public abstract void finishConfigurationBeforeStart() throws Exception;
     
@@ -339,12 +348,12 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     }
 
 
-    public JettyPluginServer getServer ()
+    public JettyServer getServer ()
     {
         return this.server;
     }
 
-    public void setServer (JettyPluginServer server)
+    public void setServer (JettyServer server)
     {
         this.server = server;
     }
@@ -392,60 +401,59 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             getLog().debug("Starting Jetty Server ...");
 
             printSystemProperties();
-            setServer(createServer());
+            this.server = new JettyServer();
+            setServer(this.server);
 
             //apply any config from a jetty.xml file first which is able to
             //be overwritten by config in the pom.xml
             applyJettyXml ();
 
-            JettyPluginServer plugin=getServer();
-
+          
 
             // if the user hasn't configured their project's pom to use a
             // different set of connectors,
             // use the default
-            Object[] configuredConnectors = getConfiguredConnectors();
-
-            plugin.setConnectors(configuredConnectors);
-            Object[] connectors = plugin.getConnectors();
+           
+            this.server.setConnectors(this.connectors);
+            Connector[] connectors = this.server.getConnectors();
 
             if (connectors == null|| connectors.length == 0)
             {
                 //if a SystemProperty -Djetty.port=<portnum> has been supplied, use that as the default port
-                configuredConnectors = new Object[] { plugin.createDefaultConnector(System.getProperty(PORT_SYSPROPERTY, null)) };
-                plugin.setConnectors(configuredConnectors);
+                this.connectors = new Connector[] { this.server.createDefaultConnector(System.getProperty(PORT_SYSPROPERTY, null)) };
+                this.server.setConnectors(this.connectors);
             }
 
 
             //set up a RequestLog if one is provided
-            if (getConfiguredRequestLog() != null)
-                getServer().setRequestLog(getConfiguredRequestLog());
+            if (this.requestLog != null)
+                getServer().setRequestLog(this.requestLog);
 
             //set up the webapp and any context provided
-            getServer().configureHandlers();
+            this.server.configureHandlers();
             configureWebApplication();
-            getServer().addWebApplication(webAppConfig);
+            this.server.addWebApplication(webAppConfig);
 
 
             // set up security realms
-            Object[] configuredRealms = getConfiguredUserRealms();
-            for (int i = 0; (configuredRealms != null) && i < configuredRealms.length; i++)
-                getLog().debug(configuredRealms[i].getClass().getName() + ": "+ configuredRealms[i].toString());
-
-            plugin.setUserRealms(configuredRealms);
+            for (int i = 0; (this.loginServices != null) && i < this.loginServices.length; i++)
+            {
+                getLog().debug(this.loginServices[i].getClass().getName() + ": "+ this.loginServices[i].toString());
+                getServer().addBean(this.loginServices[i]);
+            }
 
             //do any other configuration required by the
             //particular Jetty version
             finishConfigurationBeforeStart();
 
             // start Jetty
-            server.start();
+            this.server.start();
 
             getLog().info("Started Jetty Server");
             
             if(stopPort>0 && stopKey!=null)
             {
-                Monitor monitor = new Monitor(stopPort, stopKey, new Server[]{(Server)server.getProxiedObject()}, !daemon);
+                Monitor monitor = new Monitor(stopPort, stopKey, new Server[]{server}, !daemon);
                 monitor.start();
             }
             
@@ -491,7 +499,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         //way of doing things
         if (webAppConfig == null)
         {
-            webAppConfig = new Jetty6PluginWebAppContext();
+            webAppConfig = new JettyWebAppContext();
             webAppConfig.setContextPath((getContextPath().startsWith("/") ? getContextPath() : "/"+ getContextPath()));
             if (getTmpDirectory() != null)
                 webAppConfig.setTempDirectory(getTmpDirectory());

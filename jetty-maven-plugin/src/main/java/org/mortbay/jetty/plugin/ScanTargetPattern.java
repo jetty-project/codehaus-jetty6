@@ -13,7 +13,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.plugin.util;
+package org.mortbay.jetty.plugin;
 
 import java.io.File;
 import java.util.Collections;
