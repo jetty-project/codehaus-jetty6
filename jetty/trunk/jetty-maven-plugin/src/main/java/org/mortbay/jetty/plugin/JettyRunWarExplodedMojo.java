@@ -22,6 +22,7 @@ import java.util.List;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.eclipse.jetty.util.Scanner;
+import org.eclipse.jetty.xml.XmlConfiguration;
 
 /**
  * 
@@ -44,7 +45,7 @@ import org.eclipse.jetty.util.Scanner;
  *@goal run-exploded
  *@execute phase=package
  */
-public class Jetty6RunWarExploded extends AbstractJetty6Mojo
+public class JettyRunWarExplodedMojo extends AbstractJettyMojo
 {
 
     
@@ -169,5 +170,19 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
     {
         super.execute();
     }
+
     
+    
+    public void applyJettyXml() throws Exception
+    {
+        
+        if (getJettyXmlFile() == null)
+            return;
+        
+        getLog().info( "Configuring Jetty from xml configuration file = " + getJettyXmlFile() );        
+        XmlConfiguration xmlConfiguration = new XmlConfiguration(getJettyXmlFile().toURL());
+        xmlConfiguration.configure(this.server);   
+    }
+
+  
 }

@@ -1,6 +1,6 @@
 //========================================================================
 //$Id$
-//Copyright 2000-2004 Mort Bay Consulting Pty. Ltd.
+//Copyright 2000-2009 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.List;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.eclipse.jetty.util.Scanner;
+import org.eclipse.jetty.xml.XmlConfiguration;
 
 /**
  * <p>
@@ -47,7 +48,7 @@ import org.eclipse.jetty.util.Scanner;
  * @description Runs jetty6 on a war file
  *
  */
-public class Jetty6RunWar extends AbstractJetty6Mojo
+public class JettyRunWarMojo extends AbstractJettyMojo
 {
 
     /**
@@ -158,7 +159,21 @@ public class Jetty6RunWar extends AbstractJetty6Mojo
         return;
     }
     
-   
+
+    
+    
+    public void applyJettyXml() throws Exception
+    {
+        
+        if (getJettyXmlFile() == null)
+            return;
+        
+        getLog().info( "Configuring Jetty from xml configuration file = " + getJettyXmlFile() );        
+        XmlConfiguration xmlConfiguration = new XmlConfiguration(getJettyXmlFile().toURL());
+        xmlConfiguration.configure(this.server);   
+    }
+
+  
 
     
 }

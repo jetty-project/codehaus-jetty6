@@ -30,24 +30,24 @@ import org.eclipse.jetty.webapp.WebInfConfiguration;
  *
  *
  */
-public class Jetty6PluginWebAppContext extends WebAppContext
+public class JettyWebAppContext extends WebAppContext
 {
     private List classpathFiles;
     private File jettyEnvXmlFile;
     private File webXmlFile;
     private WebInfConfiguration webInfConfig = new WebInfConfiguration();
     private EnvConfiguration envConfig =  new EnvConfiguration();
-    private Jetty6MavenConfiguration mvnConfig;
+    private JettyMavenConfiguration mvnConfig;
     private JettyWebXmlConfiguration jettyWebConfig;
     private TagLibConfiguration tagConfig;
     private Configuration[] configs;
     
-    public Jetty6PluginWebAppContext ()
+    public JettyWebAppContext ()
     throws Exception
     {
         super();
        
-        mvnConfig = new Jetty6MavenConfiguration();
+        mvnConfig = new JettyMavenConfiguration();
         jettyWebConfig = new JettyWebXmlConfiguration();
         tagConfig =  new TagLibConfiguration();
         configs = new Configuration[]{webInfConfig,envConfig, mvnConfig, jettyWebConfig, tagConfig};

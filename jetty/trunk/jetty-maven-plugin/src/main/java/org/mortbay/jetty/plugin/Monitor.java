@@ -14,7 +14,7 @@
 //========================================================================
 
 
-package org.mortbay.jetty.plugin.util;
+package org.mortbay.jetty.plugin;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -25,6 +25,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import org.eclipse.jetty.server.Server;
+
 
 
 
