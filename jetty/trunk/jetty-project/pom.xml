@@ -22,6 +22,12 @@
     <jsp-2-1-version>9.1.1.B60.25.p0</jsp-2-1-version>
   </properties>
 
+  <scm>
+    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</developerConnection>
+    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</url>
+  </scm>
+
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
@@ -32,6 +38,13 @@
           <source>1.5</source>
           <target>1.5</target>
           <verbose>false</verbose>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <tagBase>https://svn.codehaus.org/jetty/jetty/tags</tagBase>
         </configuration>
       </plugin>
     </plugins>
