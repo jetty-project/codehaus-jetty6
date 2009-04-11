@@ -16,6 +16,7 @@
     <module>jetty-maven-plugin</module>
     <module>jetty-runner</module>
     <module>example-jetty-spring</module>
+    <!--module>example-async-rest-webapp</module-->
   </modules>
 </project>
 
