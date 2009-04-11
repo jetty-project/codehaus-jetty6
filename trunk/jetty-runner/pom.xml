@@ -88,7 +88,7 @@
     <repository>
       <id>project-repo</id>
       <name>project repo</name>
-      <url>file:${basedir}/repository</url>
+      <url>file:repository</url>
       <releases>
         <enabled>true</enabled>
       </releases>
