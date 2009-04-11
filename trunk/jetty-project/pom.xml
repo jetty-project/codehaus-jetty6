@@ -18,8 +18,8 @@
 
   <properties>
     <atomikos-version>3.2.3</atomikos-version>
-    <jetty-version>7.0.0.M0</jetty-version>
-    <jsp-2-1-version>9.1.1.B60.25.p0</jsp-2-1-version>
+    <jetty-version>7.0.0.M1-SNAPSHOT</jetty-version>
+    <jsp-2-1-version>9.1.1.B60.25.p1</jsp-2-1-version>
   </properties>
 
   <scm>
@@ -49,4 +49,29 @@
       </plugin>
     </plugins>
   </build>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+         <groupId>javax.servlet</groupId>
+         <artifactId>servlet-api</artifactId>
+         <version>2.5</version>
+       </dependency>
+       <dependency>
+         <groupId>org.eclipse.jetty</groupId>
+         <artifactId>jetty-server</artifactId>
+         <version>${jetty-version}</version>
+       </dependency>
+       <dependency>
+         <groupId>org.eclipse.jetty</groupId>
+         <artifactId>jetty-client</artifactId>
+         <version>${jetty-version}</version>
+       </dependency>
+       <dependency>
+         <groupId>org.eclipse.jetty</groupId>
+         <artifactId>jetty-webapp</artifactId>
+         <version>${jetty-version}</version>
+       </dependency>
+    </dependencies>
+  </dependencyManagement>
+
 </project>
