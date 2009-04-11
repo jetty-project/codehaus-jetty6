@@ -23,9 +23,9 @@
   </properties>
 
   <scm>
-    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</developerConnection>
-    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</url>
+    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk/jetty-project</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk/jetty-project</developerConnection>
+    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk/jetty-project</url>
   </scm>
 
   <build>
