@@ -379,10 +379,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     }
                     catch (CancelledKeyException e)
                     {
-                        if (isRunning())
-                            Log.warn(e);
-                        else
-                            Log.debug(e);
+			Log.ignore(e);
                     }
                 }
                 changes.clear();
