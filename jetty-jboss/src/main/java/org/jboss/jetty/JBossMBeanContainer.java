@@ -16,7 +16,7 @@
 package org.jboss.jetty;
 
 import javax.management.MBeanServer;
-import org.mortbay.management.MBeanContainer;
+import org.eclipse.jetty.jmx.MBeanContainer;
 
 
 /**

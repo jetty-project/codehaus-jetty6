@@ -14,9 +14,9 @@
 //========================================================================
 
 package org.mortbay.jetty.servlet.jsr77;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 public class Jsr77ServletHandler extends ServletHandler 
 {

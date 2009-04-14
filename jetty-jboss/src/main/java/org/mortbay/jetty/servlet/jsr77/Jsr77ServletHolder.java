@@ -24,8 +24,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 public class Jsr77ServletHolder extends ServletHolder 
 {
@@ -61,7 +62,7 @@ public class Jsr77ServletHolder extends ServletHolder
 		_servletStats = new ServletStatsImpl(getName());
 	}
 	
-	public void handle(ServletRequest request, ServletResponse response) 
+	public void handle(Request baseRequest, ServletRequest request, ServletResponse response) 
 		throws ServletException, UnavailableException, IOException 
 	{
         long startTime =0L;
@@ -71,7 +72,7 @@ public class Jsr77ServletHolder extends ServletHolder
             //start statistic gathering - get the name of Servlet for which this filter will apply, and therefore
             //on whose behalf we are gathering statistics???
             startTime = System.currentTimeMillis();
-            super.handle(request, response);
+            super.handle(baseRequest,request, response);
         }
         finally
         {

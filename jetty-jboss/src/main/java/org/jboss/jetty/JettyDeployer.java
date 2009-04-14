@@ -23,9 +23,9 @@ import org.jboss.web.AbstractWebDeployer;
 import org.jboss.web.WebApplication;
 import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
 import org.mortbay.j2ee.session.Manager;
-import org.mortbay.jetty.SessionManager;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.util.LazyList;
+import org.eclipse.jetty.server.SessionManager;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.util.LazyList;
 
 
 /**
@@ -44,6 +44,13 @@ public class JettyDeployer extends AbstractWebDeployer
     protected JettyService.ConfigurationData  _configData;
     protected SessionManager _distributableSessionManagerPrototype;
     protected boolean _forceDistributable = false;
+    private static String[] __dftConfigurationClasses =  
+    { 
+        "org.eclipse.jetty.webapp.WebInfConfiguration", 
+        "org.jboss.jetty.JBossWebXmlConfiguration",
+        "org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
+        "org.eclipse.jetty.webapp.TagLibConfiguration" 
+    } ;
 
     /**
      * use Hashtable because is is synchronised
@@ -82,7 +89,7 @@ public class JettyDeployer extends AbstractWebDeployer
             //and the jboss-web.xml descriptor
             JBossWebAppContext app = new JBossWebAppContext(parser, webApp, warUrl);
             app.setContextPath(contextPath);
-            app.setConfigurationClasses (new String[]{ "org.mortbay.jetty.webapp.WebInfConfiguration","org.jboss.jetty.JBossWebXmlConfiguration", "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",  "org.mortbay.jetty.webapp.TagLibConfiguration"});
+            app.setConfigurationClasses (__dftConfigurationClasses);
             app.setExtractWAR(getUnpackWars());
             app.setParentLoaderPriority(getJava2ClassLoadingCompliance());
             

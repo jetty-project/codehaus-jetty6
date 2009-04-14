@@ -71,16 +71,15 @@
     <!-- ================================================================= -->
 
     <attribute name="ConfigurationElement">
-      <Configure class="org.mortbay.jetty.Server">
+      <Configure class="org.eclipse.jetty.server.Server">
 
     <!-- =========================================================== -->
     <!-- Server Thread Pool                                          -->
     <!-- =========================================================== -->
     <Set name="ThreadPool">
-      <New class="org.mortbay.thread.BoundedThreadPool">
+      <New class="org.eclipse.jetty.util.thread.QueuedThreadPool">
         <Set name="minThreads">10</Set>
-        <Set name="lowThreads">50</Set>
-        <Set name="maxThreads">250</Set>
+        <Set name="maxThreads">200</Set>
       </New>
     </Set>
 
@@ -89,35 +88,38 @@
     <!-- =========================================================== -->
     <Call name="addConnector">
       <Arg>
-          <New class="org.mortbay.jetty.nio.SelectChannelConnector">
+          <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
+            <Set name="host"><SystemProperty name="jetty.host" /></Set>
             <Set name="port"><SystemProperty name="jetty.port" default="8080"/></Set>
             <Set name="maxIdleTime">30000</Set>
             <Set name="Acceptors">2</Set>
-            <Set name="confidentialPort">8443</Set>
+            <Set name="confidentialPort">8443</Set>           
+            <Set name="lowResourcesConnections">20000</Set>
+            <Set name="lowResourcesMaxIdleTime">5000</Set>
           </New>
       </Arg>
     </Call>
 
     <!-- Call name="addConnector">
         <Arg>
-            <New class="org.mortbay.jetty.ajp.Ajp13SocketConnector">
+            <New class="org.eclipse.jetty.ajp.Ajp13SocketConnector">
                 <Set name="port">8009</Set>
             </New>
         </Arg>
     </Call -->
 
     <Set name="handler">
-      <New id="Handlers" class="org.mortbay.jetty.handler.HandlerCollection">
+      <New id="Handlers" class="org.eclipse.jetty.server.handler.HandlerCollection">
         <Set name="handlers">
-         <Array type="org.mortbay.jetty.Handler">
+         <Array type="org.eclipse.jetty.server.Handler">
            <Item>
-             <New id="Contexts" class="org.mortbay.jetty.handler.ContextHandlerCollection"/>
+             <New id="Contexts" class="org.eclipse.jetty.server.handler.ContextHandlerCollection"/>
            </Item>
            <Item>
-             <New id="DefaultHandler" class="org.mortbay.jetty.handler.DefaultHandler"/>
+             <New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>
            </Item>
            <Item>
-             <New id="RequestLog" class="org.mortbay.jetty.handler.RequestLogHandler"/>
+             <New id="RequestLog" class="org.eclipse.jetty.server.handler.RequestLogHandler"/>
            </Item>
          </Array>
         </Set>
