@@ -48,11 +48,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.jetty.ssl.SslSelectChannelConnector;
-import org.mortbay.jetty.ssl.SslSocketConnector;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
+import org.eclipse.jetty.server.ssl.SslSocketConnector;
+
 
 import jsslutils.sslcontext.PKIXSSLContextFactory;
 import jsslutils.sslcontext.X509SSLContextFactory;
