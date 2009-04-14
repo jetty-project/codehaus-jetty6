@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
 
-<Configure id="Server" class="org.mortbay.jetty.Server">
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
 
   
     <!-- ======================================================== -->
@@ -20,16 +20,17 @@
     <!-- For more information see the jetty wiki at               -->
     <!--   http://http://docs.codehaus.org/display/JETTY/JAAS     -->
     <!-- ======================================================== -->
+    <!-- 
     <Set name="UserRealms">
-      <Array type="org.mortbay.jetty.security.LoginService">
+      <Array type="org.eclipse.jetty.security.LoginService">
         <Item>
-          <New class="org.mortbay.jetty.plus.jaas.JAASLoginService">
+          <New class="org.eclipse.jetty.plus.jaas.JAASLoginService">
            <Set name="Name">Test JAAS Realm</Set>
            <Set name="LoginModuleName">xyz</Set>
           </New>
         </Item>
       </Array>
     </Set>
-    
+    -->
 
 </Configure>
