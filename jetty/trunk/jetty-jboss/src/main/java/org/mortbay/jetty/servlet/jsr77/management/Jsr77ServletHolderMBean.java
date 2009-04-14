@@ -21,8 +21,8 @@ import javax.management.j2ee.statistics.ServletStats;
 
 import org.jboss.jetty.JBossWebAppContext;
 import org.mortbay.jetty.servlet.jsr77.Jsr77ServletHolder;
-import org.mortbay.management.ObjectMBean;
-import org.mortbay.log.Log;
+import org.eclipse.jetty.jmx.ObjectMBean;
+import org.eclipse.jetty.util.log.Log;
 
 
 /**

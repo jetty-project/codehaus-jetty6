@@ -16,7 +16,8 @@ package org.jboss.jetty;
 
 
 
-import org.jboss.jetty.security.JBossUserRealm;
+import org.jboss.jetty.security.JBossLoginService;
+
 import org.jboss.logging.Logger;
 import org.jboss.web.WebApplication;
 import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
@@ -24,9 +25,11 @@ import org.mortbay.j2ee.J2EEWebAppContext;
 import org.mortbay.j2ee.session.AbstractReplicatedStore;
 import org.mortbay.j2ee.session.Manager;
 import org.mortbay.j2ee.session.Store;
-import org.mortbay.jetty.servlet.SessionHandler;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.server.SessionManager;
+import org.eclipse.jetty.server.session.SessionHandler;
 import org.mortbay.jetty.servlet.jsr77.Jsr77ServletHandler;
-import org.mortbay.jetty.webapp.WebAppClassLoader;
+import org.eclipse.jetty.webapp.WebAppClassLoader;
 
 
 
@@ -43,7 +46,7 @@ public class JBossWebAppContext extends J2EEWebAppContext
     protected WebDescriptorParser _descriptorParser;
     protected WebApplication _webApp;
     private String _subjAttrName="j_subject";//TODO what was this doing here?
-    private JBossUserRealm _realm=null;
+    private JBossLoginService _realm=null;
     // this is a hack - but we need the session timeout - in case we are
     // going to use a distributable session manager....
     protected boolean _timeOutPresent=false;
@@ -60,7 +63,7 @@ public class JBossWebAppContext extends J2EEWebAppContext
     public JBossWebAppContext(WebDescriptorParser descriptorParser,WebApplication webApp, String warUrl) 
     throws Exception
     {
-        super(null,new SessionHandler(), new Jsr77ServletHandler(), null);
+        super(new SessionHandler(), new ConstraintSecurityHandler(), new Jsr77ServletHandler(), null);
         setWar(warUrl);
         ((Jsr77ServletHandler)getServletHandler()).setWebAppContext(this);
         _descriptorParser=descriptorParser;
@@ -86,12 +89,12 @@ public class JBossWebAppContext extends J2EEWebAppContext
     }
 
 
-    public void setRealm (JBossUserRealm realm)
+    public void setRealm (JBossLoginService realm)
     {
         _realm = realm;
     }
     
-    public JBossUserRealm getRealm ()
+    public JBossLoginService getRealm ()
     {
         return _realm;
     }
@@ -117,17 +120,21 @@ public class JBossWebAppContext extends J2EEWebAppContext
     {
         //set up the java:comp/env namespace so that it can be refered to
         //in other parts of the startup
-        setUpENC(getClassLoader());      
-        super.startContext();
+        setUpENC(getClassLoader());  
         
         //ensure there is always a realm
         //this is primarily so that jboss's webservices impl will work, as it
         //sets up a SecurityAssociation that can only be cleared by jetty if
         //there is a realm
-        if (_realm == null)
+        if (_realm != null)
+            getSecurityHandler().setLoginService(_realm);
+        else
         {
-            _realm = new JBossUserRealm("other", getSubjectAttribute());
-            getSecurityHandler().setUserRealm(_realm);
+            if (getSecurityHandler().getRealmName() == null)
+                _realm = new JBossLoginService("other", getSubjectAttribute());
+            else
+                _realm = new JBossLoginService(_securityHandler.getRealmName(), getSubjectAttribute());
+            getSecurityHandler().setLoginService(_realm);
         }
 
         //start the realm from within the webapp's classloader as it wants
@@ -136,7 +143,7 @@ public class JBossWebAppContext extends J2EEWebAppContext
         Thread.currentThread().setContextClassLoader(getClassLoader());
         try
         {
-            _realm.init();
+            super.startContext();
         }
         finally
         {
@@ -154,7 +161,7 @@ public class JBossWebAppContext extends J2EEWebAppContext
                 ((AbstractReplicatedStore)store).setLoader(loader);
             if(_timeOutPresent)
                 sm.setMaxInactiveInterval(_timeOutMinutes*60);
-            getSessionHandler().setSessionManager(sm);
+            getSessionHandler().setSessionManager((SessionManager)sm);
         }
         catch(Exception e)
         {

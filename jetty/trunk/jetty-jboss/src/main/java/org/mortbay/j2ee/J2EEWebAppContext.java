@@ -17,11 +17,11 @@ package org.mortbay.j2ee;
 
 import org.jboss.logging.Logger;
 import org.mortbay.j2ee.session.Manager;
-import org.mortbay.jetty.handler.ErrorHandler;
-import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.SessionHandler;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.server.handler.ErrorHandler;
+import org.eclipse.jetty.security.SecurityHandler;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 public class J2EEWebAppContext extends WebAppContext
 {
@@ -36,11 +36,12 @@ public class J2EEWebAppContext extends WebAppContext
     protected Manager _distributableSessionManager;
 
     // ----------------------------------------------------------------------------
-    public J2EEWebAppContext(SecurityHandler securityHandler,
-            SessionHandler sessionHandler, ServletHandler servletHandler,
-            ErrorHandler errorHandler)
-    {
-        super(securityHandler, sessionHandler, servletHandler, errorHandler);
+    public J2EEWebAppContext(SessionHandler sessionHandler,
+                             SecurityHandler securityHandler,
+                             ServletHandler servletHandler,
+                             ErrorHandler errorHandler)
+    {       
+        super(sessionHandler, securityHandler,servletHandler, errorHandler);
     }
 
 

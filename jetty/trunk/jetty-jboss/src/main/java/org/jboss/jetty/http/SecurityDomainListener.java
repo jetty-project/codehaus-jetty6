@@ -22,7 +22,7 @@ import javax.net.ssl.SSLServerSocketFactory;
 
 import org.jboss.security.SecurityDomain;
 import org.jboss.security.ssl.DomainServerSocketFactory;
-import org.mortbay.jetty.security.SslSocketConnector;
+import org.eclipse.jetty.server.ssl.SslSocketConnector;
 
 /** 
  * SecurityDomain

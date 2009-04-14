@@ -15,12 +15,10 @@
 
 package org.jboss.jetty;
 
-import org.jboss.jetty.security.JBossUserRealm;
+import org.eclipse.jetty.webapp.WebXmlConfiguration;
+import org.eclipse.jetty.xml.XmlParser;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.WebMetaData;
-import org.mortbay.jetty.security.UserRealm;
-import org.mortbay.jetty.webapp.WebXmlConfiguration;
-import org.mortbay.xml.XmlParser;
 
 /**
  * JBossWebXmlConfiguration
@@ -44,7 +42,7 @@ public class JBossWebXmlConfiguration extends WebXmlConfiguration
     }
 
    
-    protected void initWebXmlElement(String element,org.mortbay.xml.XmlParser.Node node) throws Exception
+    protected void initWebXmlElement(String element,org.eclipse.jetty.xml.XmlParser.Node node) throws Exception
     {
         //avoid jetty printing a debug message about not implementing these elements
         //because jboss implements it for us
@@ -72,17 +70,13 @@ public class JBossWebXmlConfiguration extends WebXmlConfiguration
 
     protected void initLoginConfig(XmlParser.Node node) throws Exception
     {
-        // check if a realm has been explicitly set
-        String realmName=null;
-        UserRealm userRealm = getJBossWebApplicationContext().getSecurityHandler().getUserRealm();
-        if (userRealm!= null)
-            realmName=userRealm.getName();
-        
+        super.initLoginConfig(node);
+    
         //use a security domain from jboss-web.xml
-        if (null==realmName)
+        if (null==_securityHandler.getRealmName())
         {
             WebMetaData metaData = getJBossWebApplicationContext()._webApp.getMetaData();
-            realmName = metaData.getSecurityDomain();
+            String realmName = metaData.getSecurityDomain();
             if (null!=realmName)
             {
                 if (realmName.endsWith("/"))
@@ -91,18 +85,12 @@ public class JBossWebXmlConfiguration extends WebXmlConfiguration
                 if (idx >= 0)
                     realmName = realmName.substring(idx+1);
             }
+            _securityHandler.setRealmName(realmName);
         }
         
         if(__log.isDebugEnabled())
-            __log.debug("Realm is : "+realmName);
+            __log.debug("Realm name is : "+_securityHandler.getRealmName());
         
-        if (realmName != null)
-        {
-            JBossUserRealm realm = new JBossUserRealm(realmName,getJBossWebApplicationContext().getSubjectAttribute());
-            getJBossWebApplicationContext().setRealm(realm); 
-            getJBossWebApplicationContext().getSecurityHandler().setUserRealm(realm);
-        }
-        super.initLoginConfig(node);
     }
 
 }

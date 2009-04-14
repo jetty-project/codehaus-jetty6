@@ -1,20 +1,28 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <parent>
+    <parent>
     <groupId>org.mortbay.jetty</groupId>
-    <artifactId>modules-extra</artifactId>
-    <version>7.0-SNAPSHOT</version>
+    <artifactId>jetty-project</artifactId>
+    <version>7.0.0.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jboss-jetty</artifactId>
-  <packaging>sar</packaging>
+  <version>7.0.0.0-SNAPSHOT</version>
+  <packaging>jboss-sar</packaging>
   <name>Jetty Contrib :: JBoss</name>
+  <properties>
+      <jsp-2-1-version>9.1.1.B60.25.p1</jsp-2-1-version>
+      <jboss.version>4.2.3.GA</jboss.version>
+  </properties>
   <build>
+   <finalName>jetty-${jetty-version}-jboss-${jboss.version}-jsp-2.1</finalName>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>jboss-sar-maven-plugin</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <artifactId>jboss-packaging-maven-plugin</artifactId>
+        <version>2.0-beta-1</version>
         <extensions>true</extensions>
+        <configuration>
+        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -38,104 +46,109 @@
   </repositories>
   <dependencies>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
+      <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-ajp</artifactId>
-      <version>${project.version}</version>
+      <version>${jetty-version}</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-ssl</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
+      <version>${jetty-version}</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlet</artifactId>
+      <version>${jetty-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-jmx</artifactId>
-      <version>${project.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>mx4j</groupId>
-          <artifactId>mx4j</artifactId>
-        </exclusion>
-         <exclusion>
-          <groupId>mx4j</groupId>          
-          <artifactId>mx4j-tools</artifactId>
-         </exclusion>
-      </exclusions>
+      <version>${jetty-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-security</artifactId>
+      <version>${jetty-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-webapp</artifactId>
+      <version>${jetty-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-xml</artifactId>
+      <version>${jetty-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jsp-2.1-glassfish</artifactId>
+      <version>${jsp-2-1-version}</version>
+     </dependency>
+     <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.5.6</version>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss</artifactId>
       <version>${jboss.version}</version>
-      <systemPath>${jboss.home}/server/all/lib/jboss.jar</systemPath>
-      <scope>system</scope>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss-common</artifactId>
       <version>${jboss.version}</version>
-      <systemPath>${jboss.home}/lib/jboss-common.jar</systemPath>
-      <scope>system</scope>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss-system</artifactId>
       <version>${jboss.version}</version>
-      <systemPath>${jboss.home}/lib/jboss-system.jar</systemPath>
-      <scope>system</scope>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss-jmx</artifactId>
       <version>${jboss.version}</version>
-      <systemPath>${jboss.home}/lib/jboss-jmx.jar</systemPath>
-      <scope>system</scope>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jbosssx</artifactId>
       <version>${jboss.version}</version>
-      <systemPath>${jboss.home}/server/all/lib/jbosssx.jar</systemPath>
-      <scope>system</scope>
+      <scope>provided</scope>
     </dependency>
-    <dependency>
+    <!-- dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss-jsr77</artifactId>
       <version>${jboss.version}</version>
-      <systemPath>${jboss.home}/server/all/lib/jboss-jsr77.jar</systemPath>
-      <scope>system</scope>
-    </dependency>
+      <scope>provided</scope>
+    </dependency -->
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss-j2ee</artifactId>
       <version>${jboss.version}</version>
-      <systemPath>${jboss.home}/server/all/lib/jboss-j2ee.jar</systemPath>
-      <scope>system</scope>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-j2ee-management_1.0_spec</artifactId>
+      <version>1.1</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
   <profiles>
     <profile>
-      <id>jdk1.5</id>
-      <!-- activated on JDK 5 and above -->
-      <build>
-        <finalName>jetty-${version}-jboss-${jboss.version}-jsp-2.1</finalName>
-      </build>
-      <dependencies>
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty</artifactId>
-          <version>${jetty.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jsp-2.1-jetty</artifactId>
-          <version>${jetty.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-          <version>1.0.1</version>
-        </dependency>
-      </dependencies>
+      <id>jboss-5.0.1.GA</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>jboss.version</name>
+          <value>5.0.1.GA</value>
+        </property>
+      </activation>
     </profile>
   </profiles>
 </project>
