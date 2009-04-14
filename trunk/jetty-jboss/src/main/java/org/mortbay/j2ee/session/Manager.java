@@ -29,7 +29,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionAttributeListener;
@@ -38,15 +37,13 @@ import javax.servlet.http.HttpSessionContext;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
+import org.eclipse.jetty.http.HttpCookie;
+import org.eclipse.jetty.server.SessionIdManager;
+import org.eclipse.jetty.server.SessionManager;
+import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.jboss.jetty.JBossWebAppContext;
-import org.mortbay.jetty.HttpOnlyCookie;
-import org.mortbay.jetty.SessionIdManager;
-import org.mortbay.jetty.SessionManager;
-import org.mortbay.jetty.servlet.AbstractSessionManager;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.SessionHandler;
-import org.mortbay.jetty.webapp.WebAppContext;
-import org.mortbay.log.Log;
 
 //----------------------------------------
 
@@ -87,7 +84,7 @@ import org.mortbay.log.Log;
 
 //----------------------------------------
 
-public class Manager implements org.mortbay.jetty.SessionManager
+public class Manager implements org.eclipse.jetty.server.SessionManager
 {
     // ----------------------------------------
     protected WebAppContext _context;
@@ -821,33 +818,22 @@ public class Manager implements org.mortbay.jetty.SessionManager
         _crossContextSessionIDs = useRequestedId;
     }
 
-    public Cookie getSessionCookie(HttpSession session, String contextPath, boolean requestIsSecure)
+    public HttpCookie getSessionCookie(HttpSession session, String contextPath, boolean requestIsSecure)
     {
-//        if (_handler.isUsingCookies())
-//        { what's the jetty6 counterpart for isUsingCookies? - nik
-            Cookie cookie = _handler.getSessionManager().getHttpOnly() ? new HttpOnlyCookie(SessionManager.__SessionCookieProperty, session.getId()) : new Cookie(
-                SessionManager.__SessionCookieProperty, session.getId());
-            String domain = getServletContext().getInitParameter(SessionManager.__SessionDomainProperty);
-            String maxAge = getServletContext().getInitParameter(SessionManager.__MaxAgeProperty);
-            String path = getServletContext().getInitParameter(SessionManager.__SessionPathProperty);
-            if (path == null)
-                path = getCrossContextSessionIDs() ? "/" : ((JBossWebAppContext)_context).getUniqueName();
-            if (path == null || path.length() == 0)
-                path = "/";
+        String domain = getServletContext().getInitParameter(SessionManager.__SessionDomainProperty);
+        String maxAge = getServletContext().getInitParameter(SessionManager.__MaxAgeProperty);
+        String path = getServletContext().getInitParameter(SessionManager.__SessionPathProperty);
+        if (path == null)
+            path = getCrossContextSessionIDs() ? "/" : ((JBossWebAppContext)_context).getUniqueName();
+        if (path == null || path.length() == 0)
+            path = "/";
 
-            if (domain != null)
-                cookie.setDomain(domain);
-            if (maxAge != null)
-                cookie.setMaxAge(Integer.parseInt(maxAge));
-            else
-                cookie.setMaxAge(-1);
+        HttpCookie cookie = new HttpCookie(SessionManager.__SessionCookieProperty, session.getId(),domain,path, 
+                                           (maxAge != null?Integer.parseInt(maxAge):-1),
+                                           _handler.getSessionManager().getHttpOnly(),
+                                           (requestIsSecure && getSecureCookies()));
 
-            cookie.setSecure(requestIsSecure && getSecureCookies());
-            cookie.setPath(path);
-
-            return cookie;
-//        }
-//        return null;
+        return cookie;
     }
 
     public boolean isStarting()
@@ -905,7 +891,7 @@ public class Manager implements org.mortbay.jetty.SessionManager
         return null;
     }
 
-    public Cookie access(HttpSession arg0,boolean secure)
+    public HttpCookie access(HttpSession arg0,boolean secure)
     {
         // TODO Auto-generated method stub
         return null;
@@ -1037,5 +1023,35 @@ public class Manager implements org.mortbay.jetty.SessionManager
     public boolean isUsingCookies()
     {
         return _usingCookies;
+    }
+
+    public String getSessionIdPathParameterName()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String getSessionIdPathParameterNamePrefix()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void setSessionIdPathParameterName(String parameterName)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void addLifeCycleListener(Listener arg0)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void removeLifeCycleListener(Listener arg0)
+    {
+        // TODO Auto-generated method stub
+        
     }
 }

@@ -26,7 +26,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.jboss.logging.Logger;
-import org.mortbay.xml.XmlConfiguration;
+import org.eclipse.jetty.xml.XmlConfiguration;
 import org.w3c.dom.Element;
 
 
@@ -51,7 +51,7 @@ import org.w3c.dom.Element;
  * the DRIVE LETTER which created a wrong URL).
  * </ul>
  */
-public class Jetty extends org.mortbay.jetty.Server
+public class Jetty extends org.eclipse.jetty.server.Server
 {
 
     protected static final Logger _log = Logger.getLogger("org.jboss.jetty");

@@ -21,6 +21,7 @@
    xmlns="http://java.sun.com/xml/ns/javaee" 
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+   metadata-complete="true"
    version="2.5"> 
 
   <description>
@@ -34,21 +35,38 @@
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <!-- UNCOMMENT TO ACTIVATE
   <context-param>
-    <param-name>org.mortbay.jetty.servlet.SessionDomain</param-name>
+    <param-name>org.eclipse.jetty.servlet.SessionDomain</param-name>
     <param-value>127.0.0.1</param-value>
   </context-param>
 
   <context-param>
-    <param-name>org.mortbay.jetty.servlet.SessionPath</param-name>
+    <param-name>org.eclipse.jetty.servlet.SessionPath</param-name>
     <param-value>/</param-value>
   </context-param>
 
   <context-param>
-    <param-name>org.mortbay.jetty.servlet.MaxAge</param-name>
+    <param-name>org.eclipse.jetty.servlet.MaxAge</param-name>
     <param-value>-1</param-value>
   </context-param>
   -->
 
+  <!-- control which jars from the container's classpath will be scanned for .tlds -->
+  <context-param>
+    <param-name>org.eclipse.jetty.server.webapp.ContainerIncludeTLDJarPattern</param-name>
+    <param-value>jsp-api-.*\.jar|jsp-.*\.jar</param-value>
+  </context-param>
+            
+  <!-- control which jars from the container's classpath will be scanned for   -->
+  <!-- annotations. If this property is empty, NO JARS from the container      -->
+  <!-- classpath will be scanned. This can be overridden by a webapp by        -->
+  <!-- defining this context-param in their web.xml file. Individual webapps   -->
+  <!-- can also control which jars in their WEB-INF/lib will be scanned by     -->
+  <!-- setting a context-param in web.xml called:                              -->
+  <!--                 org.eclipse.jetty.server.webapp.WebInfIncludeAnnotationPattern -->
+  <context-param>
+    <param-name>org.eclipse.jetty.server.webapp.ContainerIncludeAnnotationJarPattern</param-name>
+    <param-value></param-value>
+  </context-param>
 
 
   <!-- ==================================================================== -->
@@ -66,6 +84,10 @@
   <!--   redirectWelcome  If true, redirect welcome file requests           -->
   <!--                    else use request dispatcher forwards              -->
   <!--                                                                      -->
+  <!--   gzip             If set to true, then static content will be served--> 
+  <!--                    as gzip content encoded if a matching resource is -->
+  <!--                    found ending with ".gz"                           -->
+  <!--                                                                      -->
   <!--   resoureBase      Can be set to replace the context resource base   -->
   <!--                                                                      -->
   <!--   relativeResourceBase                                               -->
@@ -80,10 +102,25 @@
   <!--                    to false means that a direct buffer will be used  -->
   <!--                    instead. If you are having trouble with Windows   -->
   <!--                    file locking, set this to false.                  -->
+  <!--                                                                      -->
+  <!--  cacheControl      If set, all static content will have this value   -->
+  <!--                    set as the cache-control header.                  -->
+  <!--                                                                      -->
+  <!--  maxCacheSize      Maximum size of the static resource cache         -->
+  <!--                                                                      -->
+  <!--  maxCachedFileSize Maximum size of any single file in the cache      -->
+  <!--                                                                      -->
+  <!--  maxCachedFiles    Maximum number of files in the cache              -->
+  <!--                                                                      -->
+  <!--  cacheType         "nio", "bio" or "both" to determine the type(s)   -->
+  <!--                    of resource cache. A bio cached buffer may be used-->
+  <!--                    by nio but is not as efficient as a nio buffer.   -->
+  <!--                    An nio cached buffer may not be used by bio.      -->
+  <!--                                                                      -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <servlet>
     <servlet-name>default</servlet-name>
-    <servlet-class>org.mortbay.jetty.servlet.DefaultServlet</servlet-class>
+    <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
     <init-param>
       <param-name>acceptRanges</param-name>
       <param-value>true</param-value>
@@ -98,20 +135,34 @@
     </init-param>
     <init-param>
       <param-name>maxCacheSize</param-name>
-      <param-value>2000000</param-value>
+      <param-value>256000000</param-value>
     </init-param>
     <init-param>
       <param-name>maxCachedFileSize</param-name>
-      <param-value>254000</param-value>
+      <param-value>10000000</param-value>
     </init-param>
     <init-param>
       <param-name>maxCachedFiles</param-name>
       <param-value>1000</param-value>
     </init-param>
     <init-param>
+      <param-name>cacheType</param-name>
+      <param-value>both</param-value>
+    </init-param>
+    <init-param>
+      <param-name>gzip</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
       <param-name>useFileMappedBuffer</param-name>
       <param-value>true</param-value>
     </init-param>  
+    <!--
+    <init-param>
+      <param-name>cacheControl</param-name>
+      <param-value>max-age=3600,public</param-value>
+    </init-param>
+    -->
     <load-on-startup>0</load-on-startup>
   </servlet> 
 
@@ -123,7 +174,7 @@
   <!-- This is the jasper JSP servlet from the jakarta project              -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <!-- The JSP page compiler and execution servlet, which is the mechanism  -->
-  <!-- used by Tomcat to support JSP pages.  Traditionally, this servlet    -->
+  <!-- used by Glassfish to support JSP pages.  Traditionally, this servlet -->
   <!-- is mapped to URL patterh "*.jsp".  This servlet supports the         -->
   <!-- following initialization parameters (default values are in square    -->
   <!-- brackets):                                                           -->
@@ -143,6 +194,8 @@
   <!--   classpath           What class path should I use while compiling   -->
   <!--                       generated servlets?  [Created dynamically      -->
   <!--                       based on the current web application]          -->
+  <!--                       Set to ? to make the container explicitly set  -->
+  <!--                       this parameter.                                -->
   <!--                                                                      -->
   <!--   development         Is Jasper used in development mode (will check -->
   <!--                       for JSP modification on every access)?  [true] -->
@@ -216,6 +269,12 @@
         <param-name>xpoweredBy</param-name>
         <param-value>false</param-value>
     </init-param>
+    <!--  
+    <init-param>
+        <param-name>classpath</param-name>
+        <param-value>?</param-value>
+    </init-param>
+    -->
     <load-on-startup>0</load-on-startup>
   </servlet>
 
@@ -230,6 +289,7 @@
     <url-pattern>*.JSPX</url-pattern>
     <url-pattern>*.XSP</url-pattern>
   </servlet-mapping>
+  
   <!-- ==================================================================== -->
   <!-- Dynamic Servlet Invoker.                                             -->
   <!-- This servlet invokes anonymous servlets that have not been defined   -->
@@ -252,7 +312,7 @@
   <!-- Uncomment for dynamic invocation
   <servlet>
     <servlet-name>invoker</servlet-name>
-    <servlet-class>org.mortbay.jetty.servlet.Invoker</servlet-class>
+    <servlet-class>org.eclipse.jetty.servlet.Invoker</servlet-class>
     <init-param>
       <param-name>verbose</param-name>
       <param-value>false</param-value>
@@ -281,7 +341,7 @@
   <!-- ==================================================================== -->
   <!-- Default MIME mappings                                                -->
   <!-- The default MIME mappings are provided by the mime.properties        -->
-  <!-- resource in the org.mortbay.jetty.jar file.  Additional or modified  -->
+  <!-- resource in the org.eclipse.jetty.server.jar file.  Additional or modified  -->
   <!-- mappings may be specified here                                       -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <!-- UNCOMMENT TO ACTIVATE
@@ -340,8 +400,15 @@
     <locale-encoding-mapping><locale>zh</locale><encoding>GB2312</encoding></locale-encoding-mapping>
     <locale-encoding-mapping><locale>zh_TW</locale><encoding>Big5</encoding></locale-encoding-mapping>   
   </locale-encoding-mapping-list>
-
   
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Disable TRACE</web-resource-name>
+      <url-pattern>/</url-pattern>
+      <http-method>TRACE</http-method>
+    </web-resource-collection>
+    <auth-constraint/>
+  </security-constraint>
   
 </web-app>
 
