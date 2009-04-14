@@ -14,14 +14,14 @@
 
 package org.mortbay.jetty.integration.session;
 
-import org.mortbay.jetty.servlet.AbstractSessionTest;
-import org.mortbay.jetty.servlet.JDBCSessionIdManager;
-import org.mortbay.jetty.servlet.JDBCSessionManager;
-import org.mortbay.jetty.servlet.SessionTestServer;
-
+import org.eclipse.jetty.server.session.JDBCSessionIdManager;
+import org.eclipse.jetty.server.session.JDBCSessionManager;
+import org.eclipse.jetty.servlet.AbstractSessionTest;
+import org.eclipse.jetty.servlet.SessionTestServer;
 
 public class JDBCSessionServerTest extends AbstractSessionTest
 {
+	
     JDBCSessionServer _serverA;
     JDBCSessionServer _serverB;
     
