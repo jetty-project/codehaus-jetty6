@@ -16,10 +16,10 @@ package org.mortbay.jetty.integration.jaas;
 
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.apacheds.ApacheDs;
-import org.mortbay.jetty.security.Credential;
-import org.mortbay.jetty.plus.jaas.JAASRole;
-import org.mortbay.jetty.plus.jaas.callback.DefaultCallbackHandler;
-import org.mortbay.jetty.plus.jaas.spi.LdapLoginModule;
+import org.eclipse.jetty.http.security.Credential;
+import org.eclipse.jetty.plus.jaas.JAASRole;
+import org.eclipse.jetty.plus.jaas.callback.DefaultCallbackHandler;
+import org.eclipse.jetty.plus.jaas.spi.LdapLoginModule;
 import org.apache.directory.shared.ldap.util.Base64;
 import org.apache.directory.shared.ldap.exception.LdapNameNotFoundException;
 
