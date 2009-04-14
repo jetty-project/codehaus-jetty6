@@ -80,6 +80,10 @@ public class JettyDeployer extends AbstractWebDeployer
         try
         {
             String contextPath = webApp.getMetaData().getContextRoot();
+            
+            if (contextPath.equalsIgnoreCase("/root"))
+                contextPath = "/";
+            
             webApp.setURL(new URL(warUrl));
 
             if (_deployed.get(warUrl) != null)
