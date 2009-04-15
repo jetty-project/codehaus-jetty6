@@ -38,7 +38,7 @@ public class JBossIdentityService extends DefaultIdentityService
         
         public String[] getRoles()
         {
-            // TODO Auto-generated method stub
+            //No equivalent method on JBoss - not needed anyway
             return null;
         }
 
@@ -54,12 +54,12 @@ public class JBossIdentityService extends DefaultIdentityService
 
         public boolean isUserInRole(String role)
         {
+            if (_log.isDebugEnabled()) _log.debug("Checking role "+role+" for user "+_principal.getName());
             boolean isUserInRole = false;
             Set requiredRoles = Collections.singleton(new SimplePrincipal(role));
-            if (_realmMapping != null
-                    && _realmMapping.doesUserHaveRole(this._principal,requiredRoles))
+            if (_realmMapping != null && _realmMapping.doesUserHaveRole(this._principal,requiredRoles))
             {
-                if (_log.isDebugEnabled())
+               if (_log.isDebugEnabled())
                     _log.debug("JBossUserPrincipal: " + _principal + " is in Role: " + role);
 
                 isUserInRole = true;
@@ -76,10 +76,14 @@ public class JBossIdentityService extends DefaultIdentityService
     }
     
     
-    public JBossIdentityService (RealmMapping realmMapping, String realmName)
+    public JBossIdentityService (String realmName)
+    {
+        _log = Logger.getLogger(JBossIdentityService.class.getName() + "#"+ realmName);
+    }
+    
+    public void setRealmMapping (RealmMapping realmMapping)
     {
         _realmMapping = realmMapping;
-        _log = Logger.getLogger(JBossIdentityService.class.getName() + "#"+ realmName);
     }
     
     /* ------------------------------------------------------------ */
@@ -89,19 +93,22 @@ public class JBossIdentityService extends DefaultIdentityService
      */
     public UserIdentity associate(UserIdentity user, Scope scope)
     {
+        if (_log.isDebugEnabled()) _log.debug("Associating user "+user+" with scope "+scope);
+        
+        if (user == null)
+            return user;
+        
+       
         Map<String,String> roleRefMap=scope.getRoleRefMap();
         if (roleRefMap!=null && roleRefMap.size()>0)
             return new RoleRefUserIdentity(user,roleRefMap);
-        
-        SecurityAssociation.setPrincipal(((JBossUserIdentity)user).getUserPrincipal());
-        SecurityAssociation.setCredential(((JBossUserIdentity)user).getSubject().getPrivateCredentials().toArray()[0]);
-        SecurityAssociation.setSubject(((JBossUserIdentity)user).getSubject());
-        
+ 
         return user;
     }
 
     public void disassociate(UserIdentity scoped)
     {
+        if (_log.isDebugEnabled()) _log.debug("Disassociating user "+scoped);
         SecurityAssociation.clear();
     }
 
@@ -120,6 +127,7 @@ public class JBossIdentityService extends DefaultIdentityService
     
     public UserIdentity newUserIdentity(Subject subject, Principal userPrincipal, String[] roles)
     {
+        if (_log.isDebugEnabled()) _log.debug("Creating new JBossUserIdentity for user "+userPrincipal.getName());
         return new JBossUserIdentity(subject, userPrincipal);
     }
 
