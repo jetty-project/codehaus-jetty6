@@ -65,12 +65,12 @@
             <systemProperty>
               <!-- This is for convenience so that the src/etc/login.conf file can stay unmodified when copied to $jetty.home/etc directory -->
               <name>jetty.home</name>
-              <value>./src</value>
+              <value>./src/main/config</value>
             </systemProperty>
             <systemProperty>
               <!-- Mandatory. This system property tells JAAS where to find the login module configuration file -->
               <name>java.security.auth.login.config</name>
-              <value>src/etc/login.conf</value>
+              <value>src/main/config/etc/login.conf</value>
             </systemProperty>
           </systemProperties>
           <userRealms>
@@ -84,11 +84,5 @@
     </plugins>
   </build>
   <dependencies>
-    <dependency>
-      <groupId>javax.servlet.jsp</groupId>
-      <artifactId>jsp-api</artifactId>
-      <version>2.1</version>
-      <scope>provided</scope>
-    </dependency>
   </dependencies>
 </project>
