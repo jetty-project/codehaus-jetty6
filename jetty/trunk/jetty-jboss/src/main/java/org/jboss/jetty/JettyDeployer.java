@@ -16,16 +16,15 @@ import java.util.List;
 
 import javax.management.ObjectName;
 
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.util.LazyList;
 import org.jboss.deployment.DeploymentException;
 import org.jboss.deployment.DeploymentInfo;
+import org.jboss.jetty.security.JBossLoginService;
 import org.jboss.logging.Logger;
 import org.jboss.web.AbstractWebDeployer;
 import org.jboss.web.WebApplication;
 import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
-import org.mortbay.j2ee.session.Manager;
-import org.eclipse.jetty.server.SessionManager;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.util.LazyList;
 
 
 /**
@@ -42,8 +41,6 @@ public class JettyDeployer extends AbstractWebDeployer
     protected ContextHandlerCollection _contexts;
     protected DeploymentInfo _deploymentInfo;
     protected JettyService.ConfigurationData  _configData;
-    protected SessionManager _distributableSessionManagerPrototype;
-    protected boolean _forceDistributable = false;
     private static String[] __dftConfigurationClasses =  
     { 
         "org.eclipse.jetty.webapp.WebInfConfiguration", 
@@ -76,7 +73,7 @@ public class JettyDeployer extends AbstractWebDeployer
 
     public void performDeploy(WebApplication webApp, String warUrl, WebDescriptorParser parser) throws DeploymentException
     {
-    	log.debug("deploying webapp at "+warUrl);        
+    	if (log.isDebugEnabled()) log.debug("deploying webapp at "+warUrl);        
         try
         {
             String contextPath = webApp.getMetaData().getContextRoot();
@@ -97,20 +94,17 @@ public class JettyDeployer extends AbstractWebDeployer
             app.setExtractWAR(getUnpackWars());
             app.setParentLoaderPriority(getJava2ClassLoadingCompliance());
             
+            if (webApp.getMetaData().getSecurityDomain() != null)
+                app.setRealm (new JBossLoginService(webApp.getMetaData().getSecurityDomain()));
+            else
+                app.setRealm (new JBossLoginService("other"));
+            
             //permit urls without a trailing '/' even though it is not a valid url
             //as the jboss webservice client tests seem to use these invalid urls
             if (_log.isDebugEnabled())
                 _log.debug("Allowing non-trailing '/' on context path");
             app.setAllowNullPathInfo(true);
-                 
-            Manager manager = (Manager) getDistributableSessionManagerPrototype();
-            if (manager != null)
-            {
-                throw new UnsupportedOperationException("NOT IMPLEMENTED - please ask"); 
-//                app.setDistributableSessionManager((Manager) manager.clone());
-//                if (getForceDistributable())
-//                    app.setDistributable(true);
-            }
+        
 
             // if a different webdefault.xml file has been provided, use it
             if (_configData.getWebDefaultResource() != null)
@@ -142,7 +136,6 @@ public class JettyDeployer extends AbstractWebDeployer
             //tell jboss about the classloader the webapp is using - ensure
             //this is done before the context is started, because webservices
             //want to get access to this classloader
-            System.err.println("In JettyDeployer, setting webapp.metadata.contextloader="+app.getClassLoader());
             webApp.getMetaData().setContextLoader(app.getClassLoader());
 
             //if jetty has been started, then start the
@@ -240,25 +233,5 @@ public class JettyDeployer extends AbstractWebDeployer
 
         return fixedUrl;
     } 
-    
-    public void setDistributableSessionManagerPrototype(SessionManager manager)
-    {
-        throw new UnsupportedOperationException("NOT SUPPORTED - please ask");
-//        _distributableSessionManagerPrototype = manager;
-    }
-
-    public SessionManager getDistributableSessionManagerPrototype()
-    {
-        return _distributableSessionManagerPrototype;
-    }
-    
-    public boolean getForceDistributable()
-    {
-        return _forceDistributable;
-    }
-
-    public void setForceDistributable(boolean distributable)
-    {
-        _forceDistributable = distributable;
-    }
+   
 }

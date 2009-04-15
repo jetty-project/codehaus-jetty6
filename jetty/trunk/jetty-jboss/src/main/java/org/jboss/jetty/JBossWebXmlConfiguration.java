@@ -56,23 +56,12 @@ public class JBossWebXmlConfiguration extends WebXmlConfiguration
             super.initWebXmlElement(element,node);
     }
 
-    protected void initSessionConfig(XmlParser.Node node)
-    {
-        XmlParser.Node tNode=node.get("session-timeout");
-        if(tNode!=null)
-        {
-            getJBossWebApplicationContext()._timeOutPresent=true;
-            getJBossWebApplicationContext()._timeOutMinutes=Integer.parseInt(tNode.toString(false,true));
-        }
-        // pass up to our super class so they can do all this again !
-        super.initSessionConfig(node);
-    }
-
+ 
     protected void initLoginConfig(XmlParser.Node node) throws Exception
     {
         super.initLoginConfig(node);
     
-        //use a security domain from jboss-web.xml
+        //use a security domain name from jboss-web.xml
         if (null==_securityHandler.getRealmName())
         {
             WebMetaData metaData = getJBossWebApplicationContext()._webApp.getMetaData();
@@ -87,10 +76,9 @@ public class JBossWebXmlConfiguration extends WebXmlConfiguration
             }
             _securityHandler.setRealmName(realmName);
         }
-        
+       
         if(__log.isDebugEnabled())
             __log.debug("Realm name is : "+_securityHandler.getRealmName());
         
     }
-
 }
