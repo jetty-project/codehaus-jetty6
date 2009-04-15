@@ -11,7 +11,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.security.auth.Subject;
 
-import org.eclipse.jetty.security.DefaultIdentityService;
 import org.eclipse.jetty.security.IdentityService;
 import org.eclipse.jetty.security.LoginService;
 import org.eclipse.jetty.server.UserIdentity;
@@ -27,18 +26,17 @@ import org.jboss.security.SubjectSecurityManager;
 public class JBossLoginService extends AbstractLifeCycle implements LoginService
 {
     private String _realmName;
-    private String _subjAttrName;
     private final Logger _log;
-    protected IdentityService _identityService;
+    protected JBossIdentityService _identityService;
     private AuthenticationManager _authMgr;
     private RealmMapping _realmMapping;
     private SubjectSecurityManager _subjSecMgr;
     
-    public JBossLoginService (String realmName, String subjAttrName)
+    public JBossLoginService (String realmName)
     {
         _realmName = realmName;
         _log = Logger.getLogger(JBossLoginService.class.getName() + "#"+ _realmName);
-        _subjAttrName = subjAttrName;
+        _identityService = new JBossIdentityService (_realmName);
     }
     
     public IdentityService getIdentityService()
@@ -53,8 +51,8 @@ public class JBossLoginService extends AbstractLifeCycle implements LoginService
 
     public UserIdentity login(String username, Object credentials)
     {        
-        if (_log.isDebugEnabled())
-            _log.debug("authenticating: Name:" + username + " Password:****"/* +credentials */);
+        
+        if (_log.isDebugEnabled()) _log.debug("authenticating: Name:" + username + " Password:****"/* +credentials */);
       
         UserIdentity identity = null;
         
@@ -102,6 +100,13 @@ public class JBossLoginService extends AbstractLifeCycle implements LoginService
         {
             _log.warn("authentication failure: " + username);
         }
+        else
+        {
+            if (_log.isDebugEnabled()) _log.debug("Associating user.principal "+identity.getUserPrincipal().getName());
+            SecurityAssociation.setPrincipal(identity.getUserPrincipal());
+            SecurityAssociation.setCredential(credentials);
+            SecurityAssociation.setSubject(identity.getSubject());           
+        }
         
         return identity;
     }
@@ -134,33 +139,37 @@ public class JBossLoginService extends AbstractLifeCycle implements LoginService
     
     public void setIdentityService(IdentityService service)
     {
-        _identityService = service;
+        if (service instanceof JBossIdentityService)
+            _identityService = (JBossIdentityService)service;
+        else
+            throw new IllegalArgumentException ("IdentityService must be instanceof JBossIdentityService");
     }
 
 
     public void doStart() throws Exception
     {
-        super.doStart();
-        _log.debug("initialising realm "+_realmName);
         try
         {
             InitialContext iniCtx = new InitialContext();
             Context securityCtx = (Context) iniCtx.lookup("java:comp/env/security");
-            _authMgr = (AuthenticationManager) securityCtx.lookup("securityMgr");
+            _authMgr = (AuthenticationManager) securityCtx.lookup("securityMgr"); 
             _realmMapping = (RealmMapping) securityCtx.lookup("realmMapping");
+            _identityService.setRealmMapping(_realmMapping);
             iniCtx = null;
 
             if (_authMgr instanceof SubjectSecurityManager)
                 _subjSecMgr = (SubjectSecurityManager) _authMgr;
-            
-            if (_identityService == null)
-                _identityService = new JBossIdentityService (_realmMapping, _realmName);
         }
         catch (NamingException e)
         {
             _log.error("java:comp/env/security does not appear to be correctly set up", e);
         }
-        _log.debug("...initialised");
+        
+        super.doStart();
     }
 
+    public String toString()
+    {
+        return "JBossLoginService: "+_realmName;
+    }
 }
