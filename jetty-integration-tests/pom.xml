@@ -29,6 +29,7 @@
       <scope>test</scope>
       <classifier>tests</classifier>
     </dependency>
+<!--
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-plus</artifactId>
@@ -36,6 +37,7 @@
       <scope>test</scope>
       <classifier>tests</classifier>
     </dependency>
+-->
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-plus</artifactId>
