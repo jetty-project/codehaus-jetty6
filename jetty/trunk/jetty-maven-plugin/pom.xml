@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <name>Jetty Maven Plugin</name>
+  <name>Jetty :: Jetty Maven Plugin</name>
 
   <properties>
     <atomikos-version>3.2.3</atomikos-version>
