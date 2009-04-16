@@ -45,6 +45,7 @@
           </execution>
         </executions>
       </plugin>
+      <!-- need to deploy version 1.1 of the toolchain assembly descriptors
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
@@ -61,7 +62,7 @@
           </execution>
         </executions>
       </plugin>
- 
+      -->
     </plugins>
   </build>
   <dependencies>
