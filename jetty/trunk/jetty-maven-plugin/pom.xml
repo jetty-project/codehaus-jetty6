@@ -49,7 +49,7 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
            <descriptors>
-            <descriptor>src/main/assembly/site-component.xml</descriptor>
+            <descriptor>site-component.xml</descriptor>
           </descriptors>
         </configuration>
         <executions>
