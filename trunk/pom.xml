@@ -4,7 +4,7 @@
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-modules</artifactId>
   <version>7.0.0.0-SNAPSHOT</version>
-  <name>Jetty modules</name> 
+  <name>Jetty :: Convenience Module</name> 
   <packaging>pom</packaging>
 
   <build>
@@ -14,8 +14,10 @@
   <modules>
     <module>jetty-project</module>
     <module>jetty-maven-plugin</module>
+    <module>jetty-integration-tests</module>
     <module>jetty-runner</module>
     <module>example-jetty-spring</module>
+    <module>test-jaas-webapp</module>
     <!--module>example-async-rest-webapp</module-->
   </modules>
 </project>
