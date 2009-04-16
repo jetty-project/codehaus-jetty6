@@ -64,11 +64,4 @@
       </plugin>
     </plugins>
   </build>
-  <dependencies>
-  <dependency>
-              <groupId>org.eclipse.jetty.toolchain</groupId>
-              <artifactId>jetty-assembly-descriptors</artifactId>
-              <version>1.0</version>
-            </dependency>
-  </dependencies>
 </project>
