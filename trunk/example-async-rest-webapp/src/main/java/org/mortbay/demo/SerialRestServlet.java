@@ -25,8 +25,10 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.StringTokenizer;
 
 import javax.servlet.ServletConfig;
@@ -35,111 +37,62 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.util.ajax.JSON;
+import org.eclipse.jetty.util.ajax.JSON;
 
 /**
  * Servlet implementation class SerialRestServlet
  */
-public class SerialRestServlet extends HttpServlet
-{
-    private final static String __DEFAULT_APPID = "Webtide81-adf4-4f0a-ad58-d91e41bbe85";
-    
-    final static String ITEMS_PARAM="items";
-    final static String APPID_PARAM="appid";
-        
-    private String _appid;
-
-    public void init(ServletConfig servletConfig) throws ServletException
-    {
-        if (servletConfig.getInitParameter(APPID_PARAM)==null)
-            _appid = __DEFAULT_APPID;
-        else
-            _appid=servletConfig.getInitParameter(APPID_PARAM);
-        
-    }
-    
+public class SerialRestServlet extends AbstractRestServlet
+{   
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
         
-        String searchParameters = request.getParameter(ITEMS_PARAM);
-        List<String> itemTokens = new ArrayList<String>();
 
-        if (searchParameters == null)
-        {
-            response.setContentType("text/html");
-            PrintWriter out = response.getWriter();
-
-            out.println("<HTML><BODY>pass in url with ?items=a,b,c,d<br/>for more dramatic results run multiple times with 10 or more items</BODY></HTML>");
-            out.close();
-
-        }
-        else
-        {
-            StringTokenizer strtok = new StringTokenizer( (String)searchParameters, ",");
-
-            while ( strtok.hasMoreTokens() )
-            {
-                itemTokens.add( URLEncoder.encode(strtok.nextToken(), "UTF-8") );
-            }
-        }
-
+        String[] keywords=request.getParameter(ITEMS_PARAM).split(",");
+        Queue<Map<String,String>> results = new LinkedList<Map<String,String>>();
         
-        List list = new ArrayList();        
         // make all requests serially
-        for (String itemName : itemTokens)
+        for (String itemName : keywords)
         {
-            URL url = new URL("http://open.api.ebay.com/shopping?MaxEntries=5&appid="+_appid+"&version=573&siteid=0&callname=FindItems&responseencoding=JSON&QueryKeywords=" + itemName);
+            URL url = new URL(restURL(itemName));
             
             HttpURLConnection connection = (HttpURLConnection)url.openConnection();
             connection.setRequestMethod("GET");
             
             Map query = (Map)JSON.parse(new BufferedReader(new InputStreamReader(connection.getInputStream())));
-            
-            Object[] itemsArray = (Object[])query.get("Item");
-            
-            if (itemsArray==null)
+            Object[] auctions = (Object[]) query.get("Item");
+            if (auctions != null)
             {
-                Map<String, String> m = new HashMap<String, String>();
-
-                m.put("Title", "\"" + itemName + "\" not found!");
-                list.add(m);
-            }
-            else
-            {
-                List items = new ArrayList();
-                for (Object o : (Object[])query.get("Item"))
-                    list.add((Map)o);
+                for (Object o : auctions)
+                    results.add((Map) o);
             }
         }
         
 
+        // Generate the response
+        String thumbs=generateThumbs(results);
+        
         response.setContentType("text/html");
-        PrintWriter out=response.getWriter();
-        out.println("<html><head><style type='text/css'>img:hover {height:75px}</style></head><body><small>");
+        PrintWriter out = response.getWriter();
+        out.println("<html><head>");
+        out.println(STYLE);
+        out.println("</head><body><small>");
 
+        long now = System.nanoTime();
+        long total=now-start;
+
+        out.print("<b>Blocking: "+request.getParameter(ITEMS_PARAM)+"</b><br/>");
+        out.print("Total Time: "+ms(total)+"ms<br/>");
+        out.print("Thread held (<span class='red'>red</span>): "+ms(total)+"ms<br/>");
         
-        for (Map m : (List<Map>)list)
-        {
-            out.print("<a href=\""+m.get("ViewItemURLForNaturalSearch")+"\">");
-            if (m.containsKey("GalleryURL"))
-                out.print("<img border='1px' height='20px' src=\""+m.get("GalleryURL")+"\"/>&nbsp;");
-            
-            out.print(m.get("Title"));
-            out.println("</a><br/>");
-        }
-
+        out.println("<img border='0px' src='red.png'   height='20px' width='"+width(total)+"px'>");
+        
         out.println("<hr />");
-        out.print( "Total Time: ");
-        long duration=System.currentTimeMillis()-start;
-        out.print( duration );
-        out.println( "ms<br/>");
-        out.print( "Thread held: ");
-        out.print( duration );
-        out.println( "ms");
-        
-        out.println("</small></body></html>" );
-        out.close();   
+        out.println(thumbs);
+        out.println("</small>");
+        out.println("</body></html>");
+        out.close();
         
         
 
