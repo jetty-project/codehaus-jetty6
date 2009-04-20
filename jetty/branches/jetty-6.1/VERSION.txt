@@ -1,5 +1,6 @@
 jetty-6.1-SNAPSHOT
  + JETTY-982 Make test-jaas-webapp run with jetty:run
+ + JETTY-983 Default Servlet sets accept-ranges for cached/gzipped content
  + JETTY-988 X-Forwarded-Host has precedence over X-Forwarded-Server
  + JETTY-989 GzipFilter handles addHeader
  + JETTY-990 Async HttpClient connect
