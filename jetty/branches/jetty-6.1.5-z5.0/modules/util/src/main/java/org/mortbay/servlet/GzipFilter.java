@@ -206,6 +206,30 @@ public class GzipFilter extends UserAgentFilter
                 _gzStream.setContentLength(length);
         }
         
+        public void addHeader(String name, String value)
+        {
+            if ("content-length".equalsIgnoreCase(name))
+            {
+                _contentLength=Long.parseLong(value);
+                if (_gzStream!=null)
+                    _gzStream.setContentLength(_contentLength);
+            }
+            else if ("content-type".equalsIgnoreCase(name))
+            {   
+                setContentType(value);
+            }
+            else if ("content-encoding".equalsIgnoreCase(name))
+            {   
+                super.addHeader(name,value);
+                if (!isCommitted())
+                {
+                    noGzip();
+                }
+            }
+            else
+                super.addHeader(name,value);
+        }
+        
         public void setHeader(String name, String value)
         {
             if ("content-length".equalsIgnoreCase(name))
