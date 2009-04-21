@@ -1,4 +1,5 @@
 jetty-6.1-SNAPSHOT
+ + JETTY-980 Security / Directory Listing XSS present
  + JETTY-982 Make test-jaas-webapp run with jetty:run
  + JETTY-983 Default Servlet sets accept-ranges for cached/gzipped content
  + JETTY-988 X-Forwarded-Host has precedence over X-Forwarded-Server
