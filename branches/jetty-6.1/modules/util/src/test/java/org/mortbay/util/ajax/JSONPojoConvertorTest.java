@@ -156,7 +156,7 @@ public class JSONPojoConvertorTest extends TestCase
         
         public void setNullTest(String nullTest)
         {
-            assert(nullTest==null);            
+            assertNull(nullTest);            
             _nullTest = nullTest;
         }
         
