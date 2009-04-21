@@ -100,13 +100,7 @@ public class JBossLoginService extends AbstractLifeCycle implements LoginService
         {
             _log.warn("authentication failure: " + username);
         }
-        else
-        {
-            if (_log.isDebugEnabled()) _log.debug("Associating user.principal "+identity.getUserPrincipal().getName());
-            SecurityAssociation.setPrincipal(identity.getUserPrincipal());
-            SecurityAssociation.setCredential(credentials);
-            SecurityAssociation.setSubject(identity.getSubject());           
-        }
+        
         
         return identity;
     }
