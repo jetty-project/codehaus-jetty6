@@ -2,7 +2,6 @@ package org.jboss.jetty.security;
 
 import java.security.Principal;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 
 import javax.security.auth.Subject;
@@ -11,7 +10,6 @@ import org.eclipse.jetty.security.DefaultIdentityService;
 import org.eclipse.jetty.security.RoleRunAsToken;
 import org.eclipse.jetty.security.RunAsToken;
 import org.eclipse.jetty.server.UserIdentity;
-import org.eclipse.jetty.server.UserIdentity.Scope;
 import org.jboss.logging.Logger;
 import org.jboss.security.RealmMapping;
 import org.jboss.security.RunAsIdentity;
@@ -86,33 +84,28 @@ public class JBossIdentityService extends DefaultIdentityService
         _realmMapping = realmMapping;
     }
     
-    /* ------------------------------------------------------------ */
-    /** 
-     * If there are roles refs present in the scope, then wrap the UserIdentity 
-     * with one that uses the role references in the {@link UserIdentity#isUserInRole(String)}
-     */
-    public UserIdentity associate(UserIdentity user, Scope scope)
+   
+
+    public void associate(UserIdentity user)
     {
-        if (_log.isDebugEnabled()) _log.debug("Associating user "+user+" with scope "+scope);
-        
         if (user == null)
-            return user;
-        
-       
-        Map<String,String> roleRefMap=scope.getRoleRefMap();
-        if (roleRefMap!=null && roleRefMap.size()>0)
-            return new RoleRefUserIdentity(user,roleRefMap);
- 
-        return user;
+        {
+            if (_log.isDebugEnabled()) _log.debug("Disassociating user "+user);
+            SecurityAssociation.clear();
+        }
+        else
+        { 
+            if (_log.isDebugEnabled()) _log.debug("Associating user "+user);
+            SecurityAssociation.setPrincipal(user.getUserPrincipal());
+            SecurityAssociation.setCredential(user.getSubject().getPrivateCredentials());
+            SecurityAssociation.setSubject(user.getSubject());          
+        }
     }
 
-    public void disassociate(UserIdentity scoped)
-    {
-        if (_log.isDebugEnabled()) _log.debug("Disassociating user "+scoped);
-        SecurityAssociation.clear();
-    }
+    
+  
 
-    public RoleRunAsToken associateRunAs(UserIdentity identity, RunAsToken token)
+    public Object setRunAs(UserIdentity identity, RunAsToken token)
     {
         String role = ((RoleRunAsToken)token).getRunAsRole();
         String user = (identity==null?null:identity.getUserPrincipal().getName());
@@ -121,8 +114,9 @@ public class JBossIdentityService extends DefaultIdentityService
         return null;
     }
 
-    public void disassociateRunAs(RoleRunAsToken lastToken)
+    public void unsetRunAs(Object lastToken)
     {
+        SecurityAssociation.popRunAsIdentity();
     }
     
     public UserIdentity newUserIdentity(Subject subject, Principal userPrincipal, String[] roles)
