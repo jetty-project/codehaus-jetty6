@@ -69,28 +69,18 @@ public class DispatchServletTest extends TestCase
         tester.addServlet(DefaultServlet.class,"/");
         tester.start();
         
-        /* Need a high iteration count to trigger java.lang.StackOverflowError.
-         * NOTE: The StackOverFlow sometimes does not occur.
-         * And sometimes occurs in next test (not this one).
-         */
-        for(int i=0; i<3000; i++)
-        {
-            StringBuffer req1 = new StringBuffer();
-            req1.append("GET /tests/dispatch/includeN/"+dispatch.getName()+" HTTP/1.1\n");
-            req1.append("Host: tester\n");
-            req1.append("Connection: close\n");
-            req1.append("\n");
+        StringBuffer req1 = new StringBuffer();
+        req1.append("GET /tests/dispatch/includeN/"+dispatch.getName()+" HTTP/1.1\n");
+        req1.append("Host: tester\n");
+        req1.append("Connection: close\n");
+        req1.append("\n");
 
-            String response = tester.getResponses(req1.toString());
-            
-            StringBuffer msg = new StringBuffer();
-            msg.append("Response code on DoS (iteration:").append(i+1).append(")");
+        String response = tester.getResponses(req1.toString());
+        
+        String msg = "Response code on SelfRefDoS";
 
-            assertFalse(msg + " should not be code 500.",response.startsWith("HTTP/1.1 500 "));
-            
-            System.err.println(response);
-            assertTrue(msg + " should return error code 403 (Forbidden)", response.startsWith("HTTP/1.1 403 "));
-        }
+        assertFalse(msg + " should not be code 500.",response.startsWith("HTTP/1.1 500 "));
+        assertTrue(msg + " should return error code 403 (Forbidden)", response.startsWith("HTTP/1.1 403 "));
     }
     
     public void testSelfRefDeep() throws Exception
