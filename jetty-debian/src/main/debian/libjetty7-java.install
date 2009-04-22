@@ -1,7 +1,0 @@
-lib/servlet-api-3.0-${PROJECT.VERSION}.jar	usr/share/jetty7/lib
-lib/jetty-util-${PROJECT.VERSION}.jar		usr/share/jetty7/lib
-lib/jetty-${PROJECT.VERSION}.jar		usr/share/jetty7/lib
-README.txt					usr/share/doc/jetty7
-VERSION.txt					usr/share/doc/jetty7
-javadoc/*					usr/share/doc/jetty7/api
-LICENSES					usr/share/doc/jetty7
