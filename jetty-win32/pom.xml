@@ -2,11 +2,13 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-contrib-parent</artifactId>
-    <version>7.0.0.1B0-SNAPSHOT</version>
+    <version>7.0.0.1beta0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
+  <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-win32-service-java</artifactId>
+  <version>7.0.0.1beta0-SNAPSHOT</version>
   <name>Jetty Contrib :: Win32 Service - Java</name>
   <build>
     <plugins>
