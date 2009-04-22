@@ -1,7 +1,14 @@
 #!/bin/bash  
 #
 # Startup script for jetty under *nix systems (it works under NT/cygwin too).
-#
+
+# To get the service to restart correctly on reboot, uncomment below (3 lines):
+# ========================
+# chkconfig: 3 99 99
+# description: Jetty 6 webserver
+# processname: jetty
+# ========================
+
 # Configuration files
 #
 # /etc/default/jetty
