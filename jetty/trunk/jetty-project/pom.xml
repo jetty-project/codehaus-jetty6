@@ -8,7 +8,7 @@
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-project</artifactId>
   <packaging>pom</packaging>
-  <version>7.0.0.1beta0</version>
+  <version>7.0.0.1beta1-SNAPSHOT</version>
   <name>Jetty :: Project Parent</name>
 
   <properties>
@@ -18,9 +18,9 @@
   </properties>
 
   <scm>
-    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-project-7.0.0.1beta0</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-project-7.0.0.1beta0</developerConnection>
-    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-project-7.0.0.1beta0</url>
+    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk/jetty-project</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk/jetty-project</developerConnection>
+    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk/jetty-project</url>
   </scm>
 
   <build>
