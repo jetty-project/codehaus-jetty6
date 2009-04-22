@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-installer-parent</artifactId>
-    <version>7.0-SNAPSHOT</version>
+    <version>7.0.0.1B0-SNAPSHOT</version>
   </parent>
   <artifactId>jetty-rpm</artifactId>
   <name>Jetty Contrib :: Installer Source RPM</name>
