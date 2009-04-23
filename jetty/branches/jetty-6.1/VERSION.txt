@@ -7,6 +7,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-989 GzipFilter handles addHeader
  + JETTY-990 Async HttpClient connect
  + JETTY-992 URIUtil.encodePath encodes markup characters
+ + JETTY-996 Make start-stop-daemon optional
 
 jetty-6.1.16 1 April 2009
  + JETTY-702 Create "jetty-tasks.xml" for the Ant plugin
