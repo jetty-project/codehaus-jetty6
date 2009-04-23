@@ -402,12 +402,6 @@ public class Runner
                     simpleDataSourceBeanClass.getMethod("setXaDataSourceClassName", new Class[] {String.class}).invoke(o, new Object[] {jdbcClass});
                     simpleDataSourceBeanClass.getMethod("setXaDataSourceProperties", new Class[] {String.class}).invoke(o, new Object[] {jdbcProperties});
                     simpleDataSourceBeanClass.getMethod("setUniqueResourceName", new Class[] {String.class}).invoke(o, new Object[] {jdbcJndiName});
-                    //TODO reinstate when Atomikos fixes Class.forName in SimpleDataSourceBean
-                    //com.atomikos.jdbc.SimpleDataSourceBean xaDataSourceBean = new  com.atomikos.jdbc.SimpleDataSourceBean();
-                    //xaDataSourceBean.setXaDataSource(xaDS);
-                    //xaDataSourceBean.setXaDataSourceClassName(xaDS.getClass().getCanonicalName());
-                    //xaDataSourceBean.setXaDataSourceProperties(jdbcProperties);
-                    //xaDataSourceBean.setUniqueResourceName(jdbcJndiName);
                     org.eclipse.jetty.plus.jndi.Resource jdbcResource = new org.eclipse.jetty.plus.jndi.Resource(jdbcJndiName, o);
 
                 }
@@ -437,13 +431,6 @@ public class Runner
                     nonXADataSourceBeanClass.getMethod("setUrl", new Class[] {String.class}).invoke(o, new Object[] {url});
                     nonXADataSourceBeanClass.getMethod("setUser", new Class[] {String.class}).invoke(o, new Object[] {user});
                     nonXADataSourceBeanClass.getMethod("setPassword", new Class[] {String.class}).invoke(o, new Object[] {password});
-                    //TODO reinstate when Atomikos fix Class.forName in SimpleDataSourceBean
-                    //com.atomikos.jdbc.nonxa.NonXADataSourceBean nonXaDataSourceBean = new com.atomikos.jdbc.nonxa.NonXADataSourceBean();
-                    //nonXaDataSourceBean.setDriverClassName(jdbcClass);
-                    //nonXaDataSourceBean.setUniqueResourceName(jdbcJndiName);
-                    //nonXaDataSourceBean.setUrl(url);
-                    //nonXaDataSourceBean.setUser(user);
-                    //nonXaDataSourceBean.setPassword(password);
                     org.eclipse.jetty.plus.jndi.Resource jdbcResource = new org.eclipse.jetty.plus.jndi.Resource(jdbcJndiName, o);
                 }
             }
@@ -551,11 +538,12 @@ public class Runner
                 tmpDir.mkdir();
                 Log.debug("Made " + tmpDir.getAbsolutePath());
                 txprops.put("com.atomikos.icatch.service", "com.atomikos.icatch.standalone.UserTransactionServiceFactory");
-                txprops.put(com.atomikos.icatch.config.TSInitInfo.LOG_BASE_DIR_PROPERTY_NAME, tmpDir.getCanonicalPath());
-                txprops.put(com.atomikos.icatch.config.TSInitInfo.CONSOLE_FILE_NAME_PROPERTY_NAME, "tm-debug.log");
-                txprops.put(com.atomikos.icatch.config.TSInitInfo.LOG_BASE_NAME_PROPERTY_NAME, "tm-tx-log");
-                txprops.put(com.atomikos.icatch.config.TSInitInfo.OUTPUT_DIR_PROPERTY_NAME, tmpDir.getCanonicalPath());
-                txprops.put(com.atomikos.icatch.config.TSInitInfo.TM_UNIQUE_NAME_PROPERTY_NAME, _utId);
+                Class infoClass = Thread.currentThread().getContextClassLoader().loadClass("com.atomikos.icatch.config.TSInitInfo");
+                txprops.put(infoClass.getField("LOG_BASE_DIR_PROPERTY_NAME").get(null).toString(), tmpDir.getCanonicalPath());
+                txprops.put(infoClass.getField("CONSOLE_FILE_NAME_PROPERTY_NAME").get(null).toString(), "tm-debug.log");
+                txprops.put(infoClass.getField("OUTPUT_DIR_PROPERTY_NAME").get(null).toString(), "tm-tx-log");
+                txprops.put(infoClass.getField("OUTPUT_DIR_PROPERTY_NAME").get(null).toString(), tmpDir.getCanonicalPath());
+                txprops.put(infoClass.getField("TM_UNIQUE_NAME_PROPERTY_NAME").get(null).toString(), _utId);
             }
             else
             {
@@ -567,11 +555,6 @@ public class Runner
             Object uts = utsClass.getConstructor(new Class[]{Properties.class}).newInstance(txprops);
             Object tsInfo = utsClass.getMethod("createTSInitInfo", new Class[]{}).invoke(uts, new Object[]{});
             utsClass.getMethod("init", new Class[]{tsInitInfoClass}).invoke(uts, new Object[]{tsInfo});
-            //TODO reinstate when Atomikos fix Class.forName in SimpleDataSourceBean
-            //com.atomikos.icatch.config.UserTransactionServiceImp uts = new com.atomikos.icatch.config.UserTransactionServiceImp(txprops);
-            //com.atomikos.icatch.config.TSInitInfo tsInfo = uts.createTSInitInfo();
-            //uts.init(tsInfo);
-            //_ut = uts.getUserTransaction();
 
             //create UserTransaction
             _ut = (UserTransaction) utsClass.getMethod("getUserTransaction", new Class[]{}).invoke(uts, new Object[]{});
