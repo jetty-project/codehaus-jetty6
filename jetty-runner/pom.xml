@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-project</artifactId>
-    <version>7.0.0.1beta1-SNAPSHOT</version>
+    <version>7.0.0.1beta0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
@@ -80,20 +80,6 @@
     </plugins>
   </build>
 
-  <repositories>
-    <repository>
-      <id>project-repo</id>
-      <name>project repo</name>
-      <url>file:repository</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
   <dependencies>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
@@ -124,26 +110,6 @@
       <groupId>javax.transaction</groupId>
       <artifactId>jta</artifactId>
       <version>1.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.atomikos</groupId>
-      <artifactId>transactions</artifactId>
-      <version>${atomikos-version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.atomikos</groupId>
-      <artifactId>transactions-api</artifactId>
-      <version>${atomikos-version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.atomikos</groupId>
-      <artifactId>transactions-jta</artifactId>
-      <version>${atomikos-version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.atomikos</groupId>
-      <artifactId>atomikos-util</artifactId>
-      <version>${atomikos-version}</version>
     </dependency>
   </dependencies>
 </project>
