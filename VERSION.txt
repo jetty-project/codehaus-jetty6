@@ -9,6 +9,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-992 URIUtil.encodePath encodes markup characters
  + JETTY-996 Make start-stop-daemon optional
  + JETTY-997 Remove jpackage-utils dependency on rpm install
+ + Updated cometd-api to 1.0.beta8
 
 jetty-6.1.16 1 April 2009
  + JETTY-702 Create "jetty-tasks.xml" for the Ant plugin
