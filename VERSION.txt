@@ -10,7 +10,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-996 Make start-stop-daemon optional
  + JETTY-997 Remove jpackage-utils dependency on rpm install
  + JETTY-1000 Avoided needless 1.5 dependency
- + JETTY-1002 Local ArrayQueue updated cometd-api to 1.0.beta8
+ + JETTY-1002 cometd-api to 1.0.beta8
 
 jetty-6.1.16 1 April 2009
  + JETTY-702 Create "jetty-tasks.xml" for the Ant plugin
