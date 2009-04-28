@@ -28,6 +28,7 @@ import java.util.Queue;
  * is backed by a growable circular array.
  * 
  * @author gregw
+ * @deprecated Local copy in cometd and maintained copy in org.eclipse.jetty.util
  *
  * @param <E>
  */
