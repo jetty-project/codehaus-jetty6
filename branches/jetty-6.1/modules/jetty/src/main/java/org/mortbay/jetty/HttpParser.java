@@ -415,7 +415,7 @@ public class HttpParser implements Parser
                     {
                         // TODO - we really should know if we are parsing request or response!
                         final Buffer method = HttpMethods.CACHE.lookup(_tok0);
-                        if (method==_tok0 && _tok1.length()==3 && Character.isDigit(_tok1.peek()))
+                        if (method==_tok0 && _tok1.length()==3 && Character.isDigit((char)_tok1.peek()))
                         {
 			    _responseStatus = BufferUtil.toInt(_tok1);
                             _handler.startResponse(HttpVersions.CACHE.lookup(_tok0), _responseStatus,_buffer.sliceFromMark());
