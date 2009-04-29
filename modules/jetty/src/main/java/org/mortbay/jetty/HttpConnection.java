@@ -515,7 +515,6 @@ public class HttpConnection implements Connection
             String threadName = null;
             try
             {
-                // TODO try to do this lazily or more efficiently
                 String info = URIUtil.canonicalPath(_uri.getDecodedPath());
                 if (info == null)
                     throw new HttpException(400);
