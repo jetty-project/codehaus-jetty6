@@ -75,6 +75,13 @@ import org.mortbay.util.URIUtil;
  *   dirAllowed       If true, directory listings are returned if no    
  *                    welcome file is found. Else 403 Forbidden.        
  *
+ *   welcomeServlets  If true, attempt to dispatch to welcome files 
+ *                    that are servlets, but only after no matching static 
+ *                    resources could be found. 
+ *                    
+ *                    This must be false if you want directory listings,
+ *                    but have index.jsp in your welcome file list.
+ *
  *   redirectWelcome  If true, welcome files are redirected rather than
  *                    forwarded to.
  *
@@ -121,6 +128,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     
     private boolean _acceptRanges=true;
     private boolean _dirAllowed=true;
+    private boolean _welcomeServlets=false;
     private boolean _redirectWelcome=false;
     private boolean _gzip=true;
     
@@ -149,6 +157,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         
         _acceptRanges=getInitBoolean("acceptRanges",_acceptRanges);
         _dirAllowed=getInitBoolean("dirAllowed",_dirAllowed);
+        _welcomeServlets=getInitBoolean("welcomeServlets", _welcomeServlets);
         _redirectWelcome=getInitBoolean("redirectWelcome",_redirectWelcome);
         _gzip=getInitBoolean("gzip",_gzip);
         
@@ -519,7 +528,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     /**
      * Finds a matching welcome file for the supplied {@link Resource}. This will be the first entry in the list of 
      * configured {@link #_welcomes welcome files} that existing within the directory referenced by the <code>Resource</code>.
-     * If the resource is not a directory, or no matching file is found, then look for a valid servlet mapping. 
+     * If the resource is not a directory, or no matching file is found, then it may look for a valid servlet mapping. 
      * If there is none, then <code>null</code> is returned.
      * The list of welcome files is read from the {@link ContextHandler} for this servlet, or
      * <code>"index.jsp" , "index.html"</code> if that is <code>null</code>.
@@ -539,14 +548,17 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             if (welcome.exists())
                 return _welcomes[i];
         }
-
-        ServletHandler servletHandler = (ServletHandler)_context.getContextHandler().getChildHandlerByClass(ServletHandler.class);
-        for (int i=0;i<_welcomes.length;i++)
-        {
-            if (servletHandler.matchesPath(_welcomes[i]))
-                return _welcomes[i];
-        }
         
+        if (_welcomeServlets) 
+        {
+            ServletHandler servletHandler = (ServletHandler)_context.getContextHandler().getChildHandlerByClass(ServletHandler.class);
+            for (int i=0;i<_welcomes.length;i++)
+            {
+                if (servletHandler.matchesPath(_welcomes[i]))
+                    return _welcomes[i];
+            }
+        }
+
         return null;
     }
 
