@@ -50,10 +50,12 @@ import org.mortbay.util.MultiException;
  */
 public class Server extends HandlerWrapper implements Attributes
 {
+    public final static String UNKNOWN_VERSION="6.1.x";
+    public final static String SNAPSHOT_VERSION="6.1-SNAPSHOT";
     private static ShutdownHookThread hookThread = new ShutdownHookThread();
     private static String _version = (Server.class.getPackage()!=null && Server.class.getPackage().getImplementationVersion()!=null)
         ?Server.class.getPackage().getImplementationVersion()
-        :"6.1.x";
+        :UNKNOWN_VERSION;
 
     private ThreadPool _threadPool;
     private Connector[] _connectors;
