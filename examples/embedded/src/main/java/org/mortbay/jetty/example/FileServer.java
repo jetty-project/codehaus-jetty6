@@ -19,6 +19,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerList;
 import org.mortbay.jetty.handler.ResourceHandler;
+import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------ */
 /** File server
@@ -37,8 +38,9 @@ public class FileServer
         Server server = new Server(port);
         
         ResourceHandler resource_handler=new ResourceHandler();
+        resource_handler.setWelcomeFiles(new String[]{"index.html"});
         resource_handler.setResourceBase(args.length==2?args[1]:".");
-        
+        Log.info("serving "+resource_handler.getBaseResource());
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[]{resource_handler,new DefaultHandler()});
         server.setHandler(handlers);

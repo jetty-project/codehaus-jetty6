@@ -30,6 +30,7 @@ import org.mortbay.util.IO;
 import org.mortbay.util.Loader;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
+import org.mortbay.util.UrlEncoded;
 
 
 /* ------------------------------------------------------------ */
@@ -417,11 +418,11 @@ public abstract class Resource implements Serializable
      * @param parent True if the parent directory should be included
      * @return String of HTML
      */
-    public String getListHTML(String base,
-                              boolean parent)
+    public String getListHTML(String base,boolean parent)
         throws IOException
     {
-        if (!isDirectory())
+        base=URIUtil.canonicalPath(base);
+        if (base==null || !isDirectory())
             return null;
         
         String[] ls = list();
@@ -430,48 +431,116 @@ public abstract class Resource implements Serializable
         Arrays.sort(ls);
         
         String decodedBase = URIUtil.decodePath(base);
-        String title = "Directory: "+decodedBase;
+        String title = "Directory: "+deTag(decodedBase);
 
         StringBuffer buf=new StringBuffer(4096);
         buf.append("<HTML><HEAD><TITLE>");
         buf.append(title);
         buf.append("</TITLE></HEAD><BODY>\n<H1>");
         buf.append(title);
-        buf.append("</H1><TABLE BORDER=0>");
+        buf.append("</H1>\n<TABLE BORDER=0>\n");
         
         if (parent)
         {
-            buf.append("<TR><TD><A HREF=");
+            buf.append("<TR><TD><A HREF=\"");
             buf.append(URIUtil.addPaths(base,"../"));
-            buf.append(">Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
+            buf.append("\">Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
         }
+        
+        String defangedBase = defangURI(base);
         
         DateFormat dfmt=DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
                                                        DateFormat.MEDIUM);
         for (int i=0 ; i< ls.length ; i++)
         {
-            String encoded=URIUtil.encodePath(ls[i]);
             Resource item = addPath(ls[i]);
             
-            buf.append("<TR><TD><A HREF=\"");
-            String path=URIUtil.addPaths(base,encoded);
+            buf.append("\n<TR><TD><A HREF=\"");
+            String path=URIUtil.addPaths(defangedBase,URIUtil.encodePath(ls[i]));
+            
+            buf.append(path);
             
             if (item.isDirectory() && !path.endsWith("/"))
-                path=URIUtil.addPaths(path,URIUtil.SLASH);
-            buf.append(path);
+                buf.append(URIUtil.SLASH);
+            
+            // URIUtil.encodePath(buf,path);
             buf.append("\">");
-            buf.append(StringUtil.replace(StringUtil.replace(ls[i],"<","&lt;"),">","&gt;"));
+            buf.append(deTag(ls[i]));
             buf.append("&nbsp;");
             buf.append("</TD><TD ALIGN=right>");
             buf.append(item.length());
             buf.append(" bytes&nbsp;</TD><TD>");
             buf.append(dfmt.format(new Date(item.lastModified())));
-            buf.append("</TD></TR>\n");
+            buf.append("</TD></TR>");
         }
         buf.append("</TABLE>\n");
 	buf.append("</BODY></HTML>\n");
         
         return buf.toString();
+    }
+    
+    /**
+     * Defang any characters that could break the URI string in an HREF.
+     * Such as <a href="/path/to;<script>Window.alert("XSS"+'%20'+"here");</script>">Link</a>
+     * 
+     * The above example would parse incorrectly on various browsers as the "<" or '"' characters
+     * would end the href attribute value string prematurely.
+     * 
+     * @param raw the raw text to defang.
+     * @return the defanged text.
+     */
+    private static String defangURI(String raw) 
+    {
+        StringBuffer buf = null;
+        
+        if (buf==null)
+        {
+            for (int i=0;i<raw.length();i++)
+            {
+                char c=raw.charAt(i);
+                switch(c)
+                {
+                    case '\'':
+                    case '"':
+                    case '<':
+                    case '>':
+                        buf=new StringBuffer(raw.length()<<1);
+                        break;
+                }
+            }
+            if (buf==null)
+                return raw;
+        }
+        
+        for (int i=0;i<raw.length();i++)
+        {
+            char c=raw.charAt(i);       
+            switch(c)
+            {
+              case '"':
+                  buf.append("%22");
+                  continue;
+              case '\'':
+                  buf.append("%27");
+                  continue;
+              case '<':
+                  buf.append("%3C");
+                  continue;
+              case '>':
+                  buf.append("%3E");
+                  continue;
+              default:
+                  buf.append(c);
+                  continue;
+            }
+        }
+
+        return buf.toString();
+    }
+    
+    private static String deTag(String raw) 
+    {
+        return StringUtil.replace( StringUtil.replace(raw,"<","&lt;"), ">", "&gt;");
     }
     
     /* ------------------------------------------------------------ */
