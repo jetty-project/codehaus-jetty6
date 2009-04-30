@@ -15,6 +15,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1002 cometd-api to 1.0.beta8
  + JETTY-1003 java.lang.IllegalArgumentException: timeout can't be negative
  + JETTY-1004 Canonical path handling includes ? in path segment
+ + JETTY-1006 Resume meta connect on all XD messages
 
 jetty-6.1.16 1 April 2009
  + JETTY-702 Create "jetty-tasks.xml" for the Ant plugin
