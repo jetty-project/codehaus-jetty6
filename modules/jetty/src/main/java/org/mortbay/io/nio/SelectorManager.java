@@ -15,7 +15,9 @@
 package org.mortbay.io.nio;
 
 import java.io.IOException;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.CancelledKeyException;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -49,6 +51,8 @@ public abstract class SelectorManager extends AbstractLifeCycle
     private transient SelectSet[] _selectSet;
     private int _selectSets=1;
     private volatile int _set;
+    private boolean _jvmBug0;
+    private boolean _jvmBug1;
     
 
     /* ------------------------------------------------------------ */
@@ -434,24 +438,66 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     _idleTimeout.setNow(now);
                     _retryTimeout.setNow(now);
 
-                    // Look for JVM bug 
-                    if (selected==0 && wait>0 && (now-before)<wait/2 && selector.selectedKeys().size()==0)
+                    // Look for JVM bugs
+                    // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6403933
+                    // http://bugs.sun.com/view_bug.do?bug_id=6693490
+                    if (selected==0 && wait>0 && (now-before)<wait/2)
                     {
-                        if (_jvmBug++>5)  // TODO tune or configure this
+                        _jvmBug++;
+                        if (_jvmBug>16)
                         {
-                            // Probably JVM BUG!
+                            synchronized (this)
+                            {
+                                // BLOODY SUN BUG !!!  Try refreshing the entire selector.
+                                if (_jvmBug1)
+                                    Log.debug("seeing JVM BUG(s) - recreating selector");
+                                else
+                                {
+                                    _jvmBug1=true;
+                                    Log.info("seeing JVM BUG(s) - recreating selector");
+                                }
+                                
+                                final Selector new_selector = Selector.open();
+                                Iterator iterator = _selector.keys().iterator();
+                                while (iterator.hasNext())
+                                {
+                                    SelectionKey k = (SelectionKey)iterator.next();
+                                    final SelectableChannel channel = k.channel();
+                                    final Object attachment = k.attachment();
+                                    
+                                    k.cancel();
+                                    if (attachment==null)
+                                        addChange(channel);
+                                    else
+                                        addChange(attachment);
+                                }
+                                _selector.close();
+                                _selector=new_selector;
+                                return;
+                            }
+                        }
+                        else if (_jvmBug>8)
+                        {
+                            // Cancel keys with 0 interested ops
+                            if (_jvmBug0)
+                                Log.debug("seeing JVM BUG(s) - cancelling interestOps==0");
+                            else
+                            {
+                                _jvmBug0=true;
+                                Log.info("seeing JVM BUG(s) - cancelling interestOps==0");
+                            }
                             
                             Iterator iter = selector.keys().iterator();
                             while(iter.hasNext())
                             {
-                                key = (SelectionKey) iter.next();
-                                if (key.isValid()&&key.interestOps()==0)
+                                SelectionKey k = (SelectionKey) iter.next();
+                                if (k.isValid()&&k.interestOps()==0)
                                 {
-                                    key.cancel();
+                                    k.cancel();
                                 }
                             }
-                            selector.selectNow();
-                        } 
+                            return;
+                        }
                     }
                     else
                         _jvmBug=0;
