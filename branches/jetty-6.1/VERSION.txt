@@ -11,6 +11,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-996 Make start-stop-daemon optional
  + JETTY-997 Remove jpackage-utils dependency on rpm install
  + JETTY-980 Fixed ResourceHandler ? handling, and bad URI creation in listings
+ + JETTY-985 Allow listeners to implement both interfaces
  + JETTY-1000 Avoided needless 1.5 dependency
  + JETTY-1002 cometd-api to 1.0.beta8
  + JETTY-1003 java.lang.IllegalArgumentException: timeout can't be negative
