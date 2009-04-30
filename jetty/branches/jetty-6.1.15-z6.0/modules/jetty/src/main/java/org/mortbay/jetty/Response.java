@@ -386,15 +386,15 @@ public class Response implements HttpServletResponse
             throw new IllegalArgumentException();
 
         if (!URIUtil.hasScheme(location))
-        {
+        {   
             StringBuffer buf = _connection.getRequest().getRootURL();
             if (location.startsWith("/"))
-                buf.append(URIUtil.canonicalPath(location));
+                buf.append(location);
             else
             {
                 String path=_connection.getRequest().getRequestURI();
                 String parent=(path.endsWith("/"))?path:URIUtil.parentPath(path);
-                location=URIUtil.canonicalPath(URIUtil.addPaths(parent,location));
+                location=URIUtil.addPaths(parent,location);
                 if(location==null)
                     throw new IllegalStateException("path cannot be above root");
                 if (!location.startsWith("/"))
@@ -403,6 +403,27 @@ public class Response implements HttpServletResponse
             }
 
             location=buf.toString();
+            HttpURI uri = new HttpURI(location);
+            String path=uri.getDecodedPath();
+            String canonical=URIUtil.canonicalPath(path);
+            if (canonical==null)
+                throw new IllegalArgumentException();
+            if (!canonical.equals(path))
+            {
+                buf = _connection.getRequest().getRootURL();
+                buf.append(canonical);
+                if (uri.getQuery()!=null)
+                {
+                    buf.append('?');
+                    buf.append(uri.getQuery());
+                }
+                if (uri.getFragment()!=null)
+                {
+                    buf.append('#');
+                    buf.append(uri.getFragment());
+                }
+                location=buf.toString();
+            }
         }
         resetBuffer();
 
