@@ -50,6 +50,7 @@ import org.mortbay.jetty.Response;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.nio.NIOConnector;
 import org.mortbay.log.Log;
+import org.mortbay.resource.FileResource;
 import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceFactory;
 import org.mortbay.util.IO;
@@ -151,6 +152,12 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         _gzip=getInitBoolean("gzip",_gzip);
         
         _aliases=getInitBoolean("aliases",_aliases);
+
+        if (!_aliases && !FileResource.getCheckAliases())
+            throw new IllegalStateException("Alias checking disabled");
+        if (_aliases)
+            config.log("Aliases are enabled");
+        
         _useFileMappedBuffer=getInitBoolean("useFileMappedBuffer",_useFileMappedBuffer);
         
         String rrb = getInitParameter("relativeResourceBase");
