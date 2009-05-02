@@ -98,6 +98,12 @@ import org.mortbay.util.ajax.Continuation;
  */
 public class Request implements HttpServletRequest
 {
+    private static final byte STATE_DELIMITER = 1;
+    private static final byte STATE_NAME = 2;
+    private static final byte STATE_VALUE = 4;
+    private static final byte STATE_QUOTED_VALUE = 8;
+    private static final byte STATE_UNQUOTED_VALUE = 16;
+
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
     private static final int __NONE=0, _STREAM=1, __READER=2;
     
@@ -375,7 +381,6 @@ public class Request implements HttpServletRequest
             Object lastCookies = null;
 
             int version = 0;
-            Cookie cookie = null;
 
             // For each cookie header
             Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
@@ -386,51 +391,146 @@ public class Request implements HttpServletRequest
                 lastCookies = LazyList.add(lastCookies, hdr);
 
                 // Parse the header
-                QuotedStringTokenizer tok = new QuotedStringTokenizer(hdr, ";,", false, false);
-                tok.setSingle(false);
-                while (tok.hasMoreElements())
+                String name = null;
+                String value = null;
+
+                Cookie cookie = null;
+
+                byte state = STATE_NAME;
+                for (int i = 0, tokenstart = 0, length = hdr.length(); i < length; i++)
                 {
-                    String c = (String) tok.nextElement();
-                    if (c == null) continue;
-                    c = c.trim();
-
-                    try
+                    char c = hdr.charAt(i);
+                    switch (c)
                     {
-                        String n;
-                        String v;
-                        int e = c.indexOf('=');
-                        if (e > 0)
-                        {
-                            n = c.substring(0, e);
-                            v = c.substring(e + 1);
-                        }
-                        else
-                        {
-                            n = c;
-                            v = "";
-                        }
-
-                        // Ignore $ names
-                        if (n.startsWith("$"))
-                        {
-                            if ("$version".equalsIgnoreCase(n))
-                                version = Integer.parseInt(StringUtil.unquote(v));
-                            else if ("$path".equalsIgnoreCase(n) && cookie != null)
-                                cookie.setPath(v);
-                            else if ("$domain".equalsIgnoreCase(n) && cookie != null)
-                                cookie.setDomain(v);
-                            continue;
-                        }
-
-                        v = URIUtil.decodePath(v);
-                        
-                        cookie = new Cookie(n, v);
-                        if (version > 0) cookie.setVersion(version);
-                        cookies = LazyList.add(cookies, cookie);
+                        case ',':
+                        case ';':
+                            switch (state)
+                            {
+                                case STATE_DELIMITER:
+                                    state = STATE_NAME;
+                                    tokenstart = i + 1;
+                                    break;
+                                case STATE_UNQUOTED_VALUE:
+                                    state = STATE_NAME;
+                                    // TODO remove this old style jetty cookie support (encoding)
+                                    value = URIUtil.decodePath(hdr.substring(tokenstart, i).trim());
+                                    tokenstart = i + 1;
+                                    break;
+                                case STATE_NAME:
+                                    name = hdr.substring(tokenstart, i);
+                                    value = "";
+                                    tokenstart = i + 1;
+                                    break;
+                                case STATE_VALUE:
+                                    state = STATE_NAME;
+                                    value = "";
+                                    tokenstart = i + 1;
+                                    break;
+                            }
+                            break;
+                        case '=':
+                            switch (state)
+                            {
+                                case STATE_NAME:
+                                    state = STATE_VALUE;
+                                    name = hdr.substring(tokenstart, i);
+                                    tokenstart = i + 1;
+                                    break;
+                                case STATE_VALUE:
+                                    state = STATE_UNQUOTED_VALUE;
+                                    tokenstart = i;
+                                    break;
+                            }
+                            break;
+                        case '"':
+                            switch (state)
+                            {
+                                case STATE_VALUE:
+                                    state = STATE_QUOTED_VALUE;
+                                    tokenstart = i + 1;
+                                    break;
+                                case STATE_QUOTED_VALUE:
+                                    state = STATE_DELIMITER;
+                                    value = hdr.substring(tokenstart, i);
+                                    break;
+                            }
+                            break;
+                        case ' ':
+                        case '\t':
+                            break;
+                        default:
+                            switch (state)
+                            {
+                                case STATE_VALUE:
+                                    state = STATE_UNQUOTED_VALUE;
+                                    tokenstart = i;
+                                    break;
+                                case STATE_DELIMITER:
+                                    state = STATE_NAME;
+                                    tokenstart = i;
+                                    break;
+                            }
                     }
-                    catch (Exception ex)
+
+                    if (i + 1 == length)
                     {
-                        Log.ignore(ex);
+                        switch (state)
+                        {
+                            case STATE_UNQUOTED_VALUE:
+                                // TODO remove this old style jetty cookie support (encoding)
+                                value = URIUtil.decodePath(hdr.substring(tokenstart).trim());
+                                break;
+                            case STATE_NAME:
+                                name = hdr.substring(tokenstart);
+                                value = "";
+                                break;
+                            case STATE_VALUE:
+                                value = "";
+                                break;
+                        }
+                    }
+
+                    if (name != null && value != null)
+                    {
+                        name = name.trim();
+
+                        try
+                        {
+                            if (name.startsWith("$"))
+                            {
+                                String lowercaseName = name.toLowerCase();
+                                if ("$path".equals(lowercaseName))
+                                {
+                                    cookie.setPath(value);
+                                }
+                                else if ("$domain".equals(lowercaseName))
+                                {
+                                    cookie.setDomain(value);
+                                }
+                                else if ("$version".equals(lowercaseName))
+                                {
+                                    version = Integer.parseInt(value);
+                                }
+                            }
+                            else
+                            {
+                                cookie = new Cookie(name, value);
+
+                                if (version > 0)
+                                {
+                                    cookie.setVersion(version);
+                                }
+
+                                cookies = LazyList.add(cookies, cookie);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Log.ignore(e);
+                        }
+
+                        name = null;
+                        value = null;
                     }
                 }
             }
