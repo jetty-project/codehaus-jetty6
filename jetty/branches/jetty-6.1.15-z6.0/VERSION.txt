@@ -1,7 +1,8 @@
 Patches:
-libsetuid -> setuid in SetUID.java
-JETTY-980 Fixed ResourceHandler ? handling, and bad URI creation in listings
-JETTY-1004 Canonical path handling includes ? in path segment
+ + libsetuid -> setuid in SetUID.java
+ + JETTY-980 Fixed ResourceHandler ? handling, and bad URI creation in listings
+ + JETTY-989 GzipFilter handles addHeader
+ + JETTY-1004 Canonical path handling includes ? in path segment
 
 jetty-6.1.15 4 March 2009
  + JETTY-931 Fix issue with jetty-rewrite.xml
