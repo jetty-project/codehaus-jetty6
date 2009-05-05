@@ -1,5 +1,6 @@
 jetty-6.1-SNAPSHOT
  + JETTY-937 Improved work around sun JVM selector bugs
+ + JETTY-1014 Enable start-stop-daemon by default on jetty.sh (START_STOP_DAEMON=1)
 
 jetty-6.1.17 30 April 2009
  + JETTY-936 Make optional dispatching to welcome files as servlets
