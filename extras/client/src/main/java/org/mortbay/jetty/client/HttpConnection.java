@@ -36,7 +36,7 @@ import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
 
 /**
- * 
+ *
  * @author Greg Wilkins
  * @author Guillaume Nodet
  */
@@ -52,7 +52,6 @@ public class HttpConnection implements Connection
     long _last;
     boolean _requestComplete;
     public String _message;
-    public Throwable _throwable;
     public boolean _reserved;
 
     /* The current exchange waiting for a response */
@@ -119,12 +118,12 @@ public class HttpConnection implements Connection
     {
         _reserved = reserved;
     }
-    
+
     public boolean isReserved()
     {
         return _reserved;
     }
-    
+
     /* ------------------------------------------------------------ */
     public HttpDestination getDestination()
     {
@@ -143,7 +142,6 @@ public class HttpConnection implements Connection
         // _message =
         // Thread.currentThread().getName()+": Generator instance="+_generator
         // .hashCode()+" state= "+_generator.getState()+" _exchange="+_exchange;
-        _throwable = new Throwable();
         synchronized (this)
         {
             if (_exchange != null)
@@ -263,7 +261,7 @@ public class HttpConnection implements Connection
                             _generator.complete();
                     }
                 }
-                
+
 
                 // If we are not ended then parse available
                 if (!_parser.isComplete() && _generator.isCommitted())
@@ -329,7 +327,7 @@ public class HttpConnection implements Connection
                     {
                         if (!close)
                             close = shouldClose();
-                            
+
                         reset(true);
                         no_progress = 0;
                         flushed = -1;
