@@ -44,6 +44,7 @@ import org.mortbay.thread.Timeout;
  */
 public abstract class SelectorManager extends AbstractLifeCycle
 {
+    private static final int __JVMBUG_THRESHHOLD=Integer.getInteger("org.mortbay.io.nio.JVMBUG_THRESHHOLD",32).intValue();
     private boolean _delaySelectKeyUpdate=true;
     private long _maxIdleTime;
     private long _lowResourcesConnections;
@@ -307,19 +308,18 @@ public abstract class SelectorManager extends AbstractLifeCycle
             synchronized (_changes)
             {
                 _changes[_change].add(point);
-                if (point instanceof SocketChannel)
-                    _changes[_change].add(null);
             }
         }
         
         /* ------------------------------------------------------------ */
-        public void addChange(SocketChannel channel, Object att)
+        public void addChange(SelectableChannel channel, Object att)
         {   
-            synchronized (_changes)
-            {
-                _changes[_change].add(channel);
-                _changes[_change].add(att);
-            }
+            if (att==null)
+                addChange(channel);
+            else if (att instanceof EndPoint)
+                addChange(att);
+            else
+                addChange(new ChangeSelectableChannel(channel,att));
         }
         
         /* ------------------------------------------------------------ */
@@ -360,6 +360,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     try
                     {
                         Object o = changes.get(i);
+                        
                         if (o instanceof EndPoint)
                         {
                             // Update the operations for a key.
@@ -370,29 +371,49 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         {
                             dispatch((Runnable)o);
                         }
-                        else if (o instanceof SocketChannel)
+                        else if (o instanceof ChangeSelectableChannel)
                         {
                             // finish accepting/connecting this connection
-                            SocketChannel channel=(SocketChannel)o;
-                            Object att = changes.get(++i);
+                            final ChangeSelectableChannel asc = (ChangeSelectableChannel)o;
+                            final SelectableChannel channel=asc._channel;
+                            final Object att = asc._attachment;
+
+                            if ((channel instanceof SocketChannel) && ((SocketChannel)channel).isConnected())
+                            {
+                                key = channel.register(selector,SelectionKey.OP_READ,att);
+                                SelectChannelEndPoint endpoint = newEndPoint((SocketChannel)channel,this,key);
+                                key.attach(endpoint);
+                                endpoint.dispatch();
+                            }
+                            else if (channel.isOpen())
+                            {
+                                channel.register(selector,SelectionKey.OP_CONNECT,att);
+                            }
+                        }
+                        else if (o instanceof SocketChannel)
+                        {
+                            final SocketChannel channel=(SocketChannel)o;
 
                             if (channel.isConnected())
                             {
-                                key = channel.register(selector,SelectionKey.OP_READ,att);
+                                key = channel.register(selector,SelectionKey.OP_READ,null);
                                 SelectChannelEndPoint endpoint = newEndPoint(channel,this,key);
                                 key.attach(endpoint);
                                 endpoint.dispatch();
                             }
                             else
                             {
-                                channel.register(selector,SelectionKey.OP_CONNECT,att);
+                                channel.register(selector,SelectionKey.OP_CONNECT,null);
                             }
-
                         }
                         else if (o instanceof ServerSocketChannel)
                         {
                             ServerSocketChannel channel = (ServerSocketChannel)o;
                             channel.register(getSelector(),SelectionKey.OP_ACCEPT);
+                        }
+                        else if (o instanceof ChangeTask)
+                        {
+                            ((ChangeTask)o).run();
                         }
                         else
                             throw new IllegalArgumentException(o.toString());
@@ -441,10 +462,10 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     // Look for JVM bugs
                     // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6403933
                     // http://bugs.sun.com/view_bug.do?bug_id=6693490
-                    if (selected==0 && wait>0 && (now-before)<wait/2)
+                    if (selected==0 && wait>0 && (now-before)<wait/2 && __JVMBUG_THRESHHOLD>0)
                     {
                         _jvmBug++;
-                        if (_jvmBug>16)
+                        if (_jvmBug>(__JVMBUG_THRESHHOLD*2))
                         {
                             synchronized (this)
                             {
@@ -469,14 +490,14 @@ public abstract class SelectorManager extends AbstractLifeCycle
                                     if (attachment==null)
                                         addChange(channel);
                                     else
-                                        addChange(attachment);
+                                        addChange(channel,attachment);
                                 }
                                 _selector.close();
                                 _selector=new_selector;
                                 return;
                             }
                         }
-                        else if (_jvmBug>8)
+                        else if (_jvmBug>__JVMBUG_THRESHHOLD)
                         {
                             // Cancel keys with 0 interested ops
                             if (_jvmBug0)
@@ -742,5 +763,25 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 _selector=null;
             }
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    private static class ChangeSelectableChannel
+    {
+        final SelectableChannel _channel;
+        final Object _attachment;
+        
+        public ChangeSelectableChannel(SelectableChannel channel, Object attachment)
+        {
+            super();
+            _channel = channel;
+            _attachment = attachment;
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    private interface ChangeTask
+    {
+        public void run();
     }
 }
