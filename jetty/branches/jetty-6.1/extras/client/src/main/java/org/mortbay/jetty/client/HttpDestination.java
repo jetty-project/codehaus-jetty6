@@ -13,14 +13,12 @@
 //========================================================================
 package org.mortbay.jetty.client;
 
-
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
-
 import javax.servlet.http.Cookie;
 
 import org.mortbay.io.Buffer;
@@ -67,7 +65,7 @@ public class HttpDestination
             }
         }
     }
-    
+
     /* The queue of exchanged for this destination if connections are limited */
     private LinkedList<HttpExchange> _queue=new LinkedList<HttpExchange>();
 
@@ -94,7 +92,7 @@ public class HttpDestination
     {
         return _hostHeader;
     }
-    
+
     /* ------------------------------------------------------------ */
     public HttpClient getHttpClient()
     {
@@ -106,7 +104,7 @@ public class HttpDestination
     {
         return _ssl;
     }
-    
+
     /* ------------------------------------------------------------ */
     public void addAuthorization(String pathSpec,Authorization authorization)
     {
@@ -116,7 +114,7 @@ public class HttpDestination
                 _authorizations=new PathMap();
             _authorizations.put(pathSpec,authorization);
         }
-        
+
         // TODO query and remove methods
     }
 
@@ -129,10 +127,10 @@ public class HttpDestination
                 _cookies=new ArrayList<Cookie>();
             _cookies.add(cookie);
         }
-        
+
         // TODO query, remove and age methods
     }
-    
+
     /* ------------------------------------------------------------------------------- */
     /**
      * Get a connection. We either get an idle connection if one is available, or
@@ -160,7 +158,7 @@ public class HttpDestination
                     starting = true;
                 }
             }
-            
+
             if (!starting)
             {
                 try
@@ -193,7 +191,7 @@ public class HttpDestination
         }
         return connection;
     }
-    
+
     /* ------------------------------------------------------------------------------- */
     public HttpConnection reserveConnection(long timeout) throws IOException
     {
@@ -210,7 +208,7 @@ public class HttpDestination
         {
             long now = System.currentTimeMillis();
             long idleTimeout=_client.getIdleTimeout();
- 
+
             // Find an idle connection
             while (_idle.size() > 0)
             {
@@ -230,7 +228,7 @@ public class HttpDestination
     }
 
     /* ------------------------------------------------------------------------------- */
-    protected void startNewConnection() 
+    protected void startNewConnection()
     {
         try
         {
@@ -250,7 +248,7 @@ public class HttpDestination
     public void onConnectionFailed(Throwable throwable)
     {
         Throwable connect_failure=null;
-        
+
         synchronized (this)
         {
             _pendingConnections--;
@@ -293,17 +291,17 @@ public class HttpDestination
             }
         }
     }
-    
+
     /* ------------------------------------------------------------------------------- */
     public void onNewConnection(HttpConnection connection) throws IOException
     {
         HttpConnection q_connection=null;
-        
+
         synchronized (this)
         {
             _pendingConnections--;
             _connections.add(connection);
-            
+
             if (_newConnection>0)
             {
                 q_connection=connection;
@@ -338,7 +336,7 @@ public class HttpDestination
     {
         if (connection.isReserved())
             connection.setReserved(false);
-        
+
         if (close)
         {
             try
@@ -350,10 +348,10 @@ public class HttpDestination
                 Log.ignore(e);
             }
         }
-        
+
         if (!_client.isStarted())
             return;
-        
+
         if (!close && connection.getEndPoint().isOpen())
         {
             synchronized (this)
@@ -371,7 +369,7 @@ public class HttpDestination
                 this.notifyAll();
             }
         }
-        else 
+        else
         {
             synchronized (this)
             {
@@ -381,7 +379,7 @@ public class HttpDestination
             }
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     public void send(HttpExchange ex) throws IOException
     {
@@ -414,17 +412,17 @@ public class HttpDestination
         {
             ex.setEventListener( new SecurityListener( this, ex ) );
         }
-        
+
         doSend(ex);
     }
-    
+
     /* ------------------------------------------------------------ */
     public void resend(HttpExchange ex) throws IOException
     {
         ex.getEventListener().onRetry();
         doSend(ex);
     }
-    
+
     /* ------------------------------------------------------------ */
     protected void doSend(HttpExchange ex) throws IOException
     {
@@ -446,7 +444,7 @@ public class HttpDestination
             if (buf!=null)
                 ex.addRequestHeader(HttpHeaders.COOKIE,buf.toString());
         }
-        
+
         // Add any known authorizations
         if (_authorizations!=null)
         {
@@ -454,16 +452,20 @@ public class HttpDestination
             if (auth !=null)
                 ((Authorization)auth).setCredentials(ex);
         }
-       
-        synchronized(this)
-        {
-            //System.out.println( "Sending: " + ex.toString() );
 
-            HttpConnection connection=null;
-            if (_queue.size()>0 || (connection=getIdleConnection())==null || !connection.send(ex))
+        HttpConnection connection = getIdleConnection();
+        if (connection != null)
+        {
+            boolean sent = connection.send(ex);
+            if (!sent) connection = null;
+        }
+
+        if (connection == null)
+        {
+            synchronized (this)
             {
                 _queue.add(ex);
-                if (_connections.size()+_pendingConnections <_maxConnections)
+                if (_connections.size() + _pendingConnections < _maxConnections)
                 {
                      startNewConnection();
                 }
@@ -476,7 +478,7 @@ public class HttpDestination
     {
         return "HttpDestination@" + hashCode() + "//" + _address.getHost() + ":" + _address.getPort() + "(" + _connections.size() + "," + _idle.size() + "," + _queue.size() + ")";
     }
-    
+
     /* ------------------------------------------------------------ */
     public synchronized String toDetailString()
     {
@@ -498,7 +500,7 @@ public class HttpDestination
         }
         b.append("--");
         b.append('\n');
-        
+
         return b.toString();
     }
 
@@ -543,5 +545,5 @@ public class HttpDestination
             }
         }
     }
-    
+
 }
