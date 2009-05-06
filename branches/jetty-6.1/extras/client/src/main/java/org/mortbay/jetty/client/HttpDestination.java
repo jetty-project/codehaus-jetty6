@@ -214,7 +214,7 @@ public class HttpDestination
                 if (_idle.size() > 0)
                     connection = _idle.remove(_idle.size()-1);
             }
-            
+
             if (connection==null)
                 return null;
 
@@ -454,19 +454,15 @@ public class HttpDestination
                 ((Authorization)auth).setCredentials(ex);
         }
 
-        HttpConnection connection = getIdleConnection();
-        if (connection != null)
+        synchronized(this)
         {
-            boolean sent = connection.send(ex);
-            if (!sent) connection = null;
-        }
+            //System.out.println( "Sending: " + ex.toString() );
 
-        if (connection == null)
-        {
-            synchronized (this)
+            HttpConnection connection=null;
+            if (_queue.size()>0 || (connection=getIdleConnection())==null || !connection.send(ex))
             {
                 _queue.add(ex);
-                if (_connections.size() + _pendingConnections < _maxConnections)
+                if (_connections.size()+_pendingConnections <_maxConnections)
                 {
                      startNewConnection();
                 }
