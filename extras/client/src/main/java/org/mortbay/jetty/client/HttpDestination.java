@@ -211,6 +211,12 @@ public class HttpDestination
         {
             synchronized (this)
             {
+                if (connection!=null)
+                {
+                    _connections.remove(connection);
+                    connection.getEndPoint().close();
+                    connection=null;
+                }
                 if (_idle.size() > 0)
                     connection = _idle.remove(_idle.size()-1);
             }
@@ -222,9 +228,6 @@ public class HttpDestination
             if (connection.getEndPoint().isOpen() && (last==0 || ((now-last)<idleTimeout)) )
                 return connection;
 
-            _connections.remove(connection);
-            connection.getEndPoint().close();
-            connection=null;
         }
     }
 
