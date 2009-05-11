@@ -20,6 +20,8 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
+import org.mortbay.log.Log;
+import org.mortbay.thread.Timeout;
 import org.mortbay.util.ArrayQueue;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
@@ -46,20 +48,22 @@ import org.mortbay.util.ajax.ContinuationSupport;
  * <p>
  * The following init parameters control the behavior of the filter:
  * 
- * maxRequestsPerSec the maximum number of requests from a connection per
- * second. Requests in excess of this are first delayed, then throttled.
+ * maxRequestsPerSec    the maximum number of requests from a connection per
+ *                      second. Requests in excess of this are first delayed, 
+ *                      then throttled.
  * 
- * delayMs is the delay given to all requests over the rate limit, before they
- * are considered at all. -1 means just reject request, 0 means no delay,
- * otherwise it is the delay.
+ * delayMs              is the delay given to all requests over the rate limit, 
+ *                      before they are considered at all. -1 means just reject request, 
+ *                      0 means no delay, otherwise it is the delay.
  * 
- * maxWaitMs how long to blocking wait for the throttle semaphore.
+ * maxWaitMs            how long to blocking wait for the throttle semaphore.
  * 
- * throttledRequests is the number of requests over the rate limit able to be
- * considered at once.
+ * throttledRequests    is the number of requests over the rate limit able to be
+ *                      considered at once.
  * 
- * throttleMs how long to async wait for semaphore.
+ * throttleMs           how long to async wait for semaphore.
  * 
+ * maxRequestMs         how long to allow this request to run.
  */
 
 public class DoSFilter implements Filter
@@ -72,13 +76,15 @@ public class DoSFilter implements Filter
     final static int __DEFAULT_THROTTLE = 5;
     final static int __DEFAULT_WAIT_MS=50;
     final static long __DEFAULT_THROTTLE_MS = 30000L;
+    final static long __DEFAULT_MAX_REQUEST_MS_INIT_PARAM=30000L;
 
     final static String MAX_REQUESTS_PER_S_INIT_PARAM = "maxRequestsPerSec";
     final static String DELAY_MS_INIT_PARAM = "delayMs";
     final static String THROTTLED_REQUESTS_INIT_PARAM = "throttledRequests";
     final static String MAX_WAIT_INIT_PARAM="maxWaitMs";
     final static String THROTTLE_MS_INIT_PARAM = "throttleMs";
-
+    final static String MAX_REQUEST_MS_INIT_PARAM="maxRequestMs";
+    
     final static int USER_AUTH = 2;
     final static int USER_SESSION = 2;
     final static int USER_IP = 1;
@@ -89,11 +95,15 @@ public class DoSFilter implements Filter
     protected long _delayMs;
     protected long _throttleMs;
     protected long _waitMs;
+    protected long _maxRequestMs;
     protected Semaphore _passes;
     protected Queue<Continuation>[] _queue;
 
     protected int _maxRequestsPerSec;
     protected ConcurrentHashMap<String, RateTracker> _rateTrackers;
+
+    private transient Timeout _timeoutQ;
+    private transient Thread _timerThread;
 
     public void init(FilterConfig filterConfig)
     {
@@ -113,27 +123,88 @@ public class DoSFilter implements Filter
         if (filterConfig.getInitParameter(DELAY_MS_INIT_PARAM) != null)
             delay = Integer.parseInt(filterConfig.getInitParameter(DELAY_MS_INIT_PARAM));
         _delayMs = delay;
-        
+
         int passes = __DEFAULT_THROTTLE;
         if (filterConfig.getInitParameter(THROTTLED_REQUESTS_INIT_PARAM) != null)
             passes = Integer.parseInt(filterConfig.getInitParameter(THROTTLED_REQUESTS_INIT_PARAM));
         _passes = new Semaphore(passes,true);
 
         long wait = __DEFAULT_WAIT_MS;
-        if (filterConfig.getInitParameter(MAX_WAIT_INIT_PARAM)!=null)
-            wait=Integer.parseInt(filterConfig.getInitParameter(MAX_WAIT_INIT_PARAM));
-        _waitMs=wait;
-        
+        if (filterConfig.getInitParameter(MAX_WAIT_INIT_PARAM) != null)
+            wait = Integer.parseInt(filterConfig.getInitParameter(MAX_WAIT_INIT_PARAM));
+        _waitMs = wait;
+
         long suspend = __DEFAULT_THROTTLE_MS;
         if (filterConfig.getInitParameter(THROTTLE_MS_INIT_PARAM) != null)
             suspend = Integer.parseInt(filterConfig.getInitParameter(THROTTLE_MS_INIT_PARAM));
         _throttleMs = suspend;
 
+        long maxRequestMs = __DEFAULT_MAX_REQUEST_MS_INIT_PARAM;
+        if (filterConfig.getInitParameter(MAX_REQUEST_MS_INIT_PARAM) != null )
+            maxRequestMs = Long.parseLong(filterConfig.getInitParameter(MAX_REQUEST_MS_INIT_PARAM));
+        _maxRequestMs = maxRequestMs;
+        
+        _timeoutQ = new Timeout(this);
+        _timerThread = (new Thread()
+        {
+            public void run()
+            {
+                while (true)
+                {
+                    _timeoutQ.setNow();
+                    _timeoutQ.tick();
+                    try
+                    {
+                        Thread.sleep(100);
+                    }
+                    catch (InterruptedException e)
+                    {
+                        Log.ignore(e);
+                    }
+                }
+            }
+        });
+        _timerThread.start();
+
+        _timeoutQ.setNow();
+        _timeoutQ.setDuration(__DEFAULT_MAX_REQUEST_MS_INIT_PARAM);        
     }
     
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException
     {
+        final HttpServletResponse resp = (HttpServletResponse)response;
+        Timeout.Task _timeout = new Timeout.Task()
+        {
+            public void expired()
+            {
+                // take drastic measures to return this response and stop this thread.
+                if( !resp.isCommitted() )
+                {
+                    resp.setHeader("Connection", "close");
+                }
+
+                try 
+                {
+                    try
+                    {
+                        resp.getWriter().close();
+                    }
+                    catch (IllegalStateException e)
+                    {
+                        resp.getOutputStream().close();
+                    }
+                }
+                catch (IOException e)
+                {
+                    Log.warn(e);
+                }
+                
+                // interrupt the handling thread
+                Thread.currentThread().interrupt();
+            }
+        };
+        _timeoutQ.schedule(_timeout);
         final long now=System.currentTimeMillis();
         
         // Look for the rate tracker for this request
@@ -153,9 +224,9 @@ public class DoSFilter implements Filter
             if (!overRateLimit)
             {
                 chain.doFilter(request,response);
+                _timeout.cancel();
                 return;
-            }
-            
+            }   
             
             // We are over the limit.
             
@@ -165,6 +236,7 @@ public class DoSFilter implements Filter
                 case -1: 
                 {
                     // Reject this request
+                    _timeout.cancel();
                     ((HttpServletResponse)response).addHeader("DoSFilter","unavailable");
                     ((HttpServletResponse)response).sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
                     return;
@@ -181,6 +253,7 @@ public class DoSFilter implements Filter
                     ((HttpServletResponse)response).addHeader("DoSFilter","delayed");
                     Continuation continuation = ContinuationSupport.getContinuation((HttpServletRequest)request,this);
                     request.setAttribute(__TRACKER,tracker);
+                    _timeout.cancel();
                     continuation.suspend(_delayMs);
                     // can fall through if this was a waiting continuation
                 }
@@ -244,6 +317,7 @@ public class DoSFilter implements Filter
         }
         finally
         {
+            _timeout.cancel();
             if (accepted)
             {
                 // wake up the next highest priority request.
@@ -341,6 +415,7 @@ public class DoSFilter implements Filter
 
     public void destroy()
     {
+        _timeoutQ.cancelAll();
     }
 
     /**
