@@ -64,6 +64,8 @@ import org.mortbay.util.ajax.ContinuationSupport;
  * throttleMs           how long to async wait for semaphore.
  * 
  * maxRequestMs         how long to allow this request to run.
+ * 
+ * insertHeaders        if true, insert the DoSFilter headers into the response. Defaults to true 
  */
 
 public class DoSFilter implements Filter
@@ -84,7 +86,8 @@ public class DoSFilter implements Filter
     final static String MAX_WAIT_INIT_PARAM="maxWaitMs";
     final static String THROTTLE_MS_INIT_PARAM = "throttleMs";
     final static String MAX_REQUEST_MS_INIT_PARAM="maxRequestMs";
-    
+    final static String INSERT_HEADERS_INIT_PARAM="insertHeaders";
+
     final static int USER_AUTH = 2;
     final static int USER_SESSION = 2;
     final static int USER_IP = 1;
@@ -96,6 +99,7 @@ public class DoSFilter implements Filter
     protected long _throttleMs;
     protected long _waitMs;
     protected long _maxRequestMs;
+    protected boolean _insertHeaders;
     protected Semaphore _passes;
     protected Queue<Continuation>[] _queue;
 
@@ -143,7 +147,13 @@ public class DoSFilter implements Filter
         if (filterConfig.getInitParameter(MAX_REQUEST_MS_INIT_PARAM) != null )
             maxRequestMs = Long.parseLong(filterConfig.getInitParameter(MAX_REQUEST_MS_INIT_PARAM));
         _maxRequestMs = maxRequestMs;
-        
+    
+        boolean insertHeaders = true;
+        String insertHeaderParameter = filterConfig.getInitParameter(INSERT_HEADERS_INIT_PARAM);
+        if (insertHeaderParameter != null && insertHeaderParameter.length() > 0 )
+            insertHeaders = insertHeaderParameter.equalsIgnoreCase("true") ? true : false;
+        _insertHeaders = insertHeaders;
+
         _timeoutQ = new Timeout(this);
         _timerThread = (new Thread()
         {
@@ -237,7 +247,8 @@ public class DoSFilter implements Filter
                 {
                     // Reject this request
                     _timeout.cancel();
-                    ((HttpServletResponse)response).addHeader("DoSFilter","unavailable");
+                    if (_insertHeaders)
+                        ((HttpServletResponse)response).addHeader("DoSFilter","unavailable");
                     ((HttpServletResponse)response).sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
                     return;
                 }
@@ -250,7 +261,8 @@ public class DoSFilter implements Filter
                 default:
                 {
                     // insert a delay before throttling the request
-                    ((HttpServletResponse)response).addHeader("DoSFilter","delayed");
+                    if (_insertHeaders)
+                        ((HttpServletResponse)response).addHeader("DoSFilter","delayed");
                     Continuation continuation = ContinuationSupport.getContinuation((HttpServletRequest)request,this);
                     request.setAttribute(__TRACKER,tracker);
                     _timeout.cancel();
@@ -278,7 +290,8 @@ public class DoSFilter implements Filter
                 {
                     int priority = getPriority(request,tracker);
                     request.setAttribute(__THROTTLED,Boolean.TRUE);
-                    ((HttpServletResponse)response).addHeader("DoSFilter","throttled");
+                    if (_insertHeaders)
+                        ((HttpServletResponse)response).addHeader("DoSFilter","throttled");
                     synchronized (this)
                     {
                         _queue[priority].add(continuation);
@@ -306,7 +319,8 @@ public class DoSFilter implements Filter
             else                
             {
                 // fail the request
-                ((HttpServletResponse)response).addHeader("DoSFilter","unavailable");
+                if (_insertHeaders)
+                    ((HttpServletResponse)response).addHeader("DoSFilter","unavailable");
                 ((HttpServletResponse)response).sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             }
         }
