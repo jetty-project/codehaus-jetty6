@@ -28,35 +28,38 @@ import org.mortbay.util.ajax.ContinuationSupport;
  * Denial of Service filter
  * 
  * <p>
- * This filter is based on the {@link QoSFilter}. It limits the number of
- * incoming requests based on two conditions: the number of simultaneous
- * requests which pass through the filter, set by the "maxRequests" init
- * parameter (default 10), and the number of incoming requests coming over a
- * connection within a short period of time.
+ * This filter is based on the {@link QoSFilter}. it is useful for limiting
+ * exposure to abuse from request flooding, whether malicious, or as a result of
+ * a misconfigured client.
  * <p>
- * If either of these two conditions are fulfilled, then the request is
- * suspended and placed in priority queues. Priority is given first to
- * authenticated users, then connections with HttpSessions, and then connections
- * with IP addresses. Connections with no way to identify them are given lowest
- * priority.
+ * The filter keeps track of the number of requests from a connection per
+ * second. If a limit is exceeded, the request is either rejected, delayed, or
+ * throttled.
  * <p>
- * The maxRequest limit is policed by a {@link Semaphore} and the filter will
- * wait a short while attempting to acquire the semaphore. This wait is
- * controlled by the "waitMs" init parameter and allows the expense of a suspend
- * to be avoided if the semaphore is shortly available. If the semaphore cannot
- * be obtained, the request will be suspended for the default suspend period of
- * the container or the valued set as the "suspendMs" init parameter.
+ * When a request is throttled, it is placed in a priority queue. Priority is
+ * given first to authenticated users and users with an HttpSession, then
+ * connections which can be identified by their IP addresses. Connections with
+ * no way to identify them are given lowest priority.
  * <p>
- * The baseRateLimit is the basic rate limit, to be adjusted according to load,
- * based on the number of requests waiting to be processed. Authenticated users
- * have a higher limit.
+ * The {@link #extractUserId(ServletRequest request)} function should be
+ * implemented, in order to uniquely identify authenticated users.
  * <p>
- * This filter is useful for limiting exposure to abuse from request flooding,
- * whether deliberate, as a result of a misconfigured client.
- * <p>
- * This filter MUST be extended, and
- * {@link #extractUserId(ServletRequest request)} implemented, in order to be
- * able to uniquely identify authenticated users.
+ * The following init parameters control the behavior of the filter:
+ * 
+ * maxRequestsPerSec the maximum number of requests from a connection per
+ * second. Requests in excess of this are first delayed, then throttled.
+ * 
+ * delayMs is the delay given to all requests over the rate limit, before they
+ * are considered at all. -1 means just reject request, 0 means no delay,
+ * otherwise it is the delay.
+ * 
+ * maxWaitMs how long to blocking wait for the throttle semaphore.
+ * 
+ * throttledRequests is the number of requests over the rate limit able to be
+ * considered at once.
+ * 
+ * throttleMs how long to async wait for semaphore.
+ * 
  */
 
 public class DoSFilter implements Filter
@@ -266,6 +269,7 @@ public class DoSFilter implements Filter
      * Get priority for this request, based on user type
      * 
      * @param request
+     * @param tracker
      * @return priority
      */
     protected int getPriority(ServletRequest request, RateTracker tracker)
@@ -295,6 +299,8 @@ public class DoSFilter implements Filter
      * through them in order, taking the first that matches: user id (logged
      * in), session id, client IP address. Unidentifiable connections are lumped
      * into one.
+     * 
+     * When a session expires, its rate tracker is automatically deleted.
      * 
      * @param request
      * @return the request rate tracker for the current connection
@@ -339,6 +345,7 @@ public class DoSFilter implements Filter
 
     /**
      * Returns the user id, used to track this connection.
+     * This SHOULD be overridden by subclasses.
      * 
      * @param request
      * @return a unique user id, if logged in; otherwise null.
@@ -368,9 +375,7 @@ public class DoSFilter implements Filter
         }
 
         /**
-         * @return the current calculated request rate over the last
-         *         trackingPeriod span (number of requests per seconds in
-         *         trackingPeriod)
+         * @return the current calculated request rate over the last second
          */
         public boolean isRateExceeded(long now)
         {
