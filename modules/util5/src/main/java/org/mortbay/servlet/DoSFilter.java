@@ -65,6 +65,9 @@ import org.mortbay.util.ajax.ContinuationSupport;
  * 
  * maxRequestMs         how long to allow this request to run.
  * 
+ * maxIdleTrackerMs     how long to keep track of request rates for a connection, 
+ *                      before deciding that the user has gone away, and discarding it
+ * 
  * insertHeaders        if true, insert the DoSFilter headers into the response. Defaults to true 
  */
 
@@ -79,6 +82,7 @@ public class DoSFilter implements Filter
     final static int __DEFAULT_WAIT_MS=50;
     final static long __DEFAULT_THROTTLE_MS = 30000L;
     final static long __DEFAULT_MAX_REQUEST_MS_INIT_PARAM=30000L;
+    final static long __DEFAULT_MAX_IDLE_TRACKER_MS_INIT_PARAM=30000L;
 
     final static String MAX_REQUESTS_PER_S_INIT_PARAM = "maxRequestsPerSec";
     final static String DELAY_MS_INIT_PARAM = "delayMs";
@@ -86,6 +90,7 @@ public class DoSFilter implements Filter
     final static String MAX_WAIT_INIT_PARAM="maxWaitMs";
     final static String THROTTLE_MS_INIT_PARAM = "throttleMs";
     final static String MAX_REQUEST_MS_INIT_PARAM="maxRequestMs";
+    final static String MAX_IDLE_TRACKER_MS_INIT_PARAM="maxIdleTrackerMs";
     final static String INSERT_HEADERS_INIT_PARAM="insertHeaders";
 
     final static int USER_AUTH = 2;
@@ -99,6 +104,7 @@ public class DoSFilter implements Filter
     protected long _throttleMs;
     protected long _waitMs;
     protected long _maxRequestMs;
+    protected long _maxIdleTrackerMs;
     protected boolean _insertHeaders;
     protected Semaphore _passes;
     protected Queue<Continuation>[] _queue;
@@ -106,7 +112,9 @@ public class DoSFilter implements Filter
     protected int _maxRequestsPerSec;
     protected final ConcurrentHashMap<String, RateTracker> _rateTrackers=new ConcurrentHashMap<String, RateTracker>();
 
-    private final Timeout _timeoutQ= new Timeout();
+    private final Timeout _requestTimeoutQ = new Timeout();
+    private final Timeout _trackerTimeoutQ = new Timeout();
+
     private Thread _timerThread;
     private volatile boolean _running;
 
@@ -147,7 +155,12 @@ public class DoSFilter implements Filter
         if (filterConfig.getInitParameter(MAX_REQUEST_MS_INIT_PARAM) != null )
             maxRequestMs = Long.parseLong(filterConfig.getInitParameter(MAX_REQUEST_MS_INIT_PARAM));
         _maxRequestMs = maxRequestMs;
-    
+
+        long maxIdleTrackerMs = __DEFAULT_MAX_IDLE_TRACKER_MS_INIT_PARAM;
+        if (filterConfig.getInitParameter(MAX_IDLE_TRACKER_MS_INIT_PARAM) != null )
+            maxIdleTrackerMs = Long.parseLong(filterConfig.getInitParameter(MAX_IDLE_TRACKER_MS_INIT_PARAM));
+        _maxIdleTrackerMs = maxIdleTrackerMs;
+
         boolean insertHeaders = true;
         String insertHeaderParameter = filterConfig.getInitParameter(INSERT_HEADERS_INIT_PARAM);
         if (insertHeaderParameter != null && insertHeaderParameter.length() > 0 )
@@ -161,10 +174,13 @@ public class DoSFilter implements Filter
             {
                 while (_running)
                 {
-                    synchronized (_timeoutQ)
+                    synchronized (_requestTimeoutQ)
                     {
-                        _timeoutQ.setNow();
-                        _timeoutQ.tick();
+                        _requestTimeoutQ.setNow();
+                        _requestTimeoutQ.tick();
+                        
+                        _trackerTimeoutQ.setNow();
+                        _trackerTimeoutQ.tick();
                     }
                     try
                     {
@@ -179,8 +195,11 @@ public class DoSFilter implements Filter
         });
         _timerThread.start();
 
-        _timeoutQ.setNow();
-        _timeoutQ.setDuration(_maxRequestMs);        
+        _requestTimeoutQ.setNow();
+        _requestTimeoutQ.setDuration(_maxRequestMs);
+        
+        _trackerTimeoutQ.setNow();
+        _trackerTimeoutQ.setDuration(_maxIdleTrackerMs);
     }
     
 
@@ -189,7 +208,7 @@ public class DoSFilter implements Filter
         final HttpServletRequest srequest = (HttpServletRequest)request;
         final HttpServletResponse sresponse = (HttpServletResponse)response;
         
-        final long now=_timeoutQ.getNow();
+        final long now=_requestTimeoutQ.getNow();
         
         // Look for the rate tracker for this request
         RateTracker tracker = (RateTracker)request.getAttribute(__TRACKER);
@@ -369,15 +388,15 @@ public class DoSFilter implements Filter
         
         try
         {
-            synchronized (_timeoutQ)
+            synchronized (_requestTimeoutQ)
             {
-                _timeoutQ.schedule(_timeout);
+                _requestTimeoutQ.schedule(_timeout);
             }
             chain.doFilter(request,response);
         }
         finally
         {
-            synchronized (_timeoutQ)
+            synchronized (_requestTimeoutQ)
             {
                 _timeout.cancel();
             }
@@ -454,7 +473,17 @@ public class DoSFilter implements Filter
                 tracker=t;
             if (session!=null)
                 session.setAttribute(__TRACKER,tracker);
+            
+            // USER_SESSION expiration from _rateTrackers are handled by the HttpSessionBindingListener
+            if (type == USER_IP)
+            {
+                synchronized (_trackerTimeoutQ)
+                {
+                    _trackerTimeoutQ.schedule(tracker);
+                }
+            }
         }
+
         return tracker;
     }
 
@@ -462,9 +491,10 @@ public class DoSFilter implements Filter
     {
         _running=false;
         _timerThread.interrupt();
-        synchronized (_timeoutQ)
+        synchronized (_requestTimeoutQ)
         {
-            _timeoutQ.cancelAll();
+            _requestTimeoutQ.cancelAll();
+            _trackerTimeoutQ.cancelAll();
         }
     }
 
@@ -484,7 +514,7 @@ public class DoSFilter implements Filter
      * A RateTracker is associated with a connection, and stores request rate
      * data.
      */
-    class RateTracker implements HttpSessionBindingListener
+    class RateTracker extends Timeout.Task implements HttpSessionBindingListener
     {
         private final String _id;
         private final int _type;
@@ -536,6 +566,19 @@ public class DoSFilter implements Filter
         public void valueUnbound(HttpSessionBindingEvent event)
         {
             _rateTrackers.remove(_id);
+        }
+        
+        public void expired()
+        {
+            long now = System.currentTimeMillis();
+            int latestIndex = _next == 0 ? 3 : (_next - 1 ) % _timestamps.length; 
+            long last=_timestamps[latestIndex];
+            boolean hasRecentRequest = last != 0 && (now-last)<1000L;
+            
+            if (hasRecentRequest)
+                reschedule();
+            else
+                _rateTrackers.remove(_id);
         }
     }
 }
