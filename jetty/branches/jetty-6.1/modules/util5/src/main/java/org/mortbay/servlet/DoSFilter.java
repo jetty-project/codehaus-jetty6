@@ -104,15 +104,15 @@ public class DoSFilter implements Filter
     protected Queue<Continuation>[] _queue;
 
     protected int _maxRequestsPerSec;
-    protected ConcurrentHashMap<String, RateTracker> _rateTrackers;
+    protected final ConcurrentHashMap<String, RateTracker> _rateTrackers=new ConcurrentHashMap<String, RateTracker>();
 
-    private transient Timeout _timeoutQ;
-    private transient Thread _timerThread;
+    private final Timeout _timeoutQ= new Timeout();
+    private Thread _timerThread;
+    private volatile boolean _running;
 
     public void init(FilterConfig filterConfig)
     {
         _context = filterConfig.getServletContext();
-        _rateTrackers = new ConcurrentHashMap<String, RateTracker>();
 
         _queue = new Queue[getMaxPriority() + 1];
         for (int p = 0; p < _queue.length; p++)
@@ -154,15 +154,18 @@ public class DoSFilter implements Filter
             insertHeaders = insertHeaderParameter.equalsIgnoreCase("true") ? true : false;
         _insertHeaders = insertHeaders;
 
-        _timeoutQ = new Timeout(this);
+        _running=true;
         _timerThread = (new Thread()
         {
             public void run()
             {
-                while (true)
+                while (_running)
                 {
-                    _timeoutQ.setNow();
-                    _timeoutQ.tick();
+                    synchronized (_timeoutQ)
+                    {
+                        _timeoutQ.setNow();
+                        _timeoutQ.tick();
+                    }
                     try
                     {
                         Thread.sleep(100);
@@ -181,41 +184,12 @@ public class DoSFilter implements Filter
     }
     
 
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterchain) throws IOException, ServletException
     {
-        final HttpServletResponse resp = (HttpServletResponse)response;
-        Timeout.Task _timeout = new Timeout.Task()
-        {
-            public void expired()
-            {
-                // take drastic measures to return this response and stop this thread.
-                if( !resp.isCommitted() )
-                {
-                    resp.setHeader("Connection", "close");
-                }
-
-                try 
-                {
-                    try
-                    {
-                        resp.getWriter().close();
-                    }
-                    catch (IllegalStateException e)
-                    {
-                        resp.getOutputStream().close();
-                    }
-                }
-                catch (IOException e)
-                {
-                    Log.warn(e);
-                }
-                
-                // interrupt the handling thread
-                Thread.currentThread().interrupt();
-            }
-        };
-        _timeoutQ.schedule(_timeout);
-        final long now=System.currentTimeMillis();
+        final HttpServletRequest srequest = (HttpServletRequest)request;
+        final HttpServletResponse sresponse = (HttpServletResponse)response;
+        
+        final long now=_timeoutQ.getNow();
         
         // Look for the rate tracker for this request
         RateTracker tracker = (RateTracker)request.getAttribute(__TRACKER);
@@ -233,8 +207,7 @@ public class DoSFilter implements Filter
             // pass it through if  we are not currently over the rate limit
             if (!overRateLimit)
             {
-                chain.doFilter(request,response);
-                _timeout.cancel();
+                doFilterChain(filterchain,srequest,sresponse);
                 return;
             }   
             
@@ -246,7 +219,6 @@ public class DoSFilter implements Filter
                 case -1: 
                 {
                     // Reject this request
-                    _timeout.cancel();
                     if (_insertHeaders)
                         ((HttpServletResponse)response).addHeader("DoSFilter","unavailable");
                     ((HttpServletResponse)response).sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
@@ -265,7 +237,6 @@ public class DoSFilter implements Filter
                         ((HttpServletResponse)response).addHeader("DoSFilter","delayed");
                     Continuation continuation = ContinuationSupport.getContinuation((HttpServletRequest)request,this);
                     request.setAttribute(__TRACKER,tracker);
-                    _timeout.cancel();
                     continuation.suspend(_delayMs);
                     // can fall through if this was a waiting continuation
                 }
@@ -315,7 +286,7 @@ public class DoSFilter implements Filter
             // if we were accepted (either immediately or after throttle)
             if (accepted)       
                 // call the chain
-                chain.doFilter(request,response);
+                doFilterChain(filterchain,srequest,sresponse);
             else                
             {
                 // fail the request
@@ -331,7 +302,6 @@ public class DoSFilter implements Filter
         }
         finally
         {
-            _timeout.cancel();
             if (accepted)
             {
                 // wake up the next highest priority request.
@@ -353,6 +323,66 @@ public class DoSFilter implements Filter
         }
     }
 
+    /**
+     * @param chain
+     * @param request
+     * @param response
+     * @throws IOException
+     * @throws ServletException
+     */
+    protected void doFilterChain(FilterChain chain, final HttpServletRequest request, final HttpServletResponse response) 
+        throws IOException, ServletException
+    {
+        final Thread thread=Thread.currentThread();
+        
+        final Timeout.Task _timeout = new Timeout.Task()
+        {
+            public void expired()
+            {
+                // take drastic measures to return this response and stop this thread.
+                if( !response.isCommitted() )
+                {
+                    response.setHeader("Connection", "close");
+                }
+
+                try 
+                {
+                    try
+                    {
+                        response.getWriter().close();
+                    }
+                    catch (IllegalStateException e)
+                    {
+                        response.getOutputStream().close();
+                    }
+                }
+                catch (IOException e)
+                {
+                    Log.warn(e);
+                }
+                
+                // interrupt the handling thread
+                thread.interrupt();
+            }
+        };
+        
+        try
+        {
+            synchronized (_timeoutQ)
+            {
+                _timeoutQ.schedule(_timeout);
+            }
+            chain.doFilter(request,response);
+        }
+        finally
+        {
+            synchronized (_timeoutQ)
+            {
+                _timeout.cancel();
+            }
+        }
+    }
+    
     /**
      * Get priority for this request, based on user type
      * 
@@ -429,7 +459,12 @@ public class DoSFilter implements Filter
 
     public void destroy()
     {
-        _timeoutQ.cancelAll();
+        _running=false;
+        _timerThread.interrupt();
+        synchronized (_timeoutQ)
+        {
+            _timeoutQ.cancelAll();
+        }
     }
 
     /**
