@@ -9,12 +9,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import junit.framework.TestCase;
+
 import org.mortbay.jetty.HttpURI;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.testing.ServletTester;
 import org.mortbay.util.IO;
-
-import junit.framework.TestCase;
 
 public class DosFilterTest extends TestCase
 {
@@ -153,7 +153,7 @@ public class DosFilterTest extends TestCase
         other.join();
     }
     
-    public void testUnavilableIP()
+    public void testUnavailableIP()
         throws Exception
     {
         Thread other = new Thread()
@@ -189,7 +189,53 @@ public class DosFilterTest extends TestCase
         other.join();
     }
     
-    
+    public void testSessionTracking()
+        throws Exception
+    {
+        // get a session, first
+        String requestSession="GET /ctx/test?session=true HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+        String response=doRequests("",1,0,0,requestSession);
+        String sessionId=response.substring(response.indexOf("Set-Cookie: ")+12, response.indexOf(";"));
+
+        // all other requests use this session
+        String request="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nCookie: " + sessionId + "\r\n\r\n";
+        String last="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\nCookie: " + sessionId + "\r\n\r\n";
+        String responses = doRequests(request+request+request+request+request,2,1100,1100,last);
+
+        assertEquals(11,count(responses,"HTTP/1.1 200 OK"));
+        assertEquals(2,count(responses,"DoSFilter: delayed"));
+    }
+
+    public void testMultipleSessionTracking()
+        throws Exception
+    {
+        // get some session ids, first
+        String requestSession="GET /ctx/test?session=true HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        String closeRequest="GET /ctx/test?session=true HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+        String response=doRequests(requestSession+requestSession,1,0,0,closeRequest);
+
+        String[] sessions = response.split("\r\n\r\n");
+        System.out.println();
+        String sessionId1=sessions[0].substring(sessions[0].indexOf("Set-Cookie: ")+12, sessions[0].indexOf(";"));
+        String sessionId2=sessions[1].substring(sessions[1].indexOf("Set-Cookie: ")+12, sessions[1].indexOf(";"));
+
+        // alternate between sessions
+        String request1="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nCookie: " + sessionId1 + "\r\n\r\n";
+        String request2="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nCookie: " + sessionId2 + "\r\n\r\n";
+        String last="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\nCookie: " + sessionId2 + "\r\n\r\n";
+        String responses = doRequests(request1+request2+request1+request2+request1,2,1100,1100,last);
+
+        assertEquals(11,count(responses,"HTTP/1.1 200 OK"));
+        assertEquals(0,count(responses,"DoSFilter: delayed"));
+
+        // alternate between sessions
+        responses = doRequests(request1+request2+request1+request2+request1,2,550,550,last);
+
+        assertEquals(11,count(responses,"HTTP/1.1 200 OK"));
+        int delayedRequests = count(responses,"DoSFilter: delayed"); 
+        assertTrue(delayedRequests >= 2 && delayedRequests <= 3);
+    }    
+
     public static class TestServlet extends HttpServlet implements Servlet
     {
         protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
@@ -208,6 +254,7 @@ public class DosFilterTest extends TestCase
             }
             response.setContentType("text/plain");
             response.getWriter().println("TestServlet "+request.getRequestURI());
+            
         }
     }
     
