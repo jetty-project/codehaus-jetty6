@@ -212,6 +212,7 @@ public class DoSFilter implements Filter
             }   
             
             // We are over the limit.
+            Log.warn("DOS ALERT: ip="+srequest.getRemoteAddr()+",session="+srequest.getRequestedSessionId()+",user="+srequest.getUserPrincipal());
             
             // So either reject it, delay it or throttle it
             switch((int)_delayMs)
