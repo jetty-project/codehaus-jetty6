@@ -180,7 +180,7 @@ public class DoSFilter implements Filter
         _timerThread.start();
 
         _timeoutQ.setNow();
-        _timeoutQ.setDuration(__DEFAULT_MAX_REQUEST_MS_INIT_PARAM);        
+        _timeoutQ.setDuration(_maxRequestMs);        
     }
     
 
