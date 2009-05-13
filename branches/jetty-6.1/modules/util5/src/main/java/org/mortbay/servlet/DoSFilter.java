@@ -1,8 +1,9 @@
 package org.mortbay.servlet;
 
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Queue;
+import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -72,7 +73,9 @@ import org.mortbay.util.ajax.ContinuationSupport;
  * 
  * trackSessions        if true, usage rate is tracked by session if a session exists. Defaults to true.
  * 
- * remotePort           if true and session tracking is not used, then rate is tracked by IP+port (effectively connection). Defaults to false. 
+ * remotePort           if true and session tracking is not used, then rate is tracked by IP+port (effectively connection). Defaults to false.
+ * 
+ *  ipWhitelist         a comma-separated list of IP addresses that will not be rate limited
  */
 
 public class DoSFilter implements Filter
@@ -98,6 +101,7 @@ public class DoSFilter implements Filter
     final static String INSERT_HEADERS_INIT_PARAM="insertHeaders";
     final static String TRACK_SESSIONS_INIT_PARAM="trackSessions";
     final static String REMOTE_PORT_INIT_PARAM="remotePort";
+    final static String IP_WHITELIST_INIT_PARAM="ipWhitelist";
 
     final static int USER_AUTH = 2;
     final static int USER_SESSION = 2;
@@ -119,7 +123,8 @@ public class DoSFilter implements Filter
 
     protected int _maxRequestsPerSec;
     protected final ConcurrentHashMap<String, RateTracker> _rateTrackers=new ConcurrentHashMap<String, RateTracker>();
-
+    private HashSet<String> _whitelist; 
+    
     private final Timeout _requestTimeoutQ = new Timeout();
     private final Timeout _trackerTimeoutQ = new Timeout();
 
@@ -168,6 +173,23 @@ public class DoSFilter implements Filter
         if (filterConfig.getInitParameter(MAX_IDLE_TRACKER_MS_INIT_PARAM) != null )
             maxIdleTrackerMs = Long.parseLong(filterConfig.getInitParameter(MAX_IDLE_TRACKER_MS_INIT_PARAM));
         _maxIdleTrackerMs = maxIdleTrackerMs;
+        
+        String whitelistString = "";
+        if (filterConfig.getInitParameter(IP_WHITELIST_INIT_PARAM) !=null )
+            whitelistString = filterConfig.getInitParameter(IP_WHITELIST_INIT_PARAM);
+        
+        // empty 
+        if (whitelistString.length() == 0 )
+            _whitelist = new HashSet<String>();
+        else
+        {
+            StringTokenizer tokenizer = new StringTokenizer(whitelistString, ",");
+            _whitelist = new HashSet<String>(tokenizer.countTokens());
+            while (tokenizer.hasMoreTokens())
+                _whitelist.add(tokenizer.nextToken().trim());
+            
+            Log.info("Whitelisted IP addresses: {}", _whitelist.toString());
+        }
 
         String tmp = filterConfig.getInitParameter(INSERT_HEADERS_INIT_PARAM);
         _insertHeaders = tmp==null || Boolean.parseBoolean(tmp); 
@@ -485,7 +507,16 @@ public class DoSFilter implements Filter
         
         if (tracker==null)
         {
-            RateTracker t = new RateTracker(loadId,type,_maxRequestsPerSec);
+            RateTracker t;
+            if (_whitelist.contains(request.getRemoteAddr()))
+            {
+                t = new FixedRateTracker(loadId,type,_maxRequestsPerSec);
+            }
+            else
+            {
+                t = new RateTracker(loadId,type,_maxRequestsPerSec);
+            }
+            
             tracker=_rateTrackers.putIfAbsent(loadId,t);
             if (tracker==null)
                 tracker=t;
@@ -535,10 +566,10 @@ public class DoSFilter implements Filter
      */
     class RateTracker extends Timeout.Task implements HttpSessionBindingListener
     {
-        private final String _id;
-        private final int _type;
-        private final long[] _timestamps;
-        private int _next;
+        protected final String _id;
+        protected final int _type;
+        protected final long[] _timestamps;
+        protected int _next;
         
         public RateTracker(String id, int type,int maxRequestsPerSecond)
         {
@@ -599,5 +630,27 @@ public class DoSFilter implements Filter
             else
                 _rateTrackers.remove(_id);
         }
+    }
+    
+    class FixedRateTracker extends RateTracker
+    {
+        public FixedRateTracker(String id, int type, int numRecentRequestsTracked)
+        {
+            super(id,type,numRecentRequestsTracked);
+        }
+
+        public boolean isRateExceeded(long now)
+        {
+            // rate limit is never exceeded, but we keep track of the request timestamps
+            // so that we know whether there was recent activity on this tracker
+            // and whether it should be expired
+            synchronized (this)
+            {
+                _timestamps[_next]=now;
+                _next= (_next+1)%_timestamps.length;
+            }
+
+            return false;
+        }        
     }
 }
