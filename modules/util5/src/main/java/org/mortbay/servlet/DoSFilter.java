@@ -68,7 +68,11 @@ import org.mortbay.util.ajax.ContinuationSupport;
  * maxIdleTrackerMs     how long to keep track of request rates for a connection, 
  *                      before deciding that the user has gone away, and discarding it
  * 
- * insertHeaders        if true, insert the DoSFilter headers into the response. Defaults to true 
+ * insertHeaders        if true , insert the DoSFilter headers into the response. Defaults to true.
+ * 
+ * trackSessions        if true, usage rate is tracked by session if a session exists. Defaults to true.
+ * 
+ * remotePort           if true and session tracking is not used, then rate is tracked by IP+port (effectively connection). Defaults to false. 
  */
 
 public class DoSFilter implements Filter
@@ -92,6 +96,8 @@ public class DoSFilter implements Filter
     final static String MAX_REQUEST_MS_INIT_PARAM="maxRequestMs";
     final static String MAX_IDLE_TRACKER_MS_INIT_PARAM="maxIdleTrackerMs";
     final static String INSERT_HEADERS_INIT_PARAM="insertHeaders";
+    final static String TRACK_SESSIONS_INIT_PARAM="trackSessions";
+    final static String REMOTE_PORT_INIT_PARAM="remotePort";
 
     final static int USER_AUTH = 2;
     final static int USER_SESSION = 2;
@@ -106,6 +112,8 @@ public class DoSFilter implements Filter
     protected long _maxRequestMs;
     protected long _maxIdleTrackerMs;
     protected boolean _insertHeaders;
+    protected boolean _trackSessions;
+    protected boolean _remotePort;
     protected Semaphore _passes;
     protected Queue<Continuation>[] _queue;
 
@@ -161,45 +169,55 @@ public class DoSFilter implements Filter
             maxIdleTrackerMs = Long.parseLong(filterConfig.getInitParameter(MAX_IDLE_TRACKER_MS_INIT_PARAM));
         _maxIdleTrackerMs = maxIdleTrackerMs;
 
-        boolean insertHeaders = true;
-        String insertHeaderParameter = filterConfig.getInitParameter(INSERT_HEADERS_INIT_PARAM);
-        if (insertHeaderParameter != null && insertHeaderParameter.length() > 0 )
-            insertHeaders = insertHeaderParameter.equalsIgnoreCase("true") ? true : false;
-        _insertHeaders = insertHeaders;
-
-        _running=true;
-        _timerThread = (new Thread()
-        {
-            public void run()
-            {
-                while (_running)
-                {
-                    synchronized (_requestTimeoutQ)
-                    {
-                        _requestTimeoutQ.setNow();
-                        _requestTimeoutQ.tick();
-                        
-                        _trackerTimeoutQ.setNow();
-                        _trackerTimeoutQ.tick();
-                    }
-                    try
-                    {
-                        Thread.sleep(100);
-                    }
-                    catch (InterruptedException e)
-                    {
-                        Log.ignore(e);
-                    }
-                }
-            }
-        });
-        _timerThread.start();
+        String tmp = filterConfig.getInitParameter(INSERT_HEADERS_INIT_PARAM);
+        _insertHeaders = tmp==null || Boolean.parseBoolean(tmp); 
+        
+        tmp = filterConfig.getInitParameter(TRACK_SESSIONS_INIT_PARAM);
+        _trackSessions = tmp==null || Boolean.parseBoolean(tmp);
+        
+        tmp = filterConfig.getInitParameter(REMOTE_PORT_INIT_PARAM);
+        _remotePort = tmp!=null&& Boolean.parseBoolean(tmp);
 
         _requestTimeoutQ.setNow();
         _requestTimeoutQ.setDuration(_maxRequestMs);
         
         _trackerTimeoutQ.setNow();
         _trackerTimeoutQ.setDuration(_maxIdleTrackerMs);
+        
+        _running=true;
+        _timerThread = (new Thread()
+        {
+            public void run()
+            {
+                try
+                {
+                    while (_running)
+                    {
+                        synchronized (_requestTimeoutQ)
+                        {
+                            _requestTimeoutQ.setNow();
+                            _requestTimeoutQ.tick();
+
+                            _trackerTimeoutQ.setNow(_requestTimeoutQ.getNow());
+                            _trackerTimeoutQ.tick();
+                        }
+                        try
+                        {
+                            Thread.sleep(100);
+                        }
+                        catch (InterruptedException e)
+                        {
+                            Log.ignore(e);
+                        }
+                    }
+                }
+                finally
+                {
+                    Log.info("DoSFilter timer exited");
+                }
+            }
+        });
+        _timerThread.start();
     }
     
 
@@ -452,14 +470,14 @@ public class DoSFilter implements Filter
         
         loadId = extractUserId(request);
         HttpSession session=srequest.getSession(false);
-        if (session!=null && !session.isNew())
+        if (_trackSessions && session!=null && !session.isNew())
         {
             loadId=session.getId();
             type = USER_SESSION;
         }
         else
         {
-            loadId = request.getRemoteAddr();
+            loadId = _remotePort?(request.getRemoteAddr()+request.getRemotePort()):request.getRemoteAddr();
             type = USER_IP;
         }
 
@@ -471,17 +489,18 @@ public class DoSFilter implements Filter
             tracker=_rateTrackers.putIfAbsent(loadId,t);
             if (tracker==null)
                 tracker=t;
-            if (session!=null)
-                session.setAttribute(__TRACKER,tracker);
             
-            // USER_SESSION expiration from _rateTrackers are handled by the HttpSessionBindingListener
             if (type == USER_IP)
             {
+                // USER_IP expiration from _rateTrackers is handled by the _trackerTimeoutQ
                 synchronized (_trackerTimeoutQ)
                 {
                     _trackerTimeoutQ.schedule(tracker);
                 }
             }
+            else if (session!=null)
+                // USER_SESSION expiration from _rateTrackers are handled by the HttpSessionBindingListener
+                session.setAttribute(__TRACKER,tracker);
         }
 
         return tracker;
@@ -570,7 +589,7 @@ public class DoSFilter implements Filter
         
         public void expired()
         {
-            long now = System.currentTimeMillis();
+            long now = _trackerTimeoutQ.getNow();
             int latestIndex = _next == 0 ? 3 : (_next - 1 ) % _timestamps.length; 
             long last=_timestamps[latestIndex];
             boolean hasRecentRequest = last != 0 && (now-last)<1000L;
