@@ -1,5 +1,7 @@
+Patches:
  + JETTY-989 GzipFilter handles addHeader
  + JETTY-489 parse cookies with unquoted values containing separators
+ + JETTY-1018 Denial of Service filter
 
 jetty-6.1.5z5.0 - 19 Feb 2009
  + JETTY-439 Fixed 100 continues clash with Connection:close
