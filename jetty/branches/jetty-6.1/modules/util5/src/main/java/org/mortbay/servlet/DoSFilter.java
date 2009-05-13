@@ -75,7 +75,7 @@ import org.mortbay.util.ajax.ContinuationSupport;
  * 
  * remotePort           if true and session tracking is not used, then rate is tracked by IP+port (effectively connection). Defaults to false.
  * 
- *  ipWhitelist         a comma-separated list of IP addresses that will not be rate limited
+ * ipWhitelist          a comma-separated list of IP addresses that will not be rate limited
  */
 
 public class DoSFilter implements Filter
