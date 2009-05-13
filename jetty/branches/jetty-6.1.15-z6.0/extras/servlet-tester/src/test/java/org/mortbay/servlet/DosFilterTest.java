@@ -215,7 +215,7 @@ public class DosFilterTest extends TestCase
         String response=doRequests(requestSession+requestSession,1,0,0,closeRequest);
 
         String[] sessions = response.split("\r\n\r\n");
-        System.out.println();
+
         String sessionId1=sessions[0].substring(sessions[0].indexOf("Set-Cookie: ")+12, sessions[0].indexOf(";"));
         String sessionId2=sessions[1].substring(sessions[1].indexOf("Set-Cookie: ")+12, sessions[1].indexOf(";"));
 
