@@ -31,7 +31,7 @@ public class DosFilterTest extends TestCase
         _port=uri.getPort();
         
         _tester.setContextPath("/ctx");
-        _tester.addServlet(TestServlet.class, "/test");
+        _tester.addServlet(TestServlet.class, "/*");
         
         FilterHolder dos=_tester.addFilter(DoSFilter2.class,"/*",0);
         dos.setInitParameter("maxRequestsPerSec","4");
@@ -39,6 +39,8 @@ public class DosFilterTest extends TestCase
         dos.setInitParameter("throttledRequests","1");
         dos.setInitParameter("waitMs","10");
         dos.setInitParameter("throttleMs","4000");
+        dos.setInitParameter("remotePort", "false");
+        dos.setInitParameter("insertHeaders", "true");
         _tester.start();
         
         _filter=(DoSFilter2)dos.getFilter();
@@ -128,8 +130,8 @@ public class DosFilterTest extends TestCase
                 try
                 {
                     // Cause a delay, then sleep while holding pass
-                    String request="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\n\r\n";
-                    String last="GET /ctx/test?sleep=2000 HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+                    String request="GET /ctx/sleeper HTTP/1.1\r\nHost: localhost\r\n\r\n";
+                    String last="GET /ctx/sleeper?sleep=2000 HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
                     String responses = doRequests(request+request+request+request,1,0,0,last);
                 }
                 catch(Exception e)
@@ -139,7 +141,7 @@ public class DosFilterTest extends TestCase
             }
         };
         other.start();
-        Thread.sleep(500);
+        Thread.sleep(1500);
         
         String request="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\n\r\n";
         String last="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
@@ -253,7 +255,6 @@ public class DosFilterTest extends TestCase
                 }
             }
             response.setContentType("text/plain");
-            response.getWriter().println("TestServlet "+request.getRequestURI());
             
         }
     }
