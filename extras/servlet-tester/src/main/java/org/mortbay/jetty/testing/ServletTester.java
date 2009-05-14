@@ -10,6 +10,7 @@ import java.util.EventListener;
 import org.mortbay.jetty.LocalConnector;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
+import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
@@ -105,6 +106,30 @@ public class ServletTester
     throws Exception
     {
        SocketConnector connector = new SocketConnector();
+       if (localhost)
+           connector.setHost("127.0.0.1");
+       _server.addConnector(connector);
+       if (_server.isStarted())
+           connector.start();
+       else
+           connector.open();
+       
+       return "http://"+(localhost?"127.0.0.1":
+       InetAddress.getLocalHost().getHostAddress()    
+       )+":"+connector.getLocalPort();
+   }
+    
+    /* ------------------------------------------------------------ */
+    /** Create a SelectChannel connector.
+     * This methods adds a socket connector to the server
+     * @param locahost if true, only listen on local host, else listen on all interfaces.
+     * @return A URL to access the server via the socket connector.
+     * @throws Exception
+     */
+    public String createChannelConnector(boolean localhost)
+    throws Exception
+    {
+       SelectChannelConnector connector = new SelectChannelConnector();
        if (localhost)
            connector.setHost("127.0.0.1");
        _server.addConnector(connector);
