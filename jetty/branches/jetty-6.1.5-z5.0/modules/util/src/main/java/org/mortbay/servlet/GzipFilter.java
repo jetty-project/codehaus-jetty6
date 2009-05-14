@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPOutputStream;
 
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
@@ -35,8 +34,6 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.mortbay.util.ByteArrayOutputStream2;
 import org.mortbay.util.StringUtil;
-
-import sun.nio.cs.ext.ISCII91;
 
 /* ------------------------------------------------------------ */
 /** GZIP Filter
