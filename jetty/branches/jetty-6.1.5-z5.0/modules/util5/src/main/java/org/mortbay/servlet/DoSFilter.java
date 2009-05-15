@@ -331,7 +331,7 @@ public class DoSFilter implements Filter
                         continuation.reset();
                         if(continuation.suspend(_throttleMs))
                         {
-                        	// handle waiting continuation strangeness
+                            // handle waiting continuation strangeness
                             // continuation was waiting and was resumed.
                             _passes.acquire();
                             accepted = true;
