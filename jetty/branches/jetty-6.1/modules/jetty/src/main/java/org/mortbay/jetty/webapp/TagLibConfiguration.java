@@ -168,9 +168,10 @@ public class TagLibConfiguration implements Configuration
                             if (file==null || !file.exists() || !file.canRead())
                                 continue;
                             
-                            JarFile jarfile = new JarFile(file);
+                            JarFile jarfile = null;
                             try
                             {
+                                jarfile = new JarFile(file);
                                 Enumeration e = jarfile.entries();
                                 while (e.hasMoreElements())
                                 {
@@ -184,9 +185,16 @@ public class TagLibConfiguration implements Configuration
                                     }
                                 }
                             }
+                            catch (Exception e)
+                            {
+                                Log.warn("Failed to read file: " + file, e); 
+                            }
                             finally
                             {
-                                jarfile.close();
+                                if (jarfile != null)
+                                {
+                                    jarfile.close();
+                                }
                             }   
                         }
                     }
