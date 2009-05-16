@@ -139,12 +139,12 @@ public class DosFilterTest extends TestCase
             }
         };
         other.start();
-        Thread.sleep(500);
+        Thread.sleep(1250);
         
         String request="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\n\r\n";
         String last="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
         String responses = doRequests(request+request+request+request,1,0,0,last);
-        
+
         assertEquals(5,count(responses,"HTTP/1.1 200 OK"));
         assertEquals(1,count(responses,"DoSFilter: delayed"));
         assertEquals(1,count(responses,"DoSFilter: throttled"));
