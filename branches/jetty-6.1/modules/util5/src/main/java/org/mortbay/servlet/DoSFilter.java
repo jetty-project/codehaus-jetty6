@@ -327,15 +327,18 @@ public class DoSFilter implements Filter
                     {
                         _queue[priority].add(continuation);
                         continuation.reset();
-                        continuation.suspend(_throttleMs);
+                        if(continuation.suspend(_throttleMs))
+                        {
+                                // handle waiting continuation strangeness
+                            // continuation was waiting and was resumed.
+                            _passes.acquire();
+                            accepted = true;
+                        }
                         // can fall through if this was a waiting continuation
                     }
                 }
-                
-                // we have already been throttled.
-
-                // so were we resumed?
-                if (continuation.isResumed())
+                // else were we resumed?
+                else if (continuation.isResumed())
                 {
                     // we were resumed and somebody stole our pass, so we wait for the next one.
                     _passes.acquire();
