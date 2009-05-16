@@ -93,17 +93,19 @@ public class ThreadPoolTest extends TestCase
     
     public void testStress() throws Exception
     {
+        boolean stress=Boolean.getBoolean("STRESS");
+        
         QueuedThreadPool tp= new QueuedThreadPool();
-        tp.setMinThreads(240);
-        tp.setMaxThreads(250);
+        tp.setMinThreads(stress?240:24);
+        tp.setMaxThreads(stress?250:25);
         tp.setMaxIdleTimeMs(100);
         tp.start();
 
-        tp.setMinThreads(90);
+        tp.setMinThreads(stress?90:9);
         final int[] count={0};
         
         final Random random = new Random(System.currentTimeMillis());
-        int loops = 16000;
+        int loops = stress?16000:1600;
 
         try
         {
