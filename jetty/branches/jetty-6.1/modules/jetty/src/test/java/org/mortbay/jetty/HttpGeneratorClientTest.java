@@ -21,6 +21,7 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.ByteArrayEndPoint;
 import org.mortbay.io.SimpleBuffers;
 import org.mortbay.io.View;
+import org.mortbay.util.StringUtil;
 
 import junit.framework.TestCase;
 
@@ -63,7 +64,11 @@ public class HttpGeneratorClientTest extends TestCase
         generator.complete();
         generator.flush();
         
-        String result=endp.getOut().toString().replace("\r\n","|").replace('\r','|').replace('\n','|');
+        String result=endp.getOut().toString();
+        result=StringUtil.replace(result,"\r\n","|");
+        result=StringUtil.replace(result,"\r","|");
+        result=StringUtil.replace(result,"\n","|");
+        
         assertEquals("GET /usr HTTP/1.1|Header: Value|Content-Type: text/plain|Content-Length: 44||"+content,result);
     }
 
@@ -90,7 +95,10 @@ public class HttpGeneratorClientTest extends TestCase
         generator.complete();
         generator.flush();
         
-        String result=endp.getOut().toString().replace("\r\n","|").replace('\r','|').replace('\n','|');
+        String result=endp.getOut().toString();
+        result=StringUtil.replace(result,"\r\n","|");
+        result=StringUtil.replace(result,"\r","|");
+        result=StringUtil.replace(result,"\n","|");
         assertEquals("GET /usr HTTP/1.1|Header: Value|Content-Type: text/plain|Content-Length: 44||"+content,result);
     }
 
@@ -116,8 +124,11 @@ public class HttpGeneratorClientTest extends TestCase
         generator.flush();
         generator.complete();
         generator.flush();
-        
-        String result=endp.getOut().toString().replace("\r\n","|").replace('\r','|').replace('\n','|');
+
+        String result=endp.getOut().toString();
+        result=StringUtil.replace(result,"\r\n","|");
+        result=StringUtil.replace(result,"\r","|");
+        result=StringUtil.replace(result,"\n","|");
         assertEquals("GET /usr HTTP/1.1|Header: Value|Content-Type: text/plain|Transfer-Encoding: chunked||2C|"+content+"|0||",result);
     }
     
