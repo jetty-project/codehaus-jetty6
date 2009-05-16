@@ -3,6 +3,7 @@ jetty-6.1-SNAPSHOT
 jetty-6.1.18 16 May 2009
  + JETTY-937 Improved work around sun JVM selector bugs
  + JETTY-1004 CERT VU#402580 Canonical path handling includes ? in path segment
+ + JETTY-1008 ContinuationBayeux destroy is called
  + JETTY-1014 Enable start-stop-daemon by default on jetty.sh (START_STOP_DAEMON=1)
  + JETTY-1015 Reduce BayeuxClient and HttpClient lock contention
  + JETTY-1017 HttpDestination has too coarse locking
