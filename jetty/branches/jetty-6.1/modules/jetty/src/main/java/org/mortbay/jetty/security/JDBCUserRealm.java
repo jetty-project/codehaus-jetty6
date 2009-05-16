@@ -110,7 +110,6 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
         super(name);
         setConfig(config);
         Loader.loadClass(this.getClass(),_jdbcDriver).newInstance();
-        connectDatabase();
     }    
 
     /* ------------------------------------------------------------ */
@@ -205,6 +204,7 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
                 _users.clear();
                 _roles.clear();
                 _lastHashPurge = now;
+                closeConnection(); //force a fresh connection
             }
             Principal user = super.getPrincipal(username);
             if (user == null)
@@ -267,7 +267,20 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
         {
             Log.warn("UserRealm " + getName()
                       + " could not load user information from database", e);
-            connectDatabase();
+           closeConnection();
         }
+    }
+    
+    /**
+     * Close an existing connection
+     */
+    private void closeConnection ()
+    {
+        if (_con != null)
+        {
+            if (Log.isDebugEnabled()) Log.debug("Closing db connection for JDBCUserRealm");
+            try { _con.close(); }catch (Exception e) {Log.ignore(e);}
+        }
+        _con = null;
     }
 }
