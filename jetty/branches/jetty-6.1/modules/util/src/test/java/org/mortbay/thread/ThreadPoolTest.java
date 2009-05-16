@@ -15,7 +15,6 @@
 package org.mortbay.thread;
 
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.TestCase;
 
@@ -101,7 +100,7 @@ public class ThreadPoolTest extends TestCase
         tp.start();
 
         tp.setMinThreads(90);
-        final AtomicInteger count = new AtomicInteger();
+        final int[] count={0};
         
         final Random random = new Random(System.currentTimeMillis());
         int loops = 16000;
@@ -139,7 +138,10 @@ public class ThreadPoolTest extends TestCase
                             }
                             finally
                             {
-                                count.incrementAndGet();
+                                synchronized (this)
+                                {
+                                    count[0]++;
+                                }
                             }
                         }
                     });
@@ -151,8 +153,10 @@ public class ThreadPoolTest extends TestCase
             Thread.sleep(1000);
                 
             tp.stop();
-            
-            assertEquals(loops,count.get());
+            synchronized (this)
+            {
+                assertEquals(loops,count[0]);
+            }
         }
         catch (Exception e)
         {
