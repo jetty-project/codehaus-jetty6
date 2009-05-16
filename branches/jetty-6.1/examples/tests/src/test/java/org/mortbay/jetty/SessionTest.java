@@ -171,7 +171,7 @@ public class SessionTest extends TestCase
         // System.err.println(uri+" ==> "+result); 
         try
         {
-            assertTrue(result!=null && result.contains(string));
+            assertTrue(result!=null && result.indexOf(string)>=0);
         }
         catch(AssertionFailedError e)
         {
@@ -184,14 +184,14 @@ public class SessionTest extends TestCase
     throws Exception
     {
         String result=IO.toString((InputStream)new URL(url+uri).getContent());
-        assertTrue(result!=null && !result.contains(string));
+        assertTrue(result!=null && result.indexOf(string)<0);
     }
 
     protected String getID(String uri)
         throws Exception
     {
         String result=IO.toString((InputStream)new URL(url+uri).getContent());
-        assertTrue(result!=null && result.contains("ID:</b> "));
+        assertTrue(result!=null && result.indexOf("ID:</b> ")>=0);
         int i0 = result.indexOf("ID:</b> ");
         int i1 = result.indexOf("<br/>",i0);
         String id = result.substring(i0+8,i1); 

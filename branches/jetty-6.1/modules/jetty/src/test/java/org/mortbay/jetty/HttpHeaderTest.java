@@ -103,9 +103,9 @@ public class HttpHeaderTest extends TestCase
         
         ByteArrayBuffer buffer = new ByteArrayBuffer(1024);
         header.put(buffer);
-        assertTrue(buffer.toString().contains("name0: value0"));
-        assertTrue(buffer.toString().contains("name1: value1"));
-        assertTrue(buffer.toString().contains("name2: value:2"));       
+        assertTrue(buffer.toString().indexOf("name0: value0")>=0);
+        assertTrue(buffer.toString().indexOf("name1: value1")>=0);
+        assertTrue(buffer.toString().indexOf("name2: value:2")>=0);       
     }
     
     public void testCachedPut()

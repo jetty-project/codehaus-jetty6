@@ -1,6 +1,7 @@
 package org.mortbay.jetty.nio;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.channels.Channel;
 import java.nio.channels.ServerSocketChannel;
 
@@ -31,22 +32,26 @@ public class InheritedChannelConnector extends SelectChannelConnector
         {
             try 
             {
-                Channel channel = System.inheritedChannel();
-                if ( channel instanceof ServerSocketChannel )
-                    _acceptChannel = (ServerSocketChannel)channel;
-                else
-                    Log.warn("Unable to use System.inheritedChannel() [" +channel+ "]. Trying a new ServerSocketChannel at " + getHost() + ":" + getPort());
+                Method m = System.class.getMethod("inheritedChannel",null);
+                if (m!=null)
+                {
+                    Channel channel = (Channel)m.invoke(null,null);
+                    if ( channel instanceof ServerSocketChannel )
+                        _acceptChannel = (ServerSocketChannel)channel;
+                }
                 
-                if ( _acceptChannel != null )
+                if (_acceptChannel!=null)
                     _acceptChannel.configureBlocking(false);
             }
-            catch(NoSuchMethodError e)
+            catch(Exception e)
             {
-                Log.warn("Need at least Java 5 to use socket inherited from xinetd/inetd.");
+                Log.warn(e);
             }
 
             if (_acceptChannel == null)
                 super.open();
+            else
+                throw new IOException("No System.inheritedChannel()");
         }
     }
 

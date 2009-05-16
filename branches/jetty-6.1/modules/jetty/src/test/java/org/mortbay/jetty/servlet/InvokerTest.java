@@ -76,7 +76,7 @@ public class InvokerTest extends TestCase
     {
         protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
         {
-            response.getWriter().append("Invoked TestServlet!");
+            response.getWriter().print("Invoked TestServlet!");
             response.getWriter().close();            
         }
     }

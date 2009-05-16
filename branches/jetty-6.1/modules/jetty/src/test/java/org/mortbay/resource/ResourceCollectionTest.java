@@ -65,7 +65,7 @@ public class ResourceCollectionTest extends TestCase
     
     static String getContent(ResourceCollection rc, String path) throws Exception
     {
-        StringBuilder buffer = new StringBuilder();
+        StringBuffer buffer = new StringBuffer();
         String line = null;
         BufferedReader br = new BufferedReader(new InputStreamReader(rc.addPath(path).getURL().openStream()));
         while((line=br.readLine())!=null)

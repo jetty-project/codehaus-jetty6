@@ -6,6 +6,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1017 HttpDestination has too coarse locking
  + JETTY-1018 Denial of Service Filter
  + JETTY-1020 ZipException in org.mortbay.jetty.webapp.TagLibConfiguration prevents all contexts from being loaded 
+ + Removed several 1.5isms
 
 jetty-6.1.17 30 April 2009
  + JETTY-936 Make optional dispatching to welcome files as servlets

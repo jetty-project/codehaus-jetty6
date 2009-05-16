@@ -31,6 +31,7 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.log.Log;
 import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.util.IO;
+import org.mortbay.util.StringUtil;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
 
@@ -88,7 +89,7 @@ public class AsyncStressTest extends TestCase
         for (int i=0;i<__tests.length;i++)
         {
             int timeout = _random.nextInt(200)+1;
-            String uri=__tests[i][0].replace("<TIMEOUT>",Integer.toString(timeout));
+            String uri=StringUtil.replace(__tests[i][0],"<TIMEOUT>",Integer.toString(timeout));
             
             long start=System.currentTimeMillis();
             Socket socket = new Socket(_addr,_port);
