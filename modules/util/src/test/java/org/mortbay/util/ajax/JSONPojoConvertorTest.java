@@ -137,7 +137,7 @@ public class JSONPojoConvertorTest extends TestCase
         
         public String toString()
         {
-            return new StringBuffer().append("\n=== ").append(getClass().getSimpleName()).append(" ===")
+            return new StringBuffer().append("\n=== ").append(getClass().getName()).append(" ===")
                 .append("\ntitle: ").append(getTitle())
                 .append("\nboolean1: ").append(isBoolean1())
                 .append("\nnullTest: ").append(getNullTest())
@@ -216,7 +216,7 @@ public class JSONPojoConvertorTest extends TestCase
         
         public String toString()
         {
-            return new StringBuffer().append("\n=== ").append(getClass().getSimpleName()).append(" ===")
+            return new StringBuffer().append("\n=== ").append(getClass().getName()).append(" ===")
                 .append("\nmessage: ").append(getMessage())
                 .append("\nboolean2: ").append(isBoolean2())
                 .append("\nfoo: ").append(getFoo()).toString();
@@ -273,7 +273,7 @@ public class JSONPojoConvertorTest extends TestCase
         
         public String toString()
         {
-            return new StringBuffer().append("\n=== ").append(getClass().getSimpleName()).append(" ===")
+            return new StringBuffer().append("\n=== ").append(getClass().getName()).append(" ===")
                 .append("\nname: ").append(_name)
                 .append("\nint1: ").append(_int1)
                 .append("\nint2: ").append(_int2)
