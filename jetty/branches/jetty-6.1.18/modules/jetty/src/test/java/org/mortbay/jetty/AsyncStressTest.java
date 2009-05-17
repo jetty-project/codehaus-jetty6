@@ -213,7 +213,7 @@ public class AsyncStressTest extends TestCase
             doThreads(STRESS_THREADS,200);
         }
         else
-            doThreads(100,10);
+            doThreads(50,10);
         Thread.sleep(1000);
     }
     
