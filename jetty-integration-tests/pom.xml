@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>jetty-project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty-integration-tests</artifactId>
-  <version>7.0.0.1beta1-SNAPSHOT</version>
+  <version>7.0.0.1beta1</version>
   <name>Jetty :: Integration Tests</name>
   <description>This module is for testing all classes that require external dependencies not suitable for being included in migration to Eclipse</description>
   <dependencies>
@@ -96,4 +96,10 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <scm>
+    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-integration-tests-7.0.0.1beta1</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-integration-tests-7.0.0.1beta1</developerConnection>
+    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-integration-tests-7.0.0.1beta1</url>
+  </scm>
 </project>
