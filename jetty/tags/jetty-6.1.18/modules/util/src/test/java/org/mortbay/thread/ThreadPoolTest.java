@@ -152,13 +152,24 @@ public class ThreadPoolTest extends TestCase
                 Thread.sleep(random.nextInt(100));
             }
             
-            Thread.sleep(1000);
-                
-            tp.stop();
+            int waits=0;
+            while(true)
+            {
+                synchronized (this)
+                {
+                    if (loops==count[0] || waits++>10)
+                        break;
+                }
+                Thread.sleep(500);
+            }
+            
             synchronized (this)
             {
                 assertEquals(loops,count[0]);
             }
+            
+            tp.stop();
+            Thread.sleep(100);
         }
         catch (Exception e)
         {
