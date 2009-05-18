@@ -15,7 +15,7 @@
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
-        <version>${project.version}</version>
+        <version>7.0.0.1beta1</version>
         <configuration>
           <scanIntervalSeconds>10</scanIntervalSeconds>
           <systemProperties>
