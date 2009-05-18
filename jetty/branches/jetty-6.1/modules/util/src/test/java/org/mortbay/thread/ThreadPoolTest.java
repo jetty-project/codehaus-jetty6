@@ -140,7 +140,7 @@ public class ThreadPoolTest extends TestCase
                             }
                             finally
                             {
-                                synchronized (this)
+                                synchronized (ThreadPoolTest.this)
                                 {
                                     count[0]++;
                                 }
@@ -155,7 +155,7 @@ public class ThreadPoolTest extends TestCase
             int waits=0;
             while(true)
             {
-                synchronized (this)
+                synchronized (ThreadPoolTest.this)
                 {
                     if (loops==count[0] || waits++>10)
                         break;
@@ -163,7 +163,7 @@ public class ThreadPoolTest extends TestCase
                 Thread.sleep(500);
             }
             
-            synchronized (this)
+            synchronized (ThreadPoolTest.this)
             {
                 assertEquals(loops,count[0]);
             }
