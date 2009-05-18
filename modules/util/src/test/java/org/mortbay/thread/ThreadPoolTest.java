@@ -129,7 +129,7 @@ public class ThreadPoolTest extends TestCase
                     {
                         public void run()
                         {
-                            int s=random.nextInt(50);
+                            int s=random.nextInt(40)+10;
                             try
                             {
                                 Thread.sleep(s);
