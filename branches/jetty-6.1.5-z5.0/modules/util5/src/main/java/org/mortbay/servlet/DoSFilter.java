@@ -1,3 +1,17 @@
+// ========================================================================
+// Copyright 2009 Mort Bay Consulting Pty. Ltd.
+// ------------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at 
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//========================================================================
+
 package org.mortbay.servlet;
 
 import java.io.IOException;
@@ -399,42 +413,19 @@ public class DoSFilter implements Filter
     {
         final Thread thread=Thread.currentThread();
         
-        final Timeout.Task _timeout = new Timeout.Task()
+        final Timeout.Task requestTimeout = new Timeout.Task()
         {
-            public void expired()
+            public void expire()
             {
-                // take drastic measures to return this response and stop this thread.
-                if( !response.isCommitted() )
-                {
-                    response.setHeader("Connection", "close");
-                }
-
-                try 
-                {
-                    try
-                    {
-                        response.getWriter().close();
-                    }
-                    catch (IllegalStateException e)
-                    {
-                        response.getOutputStream().close();
-                    }
-                }
-                catch (IOException e)
-                {
-                    Log.warn(e);
-                }
-                
-                // interrupt the handling thread
-                thread.interrupt();
+                closeConnection(request, response, thread);
             }
         };
-        
+
         try
         {
             synchronized (_requestTimeoutQ)
             {
-                _requestTimeoutQ.schedule(_timeout);
+                _requestTimeoutQ.schedule(requestTimeout);
             }
             chain.doFilter(request,response);
         }
@@ -442,11 +433,47 @@ public class DoSFilter implements Filter
         {
             synchronized (_requestTimeoutQ)
             {
-                _timeout.cancel();
+                requestTimeout.cancel();
             }
         }
     }
-    
+
+    /**
+     * Takes drastic measures to return this response and stop this thread.
+     * Due to the way the connection is interrupted, may return mixed up headers.
+     * For a cleaner, but Jetty-specific, way of handling the timeout, see
+     * @{link IncludableDoSFilter}
+     * @param request current request
+     * @param response current response, which must be stopped
+     * @param thread the handling thread
+     */
+    protected void closeConnection(HttpServletRequest request, HttpServletResponse response, Thread thread)
+    {
+        // take drastic measures to return this response and stop this thread.
+        if( !response.isCommitted() )
+        {
+            response.setHeader("Connection", "close");
+        }
+        try 
+        {
+            try
+            {
+                response.getWriter().close();
+            }
+            catch (IllegalStateException e)
+            {
+                response.getOutputStream().close();
+            }
+        }
+        catch (IOException e)
+        {
+            Log.warn(e);
+        }
+        
+        // interrupt the handling thread
+        thread.interrupt();
+    }
+        
     /**
      * Get priority for this request, based on user type
      * 
