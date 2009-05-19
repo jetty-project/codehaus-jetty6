@@ -257,6 +257,7 @@
     <module>modules/annotations</module>
 
     <module>extras/servlet-tester</module>
+    <module>modules/servlet5</module>
     <module>extras/xbean</module>
     <module>extras/spring</module>
     <!--module>extras/grizzly</module-->
