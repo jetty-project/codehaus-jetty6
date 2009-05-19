@@ -15,7 +15,6 @@ import org.mortbay.jetty.HttpURI;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.testing.ServletTester;
 import org.mortbay.log.Log;
-import org.mortbay.servlet.jetty.IncludableDoSFilter;
 import org.mortbay.util.IO;
 
 public class DosFilterTest extends TestCase
@@ -43,17 +42,16 @@ public class DosFilterTest extends TestCase
         dos.setInitParameter("throttleMs","4000");
         dos.setInitParameter("remotePort", "false");
         dos.setInitParameter("insertHeaders", "true");
-        dos.setInitParameter("maxRequestMs", _maxRequestMs + "");
-
-        FilterHolder idos = _tester.addFilter(IncludableDoSFilter2.class, "/idos/*", 0);
-        idos.setInitParameter("maxRequestsPerSec","4");
-        idos.setInitParameter("delayMs","200");
-        idos.setInitParameter("throttledRequests","1");
-        idos.setInitParameter("waitMs","10");
-        idos.setInitParameter("throttleMs","4000");
-        idos.setInitParameter("remotePort", "false");
-        idos.setInitParameter("insertHeaders", "true");
-        idos.setInitParameter("maxRequestMs", _maxRequestMs + "");
+        
+        FilterHolder quickTimeout = _tester.addFilter(DoSFilter2.class,"/timeout/*",0);
+        quickTimeout.setInitParameter("maxRequestsPerSec","4");
+        quickTimeout.setInitParameter("delayMs","200");
+        quickTimeout.setInitParameter("throttledRequests","1");
+        quickTimeout.setInitParameter("waitMs","10");
+        quickTimeout.setInitParameter("throttleMs","4000");
+        quickTimeout.setInitParameter("remotePort", "false");
+        quickTimeout.setInitParameter("insertHeaders", "true");
+        quickTimeout.setInitParameter("maxRequestMs", _maxRequestMs + "");
 
         _tester.start();
 
@@ -266,17 +264,14 @@ public class DosFilterTest extends TestCase
         throws Exception
     {
         int numRequests = 1000;
-        String last="GET /ctx/idos/unresponsive?lines="+numRequests+" HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
-        String responses = doRequests("",0,0,0,last);
-        // was expired, and stopped before reaching the end of the requests
-        assertTrue(responses.contains("DoSFilter: timeout"));
-        int responseLines = count(responses, "Line:"); 
-        assertTrue( responseLines > 0 && responseLines < numRequests);
 
-        last="GET /ctx/dos/unresponsive?lines="+numRequests+" HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
-        responses = doRequests("",0,0,0,last);
+        String last="GET /ctx/timeout/unresponsive?lines="+numRequests+" HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+        String responses = doRequests("",0,0,0,last);
+
+        // was expired, and stopped before reaching the end of the requests
+        int responseLines = count(responses, "Line:"); 
         assertTrue(responses.contains("DoSFilter: timeout"));
-        assertTrue( responseLines > 0 && responseLines < numRequests);
+        assertTrue(responseLines > 0 && responseLines < numRequests);
     }
    
     public static class TestServlet extends HttpServlet implements Servlet
@@ -333,22 +328,5 @@ public class DosFilterTest extends TestCase
                 Log.warn(e);
             }
         }
-    }
-    
-    public static class IncludableDoSFilter2 extends IncludableDoSFilter
-    {
-        public void closeConnection(HttpServletRequest request, HttpServletResponse response, Thread thread)
-        {
-            try {
-                response.getWriter().append("DoSFilter: timeout");
-                response.flushBuffer();
-                super.closeConnection(request,response,thread);
-            }
-            catch (Exception e)
-            {
-                Log.warn(e);
-            }
-        }
-
-    }
+    }    
 }
