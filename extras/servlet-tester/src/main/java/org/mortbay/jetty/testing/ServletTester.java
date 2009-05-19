@@ -56,7 +56,8 @@ public class ServletTester
     Server _server = new Server();
     LocalConnector _connector = new LocalConnector();
     Context _context = new Context(Context.SESSIONS|Context.SECURITY);
-    
+    int _maxIdleTime = -1;
+
     public ServletTester()
     {
         try
@@ -175,6 +176,8 @@ public class ServletTester
             if (localhost)
                 connector.setHost("127.0.0.1");
             _server.addConnector(connector);
+            if (_maxIdleTime != -1 )
+                connector.setMaxIdleTime(_maxIdleTime);
             if (_server.isStarted())
                 connector.start();
             else
@@ -360,4 +363,9 @@ public class ServletTester
         _context.setResourceBase(resourceBase);
     }
     
+    /* ------------------------------------------------------------ */
+    public void setMaxIdleTime(int maxIdleTime)
+    {
+        _maxIdleTime = maxIdleTime;
+    }
 }
