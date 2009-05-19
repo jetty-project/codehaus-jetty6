@@ -109,6 +109,7 @@
   <modules>
     <module>modules/util</module>
     <module>modules/util5</module>
+    <module>modules/servlet5</module>
     <module>modules/jetty</module>
     <module>modules/jsp-2.1</module>
     <module>modules/jsp-api-2.0</module>

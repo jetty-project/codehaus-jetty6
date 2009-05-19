@@ -1,3 +1,17 @@
+// ========================================================================
+// Copyright 2009 Mort Bay Consulting Pty. Ltd.
+// ------------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at 
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//========================================================================
+
 package org.mortbay.servlet;
 
 import java.io.IOException;
@@ -14,15 +28,16 @@ import junit.framework.TestCase;
 import org.mortbay.jetty.HttpURI;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.testing.ServletTester;
+import org.mortbay.log.Log;
 import org.mortbay.util.IO;
 
 public class DosFilterTest extends TestCase
 {
-    private ServletTester _tester;
-    private String _host;
-    private int _port;
-    private DoSFilter2 _filter;
+    protected ServletTester _tester;
+    protected String _host;
+    protected int _port;
     
+    protected int _maxRequestMs = 200;
     protected void setUp() throws Exception 
     {
         _tester = new ServletTester();
@@ -33,7 +48,7 @@ public class DosFilterTest extends TestCase
         _tester.setContextPath("/ctx");
         _tester.addServlet(TestServlet.class, "/*");
         
-        FilterHolder dos=_tester.addFilter(DoSFilter2.class,"/*",0);
+        FilterHolder dos=_tester.addFilter(DoSFilter2.class,"/dos/*",0);
         dos.setInitParameter("maxRequestsPerSec","4");
         dos.setInitParameter("delayMs","200");
         dos.setInitParameter("throttledRequests","1");
@@ -41,10 +56,19 @@ public class DosFilterTest extends TestCase
         dos.setInitParameter("throttleMs","4000");
         dos.setInitParameter("remotePort", "false");
         dos.setInitParameter("insertHeaders", "true");
+        
+        FilterHolder quickTimeout = _tester.addFilter(DoSFilter2.class,"/timeout/*",0);
+        quickTimeout.setInitParameter("maxRequestsPerSec","4");
+        quickTimeout.setInitParameter("delayMs","200");
+        quickTimeout.setInitParameter("throttledRequests","1");
+        quickTimeout.setInitParameter("waitMs","10");
+        quickTimeout.setInitParameter("throttleMs","4000");
+        quickTimeout.setInitParameter("remotePort", "false");
+        quickTimeout.setInitParameter("insertHeaders", "true");
+        quickTimeout.setInitParameter("maxRequestMs", _maxRequestMs + "");
+
         _tester.start();
-        
-        _filter=(DoSFilter2)dos.getFilter();
-        
+
     }
         
     protected void tearDown() throws Exception 
@@ -52,7 +76,7 @@ public class DosFilterTest extends TestCase
         _tester.stop();
     }
     
-    private String doRequests(String requests, int loops, long pause0,long pause1,String request)
+    protected String doRequests(String requests, int loops, long pause0,long pause1,String request)
         throws Exception
     {
         Socket socket = new Socket(_host,_port);
@@ -70,12 +94,24 @@ public class DosFilterTest extends TestCase
         socket.getOutputStream().write(request.getBytes("UTF-8"));
         socket.getOutputStream().flush();
         
-        String response = IO.toString(socket.getInputStream(),"UTF-8");
+        
+        String response = "";
+
+        if (requests.contains("/unresponsive"))
+        {
+            // don't read in anything, forcing the request to time out
+            Thread.sleep(_maxRequestMs * 2);
+            response = IO.toString(socket.getInputStream(),"UTF-8");
+        }
+        else
+        {
+            response = IO.toString(socket.getInputStream(),"UTF-8");
+        }
         socket.close();
         return response;
     }
     
-    private int count(String responses,String substring)
+    protected int count(String responses,String substring)
     {
         int count=0;
         int i=responses.indexOf(substring);
@@ -91,8 +127,8 @@ public class DosFilterTest extends TestCase
     public void testEvenLowRateIP()
         throws Exception
     {
-        String request="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\n\r\n";
-        String last="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+        String request="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        String last="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
         String responses = doRequests(request,11,300,300,last);   
         assertEquals(12,count(responses,"HTTP/1.1 200 OK"));
         assertEquals(0,count(responses,"DoSFilter:"));
@@ -101,8 +137,8 @@ public class DosFilterTest extends TestCase
     public void testBurstLowRateIP()
         throws Exception
     {
-        String request="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\n\r\n";
-        String last="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+        String request="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        String last="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
         String responses = doRequests(request+request+request+request,2,1100,1100,last);   
         
         assertEquals(9,count(responses,"HTTP/1.1 200 OK"));
@@ -112,8 +148,8 @@ public class DosFilterTest extends TestCase
     public void testDelayedIP()
         throws Exception
     {
-        String request="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\n\r\n";
-        String last="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+        String request="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        String last="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
         String responses = doRequests(request+request+request+request+request,2,1100,1100,last);
         
         assertEquals(11,count(responses,"HTTP/1.1 200 OK"));
@@ -130,8 +166,8 @@ public class DosFilterTest extends TestCase
                 try
                 {
                     // Cause a delay, then sleep while holding pass
-                    String request="GET /ctx/sleeper HTTP/1.1\r\nHost: localhost\r\n\r\n";
-                    String last="GET /ctx/sleeper?sleep=2000 HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+                    String request="GET /ctx/dos/sleeper HTTP/1.1\r\nHost: localhost\r\n\r\n";
+                    String last="GET /ctx/dos/sleeper?sleep=2000 HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
                     String responses = doRequests(request+request+request+request,1,0,0,last);
                 }
                 catch(Exception e)
@@ -143,8 +179,8 @@ public class DosFilterTest extends TestCase
         other.start();
         Thread.sleep(1500);
         
-        String request="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\n\r\n";
-        String last="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+        String request="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        String last="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
         String responses = doRequests(request+request+request+request,1,0,0,last);
         
         assertEquals(5,count(responses,"HTTP/1.1 200 OK"));
@@ -165,8 +201,8 @@ public class DosFilterTest extends TestCase
                 try
                 {
                     // Cause a delay, then sleep while holding pass
-                    String request="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\n\r\n";
-                    String last="GET /ctx/test?sleep=5000 HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+                    String request="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\n\r\n";
+                    String last="GET /ctx/dos/test?sleep=5000 HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
                     String responses = doRequests(request+request+request+request,1,0,0,last);
                 }
                 catch(Exception e)
@@ -178,8 +214,8 @@ public class DosFilterTest extends TestCase
         other.start();
         Thread.sleep(500);
         
-        String request="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\n\r\n";
-        String last="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+        String request="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        String last="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
         String responses = doRequests(request+request+request+request,1,0,0,last);
         
         assertEquals(4,count(responses,"HTTP/1.1 200 OK"));
@@ -195,13 +231,13 @@ public class DosFilterTest extends TestCase
         throws Exception
     {
         // get a session, first
-        String requestSession="GET /ctx/test?session=true HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+        String requestSession="GET /ctx/dos/test?session=true HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
         String response=doRequests("",1,0,0,requestSession);
         String sessionId=response.substring(response.indexOf("Set-Cookie: ")+12, response.indexOf(";"));
 
         // all other requests use this session
-        String request="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nCookie: " + sessionId + "\r\n\r\n";
-        String last="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\nCookie: " + sessionId + "\r\n\r\n";
+        String request="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\nCookie: " + sessionId + "\r\n\r\n";
+        String last="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\nCookie: " + sessionId + "\r\n\r\n";
         String responses = doRequests(request+request+request+request+request,2,1100,1100,last);
 
         assertEquals(11,count(responses,"HTTP/1.1 200 OK"));
@@ -212,8 +248,8 @@ public class DosFilterTest extends TestCase
         throws Exception
     {
         // get some session ids, first
-        String requestSession="GET /ctx/test?session=true HTTP/1.1\r\nHost: localhost\r\n\r\n";
-        String closeRequest="GET /ctx/test?session=true HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+        String requestSession="GET /ctx/dos/test?session=true HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        String closeRequest="GET /ctx/dos/test?session=true HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
         String response=doRequests(requestSession+requestSession,1,0,0,closeRequest);
 
         String[] sessions = response.split("\r\n\r\n");
@@ -222,9 +258,9 @@ public class DosFilterTest extends TestCase
         String sessionId2=sessions[1].substring(sessions[1].indexOf("Set-Cookie: ")+12, sessions[1].indexOf(";"));
 
         // alternate between sessions
-        String request1="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nCookie: " + sessionId1 + "\r\n\r\n";
-        String request2="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nCookie: " + sessionId2 + "\r\n\r\n";
-        String last="GET /ctx/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\nCookie: " + sessionId2 + "\r\n\r\n";
+        String request1="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\nCookie: " + sessionId1 + "\r\n\r\n";
+        String request2="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\nCookie: " + sessionId2 + "\r\n\r\n";
+        String last="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\nCookie: " + sessionId2 + "\r\n\r\n";
         String responses = doRequests(request1+request2+request1+request2+request1,2,1100,1100,last);
 
         assertEquals(11,count(responses,"HTTP/1.1 200 OK"));
@@ -238,6 +274,20 @@ public class DosFilterTest extends TestCase
         assertTrue(delayedRequests >= 2 && delayedRequests <= 3);
     }    
 
+    public void testUnresponsiveClient()
+        throws Exception
+    {
+        int numRequests = 1000;
+
+        String last="GET /ctx/timeout/unresponsive?lines="+numRequests+" HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+        String responses = doRequests("",0,0,0,last);
+
+        // was expired, and stopped before reaching the end of the requests
+        int responseLines = count(responses, "Line:"); 
+        assertTrue(responses.contains("DoSFilter: timeout"));
+        assertTrue(responseLines > 0 && responseLines < numRequests);
+    }
+   
     public static class TestServlet extends HttpServlet implements Servlet
     {
         protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
@@ -254,6 +304,26 @@ public class DosFilterTest extends TestCase
                 {    
                 }
             }
+            
+            if (request.getParameter("lines")!=null)
+            {
+                int count = Integer.parseInt(request.getParameter("lines"));
+                for(int i = 0; i < count; ++i)
+                {                        
+                    response.getWriter().append("Line: " + i+"\n");
+                    response.flushBuffer();
+                    
+                    try
+                    {
+                        Thread.sleep(10);
+                    }
+                    catch(InterruptedException e)
+                    {
+                    }
+
+                }
+            }
+            
             response.setContentType("text/plain");
             
         }
@@ -261,7 +331,16 @@ public class DosFilterTest extends TestCase
     
     public static class DoSFilter2 extends DoSFilter
     {
-    }
-    
-    
+        public void closeConnection(HttpServletRequest request, HttpServletResponse response, Thread thread)
+        {
+            try {
+                response.getWriter().append("DoSFilter: timeout");
+                super.closeConnection(request,response,thread);
+            }
+            catch (Exception e)
+            {
+                Log.warn(e);
+            }
+        }
+    }    
 }
