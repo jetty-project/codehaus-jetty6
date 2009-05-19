@@ -1,5 +1,4 @@
 jetty-6.1-SNAPSHOT
- + JETTY-1018 Jetty-specific extension to the Denial of Service filter, which better handles timeouts
 
 jetty-6.1.18 16 May 2009
  + JETTY-937 Improved work around sun JVM selector bugs
