@@ -12,7 +12,6 @@
   <name>Jetty :: Project Parent</name>
 
   <properties>
-    <atomikos-version>3.2.3</atomikos-version>
     <jetty-version>7.0.0.M2</jetty-version>
     <jsp-2-1-version>9.1.1.B60.25.p1</jsp-2-1-version>
   </properties>
