@@ -108,6 +108,9 @@
         </Arg>
     </Call -->
 
+    <!-- =========================================================== -->
+    <!-- Handler structure                                           -->
+    <!-- =========================================================== -->
     <Set name="handler">
       <New id="Handlers" class="org.eclipse.jetty.server.handler.HandlerCollection">
         <Set name="handlers">
@@ -126,6 +129,37 @@
       </New>
     </Set>
 
+    <!-- 
+         Use the following alternative structure to enable statistics collection.
+
+         Then modify the ROOT.war/WEB-INF/web.xml file and replace:
+           org.jboss.web.tomcat.service.StatusServlet
+         with:
+           org.eclipse.jetty.servlet.StatisticsServlet
+    -->
+ 
+    <!--
+      <New class="org.mortbay.jetty.handler.StatisticsHandler">
+        <Set name="handler">
+          <New id="Handlers" class="org.eclipse.jetty.server.handler.HandlerCollection">
+            <Set name="handlers">
+             <Array type="org.eclipse.jetty.server.Handler">
+               <Item>
+                 <New id="Contexts" class="org.eclipse.jetty.server.handler.ContextHandlerCollection"/>
+               </Item>
+               <Item>
+                 <New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>
+               </Item>
+               <Item>
+                 <New id="RequestLog" class="org.eclipse.jetty.server.handler.RequestLogHandler"/>
+               </Item>
+            </Array>
+            </Set>
+          </New>
+         </Set>
+       </New>
+     </Set>
+    -->
 
       </Configure>
      </attribute>
