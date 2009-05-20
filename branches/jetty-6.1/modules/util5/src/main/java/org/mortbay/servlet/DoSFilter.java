@@ -441,8 +441,6 @@ public class DoSFilter implements Filter
     /**
      * Takes drastic measures to return this response and stop this thread.
      * Due to the way the connection is interrupted, may return mixed up headers.
-     * For a cleaner, but Jetty-specific, way of handling the timeout, see
-     * @{link IncludableDoSFilter}
      * @param request current request
      * @param response current response, which must be stopped
      * @param thread the handling thread
