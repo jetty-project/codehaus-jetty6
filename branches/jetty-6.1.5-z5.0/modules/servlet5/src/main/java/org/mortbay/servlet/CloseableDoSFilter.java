@@ -25,12 +25,12 @@ import org.mortbay.log.Log;
 
 
 /* ------------------------------------------------------------ */
-/** Includable DoS Filter.
+/** Closeable DoS Filter.
  * This is an extension to the {@link DoSFilter} that uses Jetty APIs to allow
  * connections to be closed cleanly. 
  */
 
-public class IncludableDoSFilter extends DoSFilter
+public class CloseableDoSFilter extends DoSFilter
 {
     protected void closeConnection(HttpServletRequest request, HttpServletResponse response, Thread thread)
     {
