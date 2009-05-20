@@ -8,7 +8,7 @@ import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.testing.ServletTester;
 import org.mortbay.log.Log;
 
-public class IncludableDosFilterTest extends DosFilterTest 
+public class CloseableDosFilterTest extends DosFilterTest 
 {
     protected void setUp() throws Exception 
     {
@@ -20,7 +20,7 @@ public class IncludableDosFilterTest extends DosFilterTest
         _tester.setContextPath("/ctx");
         _tester.addServlet(TestServlet.class, "/*");
         
-        FilterHolder dos=_tester.addFilter(IncludableDoSFilter2.class,"/dos/*",0);
+        FilterHolder dos=_tester.addFilter(CloseableDoSFilter2.class,"/dos/*",0);
         dos.setInitParameter("maxRequestsPerSec","4");
         dos.setInitParameter("delayMs","200");
         dos.setInitParameter("throttledRequests","1");
@@ -29,7 +29,7 @@ public class IncludableDosFilterTest extends DosFilterTest
         dos.setInitParameter("remotePort", "false");
         dos.setInitParameter("insertHeaders", "true");
         
-        FilterHolder quickTimeout = _tester.addFilter(IncludableDoSFilter2.class,"/timeout/*",0);
+        FilterHolder quickTimeout = _tester.addFilter(CloseableDoSFilter2.class,"/timeout/*",0);
         quickTimeout.setInitParameter("maxRequestsPerSec","4");
         quickTimeout.setInitParameter("delayMs","200");
         quickTimeout.setInitParameter("throttledRequests","1");
@@ -43,7 +43,7 @@ public class IncludableDosFilterTest extends DosFilterTest
 
     }
     
-    public static class IncludableDoSFilter2 extends IncludableDoSFilter
+    public static class CloseableDoSFilter2 extends CloseableDoSFilter
  	{
     	public void closeConnection(HttpServletRequest request, HttpServletResponse response, Thread thread)
     	{
