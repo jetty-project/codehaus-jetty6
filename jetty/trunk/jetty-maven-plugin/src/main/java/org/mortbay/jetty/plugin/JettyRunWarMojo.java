@@ -75,7 +75,6 @@ public class JettyRunWarMojo extends AbstractJettyMojo
         super.configureWebApplication();
         
         webAppConfig.setWar(webApp.getCanonicalPath());
-        webAppConfig.configure();
     }
  
 

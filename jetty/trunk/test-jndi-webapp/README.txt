@@ -1,3 +1,25 @@
+Build and Install
+-----------------
+
+To build this test webapp, do "mvn clean install".
+This will produce the following artifacts in ./target:
+
+ + contexts/
+      README-test-jndi.txt
+      test-jndi.xml
+      test-jndi.d/
+         WEB-INF/
+            instruction-web.html
+            jta.properties
+  + jetty-test-jndi-webapp.war
+
+Copy all the contents of the contexts/ directory to 
+$JETTY-HOME/contexts.
+
+Unpack the jetty-test-jndi-webapp.war file to
+$JETTY-HOME/webapps/test-jndi.
+
+
 Deploying
 --------------
 Jetty does not ship with a native transaction manager, but 
@@ -15,13 +37,10 @@ The example uses the Derby database, so also download the
 derby.jar and derbytools.jar file from the Derby site
 (http://db.apache.org/derby) and put them in $JETTY-HOME/lib/ext.
 
-Copy or move the test-jndi.xml file to $JETTY-HOME/contexts.
-Copy or move the test-jndi.d directory to $JETTY-HOME/contexts.
-
 Now edit $JETTY-HOME/contexts/test-jndi.xml and uncomment one of the 
 transaction manager setups.
 
-Edit $JETTY-HOME/contexts/test-jndi.d/WEB-INF/jetty-env.xml and uncomment
+Edit $JETTY-HOME/webapps/test-jndi/WEB-INF/jetty-env.xml and uncomment
 one of the transaction manager setups.
 
 
@@ -29,7 +48,7 @@ Running the Demo
 ----------------
 You run the demo like so:
    
-   java -DOPTIONS=plus,ext,default -jar start.jar 
+   java -DOPTIONS=All -jar start.jar 
 
 
 Adding Support for a Different Transaction Manager

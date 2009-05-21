@@ -12,7 +12,7 @@
   <name>Jetty :: Project Parent</name>
 
   <properties>
-    <jetty-version>7.0.0.M2</jetty-version>
+    <jetty-version>7.0.0.M3-SNAPSHOT</jetty-version>
     <jsp-2-1-version>9.1.1.B60.25.p1</jsp-2-1-version>
   </properties>
 

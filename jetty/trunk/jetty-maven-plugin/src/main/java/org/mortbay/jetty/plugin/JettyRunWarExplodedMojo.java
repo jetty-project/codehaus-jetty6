@@ -76,7 +76,7 @@ public class JettyRunWarExplodedMojo extends AbstractJettyMojo
      */
     public void configureScanner() throws MojoExecutionException
     {
-        final ArrayList scanList = new ArrayList();
+        final ArrayList<File> scanList = new ArrayList<File>();
         scanList.add(getProject().getFile());
         File webInfDir = new File(webApp,"WEB-INF");
         scanList.add(new File(webInfDir, "web.xml"));
@@ -90,7 +90,7 @@ public class JettyRunWarExplodedMojo extends AbstractJettyMojo
         scanList.add(new File(webInfDir, "lib"));
         setScanList(scanList);
         
-        ArrayList listeners = new ArrayList();
+        ArrayList<Scanner.BulkListener> listeners = new ArrayList<Scanner.BulkListener>();
         listeners.add(new Scanner.BulkListener()
         {
             public void filesChanged(List changes)
@@ -126,7 +126,7 @@ public class JettyRunWarExplodedMojo extends AbstractJettyMojo
         if (reconfigureScanner)
         {
             getLog().info("Reconfiguring scanner after change to pom.xml ...");
-            ArrayList scanList = getScanList();
+            ArrayList<File> scanList = getScanList();
             scanList.clear();
             scanList.add(getProject().getFile());
             File webInfDir = new File(webApp,"WEB-INF");
@@ -163,7 +163,6 @@ public class JettyRunWarExplodedMojo extends AbstractJettyMojo
     {
         super.configureWebApplication();        
         webAppConfig.setWar(webApp.getCanonicalPath());
-        webAppConfig.configure();
     }
     
     public void execute () throws MojoExecutionException, MojoFailureException
