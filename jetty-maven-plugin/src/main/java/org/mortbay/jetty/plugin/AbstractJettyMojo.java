@@ -110,6 +110,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      *
      * @parameter expression="/${project.artifactId}"
      * @required
+     * @readonly
      */
     protected String contextPath;
 
@@ -120,29 +121,12 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      *
      * @parameter expression="${project.build.directory}/work"
      * @required
+     * @readonly
      */
     protected File tmpDirectory;
 
 
 
-    /**
-     * A webdefault.xml file to use instead
-     * of the default for the webapp. Optional.
-     *
-     * @parameter
-     */
-    protected File webDefaultXml;
-
-
-    /**
-     * A web.xml file to be applied AFTER
-     * the webapp's web.xml file. Useful for
-     * applying different build profiles, eg
-     * test, production etc. Optional.
-     * @parameter
-     */
-    protected File overrideWebXml;
-    
     /**
      * The interval in seconds to scan the webapp for changes 
      * and restart the context if necessary. Ignored if reload
@@ -231,12 +215,12 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     /**
      *  List of files and directories to scan
      */
-    protected ArrayList scanList;
+    protected ArrayList<File> scanList;
     
     /**
      * List of Listeners for the scanner
      */
-    protected ArrayList scannerListeners;
+    protected ArrayList<Scanner.BulkListener> scannerListeners;
     
     
     /**
@@ -267,17 +251,6 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         return this.tmpDirectory;
     }
 
-    
-    public File getWebDefaultXml()
-    {
-        return this.webDefaultXml;
-    }
-    
-    public File getOverrideWebXml()
-    {
-        return this.overrideWebXml;
-    }
-    
     /**
      * @return Returns the contextPath.
      */
@@ -359,20 +332,20 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     }
 
 
-    public void setScanList (ArrayList list)
+    public void setScanList (ArrayList<File> list)
     {
-        this.scanList = new ArrayList(list);
+        this.scanList = new ArrayList<File>(list);
     }
 
-    public ArrayList getScanList ()
+    public ArrayList<File> getScanList ()
     {
         return this.scanList;
     }
 
 
-    public void setScannerListeners (ArrayList listeners)
+    public void setScannerListeners (ArrayList<Scanner.BulkListener> listeners)
     {
-        this.scannerListeners = new ArrayList(listeners);
+        this.scannerListeners = new ArrayList<Scanner.BulkListener>(listeners);
     }
 
     public ArrayList getScannerListeners ()
@@ -495,26 +468,25 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      */
     public void configureWebApplication () throws Exception
     {
-        //use EITHER a <webAppConfig> element or the now deprecated <contextPath>, <tmpDirectory>, <webDefaultXml>, <overrideWebXml>
-        //way of doing things
+        //As of jetty-7, you must use a <webAppConfig> element
         if (webAppConfig == null)
-        {
             webAppConfig = new JettyWebAppContext();
-            webAppConfig.setContextPath((getContextPath().startsWith("/") ? getContextPath() : "/"+ getContextPath()));
-            if (getTmpDirectory() != null)
-                webAppConfig.setTempDirectory(getTmpDirectory());
-            if (getWebDefaultXml() != null)
-                webAppConfig.setDefaultsDescriptor(getWebDefaultXml().getCanonicalPath());
-            if (getOverrideWebXml() != null)
-                webAppConfig.setOverrideDescriptor(getOverrideWebXml().getCanonicalPath());
+
+        //If no contextPath was specified, go with our default
+        String cp = webAppConfig.getContextPath();
+        if (cp == null || "".equals(cp))
+        {
+            webAppConfig.setContextPath((contextPath.startsWith("/") ? contextPath : "/"+ contextPath));
         }
 
+        //If no tmp directory was specified, and we have one, use it
+        if (webAppConfig.getTempDirectory() == null && tmpDirectory != null)
+            webAppConfig.setTempDirectory(tmpDirectory);
 
         getLog().info("Context path = " + webAppConfig.getContextPath());
-        getLog().info("Tmp directory = "+ " determined at runtime");
+        getLog().info("Tmp directory = "+ (webAppConfig.getTempDirectory()== null? " determined at runtime": webAppConfig.getTempDirectory()));
         getLog().info("Web defaults = "+(webAppConfig.getDefaultsDescriptor()==null?" jetty default":webAppConfig.getDefaultsDescriptor()));
         getLog().info("Web overrides = "+(webAppConfig.getOverrideDescriptor()==null?" none":webAppConfig.getOverrideDescriptor()));
-
     }
 
     /**
@@ -525,7 +497,6 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      */
     private void startScanner()
     {
-
         // check if scanning is enabled
         if (getScanIntervalSeconds() <= 0) return;
 
@@ -561,8 +532,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             getLog().info("Console reloading is ENABLED. Hit ENTER on the console to restart the context.");
             consoleScanner = new ConsoleScanner(this);
             consoleScanner.start();
-        }
-        
+        }       
     }
 
     private void printSystemProperties ()

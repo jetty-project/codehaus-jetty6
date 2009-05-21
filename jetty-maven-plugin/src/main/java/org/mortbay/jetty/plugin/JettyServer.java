@@ -19,7 +19,6 @@ package org.mortbay.jetty.plugin;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.RequestLog;
-import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
@@ -29,12 +28,12 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
- * Jetty6PluginServer
+ * JettyServer
  * 
- * Jetty6 version of a wrapper for the Server class.
+ * Maven jetty plugin version of a wrapper for the Server class.
  * 
  */
-public class JettyServer extends Server
+public class JettyServer extends org.eclipse.jetty.server.Server
 {
     public static int DEFAULT_PORT = 8080;
     public static int DEFAULT_MAX_IDLE_TIME = 30000;
@@ -66,7 +65,7 @@ public class JettyServer extends Server
      */
     public void doStart() throws Exception
     {
-        PluginLog.getLog().info("Starting jetty "+super.getClass().getPackage().getImplementationVersion()+" ...");
+        PluginLog.getLog().info("Starting jetty "+getClass().getSuperclass().getPackage().getImplementationVersion()+" ...");
         super.doStart();
     }
 

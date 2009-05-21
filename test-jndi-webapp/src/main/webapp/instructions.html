@@ -13,16 +13,16 @@
 If you are viewing this page, then you need to perform a couple of configuration tasks before the demo will be available. It is important that you follow the steps in the order given so that Jetty can hot-redeploy this demonstration webapp.
 </p>
 <p>
-First, make sure you read and follow the instructions in the $jetty.home/contexts-available/README-test-jndi.txt file.
+First, make sure you read and follow the instructions in the $jetty.home/contexts/README-test-jndi.txt file.
 </p>
 
 <ol>
   <li>Ensure that you have installed the jars for the transaction manager of your choice in $JETTY_HOME/lib/ext. This demo has been tested with <a href="http://jotm.objectweb.org/">JOTM</a> and <a href="http://www.atomikos.com">Atomikos</a>.</li>
 
   <li>Ensure that you have installed the database of your choice - this demo assumes that you will use Derby. If you wish to use a different database, then you will
-  need to edit the $jetty.home/contexts/test-jndi.xml file and the $jetty.home/contexts/test-jndi.d/WEB-INF/jetty-env.xml files and replace the references to Derby with your chosen database.</li>
+  need to edit the $jetty.home/contexts/test-jndi.xml file and the $jetty.home/web-apps/test-jndi/WEB-INF/jetty-env.xml files and replace the references to Derby with your chosen database.</li>
 
-  <li>Edit >$jetty.home/contexts/test-jndi.d/WEB-INF/jetty-env.xml and uncomment the transaction manager setup of your choice. Save the file.</li>
+  <li>Edit >$jetty.home/webapps/test-jndi/WEB-INF/jetty-env.xml and uncomment the transaction manager setup of your choice. Save the file.</li>
 
   <li>Edit $jetty.home/contexts/test-jndi.xml and:
 

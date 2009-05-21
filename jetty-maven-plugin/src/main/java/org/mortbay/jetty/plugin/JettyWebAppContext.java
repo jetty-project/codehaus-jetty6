@@ -20,95 +20,75 @@ import java.util.List;
 
 import org.eclipse.jetty.plus.webapp.EnvConfiguration;
 import org.eclipse.jetty.webapp.Configuration;
+import org.eclipse.jetty.webapp.FragmentConfiguration;
 import org.eclipse.jetty.webapp.JettyWebXmlConfiguration;
 import org.eclipse.jetty.webapp.TagLibConfiguration;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.webapp.WebInfConfiguration;
+import org.eclipse.jetty.webapp.WebXmlConfiguration;
 
 /**
- * Jetty6PluginWebAppContext
- *
+ * JettyWebAppContext
+ * 
+ * Extends the WebAppContext to specialize for the maven environment.
+ * We pass in the list of files that should form the classpath for
+ * the webapp when executing in the plugin, and any jetty-env.xml file
+ * that may have been configured.
  *
  */
 public class JettyWebAppContext extends WebAppContext
 {
-    private List classpathFiles;
-    private File jettyEnvXmlFile;
-    private File webXmlFile;
-    private WebInfConfiguration webInfConfig = new WebInfConfiguration();
+    private List<File> classpathFiles;
+    private String jettyEnvXml;
+    private MavenWebInfConfiguration webInfConfig = new MavenWebInfConfiguration();
+    private WebXmlConfiguration webXmlConfig = new WebXmlConfiguration();
+    private MavenMetaInfConfiguration metaInfConfig = new MavenMetaInfConfiguration();
     private EnvConfiguration envConfig =  new EnvConfiguration();
-    private JettyMavenConfiguration mvnConfig;
-    private JettyWebXmlConfiguration jettyWebConfig;
-    private TagLibConfiguration tagConfig;
+    private org.eclipse.jetty.annotations.Configuration annotationConfig = new org.eclipse.jetty.annotations.Configuration();
+    private FragmentConfiguration fragConfig = new FragmentConfiguration();
+    private org.eclipse.jetty.plus.webapp.Configuration plusConfig = new org.eclipse.jetty.plus.webapp.Configuration();
+    private JettyWebXmlConfiguration jettyWebConfig =  new JettyWebXmlConfiguration();
+    private TagLibConfiguration tagConfig = new TagLibConfiguration();
     private Configuration[] configs;
     
     public JettyWebAppContext ()
     throws Exception
     {
-        super();
-       
-        mvnConfig = new JettyMavenConfiguration();
-        jettyWebConfig = new JettyWebXmlConfiguration();
-        tagConfig =  new TagLibConfiguration();
-        configs = new Configuration[]{webInfConfig,envConfig, mvnConfig, jettyWebConfig, tagConfig};
+        super();     
+        configs = new Configuration[]{webInfConfig, webXmlConfig,  metaInfConfig,  fragConfig, envConfig, plusConfig, /*annotationConfig,*/ jettyWebConfig, tagConfig };
         setConfigurations(configs);
     }
     
-    public void setClassPathFiles(List classpathFiles)
+    public void setClassPathFiles(List<File> classpathFiles)
     {
         this.classpathFiles = classpathFiles;
     }
 
-    public List getClassPathFiles()
+    public List<File> getClassPathFiles()
     {
         return this.classpathFiles;
     }
     
-    public void setWebXmlFile(File webXmlFile)
+    public void setJettyEnvXml (String jettyEnvXml)
     {
-        this.webXmlFile = webXmlFile;
+        this.jettyEnvXml = jettyEnvXml;
     }
     
-    public File getWebXmlFile()
+    public String getJettyEnvXml()
     {
-        return this.webXmlFile;
-    }
-    
-    public void setJettyEnvXmlFile (File jettyEnvXmlFile)
-    {
-        this.jettyEnvXmlFile = jettyEnvXmlFile;
-    }
-    
-    public File getJettyEnvXmlFile()
-    {
-        return this.jettyEnvXmlFile;
-    }
-    
-    public void configure ()
-    {        
-        setConfigurations(configs);
-        mvnConfig.setClassPathConfiguration (classpathFiles);
-        mvnConfig.setWebXml (webXmlFile);  
-        try
-        {
-            if (this.jettyEnvXmlFile != null)
-                envConfig.setJettyEnvXml(this.jettyEnvXmlFile.toURL());
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException(e);
-        }
+        return this.jettyEnvXml;
     }
 
 
     public void doStart () throws Exception
     {
+        if (this.jettyEnvXml != null)
+            envConfig.setJettyEnvXml(new File(this.jettyEnvXml).toURL());
         setShutdown(false);
         super.doStart();
     }
      
     public void doStop () throws Exception
-    {
+    { 
         setShutdown(true);
         //just wait a little while to ensure no requests are still being processed
         Thread.currentThread().sleep(500L);

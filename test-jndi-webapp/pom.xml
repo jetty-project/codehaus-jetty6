@@ -2,30 +2,70 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-project</artifactId>
-    <version>7.0.0.1beta1-SNAPSHOT</version>
+    <version>7.0.0.1beta2-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-test-jndi-webapp</artifactId>
-  <version>7.0.0.1beta1-SNAPSHOT</version>
+  <version>7.0.0.1beta2-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>Jetty :: JNDI Test Webapp</name>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>mkconfig</id>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <filter filtersfile="src/templates/filter.properties"/>
+                <filter token="JAVA_TMP_DIR" value="${java.io.tmpdir}"/>
+                <copy file="src/templates/jetty-test-jndi.xml" tofile="target/contexts/test-jndi.xml" filtering="true" overwrite="true"/>
+                <copy file="src/templates/instruction-web.xml" todir="target/contexts/test-jndi.d/WEB-INF" filtering="true" overwrite="true"/>
+                <copy file="src/templates/jta.properties" todir="target/contexts/test-jndi.d/WEB-INF" filtering="true" overwrite="true"/>
+                <copy file="src/templates/jetty-env.xml" todir="target/${project.artifactId}-${project.version}/WEB-INF" filtering="true" overwrite="true"/>
+              </tasks>
+            </configuration>
+          </execution>
+          <execution>
+            <id>install</id>
+            <phase>install</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <copy file="README.txt" tofile="target/contexts/README-test-jndi.txt" overwrite="true" />
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
   <dependencies>
     <dependency>
       <groupId>org.apache.geronimo.specs</groupId>
       <artifactId>geronimo-jta_1.1_spec</artifactId>
+      <version>1.1.1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-server</artifactId>
-      <version>${project.version}</version>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>javax.mail</groupId>
       <artifactId>mail</artifactId>
       <scope>provided</scope>
+      <version>1.4</version>
     </dependency>
   </dependencies>
 </project>
