@@ -63,9 +63,6 @@ import org.eclipse.jetty.xml.XmlConfiguration;
  */
 public class JettyRunMojo extends AbstractJettyMojo
 {
-
-   
-
     /**
      * If true, the &lt;testOutputDirectory&gt;
      * and the dependencies of &lt;scope&gt;test&lt;scope&gt;
@@ -75,19 +72,16 @@ public class JettyRunMojo extends AbstractJettyMojo
     private boolean useTestClasspath;
     
     
-    /**
-     * The location of a jetty-env.xml file. Optional.
-     * @parameter
-     */
-    private File jettyEnvXml;
     
     /**
-     * The location of the web.xml file. If not
-     * set then it is assumed it is in ${basedir}/src/main/webapp/WEB-INF
+     * The default location of the web.xml file. Will be used
+     * if <webAppConfig><descriptor> is not set.
      * 
      * @parameter expression="${maven.war.webxml}"
+     * @readonly
      */
-    private File webXml;
+    private String webXml;
+    
     
     /**
      * The directory containing generated classes.
@@ -137,27 +131,17 @@ public class JettyRunMojo extends AbstractJettyMojo
      */
     private ScanTargetPattern[] scanTargetPatterns;
 
-    /**
-     * web.xml as a File
-     */
-    private File webXmlFile;
-    
-    
-    /**
-     * jetty-env.xml as a File
-     */
-    private File jettyEnvXmlFile;
 
     /**
      * List of files on the classpath for the webapp
      */
-    private List classPathFiles;
+    private List<File> classPathFiles;
     
     
     /**
      * Extra scan targets as a list
      */
-    private List extraScanTargets;
+    private List<File> extraScanTargets;
     
     /**
      * overlays (resources)
@@ -180,15 +164,12 @@ public class JettyRunMojo extends AbstractJettyMojo
     }
     
 
-    public File getWebXml()
+    public String getWebXml()
     {
         return this.webXml;
     }
     
-    public File getJettyEnvXml ()
-    {
-        return this.jettyEnvXml;
-    }
+   
 
     public File getClassesDirectory()
     {
@@ -200,43 +181,25 @@ public class JettyRunMojo extends AbstractJettyMojo
         return this.webAppSourceDirectory;
     }
 
-    public void setWebXmlFile (File f)
-    {
-        this.webXmlFile = f;
-    }
+   
     
-    public File getWebXmlFile ()
+    public void setClassPathFiles (List<File> list)
     {
-        return this.webXmlFile;
-    }
-    
-    public File getJettyEnvXmlFile ()
-    {
-        return this.jettyEnvXmlFile;
-    }
-    
-    public void setJettyEnvXmlFile (File f)
-    {
-        this.jettyEnvXmlFile = f;
-    }
-    
-    public void setClassPathFiles (List list)
-    {
-        this.classPathFiles = new ArrayList(list);
+        this.classPathFiles = new ArrayList<File>(list);
     }
 
-    public List getClassPathFiles ()
+    public List<File> getClassPathFiles ()
     {
         return this.classPathFiles;
     }
 
 
-    public List getExtraScanTargets ()
+    public List<File> getExtraScanTargets ()
     {
         return this.extraScanTargets;
     }
     
-    public void setExtraScanTargets(List list)
+    public void setExtraScanTargets(List<File> list)
     {
         this.extraScanTargets = list;
     }
@@ -277,45 +240,6 @@ public class JettyRunMojo extends AbstractJettyMojo
         }
 
 
-        // get the web.xml file if one has been provided, otherwise assume it is
-        // in the webapp src directory
-        if (getWebXml() == null )
-            webXml = new File(new File(getWebAppSourceDirectory(),"WEB-INF"), "web.xml");
-        setWebXmlFile(webXml);
-        
-        try
-        {
-            if (!getWebXmlFile().exists())
-                throw new MojoExecutionException( "web.xml does not exist at location "
-                        + webXmlFile.getCanonicalPath());
-            else
-                getLog().info( "web.xml file = "
-                        + webXmlFile.getCanonicalPath());
-        }
-        catch (IOException e)
-        {
-            throw new MojoExecutionException("web.xml does not exist", e);
-        }
-        
-        //check if a jetty-env.xml location has been provided, if so, it must exist
-        if  (getJettyEnvXml() != null)
-        {
-            setJettyEnvXmlFile(jettyEnvXml);
-            
-            try
-            {
-                if (!getJettyEnvXmlFile().exists())
-                    throw new MojoExecutionException("jetty-env.xml file does not exist at location "+jettyEnvXml);
-                else
-                    getLog().info(" jetty-env.xml = "+getJettyEnvXmlFile().getCanonicalPath());
-            }
-            catch (IOException e)
-            {
-                throw new MojoExecutionException("jetty-env.xml does not exist");
-            }
-        }
-        
-        
         // check the classes to form a classpath with
         try
         {
@@ -336,7 +260,7 @@ public class JettyRunMojo extends AbstractJettyMojo
         }
         
         
-        setExtraScanTargets(new ArrayList());
+        setExtraScanTargets(new ArrayList<File>());
         if (scanTargets != null)
         {            
             for (int i=0; i< scanTargets.length; i++)
@@ -373,11 +297,11 @@ public class JettyRunMojo extends AbstractJettyMojo
 
                 try
                 {
-                    List files = FileUtils.getFiles(scanTargetPatterns[i].getDirectory(), includes, excludes);
+                    List<File> files = FileUtils.getFiles(scanTargetPatterns[i].getDirectory(), includes, excludes);
                     itor = files.iterator();
                     while (itor.hasNext())
                         getLog().info("Adding extra scan target from pattern: "+itor.next());
-                    List currentTargets = getExtraScanTargets();
+                    List<File> currentTargets = getExtraScanTargets();
                     if(currentTargets!=null && !currentTargets.isEmpty())
                         currentTargets.addAll(files);
                     else
@@ -399,26 +323,38 @@ public class JettyRunMojo extends AbstractJettyMojo
     {
        super.configureWebApplication();
         setClassPathFiles(setUpClassPath());
-        if(webAppConfig.getWebXmlFile()==null)
-            webAppConfig.setWebXmlFile(getWebXmlFile());
-        if(webAppConfig.getJettyEnvXmlFile()==null)
-            webAppConfig.setJettyEnvXmlFile(getJettyEnvXmlFile());
-        if(webAppConfig.getClassPathFiles()==null)
+        
+        //if we have not already set web.xml location, need to set one up
+        if (webAppConfig.getDescriptor() == null)
+        {
+            //Check to see if there is a web.xml in the configured webAppSourceDirectory/WEB-INF, if so, use it
+            File f = new File (new File (getWebAppSourceDirectory(), "WEB-INF"), "web.xml");
+            if (!f.exists())
+            {
+                //Try the default web.xml location
+                f = new File (webXml);
+                if (!f.exists())
+                    throw new MojoExecutionException("No web.xml file found");
+            }
+            webAppConfig.setDescriptor(f.getPath());
+        }
+        getLog().info( "web.xml file = "+webAppConfig.getDescriptor());
+
+        if (webAppConfig.getClassPathFiles() == null)
             webAppConfig.setClassPathFiles(getClassPathFiles());
-        if(webAppConfig.getWar()==null)
+        
+        if (webAppConfig.getWar() == null)
             webAppConfig.setWar(getWebAppSourceDirectory().getCanonicalPath());
         getLog().info("Webapp directory = " + getWebAppSourceDirectory().getCanonicalPath());
-
-        webAppConfig.configure();
     }
     
     public void configureScanner ()
     {
         // start the scanner thread (if necessary) on the main webapp
-        final ArrayList scanList = new ArrayList();
-        scanList.add(getWebXmlFile());
-        if (getJettyEnvXmlFile() != null)
-            scanList.add(getJettyEnvXmlFile());
+        final ArrayList<File> scanList = new ArrayList<File>();
+        scanList.add(new File(webAppConfig.getDescriptor()));
+        if (webAppConfig.getJettyEnvXml() != null)
+            scanList.add(new File (webAppConfig.getJettyEnvXml()));
         File jettyWebXmlFile = findJettyWebXmlFile(new File(getWebAppSourceDirectory(),"WEB-INF"));
         if (jettyWebXmlFile != null)
             scanList.add(jettyWebXmlFile);
@@ -426,7 +362,7 @@ public class JettyRunMojo extends AbstractJettyMojo
         scanList.add(getProject().getFile());
         scanList.addAll(getClassPathFiles());
         setScanList(scanList);
-        ArrayList listeners = new ArrayList();
+        ArrayList<Scanner.BulkListener> listeners = new ArrayList<Scanner.BulkListener>();
         listeners.add(new Scanner.BulkListener()
         {
             public void filesChanged (List changes)
@@ -441,8 +377,6 @@ public class JettyRunMojo extends AbstractJettyMojo
                     getLog().error("Error reconfiguring/restarting webapp after change in watched files",e);
                 }
             }
-
-
         });
         setScannerListeners(listeners);
     }
@@ -463,9 +397,9 @@ public class JettyRunMojo extends AbstractJettyMojo
         {
             getLog().info("Reconfiguring scanner after change to pom.xml ...");
             scanList.clear();
-            scanList.add(getWebXmlFile());
-            if (getJettyEnvXmlFile() != null)
-                scanList.add(getJettyEnvXmlFile());
+            scanList.add(new File(webAppConfig.getDescriptor()));
+            if (webAppConfig.getJettyEnvXml() != null)
+                scanList.add(new File(webAppConfig.getJettyEnvXml()));
             scanList.addAll(getExtraScanTargets());
             scanList.add(getProject().getFile());
             scanList.addAll(getClassPathFiles());
@@ -477,11 +411,11 @@ public class JettyRunMojo extends AbstractJettyMojo
         getLog().info("Restart completed at "+new Date().toString());
     }
     
-    private List getDependencyFiles ()
+    private List<File> getDependencyFiles ()
     {
-        List dependencyFiles = new ArrayList();
+        List<File> dependencyFiles = new ArrayList<File>();
         List<Resource> overlays = new ArrayList<Resource>();
-        for ( Iterator iter = getProject().getArtifacts().iterator(); iter.hasNext(); )
+        for ( Iterator<Artifact> iter = getProject().getArtifacts().iterator(); iter.hasNext(); )
         {
             Artifact artifact = (Artifact) iter.next();
             // Include runtime and compile time libraries, and possibly test libs too
@@ -575,9 +509,9 @@ public class JettyRunMojo extends AbstractJettyMojo
     
    
 
-    private List setUpClassPath()
+    private List<File> setUpClassPath()
     {
-        List classPathFiles = new ArrayList();       
+        List<File> classPathFiles = new ArrayList<File>();       
         
         //if using the test classes, make sure they are first
         //on the list

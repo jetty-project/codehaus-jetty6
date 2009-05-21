@@ -4,21 +4,23 @@
 <!-- =============================================================== -->
 <!-- Configure the test-jndi webapp                                  -->
 <!-- =============================================================== -->
-<Configure id='wac' class="org.mortbay.jetty.webapp.WebAppContext">
+<Configure id='wac' class="org.eclipse.jetty.webapp.WebAppContext">
 
 <!-- Ensure Jetty Plus features are enabled for this webapp                      -->
   <Set name="configurationClasses">
     <Array type="java.lang.String">
-      <Item>org.mortbay.jetty.webapp.WebInfConfiguration</Item>
-      <Item>org.mortbay.jetty.plus.webapp.EnvConfiguration</Item>
-      <Item>org.mortbay.jetty.plus.webapp.Configuration</Item>
-      <Item>org.mortbay.jetty.webapp.JettyWebXmlConfiguration</Item>
-      <Item>org.mortbay.jetty.webapp.TagLibConfiguration</Item>
+      <Item>org.eclipse.jetty.webapp.WebInfConfiguration</Item>
+      <Item>org.eclipse.jetty.webapp.WebXmlConfiguration</Item>
+      <Item>org.eclipse.jetty.webapp.MetaInfConfiguration</Item>
+      <Item>org.eclipse.jetty.plus.webapp.EnvConfiguration</Item>
+      <Item>org.eclipse.jetty.plus.webapp.Configuration</Item>
+      <Item>org.eclipse.jetty.webapp.JettyWebXmlConfiguration</Item>
+      <Item>org.eclipse.jetty.webapp.TagLibConfiguration</Item>
     </Array>
   </Set>
 
   <Set name="contextPath">/test-jndi</Set>
-  <Set name="war"><SystemProperty name="jetty.home" default="."/>/contexts/test-jndi.d</Set>
+  <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/test-jndi.war</Set>
   <Set name="extractWAR">false</Set>
   <Set name="copyWebDir">false</Set>
   <Set name="descriptor"><SystemProperty name="jetty.home" default="."/>/contexts/test-jndi.d/WEB-INF/instruction-web.xml</Set>
@@ -33,11 +35,11 @@
 
   <Call class="java.lang.System" name="setProperty">
     <Arg>com.atomikos.icatch.file</Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/contexts/test-jndi.d/WEB-INF/classes/jta.properties</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/contexts/test-jndi.d/WEB-INF/jta.properties</Arg>
   </Call>
 
   <!-- Define an env entry with Server scope for java:comp/env                   -->
-  <New id="woggle"  class="org.mortbay.jetty.plus.jndi.EnvEntry">   
+  <New id="woggle"  class="org.eclipse.jetty.plus.jndi.EnvEntry">   
     <Arg><Property name='server'/></Arg>
     <Arg>woggle</Arg>
     <Arg type="java.lang.Integer">4000</Arg> 
@@ -45,7 +47,7 @@
   </New>
 
   <!-- Define an env entry with webapp scope for java:comp/env                   -->
-  <New id="wiggle"  class="org.mortbay.jetty.plus.jndi.EnvEntry">
+  <New id="wiggle"  class="org.eclipse.jetty.plus.jndi.EnvEntry">
     <Arg><Ref id='wac'/></Arg>
     <Arg>wiggle</Arg>
     <Arg type="java.lang.Double">100</Arg>
@@ -53,11 +55,11 @@
   </New>
 
  <!-- Mail Session setup                                          -->
- <New id="xxxmail" class="org.mortbay.jetty.plus.jndi.Resource">
+ <New id="xxxmail" class="org.eclipse.jetty.plus.jndi.Resource">
     <Arg><Ref id='wac'/></Arg>
      <Arg>mail/Session</Arg>
      <Arg>
-       <New class="org.mortbay.naming.factories.MailSessionReference">
+       <New class="org.eclipse.jetty.jndi.factories.MailSessionReference">
          <Set name="user">CHANGE-ME</Set>
          <Set name="password">CHANGE-ME</Set>
          <Set name="properties">
@@ -81,7 +83,7 @@
   <!-- Atomikos        
   @ATOMIKOS-TRANSACTIONMANAGER@
 
-  <New id="tx" class="org.mortbay.jetty.plus.jndi.Transaction">
+  <New id="tx" class="org.eclipse.jetty.plus.jndi.Transaction">
    <Arg>
      @ATOMIKOS-USERTRANSACTION@
    </Arg>
@@ -91,7 +93,7 @@
   @ATOMIKOS-DATASOURCE1-PRE@
 
 
-  <New id="mydatasource" class="org.mortbay.jetty.plus.jndi.Resource">
+  <New id="mydatasource" class="org.eclipse.jetty.plus.jndi.Resource">
     <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource</Arg>
     <Arg>
@@ -102,7 +104,7 @@
 
   @ATOMIKOS-DATASOURCE2-PRE@
 
-  <New id="mydatasource2" class="org.mortbay.jetty.plus.jndi.Resource">
+  <New id="mydatasource2" class="org.eclipse.jetty.plus.jndi.Resource">
     <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource2</Arg>
     <Arg>
@@ -114,7 +116,7 @@
   <!-- JOTM
   @JOTM-TRANSACTIONMANAGER@
 
-  <New id="tx" class="org.mortbay.jetty.plus.jndi.Transaction">
+  <New id="tx" class="org.eclipse.jetty.plus.jndi.Transaction">
    <Arg>
      @JOTM-USERTRANSACTION@
    </Arg>
@@ -124,7 +126,7 @@
   @JOTM-DATASOURCE1-PRE@
 
 
-  <New id="mydatasource" class="org.mortbay.jetty.plus.jndi.Resource">
+  <New id="mydatasource" class="org.eclipse.jetty.plus.jndi.Resource">
     <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource</Arg>
     <Arg>
@@ -135,7 +137,7 @@
 
   @JOTM-DATASOURCE2-PRE@
 
-  <New id="mydatasource2" class="org.mortbay.jetty.plus.jndi.Resource">
+  <New id="mydatasource2" class="org.eclipse.jetty.plus.jndi.Resource">
     <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource2</Arg>
     <Arg>
