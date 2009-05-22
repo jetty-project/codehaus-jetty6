@@ -18,6 +18,7 @@ package org.mortbay.jetty.plugin;
 import java.io.File;
 import java.util.List;
 
+import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.plus.webapp.EnvConfiguration;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.FragmentConfiguration;
@@ -43,7 +44,7 @@ public class JettyWebAppContext extends WebAppContext
     private WebXmlConfiguration webXmlConfig = new WebXmlConfiguration();
     private MavenMetaInfConfiguration metaInfConfig = new MavenMetaInfConfiguration();
     private EnvConfiguration envConfig =  new EnvConfiguration();
-    private org.eclipse.jetty.annotations.Configuration annotationConfig = new org.eclipse.jetty.annotations.Configuration();
+    private AnnotationConfiguration annotationConfig = new MavenAnnotationConfiguration();
     private FragmentConfiguration fragConfig = new FragmentConfiguration();
     private org.eclipse.jetty.plus.webapp.Configuration plusConfig = new org.eclipse.jetty.plus.webapp.Configuration();
     private JettyWebXmlConfiguration jettyWebConfig =  new JettyWebXmlConfiguration();

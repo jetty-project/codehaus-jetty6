@@ -17,9 +17,7 @@ package org.mortbay.jetty.plugin;
 
 import java.io.File;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jetty.util.log.Log;
@@ -36,10 +34,14 @@ public class MavenMetaInfConfiguration extends MetaInfConfiguration
      * @return
      */
     protected List<URL> findJars (WebAppContext context)
+    throws Exception
     {
         JettyWebAppContext jwac = (JettyWebAppContext)context;
-        List<URL> list = new ArrayList<URL>();
+        if (jwac.getClassPathFiles() == null)
+            return super.findJars(context);
         
+        
+        List<URL> list = new ArrayList<URL>();
         for (File f: jwac.getClassPathFiles())
         {
             if (f.getName().toLowerCase().endsWith(".jar"))
@@ -54,7 +56,6 @@ public class MavenMetaInfConfiguration extends MetaInfConfiguration
                 }
             }
         }
-     
         return list;
     }
 }
