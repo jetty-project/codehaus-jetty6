@@ -49,14 +49,13 @@ public class AsyncStressTest extends TestCase
     protected QueuedThreadPool _threads=new QueuedThreadPool();
     protected boolean _stress;
     
-    private static int STRESS_THREADS=500;
 
     protected void setUp() throws Exception
     {
         _stress= Boolean.getBoolean("STRESS");
-        _threads.setMaxThreads(STRESS_THREADS);
+        _threads.setMaxThreads(50);
         if (_stress)
-            _threads.setMinThreads(STRESS_THREADS);
+            _threads.setMinThreads(200);
         _server.setThreadPool(_threads);
         _connector = new SelectChannelConnector();
         _server.setConnectors(new Connector[]{ _connector });
@@ -75,12 +74,9 @@ public class AsyncStressTest extends TestCase
     {
         {"/path","NORMAL"},
         {"/path?sleep=<TIMEOUT>","SLEPT"},
-        {"/path?sleep=<TIMEOUT>","SLEPT"},
-        {"/path?sleep=<TIMEOUT>","SLEPT"},
-        {"/path?sleep=<TIMEOUT>","SLEPT"},
-        //{"/path?suspend=<TIMEOUT>","TIMEOUT"},
-        //{"/path?suspend=1000&resume=<TIMEOUT>","RESUMED"},
-        //{"/path?suspend=1000&complete=<TIMEOUT>","COMPLETED"},
+        {"/path?suspend=<TIMEOUT>","TIMEOUT"},
+        {"/path?suspend=1000&resume=<TIMEOUT>","RESUMED"},
+        {"/path?suspend=1000&complete=<TIMEOUT>","COMPLETED"},
     };
     
     
@@ -209,11 +205,11 @@ public class AsyncStressTest extends TestCase
     {
         if (_stress)
         {
-            System.err.println("STRESS! "+STRESS_THREADS);
-            doThreads(STRESS_THREADS,200);
+            System.err.println("STRESS! ");
+            doThreads(100,100);
         }
         else
-            doThreads(100,10);
+            doThreads(20,20);
         Thread.sleep(1000);
     }
     
