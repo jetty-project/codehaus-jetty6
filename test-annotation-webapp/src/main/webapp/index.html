@@ -18,16 +18,8 @@ This example shows how to use annotations.
 <ol>
 <li>Ensure that you have installed the jars for the transaction manager of your choice in $JETTY_HOME/lib/ext. This demo has been tested with <a href="http://jotm.objectweb.org/">JOTM</a> and <a href="http://www.atomikos.com">Atomikos</a>.
 
-<li>Make sure you have built this demo. Assuming your jetty src distro is installed at $JETTY_HOME:
+<li>Make sure you have built this demo. Assuming your jetty src distro is installed at $JETTY_HOME.
 </p>
-<blockquote>
-<pre>
-  +  cd $JETTY_HOME/modules/examples/jetty-annotation-example-webapp
-  +  mvn clean install
-  + cp -R $JETTY_HOME/contexts-available/test-annotations.d $JETTY_HOME/contexts
-  + cp $JETTY_HOME/contexts-available/test-annotations.xml $JETTY_HOME/contexts
-</pre>
-</blockquote>
 <li> Set up the configuration files with the transaction manager of your choice:
 <blockquote>
 <pre>
@@ -41,7 +33,7 @@ This example shows how to use annotations.
 Now you can start the demo:
 <blockquote>
 <pre>
-   java -DOPTIONS=plus,annotations,default -jar start.jar 
+   java -jar start.jar OPTIONS=All
 </pre>
 </blockquote>
 <h2>The Test</h2>
@@ -51,8 +43,5 @@ Now you can start the demo:
   <button type="submit">Test Servlet 2.5 Annotations</button>
 </form>
 
-<form action="ttt" method="post">
-  <button type="submit">Test Servlet 3.0 Annotations</button>
-</form>
 </BODY>
 </HTML>
