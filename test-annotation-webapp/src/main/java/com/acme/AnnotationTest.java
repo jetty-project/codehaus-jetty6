@@ -225,7 +225,7 @@ public class AnnotationTest extends HttpServlet
             out.println("<br/><b>JNDI Lookup Result: "+txLookupResult+"</b>");
             
             out.println("<h2>Roles</h2>");
-            result = request.isUserInRole("other");
+            boolean result = request.isUserInRole("other");
             out.println("<br/><b>Result: isUserInRole(\"other\")="+result+":"+ (result==false?" PASS":" FAIL")+"</b>");
             
             
