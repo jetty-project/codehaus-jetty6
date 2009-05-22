@@ -1,5 +1,5 @@
 //========================================================================
-//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
+//Copyright 2004-2009 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
@@ -224,9 +224,7 @@ public class AnnotationTest extends HttpServlet
             out.println("<br/><b>Result: "+txResult+"</b>");
             out.println("<br/><b>JNDI Lookup Result: "+txLookupResult+"</b>");
             
-            out.println("<h2>@RunAs</h2>");
-            boolean result = request.isUserInRole("special");
-            out.println("<br/><b>Result: isUserInRole(\"special\")="+result+":"+(result==true?" PASS":" FAIL")+"</b>");    
+            out.println("<h2>Roles</h2>");
             result = request.isUserInRole("other");
             out.println("<br/><b>Result: isUserInRole(\"other\")="+result+":"+ (result==false?" PASS":" FAIL")+"</b>");
             

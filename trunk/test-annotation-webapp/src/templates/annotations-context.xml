@@ -6,7 +6,7 @@
 <!-- Configure the test-annotations webapp                           -->
 <!-- =============================================================== -->
 
-<Configure id='wac' class="org.mortbay.jetty.server.server.webapp.WebAppContext">
+<Configure id='wac' class="org.eclipse.jetty.webapp.WebAppContext">
 
   <!-- =========================================================== -->
   <!-- Configurations for WebAppContexts                          -->
@@ -14,11 +14,13 @@
   <!-- wants to use Annotations                                   -->
   <!-- ========================================================== -->
   <Array id="annotationConfig" type="java.lang.String">
-    <Item>org.mortbay.jetty.server.server.webapp.WebInfConfiguration</Item>
-    <Item>org.mortbay.jetty.server.server.plus.webapp.EnvConfiguration</Item>
-    <Item>org.mortbay.jetty.server.server.annotations.Configuration</Item>
-    <Item>org.mortbay.jetty.server.server.webapp.JettyWebXmlConfiguration</Item>
-    <Item>org.mortbay.jetty.server.server.webapp.TagLibConfiguration</Item>
+      <Item>org.eclipse.jetty.webapp.WebInfConfiguration</Item>
+      <Item>org.eclipse.jetty.webapp.WebXmlConfiguration</Item>
+      <Item>org.eclipse.jetty.webapp.MetaInfConfiguration</Item>
+      <Item>org.eclipse.jetty.plus.webapp.EnvConfiguration</Item>
+      <Item>org.eclipse.jetty.annotations.AnnotationConfiguration</Item>
+      <Item>org.eclipse.jetty.webapp.JettyWebXmlConfiguration</Item>
+      <Item>org.eclipse.jetty.webapp.TagLibConfiguration</Item>
   </Array>
 
 
@@ -26,12 +28,12 @@
   <!-- Configure the webapp                                            -->
   <!-- =============================================================== -->
   <Set name="contextPath">/test-annotations</Set>
-  <Set name="war"><SystemProperty name="jetty.home"/>/contexts/test-annotations.d</Set>
+  <Set name="war"><SystemProperty name="jetty.home"/>/webapps/test-annotations</Set>
   <Set name="configurationClasses"><Ref id="annotationConfig"/></Set>
 
   <Get name="securityHandler">
-    <Set name="userRealm">
-      <New class="org.mortbay.jetty.server.server.security.HashUserRealm">
+    <Set name="loginService">
+      <New class="org.eclipse.jetty.security.HashLoginService">
         <Set name="name">Test Realm</Set>
         <Set name="config"><SystemProperty name="jetty.home" default="."/>/etc/realm.properties</Set>
       </New>
@@ -49,11 +51,11 @@
 
   <Call class="java.lang.System" name="setProperty">
     <Arg>com.atomikos.icatch.file</Arg>
-    <Arg><SystemProperty name="jetty.home"/>/contexts/test-annotations.d/WEB-INF/classes/jta.properties</Arg>
+    <Arg><SystemProperty name="jetty.home"/>/contexts/test-annotations.d/WEB-INF/jta.properties</Arg>
   </Call>
 
 
-  <New id="maxAmount"  class="org.mortbay.jetty.server.server.plus.naming.EnvEntry">
+  <New id="maxAmount"  class="org.eclipse.jetty.plus.jndi.EnvEntry">
     <Arg><Ref id='wac'/></Arg>
     <Arg>maxAmount</Arg>
     <Arg type="java.lang.Double">100</Arg>
@@ -71,7 +73,7 @@
   <!-- Atomikos        
   @ATOMIKOS-TRANSACTIONMANAGER@
 
-  <New id="tx" class="org.mortbay.jetty.server.server.plus.naming.Transaction">
+  <New id="tx" class="org.eclipse.jetty.plus.jndi.Transaction">
    <Arg>
      @ATOMIKOS-USERTRANSACTION@
    </Arg>
@@ -81,7 +83,7 @@
   @ATOMIKOS-DATASOURCE1-PRE@
 
 
-  <New id="mydatasource" class="org.mortbay.jetty.server.server.plus.naming.Resource">
+  <New id="mydatasource" class="org.eclipse.jetty.plus.jndi.Resource">
     <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource</Arg>
     <Arg>
@@ -93,7 +95,7 @@
   <!-- JOTM
   @JOTM-TRANSACTIONMANAGER@
 
-  <New id="tx" class="org.mortbay.jetty.server.server.plus.naming.Transaction">
+  <New id="tx" class="org.eclipse.jetty.plus.jndi.Transaction">
    <Arg>
      @JOTM-USERTRANSACTION@
    </Arg>
@@ -103,7 +105,7 @@
   @JOTM-DATASOURCE1-PRE@
 
 
-  <New id="mydatasource" class="org.mortbay.jetty.server.server.plus.naming.Resource">
+  <New id="mydatasource" class="org.eclipse.jetty.plus.jndi.Resource">
     <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource</Arg>
     <Arg>
