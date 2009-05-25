@@ -10,40 +10,46 @@
   <packaging>war</packaging>
   <name>Jetty :: JNDI Test Webapp</name>
   <build>
+  <filters>
+    <filter>src/filters/filter.properties</filter>
+  </filters>
     <plugins>
+       <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.2-beta-3</version>
+          <executions>
+            <execution>
+              <phase>package</phase>
+              <goals>
+                <goal>single</goal>
+              </goals>
+              <configuration>
+                <descriptors>
+                  <descriptor>src/main/assembly/config.xml</descriptor>
+                </descriptors>
+              </configuration>
+            </execution>
+          </executions>
+       </plugin>
       <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>mkconfig</id>
-            <phase>process-sources</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <tasks>
-                <filter filtersfile="src/templates/filter.properties"/>
-                <filter token="JAVA_TMP_DIR" value="${java.io.tmpdir}"/>
-                <copy file="src/templates/jetty-test-jndi.xml" tofile="target/contexts/test-jndi.xml" filtering="true" overwrite="true"/>
-                <copy file="src/templates/instruction-web.xml" todir="target/contexts/test-jndi.d/WEB-INF" filtering="true" overwrite="true"/>
-                <copy file="src/templates/jta.properties" todir="target/contexts/test-jndi.d/WEB-INF" filtering="true" overwrite="true"/>
-                <copy file="src/templates/jetty-env.xml" todir="target/${project.artifactId}-${project.version}/WEB-INF" filtering="true" overwrite="true"/>
-              </tasks>
-            </configuration>
-          </execution>
-          <execution>
-            <id>install</id>
-            <phase>install</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <tasks>
-                <copy file="README.txt" tofile="target/contexts/README-test-jndi.txt" overwrite="true" />
-              </tasks>
-            </configuration>
-          </execution>
-        </executions>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <configuration>
+          <filters>
+            <filter>src/filters/filter.properties</filter>
+          </filters>
+          <webResources>
+            <resource>
+              <directory>src/templates</directory>
+              <targetPath>WEB-INF</targetPath>
+              <filtering>true</filtering>
+              <includes>
+                <include>**/jetty-env.xml</include>
+              </includes>
+            </resource>
+          </webResources>
+        </configuration>
       </plugin>
     </plugins>
   </build>
