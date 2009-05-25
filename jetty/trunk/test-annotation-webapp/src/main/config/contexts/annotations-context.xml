@@ -51,7 +51,7 @@
 
   <Call class="java.lang.System" name="setProperty">
     <Arg>com.atomikos.icatch.file</Arg>
-    <Arg><SystemProperty name="jetty.home"/>/contexts/test-annotations.d/WEB-INF/jta.properties</Arg>
+    <Arg><SystemProperty name="jetty.home"/>/contexts/test-annotations.d/jta.properties</Arg>
   </Call>
 
 
