@@ -10,41 +10,28 @@
   <packaging>war</packaging>
   <name>Jetty :: Annotations Test Webapp</name>
   <build>
+  <filters>
+    <filter>src/filters/filter.properties</filter>
+  </filters>
     <plugins>
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>mkconfig</id>
-            <phase>process-sources</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <tasks>
-                <filter filtersfile="src/templates/filter.properties"/>
-                <filter token="JAVA_TMP_DIR" value="${java.io.tmpdir}"/>
-                <copy file="src/templates/annotations-context.xml" todir="target/contexts" filtering="true" overwrite="true"/>
-                <copy file="src/templates/jetty-env.xml" todir="target/${project.artifactId}-${project.version}/WEB-INF" filtering="true" overwrite="true"/>
-
-                <copy file="src/templates/jta.properties" todir="target/contexts/test-annotations.d/WEB-INF" filtering="true" overwrite="true"/>
-              </tasks>
-            </configuration>
-          </execution>
-          <execution>
-            <id>install</id>
-            <phase>install</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <tasks>
-                <copy file="README.txt" tofile="target/contexts/README-test-annotations.txt" overwrite="true"/>
-              </tasks>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+       <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.2-beta-3</version>
+          <executions>
+            <execution>
+              <phase>package</phase>
+              <goals>
+                <goal>single</goal>
+              </goals>
+              <configuration>
+                <descriptors>
+                  <descriptor>src/main/assembly/config.xml</descriptor>
+                </descriptors>
+              </configuration>
+            </execution>
+          </executions>
+       </plugin>
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
@@ -53,7 +40,7 @@
           <scanIntervalSeconds>10</scanIntervalSeconds>
           <useTestClasspath>true</useTestClasspath>
           <webAppConfig>
-            <jettyEnvXml>src/templates/jetty-plugin-env.xml</jettyEnvXml>
+            <jettyEnvXml>src/test/jetty-plugin-env.xml</jettyEnvXml>
           </webAppConfig>
         </configuration>
       </plugin>
