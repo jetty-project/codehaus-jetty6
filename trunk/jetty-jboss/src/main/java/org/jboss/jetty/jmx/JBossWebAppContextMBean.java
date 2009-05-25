@@ -13,15 +13,13 @@
 //limitations under the License.
 //========================================================================
 
-package org.jboss.jetty.management;
+package org.jboss.jetty.jmx;
 
 import javax.management.ObjectName;
 
 import org.jboss.jetty.JBossWebAppContext;
-import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.jmx.webapp.WebAppContextMBean;
 import org.eclipse.jetty.util.log.Log;
-import org.eclipse.jetty.jmx.ObjectMBean;
+
 
 /**
  * JBossWebApplicationContextMBean
@@ -29,7 +27,7 @@ import org.eclipse.jetty.jmx.ObjectMBean;
  * Provides special object name for itself so that 
  * we can integrate with jboss jsr77 management system.
  */
-public class JBossWebAppContextMBean extends WebAppContextMBean
+public class JBossWebAppContextMBean extends org.eclipse.jetty.webapp.jmx.WebAppContextMBean
 {
     private JBossWebAppContext _webAppContext;
     
