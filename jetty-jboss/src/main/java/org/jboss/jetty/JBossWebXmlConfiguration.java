@@ -15,7 +15,9 @@
 
 package org.jboss.jetty;
 
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
+import org.eclipse.jetty.webapp.WebXmlProcessor;
 import org.eclipse.jetty.xml.XmlParser;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.WebMetaData;
@@ -30,55 +32,60 @@ public class JBossWebXmlConfiguration extends WebXmlConfiguration
 {
     protected static Logger __log=Logger.getLogger(JBossWebAppContext.class); 
 
-    public JBossWebXmlConfiguration() throws ClassNotFoundException
+  
+    public class JBossWebXmlProcessor extends WebXmlProcessor
     {
-        super();
-    }
 
-
-    public JBossWebAppContext getJBossWebApplicationContext()
-    {
-        return (JBossWebAppContext)getWebAppContext();
-    }
-
-   
-    protected void initWebXmlElement(String element,org.eclipse.jetty.xml.XmlParser.Node node) throws Exception
-    {
-        //avoid jetty printing a debug message about not implementing these elements
-        //because jboss implements it for us
-        if("resource-ref".equals(element)||"resource-env-ref".equals(element)||"env-entry".equals(element)
-                ||"ejb-ref".equals(element)||"ejb-local-ref".equals(element)||"security-domain".equals(element))
+        public JBossWebXmlProcessor(WebAppContext context) throws ClassNotFoundException
         {
-            //ignore
+            super(context);
         }
-        // these are handled by Jetty
-        else
-            super.initWebXmlElement(element,node);
-    }
-
- 
-    protected void initLoginConfig(XmlParser.Node node) throws Exception
-    {
-        super.initLoginConfig(node);
-    
-        //use a security domain name from jboss-web.xml
-        if (null==_securityHandler.getRealmName())
-        {
-            WebMetaData metaData = getJBossWebApplicationContext()._webApp.getMetaData();
-            String realmName = metaData.getSecurityDomain();
-            if (null!=realmName)
-            {
-                if (realmName.endsWith("/"))
-                    realmName = realmName.substring (0, realmName.length());
-                int idx = realmName.lastIndexOf('/');
-                if (idx >= 0)
-                    realmName = realmName.substring(idx+1);
-            }
-            _securityHandler.setRealmName(realmName);
-        }
-       
-        if(__log.isDebugEnabled())
-            __log.debug("Realm name is : "+_securityHandler.getRealmName());
         
+        protected void initLoginConfig(XmlParser.Node node) throws Exception
+        {
+            super.initLoginConfig(node);
+            
+            //use a security domain name from jboss-web.xml
+            if (null==_securityHandler.getRealmName())
+            {
+                WebMetaData metaData = ((JBossWebAppContext)_context)._webApp.getMetaData();
+                String realmName = metaData.getSecurityDomain();
+                if (null!=realmName)
+                {
+                    if (realmName.endsWith("/"))
+                        realmName = realmName.substring (0, realmName.length());
+                    int idx = realmName.lastIndexOf('/');
+                    if (idx >= 0)
+                        realmName = realmName.substring(idx+1);
+                }
+                _securityHandler.setRealmName(realmName);
+            }
+           
+            if(__log.isDebugEnabled())
+                __log.debug("Realm name is : "+_securityHandler.getRealmName());
+        }
+    }
+
+    public void configure(WebAppContext context) throws Exception
+    {
+        super.configure(context);
+    }
+
+
+    public void deconfigure(WebAppContext context) throws Exception
+    {
+        super.deconfigure(context);
+    }
+
+
+    public void postConfigure(WebAppContext context) throws Exception
+    {
+        super.postConfigure(context);
+    }
+
+
+    public void preConfigure(WebAppContext context) throws Exception
+    {
+        super.preConfigure(context);
     }
 }
