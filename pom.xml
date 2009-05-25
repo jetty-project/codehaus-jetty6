@@ -117,8 +117,8 @@
     <module>test-annotation-webapp</module>
     <module>jetty-integration-tests</module>
     <module>jetty-runner</module>
-<!--
     <module>jetty-jboss</module>
+<!--
     <module>example-jetty-spring</module>
     <module>example-async-rest-webapp</module>
 -->
