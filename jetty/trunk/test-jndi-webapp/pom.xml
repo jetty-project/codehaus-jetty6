@@ -41,7 +41,7 @@
           </filters>
           <webResources>
             <resource>
-              <directory>src/templates</directory>
+              <directory>${basedir}/src/templates</directory>
               <targetPath>WEB-INF</targetPath>
               <filtering>true</filtering>
               <includes>
