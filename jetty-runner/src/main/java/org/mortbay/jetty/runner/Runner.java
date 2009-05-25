@@ -62,6 +62,9 @@ public class Runner
 {
     public static final String[] __plusConfigurationClasses = new String[] {
             org.eclipse.jetty.webapp.WebInfConfiguration.class.getCanonicalName(),
+            org.eclipse.jetty.webapp.WebXmlConfiguration.class.getCanonicalName(),
+            org.eclipse.jetty.webapp.MetaInfConfiguration.class.getCanonicalName(),
+            org.eclipse.jetty.webapp.FragmentConfiguration.class.getCanonicalName(),
             org.eclipse.jetty.plus.webapp.EnvConfiguration.class.getCanonicalName(),
             org.eclipse.jetty.plus.webapp.Configuration.class.getCanonicalName(),
             org.eclipse.jetty.webapp.JettyWebXmlConfiguration.class.getCanonicalName(),
