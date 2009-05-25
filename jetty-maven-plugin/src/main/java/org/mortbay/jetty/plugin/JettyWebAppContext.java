@@ -55,7 +55,7 @@ public class JettyWebAppContext extends WebAppContext
     throws Exception
     {
         super();     
-        configs = new Configuration[]{webInfConfig, webXmlConfig,  metaInfConfig,  fragConfig, envConfig, plusConfig, /*annotationConfig,*/ jettyWebConfig, tagConfig };
+        configs = new Configuration[]{webInfConfig, webXmlConfig,  metaInfConfig,  fragConfig, envConfig, annotationConfig, jettyWebConfig, tagConfig };
         setConfigurations(configs);
     }
     
