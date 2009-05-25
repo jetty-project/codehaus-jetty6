@@ -20,17 +20,13 @@
     <!-- For more information see the jetty wiki at               -->
     <!--   http://http://docs.codehaus.org/display/JETTY/JAAS     -->
     <!-- ======================================================== -->
-    <!-- 
-    <Set name="UserRealms">
-      <Array type="org.eclipse.jetty.security.LoginService">
-        <Item>
+    <Call name="addBean">
+      <Arg>
           <New class="org.eclipse.jetty.plus.jaas.JAASLoginService">
            <Set name="Name">Test JAAS Realm</Set>
            <Set name="LoginModuleName">xyz</Set>
           </New>
-        </Item>
-      </Array>
-    </Set>
-    -->
+      </Arg>
+    </Call>
 
 </Configure>
