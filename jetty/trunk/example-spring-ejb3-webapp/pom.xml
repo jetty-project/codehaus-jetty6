@@ -9,7 +9,7 @@
   <artifactId>spring-ejb3-example-webapp</artifactId>
   <version>7.0.0.1beta1-SNAPSHOT</version>
   <packaging>war</packaging>
-  <name>Jetty Example :: spring ejb3 demo webapp</name>
+  <name>Example :: spring jetty ejb3 demo webapp</name>
   <dependencies>
    <dependency>
      <groupId>org.apache.geronimo.specs</groupId>

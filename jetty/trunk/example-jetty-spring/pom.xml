@@ -6,7 +6,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>example-jetty-spring</artifactId>
-  <name>Jetty :: Spring Example</name>
+  <name>Example :: Jetty Spring Example</name>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
