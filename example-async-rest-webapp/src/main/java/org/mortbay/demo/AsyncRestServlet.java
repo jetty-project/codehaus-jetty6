@@ -92,7 +92,7 @@ public class AsyncRestServlet extends AbstractRestServlet
             // suspend the request
             // This is done before scheduling async handling to avoid race of 
             // resume before suspend!
-            final Continuation continuation = ContinuationSupport.getContinuation(request);
+            final Continuation continuation = ContinuationSupport.getContinuation(request,response);
             continuation.setTimeout(10000);
             continuation.suspend();
 
