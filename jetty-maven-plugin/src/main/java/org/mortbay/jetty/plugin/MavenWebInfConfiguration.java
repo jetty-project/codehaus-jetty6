@@ -16,12 +16,15 @@
 package org.mortbay.jetty.plugin;
 
 import java.io.File;
+import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jetty.util.LazyList;
 import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.WebAppClassLoader;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -79,6 +82,37 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
         super.postConfigure(context);
     }
 
-   
+    /**
+     * Get the jars to examine from the files from which we have
+     * synthesized the classpath. Note that the classpath is not
+     * set at this point, so we cannot get them from the classpath.
+     * @param context
+     * @return
+     */
+    protected List<Resource> findJars (WebAppContext context)
+    throws Exception
+    {
+        JettyWebAppContext jwac = (JettyWebAppContext)context;
+        if (jwac.getClassPathFiles() == null)
+            return super.findJars(context);
+        
+        
+        List<Resource> list = new ArrayList<Resource>();
+        for (File f: jwac.getClassPathFiles())
+        {
+            if (f.getName().toLowerCase().endsWith(".jar"))
+            {
+                try
+                {
+                    list.add(Resource.newResource(f.toURL()));
+                }
+                catch (Exception e)
+                {
+                    Log.warn("Bad url ", e);
+                }
+            }
+        }
+        return list;
+    }
 
 }
