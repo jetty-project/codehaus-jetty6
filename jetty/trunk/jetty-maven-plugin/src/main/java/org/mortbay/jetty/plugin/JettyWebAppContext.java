@@ -23,6 +23,7 @@ import org.eclipse.jetty.plus.webapp.EnvConfiguration;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.FragmentConfiguration;
 import org.eclipse.jetty.webapp.JettyWebXmlConfiguration;
+import org.eclipse.jetty.webapp.MetaInfConfiguration;
 import org.eclipse.jetty.webapp.TagLibConfiguration;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
@@ -42,7 +43,7 @@ public class JettyWebAppContext extends WebAppContext
     private String jettyEnvXml;
     private MavenWebInfConfiguration webInfConfig = new MavenWebInfConfiguration();
     private WebXmlConfiguration webXmlConfig = new WebXmlConfiguration();
-    private MavenMetaInfConfiguration metaInfConfig = new MavenMetaInfConfiguration();
+    private MetaInfConfiguration metaInfConfig = new MetaInfConfiguration();
     private EnvConfiguration envConfig =  new EnvConfiguration();
     private AnnotationConfiguration annotationConfig = new MavenAnnotationConfiguration();
     private FragmentConfiguration fragConfig = new FragmentConfiguration();
