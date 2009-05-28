@@ -1,4 +1,5 @@
 jetty-6.1-SNAPSHOT
+ + JETTY-799 shell script for jetty on cygwin
 
 jetty-6.1.18 16 May 2009
  + JETTY-937 Improved work around sun JVM selector bugs
