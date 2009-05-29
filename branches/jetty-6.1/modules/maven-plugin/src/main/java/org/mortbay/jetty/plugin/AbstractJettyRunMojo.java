@@ -218,6 +218,9 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
      */
     public void checkPomConfiguration () throws MojoExecutionException
     {
+        File buildDir = new File(getProject().getBuild().getDirectory());
+        if(!buildDir.exists())
+            buildDir.mkdir();
         // check the location of the static content/jsps etc
         try
         {
