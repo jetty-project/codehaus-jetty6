@@ -243,28 +243,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
         {
             getLog().info("Reload Mechanic: " + reload );
         }
-
-
-        // get the web.xml file if one has been provided, otherwise assume it is
-        // in the webapp src directory
-        if (getWebXml() == null )
-            webXml = new File(new File(getWebAppSourceDirectory(),"WEB-INF"), "web.xml");
-        setWebXmlFile(webXml);
-        
-        try
-        {
-            if (!getWebXmlFile().exists())
-                throw new MojoExecutionException( "web.xml does not exist at location "
-                        + webXmlFile.getCanonicalPath());
-            else
-                getLog().info( "web.xml file = "
-                        + webXmlFile.getCanonicalPath());
-        }
-        catch (IOException e)
-        {
-            throw new MojoExecutionException("web.xml does not exist", e);
-        }
-        
+      
         //check if a jetty-env.xml location has been provided, if so, it must exist
         if  (getJettyEnvXml() != null)
         {
@@ -361,7 +340,36 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
         }
     }
 
-   
+    private void checkWebXml() throws MojoExecutionException
+    {
+        // get the web.xml file if one has been provided, otherwise assume it is
+        // in the webapp src directory
+        if (getWebXml() == null )
+            webXml = new File(new File(getWebAppSourceDirectory(),"WEB-INF"), "web.xml");
+        setWebXmlFile(webXml);
+        
+        try
+        {
+            if (!getWebXmlFile().exists())
+            {
+                Resource resource = webAppConfig.getBaseResource().addPath("WEB-INF/web.xml");
+                if(!resource.exists())
+                {
+                    
+                    throw new MojoExecutionException( "web.xml does not exist at location "
+                            + webXmlFile.getCanonicalPath());
+                }
+                getLog().info( "web.xml file = " + resource);
+            }
+            else
+                getLog().info( "web.xml file = "
+                        + webXmlFile.getCanonicalPath());
+        }
+        catch (IOException e)
+        {
+            throw new MojoExecutionException("web.xml does not exist", e);
+        }
+    }
 
 
 
@@ -369,6 +377,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
     {
        super.configureWebApplication();
         setClassPathFiles(setUpClassPath());
+        checkWebXml();
         if(webAppConfig.getWebXmlFile()==null)
             webAppConfig.setWebXmlFile(getWebXmlFile());
         if(webAppConfig.getJettyEnvXmlFile()==null)
