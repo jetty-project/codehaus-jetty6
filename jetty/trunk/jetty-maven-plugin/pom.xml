@@ -28,6 +28,7 @@
             <phase>generate-sources</phase>            
             <goals>
               <goal>xdoc</goal>
+              <goal>helpmojo</goal>
             </goals>
           </execution>
         </executions>
