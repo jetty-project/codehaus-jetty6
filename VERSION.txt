@@ -1,5 +1,6 @@
 jetty-6.1-SNAPSHOT
  + JETTY-799 shell script for jetty on cygwin
+ + JETTY-1028 jetty:run plugin should check for the web.xml from the overlays if not found in src/main/webapp/WEB-INF/
 
 jetty-6.1.18 16 May 2009
  + JETTY-937 Improved work around sun JVM selector bugs
