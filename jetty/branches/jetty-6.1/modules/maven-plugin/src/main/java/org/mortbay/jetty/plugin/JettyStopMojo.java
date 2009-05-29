@@ -25,6 +25,10 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
+ * JettyStopMojo - stops a running instance of jetty.
+ * The ff are required:
+ * -DstopKey=someKey
+ * -DstopPort=somePort
  * 
  * @author David Yu
  * 
