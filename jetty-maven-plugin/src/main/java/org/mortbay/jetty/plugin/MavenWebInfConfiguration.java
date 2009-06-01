@@ -55,10 +55,9 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
             if (Log.isDebugEnabled())
                 Log.debug("Classpath = "+LazyList.array2List(((URLClassLoader)context.getClassLoader()).getURLs()));
         }
-        else
-        {
-            super.configure(context);
-        }
+        
+        super.configure(context);
+        
 
         // knock out environmental maven and plexus classes from webAppContext
         String[] existingServerClasses = context.getServerClasses();
@@ -92,26 +91,30 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
     protected List<Resource> findJars (WebAppContext context)
     throws Exception
     {
-        JettyWebAppContext jwac = (JettyWebAppContext)context;
-        if (jwac.getClassPathFiles() == null)
-            return super.findJars(context);
-        
-        
         List<Resource> list = new ArrayList<Resource>();
-        for (File f: jwac.getClassPathFiles())
+        JettyWebAppContext jwac = (JettyWebAppContext)context;
+        if (jwac.getClassPathFiles() != null)
         {
-            if (f.getName().toLowerCase().endsWith(".jar"))
+            for (File f: jwac.getClassPathFiles())
             {
-                try
+                if (f.getName().toLowerCase().endsWith(".jar"))
                 {
-                    list.add(Resource.newResource(f.toURL()));
-                }
-                catch (Exception e)
-                {
-                    Log.warn("Bad url ", e);
+                    try
+                    {
+                        list.add(Resource.newResource(f.toURL()));
+                    }
+                    catch (Exception e)
+                    {
+                        Log.warn("Bad url ", e);
+                    }
                 }
             }
         }
+        
+        List<Resource> superList = super.findJars(context);
+          
+        list.addAll(superList);
+        
         return list;
     }
 
