@@ -143,6 +143,7 @@
     <module>contrib/cometd</module>
     <module>contrib/jetty-ant</module>
     <module>contrib/jetty-rewrite-handler</module>
+    <module>contrib/jetty-ldap-jaas</module>
     <!--module>contrib/grizzly</module-->
     <!--module>contrib/wadi</module-->
     <module>contrib/terracotta</module>
