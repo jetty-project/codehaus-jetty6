@@ -91,7 +91,7 @@ public class HttpConnection implements Connection
             {
                 try
                 {
-                    _endp.close();
+                    close();
                 }
                 catch (IOException e)
                 {
@@ -205,7 +205,7 @@ public class HttpConnection implements Connection
                         if (_parser.isMoreInBuffer())
                         {
                             Log.warn("unexpected data");
-                            _endp.close();
+                            close();
                         }
 
                         return;
