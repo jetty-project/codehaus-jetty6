@@ -2,6 +2,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-799 shell script for jetty on cygwin
  + JETTY-1028 jetty:run plugin should check for the web.xml from the overlays if not found in src/main/webapp/WEB-INF/
  + JETTY-1033 jetty-plus compiled with jdk1.5
+ + JETTY-863 Non blocking stats handler
 
 jetty-6.1.18 16 May 2009
  + JETTY-937 Improved work around sun JVM selector bugs
@@ -12,7 +13,7 @@ jetty-6.1.18 16 May 2009
  + JETTY-1015 Reduce BayeuxClient and HttpClient lock contention
  + JETTY-1017 HttpDestination has too coarse locking
  + JETTY-1018 Denial of Service Filter
- + JETTY-1020 ZipException in org.mortbay.jetty.webapp.TagLibConfiguration prevents all contexts from being loaded 
+ + JETTY-1020 ZipException in org.mortbay.jetty.webapp.TagLibConfiguration prevents all contexts from being loaded
  + JETTY-1022 Removed several 1.5isms
 
 Jetty-5.1.15 - 18 May 2009

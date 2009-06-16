@@ -131,6 +131,7 @@
     <!--module>extras/gwt</module-->
     <module>extras/threadpool</module>
     <module>extras/client</module>
+    <module>extras/jetty-java5-stats</module>
 
     <module>examples/test-webapp</module>
     <module>examples/test-jaas-webapp</module>
@@ -239,7 +240,7 @@
                   <link>http://java.sun.com/javaee/5/docs/api</link>
                   <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
                 </links>
-                <reportOutputDirectory>${basedir}</reportOutputDirectory> 
+                <reportOutputDirectory>${basedir}</reportOutputDirectory>
                 <destDir>javadoc</destDir>
             </configuration>
         </plugin>

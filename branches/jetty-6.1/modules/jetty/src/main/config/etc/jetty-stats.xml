@@ -9,14 +9,14 @@
 <Configure id="Server" class="org.mortbay.jetty.Server">
 
     <!-- =========================================================== -->
-    <!-- configure rewrite handler                                   --> 
+    <!-- configure rewrite handler                                   -->
     <!-- =========================================================== -->
     <Get id="oldhandler" name="handler"/>
 
     <Set name="handler">
-     <New id="StatsHandler" class="org.mortbay.jetty.handler.StatisticsHandler">
+     <New id="StatsHandler" class="org.mortbay.jetty.handler.SynchronizedStatisticsHandler">
       <Set name="handler"><Ref id="oldhandler"/></Set>
      </New>
     </Set>
-    
+
 </Configure>
