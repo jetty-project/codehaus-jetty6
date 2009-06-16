@@ -214,7 +214,7 @@ public class HttpDestination
                 if (connection!=null)
                 {
                     _connections.remove(connection);
-                    connection.getEndPoint().close();
+                    connection.close();
                     connection=null;
                 }
                 if (_idle.size() > 0)
