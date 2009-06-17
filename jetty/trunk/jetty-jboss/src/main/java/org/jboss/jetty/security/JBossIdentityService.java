@@ -50,7 +50,7 @@ public class JBossIdentityService extends DefaultIdentityService
             return _principal;
         }
 
-        public boolean isUserInRole(String role)
+        public boolean isUserInRole(String role, UserIdentity.Scope scope)
         {
             if (_log.isDebugEnabled()) _log.debug("Checking role "+role+" for user "+_principal.getName());
             boolean isUserInRole = false;
