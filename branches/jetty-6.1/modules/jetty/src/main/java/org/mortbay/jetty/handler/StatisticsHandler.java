@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Response;
 
-public class SynchronizedStatisticsHandler extends AbstractStatisticsHandler
+public class StatisticsHandler extends AbstractStatisticsHandler
 {
     private transient long _statsStartedAt;
     private transient int _requests;
