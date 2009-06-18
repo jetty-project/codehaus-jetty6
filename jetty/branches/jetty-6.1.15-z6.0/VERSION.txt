@@ -1,5 +1,6 @@
 Patches:
  + libsetuid -> setuid in SetUID.java
+ + JETTY-937 Further Improvements for sun JVM selector bugs
  + JETTY-980 Fixed ResourceHandler ? handling, and bad URI creation in listings
  + JETTY-989 GzipFilter handles addHeader
  + JETTY-1004 Canonical path handling includes ? in path segment
