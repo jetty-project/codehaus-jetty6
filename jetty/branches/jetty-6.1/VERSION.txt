@@ -1,8 +1,9 @@
 jetty-6.1-SNAPSHOT
  + JETTY-799 shell script for jetty on cygwin
+ + JETTY-863 Non blocking stats handler
  + JETTY-1028 jetty:run plugin should check for the web.xml from the overlays if not found in src/main/webapp/WEB-INF/
  + JETTY-1033 jetty-plus compiled with jdk1.5
- + JETTY-863 Non blocking stats handler
+ + JETTY-1040 jetty.client.HttpConnection does not handle non IOExceptions
 
 jetty-6.1.18 16 May 2009
  + JETTY-937 Improved work around sun JVM selector bugs
