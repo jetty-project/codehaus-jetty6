@@ -44,7 +44,9 @@ import org.mortbay.thread.Timeout;
  */
 public abstract class SelectorManager extends AbstractLifeCycle
 {
-    private static final int __JVMBUG_THRESHHOLD=Integer.getInteger("org.mortbay.io.nio.JVMBUG_THRESHHOLD",32).intValue();
+    private static final int __JVMBUG_THRESHHOLD=Integer.getInteger("org.mortbay.io.nio.JVMBUG_THRESHHOLD",128).intValue();
+    private static final int __JVMBUG_THRESHHOLD2=__JVMBUG_THRESHHOLD*2;
+    private static final int __JVMBUG_THRESHHOLD1=(__JVMBUG_THRESHHOLD2+__JVMBUG_THRESHHOLD)/2;
     private boolean _delaySelectKeyUpdate=true;
     private long _maxIdleTime;
     private long _lowResourcesConnections;
@@ -462,10 +464,10 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     // Look for JVM bugs
                     // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6403933
                     // http://bugs.sun.com/view_bug.do?bug_id=6693490
-                    if (selected==0 && wait>0 && (now-before)<wait/2 && __JVMBUG_THRESHHOLD>0)
+                    if (__JVMBUG_THRESHHOLD>0 && selected==0 && wait>__JVMBUG_THRESHHOLD && (now-before)<(wait/2) )
                     {
                         _jvmBug++;
-                        if (_jvmBug>(__JVMBUG_THRESHHOLD*2))
+                        if (_jvmBug>=(__JVMBUG_THRESHHOLD2))
                         {
                             synchronized (this)
                             {
@@ -483,10 +485,12 @@ public abstract class SelectorManager extends AbstractLifeCycle
                                 while (iterator.hasNext())
                                 {
                                     SelectionKey k = (SelectionKey)iterator.next();
+                                    if (!k.isValid() || k.interestOps()==0)
+                                        continue;
+                                    
                                     final SelectableChannel channel = k.channel();
                                     final Object attachment = k.attachment();
                                     
-                                    k.cancel();
                                     if (attachment==null)
                                         addChange(channel);
                                     else
@@ -494,10 +498,11 @@ public abstract class SelectorManager extends AbstractLifeCycle
                                 }
                                 _selector.close();
                                 _selector=new_selector;
+                                _jvmBug=0;
                                 return;
                             }
                         }
-                        else if (_jvmBug>__JVMBUG_THRESHHOLD)
+                        else if (_jvmBug==__JVMBUG_THRESHHOLD || _jvmBug==__JVMBUG_THRESHHOLD1)
                         {
                             // Cancel keys with 0 interested ops
                             if (_jvmBug0)
@@ -507,7 +512,6 @@ public abstract class SelectorManager extends AbstractLifeCycle
                                 _jvmBug0=true;
                                 Log.info("seeing JVM BUG(s) - cancelling interestOps==0");
                             }
-                            
                             Iterator iter = selector.keys().iterator();
                             while(iter.hasNext())
                             {
