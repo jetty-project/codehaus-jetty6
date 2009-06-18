@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.handler.SynchronizedStatisticsHandler;
+import org.mortbay.jetty.handler.StatisticsHandler;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 
@@ -42,7 +42,7 @@ public class ManyServletContexts
         Context other = new Context(contexts,"/other",Context.SESSIONS);
         other.addServlet("org.mortbay.jetty.example.ManyServletContexts$HelloServlet", "/*");
 
-        SynchronizedStatisticsHandler stats = new SynchronizedStatisticsHandler();
+        StatisticsHandler stats = new StatisticsHandler();
         contexts.addHandler(stats);
         Context yetanother =new Context(stats,"/yo",Context.SESSIONS);
         yetanother.addServlet(new ServletHolder(new HelloServlet("YO!")), "/*");
