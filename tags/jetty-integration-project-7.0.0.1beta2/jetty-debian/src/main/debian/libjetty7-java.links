@@ -1,0 +1,3 @@
+usr/share/jetty7/lib/servlet-api-3.0-${PROJECT.VERSION}.jar usr/share/java/jetty7-servlet3.0.jar
+usr/share/jetty7/lib/jetty-util-${PROJECT.VERSION}.jar usr/share/java/jetty7-util.jar
+usr/share/jetty7/lib/jetty-${PROJECT.VERSION}.jar usr/share/java/jetty7.jar
