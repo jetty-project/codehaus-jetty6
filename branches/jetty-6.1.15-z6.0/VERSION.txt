@@ -5,6 +5,7 @@ Patches:
  + JETTY-989 GzipFilter handles addHeader
  + JETTY-1004 Canonical path handling includes ? in path segment
  + JETTY-1018 Denial of Service Filter, plus Jetty-specific extension which better handles timeouts
+ + JETTY-1042 Avoid cookie reuse on shared connection
 
 jetty-6.1.15 4 March 2009
  + JETTY-931 Fix issue with jetty-rewrite.xml
