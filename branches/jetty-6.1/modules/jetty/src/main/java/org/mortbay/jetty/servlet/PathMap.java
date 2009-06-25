@@ -463,11 +463,14 @@ public class PathMap extends HashMap implements Externalizable
         {
             if (pathSpec.length()==1)
                 return null;
-            
-            if (pathSpec.equals(path))
+
+            boolean wildcard = isPathWildcardMatch(pathSpec, path);
+
+            // handle the case where pathSpec uses a wildcard and path info is "/*"
+            if (pathSpec.equals(path) && !wildcard)
                 return null;
 
-            if (isPathWildcardMatch(pathSpec, path))
+            if (wildcard)
             {
                 if (path.length()==pathSpec.length()-2)
                     return null;

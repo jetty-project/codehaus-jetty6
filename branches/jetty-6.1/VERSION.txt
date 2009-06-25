@@ -6,6 +6,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1033 jetty-plus compiled with jdk1.5
  + JETTY-1040 jetty.client.HttpConnection does not handle non IOExceptions
  + JETTY-1042 Avoid cookie reuse on shared connection
+ + JETTY-1045 Handle the case where request.PathInfo() should be "/*"
 
 jetty-6.1.18 16 May 2009
  + JETTY-937 Improved work around sun JVM selector bugs
