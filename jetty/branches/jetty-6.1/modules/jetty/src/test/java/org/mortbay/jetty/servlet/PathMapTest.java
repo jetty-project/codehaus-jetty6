@@ -81,9 +81,11 @@ public class PathMapTest extends TestCase
                         { "/abs/path/xxx", "8"},
                         { "/animal/bird/eagle/bald", "3"}, 
                         { "/animal/fish/shark/grey", "4"},
-                        { "/animal/insect/bug", "5"}, 
+                        { "/animal/insect/bug", "5"},
                         { "/animal", "5"}, 
                         { "/animal/", "5"},
+                        { "/animal/x", "5"},
+                        { "/animal/*", "5"},
                         { "/suffix/path.tar.gz", "6"}, 
                         { "/suffix/path.gz", "7"},
                         { "/animal/path.gz", "5"}, 
@@ -112,6 +114,7 @@ public class PathMapTest extends TestCase
 
         assertEquals("pathInfo exact", null, PathMap.pathInfo("/Foo/bar", "/Foo/bar"));
         assertEquals("pathInfo prefix", "/bar", PathMap.pathInfo("/Foo/*", "/Foo/bar"));
+        assertEquals("pathInfo prefix", "/*", PathMap.pathInfo("/Foo/*", "/Foo/*"));
         assertEquals("pathInfo prefix", "/", PathMap.pathInfo("/Foo/*", "/Foo/"));
         assertEquals("pathInfo prefix", null, PathMap.pathInfo("/Foo/*", "/Foo"));
         assertEquals("pathInfo suffix", null, PathMap.pathInfo("*.ext", "/Foo/bar.ext"));
