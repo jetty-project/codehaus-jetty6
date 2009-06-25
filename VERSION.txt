@@ -7,6 +7,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1040 jetty.client.HttpConnection does not handle non IOExceptions
  + JETTY-1042 Avoid cookie reuse on shared connection
  + JETTY-1045 Handle the case where request.PathInfo() should be "/*"
+ + JETTY-1047 Cometd client can grow cookie headers
 
 jetty-6.1.18 16 May 2009
  + JETTY-937 Improved work around sun JVM selector bugs
