@@ -364,51 +364,55 @@ public class Request implements HttpServletRequest
      */
     public Cookie[] getCookies()
     {
-        if (_cookiesExtracted) return _cookies;
+        if (_cookiesExtracted) 
+            return _cookies;
 
-        try
+        // Handle no cookies
+        if (!_connection.getRequestFields().containsKey(HttpHeaders.COOKIE_BUFFER))
         {
-            // Handle no cookies
-            if (!_connection.getRequestFields().containsKey(HttpHeaders.COOKIE_BUFFER))
-            {
-                _cookies = null;
-                _cookiesExtracted = true;
-                _lastCookies = null;
-                return _cookies;
-            }
+            _cookies = null;
+            _cookiesExtracted = true;
+            _lastCookies = null;
+            return _cookies;
+        }
 
-            // Check if cookie headers match last cookies
-            if (_lastCookies != null)
-            {
-                int last = 0;
-                Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
-                while (enm.hasMoreElements())
-                {
-                    String c = (String)enm.nextElement();
-                    if (last >= _lastCookies.length || !c.equals(_lastCookies[last]))
-                    {
-                        _lastCookies = null;
-                        break;
-                    }
-                    last++;
-                }
-                if (_lastCookies != null && _lastCookies.length==last)
-                {
-                    _cookiesExtracted = true;
-                    return _cookies;
-                }
-            }
-
-            // Get ready to parse cookies (Expensive!!!)
-            Object cookies = null;
-            Object lastCookies = null;
-
-            int version = 0;
-
-            // For each cookie header
+        // Check if cookie headers match last cookies
+        if (_lastCookies != null)
+        {
+            int last = 0;
             Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
             while (enm.hasMoreElements())
             {
+                String c = (String)enm.nextElement();
+                if (last >= _lastCookies.length || !c.equals(_lastCookies[last]))
+                {
+                    _lastCookies = null;
+                    break;
+                }
+                last++;
+            }
+            if (_lastCookies != null && _lastCookies.length==last)
+            {
+                _cookiesExtracted = true;
+                return _cookies;
+            }
+        }
+
+        // Get ready to parse cookies (Expensive!!!)
+        _cookies=null;
+        Object cookies = null;
+        Object lastCookies = null;
+
+        int version = 0;
+
+        // For each cookie header
+        Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
+        while (enm.hasMoreElements())
+        {
+
+            try
+            {
+
                 // Save a copy of the unparsed header as cache.
                 String hdr = (String)enm.nextElement();
                 lastCookies = LazyList.add(lastCookies, hdr);
@@ -558,26 +562,31 @@ public class Request implements HttpServletRequest
                         value = null;
                     }
                 }
-            }
 
-            int l = LazyList.size(cookies);
-            _cookiesExtracted = true;
-            if (l>0)
+            }
+            catch (Exception e)
             {
-                if (_cookies == null || _cookies.length != l) _cookies = new Cookie[l];
-                for (int i = 0; i < l; i++)
-                    _cookies[i] = (Cookie) LazyList.get(cookies, i);
-
-                l = LazyList.size(lastCookies);
-                _lastCookies = new String[l];
-                for (int i = 0; i < l; i++)
-                    _lastCookies[i] = (String) LazyList.get(lastCookies, i);
+                Log.warn(e);
             }
         }
-        catch (Exception e)
+
+        int l = LazyList.size(cookies);
+        _cookiesExtracted = true;
+        if (l>0)
         {
-            Log.warn(e);
+            if (_cookies == null || _cookies.length != l) 
+                _cookies = new Cookie[l];
+            for (int i = 0; i < l; i++)
+                _cookies[i] = (Cookie) LazyList.get(cookies, i);
+
+            l = LazyList.size(lastCookies);
+            _lastCookies = new String[l];
+            for (int i = 0; i < l; i++)
+                _lastCookies[i] = (String) LazyList.get(lastCookies, i);
         }
+        else
+            _cookies=null;
+
 
         if (_cookies==null || _cookies.length==0)
             return null;
