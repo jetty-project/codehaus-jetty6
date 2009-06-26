@@ -8,6 +8,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1042 Avoid cookie reuse on shared connection
  + JETTY-1045 Handle the case where request.PathInfo() should be "/*"
  + JETTY-1047 Cometd client can grow cookie headers
+ + JETTY-1048 Default servlet can handle partially filtered large static content
 
 jetty-6.1.18 16 May 2009
  + JETTY-937 Improved work around sun JVM selector bugs
