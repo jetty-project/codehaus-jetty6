@@ -76,6 +76,13 @@
     	<scope>test</scope>
     	<optional>false</optional>
     </dependency>
+    <dependency>
+    	<groupId>org.eclipse.jetty</groupId>
+    	<artifactId>jetty-io</artifactId>
+    	<version>${jetty-version}</version>
+    	<scope>test</scope>
+    	<optional>false</optional>
+    </dependency>
   </dependencies>
   <repositories>
     <repository>
