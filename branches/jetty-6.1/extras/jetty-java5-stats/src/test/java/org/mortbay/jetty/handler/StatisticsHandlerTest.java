@@ -41,7 +41,7 @@ public class StatisticsHandlerTest extends TestCase
 
     public void testSynchronizedStatisticsHandler() throws Exception
     {
-        SynchronizedStatisticsHandler statisticsHandler = new SynchronizedStatisticsHandler();
+        StatisticsHandler statisticsHandler = new StatisticsHandler();
         runTestWithStatisticsHandler(statisticsHandler);
     }
 
