@@ -48,7 +48,7 @@ Running the Demo
 ----------------
 You run the demo like so:
    
-   java -jar start.jar DOPTIONS=All
+   java -jar start.jar OPTIONS=All
 
 
 Adding Support for a Different Transaction Manager
