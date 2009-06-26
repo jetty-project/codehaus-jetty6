@@ -76,13 +76,6 @@
     	<scope>test</scope>
     	<optional>false</optional>
     </dependency>
-    <dependency>
-    	<groupId>org.eclipse.jetty</groupId>
-    	<artifactId>jetty-io</artifactId>
-    	<version>${jetty-version}</version>
-    	<scope>test</scope>
-    	<optional>false</optional>
-    </dependency>
   </dependencies>
   <repositories>
     <repository>
@@ -95,7 +88,7 @@
   </repositories>
   <properties>
   	<blazeds-version>3.2.0</blazeds-version>
-  	<jetty-version>7.0.0.M3-SNAPSHOT</jetty-version>
-  	<jetty-6-version>6.1-SNAPSHOT</jetty-6-version>
+  	<jetty-version>7.0.0.M3</jetty-version>
+  	<jetty-6-version>6.1.18</jetty-6-version>
   </properties>
 </project>
