@@ -149,7 +149,7 @@ public class Request implements HttpServletRequest
     private SessionManager _sessionManager;
     private boolean _cookiesExtracted=false;
     private Cookie[] _cookies;
-    private String[] _lastCookies;
+    private String[] _unparsedCookies;
     private long _timeStamp;
     private Buffer _timeStampBuffer;
     private Continuation _continuation;
@@ -372,26 +372,26 @@ public class Request implements HttpServletRequest
         {
             _cookies = null;
             _cookiesExtracted = true;
-            _lastCookies = null;
+            _unparsedCookies = null;
             return _cookies;
         }
 
         // Check if cookie headers match last cookies
-        if (_lastCookies != null)
+        if (_unparsedCookies != null)
         {
             int last = 0;
             Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
             while (enm.hasMoreElements())
             {
                 String c = (String)enm.nextElement();
-                if (last >= _lastCookies.length || !c.equals(_lastCookies[last]))
+                if (last >= _unparsedCookies.length || !c.equals(_unparsedCookies[last]))
                 {
-                    _lastCookies = null;
+                    _unparsedCookies = null;
                     break;
                 }
                 last++;
             }
-            if (_lastCookies != null && _lastCookies.length==last)
+            if (_unparsedCookies != null && _unparsedCookies.length==last)
             {
                 _cookiesExtracted = true;
                 return _cookies;
@@ -409,10 +409,8 @@ public class Request implements HttpServletRequest
         Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
         while (enm.hasMoreElements())
         {
-
             try
             {
-
                 // Save a copy of the unparsed header as cache.
                 String hdr = (String)enm.nextElement();
                 lastCookies = LazyList.add(lastCookies, hdr);
@@ -500,6 +498,7 @@ public class Request implements HttpServletRequest
                             }
                     }
 
+                    // Process the the last character specially
                     if (i + 1 == length)
                     {
                         switch (state)
@@ -519,6 +518,7 @@ public class Request implements HttpServletRequest
                         }
                     }
 
+                    // If a name and value have been found, create a cookie
                     if (name != null && value != null)
                     {
                         name = name.trim();
@@ -570,22 +570,30 @@ public class Request implements HttpServletRequest
             }
         }
 
+        // how many cookies did we find?
         int l = LazyList.size(cookies);
         _cookiesExtracted = true;
         if (l>0)
         {
+            // Do we need a new cookie array
             if (_cookies == null || _cookies.length != l) 
                 _cookies = new Cookie[l];
+            
+            // Copy the cookies into the array
             for (int i = 0; i < l; i++)
                 _cookies[i] = (Cookie) LazyList.get(cookies, i);
 
+            // 
             l = LazyList.size(lastCookies);
-            _lastCookies = new String[l];
+            _unparsedCookies = new String[l];
             for (int i = 0; i < l; i++)
-                _lastCookies[i] = (String) LazyList.get(lastCookies, i);
+                _unparsedCookies[i] = (String) LazyList.get(lastCookies, i);
         }
         else
+        {
             _cookies=null;
+            _unparsedCookies=null;
+        }
 
 
         if (_cookies==null || _cookies.length==0)
