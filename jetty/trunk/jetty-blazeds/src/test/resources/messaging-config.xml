@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="message-service" class="flex.messaging.services.MessageService">
+
+    <adapters>
+        <adapter-definition id="actionscript" class="flex.messaging.services.messaging.adapters.ActionScriptAdapter" default="true" />
+        <adapter-definition id="jms" class="flex.messaging.services.messaging.adapters.JMSAdapter"/>
+    </adapters>
+    
+    <destination id="polling-chat">
+        <channels>
+            <channel ref="my-polling-amf"/>
+        </channels>
+    </destination>
+
+    <destination id="async-chat">
+        <channels>
+            <channel ref="my-async-amf"/>
+        </channels>
+    </destination>
+    
+</service>
