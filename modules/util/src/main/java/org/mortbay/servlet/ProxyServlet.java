@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
@@ -32,6 +33,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,8 +42,10 @@ import org.mortbay.util.IO;
 
 
 /**
- * EXPERIMENTAL Proxy servlet.
- * @author gregw
+ * Proxy Servlet.
+ * <p>
+ * Forward requests to another server either as a standard web proxy (as defined by
+ * RFC2616) or as a transparent proxy.
  *
  */
 public class ProxyServlet implements Servlet
@@ -60,16 +64,16 @@ public class ProxyServlet implements Servlet
         _DontProxyHeaders.add("upgrade");
     }
     
-    private ServletConfig config;
-    private ServletContext context;
+    protected ServletConfig _config;
+    protected ServletContext _context;
     
     /* (non-Javadoc)
      * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
      */
     public void init(ServletConfig config) throws ServletException
     {
-        this.config=config;
-        this.context=config.getServletContext();
+        this._config=config;
+        this._context=config.getServletContext();
     }
 
     /* (non-Javadoc)
@@ -77,7 +81,7 @@ public class ProxyServlet implements Servlet
      */
     public ServletConfig getServletConfig()
     {
-        return config;
+        return _config;
     }
 
     /* (non-Javadoc)
@@ -97,12 +101,12 @@ public class ProxyServlet implements Servlet
             String uri=request.getRequestURI();
             if (request.getQueryString()!=null)
                 uri+="?"+request.getQueryString();
-            URL url = new URL(request.getScheme(),
-                    		  request.getServerName(),
-                    		  request.getServerPort(),
-                    		  uri);
             
-            context.log("URL="+url);
+            URL url=proxyHttpURL(request.getScheme(),
+                    request.getServerName(),
+                    request.getServerPort(),
+                    uri);
+            
 
             URLConnection connection = url.openConnection();
             connection.setAllowUserInteraction(false);
@@ -151,7 +155,6 @@ public class ProxyServlet implements Servlet
                     if (val!=null)
                     {
                         connection.addRequestProperty(hdr,val);
-                        context.log("req "+hdr+": "+val);
                         xForwardedFor|="X-Forwarded-For".equalsIgnoreCase(hdr);
                     }
                 }
@@ -189,7 +192,7 @@ public class ProxyServlet implements Servlet
             }
             catch (Exception e)
             {
-                context.log("proxy",e);
+                _context.log("proxy",e);
             }
             
             InputStream proxy_in = null;
@@ -202,7 +205,6 @@ public class ProxyServlet implements Servlet
                 
                 code=http.getResponseCode();
                 response.setStatus(code, http.getResponseMessage());
-                context.log("response = "+http.getResponseCode());
             }
             
             if (proxy_in==null)
@@ -210,7 +212,7 @@ public class ProxyServlet implements Servlet
                 try {proxy_in=connection.getInputStream();}
                 catch (Exception e)
                 {
-                    context.log("stream",e);
+                    _context.log("stream",e);
                     proxy_in = http.getErrorStream();
                 }
             }
@@ -228,8 +230,6 @@ public class ProxyServlet implements Servlet
                 String lhdr = hdr!=null?hdr.toLowerCase():null;
                 if (hdr!=null && val!=null && !_DontProxyHeaders.contains(lhdr))
                     response.addHeader(hdr,val);
-
-                context.log("res "+hdr+": "+val);
                 
                 h++;
                 hdr=connection.getHeaderFieldKey(h);
@@ -244,15 +244,29 @@ public class ProxyServlet implements Servlet
         }
     }
 
-
+    /* ------------------------------------------------------------ */
+    /** Resolve requested URL to the Proxied URL
+     * @param scheme The scheme of the received request.
+     * @param serverName The server encoded in the received request(which 
+     * may be from an absolute URL in the request line).
+     * @param serverPort The server port of the received request (which 
+     * may be from an absolute URL in the request line).
+     * @param uri The URI of the received request.
+     * @return The URL to which the request should be proxied.
+     * @throws MalformedURLException
+     */
+    protected URL proxyHttpURL(String scheme, String serverName, int serverPort, String uri)
+        throws MalformedURLException
+    {
+        return new URL(scheme,serverName,serverPort,uri);
+    }
+    
     /* ------------------------------------------------------------ */
     public void handleConnect(HttpServletRequest request,
                               HttpServletResponse response)
         throws IOException
     {
         String uri = request.getRequestURI();
-        
-        context.log("CONNECT: "+uri);
         
         String port = "";
         String host = "";
@@ -281,17 +295,12 @@ public class ProxyServlet implements Servlet
             OutputStream out=response.getOutputStream();
             
             Socket socket = new Socket(inetAddress.getAddress(),inetAddress.getPort());
-            context.log("Socket: "+socket);
             
             response.setStatus(200);
             response.setHeader("Connection","close");
             response.flushBuffer();
             
-            
-
-            context.log("out<-in");
             IO.copyThread(socket.getInputStream(),out);
-            context.log("in->out");
             IO.copy(in,socket.getOutputStream());
         }
     }
@@ -314,4 +323,56 @@ public class ProxyServlet implements Servlet
     {
 
     }
+    /**
+     * Transparent Proxy.
+     * 
+     * This convenience extension to AsyncProxyServlet configures the servlet
+     * as a transparent proxy.   The servlet is configured with init parameter:<ul>
+     * <li> ProxyTo - a URI like http://host:80/context to which the request is proxied.
+     * <li> Prefix  - a URI prefix that is striped from the start of the forwarded URI.
+     * </ul>
+     * For example, if a request was received at /foo/bar and the ProxyTo was  http://host:80/context
+     * and the Prefix was /foo, then the request would be proxied to http://host:80/context/bar
+     *
+     */
+    public static class Transparent extends ProxyServlet
+    {
+        String _prefix;
+        String _proxyTo;
+        
+        public Transparent()
+        {    
+        }
+        
+        public Transparent(String prefix,String server, int port)
+        {
+            _prefix=prefix;
+            _proxyTo="http://"+server+":"+port;
+        }
+
+        public void init(ServletConfig config) throws ServletException
+        {
+            if (config.getInitParameter("ProxyTo")!=null)
+                _proxyTo=config.getInitParameter("ProxyTo");
+            if (config.getInitParameter("Prefix")!=null)
+                _prefix=config.getInitParameter("Prefix");
+            if (_proxyTo==null)
+                throw new UnavailableException("No ProxyTo");
+            super.init(config);
+            
+            _context.log("Transparent ProxyServlet @ "+(_prefix==null?"-":_prefix)+ " to "+_proxyTo);
+            
+        }
+        
+        protected URL proxyHttpURL(final String scheme, final String serverName, int serverPort, final String uri) throws MalformedURLException
+        {
+            if (_prefix!=null && !uri.startsWith(_prefix))
+                return null;
+            
+            if (_prefix!=null)
+                return new URL(_proxyTo+uri.substring(_prefix.length()));
+            return new URL(_proxyTo+uri);
+        }
+    }
+
 }

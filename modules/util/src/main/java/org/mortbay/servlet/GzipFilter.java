@@ -109,7 +109,9 @@ public class GzipFilter extends UserAgentFilter
         HttpServletResponse response=(HttpServletResponse)res;
 
         String ae = request.getHeader("accept-encoding");
-        if (ae != null && ae.indexOf("gzip")>=0 && !response.containsHeader("Content-Encoding"))
+        Boolean gzip=(Boolean)request.getAttribute("GzipFilter");
+        if (ae != null && ae.indexOf("gzip")>=0 && !response.containsHeader("Content-Encoding") &&
+            (gzip==null || gzip.booleanValue()))
         {
             if (_excluded!=null)
             {
@@ -128,6 +130,12 @@ public class GzipFilter extends UserAgentFilter
             {
                 super.doFilter(request,wrappedResponse,chain);
                 exceptional=false;
+            }
+            catch(RuntimeException e)
+            {
+                request.setAttribute("GzipFilter",Boolean.FALSE);
+                wrappedResponse.noGzip();
+                throw e;
             }
             finally
             {
