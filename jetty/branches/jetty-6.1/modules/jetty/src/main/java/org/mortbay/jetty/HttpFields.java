@@ -190,7 +190,7 @@ public class HttpFields
             __dateReceive[i].setTimeZone(__GMT);
         }
     }
-    public final static String __01Jan1970 = formatDate(0, false);
+    public final static String __01Jan1970 = formatDate(0, false).trim();
     public final static Buffer __01Jan1970_BUFFER = new ByteArrayBuffer(__01Jan1970);
 
     /* -------------------------------------------------------------- */
@@ -982,13 +982,16 @@ public class HttpFields
             if (path != null && path.length() > 0)
             {
                 buf.append(";Path=");
-                buf.append(URIUtil.encodePath(path));
+                if (path.startsWith("\""))
+                    buf.append(path);
+                else
+                    QuotedStringTokenizer.quoteIfNeeded(buf,path);
             }
             String domain = cookie.getDomain();
             if (domain != null && domain.length() > 0)
             {
                 buf.append(";Domain=");
-                buf.append(domain.toLowerCase());// lowercase for IE
+                QuotedStringTokenizer.quoteIfNeeded(buf,domain.toLowerCase());
             }
 
             long maxAge = cookie.getMaxAge();
