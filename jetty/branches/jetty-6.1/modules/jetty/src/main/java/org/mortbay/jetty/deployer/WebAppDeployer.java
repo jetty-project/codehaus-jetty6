@@ -23,6 +23,7 @@ import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.URIUtil;
 
@@ -194,16 +195,22 @@ public class WebAppDeployer extends AbstractLifeCycle
         
                     if (context.equals(c.getContextPath()))
                         continue files;
-                    
-                   String path;
-                   if (c instanceof WebAppContext)
-                       path = ((WebAppContext)c).getWar();
-                   else
-                       path = (c.getBaseResource()==null?"":c.getBaseResource().getFile().getAbsolutePath());
 
-                    if (path.equals(app.getFile().getAbsolutePath()))
-                        continue files;
-   
+                    try
+                    {
+                        String path=null;
+                        if (c instanceof WebAppContext)
+                            path = Resource.newResource(((WebAppContext)c).getWar()).getFile().getAbsolutePath();
+                        else if (c.getBaseResource()!=null)
+                            path = c.getBaseResource().getFile().getAbsolutePath();
+
+                        if (path!=null && path.equals(app.getFile().getAbsolutePath()))
+                            continue files;
+                    }
+                    catch (Exception e)
+                    {
+                        Log.ignore(e);
+                    }
                 }
             }
 
