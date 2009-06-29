@@ -287,19 +287,13 @@ public class RequestTest extends TestCase
         assertTrue(response.indexOf("200")>0);
         assertTrue(response.indexOf("Connection: close")>0);
         assertTrue(response.indexOf("Hello World")>0);
-
-        
-        
-        
     }
-    
-    
-
     
     public void testCookie()
         throws Exception
     {
-      
+
+        final String[] name=new String[10];
         final String[] cookie=new String[10];
         
         _handler._checker = new RequestTester()
@@ -307,11 +301,15 @@ public class RequestTest extends TestCase
             public boolean check(HttpServletRequest request,HttpServletResponse response)
             {
                 for (int i=0;i<cookie.length; i++)
+                {
+                    name[i]=null;
                     cookie[i]=null;
+                }
                 
                 Cookie[] cookies = request.getCookies();
                 for (int i=0;cookies!=null && i<cookies.length; i++)
                 {
+                    name[i]=cookies[i].getName();
                     cookie[i]=cookies[i].getValue();
                 }
                 return true;
@@ -321,15 +319,16 @@ public class RequestTest extends TestCase
         
         String request="POST / HTTP/1.1\r\n"+
         "Host: whatever\r\n"+
-        "Cookie: name=value\r\n"+
+        "Cookie: name=\"quoted=\\\"value\\\"\"\n" +
         "Connection: close\r\n"+
         "\r\n";
 
         _connector.reopen();
         _connector.getResponses(request);
 
-        assertEquals("value",cookie[0]);
+        assertEquals("quoted=\"value\"",cookie[0]);
         assertEquals(null,cookie[1]);
+        
         
         request="POST / HTTP/1.1\r\n"+
         "Host: whatever\r\n"+
@@ -365,7 +364,31 @@ public class RequestTest extends TestCase
         assertEquals("value",cookie[0]);
         assertEquals(null,cookie[1]);
         
-        
+
+        request="POST / HTTP/1.1\r\n"+
+        "Host: whatever\r\n"+
+        "Cookie: name0=value0; name1 = value1 ; \"\\\"name2\\\"\"  =  \"\\\"value2\\\"\"  \n" +
+        "Cookie: name3=value3=value3; name4=; name5 =  ; name6\n" +
+        "Connection: close\r\n"+
+        "\r\n";
+
+        _connector.reopen();
+        _connector.getResponses(request);
+
+        assertEquals("name0" ,name[0]);
+        assertEquals("value0" ,cookie[0]);
+        assertEquals("name1" ,name[1]);
+        assertEquals("value1" ,cookie[1]);
+        assertEquals("\"name2\"" ,name[2]);
+        assertEquals("\"value2\"" ,cookie[2]);
+        assertEquals("name3" ,name[3]);
+        assertEquals("value3=value3" ,cookie[3]);
+        assertEquals("name4" ,name[4]);
+        assertEquals("" ,cookie[4]);
+        assertEquals("name5" ,name[5]);
+        assertEquals("" ,cookie[5]);
+        assertEquals("name6" ,name[6]);
+        assertEquals("" ,cookie[6]);
     }
     
     
