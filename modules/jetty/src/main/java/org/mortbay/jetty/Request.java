@@ -62,6 +62,7 @@ import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiMap;
+import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.UrlEncoded;
@@ -102,12 +103,6 @@ import org.mortbay.util.ajax.Continuation;
  */
 public class Request implements HttpServletRequest
 {
-    private static final byte STATE_DELIMITER = 1;
-    private static final byte STATE_NAME = 2;
-    private static final byte STATE_VALUE = 4;
-    private static final byte STATE_QUOTED_VALUE = 8;
-    private static final byte STATE_UNQUOTED_VALUE = 16;
-
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
     private static final int __NONE=0, _STREAM=1, __READER=2;
     
@@ -357,7 +352,7 @@ public class Request implements HttpServletRequest
     {
         return _contextPath;
     }
-
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.http.HttpServletRequest#getCookies()
@@ -404,7 +399,7 @@ public class Request implements HttpServletRequest
         Object lastCookies = null;
 
         int version = 0;
-
+        
         // For each cookie header
         Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
         while (enm.hasMoreElements())
@@ -414,115 +409,153 @@ public class Request implements HttpServletRequest
                 // Save a copy of the unparsed header as cache.
                 String hdr = (String)enm.nextElement();
                 lastCookies = LazyList.add(lastCookies, hdr);
-
+                
                 // Parse the header
                 String name = null;
                 String value = null;
 
                 Cookie cookie = null;
 
-                byte state = STATE_NAME;
-                for (int i = 0, tokenstart = 0, length = hdr.length(); i < length; i++)
+                boolean invalue=false;
+                boolean quoted=false;
+                boolean escaped=false;
+                int tokenstart=-1;
+                int tokenend=-1;
+                for (int i = 0, length = hdr.length(), last=length-1; i < length; i++)
                 {
                     char c = hdr.charAt(i);
-                    switch (c)
+                    
+                    // Handle quoted values for name or value
+                    if (quoted)
                     {
-                        case ',':
-                        case ';':
-                            switch (state)
-                            {
-                                case STATE_DELIMITER:
-                                    state = STATE_NAME;
-                                    tokenstart = i + 1;
-                                    break;
-                                case STATE_UNQUOTED_VALUE:
-                                    state = STATE_NAME;
-                                    value = hdr.substring(tokenstart, i).trim();
-                                    if(isRequestedSessionIdFromURL())
-                                        value = URIUtil.decodePath(value);
-                                    tokenstart = i + 1;
-                                    break;
-                                case STATE_NAME:
-                                    name = hdr.substring(tokenstart, i);
-                                    value = "";
-                                    tokenstart = i + 1;
-                                    break;
-                                case STATE_VALUE:
-                                    state = STATE_NAME;
-                                    value = "";
-                                    tokenstart = i + 1;
-                                    break;
-                            }
-                            break;
-                        case '=':
-                            switch (state)
-                            {
-                                case STATE_NAME:
-                                    state = STATE_VALUE;
-                                    name = hdr.substring(tokenstart, i);
-                                    tokenstart = i + 1;
-                                    break;
-                                case STATE_VALUE:
-                                    state = STATE_UNQUOTED_VALUE;
-                                    tokenstart = i;
-                                    break;
-                            }
-                            break;
-                        case '"':
-                            switch (state)
-                            {
-                                case STATE_VALUE:
-                                    state = STATE_QUOTED_VALUE;
-                                    tokenstart = i + 1;
-                                    break;
-                                case STATE_QUOTED_VALUE:
-                                    state = STATE_DELIMITER;
-                                    value = hdr.substring(tokenstart, i);
-                                    break;
-                            }
-                            break;
-                        case ' ':
-                        case '\t':
-                            break;
-                        default:
-                            switch (state)
-                            {
-                                case STATE_VALUE:
-                                    state = STATE_UNQUOTED_VALUE;
-                                    tokenstart = i;
-                                    break;
-                                case STATE_DELIMITER:
-                                    state = STATE_NAME;
-                                    tokenstart = i;
-                                    break;
-                            }
-                    }
-
-                    // Process the the last character specially
-                    if (i + 1 == length)
-                    {
-                        switch (state)
+                        if (escaped)
                         {
-                            case STATE_UNQUOTED_VALUE:
-                                value = hdr.substring(tokenstart).trim();
-                                if(isRequestedSessionIdFromURL())
-                                    value = URIUtil.decodePath(value);
+                            escaped=false;
+                            continue;
+                        }
+                        
+                        switch (c)
+                        {
+                            case '"':
+                                tokenend=i;
+                                quoted=false;
+
+                                // handle quote as last character specially
+                                if (i==last)
+                                {
+                                    if (invalue)
+                                        value = hdr.substring(tokenstart, tokenend+1);
+                                    else
+                                    {
+                                        name = hdr.substring(tokenstart, tokenend+1);
+                                        value = "";
+                                    }
+                                }
                                 break;
-                            case STATE_NAME:
-                                name = hdr.substring(tokenstart);
-                                value = "";
-                                break;
-                            case STATE_VALUE:
-                                value = "";
-                                break;
+                                
+                            case '\\':
+                                escaped=true;
+                                continue;
+                            default:
+                                continue;
+                        }
+                    }
+                    else
+                    {
+                        // Handle name and value state machines
+                        if (invalue)
+                        {
+                            // parse the value
+                            switch (c)
+                            {
+                                case ' ':
+                                case '\t':
+                                    continue;
+                                    
+                                case '"':
+                                    if (tokenstart<0)
+                                    {
+                                        quoted=true;
+                                        tokenstart=i;
+                                    }
+                                    continue;
+
+                                case ';':
+                                    if (tokenstart>=0)
+                                        value = hdr.substring(tokenstart, tokenend+1);
+                                    else
+                                        value="";
+                                    tokenstart = -1;
+                                    invalue=false;
+                                    break;
+                                    
+                                default:
+                                    if (tokenstart<0)
+                                        tokenstart=i;
+                                    tokenend=i;
+                                    if (i==last)
+                                    {
+                                        value = hdr.substring(tokenstart, tokenend+1);
+                                        break;
+                                    }
+                                    continue;
+                            }
+                        }
+                        else
+                        {
+                            // parse the name
+                            switch (c)
+                            {
+                                case ' ':
+                                case '\t':
+                                    continue;
+                                    
+                                case '"':
+                                    if (tokenstart<0)
+                                    {
+                                        quoted=true;
+                                        tokenstart=i;
+                                    }
+                                    continue;
+
+                                case ';':
+                                    if (tokenstart>=0)
+                                    {
+                                        name = hdr.substring(tokenstart, tokenend+1);
+                                        value = "";
+                                    }
+                                    tokenstart = -1;
+                                    break;
+
+                                case '=':
+                                    if (tokenstart>=0)
+                                        name = hdr.substring(tokenstart, tokenend+1);
+                                    tokenstart = -1;
+                                    invalue=true;
+                                    continue;
+                                    
+                                default:
+                                    if (tokenstart<0)
+                                        tokenstart=i;
+                                    tokenend=i;
+                                    if (i==last)
+                                    {
+                                        name = hdr.substring(tokenstart, tokenend+1);
+                                        value = "";
+                                        break;
+                                    }
+                                    continue;
+                            }
                         }
                     }
 
-                    // If a name and value have been found, create a cookie
-                    if (name != null && value != null)
+                    // If after processing the current character we have a value and a name, then it is a cookie
+                    if (value!=null && name!=null)
                     {
-                        name = name.trim();
-
+                        // TODO handle unquoting during parsing!  But quoting is uncommon
+                        name=QuotedStringTokenizer.unquote(name);
+                        value=QuotedStringTokenizer.unquote(value);
+                        
                         try
                         {
                             if (name.startsWith("$"))
@@ -530,11 +563,13 @@ public class Request implements HttpServletRequest
                                 String lowercaseName = name.toLowerCase();
                                 if ("$path".equals(lowercaseName))
                                 {
-                                    cookie.setPath(value);
+                                    if (cookie!=null)
+                                        cookie.setPath(value);
                                 }
                                 else if ("$domain".equals(lowercaseName))
                                 {
-                                    cookie.setDomain(value);
+                                    if (cookie!=null)
+                                        cookie.setDomain(value);
                                 }
                                 else if ("$version".equals(lowercaseName))
                                 {
@@ -544,18 +579,15 @@ public class Request implements HttpServletRequest
                             else
                             {
                                 cookie = new Cookie(name, value);
-
                                 if (version > 0)
-                                {
                                     cookie.setVersion(version);
-                                }
-
                                 cookies = LazyList.add(cookies, cookie);
                             }
                         }
                         catch (Exception e)
                         {
-                            Log.ignore(e);
+                            Log.warn(e.toString());
+                            Log.debug(e);
                         }
 
                         name = null;
@@ -569,7 +601,7 @@ public class Request implements HttpServletRequest
                 Log.warn(e);
             }
         }
-
+        
         // how many cookies did we find?
         int l = LazyList.size(cookies);
         _cookiesExtracted = true;
