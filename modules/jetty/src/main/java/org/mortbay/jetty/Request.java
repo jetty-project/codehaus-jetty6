@@ -478,6 +478,12 @@ public class Request implements HttpServletRequest
                                         quoted=true;
                                         tokenstart=i;
                                     }
+                                    tokenend=i;
+                                    if (i==last)
+                                    {
+                                        value = hdr.substring(tokenstart, tokenend+1);
+                                        break;
+                                    }
                                     continue;
 
                                 case ';':
@@ -515,6 +521,13 @@ public class Request implements HttpServletRequest
                                     {
                                         quoted=true;
                                         tokenstart=i;
+                                    }
+                                    tokenend=i;
+                                    if (i==last)
+                                    {
+                                        name = hdr.substring(tokenstart, tokenend+1);
+                                        value = "";
+                                        break;
                                     }
                                     continue;
 
