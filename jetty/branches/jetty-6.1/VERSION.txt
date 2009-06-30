@@ -6,6 +6,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1011 Grizzy uses queued thread pool
  + JETTY-1028 jetty:run plugin should check for the web.xml from the overlays if not found in src/main/webapp/WEB-INF/
  + JETTY-1029 Handle quoted cookie paths
+ + JETTY-1031 Handle large pipeline
  + JETTY-1033 jetty-plus compiled with jdk1.5
  + JETTY-1034 Cookie parsing
  + JETTY-1037 reimplemented channel doRemove
