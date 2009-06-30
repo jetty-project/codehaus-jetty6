@@ -369,6 +369,7 @@ public class RequestTest extends TestCase
         "Host: whatever\r\n"+
         "Cookie: name0=value0; name1 = value1 ; \"\\\"name2\\\"\"  =  \"\\\"value2\\\"\"  \n" +
         "Cookie: name3=value3=value3; name4=; name5 =  ; name6\n" +
+        "Cookie: name7=value7;\n" +
         "Connection: close\r\n"+
         "\r\n";
 
@@ -389,6 +390,8 @@ public class RequestTest extends TestCase
         assertEquals("" ,cookie[5]);
         assertEquals("name6" ,name[6]);
         assertEquals("" ,cookie[6]);
+        assertEquals("name7" ,name[7]);
+        assertEquals("value7" ,cookie[7]);
     }
     
     
