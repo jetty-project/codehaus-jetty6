@@ -436,6 +436,12 @@ public class Main
     /* ------------------------------------------------------------ */
     public void start(String[] args)
     {
+        init(args);
+        start();
+    }
+
+    public void init(String[] args)
+    {
         ArrayList al=new ArrayList();
         for (int i=0; i<args.length; i++)
         {
@@ -449,8 +455,6 @@ public class Main
         InputStream cpcfg=null;
         try
         {
-            Monitor.monitor();
-
             cpcfg=getClass().getClassLoader().getResourceAsStream(_config);
             if (_debug)
                 System.err.println("config="+_config);
@@ -489,6 +493,18 @@ public class Main
             System.err.println("classloader="+cl);
             System.err.println("classloader.parent="+cl.getParent());
         }
+
+        for (int i=0; i<args.length; i++)
+        {
+            if (args[i]==null)
+                continue;
+            _xml.add(args[i]);
+        }
+     }
+
+     public void start()
+     {
+        ClassLoader cl=_classpath.getClassLoader();
         // Invoke main(args) using new classloader.
         Thread.currentThread().setContextClassLoader(cl);
         // re-eval the policy now that env is set
@@ -504,13 +520,7 @@ public class Main
         }
         try
         {
-            for (int i=0; i<args.length; i++)
-            {
-                if (args[i]==null)
-                    continue;
-                _xml.add(args[i]);
-            }
-            args=(String[])_xml.toArray(args);
+            String[] args=(String[])_xml.toArray(new String[_xml.size()]);
             //check for override of start class
             String mainClass=System.getProperty("jetty.server");
             if (mainClass!=null)
