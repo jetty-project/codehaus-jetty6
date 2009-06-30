@@ -12,6 +12,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1037 reimplemented channel doRemove
  + JETTY-1040 jetty.client.HttpConnection does not handle non IOExceptions
  + JETTY-1042 Avoid cookie reuse on shared connection
+ + JETTY-1044 add commons-daemon support as contrib/start-daemon module
  + JETTY-1045 Handle the case where request.PathInfo() should be "/*"
  + JETTY-1047 Cometd client can grow cookie headers
  + JETTY-1048 Default servlet can handle partially filtered large static content
