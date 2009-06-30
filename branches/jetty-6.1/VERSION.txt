@@ -2,6 +2,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-799 shell script for jetty on cygwin
  + JETTY-863 Non blocking stats handler
  + JETTY-937 Further Improvements for sun JVM selector bugs
+ + JETTY-970 BayeuxLoadGenerator latency handling
  + JETTY-1011 Grizzy uses queued thread pool
  + JETTY-1028 jetty:run plugin should check for the web.xml from the overlays if not found in src/main/webapp/WEB-INF/
  + JETTY-1029 Handle quoted cookie paths
