@@ -437,6 +437,7 @@ public class Main
     public void start(String[] args)
     {
         init(args);
+        Monitor.monitor();
         start();
     }
 
