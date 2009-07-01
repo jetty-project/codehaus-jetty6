@@ -19,6 +19,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1049 Improved transparent proxy usability
  + JETTY-1054 Avoid double deploys
  + JETTY-1055 Cookie quoting
+ + JETTY-1057 Error page stack trace XSS 
 
 jetty-6.1.18 16 May 2009
  + JETTY-937 Improved work around sun JVM selector bugs
