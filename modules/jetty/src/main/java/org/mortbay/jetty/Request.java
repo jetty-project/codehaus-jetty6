@@ -487,6 +487,7 @@ public class Request implements HttpServletRequest
                                     continue;
 
                                 case ';':
+                                case ',':
                                     if (tokenstart>=0)
                                         value = hdr.substring(tokenstart, tokenend+1);
                                     else
@@ -532,6 +533,7 @@ public class Request implements HttpServletRequest
                                     continue;
 
                                 case ';':
+                                case ',':
                                     if (tokenstart>=0)
                                     {
                                         name = hdr.substring(tokenstart, tokenend+1);
@@ -583,6 +585,11 @@ public class Request implements HttpServletRequest
                                 {
                                     if (cookie!=null)
                                         cookie.setDomain(value);
+                                }
+                                else if ("$port".equals(lowercaseName))
+                                {
+                                    if (cookie!=null)
+                                        cookie.setComment("port="+value);
                                 }
                                 else if ("$version".equals(lowercaseName))
                                 {
