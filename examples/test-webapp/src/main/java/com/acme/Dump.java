@@ -298,7 +298,7 @@ public class Dump extends HttpServlet
                 throw new UnavailableException("test ex2");
             else if (pi.startsWith("/ex3/"))
                 throw new UnavailableException("test ex3",Integer.parseInt(pi.substring(5)));
-            throw new RuntimeException("test");
+            throw new RuntimeException("test<script>alert('no script?');</script>");
         }
 
         if ("true".equals(request.getParameter("close")))
