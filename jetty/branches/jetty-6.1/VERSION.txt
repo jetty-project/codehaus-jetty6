@@ -1,4 +1,6 @@
 jetty-6.1-SNAPSHOT
+
+jetty-6.1.19 1 July 2009
  + JETTY-799 shell script for jetty on cygwin
  + JETTY-863 Non blocking stats handler
  + JETTY-937 Further Improvements for sun JVM selector bugs
