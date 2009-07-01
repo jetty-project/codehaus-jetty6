@@ -293,8 +293,8 @@ public class RequestTest extends TestCase
         throws Exception
     {
 
-        final String[] name=new String[10];
-        final String[] cookie=new String[10];
+        final String[] name=new String[20];
+        final String[] cookie=new String[20];
         
         _handler._checker = new RequestTester()
         {
@@ -367,8 +367,8 @@ public class RequestTest extends TestCase
 
         request="POST / HTTP/1.1\r\n"+
         "Host: whatever\r\n"+
-        "Cookie: name0=value0; name1 = value1 ; \"\\\"name2\\\"\"  =  \"\\\"value2\\\"\"  \n" +
-        "Cookie: name3=value3=value3; name4=; name5 =  ; name6\n" +
+        "Cookie: name0=value0; name1 = value1 , \"\\\"name2\\\"\"  =  \"\\\"value2\\\"\"  \n" +
+        "Cookie: $Version=2; name3=value3=value3;$path=/path;$domain=acme.com;$port=8080, name4=; name5 =  ; name6\n" +
         "Cookie: name7=value7;\n" +
         "Connection: close\r\n"+
         "\r\n";
