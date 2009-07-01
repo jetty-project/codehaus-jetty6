@@ -4,6 +4,7 @@ Patches:
  + JETTY-1018 Denial of Service Filter, plus Jetty-specific extension which better handles timeouts
  + JETTY-688 Cookie causes NumberFormatException
  + JETTY-1042 Avoid cookie reuse on shared connection
+ + JETTY-1057 Error page stack trace XSS 
 
 jetty-6.1.5z5.0 - 19 Feb 2009
  + JETTY-439 Fixed 100 continues clash with Connection:close
