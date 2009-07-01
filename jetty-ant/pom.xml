@@ -8,6 +8,39 @@
   <artifactId>jetty-ant</artifactId>
   <packaging>jar</packaging>
   <name>Jetty Contrib :: Ant Plugin</name>
+  <build>
+    <plugins>
+      <!-- plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <delete failonerror="false" file="${basedir}/bin/jetty-tasks.xml" />
+              </tasks>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copyjar</id>
+            <phase>install</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <copy failonerror="false" file="${basedir}/src/main/config/bin/jetty-tasks.xml" todir="${basedir}/bin" />
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin -->
+    </plugins>
+  </build>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
