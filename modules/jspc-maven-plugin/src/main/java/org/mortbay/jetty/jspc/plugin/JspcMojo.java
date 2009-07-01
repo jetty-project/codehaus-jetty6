@@ -27,6 +27,7 @@ import org.mortbay.util.IO;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
@@ -338,23 +339,29 @@ public class JspcMojo extends AbstractMojo
             File generatedClassesDir = new File(generatedClasses
                     + File.separatorChar + packageRootDirectory);
 
-            File[] srcFiles = generatedClassesDir
-            .listFiles(new FilenameFilter()
+            if(generatedClassesDir.exists() && generatedClassesDir.isDirectory())
             {
-                public boolean accept(File dir, String name)
+                delete(generatedClassesDir, new FileFilter()
                 {
-                    if (name == null) return false;
-                    if (name.trim().equals("")) return false;
-                    if (name.endsWith(".java")) return true;
-
-                    return false;
-                }
-            });
-
-            for (int i = 0; (srcFiles != null) && (i < srcFiles.length); i++)
-            {
-                srcFiles[i].delete();
+                    public boolean accept(File f)
+                    {
+                        return f.isDirectory() || f.getName().endsWith(".java");
+                    }                
+                });
             }
+        }
+    }
+    
+    static void delete(File dir, FileFilter filter)
+    {
+        File[] files = dir.listFiles(filter);
+        for(int i=0; i<files.length; i++)
+        {
+            File f = files[i];
+            if(f.isDirectory())
+                delete(f, filter);
+            else
+                f.delete();
         }
     }
 

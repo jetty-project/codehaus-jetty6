@@ -14,6 +14,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1042 Avoid cookie reuse on shared connection
  + JETTY-1044 add commons-daemon support as contrib/start-daemon module
  + JETTY-1045 Handle the case where request.PathInfo() should be "/*"
+ + JETTY-1046 maven-jetty-jspc-plugin keepSources takes affect only in packageRoot
  + JETTY-1047 Cometd client can grow cookie headers
  + JETTY-1048 Default servlet can handle partially filtered large static content
  + JETTY-1049 Improved transparent proxy usability
