@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<project name="jetty-tasks">
+  <property name="project.outputDirectory" value="target" />
+  <property name="project.version" value="7.0.0.1beta3-SNAPSHOT" />
+  <property name="M2_REPO" value="${user.home}/.m2/repository/" />
+
+  <property name="jetty.version" value="7.0.0.M4-SNAPSHOT" />
+  <property name="servlet.api.version" value="2.5" />
+  <property name="glassfish.jsp.version" value="9.1.1.B60.25.p1" />
+
+  <path id="jetty.plugin.classpath">
+
+    <fileset dir="${M2_REPO}">
+      <!-- jetty integrations at codehaus -->
+      <include name="org/mortbay/jetty/jetty-ant/${project.version}/jetty-ant-${project.version}.jar" />
+      <include name="org/mortbay/jetty/jsp-api-2.1-glassfish/${glassfish.jsp.version}/jsp-api-2.1-glassfish-${glassfish.jsp.version}.jar" />
+      <include name="org/mortbay/jetty/jsp-2.1-glassfish/${glassfish.jsp.version}/jsp-2.1-glassfish-${glassfish.jsp.version}.jar" />
+
+      <!-- jetty core modules at eclipse -->
+      <include name="org/eclipse/jetty/jetty-server/${jetty.version}/jetty-server-${jetty.version}.jar" />
+      <include name="org/eclipse/jetty/jetty-util/${jetty.version}/jetty-util-${jetty.version}.jar" />
+      <include name="org/eclipse/jetty/jetty-plus/${jetty.version}/jetty-plus-${jetty.version}.jar" />
+      <include name="org/eclipse/jetty/jetty-jndi/${jetty.version}/jetty-jndi-${jetty.version}.jar" />
+      <include name="org/eclipse/jetty/jetty-http/${jetty.version}/jetty-http-${jetty.version}.jar" />
+      <include name="org/eclipse/jetty/jetty-io/${jetty.version}/jetty-io-${jetty.version}.jar" />
+      <include name="org/eclipse/jetty/jetty-webapp/${jetty.version}/jetty-webapp-${jetty.version}.jar" />
+      <include name="org/eclipse/jetty/jetty-security/${jetty.version}/jetty-security-${jetty.version}.jar" />
+      <include name="org/eclipse/jetty/jetty-continuation/${jetty.version}/jetty-continuation-${jetty.version}.jar" />
+      <include name="org/eclipse/jetty/jetty-servlet/${jetty.version}/jetty-servlet-${jetty.version}.jar" />
+      <include name="org/eclipse/jetty/jetty-xml/${jetty.version}/jetty-xml-${jetty.version}.jar" />
+      
+      <!-- servlet api -->
+      <include name="javax/servlet/servlet-api/${servlet.api.version}/servlet-api-${servlet.api.version}.jar" />
+    </fileset>
+  </path>
+
+  <taskdef classpathref="jetty.plugin.classpath" resource="tasks.properties" loaderref="jetty.loader" />
+  <typedef name="selectChannelConnector" classname="org.eclipse.jetty.server.nio.SelectChannelConnector" classpathref="jetty.plugin.classpath" loaderref="jetty.loader" />  
+</project>
+
+

@@ -1,0 +1,60 @@
+Source: jetty7
+Section: contrib/web
+Priority: optional
+Maintainer: Debian Java Maintainers <pkg-java-maintainers@lists.alioth.debian.org>
+Uploaders: Philipp Meier <meier@fnogol.de>, Michael Koch <konqueror@gmx.de>, Greg Wilkins <gregw@mortbay.com>
+Build-Depends: debhelper (>= 4.9.5), cdbs (>> 0.4.5.3)
+Standards-Version: 3.7.2
+
+Package: libjetty7-java
+Architecture: all
+Depends: java-gcj-compat | java2-runtime
+Suggests: jetty7
+Description: Java servlet engine and webserver -- core libraries
+ Jetty is an Open Source HTTP Servlet Server written in 100% Java.
+ It is designed to be light weight, high performance, embeddable,
+ extensible and flexible, thus making it an ideal platform for serving
+ dynamic HTTP requests from any Java application.
+
+Package: libjetty7-extra-java
+Architecture: all
+Depends: java-gcj-compat | java2-runtime, libjetty7-java, libgnujaf-java, libgnumail-java
+Suggests: jetty7
+Description: Java servlet engine and webserver -- extra libraries
+ Jetty is an Open Source HTTP Servlet Server written in 100% Java.
+ It is designed to be light weight, high performance, embeddable,
+ extensible and flexible, thus making it an ideal platform for serving
+ dynamic HTTP requests from any Java application. 
+ The extra libraries include JMX managementm, JNDI naming and jetty plus. 
+
+Package: libjetty7-jsp-java
+Architecture: all
+Depends: java-gcj-compat | java2-runtime, libjetty7-java, ant
+Suggests: jetty7
+Description: Java servlet engine and webserver -- JSP 2.1 libraries
+ Jetty is an Open Source HTTP Servlet Server written in 100% Java.
+ It is designed to be light weight, high performance, embeddable,
+ extensible and flexible, thus making it an ideal platform for serving
+ dynamic HTTP requests from any Java application. 
+ The JSP 2.1 libraries are taken from glassfish and compile for jetty 
+ 
+
+Package: jetty7
+Architecture: all
+Depends: libjetty7-java
+Suggests: libjetty7-extra-java, libjetty7-jsp-java
+Description: Java servlet engine and webserver
+ Jetty is an Open Source HTTP Servlet Server written in 100% Java.
+ It is designed to be light weight, high performance, embeddable,
+ extensible and flexible, thus making it an ideal platform for serving
+ dynamic HTTP requests from any Java application.
+
+Package: jetty7-examples
+Architecture: all
+Depends: jetty7
+Suggests: libjetty7-extra-java, libjetty7-jsp-java
+Description: Java servlet engine and webserver -- example webapps
+ Jetty is an Open Source HTTP Servlet Server written in 100% Java.
+ It is designed to be light weight, high performance, embeddable,
+ extensible and flexible, thus making it an ideal platform for serving
+ dynamic HTTP requests from any Java application.

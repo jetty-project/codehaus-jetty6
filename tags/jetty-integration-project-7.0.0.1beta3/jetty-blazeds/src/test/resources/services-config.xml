@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services-config>
+
+    <services>
+        
+        <service-include file-path="messaging-config.xml" />
+
+    	<!-- 
+    	Application level default channels. Application level default channels are 
+    	necessary when a dynamic destination is being used by a service component
+    	and no ChannelSet has been defined for the service component. In that case,
+    	application level default channels will be used to contact the destination.
+        -->   
+        <default-channels>
+           <channel ref="my-polling-amf"/>
+        </default-channels>
+    
+	</services>
+
+    <channels>
+        <channel-definition id="my-async-amf" class="mx.messaging.channels.AMFChannel">
+            <endpoint url="http://{server.name}:{server.port}/{context.root}/messagebroker/amfasync"
+                class="org.mortbay.jetty.asyncblazeds.AsyncAMFEndpoint"/>
+            <properties>
+                <!--client-wait-interval-millis>2000</client-wait-interval-millis>
+                <wait-interval-millis>10000</wait-interval-millis-->
+                <polling-enabled>true</polling-enabled>
+                <polling-interval-seconds>0</polling-interval-seconds>
+                <max-waiting-poll-requests>10</max-waiting-poll-requests>
+                <wait-interval-millis>30000</wait-interval-millis>
+                <client-wait-interval-millis>250</client-wait-interval-millis>                
+            </properties>
+        </channel-definition>
+
+        <channel-definition id="my-polling-amf" class="mx.messaging.channels.AMFChannel">
+            <endpoint url="http://{server.name}:{server.port}/{context.root}/messagebroker/amfpolling" class="flex.messaging.endpoints.AMFEndpoint"/>
+            <properties>
+                <polling-enabled>true</polling-enabled>
+                <polling-interval-seconds>0</polling-interval-seconds>
+                <max-waiting-poll-requests>10</max-waiting-poll-requests>
+                <wait-interval-millis>30000</wait-interval-millis>
+                <client-wait-interval-millis>3000</client-wait-interval-millis> 
+            </properties>
+        </channel-definition>                                                                                                                                     
+    </channels>
+
+    <logging>
+        <!-- You may also use flex.messaging.log.ServletLogTarget -->
+        <target class="flex.messaging.log.ConsoleTarget" level="Info">
+            <properties>
+                <prefix>[BlazeDS] </prefix>
+                <includeDate>false</includeDate>
+                <includeTime>true</includeTime>
+                <includeLevel>true</includeLevel>
+                <includeCategory>true</includeCategory>
+            </properties>
+            <filters>
+                <pattern>Endpoint.*</pattern>
+                <pattern>Service.*</pattern>
+                <pattern>Configuration</pattern>
+            </filters>
+        </target>
+    </logging>
+
+    <system>
+        <redeploy>
+            <enabled>true</enabled>
+            <watch-interval>20</watch-interval>
+            <watch-file>src/test/resources/services-config.xml</watch-file>
+            <watch-file>src/test/resources/messaging-config.xml</watch-file>
+        </redeploy>
+    </system>
+
+</services-config>
