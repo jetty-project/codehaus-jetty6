@@ -21,6 +21,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +32,7 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.util.IO;
 
 /**
  * @version $Revision$ $Date$
@@ -57,21 +60,31 @@ public class StatisticsHandlerTest extends TestCase
         Connector connector = new SelectChannelConnector();
         server.setConnectors(new Connector[]{connector});
         server.setHandler(statisticsHandler);
-        statisticsHandler.setHandler(new TestHandler());
+        TestHandler test = new TestHandler();
+        statisticsHandler.setHandler(test);
         server.start();
         int serverPort = connector.getLocalPort();
         try
         {
+            AtomicInteger count = new AtomicInteger();
+            test.count=count;
+            
             CountDownLatch latch = new CountDownLatch(workerCount);
+            
             Worker[] workers = new Worker[workerCount];
-            for (int i = 0; i < workers.length; ++i) workers[i] = new Worker(i, serverPort, requestCount, latch);
+            for (int i = 0; i < workers.length; ++i) 
+                workers[i] = new Worker(i, serverPort, requestCount, latch);
+            
             long start = System.nanoTime();
-            for (Worker worker : workers) worker.start();
-            // Assume workers run truly in parallel and that each request takes 250 ms and wait
-            // In reality requests will take less than 250 ms, so the latch should not timeout
-            boolean latched = latch.await(250 * requestCount, TimeUnit.MILLISECONDS);
+            for (Worker worker : workers) 
+                worker.start();
+            
+            boolean latched = latch.await(100 * requestCount, TimeUnit.MILLISECONDS);
             long end = System.nanoTime();
+            Thread.sleep(1000);
+
             assertTrue(latched);
+            assertEquals(workers.length * requestCount,count.get());
             assertEquals(workers.length * requestCount, statisticsHandler.getRequests());
             assertEquals(workers.length * requestCount, statisticsHandler.getResponses2xx());
             System.out.println(statisticsHandler.getClass().getSimpleName() + " - " + workerCount + " threads: " + TimeUnit.NANOSECONDS.toMillis(end - start) + " ms");
@@ -99,17 +112,27 @@ public class StatisticsHandlerTest extends TestCase
 
         public void run()
         {
-            for (int i = 0; i < requestCount; ++i)
+            for (int i = 0; i < requestCount; i++)
             {
                 try
                 {
                     Socket socket = new Socket(InetAddress.getByName(null), port);
-                    String request = "GET /?id=" + id + " HTTP/1.1\r\n" + "Host: localhost\r\nConnection: close\r\n\r\n";
                     OutputStream output = socket.getOutputStream();
+                    
+                    for (int j=20;j-->0 && i+1<requestCount;)
+                    {
+                        String request = "GET /?id=" + id + " HTTP/1.1\r\n" + "Host: localhost\r\n\r\n";
+                        output.write(request.getBytes("UTF-8"));
+                        output.flush();
+                        i++;
+                    }
+
+                    String request = "GET /?id=" + id + " HTTP/1.1\r\n" + "Host: localhost\r\nConnection: close\r\n\r\n";
                     output.write(request.getBytes("UTF-8"));
                     output.flush();
+                    
                     InputStream input = socket.getInputStream();
-                    input.read();
+                    String responses = IO.toString(input);
                     socket.close();
                 }
                 catch (Exception x)
@@ -124,8 +147,10 @@ public class StatisticsHandlerTest extends TestCase
 
     private class TestHandler extends AbstractHandler
     {
+        AtomicInteger count;
         public void handle(String target, HttpServletRequest servletRequest, HttpServletResponse servletResponse, int dispatch) throws IOException, ServletException
         {
+            count.incrementAndGet();
             Request request = (Request)servletRequest;
             request.setHandled(true);
             servletResponse.setStatus(HttpServletResponse.SC_OK);
