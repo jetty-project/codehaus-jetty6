@@ -67,9 +67,9 @@ public class StatisticsHandlerTest extends TestCase
             for (int i = 0; i < workers.length; ++i) workers[i] = new Worker(i, serverPort, requestCount, latch);
             long start = System.nanoTime();
             for (Worker worker : workers) worker.start();
-            // Assume workers run truly in parallel and that each request takes 250 ms and wait
+            // Assume workers run truly in parallel and that each request takes 500 ms and wait
             // In reality requests will take less than 250 ms, so the latch should not timeout
-            boolean latched = latch.await(250 * requestCount, TimeUnit.MILLISECONDS);
+            boolean latched = latch.await(500 * requestCount, TimeUnit.MILLISECONDS);
             long end = System.nanoTime();
             assertTrue(latched);
             assertEquals(workers.length * requestCount, statisticsHandler.getRequests());
