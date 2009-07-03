@@ -71,6 +71,8 @@ public class StatisticsHandlerTest extends TestCase
             // In reality requests will take less than 250 ms, so the latch should not timeout
             boolean latched = latch.await(500 * requestCount, TimeUnit.MILLISECONDS);
             long end = System.nanoTime();
+            Thread.sleep(1000);
+            
             assertTrue(latched);
             assertEquals(workers.length * requestCount, statisticsHandler.getRequests());
             assertEquals(workers.length * requestCount, statisticsHandler.getResponses2xx());
