@@ -49,6 +49,8 @@ public class HttpConnectionTest extends TestCase
     {
         super.setUp();
         connector.setHeaderBufferSize(1024);
+        connector.setRequestBufferSize(2048);
+        connector.setResponseBufferSize(4096);
         server.start();
     }
 
@@ -209,6 +211,78 @@ public class HttpConnectionTest extends TestCase
         }
     }
 
+    /* --------------------------------------------------------------- */
+    public void testPipeline()
+    {        
+        
+        String response=null;
+        String requests=null;
+        try
+        {
+            int offset=0;
+            
+            offset=0; connector.reopen();
+            requests="GET /R1 HTTP/1.1\n"+
+                "Host: localhost\n"+
+                "Content-Type: text/plain; charset=utf-8\n"+
+                "Content-Length: 10\n"+
+                "\n"+
+                "0123456789\n"+
+                "GET /R2 HTTP/1.1\n"+
+                "Host: localhost\n"+
+                "Content-Type: text/plain; charset=utf-8\n"+
+                "Content-Length: 10\n"+
+                "\n"+
+                "abcdefghij\n";
+            
+            response=connector.getResponses(requests);
+            offset = checkContains(response,offset,"HTTP/1.1 200");
+            offset = checkContains(response,offset,"/R1");
+            offset = checkContains(response,offset,"encoding=utf-8");
+            offset = checkContains(response,offset,"0123456789");
+            offset = checkContains(response,offset,"HTTP/1.1 200");
+            offset = checkContains(response,offset,"/R2");
+            offset = checkContains(response,offset,"encoding=utf-8");
+            offset = checkContains(response,offset,"abcdefghij");
+
+
+            offset=0; connector.reopen();
+            requests="GET /R1 HTTP/1.1\n"+
+                "Host: localhost\n"+
+                "Content-Type: text/plain; charset=utf-8\n"+
+                "Content-Length: 1026\n"+
+                "\n";
+            
+            for (int i=0;i<100;i++)
+                requests+="0123456789";
+            requests+="abcdefghijklmnopqrstuvwxyz";
+            requests+=
+                "GET /R2 HTTP/1.1\n"+
+                "Host: localhost\n"+
+                "Content-Type: text/plain; charset=utf-8\n"+
+                "Content-Length: 10\n"+
+                "\n"+
+                "0987654321\n";
+            
+            response=connector.getResponses(requests);
+            offset = checkContains(response,offset,"HTTP/1.1 200");
+            offset = checkContains(response,offset,"/R1");
+            offset = checkContains(response,offset,"encoding=utf-8");
+            offset = checkContains(response,offset,"abcdefghijklmnopqrstuvwxyz");
+            offset = checkContains(response,offset,"HTTP/1.1 200");
+            offset = checkContains(response,offset,"/R2");
+            offset = checkContains(response,offset,"encoding=utf-8");
+            offset = checkContains(response,offset,"0987654321");
+            
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            assertTrue(false);
+            if (response!=null)
+                System.err.println(response);
+        }
+    }
     
     public void testConnection ()
     { 
