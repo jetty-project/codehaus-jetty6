@@ -97,7 +97,7 @@ public class DosFilterTest extends TestCase
         
         String response = "";
 
-        if (requests.contains("/unresponsive"))
+        if (requests.indexOf("/unresponsive") != -1)
         {
             // don't read in anything, forcing the request to time out
             Thread.sleep(_maxRequestMs * 2);
@@ -284,7 +284,7 @@ public class DosFilterTest extends TestCase
 
         // was expired, and stopped before reaching the end of the requests
         int responseLines = count(responses, "Line:"); 
-        assertTrue(responses.contains("DoSFilter: timeout"));
+        assertTrue(responses.indexOf("DoSFilter: timeout") != -1);
         assertTrue(responseLines > 0 && responseLines < numRequests);
     }
    
@@ -310,7 +310,7 @@ public class DosFilterTest extends TestCase
                 int count = Integer.parseInt(request.getParameter("lines"));
                 for(int i = 0; i < count; ++i)
                 {                        
-                    response.getWriter().append("Line: " + i+"\n");
+                    response.getWriter().write("Line: " + i+"\n");
                     response.flushBuffer();
                     
                     try
@@ -334,7 +334,7 @@ public class DosFilterTest extends TestCase
         public void closeConnection(HttpServletRequest request, HttpServletResponse response, Thread thread)
         {
             try {
-                response.getWriter().append("DoSFilter: timeout");
+                response.getWriter().write("DoSFilter: timeout");
                 super.closeConnection(request,response,thread);
             }
             catch (Exception e)
