@@ -2,12 +2,13 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-integration-project</artifactId>
-    <version>7.0.0.1beta3-SNAPSHOT</version>
+    <version>7.0.0.1beta4-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
+  <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-ant</artifactId>
   <packaging>jar</packaging>
-  <name>Jetty Contrib :: Ant Plugin</name>
+  <name>Jetty :: Ant Plugin</name>
   <build>
     <plugins>
       <!-- plugin>
