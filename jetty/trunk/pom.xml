@@ -112,6 +112,7 @@
   </build>
   <modules>
     <module>jetty-maven-plugin</module>
+    <module>jetty-ant</module>
     <module>test-jndi-webapp</module>
     <!-- module>test-jaas-webapp</module -->
     <module>test-annotation-webapp</module>
