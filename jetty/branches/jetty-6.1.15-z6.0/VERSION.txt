@@ -7,6 +7,7 @@ Patches:
  + JETTY-1018 Denial of Service Filter, plus Jetty-specific extension which better handles timeouts
  + JETTY-1042 Avoid cookie reuse on shared connection
  + JETTY-1057 Error page stack trace XSS 
+ + JETTY-1066 Improved handling of URI parse exceptions
 
 jetty-6.1.15 4 March 2009
  + JETTY-931 Fix issue with jetty-rewrite.xml
