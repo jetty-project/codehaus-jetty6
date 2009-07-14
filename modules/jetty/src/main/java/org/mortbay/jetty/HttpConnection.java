@@ -513,9 +513,10 @@ public class HttpConnection implements Connection
             boolean retrying = false;
             boolean error = false;
             String threadName = null;
+            String info=null;
             try
             {
-                String info = URIUtil.canonicalPath(_uri.getDecodedPath());
+                info = URIUtil.canonicalPath(_uri.getDecodedPath());
                 if (info == null)
                     throw new HttpException(400);
                 _request.setPathInfo(info);
@@ -551,18 +552,24 @@ public class HttpConnection implements Connection
                 _response.sendError(e.getStatus(),e.getReason());
                 error = true;
             }
-            catch (Exception e)
+            catch (Throwable e)
             {
-                Log.warn(e);
-                _request.setHandled(true);
-                _generator.sendError(500,null,null,true);
-                error = true;
-            }
-            catch (Error e)
-            {
-                Log.warn(e);
-                _request.setHandled(true);
-                _generator.sendError(500,null,null,true);
+                if (e instanceof ThreadDeath)
+                    throw (ThreadDeath)e;
+                
+                if (info==null)
+                {
+                    Log.warn(_uri+": "+e);
+                    Log.debug(e);
+                    _request.setHandled(true);
+                    _generator.sendError(400,null,null,true);
+                }
+                else
+                {
+                    Log.warn(""+_uri,e);
+                    _request.setHandled(true);
+                    _generator.sendError(500,null,null,true);
+                }
                 error = true;
             }
             finally
