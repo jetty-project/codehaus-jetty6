@@ -1,6 +1,7 @@
 jetty-6.1-SNAPSHOT
  + JETTY-1065 Add RedirectRegexRule to provide match/replace/group redirect support
  + JETTY-1066 Send 400 error for request URI parse exceptions
+ + Added getSubscriptions to cometd client
 
 jetty-6.1.19 1 July 2009
  + JETTY-799 shell script for jetty on cygwin
