@@ -49,7 +49,7 @@ import java.util.Enumeration;
  * </PRE>
  * then run:
  * <PRE>
- *    java PKCS12Import keystore.pkcs12 keytore.jks
+ *    java PKCS12Import keystore.pkcs12 keystore.jks
  * </PRE>
  *
  * @author Jason Gilbert &lt;jason@doozer.com&gt;
