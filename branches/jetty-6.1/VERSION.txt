@@ -1,6 +1,7 @@
 jetty-6.1-SNAPSHOT
  + JETTY-1065 Add RedirectRegexRule to provide match/replace/group redirect support
  + JETTY-1066 Send 400 error for request URI parse exceptions
+ + JETTY-1068 Avoid busy flush of async SSL
  + Added getSubscriptions to cometd client
  + Made unSubscribeAll public on cometd client
  + Removed clearing of queue in unSubscribeAll for cometd client
