@@ -57,13 +57,9 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
 
     private boolean _closing=false;
     private SSLEngineResult _result;
-    private String _last;
     
     // ssl
     protected SSLSession _session;
-    
-    // TODO get rid of this
-    // StringBuilder h = new StringBuilder(500);
     
     /* ------------------------------------------------------------ */
     public SslHttpChannelEndPoint(Buffers buffers,SocketChannel channel, SelectorManager.SelectSet selectSet, SelectionKey key, SSLEngine engine)
@@ -82,7 +78,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         _inNIOBuffer=(NIOBuffer)buffers.getBuffer(_session.getPacketBufferSize());
         _inBuffer=_inNIOBuffer.getByteBuffer();
         
-        // h.append("CONSTRUCTED\n");
     }
 
     // TODO get rid of these dumps
@@ -118,7 +113,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     /* ------------------------------------------------------------ */
     protected void doIdleExpired()
     {
-        // h.append("IDLE EXPIRED\n");
         super.idleExpired();
     }
 
@@ -127,33 +121,31 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     {
         // TODO - this really should not be done in a loop here - but with async callbacks.
 
-        // h.append("CLOSE\n");
         _closing=true;
         try
         {   
-            int tries=0;
-            
-            while (_outNIOBuffer.length()>0)
+            if (isBufferingOutput())
             {
-                // TODO REMOVE loop check
-                if (tries++>100)
-                    throw new IllegalStateException();
                 flush();
-                Thread.sleep(100); // TODO yuck
+                while (isOpen() && isBufferingOutput())
+                {
+                    Thread.sleep(100); // TODO non blocking
+                    flush();
+                }
             }
 
             _engine.closeOutbound();
 
             loop: while (isOpen() && !(_engine.isInboundDone() && _engine.isOutboundDone()))
             {   
-                // TODO REMOVE loop check
-                if (tries++>100)
-                    throw new IllegalStateException();
-                
-                if (_outNIOBuffer.length()>0)
+                if (isBufferingOutput())
                 {
                     flush();
-                    Thread.sleep(100); // TODO yuck
+                    while (isOpen() && isBufferingOutput())
+                    {
+                        Thread.sleep(100); // TODO non blocking
+                        flush();
+                    }
                 }
 
                 switch(_engine.getHandshakeStatus())
@@ -169,7 +161,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                             ByteBuffer bbuffer = ((NIOBuffer)buffer).getByteBuffer();
                             if (!unwrap(bbuffer) && _engine.getHandshakeStatus()==HandshakeStatus.NEED_UNWRAP)
                             {
-                                // h.append("break loop\n");
                                 break loop;
                             }
                         }
@@ -195,16 +186,12 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                         
                     case NEED_WRAP:
                     {
-                        if (_outNIOBuffer.length()>0)
-                            flush();
-                        
                         try
                         {
                             _outNIOBuffer.compact();
                             int put=_outNIOBuffer.putIndex();
                             _outBuffer.position(put);
                             _result=null;
-                            _last="close wrap";
                             _result=_engine.wrap(__NO_BUFFERS,_outBuffer);
                             _outNIOBuffer.setPutIndex(put+_result.bytesProduced());
                         }
@@ -212,8 +199,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                         {
                             _outBuffer.position(0);
                         }
-                        
-                        flush();
                         
                         break;
                     }
@@ -257,19 +242,16 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             {
                 unwrap(bbuf);
 
-                int tries=0, wraps=0;
+                int wraps=0;
                 loop: while (true)
                 {
-                    // TODO REMOVE loop check
-                    if (tries++>100)
-                        throw new IllegalStateException();
-
-                    // h.append("Fill(Buffer)\n");
-                    
-                    if (_outNIOBuffer.length()>0)
+                    if (isBufferingOutput())
+                    {
                         flush();
+                        if (isBufferingOutput())
+                            break loop;
+                    }
 
-                    // h.append("status=").append(_engine.getHandshakeStatus()).append('\n');
                     switch(_engine.getHandshakeStatus())
                     {
                         case FINISHED:
@@ -281,7 +263,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                         case NEED_UNWRAP:
                             if (!unwrap(bbuf) && _engine.getHandshakeStatus()==HandshakeStatus.NEED_UNWRAP)
                             {
-                                // h.append("break loop\n");
                                 break loop;
                             }
                             break;
@@ -291,11 +272,11 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                             Runnable task;
                             while ((task=_engine.getDelegatedTask())!=null)
                             {
-                                // h.append("run task\n");
                                 task.run();
                             }
+                            
                             if(initialStatus==HandshakeStatus.NOT_HANDSHAKING && 
-                                    HandshakeStatus.NEED_UNWRAP==_engine.getHandshakeStatus() && wraps==0)
+                               _engine.getHandshakeStatus()==HandshakeStatus.NEED_UNWRAP && wraps==0)
                             {
                                 // This should be NEED_WRAP
                                 // The fix simply detects the signature of the bug and then close the connection (fail-fast) so that ff3 will delegate to using SSL instead of TLS.
@@ -317,7 +298,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                                     int put=_outNIOBuffer.putIndex();
                                     _outBuffer.position();
                                     _result=null;
-                                    _last="fill wrap";
                                     _result=_engine.wrap(__NO_BUFFERS,_outBuffer);
                                     switch(_result.getStatus())
                                     {
@@ -328,7 +308,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                                             _closing=true;
                                     }
                                     
-                                    // h.append("wrap ").append(result).append('\n');
                                     _outNIOBuffer.setPutIndex(put+_result.bytesProduced());
                                 }
                                 finally
@@ -379,17 +358,13 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         
         int tries=0;
         loop: while (true)
-        {
-            // TODO REMOVE loop check
-            if (tries++>100)
-                throw new IllegalStateException();
-            
-            // h.append("Flush ").append(tries).append(' ').append(_outNIOBuffer.length()).append('\n');
-            
+        {   
             if (_outNIOBuffer.length()>0)
+            {
                 flush();
-
-            // h.append(_engine.getHandshakeStatus()).append('\n');
+                if (isBufferingOutput())
+                    break loop;
+            }
             
             switch(_engine.getHandshakeStatus())
             {
@@ -403,7 +378,17 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                         break loop;
                     }
                         
-                    int c=(header!=null && buffer!=null)?wrap(header,buffer):wrap(header);
+                    int c;
+                    if (header!=null && header.length()>0)
+                    {
+                        if (buffer!=null && buffer.length()>0)
+                            c=wrap(header,buffer);
+                        else
+                            c=wrap(header);
+                    }
+                    else 
+                        c=wrap(buffer);
+                    
                     if (c>0)
                     {
                         consumed+=c;
@@ -425,7 +410,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                         ByteBuffer bbuf = ((NIOBuffer)buf).getByteBuffer();
                         if (!unwrap(bbuf) && _engine.getHandshakeStatus()==HandshakeStatus.NEED_UNWRAP)
                         {
-                            // h.append("break").append('\n');
                             break loop;
                         }
                     }
@@ -441,7 +425,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                     Runnable task;
                     while ((task=_engine.getDelegatedTask())!=null)
                     {
-                        // h.append("run task\n");
                         task.run();
                     }
                     break;
@@ -457,7 +440,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                             int put=_outNIOBuffer.putIndex();
                             _outBuffer.position();
                             _result=null;
-                            _last="flush wrap";
                             _result=_engine.wrap(__NO_BUFFERS,_outBuffer);
                             switch(_result.getStatus())
                             {
@@ -467,7 +449,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                                 case CLOSED:
                                     _closing=true;
                             }
-                            // h.append("wrap=").append(result).append('\n');
                             _outNIOBuffer.setPutIndex(put+_result.bytesProduced());
                         }
                         finally
@@ -477,6 +458,8 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                     }
 
                     flush();
+                    if (isBufferingOutput())
+                        break loop;
 
                     break;
                 }
@@ -486,20 +469,20 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         return consumed;
     }
     
-    
     /* ------------------------------------------------------------ */
     public void flush() throws IOException
     {
-        while (_outNIOBuffer.length()>0)
+        int len=_outNIOBuffer.length();
+        if (len>0)
         {
             int flushed=super.flush(_outNIOBuffer);
-
-            // h.append("flushed=").append(flushed).append(" of ").append(_outNIOBuffer.length()).append('\n');
-            if (flushed==0)
+            len=_outNIOBuffer.length();
+            
+            if (len>0)
             {
                 Thread.yield();
                 flushed=super.flush(_outNIOBuffer);
-                // h.append("flushed2=").append(flushed).append(" of ").append(_outNIOBuffer.length()).append('\n');
+                len=_outNIOBuffer.length();
             }
         }
     }
@@ -531,7 +514,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             try
             {
                 int filled=super.fill(_inNIOBuffer);
-                // h.append("fill=").append(filled).append('\n');
                 if (filled<=0)
                     break;
                 total_filled+=filled;
@@ -543,8 +525,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                 break;
             }
         }
-
-        // h.append("inNIOBuffer=").append(_inNIOBuffer.length()).append('\n');
         
         if (_inNIOBuffer.length()==0)
         {
@@ -558,9 +538,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             _inBuffer.position(_inNIOBuffer.getIndex());
             _inBuffer.limit(_inNIOBuffer.putIndex());
             _result=null;
-            _last="unwrap";
             _result=_engine.unwrap(_inBuffer,buffer);
-            // h.append("unwrap=").append(result).append('\n');
             _inNIOBuffer.skip(_result.bytesConsumed());
         }
         finally
@@ -580,8 +558,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             case CLOSED:
                 _closing=true;
             case OK:
-                boolean progress=total_filled>0 ||_result.bytesConsumed()>0 || _result.bytesProduced()>0;    
-                // h.append("progress=").append(progress).append('\n');
+                boolean progress=total_filled>0 ||_result.bytesConsumed()>0 || _result.bytesProduced()>0; 
                 return progress;
             default:
                 Log.warn("unwrap "+_result);
@@ -637,9 +614,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                         _outBuffer.limit(_outBuffer.capacity());
 
                         _result=null;
-                        _last="wrap wrap";
                         _result=_engine.wrap(_gather,_outBuffer);
-                        // h.append("wrap2=").append(result).append('\n');
                         _outNIOBuffer.setGetIndex(0);
                         _outNIOBuffer.setPutIndex(_result.bytesProduced());
                         consumed=_result.bytesConsumed();
@@ -690,13 +665,13 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     }
 
     /* ------------------------------------------------------------ */
-    private int wrap(Buffer header) throws IOException
+    private int wrap(Buffer buffer) throws IOException
     {
-        _gather[0]=extractOutputBuffer(header,0);
+        _gather[0]=extractOutputBuffer(buffer,0);
         synchronized(_gather[0])
         {
-            _gather[0].position(header.getIndex());
-            _gather[0].limit(header.putIndex());
+            _gather[0].position(buffer.getIndex());
+            _gather[0].limit(buffer.putIndex());
 
             int consumed=0;
             synchronized(_outBuffer)
@@ -707,9 +682,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                     _outBuffer.position(0);
                     _outBuffer.limit(_outBuffer.capacity());
                     _result=null;
-                    _last="wrap wrap";
                     _result=_engine.wrap(_gather[0],_outBuffer);
-                    // h.append("wrap1=").append(result).append('\n');
                     _outNIOBuffer.setGetIndex(0);
                     _outNIOBuffer.setPutIndex(_result.bytesProduced());
                     consumed=_result.bytesConsumed();
@@ -718,10 +691,10 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                 {
                     _outBuffer.position(0);
 
-                    if (consumed>0 && header!=null)
+                    if (consumed>0 && buffer!=null)
                     {
-                        int len=consumed<header.length()?consumed:header.length();
-                        header.skip(len);
+                        int len=consumed<buffer.length()?consumed:buffer.length();
+                        buffer.skip(len);
                         consumed-=len;
                         _gather[0].position(0);
                         _gather[0].limit(_gather[0].capacity());
@@ -775,6 +748,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return super.toString()+","+_engine.getHandshakeStatus()+", in/out="+_inNIOBuffer.length()+"/"+_outNIOBuffer.length()+" last "+_last+" "+_result;
+        return super.toString()+","+_engine.getHandshakeStatus()+", in/out="+_inNIOBuffer.length()+"/"+_outNIOBuffer.length()+" "+_result;
     }
 }
