@@ -547,10 +547,11 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             _inBuffer.limit(_inBuffer.capacity());
         }
         
-
         switch(_result.getStatus())
         {
             case BUFFER_OVERFLOW:
+                throw new IllegalStateException(_result.toString());                        
+                
             case BUFFER_UNDERFLOW:
                 if (Log.isDebugEnabled()) Log.debug("unwrap {}",_result);
                 return (total_filled > 0);
