@@ -573,6 +573,12 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     protected void doStart() throws Exception
     {
         _context=createSSLContext();
+        SSLEngine engine=_context.createSSLEngine();
+        SSLSession session=engine.getSession();
+        if (getHeaderBufferSize()<session.getApplicationBufferSize())
+            setHeaderBufferSize(session.getApplicationBufferSize());
+        if (getRequestBufferSize()<session.getApplicationBufferSize())
+            setRequestBufferSize(session.getApplicationBufferSize());
         super.doStart();
     }
 
