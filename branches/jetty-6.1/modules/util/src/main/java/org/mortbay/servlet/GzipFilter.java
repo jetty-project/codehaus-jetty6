@@ -565,7 +565,7 @@ public class GzipFilter extends UserAgentFilter
             {
                 if (_response.isCommitted() || (_contentLength>=0 && _contentLength<_minGzipSize))
                     doNotGzip();
-                else if (length>=(_bOut.size()-_bOut.getCount()))
+                else if (length>=(_bOut.getBuf().length-_bOut.getCount()))
                     doGzip();
             }
         }

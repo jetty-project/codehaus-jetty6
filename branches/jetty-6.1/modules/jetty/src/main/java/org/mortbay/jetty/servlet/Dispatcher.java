@@ -247,19 +247,12 @@ public class Dispatcher implements RequestDispatcher
                         {
                             Map.Entry entry = (Map.Entry)iter.next();
                             String name=(String)entry.getKey();
-                            
+
                             if (parameters.containsKey(name))
-                            {
                                 rewrite_old_query = true;
-                            }
-                            else
-                            {
-                                Object values=entry.getValue();
-                                for (int i=0;i<LazyList.size(values);i++)
-                                {
-                                    parameters.add(name, LazyList.get(values, i));
-                                }
-                            }
+                            Object values=entry.getValue();
+                            for (int i=0;i<LazyList.size(values);i++)
+                                parameters.add(name, LazyList.get(values, i));
                         }
                     }
                     
