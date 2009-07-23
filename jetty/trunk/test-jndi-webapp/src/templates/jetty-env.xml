@@ -32,23 +32,23 @@
   <!-- ==============================================================  -->
 
   <!-- Atomikos datasource                                             
-@ATOMIKOS-DATASOURCE99-PRE@
+${ATOMIKOS-DATASOURCE99-PRE}
   <New id="mydatasource99" class="org.eclipse.jetty.plus.jndi.Resource">
     <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource99</Arg>
     <Arg>
-     @ATOMIKOS-DATASOURCE99@
+     ${ATOMIKOS-DATASOURCE99}
     </Arg>
    </New>
   -->
 
   <!-- JOTM datasource
-@JOTM-DATASOURCE99-PRE@
+${JOTM-DATASOURCE99-PRE}
   <New id="mydatasource99" class="org.eclipse.jetty.plus.jndi.Resource">
     <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource99</Arg>
     <Arg>
-     @JOTM-DATASOURCE99@
+     ${JOTM-DATASOURCE99}
     </Arg>
    </New>
   -->
