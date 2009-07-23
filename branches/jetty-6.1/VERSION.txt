@@ -7,6 +7,7 @@ jetty-6.1-SNAPSHOT
  + Added getSubscriptions to cometd client
  + Made unSubscribeAll public on cometd client
  + Removed clearing of queue in unSubscribeAll for cometd client
+ + Update test-jndi and test-annotation examples for atomikos 3.5.5
 
 jetty-6.1.19 1 July 2009
  + JETTY-799 shell script for jetty on cygwin
