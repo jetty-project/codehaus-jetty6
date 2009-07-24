@@ -81,10 +81,9 @@ public class Main
             else if ("-webapp".equals(args[1]))
             {
                 WebAppContext webapp = new WebAppContext();
-                webapp.setResourceBase(args[2]);
+                webapp.setWar(args[2]);
                 webapp.setContextPath(URIUtil.SLASH);
                 contexts.addHandler(webapp);
-                
             }
                 
             server.start();
