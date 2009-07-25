@@ -9,7 +9,9 @@ jetty-6.1-SNAPSHOT
  + Removed clearing of queue in unSubscribeAll for cometd client
  + 283818 fixed merge of forward parameters
  + Update test-jndi and test-annotation examples for atomikos 3.5.5
+ + Clarified cometd interval timeout and allow per client intervals
  + Update Main.main method to call setWar
+ + Added DebugHandler
 
 jetty-6.1.19 1 July 2009
  + JETTY-799 shell script for jetty on cygwin
