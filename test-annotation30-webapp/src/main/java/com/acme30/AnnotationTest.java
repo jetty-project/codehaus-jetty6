@@ -18,6 +18,8 @@
 package com.acme30;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.naming.InitialContext;
@@ -47,6 +49,7 @@ import javax.annotation.security.RunAs;
 @RunAs("special")
 public class AnnotationTest extends HttpServlet 
 {
+    static List<String> __HandlesTypes; 
     private String postConstructResult = "";
     private String dsResult = "";
     private String envResult = "";
@@ -60,6 +63,7 @@ public class AnnotationTest extends HttpServlet
     private String txLookupResult = "";
     private DataSource myDS;
     private ServletConfig config;
+    
     
     @Resource(mappedName="UserTransaction")
     private UserTransaction myUserTransaction;
@@ -163,6 +167,14 @@ public class AnnotationTest extends HttpServlet
     {
         super.init(config);
         this.config = config;
+        __HandlesTypes = Arrays.asList("org.apache.jasper.runtime.HttpJspBase",
+                                        "javax.servlet.jsp.HttpJspPage",
+                                        "org.apache.jasper.servlet.JspServlet",
+                                        "javax.servlet.GenericServlet", 
+                                        "javax.servlet.jsp.JspPage", 
+                                        "javax.servlet.http.HttpServlet", 
+                                        "com.acme30.AnnotationTest", 
+                                        "com.acme30.TestListener" );
     }
 
     
@@ -190,10 +202,21 @@ public class AnnotationTest extends HttpServlet
             out.println("</pre>");
             out.print("<br/><b>Result: ");
             List<Class> classes = (List<Class>)config.getServletContext().getAttribute("com.acme.Foo");
+            List<String> classNames = new ArrayList<String>();
             if (classes != null)
             {
                 for (Class c: classes)
+                {
+                    classNames.add(c.getName());
                     out.print(c.getName()+" ");
+                }
+               
+                if (classNames.size() != __HandlesTypes.size())
+                    out.println("<br/>FAIL");
+                else if (!classNames.containsAll(__HandlesTypes))
+                    out.println("<br/>FAIL");
+                else
+                    out.println("<br/>PASS");
             }
             else
                 out.print("FAIL");
