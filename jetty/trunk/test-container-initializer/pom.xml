@@ -1,0 +1,32 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.mortbay.jetty</groupId>
+    <artifactId>jetty-integration-project</artifactId>
+    <version>7.0.0.1beta4-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.mortbay.jetty</groupId>
+  <artifactId>jetty-test-container-initializer</artifactId>
+  <packaging>jar</packaging>
+  <name>Jetty :: ServletContainerInitializer Test Jar</name>
+  <build>
+    <plugins>
+       <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+          <verbose>false</verbose>
+        </configuration>
+       </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>3.0.PFD20090525</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+</project>
