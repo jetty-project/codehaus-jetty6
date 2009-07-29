@@ -578,7 +578,17 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     public void close() throws IOException
     {
-        _endp.close();
-    }
+        try
+        {
+            _endp.close();
+        }
+        finally
+        {
 
+            if (_exchange != null)
+            {
+                _exchange.onException(new IOException("Connection closed"));
+            }
+        }
+    }
 }
