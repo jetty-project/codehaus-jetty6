@@ -13,7 +13,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <jetty-version>7.0.0.M4</jetty-version>
+    <jetty-version>7.0.0.RC2</jetty-version>
   </properties>
   <scm>
     <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
