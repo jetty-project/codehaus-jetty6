@@ -26,10 +26,10 @@
               </goals>
               <configuration>
                 <descriptors>
-                  <descriptor>src/main/assembly/config.xml</descriptor>
+                  <descriptor>${basedir}/src/main/assembly/config.xml</descriptor>
                 </descriptors>
                 <filters>
-                  <filter>src/filters/filter.properties</filter>
+                  <filter>${basedir}/src/filters/filter.properties</filter>
                 </filters>
               </configuration>
             </execution>
@@ -43,7 +43,7 @@
           <scanIntervalSeconds>10</scanIntervalSeconds>
           <useTestClasspath>true</useTestClasspath>
           <webAppConfig>
-            <jettyEnvXml>src/test/jetty-plugin-env.xml</jettyEnvXml>
+            <jettyEnvXml>${basedir}/src/test/jetty-plugin-env.xml</jettyEnvXml>
           </webAppConfig>
         </configuration>
       </plugin>
