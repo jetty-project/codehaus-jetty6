@@ -3,12 +3,12 @@
   <parent>
     <groupId>org.eclipse.jetty</groupId>
     <artifactId>jetty-parent</artifactId>
-    <version>10</version>
+    <version>11</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-integration-project</artifactId>
-  <version>7.0.0.1beta4-SNAPSHOT</version>
+  <version>7.0.0.RC2-SNAPSHOT</version>
   <name>Jetty :: Codehaus Integration Project</name>
   <packaging>pom</packaging>
 
@@ -111,6 +111,7 @@
     </pluginManagement>
   </build>
   <modules>
+    <module>jetty-distribution</module>
     <module>jetty-maven-plugin</module>
     <module>jetty-ant</module>
     <module>test-jndi-webapp</module>

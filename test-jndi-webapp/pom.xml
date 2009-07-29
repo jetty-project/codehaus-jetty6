@@ -29,7 +29,7 @@
                   <descriptor>src/main/assembly/config.xml</descriptor>
                 </descriptors>
                 <filters>
-                  <filter>src/filters/filter.properties</filter>
+                  <filter>${basedir}/src/filters/filter.properties</filter>
                 </filters>
               </configuration>
             </execution>
@@ -40,7 +40,7 @@
         <artifactId>maven-war-plugin</artifactId>
         <configuration>
           <filters>
-            <filter>src/filters/filter.properties</filter>
+            <filter>${basedir}/src/filters/filter.properties</filter>
           </filters>
           <webResources>
             <resource>
