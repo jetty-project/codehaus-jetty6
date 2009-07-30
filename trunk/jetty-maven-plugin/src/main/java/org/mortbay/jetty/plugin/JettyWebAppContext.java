@@ -55,9 +55,9 @@ public class JettyWebAppContext extends WebAppContext
     public JettyWebAppContext ()
     throws Exception
     {
-        super();     
-        configs = new Configuration[]{webInfConfig, webXmlConfig,  metaInfConfig,  fragConfig, envConfig, annotationConfig, jettyWebConfig, tagConfig };
-        setConfigurations(configs);
+        super();   
+        configs = new Configuration[]{webInfConfig, webXmlConfig,  metaInfConfig,  fragConfig, envConfig, plusConfig, annotationConfig, jettyWebConfig, tagConfig };
+        
     }
     
     public void setClassPathFiles(List<File> classpathFiles)
@@ -83,6 +83,7 @@ public class JettyWebAppContext extends WebAppContext
 
     public void doStart () throws Exception
     {
+        setConfigurations(configs);
         if (this.jettyEnvXml != null)
             envConfig.setJettyEnvXml(new File(this.jettyEnvXml).toURL());
         setShutdown(false);
