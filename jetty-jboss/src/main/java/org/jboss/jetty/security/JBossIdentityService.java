@@ -85,8 +85,8 @@ public class JBossIdentityService extends DefaultIdentityService
     }
     
    
-
-    public void associate(UserIdentity user)
+    @Override
+    public Object associate(UserIdentity user)
     {
         if (user == null)
         {
@@ -100,10 +100,15 @@ public class JBossIdentityService extends DefaultIdentityService
             SecurityAssociation.setCredential(user.getSubject().getPrivateCredentials());
             SecurityAssociation.setSubject(user.getSubject());          
         }
+        return user;
     }
-
     
-  
+    @Override
+    public void disassociate(Object previous)
+    {
+        if (_log.isDebugEnabled()) _log.debug("Disassociating user "+previous);
+        SecurityAssociation.clear();
+    }
 
     public Object setRunAs(UserIdentity identity, RunAsToken token)
     {

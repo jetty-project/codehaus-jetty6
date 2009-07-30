@@ -1,4 +1,4 @@
-package org.eclipse.jetty.server.ant;
+package org.mortbay.jetty.ant;
 
 import junit.framework.TestCase;
 
