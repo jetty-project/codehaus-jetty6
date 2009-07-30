@@ -332,9 +332,17 @@ public class JettyRunMojo extends AbstractJettyMojo
             if (!f.exists())
             {
                 //Try the default web.xml location
-                f = new File (webXml);
-                if (!f.exists())
-                    throw new MojoExecutionException("No web.xml file found");
+                if (webXml==null)
+                {
+                    // TODO look in overlays
+                    throw new MojoExecutionException("LOOK IN OVERLAYS!!!");
+                }
+                else
+                {
+                    f = new File (webXml);
+                    if (!f.exists())
+                        throw new MojoExecutionException("No web.xml file found");
+                }
             }
             webAppConfig.setDescriptor(f.getPath());
         }

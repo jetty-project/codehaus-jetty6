@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.mortbay.jetty.ant.utils.TaskLog;
 import org.eclipse.jetty.plus.webapp.Configuration;
+import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppClassLoader;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -104,7 +105,7 @@ public class JettyWebAppConfiguration extends WebXmlConfiguration
 
         if (webXmlFile.exists())
         {
-            processor.parseWebXml(webXmlFile.toURL());
+            processor.parseWebXml(Resource.newResource(webXmlFile.toURL()));
             processor.processWebXml();
         }
 
