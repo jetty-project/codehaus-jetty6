@@ -12,6 +12,7 @@ jetty-6.1-SNAPSHOT
  + Clarified cometd interval timeout and allow per client intervals
  + Update Main.main method to call setWar
  + Added DebugHandler
+ + COMETD-7 max latency config for lazy messages
 
 jetty-6.1.19 1 July 2009
  + JETTY-799 shell script for jetty on cygwin
