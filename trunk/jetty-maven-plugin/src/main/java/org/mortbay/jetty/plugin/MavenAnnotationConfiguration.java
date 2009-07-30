@@ -2,7 +2,7 @@ package org.mortbay.jetty.plugin;
 
 import java.io.File;
 
-import org.eclipse.jetty.annotations.AnnotationFinder;
+import org.eclipse.jetty.annotations.AnnotationParser;
 import org.eclipse.jetty.annotations.ClassNameResolver;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.util.log.Log;
@@ -12,13 +12,14 @@ import org.eclipse.jetty.webapp.WebAppContext;
 public class MavenAnnotationConfiguration extends AnnotationConfiguration
 {
 
-    public void parseWebInfClasses (final WebAppContext context, final AnnotationFinder finder)
-    throws Exception
+    /* ------------------------------------------------------------ */
+    @Override
+    public void parseWebInfClasses(final WebAppContext context, final AnnotationParser parser) throws Exception
     {
 
         JettyWebAppContext jwac = (JettyWebAppContext)context;
         if (jwac.getClassPathFiles() == null)
-            super.parseWebInfClasses (context, finder);
+            super.parseWebInfClasses (context, parser);
         else
         {
             Log.debug("Scanning classes ");
@@ -27,7 +28,7 @@ public class MavenAnnotationConfiguration extends AnnotationConfiguration
             {
                 if (f.isDirectory() && f.exists())
                 {
-                    finder.find(Resource.newResource(f.toURL()), 
+                    parser.parse(Resource.newResource(f.toURL()), 
                                 new ClassNameResolver()
                     {
                         public boolean isExcluded (String name)
