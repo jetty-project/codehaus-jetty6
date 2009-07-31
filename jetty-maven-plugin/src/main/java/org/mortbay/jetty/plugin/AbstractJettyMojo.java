@@ -29,12 +29,14 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.jetty.security.LoginService;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.RequestLog;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.util.Scanner;
+import org.eclipse.jetty.xml.XmlConfiguration;
 
 
 
@@ -206,6 +208,14 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * @parameter expression="${jetty.daemon}" default-value="false"
      */
     protected boolean daemon;
+
+    
+    /**
+     * Location of a context xml configuration file whose contents
+     * will be applied to the webapp AFTER anything in <webAppConfig>.Optional.
+     * @parameter
+     */
+    protected String webAppXml;
 
     /**
      * A scanner to check for changes to the webapp
@@ -471,7 +481,20 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         //As of jetty-7, you must use a <webAppConfig> element
         if (webAppConfig == null)
             webAppConfig = new JettyWebAppContext();
+        
+        //Apply any context xml file to set up the webapp
+        //CAUTION: if you've defined a <webAppConfig> element then the
+        //context xml file can OVERRIDE those settings
+        if (webAppXml != null)
+        {
+            webAppConfig = new JettyWebAppContext();
+            File file = FileUtils.getFile(webAppXml);
+            XmlConfiguration xmlConfiguration = new XmlConfiguration(file.toURL());
+            getLog().info("Applying context xml file "+webAppXml);
+            xmlConfiguration.configure(webAppConfig);   
+        }
 
+        
         //If no contextPath was specified, go with our default
         String cp = webAppConfig.getContextPath();
         if (cp == null || "".equals(cp))
