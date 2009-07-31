@@ -327,24 +327,17 @@ public class JettyRunMojo extends AbstractJettyMojo
         //if we have not already set web.xml location, need to set one up
         if (webAppConfig.getDescriptor() == null)
         {
-            //Check to see if there is a web.xml in the configured webAppSourceDirectory/WEB-INF, if so, use it
-            File f = new File (new File (getWebAppSourceDirectory(), "WEB-INF"), "web.xml");
-            if (!f.exists())
+            Resource base = webAppConfig.getBaseResource();
+            Resource web_xml=base.addPath("WEB-INF/web.xml");
+            
+            if (web_xml.exists() && !web_xml.isDirectory())
+                webAppConfig.setDescriptor(web_xml.toString());
+            else if (webXml!=null)
             {
-                //Try the default web.xml location
-                if (webXml==null)
-                {
-                    // TODO look in overlays
-                    throw new MojoExecutionException("LOOK IN OVERLAYS!!!");
-                }
-                else
-                {
-                    f = new File (webXml);
-                    if (!f.exists())
-                        throw new MojoExecutionException("No web.xml file found");
-                }
+                web_xml=Resource.newResource(webXml);
+                if (web_xml.exists() && !web_xml.isDirectory())
+                    webAppConfig.setDescriptor(web_xml.toString());
             }
-            webAppConfig.setDescriptor(f.getPath());
         }
         getLog().info( "web.xml file = "+webAppConfig.getDescriptor());
 
