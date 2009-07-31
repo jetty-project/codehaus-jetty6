@@ -35,12 +35,6 @@ import org.eclipse.jetty.webapp.WebInfConfiguration;
 
 public class MavenWebInfConfiguration extends WebInfConfiguration
 {
-   
-    
-    public void preConfigure(WebAppContext context) throws Exception
-    {
-        super.preConfigure(context);
-    }
     
     public void configure(WebAppContext context) throws Exception
     {
@@ -104,7 +98,7 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
                 {
                     try
                     {
-                        list.add(Resource.newResource(f.toURL()));
+                        list.add(Resource.newResource(f.toURI()));
                     }
                     catch (Exception e)
                     {
@@ -117,7 +111,7 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
         List<Resource> superList = super.findJars(context);
           
         list.addAll(superList);
-        
+     
         return list;
     }
 
@@ -128,22 +122,27 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
         super.unpack(context);
 
         Resource web_app = context.getBaseResource();
-        
+               
         // Do we need to extract WEB-INF/lib?
         Resource web_inf= web_app.addPath("WEB-INF/");
         
         if (web_inf.exists() && web_inf.isDirectory() && (web_inf.getFile()==null || !web_app.getFile().isDirectory()))
         {
-            File extractedWebInfDir= new File(context.getTempDirectory(), "webinf");
+            File extractedDir = new File (context.getTempDirectory(), "webinf-unpacked");
+            if (extractedDir.exists())
+                extractedDir.delete();
+            extractedDir.mkdir();
+            
+            File extractedWebInfDir= new File(extractedDir, "WEB-INF");
             if (extractedWebInfDir.exists())
                 extractedWebInfDir.delete();
             extractedWebInfDir.mkdir();
+            
             Log.info("Extract " + web_inf + " to " + extractedWebInfDir);
             JarResource.extract(web_inf, extractedWebInfDir, false);
-            web_inf=Resource.newResource(extractedWebInfDir.toURL());
+            web_inf=Resource.newResource(extractedDir.toURL());
             ResourceCollection rc = new ResourceCollection(new Resource[]{web_inf,web_app});
             context.setBaseResource(rc);
         }       
     }
-
 }
