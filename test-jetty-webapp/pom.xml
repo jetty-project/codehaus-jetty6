@@ -17,9 +17,23 @@
         <version>${project.version}</version>
         <configuration>
           <scanIntervalSeconds>1</scanIntervalSeconds>
-          <useTestClasspath>true</useTestClasspath>
+          <!-- useTestClasspath>true</useTestClasspath -->
           <webAppConfig>
+            <contextPath>/test</contextPath>
+            <tempDirectory>${project.build.directory}/work</tempDirectory>
+            <configurationDiscovered>false</configurationDiscovered>
+            <sessionHandler implementation="org.eclipse.jetty.server.session.SessionHandler">
+              <sessionManager implementation="org.eclipse.jetty.server.session.HashSessionManager">
+                <storeDirectory>${basedir}/target/sessions</storeDirectory>
+              </sessionManager>
+            </sessionHandler>
           </webAppConfig>
+          <loginServices>
+            <loginService implementation="org.eclipse.jetty.security.HashLoginService">
+              <name>Test Realm</name>
+              <config>src/etc/realm.properties</config>
+            </loginService>
+          </loginServices>
         </configuration>
       </plugin>
       <plugin>
