@@ -29,6 +29,7 @@ import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.util.Scanner;
+import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceCollection;
 import org.eclipse.jetty.xml.XmlConfiguration;
@@ -322,21 +323,50 @@ public class JettyRunMojo extends AbstractJettyMojo
     public void configureWebApplication() throws Exception
     {
        super.configureWebApplication();
+       
+       //Set up the location of the webapp.
+       //There are 2 parts to this: setWar() and setBaseResource(). On standalone jetty,
+       //the former could be the location of a packed war, while the latter is the location
+       //after any unpacking. With this mojo, you are running an unpacked, unassembled webapp,
+       //so the two locations should be equal.
+       Resource webAppSourceDirectoryResource = Resource.newResource(webAppSourceDirectory.getCanonicalPath());
+       if (webAppConfig.getWar() == null)
+           webAppConfig.setWar(webAppSourceDirectoryResource.toString());
+       
+       if (webAppConfig.getBaseResource() == null)
+               webAppConfig.setBaseResource(webAppSourceDirectoryResource);
+  
         setClassPathFiles(setUpClassPath());
+        
+        getLog().info("webapp baseResource="+webAppConfig.getBaseResource());
         
         //if we have not already set web.xml location, need to set one up
         if (webAppConfig.getDescriptor() == null)
         {
-            Resource base = webAppConfig.getBaseResource();
-            Resource web_xml=base.addPath("WEB-INF/web.xml");
-            
-            if (web_xml.exists() && !web_xml.isDirectory())
-                webAppConfig.setDescriptor(web_xml.toString());
-            else if (webXml!=null)
+            //Has an explicit web.xml file been configured to use?
+            if (webXml != null)
             {
-                web_xml=Resource.newResource(webXml);
-                if (web_xml.exists() && !web_xml.isDirectory())
-                    webAppConfig.setDescriptor(web_xml.toString());
+                Resource r = Resource.newResource(webXml);
+                if (r.exists() && !r.isDirectory())
+                    webAppConfig.setDescriptor(r.toString());
+            }
+            
+            //Still don't have a web.xml file: try the resourceBase of the webapp, if it is set
+            if (webAppConfig.getDescriptor() == null && webAppConfig.getBaseResource() != null)
+            {
+                Resource r = webAppConfig.getBaseResource().addPath("WEB-INF/web.xml");
+                if (r.exists() && !r.isDirectory())
+                    webAppConfig.setDescriptor(r.toString());
+            }
+            
+            //Still don't have a web.xml file: finally try the configured static resource directory if there is one
+            if (webAppConfig.getDescriptor() == null && (webAppSourceDirectory != null))
+            {
+                File f = new File (new File (webAppSourceDirectory, "WEB-INF"), "web.xml");
+                if (f.exists() && f.isFile())
+                {
+                   webAppConfig.setDescriptor(f.getCanonicalPath());
+                }
             }
         }
         getLog().info( "web.xml file = "+webAppConfig.getDescriptor());
@@ -344,8 +374,7 @@ public class JettyRunMojo extends AbstractJettyMojo
         if (webAppConfig.getClassPathFiles() == null)
             webAppConfig.setClassPathFiles(getClassPathFiles());
         
-        if (webAppConfig.getWar() == null)
-            webAppConfig.setWar(getWebAppSourceDirectory().getCanonicalPath());
+       
         getLog().info("Webapp directory = " + getWebAppSourceDirectory().getCanonicalPath());
     }
     
