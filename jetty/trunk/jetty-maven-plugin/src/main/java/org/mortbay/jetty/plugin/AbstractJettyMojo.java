@@ -212,7 +212,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     
     /**
      * Location of a context xml configuration file whose contents
-     * will be applied to the webapp AFTER anything in <webAppConfig>.Optional.
+     * will be applied to the webapp AFTER anything in &lt;webAppConfig&gt;.Optional.
      * @parameter
      */
     protected String webAppXml;
