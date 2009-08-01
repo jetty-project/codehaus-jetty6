@@ -19,7 +19,7 @@
           <scanIntervalSeconds>1</scanIntervalSeconds>
           <!-- useTestClasspath>true</useTestClasspath -->
           <webAppConfig>
-            <contextPath>/test</contextPath>
+            <contextPath>/</contextPath>
             <configurationDiscovered>false</configurationDiscovered>
             <sessionHandler implementation="org.eclipse.jetty.server.session.SessionHandler">
               <sessionManager implementation="org.eclipse.jetty.server.session.HashSessionManager">
