@@ -30,6 +30,7 @@ import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.util.Scanner;
 import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.util.resource.JarResource;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceCollection;
 import org.eclipse.jetty.xml.XmlConfiguration;
@@ -453,7 +454,18 @@ public class JettyRunMojo extends AbstractJettyMojo
             {
                 try
                 {
-                    Resource r = Resource.newResource("jar:" + artifact.getFile().toURL().toString() + "!/");
+                    // TODO temp solution until after RC2. Extract overlays
+                    File extract=new File(new File(webAppConfig.getTempDirectory(),"overlays"),artifact.getGroupId()+"-"+artifact.getArtifactId()+"-"+artifact.getVersion());
+                    if (extract.exists() && artifact.isSnapshot())
+                        extract.delete();
+                    if (!extract.exists() || artifact.isSnapshot())
+                    {
+                        extract.mkdirs();
+                        Resource r = Resource.newResource("jar:"+artifact.getFile().toURL().toString()+"!/");
+                        Log.info("Extract "+r+" to "+extract);
+                        JarResource.extract(r,extract,false);
+                    }
+                    Resource r=Resource.newResource(extract.toURL());
                     overlays.add(r);
                     getExtraScanTargets().add(artifact.getFile());
                 }
@@ -471,12 +483,14 @@ public class JettyRunMojo extends AbstractJettyMojo
                 getLog().debug( "Adding artifact " + artifact.getFile().getName() + " for WEB-INF/lib " );   
             }
         }
+        
         if(!overlays.isEmpty() && !isEqual(overlays, _overlays))
         {
             try
             {
                 Resource resource = _overlays==null ? webAppConfig.getBaseResource() : null;
                 ResourceCollection rc = new ResourceCollection();
+                
                 if(resource==null)
                 {
                     // nothing configured, so we automagically enable the overlays                    
@@ -508,12 +522,6 @@ public class JettyRunMojo extends AbstractJettyMojo
                     }
                     else
                     {
-                        // baseResource was already configured w/c could be src/main/webapp
-                        if(!resource.isDirectory() && String.valueOf(resource.getFile()).endsWith(".war"))
-                        {
-                            // its a war                            
-                            resource = Resource.newResource("jar:" + resource.getURL().toString() + "!/");
-                        }
                         int size = overlays.size()+1;
                         Resource[] resources = new Resource[size];
                         resources[0] = resource;

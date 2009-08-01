@@ -17,6 +17,10 @@ package org.mortbay.jetty.plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -28,7 +32,6 @@ import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.resource.JarResource;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceCollection;
-import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.WebAppClassLoader;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.webapp.WebInfConfiguration;
@@ -119,30 +122,28 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
     @Override
     public void unpack(WebAppContext context) throws IOException
     {
+        // TODO remove this override after 7.0.0.RC2
         super.unpack(context);
 
         Resource web_app = context.getBaseResource();
                
         // Do we need to extract WEB-INF/lib?
         Resource web_inf= web_app.addPath("WEB-INF/");
-        
         if (web_inf.exists() && web_inf.isDirectory() && (web_inf.getFile()==null || !web_app.getFile().isDirectory()))
         {
-            File extractedDir = new File (context.getTempDirectory(), "webinf-unpacked");
-            if (extractedDir.exists())
-                extractedDir.delete();
-            extractedDir.mkdir();
-            
-            File extractedWebInfDir= new File(extractedDir, "WEB-INF");
+            File extractedWebInfDir= new File(context.getTempDirectory(), "webinf");
             if (extractedWebInfDir.exists())
                 extractedWebInfDir.delete();
             extractedWebInfDir.mkdir();
+            File webInfDir=new File(extractedWebInfDir,"WEB-INF");
+            webInfDir.mkdir();
+            Log.info("Extract " + web_inf + " to " + webInfDir);
+            JarResource.extract(web_inf, webInfDir, false);
+            web_inf=Resource.newResource(extractedWebInfDir.toURL());
             
-            Log.info("Extract " + web_inf + " to " + extractedWebInfDir);
-            JarResource.extract(web_inf, extractedWebInfDir, false);
-            web_inf=Resource.newResource(extractedDir.toURL());
             ResourceCollection rc = new ResourceCollection(new Resource[]{web_inf,web_app});
             context.setBaseResource(rc);
-        }       
+        }    
     }
+    
 }
