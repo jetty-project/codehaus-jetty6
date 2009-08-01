@@ -10,10 +10,51 @@
   <packaging>war</packaging>
   <name>Jetty :: JNDI Test Webapp</name>
   <build>
-  <filters>
-    <filter>src/filters/filter.properties</filter>
-  </filters>
     <plugins>
+       <plugin>
+         <artifactId>maven-antrun-plugin</artifactId>
+         <executions>
+           <execution>
+            <id>generate-xml-files</id>
+            <phase>process-resources</phase>
+            <configuration>
+              <tasks>
+                <concat destfile="${project.build.directory}/plugin-context.xml">
+                  <filelist dir="src/main/templates/" files="plugin-context-header.xml,env-definitions.xml"/>
+                </concat>
+                <concat destfile="${project.build.directory}/contexts/jetty-test-jndi.xml">
+                  <filelist dir="src/main/templates/" files="jetty-test-jndi-header.xml,env-definitions.xml"/>
+                </concat>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+           </execution>
+         </executions>
+       </plugin>
+       <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-transaction-properties</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/resources</outputDirectory>
+              <resources>          
+                <resource>
+                  <directory>src/main/config/resources</directory>
+                  <includes><include>**/transactions.properties</include></includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>              
+            </configuration>            
+          </execution>
+        </executions>
+      </plugin>
        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
@@ -28,9 +69,9 @@
                 <descriptors>
                   <descriptor>src/main/assembly/config.xml</descriptor>
                 </descriptors>
-                <filters>
-                  <filter>${basedir}/src/filters/filter.properties</filter>
-                </filters>
+                <!-- filters>
+                  <filter>src/filters/filter.properties</filter>
+                </filters -->
               </configuration>
             </execution>
           </executions>
@@ -39,20 +80,57 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <configuration>
-          <filters>
-            <filter>${basedir}/src/filters/filter.properties</filter>
-          </filters>
-          <webResources>
-            <resource>
-              <directory>${basedir}/src/templates</directory>
-              <targetPath>WEB-INF</targetPath>
-              <filtering>true</filtering>
-              <includes>
-                <include>**/jetty-env.xml</include>
-              </includes>
-            </resource>
-          </webResources>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>${project.version}</version>
+        <configuration>
+         <webAppXml>${project.build.directory}/plugin-context.xml</webAppXml> 
+         <webAppConfig>
+           <war>src/main/webapp</war>
+           <descriptor>src/main/webapp/WEB-INF/web.xml</descriptor>
+           <contextPath>/test-jndi</contextPath>
+         </webAppConfig>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>com.atomikos</groupId>
+            <artifactId>atomikos-util</artifactId>
+            <version>3.5.5</version>
+          </dependency>
+          <dependency>
+            <groupId>com.atomikos</groupId>
+            <artifactId>transactions-api</artifactId>
+            <version>3.5.5</version>
+            </dependency>
+            <dependency>
+              <groupId>com.atomikos</groupId>
+              <artifactId>transactions</artifactId>
+              <version>3.5.5</version>
+            </dependency>
+            <dependency>
+              <groupId>com.atomikos</groupId>
+              <artifactId>transactions-jdbc</artifactId>
+              <version>3.5.5</version>
+            </dependency>
+            <dependency>
+              <groupId>com.atomikos</groupId>
+              <artifactId>transactions-jta</artifactId>
+              <version>3.5.5</version>
+            </dependency>
+            <dependency>
+               <groupId>org.apache.derby</groupId>
+               <artifactId>derby</artifactId>
+               <version>10.4.1.3</version>
+             </dependency>
+             <dependency>
+               <groupId>org.apache.derby</groupId>
+               <artifactId>derbytools</artifactId>
+               <version>10.4.1.3</version>
+             </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>

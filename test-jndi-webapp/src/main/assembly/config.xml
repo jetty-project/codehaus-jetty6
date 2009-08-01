@@ -8,10 +8,26 @@
   <fileSets>
     <fileSet>
       <directory>src/main/config</directory>
-      <filtered>true</filtered>
       <outputDirectory></outputDirectory>
       <includes>
         <include>**</include>
+      </includes>
+      <excludes>
+        <exclude>**/resources/**</exclude>
+      </excludes>
+    </fileSet>
+    <fileSet>
+      <directory>target</directory>
+      <outputDirectory></outputDirectory>
+      <includes>
+        <include>**/jetty-test-jndi.xml</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>target</directory>
+      <outputDirectory></outputDirectory>
+      <includes>
+        <include>**/transactions.properties</include>
       </includes>
     </fileSet>
   </fileSets>
