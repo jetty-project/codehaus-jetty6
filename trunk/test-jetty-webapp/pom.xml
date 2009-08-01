@@ -20,7 +20,6 @@
           <!-- useTestClasspath>true</useTestClasspath -->
           <webAppConfig>
             <contextPath>/test</contextPath>
-            <tempDirectory>${project.build.directory}/work</tempDirectory>
             <configurationDiscovered>false</configurationDiscovered>
             <sessionHandler implementation="org.eclipse.jetty.server.session.SessionHandler">
               <sessionManager implementation="org.eclipse.jetty.server.session.HashSessionManager">
