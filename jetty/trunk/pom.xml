@@ -124,6 +124,7 @@
     <module>jetty-pkcs12</module>
     <module>example-jetty-spring</module>
     <module>example-async-rest-webapp</module>
+    <module>repository</module>
   </modules>
 
   <!-- Temporarily added until release of jetty-integration-parent allows modules to find oss repo -->
