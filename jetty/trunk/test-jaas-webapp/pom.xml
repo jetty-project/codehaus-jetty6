@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-integration-project</artifactId>
-    <version>7.0.0.1beta2-SNAPSHOT</version>
+    <version>7.0.0.RC2-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
@@ -18,23 +18,26 @@
         <configuration>
           <scanIntervalSeconds>10</scanIntervalSeconds>
           <systemProperties>
-            <systemProperty>
               <!-- This is for convenience so that the src/etc/login.conf file can stay unmodified when copied to $jetty.home/etc directory -->
+            <!-- systemProperty>
               <name>jetty.home</name>
-              <value>./src/main/config</value>
-            </systemProperty>
-            <systemProperty>
+              <value>${basedir}/src/main/config</value>
+            </systemProperty -->
               <!-- Mandatory. This system property tells JAAS where to find the login module configuration file -->
+            <!-- systemProperty>
               <name>java.security.auth.login.config</name>
-              <value>./src/main/config/etc/login.conf</value>
-            </systemProperty>
+              <value>${basedir}/src/main/config/etc/login.conf</value>
+            </systemProperty -->
           </systemProperties>
-          <loginServices>
-            <loginService implementation="org.eclipse.jetty.plus.jaas.JAASLoginService">
-              <name>Test JAAS Realm</name>
-              <loginModuleName>xyz</loginModuleName>
-            </loginService>
-          </loginServices>
+           <webAppConfig>
+            <contextPath>/test-jaas</contextPath>
+            <securityHandler implementation="org.eclipse.jetty.security.ConstraintSecurityHandler">
+              <loginService implementation="org.eclipse.jetty.plus.jaas.JAASLoginService">
+                 <name>Test JAAS Realm</name>
+                 <loginModuleName>xyz</loginModuleName>
+              </loginService>
+            </securityHandler>
+          </webAppConfig>
         </configuration> 
       </plugin>
       <plugin>
