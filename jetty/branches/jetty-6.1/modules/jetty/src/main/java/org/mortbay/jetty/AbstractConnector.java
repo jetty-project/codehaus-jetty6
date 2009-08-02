@@ -685,15 +685,16 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
         public void run()
         {   
             Thread current = Thread.currentThread();
+            String name;
             synchronized(AbstractConnector.this)
             {
                 if (_acceptorThread==null)
                     return;
                 
                 _acceptorThread[_acceptor]=current;
+                name =_acceptorThread[_acceptor].getName();
+                current.setName(name+" - Acceptor"+_acceptor+" "+AbstractConnector.this);
             }
-            String name =_acceptorThread[_acceptor].getName();
-            current.setName(name+" - Acceptor"+_acceptor+" "+AbstractConnector.this);
             int old_priority=current.getPriority();
             
             try
