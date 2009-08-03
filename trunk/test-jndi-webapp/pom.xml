@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-integration-project</artifactId>
-    <version>7.0.0.RC2-SNAPSHOT</version>
+    <version>7.0.0.RC2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
@@ -20,10 +20,10 @@
             <configuration>
               <tasks>
                 <concat destfile="${project.build.directory}/plugin-context.xml">
-                  <filelist dir="src/main/templates/" files="plugin-context-header.xml,env-definitions.xml"/>
+                  <filelist dir="src/main/templates/" files="plugin-context-header.xml,env-definitions.xml" />
                 </concat>
                 <concat destfile="${project.build.directory}/contexts/jetty-test-jndi.xml">
-                  <filelist dir="src/main/templates/" files="jetty-test-jndi-header.xml,env-definitions.xml"/>
+                  <filelist dir="src/main/templates/" files="jetty-test-jndi-header.xml,env-definitions.xml" />
                 </concat>
               </tasks>
             </configuration>
