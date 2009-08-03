@@ -70,7 +70,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-rewrite</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
@@ -80,7 +80,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-ajp</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
@@ -90,7 +90,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>test-jetty-webapp</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
@@ -100,7 +100,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-jmx</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
@@ -110,7 +110,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-util</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
@@ -120,7 +120,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-webapp</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
@@ -130,7 +130,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-plus</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
@@ -140,7 +140,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-server</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
@@ -150,7 +150,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-policy</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
@@ -171,7 +171,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-util</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -180,7 +180,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-io</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -189,7 +189,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-http</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -198,7 +198,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-server</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -207,7 +207,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-security</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -216,7 +216,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-servlet</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -225,7 +225,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-servlets</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -234,7 +234,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-xml</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -243,7 +243,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-webapp</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -252,7 +252,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-deploy</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -261,7 +261,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-jmx</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -270,7 +270,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-rewrite</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -279,7 +279,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-ajp</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -288,7 +288,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-annotations</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -297,7 +297,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-client</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -306,7 +306,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-jndi</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -315,7 +315,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-policy</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -342,7 +342,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-plus</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -351,7 +351,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-continuation</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -369,7 +369,7 @@
                  <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>test-jetty-webapp</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>war</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -379,7 +379,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-start</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -521,63 +521,63 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-deploy</artifactId>
-        <version>${project.version}</version>
+        <version>${jetty-version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
     	<artifactId>jetty-rewrite</artifactId>
-    	<version>${project.version}</version>
+    	<version>${jetty-version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
     	<artifactId>jetty-ajp</artifactId>
-    	<version>${project.version}</version>
+    	<version>${jetty-version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
     	<artifactId>jetty-annotations</artifactId>
-    	<version>${project.version}</version>
+    	<version>${jetty-version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
         <artifactId>test-jetty-webapp</artifactId>
         <type>war</type>
-        <version>${project.version}</version>
+        <version>${jetty-version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
     	<artifactId>jetty-jmx</artifactId>
-    	<version>${project.version}</version>
+    	<version>${jetty-version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-jndi</artifactId>
-      <version>${project.version}</version>
+      <version>${jetty-version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
     	<artifactId>jetty-plus</artifactId>
-    	<version>${project.version}</version>
+    	<version>${jetty-version}</version>
     </dependency>
     <dependency>
     	<groupId>org.eclipse.jetty</groupId>
     	<artifactId>jetty-client</artifactId>
-    	<version>${project.version}</version>
+    	<version>${jetty-version}</version>
     </dependency>
     <dependency>
     	<groupId>org.eclipse.jetty</groupId>
     	<artifactId>jetty-continuation</artifactId>
-    	<version>${project.version}</version>
+    	<version>${jetty-version}</version>
     </dependency>
     <dependency>
     	<groupId>org.eclipse.jetty</groupId>
     	<artifactId>jetty-start</artifactId>
-    	<version>${project.version}</version>
+    	<version>${jetty-version}</version>
     </dependency>
     <dependency>
     	<groupId>org.eclipse.jetty</groupId>
     	<artifactId>jetty-policy</artifactId>
-    	<version>${project.version}</version>
+    	<version>${jetty-version}</version>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
