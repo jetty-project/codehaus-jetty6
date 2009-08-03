@@ -555,7 +555,7 @@ public class HttpExchange
     }
 
     /**
-     * Called when an exception was thrown during an attempt to open a connectoin
+     * Called when an exception was thrown during an attempt to open a connection
      * @param ex
      */
     protected void onConnectionFailed(Throwable ex)
@@ -573,7 +573,7 @@ public class HttpExchange
     }
 
     /**
-     * Called when no response has been recieved within the timeout.
+     * Called when no response has been received within the timeout.
      */
     protected void onExpire()
     {
