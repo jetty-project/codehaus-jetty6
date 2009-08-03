@@ -36,6 +36,9 @@
                  <name>Test JAAS Realm</name>
                  <loginModuleName>xyz</loginModuleName>
               </loginService>
+              <_initParameters>
+                <org.eclipse.jetty.security.dispatch>true</org.eclipse.jetty.security.dispatch>
+              </_initParameters>
             </securityHandler>
           </webAppConfig>
         </configuration> 
