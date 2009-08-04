@@ -484,6 +484,68 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
     
 
     /* ------------------------------------------------------------ */
+    public String dump()
+    {
+        StringBuffer buf = new StringBuffer();
+
+        synchronized (_threadsLock)
+        {
+            for (Iterator i=_threads.iterator();i.hasNext();)
+            {
+                Thread thread = (Thread)i.next();
+                buf.append(thread.getName()).append(" ").append(thread.toString()).append('\n');
+            }
+        }
+        
+        return buf.toString();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param name The thread name to stop.
+     * @return true if the thread was found and stopped.
+     * @Deprecated Use {@link #interruptThread(long)} in preference
+     */
+    public boolean stopThread(String name)
+    {
+        synchronized (_threadsLock)
+        {
+            for (Iterator i=_threads.iterator();i.hasNext();)
+            {
+                Thread thread = (Thread)i.next();
+                if (name.equals(thread.getName()))
+                {
+                    thread.stop();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param name The thread name to interrupt.
+     * @return true if the thread was found and interrupted.
+     */
+    public boolean interruptThread(String name)
+    {
+        synchronized (_threadsLock)
+        {
+            for (Iterator i=_threads.iterator();i.hasNext();)
+            {
+                Thread thread = (Thread)i.next();
+                if (name.equals(thread.getName()))
+                {
+                    thread.interrupt();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /* ------------------------------------------------------------ */
     /** Pool Thread class.
      * The PoolThread allows the threads job to be
      * retrieved and active status to be indicated.
