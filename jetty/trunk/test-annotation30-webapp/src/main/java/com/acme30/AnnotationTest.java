@@ -18,6 +18,7 @@
 package com.acme30;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -161,6 +162,23 @@ public class AnnotationTest extends HttpServlet
     private void myPreDestroyMethod()
     {
         System.err.println("PreDestroy called");
+        //necessary for Atomikos to deregister the datasource in their static map
+        close(myDS);
+    }
+    public void close (DataSource ds)
+    {
+        if (ds != null)
+        {
+            try
+            {
+                Method close = ds.getClass().getMethod("close", new Class[]{});
+                close.invoke(ds, new Object[]{});
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
     }
     
     public void init(ServletConfig config) throws ServletException
