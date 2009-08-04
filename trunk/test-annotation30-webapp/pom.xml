@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-integration-project</artifactId>
-    <version>7.0.0.RC2-SNAPSHOT</version>
+    <version>7.0.0.RC3-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
@@ -67,7 +67,7 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
-      <version>${jetty-version}</version>
+      <version>8.0.0.M0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -79,7 +79,7 @@
    <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>servlet-api</artifactId>
-      <version>3.0.PFD20090525</version>
+      <version>3.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -90,7 +90,7 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-test-container-initializer</artifactId>
+      <artifactId>test-container-initializer</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
