@@ -47,9 +47,10 @@ public class LikeJettyXml
         threadPool.setMaxThreads(100);
         server.setThreadPool(threadPool);
              
-        Connector connector=new SelectChannelConnector();
+        SelectChannelConnector connector=new SelectChannelConnector();
         connector.setPort(8080);
         connector.setMaxIdleTime(30000);
+        connector.setConfidentialPort(8443);
         server.setConnectors(new Connector[]{connector});
 
         SslSelectChannelConnector ssl_connector=new SslSelectChannelConnector();
@@ -60,16 +61,6 @@ public class LikeJettyXml
         ssl_connector.setTruststore(jetty_home+"/etc/keystore");
         ssl_connector.setTrustPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
         server.addConnector(ssl_connector);  
-
-        SslSocketConnector ssl_connector2=new SslSocketConnector();
-        ssl_connector2.setPort(8444);
-        ssl_connector2.setKeystore(jetty_home+"/etc/keystore");
-        ssl_connector2.setPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
-        ssl_connector2.setKeyPassword("OBF:1u2u1wml1z7s1z7a1wnl1u2g");
-        ssl_connector2.setTruststore(jetty_home+"/etc/keystore");
-        ssl_connector2.setTrustPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
-        server.addConnector(ssl_connector2);  
-        
         
         HandlerCollection handlers = new HandlerCollection();
         ContextHandlerCollection contexts = new ContextHandlerCollection();
