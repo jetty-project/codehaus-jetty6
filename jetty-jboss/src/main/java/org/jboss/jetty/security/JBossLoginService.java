@@ -2,6 +2,7 @@ package org.jboss.jetty.security;
 
 import java.security.Principal;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
@@ -31,43 +32,47 @@ public class JBossLoginService extends AbstractLifeCycle implements LoginService
     private AuthenticationManager _authMgr;
     private RealmMapping _realmMapping;
     private SubjectSecurityManager _subjSecMgr;
-    
+
+    /* ------------------------------------------------------------ */
     public JBossLoginService (String realmName)
     {
         _realmName = realmName;
         _log = Logger.getLogger(JBossLoginService.class.getName() + "#"+ _realmName);
         _identityService = new JBossIdentityService (_realmName);
     }
-    
+
+    /* ------------------------------------------------------------ */
     public IdentityService getIdentityService()
     {
         return _identityService;
     }
 
+    /* ------------------------------------------------------------ */
     public String getName()
     {
         return _realmName;
     }
 
+    /* ------------------------------------------------------------ */
     public UserIdentity login(String username, Object credentials)
     {        
-        
         if (_log.isDebugEnabled()) _log.debug("authenticating: Name:" + username + " Password:****"/* +credentials */);
       
         UserIdentity identity = null;
         
         if (credentials == null || credentials instanceof java.lang.String)
         {
-            Subject subjectCopy = new Subject();
             if (credentials == null) credentials = "";
             char[] passwordChars = ((String)credentials).toCharArray();
             Principal principal = new SimplePrincipal(username);
-            if (_subjSecMgr != null && _subjSecMgr.isValid(principal, passwordChars, subjectCopy))
+            Subject subject = new Subject(false,Collections.singleton(principal),Collections.emptySet(),Collections.singleton(passwordChars));
+            if (_subjSecMgr != null && _subjSecMgr.isValid(principal, passwordChars, subject))
             {
                 if (_log.isDebugEnabled())
                     _log.debug("authenticated: " + username);
-                
-                identity =_identityService.newUserIdentity(subjectCopy,principal,null);
+
+                // TODO what about roles?
+                identity =_identityService.newUserIdentity(subject,principal,null);
             }
            
         }
@@ -85,14 +90,13 @@ public class JBossLoginService extends AbstractLifeCycle implements LoginService
             String pname = buff.toString();
             
             Principal principal = new SimplePrincipal(pname);
-           
-            Subject subjectCopy = new Subject();
-            if (_subjSecMgr != null && _subjSecMgr.isValid(principal, certs, subjectCopy))
+            Subject subject = new Subject(false,Collections.singleton(principal),Collections.emptySet(),Collections.singleton(certs));
+            if (_subjSecMgr != null && _subjSecMgr.isValid(principal, certs, subject))
             {
                 if (_log.isDebugEnabled())
                     _log.debug("authenticated: " + principal);
-   
-                identity =_identityService.newUserIdentity(subjectCopy,principal,null);
+                // TODO what about roles?
+                identity =_identityService.newUserIdentity(subject,principal,null);
             }
         }
         
@@ -104,33 +108,18 @@ public class JBossLoginService extends AbstractLifeCycle implements LoginService
         
         return identity;
     }
-    
 
-    public void logout(UserIdentity user)
+    /* ------------------------------------------------------------ */
+    public boolean validate(UserIdentity user)
     {
-        try
-        {
-            java.util.ArrayList servers = MBeanServerFactory.findMBeanServer(null);
-            if (servers.size() != 1)
-                _log.warn("More than one MBeanServer found, choosing first");
-            MBeanServer server = (MBeanServer) servers.get(0);
-
-            server.invoke(new ObjectName("jboss.security:service=JaasSecurityManager"),
-                                         "flushAuthenticationCache",
-                                         new Object[] { user.getUserPrincipal().getName(), user.getUserPrincipal() }, 
-                                         new String[] {"java.lang.String", "java.security.Principal" });
-        }
-        catch (Exception e)
-        {
-            _log.error(e);
-        }
-        catch (Error err)
-        {
-            _log.error(err);
-        }
+        // TODO is this right?
+        return _subjSecMgr.isValid(user.getUserPrincipal(),
+                user.getSubject().getPrivateCredentials().iterator().next(),
+                user.getSubject());
     }
-    
-    
+
+
+    /* ------------------------------------------------------------ */
     public void setIdentityService(IdentityService service)
     {
         if (service instanceof JBossIdentityService)
@@ -139,7 +128,7 @@ public class JBossLoginService extends AbstractLifeCycle implements LoginService
             throw new IllegalArgumentException ("IdentityService must be instanceof JBossIdentityService");
     }
 
-
+    /* ------------------------------------------------------------ */
     public void doStart() throws Exception
     {
         try
