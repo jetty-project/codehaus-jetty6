@@ -454,18 +454,7 @@ public class JettyRunMojo extends AbstractJettyMojo
             {
                 try
                 {
-                    // TODO temp solution until after RC2. Extract overlays
-                    File extract=new File(new File(webAppConfig.getTempDirectory(),"overlays"),artifact.getGroupId()+"-"+artifact.getArtifactId()+"-"+artifact.getVersion());
-                    if (extract.exists() && artifact.isSnapshot())
-                        extract.delete();
-                    if (!extract.exists() || artifact.isSnapshot())
-                    {
-                        extract.mkdirs();
-                        Resource r = Resource.newResource("jar:"+artifact.getFile().toURL().toString()+"!/");
-                        Log.info("Extract "+r+" to "+extract);
-                        JarResource.extract(r,extract,false);
-                    }
-                    Resource r=Resource.newResource(extract.toURL());
+                    Resource r=Resource.newResource("jar:"+artifact.getFile().toURL().toString()+"!/");
                     overlays.add(r);
                     getExtraScanTargets().add(artifact.getFile());
                 }
