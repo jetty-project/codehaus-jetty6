@@ -18,3 +18,6 @@ The win32 Java Service Wrapper (v3.2.3) is Copyright (c) 1999, 2006
 Tanuki Software, Inc.  and 2001 Silver Egg Technology.  It is 
 covered by an open license which is viewable at
 http://svn.codehaus.org/jetty/jetty/trunk/jetty-win32/LICENSE.txt
+
+The Atomikos binary jars in the repository module are licensed under
+the Apache 2 License and are copyright Atomikos.
