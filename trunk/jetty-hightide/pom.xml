@@ -5,11 +5,11 @@
     <artifactId>jetty-integration-project</artifactId>
     <version>7.0.0.RC3-SNAPSHOT</version>
   </parent>
-  <artifactId>jetty-distribution</artifactId>
-  <name>Jetty :: Distribution Assemblies</name>
+  <artifactId>jetty-hightide</artifactId>
+  <name>Jetty :: Hightide Distribution</name>
   <packaging>pom</packaging>
   <properties>
-    <assembly.directory>target/distribution</assembly.directory>
+    <assembly.directory>target/hightide</assembly.directory>
     <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
     <activation-version>1.1</activation-version>
     <jta-spec-version>1.1.1</jta-spec-version>
