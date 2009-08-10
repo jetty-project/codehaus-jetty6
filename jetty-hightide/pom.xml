@@ -160,6 +160,63 @@
                   <includes>**</includes>
                   <outputDirectory>${assembly.directory}</outputDirectory>
                 </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>test-jndi-webapp</artifactId>
+                  <version>${project.version}</version>
+                  <classifier>config</classifier>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>test-jndi-webapp</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/webapps/test-jndi</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>test-annotation-webapp</artifactId>
+                  <version>${project.version}</version>
+                  <classifier>config</classifier>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>test-annotation-webapp</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/webapps/test-annotations</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>test-jaas-webapp</artifactId>
+                  <version>${project.version}</version>
+                  <classifier>config</classifier>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>test-jaas-webapp</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/webapps/test-jaas</outputDirectory>
+                </artifactItem>
               </artifactItems>
             </configuration>
           </execution>                 
@@ -478,6 +535,12 @@
                   <outputDirectory>${assembly.directory}/lib/jetty-annotations</outputDirectory>
               </artifactItem>
               <artifactItem>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-jta_1.1_spec</artifactId>
+                <version>1.1.1</version>
+                <outputDirectory>${assembly.directory}/lib/ext/jta/</outputDirectory>
+              </artifactItem>
+              <artifactItem>
                   <groupId>asm</groupId>
                   <artifactId>asm-commons</artifactId>
                   <version>${asm-version}</version>
@@ -511,31 +574,31 @@
                 <groupId>com.atomikos</groupId>
                 <artifactId>transactions</artifactId>
                 <version>${atomikos-version}</version>
-                <outputDirectory>${assembly.directory}/lib/ext/atomikos</outputDirectory>
+                <outputDirectory>${assembly.directory}/lib/ext/jta/atomikos</outputDirectory>
               </artifactItem>
               <artifactItem>
                 <groupId>com.atomikos</groupId>
                 <artifactId>transactions-jdbc</artifactId>
                 <version>${atomikos-version}</version>
-                <outputDirectory>${assembly.directory}/lib/ext/atomikos</outputDirectory>
+                <outputDirectory>${assembly.directory}/lib/ext/jta/atomikos</outputDirectory>
               </artifactItem>
               <artifactItem>
                 <groupId>com.atomikos</groupId>
                 <artifactId>transactions-jta</artifactId>
                 <version>${atomikos-version}</version>
-                <outputDirectory>${assembly.directory}/lib/ext/atomikos</outputDirectory>
+                <outputDirectory>${assembly.directory}/lib/ext/jta/atomikos</outputDirectory>
               </artifactItem>
               <artifactItem>
                  <groupId>org.apache.derby</groupId>
                  <artifactId>derby</artifactId>
                  <version>${derby-version}</version>
-                 <outputDirectory>${assembly.directory}/lib/ext/derby</outputDirectory>
+                 <outputDirectory>${assembly.directory}/lib/ext/jdbc/derby</outputDirectory>
                </artifactItem>
                <artifactItem>
                  <groupId>org.apache.derby</groupId>
                  <artifactId>derbytools</artifactId>
                  <version>${derby-version}</version>
-                 <outputDirectory>${assembly.directory}/lib/ext/derby</outputDirectory>
+                 <outputDirectory>${assembly.directory}/lib/ext/jdbc/derby</outputDirectory>
                </artifactItem>
               </artifactItems>
             </configuration>
@@ -633,6 +696,24 @@
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jsp-2.1-glassfish</artifactId>
       <version>${jsp-2-1-version}</version>
+    </dependency>               
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>test-jndi-webapp</artifactId>
+      <type>war</type>
+      <version>${project.version}</version>
+    </dependency>               
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>test-annotation-webapp</artifactId>
+      <type>war</type>
+      <version>${project.version}</version>
+    </dependency>               
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>test-jaas-webapp</artifactId>
+      <type>war</type>
+      <version>${project.version}</version>
     </dependency>               
   </dependencies>
 </project>
