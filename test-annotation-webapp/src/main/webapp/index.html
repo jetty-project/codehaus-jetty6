@@ -15,27 +15,9 @@ This example shows how to use annotations.
 
 <h2>Preparation</h2>
 <p>
-<ol>
-<li>Ensure that you have installed the jars for the transaction manager of your choice in $JETTY_HOME/lib/ext. This demo has been tested with <a href="http://jotm.objectweb.org/">JOTM</a> and <a href="http://www.atomikos.com">Atomikos</a>.
-
-<li>Make sure you have built this demo. Assuming your jetty src distro is installed at $JETTY_HOME.
+This demo uses <a href="http://www.atomikos.com">Atomikos</a> as a transaction manager by default, however it also supports JOTM. You can activate JOTM by editing the contexts/test-annotations.xml file and uncommenting the JOTM section, and by placing the JOTM jars in lib/.
 </p>
-<li> Set up the configuration files with the transaction manager of your choice:
-<blockquote>
-<pre>
-  +  cd $JETTY_HOME/contexts
-  +  edit annotations-context.xml and uncomment one of the transaction manager setups
-</pre>
-</blockquote>
-</ol>
- 
-<p>
-Now you can start the demo:
-<blockquote>
-<pre>
-   java -jar start.jar OPTIONS=All
-</pre>
-</blockquote>
+
 <h2>The Test</h2>
 <p>
 </p>
