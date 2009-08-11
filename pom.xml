@@ -8,17 +8,17 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-integration-project</artifactId>
-  <version>7.0.0.RC3-SNAPSHOT</version>
+  <version>7.0.0.RC2</version>
   <name>Jetty :: Codehaus Integration Project</name>
   <packaging>pom</packaging>
 
   <properties>
-    <jetty-version>7.0.0.RC3</jetty-version>
+    <jetty-version>7.0.0.RC2</jetty-version>
   </properties>
   <scm>
-    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</developerConnection>
-    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</url>
+    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-integration-project-7.0.0.RC2</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-integration-project-7.0.0.RC2</developerConnection>
+    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-integration-project-7.0.0.RC2</url>
   </scm>
 
   <build>
@@ -111,12 +111,11 @@
     </pluginManagement>
   </build>
   <modules>
-    <module>repository</module>
+    <module>jetty-distribution</module>
     <module>jetty-maven-plugin</module>
     <module>jetty-ant</module>
     <module>test-jndi-webapp</module>
-    <module>test-jetty-webapp</module>
-    <module>test-jaas-webapp</module>
+    <!-- module>test-jaas-webapp</module -->
     <module>test-annotation-webapp</module>
     <module>jetty-integration-tests</module>
     <module>jetty-runner</module>
@@ -125,7 +124,7 @@
     <module>jetty-pkcs12</module>
     <module>example-jetty-spring</module>
     <module>example-async-rest-webapp</module>
-    <module>jetty-hightide</module>
+    <module>repository</module>
   </modules>
 
   <!-- Temporarily added until release of jetty-integration-parent allows modules to find oss repo -->

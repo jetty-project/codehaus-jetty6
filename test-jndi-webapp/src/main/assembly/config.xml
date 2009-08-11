@@ -20,7 +20,7 @@
       <directory>target</directory>
       <outputDirectory></outputDirectory>
       <includes>
-        <include>**/test-jndi.xml</include>
+        <include>**/jetty-test-jndi.xml</include>
       </includes>
     </fileSet>
     <fileSet>

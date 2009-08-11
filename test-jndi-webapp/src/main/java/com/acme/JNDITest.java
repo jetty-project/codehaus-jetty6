@@ -18,8 +18,6 @@
 package com.acme;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -94,26 +92,6 @@ public class JNDITest extends HttpServlet {
     private void preDestroy()
     {
         System.err.println("PreDestroy called");
-        //close datasources - necessary for Atomikos
-        close(myDS);
-        close(myDS2);
-        close(myDS99);
-    }
-    
-    public void close (DataSource ds)
-    {
-        if (ds != null)
-        {
-            try
-            {
-                Method close = ds.getClass().getMethod("close", new Class[]{});
-                close.invoke(ds, new Object[]{});
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
     }
     
     public void init(ServletConfig config) throws ServletException

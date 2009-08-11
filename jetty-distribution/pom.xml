@@ -3,13 +3,13 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-integration-project</artifactId>
-    <version>7.0.0.RC3-SNAPSHOT</version>
+    <version>7.0.0.RC2</version>
   </parent>
-  <artifactId>jetty-hightide</artifactId>
-  <name>Jetty :: Hightide Distribution</name>
+  <artifactId>jetty-distribution</artifactId>
+  <name>Jetty :: Distribution Assemblies</name>
   <packaging>pom</packaging>
   <properties>
-    <assembly.directory>target/hightide</assembly.directory>
+    <assembly.directory>target/distribution</assembly.directory>
     <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
     <activation-version>1.1</activation-version>
     <jta-spec-version>1.1.1</jta-spec-version>
@@ -18,12 +18,43 @@
     <slf4j-version>1.5.6</slf4j-version>
     <jsp-2-1-version>9.1.1.B60.25.p1</jsp-2-1-version>
     <ant-version>1.6.5</ant-version>
-    <atomikos-version>3.5.5</atomikos-version>
-    <derby-version>10.4.1.3</derby-version>
-    <asm-version>3.1</asm-version>
   </properties>
    <build>
     <plugins>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <configuration>
+          <includeEmptyDirs>true</includeEmptyDirs>
+          <outputDirectory>${assembly.directory}</outputDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>resources</goal>
+            </goals>
+          </execution>
+        </executions>      
+      </plugin>   
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-remote-resources-plugin</artifactId>
+          <executions>
+            <execution>
+              <phase>generate-resources</phase>
+              <goals>
+                <goal>process</goal>
+              </goals>
+              <configuration>
+                <resourceBundles>
+                  <resourceBundle>org.eclipse.jetty.toolchain:jetty-artifact-remote-resources:1.0</resourceBundle>
+                  <resourceBundle>org.eclipse.jetty.toolchain:jetty-distribution-remote-resources:1.1</resourceBundle>
+                </resourceBundles>
+                <outputDirectory>${assembly.directory}</outputDirectory>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
         <version>2.1</version>
@@ -125,63 +156,6 @@
                   <overWrite>true</overWrite>
                   <includes>**</includes>
                   <outputDirectory>${assembly.directory}</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>test-jndi-webapp</artifactId>
-                  <version>${project.version}</version>
-                  <classifier>config</classifier>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly.directory}</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>test-jndi-webapp</artifactId>
-                  <version>${project.version}</version>
-                  <type>war</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/webapps/test-jndi</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>test-annotation-webapp</artifactId>
-                  <version>${project.version}</version>
-                  <classifier>config</classifier>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly.directory}</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>test-annotation-webapp</artifactId>
-                  <version>${project.version}</version>
-                  <type>war</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/webapps/test-annotations</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>test-jaas-webapp</artifactId>
-                  <version>${project.version}</version>
-                  <classifier>config</classifier>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly.directory}</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>test-jaas-webapp</artifactId>
-                  <version>${project.version}</version>
-                  <type>war</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly.directory}/webapps/test-jaas</outputDirectory>
                 </artifactItem>
               </artifactItems>
             </configuration>
@@ -447,12 +421,11 @@
                   <overWrite>true</overWrite>
                   <includes>**</includes>
                   <outputDirectory>${assembly.directory}/webapps</outputDirectory>
-                  <destFileName>cometd.war</destFileName>
                 </artifactItem>
               </artifactItems>
             </configuration>
           </execution>
-          <execution>
+            <execution>
             <phase>generate-resources</phase>
             <goals>
               <goal>copy</goal>
@@ -502,110 +475,28 @@
                   <outputDirectory>${assembly.directory}/lib/jetty-annotations</outputDirectory>
               </artifactItem>
               <artifactItem>
-                <groupId>org.apache.geronimo.specs</groupId>
-                <artifactId>geronimo-jta_1.1_spec</artifactId>
-                <version>1.1.1</version>
-                <outputDirectory>${assembly.directory}/lib/ext/jta/</outputDirectory>
-              </artifactItem>
-              <artifactItem>
                   <groupId>asm</groupId>
                   <artifactId>asm-commons</artifactId>
-                  <version>${asm-version}</version>
+                  <version>3.1</version>
                   <outputDirectory>${assembly.directory}/lib/jetty-annotations</outputDirectory>
               </artifactItem>
               <artifactItem>
                   <groupId>asm</groupId>
                   <artifactId>asm</artifactId>
-                  <version>${asm-version}</version>
+                  <version>3.1</version>
                   <outputDirectory>${assembly.directory}/lib/jetty-annotations</outputDirectory>
               </artifactItem>
               <artifactItem>
                   <groupId>asm</groupId>
                   <artifactId>asm-tree</artifactId>
-                  <version>${asm-version}</version>
+                  <version>3.1</version>
                   <outputDirectory>${assembly.directory}/lib/jetty-annotations</outputDirectory>
               </artifactItem>
-              <artifactItem>
-                <groupId>com.atomikos</groupId>
-                <artifactId>atomikos-util</artifactId>
-                <version>${atomikos-version}</version>
-                <outputDirectory>${assembly.directory}/lib/ext/atomikos</outputDirectory>
-              </artifactItem>
-              <artifactItem>
-                <groupId>com.atomikos</groupId>
-                <artifactId>transactions-api</artifactId>
-                <version>${atomikos-version}</version>
-                <outputDirectory>${assembly.directory}/lib/ext/atomikos</outputDirectory>
-              </artifactItem>
-              <artifactItem>
-                <groupId>com.atomikos</groupId>
-                <artifactId>transactions</artifactId>
-                <version>${atomikos-version}</version>
-                <outputDirectory>${assembly.directory}/lib/ext/jta/atomikos</outputDirectory>
-              </artifactItem>
-              <artifactItem>
-                <groupId>com.atomikos</groupId>
-                <artifactId>transactions-jdbc</artifactId>
-                <version>${atomikos-version}</version>
-                <outputDirectory>${assembly.directory}/lib/ext/jta/atomikos</outputDirectory>
-              </artifactItem>
-              <artifactItem>
-                <groupId>com.atomikos</groupId>
-                <artifactId>transactions-jta</artifactId>
-                <version>${atomikos-version}</version>
-                <outputDirectory>${assembly.directory}/lib/ext/jta/atomikos</outputDirectory>
-              </artifactItem>
-              <artifactItem>
-                 <groupId>org.apache.derby</groupId>
-                 <artifactId>derby</artifactId>
-                 <version>${derby-version}</version>
-                 <outputDirectory>${assembly.directory}/lib/ext/jdbc/derby</outputDirectory>
-               </artifactItem>
-               <artifactItem>
-                 <groupId>org.apache.derby</groupId>
-                 <artifactId>derbytools</artifactId>
-                 <version>${derby-version}</version>
-                 <outputDirectory>${assembly.directory}/lib/ext/jdbc/derby</outputDirectory>
-               </artifactItem>
               </artifactItems>
             </configuration>
           </execution>
           </executions>
       </plugin>     
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <configuration>
-          <includeEmptyDirs>true</includeEmptyDirs>
-          <outputDirectory>${assembly.directory}</outputDirectory>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>resources</goal>
-            </goals>
-          </execution>
-        </executions>      
-      </plugin>   
-      <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-remote-resources-plugin</artifactId>
-          <executions>
-            <execution>
-              <phase>generate-resources</phase>
-              <goals>
-                <goal>process</goal>
-              </goals>
-              <configuration>
-                <resourceBundles>
-                  <resourceBundle>org.eclipse.jetty.toolchain:jetty-artifact-remote-resources:1.0</resourceBundle>
-                  <resourceBundle>org.eclipse.jetty.toolchain:jetty-distribution-remote-resources:1.1</resourceBundle>
-                </resourceBundles>
-                <outputDirectory>${assembly.directory}</outputDirectory>
-              </configuration>
-            </execution>
-          </executions>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -697,24 +588,6 @@
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jsp-2.1-glassfish</artifactId>
       <version>${jsp-2-1-version}</version>
-    </dependency>               
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>test-jndi-webapp</artifactId>
-      <type>war</type>
-      <version>${project.version}</version>
-    </dependency>               
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>test-annotation-webapp</artifactId>
-      <type>war</type>
-      <version>${project.version}</version>
-    </dependency>               
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>test-jaas-webapp</artifactId>
-      <type>war</type>
-      <version>${project.version}</version>
     </dependency>               
   </dependencies>
 </project>

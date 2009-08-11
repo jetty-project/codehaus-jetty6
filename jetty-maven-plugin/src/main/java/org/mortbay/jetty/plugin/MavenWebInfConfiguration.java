@@ -38,8 +38,10 @@ import org.eclipse.jetty.webapp.WebInfConfiguration;
 
 public class MavenWebInfConfiguration extends WebInfConfiguration
 {
+    
     public void configure(WebAppContext context) throws Exception
     {
+
         JettyWebAppContext jwac = (JettyWebAppContext)context;
         if (jwac.getClassPathFiles() != null)
         {
@@ -53,7 +55,9 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
             if (Log.isDebugEnabled())
                 Log.debug("Classpath = "+LazyList.array2List(((URLClassLoader)context.getClassLoader()).getURLs()));
         }
+        
         super.configure(context);
+        
 
         // knock out environmental maven and plexus classes from webAppContext
         String[] existingServerClasses = context.getServerClasses();
@@ -134,7 +138,7 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
             File webInfDir=new File(extractedWebInfDir,"WEB-INF");
             webInfDir.mkdir();
             Log.info("Extract " + web_inf + " to " + webInfDir);
-            web_inf.copyTo(webInfDir);
+            JarResource.extract(web_inf, webInfDir, false);
             web_inf=Resource.newResource(extractedWebInfDir.toURL());
             
             ResourceCollection rc = new ResourceCollection(new Resource[]{web_inf,web_app});
