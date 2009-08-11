@@ -20,7 +20,7 @@
        <directory>target</directory>
       <outputDirectory></outputDirectory>
       <includes>
-        <include>**/annotations-context.xml</include>
+        <include>**/test-annotations.xml</include>
       </includes>
     </fileSet>
     <fileSet>

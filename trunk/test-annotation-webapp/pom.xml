@@ -22,7 +22,7 @@
                 <concat destfile="${project.build.directory}/plugin-context.xml">
                   <filelist dir="src/main/templates/" files="plugin-context-header.xml,env-definitions.xml" />
                 </concat>
-                <concat destfile="${project.build.directory}/contexts/annotations-context.xml">
+                <concat destfile="${project.build.directory}/contexts/test-annotations.xml">
                   <filelist dir="src/main/templates/" files="annotations-context-header.xml,env-definitions.xml" />
                 </concat>
               </tasks>
