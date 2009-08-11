@@ -24,6 +24,5 @@
   <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/test-jndi</Set>
   <Set name="extractWAR">false</Set>
   <Set name="copyWebDir">false</Set>
-  <Set name="descriptor"><SystemProperty name="jetty.home" default="."/>/contexts/test-jndi.d/WEB-INF/instruction-web.xml</Set>
   <Set name="configurationDiscovered">true</Set>
 
