@@ -57,6 +57,10 @@ The run directory is either the top-level of a distribution
 or jetty-distribution/target/distribution directory when built from
 source.
 
+To run with all the demo options:
+
+  java -jar start.jar OPTIONS=All
+
 To run with the default options:
 
   java -jar start.jar
