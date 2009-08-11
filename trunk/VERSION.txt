@@ -1,0 +1,5 @@
+
+
+jetty@codehaus 7.0.0.RC4-SNAPSHOT
+
+ + created separate VERSION.txt file
