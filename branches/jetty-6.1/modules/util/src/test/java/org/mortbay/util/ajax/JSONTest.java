@@ -76,6 +76,7 @@ public class JSONTest extends TestCase
         obj7.put("x","value");
         
         String s = JSON.toString(map);
+        System.err.println(s);
         assertTrue(s.indexOf("\"n1\":null")>=0);
         assertTrue(s.indexOf("\"n2\":2")>=0);
         assertTrue(s.indexOf("\"n3\":-3.0E-11")>=0);
@@ -92,6 +93,7 @@ public class JSONTest extends TestCase
         gadget.setWoggles(new Woggle[]{w0,w1});
         
         s = JSON.toString(new Gadget[]{gadget});
+        System.err.println(s);
         assertTrue(s.startsWith("["));
         assertTrue(s.indexOf("\"modulated\":false")>=0);
         assertTrue(s.indexOf("\"shields\":42")>=0);

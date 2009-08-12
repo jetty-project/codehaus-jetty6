@@ -22,6 +22,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -74,7 +75,7 @@ public class JSON
 {
     private static JSON __default = new JSON();
 
-    private Map _convertors=new HashMap();
+    private Map _convertors=Collections.synchronizedMap(new HashMap());
     private int _stringBufferSize=256;
     
     
@@ -538,7 +539,7 @@ public class JSON
      */
     public void addConvertor(Class forClass, Convertor convertor)
     {
-        _convertors.put(forClass,convertor);
+        _convertors.put(forClass.getName(),convertor);
     }
     
     /**
@@ -551,27 +552,50 @@ public class JSON
      */
     protected Convertor getConvertor(Class forClass)
     {
-        Class c=forClass;
-        Convertor convertor=(Convertor)_convertors.get(c);
+        Class cls=forClass;
+        Convertor convertor=(Convertor)_convertors.get(cls.getName());
         if (convertor==null && this!=__default)
-            convertor=__default.getConvertor(forClass);
+            convertor=__default.getConvertor(cls);
         
-        while (convertor==null&&c!=null&&c!=Object.class)
+        while (convertor==null&&cls!=null&&cls!=Object.class)
         {
-            Class[] ifs=c.getInterfaces();
+            Class[] ifs=cls.getInterfaces();
             int i=0;
             while (convertor==null&&ifs!=null&&i<ifs.length)
-                convertor=(Convertor)_convertors.get(ifs[i++]);
+                convertor=(Convertor)_convertors.get(ifs[i++].getName());
             if (convertor==null)
             {
-                c=c.getSuperclass();
-                convertor=(Convertor)_convertors.get(c);
+                cls=cls.getSuperclass();
+                convertor=(Convertor)_convertors.get(cls.getName());
             }
         }
         return convertor;
     }
 
+    /**
+     * Register a {@link Convertor} for a named class or interface.
+     * @param name name of a class or an interface that the convertor applies to
+     * @param convertor the convertor
+     */
+    public void addConvertorFor(String name, Convertor convertor)
+    {
+        _convertors.put(name,convertor);
+    }   
     
+    /**
+     * Lookup a convertor for a named class.
+     *
+     * @param name name of the class
+     * @return a {@link Convertor} or null if none were found.
+     */
+    public Convertor getConvertorFor(String name)
+    {
+        String clsName=name;
+        Convertor convertor=(Convertor)_convertors.get(clsName);
+        if (convertor==null && this!=__default)
+            convertor=__default.getConvertorFor(clsName);
+        return convertor;
+    }   
 
     public Object parse(Source source, boolean stripOuterComment)
     {
