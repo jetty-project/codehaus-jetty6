@@ -68,9 +68,10 @@ public class HashSSORealm implements SSORealm
         {
             // TODO - make this work for non webapps
             UserRealm realm = ((WebAppContext)(request.getContext().getContextHandler())).getSecurityHandler().getUserRealm();
-            if (realm.reauthenticate(principal))
+            Principal authPrincipal = realm.authenticate(principal.getName(), credential, request);
+            if (authPrincipal != null)
             {
-                request.setUserPrincipal(principal);
+                request.setUserPrincipal(authPrincipal);
                 return credential;
             }
             else
