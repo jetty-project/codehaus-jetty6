@@ -106,30 +106,23 @@ public class ContentExchange extends CachedExchange
         _responseStatus = status;
         super.onResponseStatus(version,status,reason);
     }
-    
+
+
     /* ------------------------------------------------------------ */
     protected void onResponseHeader(Buffer name, Buffer value) throws IOException
     {
         super.onResponseHeader(name,value);
-        int header = HttpHeaders.CACHE.getOrdinal(value);
+        int header = HttpHeaders.CACHE.getOrdinal(name);
         switch (header)
         {
             case HttpHeaders.CONTENT_LENGTH_ORDINAL:
                 _contentLength = BufferUtil.toInt(value);
                 break;
             case HttpHeaders.CONTENT_TYPE_ORDINAL:
-
                 String mime = StringUtil.asciiToLowerCase(value.toString());
                 int i = mime.indexOf("charset=");
                 if (i > 0)
-                {
-                    mime = mime.substring(i + 8);
-                    i = mime.indexOf(';');
-                    if (i > 0)
-                        mime = mime.substring(0,i);
-                }
-                if (mime != null && mime.length() > 0)
-                    _encoding = mime;
+                    _encoding = mime.substring(i + 8);
                 break;
         }
     }

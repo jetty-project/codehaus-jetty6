@@ -18,6 +18,7 @@ jetty-6.1-SNAPSHOT
  + 283513 Check endp.isOpen when blocking read
  + JETTY-1077 HashSSORealm shares Principals between UserRealms
  + JETTY-1078 Automatic JSON Pojo Conversion
+ + 286535 ContentExchange status code
 
 jetty-6.1.19 1 July 2009
  + JETTY-799 shell script for jetty on cygwin
