@@ -434,7 +434,7 @@ public class ResourceCollection extends Resource
     public String toString()
     {
         if(_resources==null)
-            throw new IllegalStateException("*resources* not set.");
+            return "";
         
         StringBuffer buffer = new StringBuffer();
         for(int i=0; i<_resources.length; i++)
