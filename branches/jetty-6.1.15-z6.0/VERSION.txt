@@ -12,7 +12,8 @@ Patches:
  + Added DebugHandler
  + JETTY-1079 ResourceCollection.toString() can throw IllegalStateException
  + Added UncheckedPrintWriter & RuntimeIOException
-
+ + 286911 Clean out cache when recycling HTTP fields
+ 
 jetty-6.1.15 4 March 2009
  + JETTY-931 Fix issue with jetty-rewrite.xml
  + JETTY-934 fixed stop/start of Bayeux Client
