@@ -1,6 +1,7 @@
 
 
-jetty@codehaus 7.0.0.RC4-SNAPSHOT
-
+jetty@codehaus 7.0.0.RC4 18 August 2009
  + created separate VERSION.txt file
  + 286242 Ported jetty-setuid from jetty-6
+
+ 
