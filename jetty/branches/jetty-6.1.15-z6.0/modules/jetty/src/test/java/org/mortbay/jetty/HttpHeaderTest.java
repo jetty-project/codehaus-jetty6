@@ -305,6 +305,21 @@ public class HttpHeaderTest extends TestCase
         assertEquals(false, e.hasMoreElements());
     }
     
+    public void testDestroy()
+	    throws Exception
+	{
+	    HttpFields header = new HttpFields();
+	    
+	    header.put(new ByteArrayBuffer("name0"), new View(new ByteArrayBuffer("value0")));
+	    assertTrue(header.getFieldNames().hasMoreElements());
+	    assertNotNull(header.getStringField("name0"));
+	    assertNull(header.getStringField("name1"));
+	    
+	    header.destroy();
+	
+	    assertNull(header.getStringField("name0"));
+	}
+
     public void testCase()
     throws Exception
     {
