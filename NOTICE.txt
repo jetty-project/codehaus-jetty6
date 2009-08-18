@@ -26,3 +26,6 @@ http://svn.codehaus.org/jetty/jetty/trunk/jetty-win32/LICENSE.txt
 
 The Atomikos binary jars in the repository module are licensed under
 the Apache 2 License and are copyright Atomikos.
+
+The jetty-setuid module uses https://jna.dev.java.net/ which
+is licensed with LGPL
