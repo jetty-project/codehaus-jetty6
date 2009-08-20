@@ -22,7 +22,8 @@ jetty-6.1-SNAPSHOT
  + JETTY-1079 ResourceCollection.toString() can throw IllegalStateException
  + JETTY-1080 Ignore files that would be extracted outside the destination directory when unpacking WARs
  + 286911 Clean out cache when recycling HTTP fields
- 
+ + JETTY-1081 Handle null content type in GzipFilter
+  
 jetty-6.1.19 1 July 2009
  + JETTY-799 shell script for jetty on cygwin
  + JETTY-863 Non blocking stats handler
