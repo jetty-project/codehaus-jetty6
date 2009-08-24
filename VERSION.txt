@@ -11,8 +11,8 @@ Patches:
  + JETTY-1068 Avoid busy flush of async SSL and force minimal buffer size
  + Added DebugHandler
  + JETTY-1079 ResourceCollection.toString() can throw IllegalStateException
- + Added UncheckedPrintWriter & RuntimeIOException
  + 286911 Clean out cache when recycling HTTP fields
+ + JETTY-1086 Added UncheckedPrintWriter to avoid ignored EOFs
  
 jetty-6.1.15 4 March 2009
  + JETTY-931 Fix issue with jetty-rewrite.xml
