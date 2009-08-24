@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
+import org.mortbay.io.RuntimeIOException;
 import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.io.UncheckedPrintWriter;
 import org.mortbay.io.nio.SelectChannelEndPoint;
@@ -532,6 +533,12 @@ public class HttpConnection implements Connection
                 Log.debug(e);
                 _request.setHandled(true);
                 _response.sendError(e.getStatus(),e.getReason());
+                error = true;
+            }
+            catch (RuntimeIOException e)
+            {
+                Log.debug(e);
+                _request.setHandled(true);
                 error = true;
             }
             catch (Throwable e)
