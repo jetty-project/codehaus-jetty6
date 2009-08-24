@@ -111,8 +111,8 @@ public class DebugHandler extends HandlerWrapper
                 _print.println(d+(ms>99?".":(ms>9?".0":".00"))+ms+":"+name+" SUSPEND");
             else
                 _print.println(d+(ms>99?".":(ms>9?".0":".00"))+ms+":"+name+" "+sresponse.getStatus()+
-                        (ex==null?"":("/"+ex))+
-                        " "+sresponse.getContentType()+" "+sresponse.getContentCount());
+                        " "+sresponse.getContentType()+" "+sresponse.getContentCount()+
+                        (ex==null?"":("/"+ex)));
         }
     }
 

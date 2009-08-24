@@ -36,6 +36,7 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.io.RuntimeIOException;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpException;
@@ -397,6 +398,10 @@ public class ServletHandler extends AbstractHandler
             throw e;
         }
         catch(EofException e)
+        {
+            throw e;
+        }
+        catch(RuntimeIOException e)
         {
             throw e;
         }
