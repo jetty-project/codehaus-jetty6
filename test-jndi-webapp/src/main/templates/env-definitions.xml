@@ -35,7 +35,7 @@
              <Put name="mail.smtp.auth">false</Put> <!-- change to true if you want to authenticate -->
              <Put name="mail.smtp.host">CHANGE-ME</Put>
              <Put name="mail.from">CHANGE-ME</Put>
-             <Put name="mail.debug">true</Put>
+             <Put name="mail.debug">false</Put>
            </New>
           </Set>
        </New>
