@@ -63,6 +63,7 @@ public class DebugHandler extends HandlerWrapper
         else
             retry=true;
         
+        String ex=null;
         try
         {
             final String d=_date.now();
@@ -81,6 +82,26 @@ public class DebugHandler extends HandlerWrapper
             request.setAttribute("org.mortbay.jetty.thread.name",name);
             throw r;
         }
+        catch(IOException ioe)
+        {
+            ex=ioe.toString();
+            throw ioe;
+        }
+        catch(ServletException se)
+        {
+            ex=se.toString()+":"+se.getCause();
+            throw se;
+        }
+        catch(RuntimeException rte)
+        {
+            ex=rte.toString();
+            throw rte;
+        }
+        catch(Error e)
+        {
+            ex=e.toString();
+            throw e;
+        }
         finally
         {
             thread.setName(old_name);
@@ -89,7 +110,9 @@ public class DebugHandler extends HandlerWrapper
             if (suspend)
                 _print.println(d+(ms>99?".":(ms>9?".0":".00"))+ms+":"+name+" SUSPEND");
             else
-                _print.println(d+(ms>99?".":(ms>9?".0":".00"))+ms+":"+name+" "+sresponse.getStatus()+" "+sresponse.getContentType()+" "+sresponse.getContentCount());
+                _print.println(d+(ms>99?".":(ms>9?".0":".00"))+ms+":"+name+" "+sresponse.getStatus()+
+                        (ex==null?"":("/"+ex))+
+                        " "+sresponse.getContentType()+" "+sresponse.getContentCount());
         }
     }
 
