@@ -13,6 +13,7 @@ Patches:
  + JETTY-1079 ResourceCollection.toString() can throw IllegalStateException
  + 286911 Clean out cache when recycling HTTP fields
  + JETTY-1086 Added UncheckedPrintWriter to avoid ignored EOFs
+ + Protect setConfigurations when running
  
 jetty-6.1.15 4 March 2009
  + JETTY-931 Fix issue with jetty-rewrite.xml
