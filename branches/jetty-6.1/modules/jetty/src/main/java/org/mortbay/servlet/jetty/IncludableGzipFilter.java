@@ -92,6 +92,6 @@ public class IncludableGzipFilter extends GzipFilter
     {
         if (_uncheckedPrintWriter)
             return encoding==null?new UncheckedPrintWriter(out):new UncheckedPrintWriter(new OutputStreamWriter(out,encoding));
-        return encoding==null?new PrintWriter(out):new PrintWriter(new OutputStreamWriter(out,encoding));
+        return super.newWriter(out,encoding);
     }
 }

@@ -160,6 +160,13 @@ public class GzipFilter extends UserAgentFilter
         return new GZIPResponseWrapper(request,response);
     }
 
+    /*
+     * Allows derived implementations to replace PrintWriter implementation
+     */
+    protected PrintWriter newWriter(OutputStream out,String encoding) throws UnsupportedEncodingException
+    {
+        return encoding==null?new PrintWriter(out):new PrintWriter(new OutputStreamWriter(out,encoding));
+    }
 
     public class GZIPResponseWrapper extends HttpServletResponseWrapper
     {
@@ -354,14 +361,6 @@ public class GzipFilter extends UserAgentFilter
             }
             return _writer;   
         }
-        
-        /*
-         * Allows derived implementations to replace PrintWriter implementation
-         */
-        protected PrintWriter newWriter(OutputStream out,String encoding) throws UnsupportedEncodingException
-        {
-            return encoding==null?new PrintWriter(out):new PrintWriter(new OutputStreamWriter(out,encoding));
-        }
 
         void noGzip()
         {
@@ -381,7 +380,7 @@ public class GzipFilter extends UserAgentFilter
         
         void finish() throws IOException
         {
-            if (_writer!=null)
+            if (_writer!=null && !_gzStream._closed)
                 _writer.flush();
             if (_gzStream!=null)
                 _gzStream.finish();
