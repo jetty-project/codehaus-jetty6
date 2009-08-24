@@ -114,7 +114,7 @@ public class Dump extends HttpServlet
         String dribble= request.getParameter("dribble");
         if (data != null && data.length() > 0)
         {
-            int d=Integer.parseInt(data);
+            long d=Long.parseLong(data);
             int b=(block!=null&&block.length()>0)?Integer.parseInt(block):50;
             byte[] buf=new byte[b];
             for (int i=0;i<b;i++)
@@ -141,7 +141,7 @@ public class Dump extends HttpServlet
                 }
                 else
                 {
-                    out.write(buf,0,d);
+                    out.write(buf,0,(int)d);
                     d=0;
                 }
                 
@@ -163,6 +163,44 @@ public class Dump extends HttpServlet
             
             return;
         }
+
+        // Handle a dump of data
+        String chars= request.getParameter("chars");
+        if (chars != null && chars.length() > 0)
+        {
+            long d=Long.parseLong(chars);
+            int b=(block!=null&&block.length()>0)?Integer.parseInt(block):50;
+            char[] buf=new char[b];
+            for (int i=0;i<b;i++)
+            {
+                buf[i]=(char)('0'+(i%10));
+                if (i%10==9)
+                    buf[i]='\n';
+            }
+            buf[0]='o';
+            response.setContentType("text/plain");
+            PrintWriter out=response.getWriter();
+	    while (d > 0 && !out.checkError())
+            {
+                if (b==1)
+                {
+                    out.write(d%80==0?'\n':'.');
+                    d--;
+                }
+                else if (d>=b)
+                {
+                    out.write(buf);
+                    d=d-b;
+                }
+                else
+                {
+                    out.write(buf,0,(int)d);
+                    d=0;
+                }
+            }
+            return;
+        }
+
         
         
         // handle an exception
