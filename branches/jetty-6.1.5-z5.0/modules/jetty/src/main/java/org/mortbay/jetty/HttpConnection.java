@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
+import org.mortbay.io.RuntimeIOException;
 import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.io.UncheckedPrintWriter;
 import org.mortbay.io.nio.SelectChannelEndPoint;
