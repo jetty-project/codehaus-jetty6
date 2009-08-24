@@ -25,6 +25,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1081 Handle null content type in GzipFilter
  + JETTY-1057 XSS error page
  + JETTY-1086 Added UncheckedPrintWriter to avoid ignored EOFs
+ + JETTY-1087 Chunked SSL non blocking input
   
 jetty-6.1.19 1 July 2009
  + JETTY-799 shell script for jetty on cygwin

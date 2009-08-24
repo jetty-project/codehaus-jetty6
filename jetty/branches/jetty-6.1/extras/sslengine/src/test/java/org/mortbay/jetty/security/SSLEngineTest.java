@@ -22,15 +22,24 @@ package org.mortbay.jetty.security;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
 import java.net.Socket;
+import java.net.URL;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,6 +49,8 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.security.SslSelectChannelConnector;
+import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.jetty.servlet.ServletHolder;
 
 /**
  * HttpServer Tester.
@@ -50,6 +61,7 @@ public class SSLEngineTest extends TestCase
     // ---------------------------------------------
 
     // Useful constants
+    private static final int BODY_SIZE = 300;
     private static final String HELLO_WORLD="Hello world\r\n";
     private static final String JETTY_VERSION=Server.getVersion();
     private static final String PROTOCOL_VERSION="2.0";
@@ -68,24 +80,26 @@ public class SSLEngineTest extends TestCase
     private static final String RESPONSE0="HTTP/1.1 200 OK\n"+"Content-Length: "+HELLO_WORLD.length()+"\n"+"Server: Jetty("+JETTY_VERSION+")\n"+'\n'+"Hello world\n";
     private static final String RESPONSE1="HTTP/1.1 200 OK\n"+"Connection: close\n"+"Server: Jetty("+JETTY_VERSION+")\n"+'\n'+"Hello world\n";
 
-    private static final TrustManager[] s_dummyTrustManagers=new TrustManager[]
-    { new X509TrustManager()
+
+    private static class CredulousTM implements TrustManager, X509TrustManager
     {
-        public java.security.cert.X509Certificate[] getAcceptedIssuers()
+        public X509Certificate[] getAcceptedIssuers()
         {
             return null;
         }
 
-        public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType)
-
+        public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException
         {
+            return;
         }
 
-        public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType)
-
+        public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException
         {
+            return;
         }
-    } };
+    }
+    
+    private static final TrustManager[] s_dummyTrustManagers=new TrustManager[]  { new CredulousTM() };
 
     // ~ Methods
     // ----------------------------------------------------------------
@@ -110,18 +124,18 @@ public class SSLEngineTest extends TestCase
         server.setConnectors(new Connector[]
         { connector });
         server.setHandler(new HelloWorldHandler());
-        server.start();
-
         final int numConns=200;
         Socket[] client=new Socket[numConns];
-
-        SSLContext ctx=SSLContext.getInstance("SSLv3");
-        ctx.init(null,s_dummyTrustManagers,new java.security.SecureRandom());
-
-        int port=connector.getLocalPort();
-
+        
         try
         {
+            server.start();
+
+            SSLContext ctx=SSLContext.getInstance("SSLv3");
+            ctx.init(null,s_dummyTrustManagers,new java.security.SecureRandom());
+
+            int port=connector.getLocalPort();
+
             for (int i=0; i<numConns; ++i)
             {
                 // System.err.println("write:"+i);
@@ -203,9 +217,6 @@ public class SSLEngineTest extends TestCase
 
     private static class HelloWorldHandler extends AbstractHandler
     {
-        // ~ Methods
-        // ------------------------------------------------------------
-
         public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
             PrintWriter out=response.getWriter();
@@ -218,6 +229,117 @@ public class SSLEngineTest extends TestCase
             {
                 out.close();
             }
+        }
+    }
+
+    public void testServletPost() throws Exception
+    {
+        Server server=new Server();
+        SslSelectChannelConnector connector=new SslSelectChannelConnector();
+
+        String keystore = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+"keystore";
+        
+        connector.setPort(0);
+        connector.setKeystore(keystore);
+        connector.setPassword("storepwd");
+        connector.setKeyPassword("keypwd");
+        connector.setTruststore(keystore);
+        connector.setTrustPassword("storepwd");
+
+        server.setConnectors(new Connector[]
+        { connector });
+
+        ServletHandler handler = new ServletHandler();
+        TestServlet servlet = new TestServlet();
+        handler.addServletWithMapping(new ServletHolder(servlet),"/test");
+        server.addHandler(handler);
+        
+        try
+        {
+            SSLContext context = SSLContext.getInstance("SSL");
+            context.init(null,s_dummyTrustManagers,new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
+
+            server.start();
+
+            URL url = new URL("https://localhost:"+connector.getLocalPort()+"/test");
+
+            HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+            if (conn instanceof HttpsURLConnection)
+            {
+                ((HttpsURLConnection)conn).setHostnameVerifier(new HostnameVerifier()
+                {
+                    public boolean verify(String urlHostName, SSLSession session)
+                    {
+                        return true;
+                    }
+                });
+            }
+
+            conn.setConnectTimeout(10000);
+            conn.setReadTimeout(100000);
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type","text/plain"); //$NON-NLS-1$
+            conn.setChunkedStreamingMode(128);
+            conn.connect();
+            byte[] b = new byte[BODY_SIZE];
+            for (int i = 0; i < BODY_SIZE; i++)
+            {
+                b[i] = 'x';
+            }
+            OutputStream os = conn.getOutputStream();
+            os.write(b);
+            os.flush();
+            int rc = conn.getResponseCode();
+
+            int len = 0;
+            InputStream is = conn.getInputStream();
+            int bytes=0;
+            while ((len = is.read(b)) > -1)
+                bytes+=len;
+            is.close();
+
+            assertEquals(BODY_SIZE,servlet.bytes);
+            assertEquals(BODY_SIZE,bytes);
+            
+        }
+        finally
+        {
+            server.stop();
+        }
+    }
+
+    public static class TestServlet extends HttpServlet
+    {
+        public int bytes=0;
+        
+        @Override
+        protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+        {
+            resp.setContentType("text/plain");
+            resp.setBufferSize(128);
+            byte[] b = new byte[BODY_SIZE];
+            int len = 0;
+            InputStream is = req.getInputStream();
+
+            // !!!! UNDER HTTPS, FIRST CHUNK IS READ HERE BUT THEN SERVER IS
+            // WAITING FOR
+            // !!!! MORE DATA
+            while ((len = is.read(b)) > -1)
+            {
+                bytes+=len;
+            }
+
+            OutputStream os = resp.getOutputStream();
+            for (int i = 0; i < BODY_SIZE; i++)
+            {
+                b[i] = 'x';
+            }
+            os.write(b);
+            resp.flushBuffer();
+
         }
     }
 }
