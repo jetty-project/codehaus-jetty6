@@ -31,6 +31,7 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
 
+import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.Server;
@@ -980,6 +981,8 @@ public class WebAppContext extends Context
      */
     public void setConfigurationClasses(String[] configurations)
     {
+        if (isRunning())
+            throw new IllegalStateException("Running");
         _configurationClasses = configurations==null?null:(String[])configurations.clone();
     }
     
@@ -989,6 +992,8 @@ public class WebAppContext extends Context
      */
     public void setConfigurations(Configuration[] configurations)
     {
+        if (isRunning())
+            throw new IllegalStateException("Running");
         _configurations = configurations==null?null:(Configuration[])configurations.clone();
     }
 
@@ -999,6 +1004,8 @@ public class WebAppContext extends Context
      */
     public void setDefaultsDescriptor(String defaultsDescriptor)
     {
+        if (isRunning())
+            throw new IllegalStateException("Running");
         _defaultsDescriptor = defaultsDescriptor;
     }
 
@@ -1009,6 +1016,8 @@ public class WebAppContext extends Context
      */
     public void setOverrideDescriptor(String overrideDescriptor)
     {
+        if (isRunning())
+            throw new IllegalStateException("Running");
         _overrideDescriptor = overrideDescriptor;
     }
 
@@ -1027,6 +1036,8 @@ public class WebAppContext extends Context
      */
     public void setDescriptor(String descriptor)
     {
+        if (isRunning())
+            throw new IllegalStateException("Running");
         _descriptor=descriptor;
     }
     
