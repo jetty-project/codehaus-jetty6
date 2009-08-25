@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.plus.webapp.EnvConfiguration;
+import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.FragmentConfiguration;
 import org.eclipse.jetty.webapp.JettyWebXmlConfiguration;
@@ -51,13 +52,13 @@ public class JettyWebAppContext extends WebAppContext
     private JettyWebXmlConfiguration jettyWebConfig =  new JettyWebXmlConfiguration();
     private TagLibConfiguration tagConfig = new TagLibConfiguration();
     private Configuration[] configs;
+    private List<Resource> overlays;
     
     public JettyWebAppContext ()
     throws Exception
     {
         super();   
         configs = new Configuration[]{webInfConfig, webXmlConfig,  metaInfConfig,  fragConfig, envConfig, plusConfig, annotationConfig, jettyWebConfig, tagConfig };
-        setConfigurations(configs);
     }
     
     public void setClassPathFiles(List<File> classpathFiles)
@@ -68,6 +69,16 @@ public class JettyWebAppContext extends WebAppContext
     public List<File> getClassPathFiles()
     {
         return this.classpathFiles;
+    }
+    
+    public void setOverlays (List<Resource> overlays)
+    {
+        this.overlays = overlays;
+    }
+    
+    public List<Resource> getOverlays ()
+    {
+        return this.overlays;
     }
     
     public void setJettyEnvXml (String jettyEnvXml)
@@ -83,6 +94,7 @@ public class JettyWebAppContext extends WebAppContext
 
     public void doStart () throws Exception
     {
+        setConfigurations(configs);
         
         if (this.jettyEnvXml != null)
             envConfig.setJettyEnvXml(new File(this.jettyEnvXml).toURL());
