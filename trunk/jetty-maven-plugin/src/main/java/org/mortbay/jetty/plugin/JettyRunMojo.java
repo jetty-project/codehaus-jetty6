@@ -327,7 +327,9 @@ public class JettyRunMojo extends AbstractJettyMojo
             {
                 Resource r = Resource.newResource(webXml);
                 if (r.exists() && !r.isDirectory())
+                {
                     webAppConfig.setDescriptor(r.toString());
+                }
             }
             
             //Still don't have a web.xml file: try the resourceBase of the webapp, if it is set
@@ -335,7 +337,9 @@ public class JettyRunMojo extends AbstractJettyMojo
             {
                 Resource r = webAppConfig.getBaseResource().addPath("WEB-INF/web.xml");
                 if (r.exists() && !r.isDirectory())
+                {
                     webAppConfig.setDescriptor(r.toString());
+                }
             }
             
             //Still don't have a web.xml file: finally try the configured static resource directory if there is one
@@ -362,14 +366,17 @@ public class JettyRunMojo extends AbstractJettyMojo
     {
         // start the scanner thread (if necessary) on the main webapp
         final ArrayList<File> scanList = new ArrayList<File>();
-        try
+        if (webAppConfig.getDescriptor() != null)
         {
-            Resource r = Resource.newResource(webAppConfig.getDescriptor());
-            scanList.add(r.getFile());
-        }
-        catch (IOException e)
-        {
-            throw new MojoExecutionException("Problem configuring scanner for web.xml", e);
+            try
+            {
+                Resource r = Resource.newResource(webAppConfig.getDescriptor());
+                scanList.add(r.getFile());
+            }
+            catch (IOException e)
+            {
+                throw new MojoExecutionException("Problem configuring scanner for web.xml", e);
+            }
         }
 
         if (webAppConfig.getJettyEnvXml() != null)
