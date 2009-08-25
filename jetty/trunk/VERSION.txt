@@ -1,4 +1,6 @@
-
+SNAPSHOT
+ + JETTY-1021 jetty-maven-plugin overlay or reload issue
+ 
 
 jetty@codehaus 7.0.0.RC4 18 August 2009
  + created separate VERSION.txt file

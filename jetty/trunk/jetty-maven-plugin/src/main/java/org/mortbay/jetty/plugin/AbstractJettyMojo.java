@@ -240,7 +240,8 @@ public abstract class AbstractJettyMojo extends AbstractMojo
 
     
     public String PORT_SYSPROPERTY = "jetty.port";
-     
+    
+   
 
     public abstract void checkPomConfiguration() throws MojoExecutionException;
     
@@ -417,7 +418,6 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             configureWebApplication();
             this.server.addWebApplication(webAppConfig);
 
-
             // set up security realms
             for (int i = 0; (this.loginServices != null) && i < this.loginServices.length; i++)
             {
@@ -505,7 +505,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         //If no tmp directory was specified, and we have one, use it
         if (webAppConfig.getTempDirectory() == null && tmpDirectory != null)
             webAppConfig.setTempDirectory(tmpDirectory);
-
+      
         getLog().info("Context path = " + webAppConfig.getContextPath());
         getLog().info("Tmp directory = "+ (webAppConfig.getTempDirectory()== null? " determined at runtime": webAppConfig.getTempDirectory()));
         getLog().info("Web defaults = "+(webAppConfig.getDefaultsDescriptor()==null?" jetty default":webAppConfig.getDefaultsDescriptor()));
