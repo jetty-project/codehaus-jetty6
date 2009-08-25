@@ -487,7 +487,6 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         //context xml file can OVERRIDE those settings
         if (webAppXml != null)
         {
-            webAppConfig = new JettyWebAppContext();
             File file = FileUtils.getFile(webAppXml);
             XmlConfiguration xmlConfiguration = new XmlConfiguration(file.toURL());
             getLog().info("Applying context xml file "+webAppXml);
