@@ -16,12 +16,6 @@
 package org.mortbay.jetty.plugin;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -29,7 +23,6 @@ import java.util.List;
 
 import org.eclipse.jetty.util.LazyList;
 import org.eclipse.jetty.util.log.Log;
-import org.eclipse.jetty.util.resource.JarResource;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceCollection;
 import org.eclipse.jetty.webapp.WebAppClassLoader;
@@ -38,12 +31,14 @@ import org.eclipse.jetty.webapp.WebInfConfiguration;
 
 public class MavenWebInfConfiguration extends WebInfConfiguration
 {
+    protected Resource _originalResourceBase;
+    
     public void configure(WebAppContext context) throws Exception
     {
         JettyWebAppContext jwac = (JettyWebAppContext)context;
         if (jwac.getClassPathFiles() != null)
         {
-            Log.debug("Setting up classpath ...");
+            if (Log.isDebugEnabled()) Log.debug("Setting up classpath ...");
 
             //put the classes dir and all dependencies into the classpath
             Iterator itor = jwac.getClassPathFiles().iterator();
@@ -61,22 +56,81 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
         newServerClasses[0] = "-org.apache.maven.";
         newServerClasses[1] = "-org.codehaus.plexus.";
         System.arraycopy( existingServerClasses, 0, newServerClasses, 2, existingServerClasses.length );
-
-        context.setServerClasses( newServerClasses );
+        context.setServerClasses( newServerClasses ); 
     }
 
 
-
-    public void deconfigure(WebAppContext context) throws Exception
+    public void preConfigure(WebAppContext context) throws Exception
     {
-        super.deconfigure(context);
-    }
+        _originalResourceBase = context.getBaseResource();
+        JettyWebAppContext jwac = (JettyWebAppContext)context;
 
+        //Add in any overlaid wars as base resources
+        if (jwac.getOverlays() != null && !jwac.getOverlays().isEmpty())
+        {
+            ResourceCollection rc = new ResourceCollection();
+
+            if(jwac.getBaseResource()==null)
+            {
+                // nothing configured, so we automagically enable the overlays                    
+                int size = jwac.getOverlays().size()+1;
+                Resource[] resources = new Resource[size];
+                for(int i=0; i<size; i++)
+                {
+                    resources[i] = jwac.getOverlays().get(i);
+                    Log.info("Adding overlay: " + resources[i]);
+                }
+                rc.setResources(resources);
+            }                
+            else
+            {                    
+                if(jwac.getBaseResource() instanceof ResourceCollection)
+                {
+                    // there was a preconfigured ResourceCollection ... append the artifact wars
+                    Resource[] old = ((ResourceCollection)jwac.getBaseResource()).getResources();
+                    int size = old.length + jwac.getOverlays().size();
+                    Resource[] resources = new Resource[size];
+                    System.arraycopy(old, 0, resources, 0, old.length);
+                    for(int i=old.length,j=0; i<size; i++,j++)
+                    {
+                        resources[i] = jwac.getOverlays().get(j);
+                        Log.info("Adding overlay: " + resources[i]);
+                    }
+                    rc.setResources(resources);
+                }
+                else
+                {
+                    int size = jwac.getOverlays().size()+1;
+                    Resource[] resources = new Resource[size];
+                    resources[0] = jwac.getBaseResource();
+                    for(int i=1; i<size; i++)
+                    {
+                        resources[i] = jwac.getOverlays().get(i-1);
+                        Log.info("Adding overlay: " + resources[i]);
+                    }
+                    rc.setResources(resources);
+                }
+            }
+
+            jwac.setBaseResource(rc);
+        }
+        super.preConfigure(context);
+    }
+    
     public void postConfigure(WebAppContext context) throws Exception
     {
         super.postConfigure(context);
     }
 
+
+    public void deconfigure(WebAppContext context) throws Exception
+    {
+        super.deconfigure(context);
+        //restore whatever the base resource was before we might have included overlaid wars
+        context.setBaseResource(_originalResourceBase);
+    }
+
+  
     /**
      * Get the jars to examine from the files from which we have
      * synthesized the classpath. Note that the classpath is not
@@ -114,32 +168,6 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
         return list;
     }
 
-    /* ------------------------------------------------------------ */
-    @Override
-    public void unpack(WebAppContext context) throws IOException
-    {
-        // TODO remove this override after 7.0.0.RC2
-        super.unpack(context);
 
-        Resource web_app = context.getBaseResource();
-               
-        // Do we need to extract WEB-INF/lib?
-        Resource web_inf= web_app.addPath("WEB-INF/");
-        if (web_inf.exists() && web_inf.isDirectory() && (web_inf.getFile()==null || !web_app.getFile().isDirectory()))
-        {
-            File extractedWebInfDir= new File(context.getTempDirectory(), "webinf");
-            if (extractedWebInfDir.exists())
-                extractedWebInfDir.delete();
-            extractedWebInfDir.mkdir();
-            File webInfDir=new File(extractedWebInfDir,"WEB-INF");
-            webInfDir.mkdir();
-            Log.info("Extract " + web_inf + " to " + webInfDir);
-            web_inf.copyTo(webInfDir);
-            web_inf=Resource.newResource(extractedWebInfDir.toURL());
-            
-            ResourceCollection rc = new ResourceCollection(new Resource[]{web_inf,web_app});
-            context.setBaseResource(rc);
-        }    
-    }
-    
+
 }

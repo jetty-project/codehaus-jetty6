@@ -145,26 +145,6 @@ public class JettyRunMojo extends AbstractJettyMojo
      */
     private List<File> extraScanTargets;
     
-    /**
-     * overlays (resources)
-     */
-    private List _overlays;
-    
-   
-    
-    static boolean isEqual(List list1, List list2)
-    {
-        if(list2==null || list1.size()!=list2.size())
-            return false;
-        
-        for(int i=0; i<list1.size(); i++)
-        {
-            if(!list1.get(i).equals(list2.get(i)))
-                return false;
-        }
-        return true;
-    }
-    
 
     public String getWebXml()
     {
@@ -339,8 +319,6 @@ public class JettyRunMojo extends AbstractJettyMojo
   
         setClassPathFiles(setUpClassPath());
         
-        getLog().info("webapp baseResource="+webAppConfig.getBaseResource());
-        
         //if we have not already set web.xml location, need to set one up
         if (webAppConfig.getDescriptor() == null)
         {
@@ -380,12 +358,33 @@ public class JettyRunMojo extends AbstractJettyMojo
     }
     
     public void configureScanner ()
+    throws MojoExecutionException
     {
         // start the scanner thread (if necessary) on the main webapp
         final ArrayList<File> scanList = new ArrayList<File>();
-        scanList.add(new File(webAppConfig.getDescriptor()));
+        try
+        {
+            Resource r = Resource.newResource(webAppConfig.getDescriptor());
+            scanList.add(r.getFile());
+        }
+        catch (IOException e)
+        {
+            throw new MojoExecutionException("Problem configuring scanner for web.xml", e);
+        }
+
         if (webAppConfig.getJettyEnvXml() != null)
-            scanList.add(new File (webAppConfig.getJettyEnvXml()));
+        {
+            try
+            {
+                Resource r = Resource.newResource(webAppConfig.getJettyEnvXml());
+                scanList.add(r.getFile());
+            }
+            catch (IOException e)
+            {
+                throw new MojoExecutionException("Problem configuring scanner for jetty-env.xml", e);
+            }
+        }
+
         File jettyWebXmlFile = findJettyWebXmlFile(new File(getWebAppSourceDirectory(),"WEB-INF"));
         if (jettyWebXmlFile != null)
             scanList.add(jettyWebXmlFile);
@@ -418,7 +417,7 @@ public class JettyRunMojo extends AbstractJettyMojo
         getLog().debug("Stopping webapp ...");
         webAppConfig.stop();
         getLog().debug("Reconfiguring webapp ...");
-
+ 
         checkPomConfiguration();
         configureWebApplication();
 
@@ -473,63 +472,9 @@ public class JettyRunMojo extends AbstractJettyMojo
             }
         }
         
-        if(!overlays.isEmpty() && !isEqual(overlays, _overlays))
-        {
-            try
-            {
-                Resource resource = _overlays==null ? webAppConfig.getBaseResource() : null;
-                ResourceCollection rc = new ResourceCollection();
-                
-                if(resource==null)
-                {
-                    // nothing configured, so we automagically enable the overlays                    
-                    int size = overlays.size()+1;
-                    Resource[] resources = new Resource[size];
-                    resources[0] = Resource.newResource(getWebAppSourceDirectory().toURL());
-                    for(int i=1; i<size; i++)
-                    {
-                        resources[i] = overlays.get(i-1);
-                        getLog().info("Adding overlay: " + resources[i]);
-                    }
-                    rc.setResources(resources);
-                }                
-                else
-                {                    
-                    if(resource instanceof ResourceCollection)
-                    {
-                        // there was a preconfigured ResourceCollection ... append the artifact wars
-                        Resource[] old = ((ResourceCollection)resource).getResources();
-                        int size = old.length + overlays.size();
-                        Resource[] resources = new Resource[size];
-                        System.arraycopy(old, 0, resources, 0, old.length);
-                        for(int i=old.length,j=0; i<size; i++,j++)
-                        {
-                            resources[i] = overlays.get(j);
-                            getLog().info("Adding overlay: " + resources[i]);
-                        }
-                        rc.setResources(resources);
-                    }
-                    else
-                    {
-                        int size = overlays.size()+1;
-                        Resource[] resources = new Resource[size];
-                        resources[0] = resource;
-                        for(int i=1; i<size; i++)
-                        {
-                            resources[i] = overlays.get(i-1);
-                            getLog().info("Adding overlay: " + resources[i]);
-                        }
-                        rc.setResources(resources);
-                    }
-                }
-                webAppConfig.setBaseResource(rc);
-                _overlays = overlays;
-            }
-            catch(Exception e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
+        webAppConfig.setOverlays(overlays);
+        
+      
         return dependencyFiles; 
     }
     
