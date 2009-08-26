@@ -154,7 +154,8 @@ public class ResourceHandler extends AbstractHandler
         }
         catch (Exception e)
         {
-            Log.warn(e);
+            Log.warn(e.toString());
+            Log.debug(e);
             throw new IllegalArgumentException(resourceBase);
         }
     }
