@@ -135,7 +135,8 @@ public class GzipFilter extends UserAgentFilter
             catch(RuntimeException e)
             {
                 request.setAttribute("GzipFilter",Boolean.FALSE);
-                wrappedResponse.noGzip();
+                if (!response.isCommitted())
+                    response.reset();
                 throw e;
             }
             finally
