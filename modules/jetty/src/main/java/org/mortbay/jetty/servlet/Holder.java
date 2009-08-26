@@ -75,8 +75,7 @@ public class Holder extends AbstractLifeCycle implements Serializable
             }
             catch (Exception e)
             {
-                Log.warn(e.toString());
-                Log.debug(e);
+                Log.warn(e);
                 throw new UnavailableException(e.getMessage(), -1);
             }
         }
