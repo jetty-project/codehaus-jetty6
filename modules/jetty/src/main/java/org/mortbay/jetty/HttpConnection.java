@@ -621,7 +621,24 @@ public class HttpConnection implements Connection
         if (!_generator.isCommitted())
         {
             _generator.setResponse(_response.getStatus(),_response.getReason());
-            _generator.completeHeader(_responseFields,last);
+            try
+            {
+                _generator.completeHeader(_responseFields,last);
+            }
+            catch(IOException io)
+            {
+                throw io;
+            }
+            catch(RuntimeException e)
+            {
+                Log.warn("header full: "+e);
+                Log.debug(e);
+                _response.reset();
+                _generator.reset(true);
+                _generator.setResponse(HttpStatus.ORDINAL_500_Internal_Server_Error,null);
+                _generator.completeHeader(_responseFields,HttpGenerator.LAST);
+                throw e;
+            }
         }
         if (last)
             _generator.complete();
@@ -633,7 +650,25 @@ public class HttpConnection implements Connection
         if (!_generator.isCommitted())
         {
             _generator.setResponse(_response.getStatus(),_response.getReason());
-            _generator.completeHeader(_responseFields,HttpGenerator.LAST);
+            try
+            {
+                _generator.completeHeader(_responseFields,HttpGenerator.LAST);
+            }
+            catch(IOException io)
+            {
+                throw io;
+            }
+            catch(RuntimeException e)
+            {
+                Log.warn("header full: "+e);
+                Log.debug(e);
+
+                _response.reset();
+                _generator.reset(true);
+                _generator.setResponse(HttpStatus.ORDINAL_500_Internal_Server_Error,null);
+                _generator.completeHeader(_responseFields,HttpGenerator.LAST);
+                throw e;
+            }
         }
 
         _generator.complete();
