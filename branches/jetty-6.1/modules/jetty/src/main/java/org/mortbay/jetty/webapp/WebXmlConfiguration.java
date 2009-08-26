@@ -294,7 +294,8 @@ public class WebXmlConfiguration implements Configuration
             }
             catch(Exception e)
             {
-                Log.warn("Configuration problem at "+node,e);
+                Log.warn("Configuration problem at "+node+": "+e);
+                Log.debug(e);
                 throw new UnavailableException("Configuration problem");
             }
         }

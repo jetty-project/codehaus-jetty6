@@ -53,13 +53,11 @@ public abstract class AbstractLifeCycle implements LifeCycle
             }
             catch (Exception e)
             {
-                Log.warn("failed " + this,e);
                 setFailed(e);
                 throw e;
             }
             catch (Error e)
             {
-                Log.warn("failed " + this,e);
                 setFailed(e);
                 throw e;
             }
@@ -81,13 +79,11 @@ public abstract class AbstractLifeCycle implements LifeCycle
             }
             catch (Exception e)
             {
-                Log.warn("failed " + this,e);
                 setFailed(e);
                 throw e;
             }
             catch (Error e)
             {
-                Log.warn("failed " + this,e);
                 setFailed(e);
                 throw e;
             }
@@ -182,14 +178,16 @@ public abstract class AbstractLifeCycle implements LifeCycle
         }
     }
 
-    private void setFailed(Throwable error)
+    private void setFailed(Throwable th)
     {
+        Log.warn("failed "+this+": "+th);
+        Log.debug(th);
         _state = FAILED;
         if (_listeners != null)
         {
             for (int i = 0; i < _listeners.length; i++)
             {
-                _listeners[i].lifeCycleFailure(this,error);
+                _listeners[i].lifeCycleFailure(this,th);
             }
         }
     }

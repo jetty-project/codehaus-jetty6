@@ -1,4 +1,5 @@
 jetty-6.1-SNAPSHOT
+ + JETTY-838 Don't log and throw
  + JETTY-874 Better error on full header.
  + JETTY-960 Support ldaps
  + JETTY-1065 Add RedirectRegexRule to provide match/replace/group redirect support
