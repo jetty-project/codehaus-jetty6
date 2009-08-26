@@ -497,11 +497,13 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         _secureCookies=secureCookies;
     }
 
+    /* ------------------------------------------------------------ */
     public void setSessionCookie(String cookieName)
     {
         _sessionCookie=cookieName;
     }
 
+    /* ------------------------------------------------------------ */
     public void setSessionDomain(String domain)
     {
         _sessionDomain=domain;
@@ -543,6 +545,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     }
 
 
+    /* ------------------------------------------------------------ */
     protected abstract void addSession(Session session);
 
     /* ------------------------------------------------------------ */
@@ -583,6 +586,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
      */
     public abstract Session getSession(String idInCluster);
 
+    /* ------------------------------------------------------------ */
     protected abstract void invalidateSessions();
 
     
