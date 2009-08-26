@@ -985,7 +985,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         }
         catch (Exception e)
         {
-            Log.warn(e);
+            Log.warn(e.toString());
+            Log.debug(e);
             throw new IllegalArgumentException(resourceBase);
         }
     }
