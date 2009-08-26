@@ -31,6 +31,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.log.Log;
+import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
 /** SessionHandler.
@@ -216,9 +217,9 @@ public class SessionHandler extends HandlerWrapper
             return;
         }
         
-        SessionManager sessionManager = getSessionManager();
+        final SessionManager sessionManager = getSessionManager();
         boolean requested_session_id_from_cookie=false;
-        
+        HttpSession session=null;
         // Look for session id cookie    
         if (_sessionManager.isUsingCookies())
         {
@@ -241,26 +242,33 @@ public class SessionHandler extends HandlerWrapper
                         requested_session_id=cookies[i].getValue();
                         requested_session_id_from_cookie = true;
                         if(Log.isDebugEnabled())Log.debug("Got Session ID "+requested_session_id+" from cookie");
+                        
+                        session=sessionManager.getHttpSession(requested_session_id);
+                        if (session!=null)
+                            base_request.setSession(session);
                     }
                 }
             }
         }
         
-        if (requested_session_id==null)
+        if (requested_session_id==null || session==null)
         {
             String uri = request.getRequestURI();
             
             int semi = uri.lastIndexOf(';');
             if (semi>=0)
             {   
-                String path_params=uri.substring(semi+1);
-                
                 // check if there is a url encoded session param.
                 String param=sessionManager.getSessionURL();
-                if (param!=null && path_params!=null && path_params.startsWith(param))
+                if (param!=null)
                 {
-                    requested_session_id = path_params.substring(sessionManager.getSessionURL().length()+1);
-                    if(Log.isDebugEnabled())Log.debug("Got Session ID "+requested_session_id+" from URL");
+                    int p=uri.indexOf(param,semi+1);
+                    if (p>0)
+                    {
+                        requested_session_id = uri.substring(p+param.length()+1);
+                        requested_session_id_from_cookie = false;
+                        if(Log.isDebugEnabled())Log.debug("Got Session ID "+requested_session_id+" from URL");
+                    }
                 }
             }
         }

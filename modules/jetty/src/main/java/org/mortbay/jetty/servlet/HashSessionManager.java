@@ -143,7 +143,8 @@ public class HashSessionManager extends AbstractSessionManager
         if (_dftMaxIdleSecs>0&&_scavengePeriodMs>_dftMaxIdleSecs*1000)
             setScavengePeriod((_dftMaxIdleSecs+9)/10);
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void setSavePeriod (int seconds)
     {
         int oldSavePeriod = _savePeriodMs;
@@ -179,7 +180,8 @@ public class HashSessionManager extends AbstractSessionManager
             }
         }
     }
-    
+
+    /* ------------------------------------------------------------ */
     public int getSavePeriod ()
     {
         if (_savePeriodMs<=0)
@@ -351,27 +353,31 @@ public class HashSessionManager extends AbstractSessionManager
         _sessions.remove(clusterId);
     }
     
-    
+    /* ------------------------------------------------------------ */
     public void setStoreDirectory (File dir)
     {
         _storeDir=dir;
     }
     
+    /* ------------------------------------------------------------ */
     public File getStoreDirectory ()
     {
         return _storeDir;
     }
-
+    
+    /* ------------------------------------------------------------ */
     public void setLazyLoad(boolean lazyLoad)
     {
         _lazyLoad = lazyLoad;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public boolean isLazyLoad()
     {
         return _lazyLoad;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void restoreSessions () throws Exception
     {
         if (_storeDir==null || !_storeDir.exists())
@@ -404,7 +410,8 @@ public class HashSessionManager extends AbstractSessionManager
         
         _sessionsLoaded = true;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void saveSessions () throws Exception
     {
         if (_storeDir==null || !_storeDir.exists())
@@ -443,7 +450,8 @@ public class HashSessionManager extends AbstractSessionManager
             }
         }
     }
-        
+
+    /* ------------------------------------------------------------ */
     public Session restoreSession (FileInputStream fis) 
     throws Exception
     {
