@@ -333,11 +333,7 @@ public class JspcMojo extends AbstractMojo
         // delete the .java files - depending on keepGenerated setting
         if (!keepSources)
         {
-            String packageRootDirectory = packageRoot.replace('.',
-                    File.separatorChar);
-
-            File generatedClassesDir = new File(generatedClasses
-                    + File.separatorChar + packageRootDirectory);
+            File generatedClassesDir = new File(generatedClasses);
 
             if(generatedClassesDir.exists() && generatedClassesDir.isDirectory())
             {
