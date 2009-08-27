@@ -61,7 +61,7 @@ import org.eclipse.jetty.xml.XmlConfiguration;
  * @goal run
  * @requiresDependencyResolution runtime
  * @execute phase="test-compile"
- * @description Runs jetty6 directly from a maven project
+ * @description Runs jetty directly from a maven project
  */
 public class JettyRunMojo extends AbstractJettyMojo
 {

@@ -595,9 +595,6 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         f = new File (webInfDir, "web-jetty.xml");
         if (f.exists())
             return f;
-        f = new File (webInfDir, "jetty6-web.xml");
-        if (f.exists())
-            return f;
         
         return null;
     }

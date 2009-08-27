@@ -45,7 +45,7 @@ import org.eclipse.jetty.xml.XmlConfiguration;
  * @goal run-war
  * @requiresDependencyResolution runtime
  * @execute phase="package"
- * @description Runs jetty6 on a war file
+ * @description Runs jetty on a war file
  *
  */
 public class JettyRunWarMojo extends AbstractJettyMojo
