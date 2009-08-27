@@ -2,6 +2,7 @@ jetty-6.1.20 27 August 2009
  + JETTY-838 Don't log and throw
  + JETTY-874 Better error on full header.
  + JETTY-960 Support ldaps
+ + JETTY-1046 maven-jetty-jspc-plugin keepSources takes affect only in packageRoot
  + JETTY-1057 XSS error page
  + JETTY-1065 Add RedirectRegexRule to provide match/replace/group redirect support
  + JETTY-1066 Send 400 error for request URI parse exceptions
@@ -18,6 +19,7 @@ jetty-6.1.20 27 August 2009
  + JETTY-1085 Allow url sessionID if cookie invalid 
  + JETTY-1086 Added UncheckedPrintWriter to avoid ignored EOFs
  + JETTY-1087 Chunked SSL non blocking input
+ + JETTY-1098 Upgrade JSP to SJSAS-9_1_1-B60F-07_Jan_2009
  + 283513 Check endp.isOpen when blocking read
  + 283818 fixed merge of forward parameters
  + 285006 Fixed NPE in AbstractConnector during shutdown
