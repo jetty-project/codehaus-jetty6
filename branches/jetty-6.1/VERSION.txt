@@ -18,6 +18,7 @@ jetty-6.1.20 27 August 2009
  + JETTY-1085 Allow url sessionID if cookie invalid 
  + JETTY-1086 Added UncheckedPrintWriter to avoid ignored EOFs
  + JETTY-1087 Chunked SSL non blocking input
+ + JETTY-1098 Upgrade jsp to SJSAS-9_1_1-B60F-07_Jan_2009
  + 283513 Check endp.isOpen when blocking read
  + 283818 fixed merge of forward parameters
  + 285006 Fixed NPE in AbstractConnector during shutdown
