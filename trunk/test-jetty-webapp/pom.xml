@@ -19,7 +19,7 @@
           <scanIntervalSeconds>1</scanIntervalSeconds>
           <!-- useTestClasspath>true</useTestClasspath -->
           <webAppConfig>
-            <contextPath>/</contextPath>
+            <contextPath>/test</contextPath>
             <configurationDiscovered>false</configurationDiscovered>
             <sessionHandler implementation="org.eclipse.jetty.server.session.SessionHandler">
               <sessionManager implementation="org.eclipse.jetty.server.session.HashSessionManager">
@@ -55,6 +55,12 @@
       <artifactId>test-jetty-webapp</artifactId>
       <version>${jetty-version}</version>
       <type>war</type>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet.jsp</groupId>
+      <artifactId>jsp-api</artifactId>
+      <version>2.1</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
