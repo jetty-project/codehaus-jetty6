@@ -127,6 +127,7 @@
     <module>test-annotation-webapp</module>
     <module>example-jetty-spring</module>
     <module>example-async-rest-webapp</module>
+    <module>jetty-jsp-2.1</module>
     <module>jetty-hightide</module>
     <module>jetty-jboss</module>
   </modules>
