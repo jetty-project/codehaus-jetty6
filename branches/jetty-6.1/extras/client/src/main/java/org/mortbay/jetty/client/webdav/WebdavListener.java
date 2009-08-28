@@ -211,7 +211,7 @@ public class WebdavListener extends HttpEventListenerWrapper
         int rewind = 0;
 
         String parentUri = URIUtil.parentPath( uri );
-        while ( !checkExists( parentUri ) )
+        while ( parentUri != null && !checkExists( parentUri ) )
         {
             ++rewind;
             parentUri = URIUtil.parentPath( parentUri );
