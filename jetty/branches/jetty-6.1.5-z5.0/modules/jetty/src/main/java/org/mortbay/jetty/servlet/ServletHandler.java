@@ -401,6 +401,10 @@ public class ServletHandler extends AbstractHandler
             
             if (th instanceof HttpException)
                 throw (HttpException)th;
+            else if (th instanceof RuntimeIOException)
+                throw (RuntimeIOException)th;
+            else if (th instanceof EofException)
+                throw (EofException)th;
             else if (th instanceof UnavailableException)
             {
                 Log.warn(request.getRequestURI()+": "+th);
