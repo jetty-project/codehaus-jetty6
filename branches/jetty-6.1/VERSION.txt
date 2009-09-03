@@ -1,6 +1,9 @@
 jetty-6.1-SNAPSHOT
  + JETTY-1090 resolve inifinte loop condition for webdav listener
  + JETTY-1093 Request.toString throws exception when size exceeds 4k
+ + 288055 fix jetty-client for failed listener state machine
+ + 288153 reset exchange when resending
+ + 288182 PUT request fails during retry
 
 jetty-6.1.20 27 August 2009
  + JETTY-838 Don't log and throw

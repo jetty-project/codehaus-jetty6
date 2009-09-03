@@ -145,10 +145,18 @@ public class ContentExchange extends CachedExchange
             _requestContent = null;
             _requestContentSource =  getInputStream();
         }
-        else if ( _requestContentSource != null )
+        else if (_requestContentSource != null) 
         {
-            throw new IOException("Unsupported Retry attempt, no registered file for upload.");
-        }
+			if (_requestContentSource.markSupported()) 
+			{
+				_requestContent = null;
+				_requestContentSource.reset();
+			} 
+			else 
+			{
+				throw new IOException("Unsupported retry attempt");
+			}
+		}
 
         super.onRetry();
     }
