@@ -424,6 +424,7 @@ public class HttpDestination
     public void resend(HttpExchange ex) throws IOException
     {
         ex.getEventListener().onRetry();
+        ex.reset();
         doSend(ex);
     }
 
