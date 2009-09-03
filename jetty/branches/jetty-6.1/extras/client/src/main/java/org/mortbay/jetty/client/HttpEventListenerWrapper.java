@@ -24,6 +24,10 @@ public class HttpEventListenerWrapper implements HttpEventListener
     HttpEventListener _listener;
     boolean _delegatingRequests;
     boolean _delegatingResponses;
+    boolean _delegationResult = true;
+    private Buffer _version;
+    private int _status;
+    private Buffer _reason;
 
     public HttpEventListenerWrapper()
     {
@@ -37,6 +41,11 @@ public class HttpEventListenerWrapper implements HttpEventListener
         _listener=eventListener;
         _delegatingRequests=delegating;
         _delegatingResponses=delegating;
+    }
+    
+    public void setDelegationResult( boolean result )
+    {
+    	_delegationResult = result;
     }
     
     public HttpEventListener getEventListener()
@@ -101,8 +110,14 @@ public class HttpEventListenerWrapper implements HttpEventListener
 
     public void onResponseComplete() throws IOException
     {
-        if (_delegatingResponses)
-            _listener.onResponseComplete();
+		if (_delegatingResponses) 
+		{
+			if (_delegationResult == false) 
+			{
+				_listener.onResponseStatus(_version, _status, _reason);
+			}
+			_listener.onResponseComplete();
+		}
     }
 
     public void onResponseContent(Buffer content) throws IOException
@@ -126,7 +141,15 @@ public class HttpEventListenerWrapper implements HttpEventListener
     public void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
     {
         if (_delegatingResponses)
+        {
             _listener.onResponseStatus(version,status,reason);
+        }
+        else
+        {
+            _version = version;
+            _status = status;
+            _reason = reason;
+        }
     }
 
     public void onRetry()
