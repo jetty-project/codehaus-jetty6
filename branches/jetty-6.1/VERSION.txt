@@ -1,4 +1,5 @@
 jetty-6.1-SNAPSHOT
+ + JETTY-1080 modified previous fix for windows
  + JETTY-1090 resolve inifinte loop condition for webdav listener
  + JETTY-1093 Request.toString throws exception when size exceeds 4k
  + 288055 fix jetty-client for failed listener state machine
