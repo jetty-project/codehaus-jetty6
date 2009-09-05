@@ -27,6 +27,7 @@ public class SetUIDServer extends Server
     int _uid=0;
     int _gid=0;
     int _umask=0;
+    private RLimit _rlimitNoFiles = null;
     boolean _startServerAsPrivileged;
 
 
@@ -60,12 +61,31 @@ public class SetUIDServer extends Server
         return _gid;
     }
 
+    public void setRLimitNoFiles(RLimit rlimit)
+    {
+        _rlimitNoFiles = rlimit;
+    }
+    
+    public RLimit getRLimitNoFiles ()
+    {
+        return _rlimitNoFiles;
+    }
+    
     protected void doStart() throws Exception
     {
         if (_umask!=0)
         {
             Log.info("Setting umask=0"+Integer.toString(_umask,8));
             SetUID.setumask(_umask);
+        }
+        
+        if (_rlimitNoFiles != null)
+        {
+            Log.info("Current "+SetUID.getrlimitnofiles());
+            int success = SetUID.setrlimitnofiles(_rlimitNoFiles);
+            if (success < 0)
+                Log.warn("Failed to set rlimit_nofiles, returned status "+success);
+            Log.info("Set "+SetUID.getrlimitnofiles());
         }
         
         if (_startServerAsPrivileged)
