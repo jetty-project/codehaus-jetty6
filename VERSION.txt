@@ -6,6 +6,7 @@ jetty-6.1-SNAPSHOT
  + 288153 reset exchange when resending
  + 288182 PUT request fails during retry
  + JETTY-1099: Improve cookie handling in BayeuxClient
+ + JETTY-1100 extend setuid feature to allow setting max open file descriptors
 
 jetty-6.1.20 27 August 2009
  + JETTY-838 Don't log and throw
