@@ -38,6 +38,9 @@ public class SetUID
     public static native Group getgrnam(String name) throws SecurityException;
     public static native Group getgrgid(int gid) throws SecurityException;    
     
+    public static native RLimit getrlimitnofiles();
+    public static native int setrlimitnofiles(RLimit rlimit);
+    
     private static void loadLibrary()
     {
         // load libjettysetuid.so ${jetty.libsetuid.path} 

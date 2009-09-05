@@ -16,14 +16,15 @@
 #include "org_mortbay_setuid_SetUID.h"
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/resource.h>
 #include <stdio.h>
 #include <pwd.h>
 #include <grp.h>
+#include <stdio.h>
+#include <errno.h>
 
 /**
  * Native code for SetUID, class is for changing user and groupId, it can also be use to retrieve user information by using getpwuid(uid) or getpwnam(username) of both linux and unix systems
- * @author Greg Wilkins
- * @author Leopoldo Lee Agdeppa III
  */
 
 
@@ -34,6 +35,7 @@ void setJavaFieldLong(JNIEnv *env, jobject obj, const char *name, long value);
 void setJavaFieldString(JNIEnv *env, jobject obj, const char *name, const char *value);
 void throwNewJavaException(JNIEnv *env, const char *name, const char *msg);
 void throwNewJavaSecurityException(JNIEnv *env, const char *msg);
+int getJavaFieldInt(JNIEnv *env, jobject obj, const char *name);
 /* End of Helper functions Declaration */
 
   
@@ -57,7 +59,7 @@ Java_org_mortbay_setuid_SetUID_setgid (JNIEnv * env, jclass j, jint gid)
 
 
 
-/* User informaton implimentatons */
+/* User informaton implementatons */
 
 JNIEXPORT jobject JNICALL 
 Java_org_mortbay_setuid_SetUID_getpwnam(JNIEnv * env, jclass j, jstring name)
@@ -227,8 +229,6 @@ Java_org_mortbay_setuid_SetUID_getgrnam(JNIEnv * env, jclass j, jstring name)
         return NULL;
     }
     
-    
-    
     // copy the struct grpup values to java object org.mortbay.setuid.Group
     //char *gr_name;
     setJavaFieldString(env, retVal, "_grName", gr->gr_name);
@@ -236,9 +236,7 @@ Java_org_mortbay_setuid_SetUID_getgrnam(JNIEnv * env, jclass j, jstring name)
     setJavaFieldString(env, retVal, "_grPasswd", gr->gr_passwd);
 	//gid_t   gr_gid;
     setJavaFieldInt(env, retVal, "_grGid", gr->gr_gid);
-    
-    
-    
+     
     if (gr->gr_mem != NULL) 
     {
         int array_size, i;
@@ -248,21 +246,14 @@ Java_org_mortbay_setuid_SetUID_getgrnam(JNIEnv * env, jclass j, jstring name)
         
         if(array_size)
         {
-            jobjectArray strArr =  (*env)->NewObjectArray(
-                                                                env, array_size, 
-                                                                (*env)->FindClass(env, "java/lang/String"), 
-                                                                (*env)->NewStringUTF(env, "")
-                                                            );
-            
+            jobjectArray strArr =  (*env)->NewObjectArray(env, array_size, 
+                                                          (*env)->FindClass(env, "java/lang/String"), 
+                                                          (*env)->NewStringUTF(env, ""));
             
             for(i=0;i<array_size;i++) 
             {
-                (*env)->SetObjectArrayElement(
-                                                    env,
-                                                    strArr,
-                                                    i,
-                                                    (*env)->NewStringUTF(env, gr->gr_mem[i])
-                                                 );
+                (*env)->SetObjectArrayElement(env,strArr,i,
+                                              (*env)->NewStringUTF(env, gr->gr_mem[i]));
             }
             
             
@@ -274,11 +265,8 @@ Java_org_mortbay_setuid_SetUID_getgrnam(JNIEnv * env, jclass j, jstring name)
                 throwNewJavaSecurityException(env, "Class: Java Object Field is not found: String[] _grMem!!!");
             }
             
-            (*env)->SetObjectField(env, retVal, fieldId, strArr);
-            
-            
-        }
-        
+            (*env)->SetObjectField(env, retVal, fieldId, strArr); 
+        }  
     }
 	
     (*env)->DeleteLocalRef(env, cls);
@@ -342,24 +330,16 @@ Java_org_mortbay_setuid_SetUID_getgrgid(JNIEnv * env, jclass j, jint gid)
         
         if(array_size)
         {
-            jobjectArray strArr =  (*env)->NewObjectArray(
-                                                                env, array_size, 
-                                                                (*env)->FindClass(env, "java/lang/String"), 
-                                                                (*env)->NewStringUTF(env, "")
-                                                            );
-            
+            jobjectArray strArr =  (*env)->NewObjectArray(env, array_size, 
+                                                          (*env)->FindClass(env, "java/lang/String"), 
+                                                          (*env)->NewStringUTF(env, ""));
             
             for(i=0;i<array_size;i++) 
             {
-                (*env)->SetObjectArrayElement(
-                                                    env,
-                                                    strArr,
-                                                    i,
-                                                    (*env)->NewStringUTF(env, gr->gr_mem[i])
-                                                 );
+                (*env)->SetObjectArrayElement(env,strArr,i,
+                                              (*env)->NewStringUTF(env, gr->gr_mem[i]));
             }
-            
-            
+
             // set string array field;
             // find field
             jfieldID fieldId =  (*env)->GetFieldID(env, cls, "_grMem", "[Ljava/lang/String;");
@@ -368,19 +348,73 @@ Java_org_mortbay_setuid_SetUID_getgrgid(JNIEnv * env, jclass j, jint gid)
                 throwNewJavaSecurityException(env, "Java Object Field is not found: String _grMem!!!");
             }
             
-            (*env)->SetObjectField(env, retVal, fieldId, strArr);
-            
-            
+            (*env)->SetObjectField(env, retVal, fieldId, strArr); 
         }
-        
     }
     
     (*env)->DeleteLocalRef(env, cls);
-    
-    
     return retVal;
 }
 
+
+/*
+ * Class:     org_mortbay_setuid_SetUID
+ * Method:    getrlimitnofiles
+ * Signature: ()Lorg/mortbay/setuid/RLimit;
+ */
+JNIEXPORT jobject JNICALL Java_org_mortbay_setuid_SetUID_getrlimitnofiles
+  (JNIEnv *env, jclass j)
+{
+    struct rlimit rlim;
+    int success = getrlimit(RLIMIT_NOFILE, &rlim);
+    if (success < 0)
+    {
+        throwNewJavaSecurityException(env, "getrlimit failed");
+        return NULL;
+    }
+
+    // get The java class org.mortbay.setuid.RLimit
+    jclass cls = (*env)->FindClass(env, "org/mortbay/setuid/RLimit");
+    if(!cls)
+    {
+        throwNewJavaSecurityException(env, "Class: org.mortbay.setuid.RLimit is not found!!!");
+        return NULL;
+    }
+    
+    // get the default constructor  of org.mortbay.setuid.RLimit
+    jmethodID constructorMethod = getJavaMethodId(env, cls, "<init>", "()V");
+    
+    // construct org.mortbay.setuid.RLimit java object
+    jobject retVal = (*env)->NewObject(env, cls,constructorMethod);
+    if(!retVal)
+    {
+        throwNewJavaSecurityException(env, "Object Construction Error of Class: org.mortbay.setuid.RLimit!!!");
+        return NULL;
+    }
+    setJavaFieldInt(env, retVal, "_soft", rlim.rlim_cur);
+    setJavaFieldInt(env, retVal, "_hard", rlim.rlim_max);
+
+    (*env)->DeleteLocalRef(env, cls);
+    return retVal;
+}
+
+/*
+ * Class:     org_mortbay_setuid_SetUID
+ * Method:    setrlimitnofiles
+ * Signature: (Lorg/mortbay/setuid/RLimit;)I
+ */
+JNIEXPORT jint JNICALL Java_org_mortbay_setuid_SetUID_setrlimitnofiles
+  (JNIEnv *env, jclass j, jobject jo)
+{
+    struct rlimit rlim;
+
+    jclass cls = (*env)->FindClass(env, "org/mortbay/setuid/RLimit");
+    rlim.rlim_cur=getJavaFieldInt(env,jo, "_soft");
+    rlim.rlim_max=getJavaFieldInt(env,jo, "_hard");
+    int success = setrlimit(RLIMIT_NOFILE, &rlim);
+    (*env)->DeleteLocalRef(env, cls);
+    return (jint)success;  
+}
 
 
 
@@ -401,6 +435,21 @@ jmethodID getJavaMethodId(JNIEnv *env, jclass clazz, const char *name, const cha
     
     return methodId;
 
+}
+
+int getJavaFieldInt(JNIEnv *env, jobject obj, const char *name)
+{
+    jclass clazz = (*env)->GetObjectClass(env, obj);
+    jfieldID fieldId =  (*env)->GetFieldID(env, clazz, name, "I");
+    if(!fieldId)
+    {
+        char strErr[255];
+        sprintf(strErr, "Java Object Field is not found: int %s !!!", name);
+        throwNewJavaSecurityException(env, strErr);
+    }
+    int val = (*env)->GetIntField(env, obj, fieldId);
+    (*env)->DeleteLocalRef(env, clazz);
+    return val;
 }
 
 void setJavaFieldInt(JNIEnv *env, jobject obj, const char *name, int value)
