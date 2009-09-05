@@ -9,6 +9,10 @@ public class SetUID
     public static native int setumask(int mask);
     public static native int setuid(int uid);
     public static native int setgid(int gid);
+     
+    public static native RLimit getrlimitnofiles();
+    public static native int setrlimitnofiles(RLimit rlimit);
+
 
     static 
     {

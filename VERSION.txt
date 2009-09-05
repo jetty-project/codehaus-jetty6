@@ -8,6 +8,7 @@ Patches:
  + Added DebugHandler
  + 286911 Clean out cache when recycling HTTP fields
  + JETTY-1086 Added UncheckedPrintWriter to avoid ignored EOFs
+ + JETTY-1100 extend setuid feature to allow config of max open file descriptors
 
 jetty-6.1.5z5.0 - 19 Feb 2009
  + JETTY-439 Fixed 100 continues clash with Connection:close
