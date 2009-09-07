@@ -36,7 +36,7 @@ file="src/main/native/org_mortbay_setuid_SetUID.c"
                             </tasks>
                         </configuration>
                     </execution>
-                    <execution>
+                    <!-- execution>
                         <id>copy-native-library</id>
                         <phase>package</phase>
                         <goals>
@@ -48,7 +48,7 @@ file="src/main/native/org_mortbay_setuid_SetUID.c"
                                       todir="../../target"/>
                             </tasks>
                         </configuration>
-                    </execution>
+                    </execution -->
                 </executions>
             </plugin>
             <plugin>
