@@ -1,0 +1,36 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <artifactId>jetty-setuid</artifactId>
+        <groupId>org.mortbay.jetty</groupId>
+        <version>7.0.0.RC6-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.mortbay.jetty</groupId>
+    <artifactId>jetty-setuid-test</artifactId>
+    <name>Jetty SetUID Test</name>
+    <url>http://jetty.mortbay.org</url>
+    <packaging>jar</packaging>
+    <build>
+        <defaultGoal>test</defaultGoal>
+    </build>
+    <dependencies>
+        <dependency>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty-setuid-java</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>libsetuid</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <scope>test</scope>
+          <version>3.8.2</version>
+        </dependency>
+    </dependencies>
+</project>
