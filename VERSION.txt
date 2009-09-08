@@ -1,4 +1,5 @@
 jetty-6.1-SNAPSHOT
+ + JETTY-1038 ChannelId.isParentOf returns the wrong result
  + JETTY-1080 modified previous fix for windows
  + JETTY-1090 resolve inifinte loop condition for webdav listener
  + JETTY-1092 MultiPartFilter can be pushed into infinite loop
