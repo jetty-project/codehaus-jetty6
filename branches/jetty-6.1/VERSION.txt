@@ -2,6 +2,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1038 ChannelId.isParentOf returns the wrong result
  + JETTY-1072 maven plugin handles context path not as documented
  + JETTY-1080 modified previous fix for windows
+ + JETTY-1084 HEAD command not setting content-type in response under certain circumstances
  + JETTY-1090 resolve inifinte loop condition for webdav listener
  + JETTY-1092 MultiPartFilter can be pushed into infinite loop
  + JETTY-1093 Request.toString throws exception when size exceeds 4k
