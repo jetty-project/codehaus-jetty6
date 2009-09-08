@@ -525,7 +525,14 @@ public class HttpConnection implements Connection
             }
             catch (EofException e)
             {
-                Log.ignore(e);
+                Log.debug(e);
+                _request.setHandled(true);
+                error = true;
+            }
+            catch (RuntimeIOException e)
+            {
+                Log.debug(e);
+                _request.setHandled(true);
                 error = true;
             }
             catch (HttpException e)
@@ -533,12 +540,6 @@ public class HttpConnection implements Connection
                 Log.debug(e);
                 _request.setHandled(true);
                 _response.sendError(e.getStatus(),e.getReason());
-                error = true;
-            }
-            catch (RuntimeIOException e)
-            {
-                Log.debug(e);
-                _request.setHandled(true);
                 error = true;
             }
             catch (Throwable e)
