@@ -500,6 +500,10 @@ public abstract class AbstractJettyMojo extends AbstractMojo
                 webAppConfig.setOverrideDescriptor(getOverrideWebXml().getCanonicalPath());
         }
 
+        if (webAppConfig.getContextPath() == null)
+        {
+            webAppConfig.setContextPath((getContextPath().startsWith("/") ? getContextPath() : "/"+ getContextPath()));
+        }
 
         getLog().info("Context path = " + webAppConfig.getContextPath());
         getLog().info("Tmp directory = "+ " determined at runtime");
