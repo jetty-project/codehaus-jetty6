@@ -41,11 +41,22 @@ public class Jetty6PluginWebAppContext extends WebAppContext
     private JettyWebXmlConfiguration jettyWebConfig = new JettyWebXmlConfiguration();
     private TagLibConfiguration tagConfig = new TagLibConfiguration();
     private Configuration[] configs = new Configuration[]{webInfConfig,envConfig, mvnConfig, jettyWebConfig, tagConfig};
+    private String contextPath = null;
     
     public Jetty6PluginWebAppContext ()
     {
         super();
         setConfigurations(configs);
+    }
+    
+    public void setContextPath(String path)
+    {
+        this.contextPath = path;
+    }
+    
+    public String getContextPath()
+    {
+        return contextPath;
     }
     
     public void setClassPathFiles(List classpathFiles)
@@ -80,6 +91,9 @@ public class Jetty6PluginWebAppContext extends WebAppContext
     
     public void configure ()
     {        
+        if (this.contextPath != null)
+            super.setContextPath(this.contextPath);
+        
         setConfigurations(configs);
         mvnConfig.setClassPathConfiguration (classpathFiles);
         mvnConfig.setWebXml (webXmlFile);  
@@ -92,29 +106,6 @@ public class Jetty6PluginWebAppContext extends WebAppContext
         {
             throw new RuntimeException(e);
         }
-        /*
-        Configuration[] configurations = getConfigurations();
-        for (int i=0;i<configurations.length; i++)
-        {
-            if (configurations[i] instanceof Jetty6MavenConfiguration)
-            {
-                ((Jetty6MavenConfiguration)configurations[i]).setClassPathConfiguration (classpathFiles);
-                ((Jetty6MavenConfiguration)configurations[i]).setWebXml (webXmlFile);              
-            }
-            else if (configurations[i] instanceof EnvConfiguration)
-            {
-                try
-                {
-                    if (this.jettyEnvXmlFile != null)
-                        ((EnvConfiguration)configurations[i]).setJettyEnvXml(this.jettyEnvXmlFile.toURL());
-                }
-                catch (Exception e)
-                {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-        */
     }
 
 
