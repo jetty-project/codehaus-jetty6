@@ -196,4 +196,9 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
 
         }
     }
+    
+    public String toString()
+    {
+        return "{{"+_headerBufferSize+","+_requestBufferSize+","+_responseBufferSize+"}}";
+    }
 }

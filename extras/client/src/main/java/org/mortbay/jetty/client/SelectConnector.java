@@ -38,7 +38,7 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
 {
     private final HttpClient _httpClient;
     private SSLContext _sslContext;
-    private Buffers _sslBuffers;
+    private AbstractBuffers _sslBuffers;
 
     SelectorManager _selectorManager=new Manager();
 
@@ -109,6 +109,8 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
 
         protected Connection newConnection(SocketChannel channel, SelectChannelEndPoint endpoint)
         {
+            if (endpoint instanceof SslHttpChannelEndPoint)
+                return new HttpConnection(_sslBuffers,endpoint,_sslBuffers.getHeaderBufferSize(),_sslBuffers.getRequestBufferSize());
             return new HttpConnection(_httpClient,endpoint,SelectConnector.this._httpClient.getHeaderBufferSize(),SelectConnector.this._httpClient.getRequestBufferSize());
         }
 
@@ -165,7 +167,8 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
                     }
                 };
 
-                buffers.setRequestBufferSize( sslEngine.getSession().getPacketBufferSize());
+                buffers.setHeaderBufferSize( sslEngine.getSession().getApplicationBufferSize());
+                buffers.setRequestBufferSize( sslEngine.getSession().getApplicationBufferSize());
                 buffers.setResponseBufferSize(sslEngine.getSession().getApplicationBufferSize());
 
                 try
