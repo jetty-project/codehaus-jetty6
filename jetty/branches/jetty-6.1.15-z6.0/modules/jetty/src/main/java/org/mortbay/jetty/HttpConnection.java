@@ -48,7 +48,7 @@ import org.mortbay.util.ajax.Continuation;
  * A connection is also the prime mechanism used by jetty to recycle objects
  * without pooling. The {@link Request},{@link Response}, {@link HttpParser},
  * {@link HttpGenerator} and {@link HttpFields} instances are all recycled for
- * the duraction of a connection. Where appropriate, allocated buffers are also
+ * the duration of a connection. Where appropriate, allocated buffers are also
  * kept associated with the connection via the parser and/or generator.
  * </p>
  * 
