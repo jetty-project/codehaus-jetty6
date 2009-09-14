@@ -30,6 +30,7 @@ import org.mortbay.io.Buffers;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
+import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.log.Log;
 
@@ -77,7 +78,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         _outBuffer=_outNIOBuffer.getByteBuffer();
         _inNIOBuffer=(NIOBuffer)buffers.getBuffer(_session.getPacketBufferSize());
         _inBuffer=_inNIOBuffer.getByteBuffer();
-        
     }
 
     // TODO get rid of these dumps
@@ -509,6 +509,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             _inNIOBuffer.clear();
 
         int total_filled=0;
+        
         while (_inNIOBuffer.space()>0 && super.isOpen())
         {
             try
@@ -521,15 +522,21 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             catch(IOException e)
             {
                 if (_inNIOBuffer.length()==0)
+                {
+                    _outNIOBuffer.clear();
                     throw e;
+                }
                 break;
             }
         }
         
-        if (_inNIOBuffer.length()==0)
+        if (total_filled==0 && _inNIOBuffer.length()==0)
         {
             if(!isOpen())
-                throw new org.mortbay.jetty.EofException();
+            {
+                _outNIOBuffer.clear();
+                throw new EofException();
+            }
             return false;
         }
 
@@ -553,17 +560,25 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                 throw new IllegalStateException(_result.toString());                        
                 
             case BUFFER_UNDERFLOW:
-                if (Log.isDebugEnabled()) Log.debug("unwrap {}",_result);
+                if (Log.isDebugEnabled()) 
+                    Log.debug("unwrap {}",_result);
+                if(!isOpen())
+                {
+                    _inNIOBuffer.clear();
+                    _outNIOBuffer.clear();
+                    throw new EofException();
+                }
                 return (total_filled > 0);
                 
             case CLOSED:
                 _closing=true;
+                
             case OK:
                 boolean progress=total_filled>0 ||_result.bytesConsumed()>0 || _result.bytesProduced()>0; 
                 return progress;
             default:
                 Log.warn("unwrap "+_result);
-            throw new IOException(_result.toString());
+                throw new IOException(_result.toString());
         }
     }
 
