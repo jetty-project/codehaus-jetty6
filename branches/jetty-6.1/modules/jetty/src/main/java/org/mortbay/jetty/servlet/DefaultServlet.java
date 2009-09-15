@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.servlet.RequestDispatcher;
@@ -141,6 +142,8 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     private boolean _aliases=false;
     private boolean _useFileMappedBuffer=false;
     ByteArrayBuffer _cacheControl;
+    private ServletHandler _servletHandler;
+    private ServletHolder _defaultHolder;
     
     
     /* ------------------------------------------------------------ */
@@ -242,13 +245,18 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             }
             if (_nioCache==null)
                 _bioCache=null;
-           
         }
         catch (Exception e) 
         {
             Log.warn(Log.EXCEPTION,e);
             throw new UnavailableException(e.toString()); 
         }
+        
+        _servletHandler= (ServletHandler) _context.getContextHandler().getChildHandlerByClass(ServletHandler.class);
+        ServletHolder[] holders = _servletHandler.getServlets();
+        for (int i=holders.length;i-->0;)
+            if (holders[i].getServletInstance()==this)
+                _defaultHolder=holders[i];
         
         if (Log.isDebugEnabled()) Log.debug("resource base = "+_resourceBase);
     }
@@ -466,30 +474,29 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                     response.sendRedirect(response.encodeRedirectURL(buf.toString()));
                 }
                 // else look for a welcome file
-                else if (null!=(welcome=getWelcomeFile(resource)))
+                else if (null!=(welcome=getWelcomeFile(pathInContext)))
                 {
-                    String ipath=URIUtil.addPaths(pathInContext,welcome);
                     if (_redirectWelcome)
                     {
                         // Redirect to the index
                         response.setContentLength(0);
                         String q=request.getQueryString();
                         if (q!=null&&q.length()!=0)
-                            response.sendRedirect(response.encodeRedirectURL(URIUtil.addPaths( _context.getContextPath(),ipath)+"?"+q));
+                            response.sendRedirect(response.encodeRedirectURL(URIUtil.addPaths( _context.getContextPath(),welcome)+"?"+q));
                         else
-                            response.sendRedirect(response.encodeRedirectURL(URIUtil.addPaths( _context.getContextPath(),ipath)));
+                            response.sendRedirect(response.encodeRedirectURL(URIUtil.addPaths( _context.getContextPath(),welcome)));
                     }
                     else
                     {
                         // Forward to the index
-                        RequestDispatcher dispatcher=request.getRequestDispatcher(ipath);
+                        RequestDispatcher dispatcher=request.getRequestDispatcher(welcome);
                         if (dispatcher!=null)
                         {
                             if (included.booleanValue())
                                 dispatcher.include(request,response);
                             else
                             {
-                                request.setAttribute("org.mortbay.jetty.welcome",ipath);
+                                request.setAttribute("org.mortbay.jetty.welcome",welcome);
                                 dispatcher.forward(request,response);
                             }
                         }
@@ -543,34 +550,33 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
      * If there is none, then <code>null</code> is returned.
      * The list of welcome files is read from the {@link ContextHandler} for this servlet, or
      * <code>"index.jsp" , "index.html"</code> if that is <code>null</code>.
-     * @param resource
-     * @return The name of the matching welcome file.
+     * @param pathInContext The path in Context in which we are looking for a welcome
+     * @return The path of the matching welcome file in context
      * @throws IOException
      * @throws MalformedURLException
      */
-    private String getWelcomeFile(Resource resource) throws MalformedURLException, IOException
+    private String getWelcomeFile(String pathInContext) throws MalformedURLException, IOException
     {
-        if (!resource.isDirectory() || _welcomes==null)
+        if (_welcomes==null)
             return null;
-
+       
+        String welcome_servlet=null;
         for (int i=0;i<_welcomes.length;i++)
         {
-            Resource welcome=resource.addPath(_welcomes[i]);
-            if (welcome.exists())
+            String welcome_in_context=URIUtil.addPaths(pathInContext,_welcomes[i]);
+            Resource welcome=getResource(welcome_in_context);
+            if (welcome!=null && welcome.exists())
                 return _welcomes[i];
-        }
-        
-        if (_welcomeServlets) 
-        {
-            ServletHandler servletHandler = (ServletHandler)_context.getContextHandler().getChildHandlerByClass(ServletHandler.class);
-            for (int i=0;i<_welcomes.length;i++)
+            
+            if (_welcomeServlets && welcome_servlet==null)
             {
-                if (servletHandler.matchesPath(_welcomes[i]))
-                    return _welcomes[i];
+                Map.Entry entry=_servletHandler.getHolderEntry(welcome_in_context);
+                if (entry!=null && entry.getValue()!=_defaultHolder)
+                    welcome_servlet=welcome_in_context;
             }
         }
-
-        return null;
+        return welcome_servlet;
+        
     }
 
     /* ------------------------------------------------------------ */
