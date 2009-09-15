@@ -69,6 +69,8 @@ public class LastAccessTimeTest
                     assert exchange1.getResponseStatus() == HttpServletResponse.SC_OK;
                     String sessionCookie = exchange1.getResponseFields().getStringField("Set-Cookie");
                     assert sessionCookie != null;
+                    // Mangle the cookie, replacing Path with $Path, etc.
+                    sessionCookie = sessionCookie.replaceFirst("(\\W)(P|p)ath=", "$1\\$Path=");
 
                     // Perform some request to server2 using the session cookie from the previous request
                     // This should migrate the session from server1 to server2, and leave server1's

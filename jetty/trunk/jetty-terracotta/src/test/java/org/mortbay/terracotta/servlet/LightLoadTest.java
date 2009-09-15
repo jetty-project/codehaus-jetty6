@@ -79,6 +79,8 @@ public class LightLoadTest
                         assert exchange1.getResponseStatus() == HttpServletResponse.SC_OK;
                         String sessionCookie = exchange1.getResponseFields().getStringField( "Set-Cookie" );
                         assert sessionCookie != null;
+                        // Mangle the cookie, replacing Path with $Path, etc.
+                        sessionCookie = sessionCookie.replaceFirst("(\\W)(P|p)ath=", "$1\\$Path=");
 
                         ExecutorService executor = Executors.newCachedThreadPool();
                         int clientsCount = 50;

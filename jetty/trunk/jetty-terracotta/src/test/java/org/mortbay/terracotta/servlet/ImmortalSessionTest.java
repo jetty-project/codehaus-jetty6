@@ -62,6 +62,9 @@ public class ImmortalSessionTest
                 assert exchange.getResponseStatus() == HttpServletResponse.SC_OK;
                 String sessionCookie = exchange.getResponseFields().getStringField("Set-Cookie");
                 assert sessionCookie != null;
+                // Mangle the cookie, replacing Path with $Path, etc.
+                sessionCookie = sessionCookie.replaceFirst("(\\W)(P|p)ath=", "$1\\$Path=");
+
                 String response = exchange.getResponseContent();
                 assert response.trim().equals(String.valueOf(value));
 
