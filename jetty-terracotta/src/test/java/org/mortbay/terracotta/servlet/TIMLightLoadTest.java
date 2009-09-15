@@ -105,6 +105,8 @@ public class TIMLightLoadTest
                     String sessionCookie = exchange1.getResponseFields().getStringField("Set-Cookie");
                     assert sessionCookie != null;
                     System.out.println("sessionCookie = " + sessionCookie);
+                    // Mangle the cookie, replacing Path with $Path, etc.
+                    sessionCookie = sessionCookie.replaceFirst("(\\W)(P|p)ath=", "$1\\$Path=");
 
                     ExecutorService executor = Executors.newCachedThreadPool();
                     int clientsCount = 50;

@@ -66,6 +66,8 @@ public class ClientCrossContextSessionTest
                 assert exchangeA.getResponseStatus() == HttpServletResponse.SC_OK;
                 String sessionCookie = exchangeA.getResponseFields().getStringField("Set-Cookie");
                 assert sessionCookie != null;
+                // Mangle the cookie, replacing Path with $Path, etc.
+                sessionCookie = sessionCookie.replaceFirst("(\\W)(P|p)ath=", "$1\\$Path=");
 
                 // Perform a request to contextB with the same session cookie
                 ContentExchange exchangeB = new ContentExchange(true);

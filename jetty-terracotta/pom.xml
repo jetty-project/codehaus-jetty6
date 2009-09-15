@@ -36,6 +36,7 @@
                 <artifactId>tc-maven-plugin</artifactId>
                 <version>${tc.maven.plugin.version}</version>
                 <configuration>
+                    <!--<argLine>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>-->
                 </configuration>
                 <executions>
                     <execution>

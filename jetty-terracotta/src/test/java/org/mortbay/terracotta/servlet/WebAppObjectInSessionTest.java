@@ -121,6 +121,8 @@ public class WebAppObjectInSessionTest
                     assert exchange1.getResponseStatus() == HttpServletResponse.SC_OK : exchange1.getResponseStatus();
                     String sessionCookie = exchange1.getResponseFields().getStringField("Set-Cookie");
                     assert sessionCookie != null;
+                    // Mangle the cookie, replacing Path with $Path, etc.
+                    sessionCookie = sessionCookie.replaceFirst("(\\W)(P|p)ath=", "$1\\$Path=");
 
                     // Perform a request to server2 using the session cookie from the previous request
                     ContentExchange exchange2 = new ContentExchange(true);
