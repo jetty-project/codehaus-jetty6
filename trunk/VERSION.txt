@@ -2,10 +2,11 @@ SNAPSHOT
  + JETTY-1021 jetty-maven-plugin overlay or reload issue
  + JETTY-1089 Upgrade jsp to SJSAS-9_1_1-B60F-07_Jan_2009
  + JETTY-1100 extend setuid feature to set number of open file descriptors
- 
+ + JETTY-1109 Improper handling of cookies in Terracotta tests
+
 
 jetty@codehaus 7.0.0.RC4 18 August 2009
  + created separate VERSION.txt file
  + 286242 Ported jetty-setuid from jetty-6
 
- 
+

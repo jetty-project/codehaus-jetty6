@@ -61,6 +61,8 @@ public class NewSessionTest
                 assert exchange.getResponseStatus() == HttpServletResponse.SC_OK;
                 String sessionCookie = exchange.getResponseFields().getStringField("Set-Cookie");
                 assert sessionCookie != null;
+                // Mangle the cookie, replacing Path with $Path, etc.
+                sessionCookie = sessionCookie.replaceFirst("(\\W)(P|p)ath=", "$1\\$Path=");
 
                 // Let's wait for the scavenger to run, waiting 2.5 times the scavenger period
                 Thread.sleep(scavengePeriod * 2500L);
