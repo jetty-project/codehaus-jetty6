@@ -10,6 +10,7 @@ import junit.framework.TestCase;
 
 import org.mortbay.jetty.LocalConnector;
 import org.mortbay.jetty.Server;
+import org.mortbay.servlet.NoJspServlet;
 import org.mortbay.util.IO;
 
 public class DefaultServletTest extends TestCase
@@ -29,7 +30,7 @@ public class DefaultServletTest extends TestCase
 
         context = new Context();
         context.setContextPath("/context");
-        context.setWelcomeFiles(new String[] {}); // no welcome files
+        context.setWelcomeFiles(new String[] {"index.html","index.jsp","index.htm"}); // no welcome files
 
         server.addHandler(context);
         server.addConnector(connector);
@@ -190,7 +191,7 @@ public class DefaultServletTest extends TestCase
         resBase.mkdirs();
 
         File index = new File(resBase, "index.html");
-        createFile(index, "<h>Hello Index</h1>");
+        createFile(index, "<h1>Hello Index</h1>");
         
         File wackyDir = new File(resBase, "dir?");
         assertTrue(wackyDir.mkdirs());
@@ -221,7 +222,7 @@ public class DefaultServletTest extends TestCase
 
         connector.reopen();
         response= connector.getResponses("GET /context/ HTTP/1.0\r\n\r\n");
-        assertResponseContains("Directory: /context/<",response);
+        assertResponseContains("<h1>Hello Index</h1>",response);
 
         connector.reopen();
         response= connector.getResponses("GET /context/dir?/ HTTP/1.0\r\n\r\n");
@@ -259,7 +260,7 @@ public class DefaultServletTest extends TestCase
 
         connector.reopen();
         response= connector.getResponses("GET /context/ HTTP/1.0\r\n\r\n");
-        assertResponseContains("Directory: /context/<",response);
+        assertResponseContains("<h1>Hello Index</h1>",response);
 
         connector.reopen();
         response= connector.getResponses("GET /context/dir;/ HTTP/1.0\r\n\r\n");
@@ -294,6 +295,106 @@ public class DefaultServletTest extends TestCase
         assertResponseNotContains("Sssh",response);
         
     }
+
+
+
+    public void testWelcome() throws Exception
+    {
+        File testDir = new File("target/tests/" + getName());
+        prepareEmptyTestDir(testDir);
+        File resBase = new File(testDir, "docroot");
+        resBase.mkdirs();
+        File inde = new File(resBase, "index.htm");
+        File index = new File(resBase, "index.html");
+        
+
+        String resBasePath = resBase.getAbsolutePath();
+
+        ServletHolder defholder = context.addServlet(DefaultServlet.class,"/");
+        defholder.setInitParameter("dirAllowed","false");
+        defholder.setInitParameter("redirectWelcome","false");
+        defholder.setInitParameter("welcomeServlets","false");
+        defholder.setInitParameter("gzip","false");
+        defholder.setInitParameter("resourceBase",resBasePath);
+        
+        ServletHolder jspholder = context.addServlet(NoJspServlet.class,"*.jsp");
+
+        String response;
+
+        connector.reopen();
+        response= connector.getResponses("GET /context/ HTTP/1.0\r\n\r\n");
+        assertResponseContains("403",response);
+
+        createFile(index, "<h1>Hello Index</h1>");
+        connector.reopen();
+        response= connector.getResponses("GET /context/ HTTP/1.0\r\n\r\n");
+        assertResponseContains("<h1>Hello Index</h1>",response);
+        
+        createFile(inde, "<h1>Hello Inde</h1>");
+        connector.reopen();
+        response= connector.getResponses("GET /context/ HTTP/1.0\r\n\r\n");
+        assertResponseContains("<h1>Hello Index</h1>",response);
+
+        index.delete();
+        connector.reopen();
+        response= connector.getResponses("GET /context/ HTTP/1.0\r\n\r\n");
+        assertResponseContains("<h1>Hello Inde</h1>",response);
+        
+        inde.delete();
+        connector.reopen();
+        response= connector.getResponses("GET /context/ HTTP/1.0\r\n\r\n");
+        assertResponseContains("403",response);
+
+    }
+
+    public void testWelcomeServlet() throws Exception
+    {
+        File testDir = new File("target/tests/" + getName());
+        prepareEmptyTestDir(testDir);
+        File resBase = new File(testDir, "docroot");
+        resBase.mkdirs();
+        File inde = new File(resBase, "index.htm");
+        File index = new File(resBase, "index.html");
+        
+
+        String resBasePath = resBase.getAbsolutePath();
+
+        ServletHolder defholder = context.addServlet(DefaultServlet.class,"/");
+        defholder.setInitParameter("dirAllowed","false");
+        defholder.setInitParameter("redirectWelcome","false");
+        defholder.setInitParameter("welcomeServlets","true");
+        defholder.setInitParameter("gzip","false");
+        defholder.setInitParameter("resourceBase",resBasePath);
+        
+        ServletHolder jspholder = context.addServlet(NoJspServlet.class,"*.jsp");
+
+        String response;
+
+        connector.reopen();
+        response= connector.getResponses("GET /context/ HTTP/1.0\r\n\r\n");
+        assertResponseContains("JSP support not configured",response);
+
+        createFile(index, "<h1>Hello Index</h1>");
+        connector.reopen();
+        response= connector.getResponses("GET /context/ HTTP/1.0\r\n\r\n");
+        assertResponseContains("<h1>Hello Index</h1>",response);
+        
+        createFile(inde, "<h1>Hello Inde</h1>");
+        connector.reopen();
+        response= connector.getResponses("GET /context/ HTTP/1.0\r\n\r\n");
+        assertResponseContains("<h1>Hello Index</h1>",response);
+
+        index.delete();
+        connector.reopen();
+        response= connector.getResponses("GET /context/ HTTP/1.0\r\n\r\n");
+        assertResponseContains("<h1>Hello Inde</h1>",response);
+        
+        inde.delete();
+        connector.reopen();
+        response= connector.getResponses("GET /context/ HTTP/1.0\r\n\r\n");
+        assertResponseContains("JSP support not configured",response);
+    }
+    
 
     private void createFile(File file, String str) throws IOException
     {
