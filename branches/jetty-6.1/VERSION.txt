@@ -17,7 +17,7 @@ jetty-6.1-SNAPSHOT
  + 288055 fix jetty-client for failed listener state machine
  + 288153 reset exchange when resending
  + 288182 PUT request fails during retry
-
+ + JETTY-1109 Improper handling of cookies in Terracotta tests
 
 jetty-6.1.20 27 August 2009
  + JETTY-838 Don't log and throw
