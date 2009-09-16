@@ -637,6 +637,7 @@ public class HttpConnection implements Connection
                 _generator.reset(true);
                 _generator.setResponse(HttpStatus.ORDINAL_500_Internal_Server_Error,null);
                 _generator.completeHeader(_responseFields,HttpGenerator.LAST);
+                _generator.complete();
                 throw e;
             }
         }
@@ -667,6 +668,7 @@ public class HttpConnection implements Connection
                 _generator.reset(true);
                 _generator.setResponse(HttpStatus.ORDINAL_500_Internal_Server_Error,null);
                 _generator.completeHeader(_responseFields,HttpGenerator.LAST);
+                _generator.complete();
                 throw e;
             }
         }

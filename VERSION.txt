@@ -1,4 +1,5 @@
 jetty-6.1-SNAPSHOT
+ + JETTY-719 Document state machine of jetty http client
  + JETTY-933 State == HEADER in client
  + JETTY-936 Improved servlet matching and optimized
  + JETTY-1038 ChannelId.isParentOf returns the wrong result
@@ -13,12 +14,12 @@ jetty-6.1-SNAPSHOT
  + JETTY-1100 extend setuid feature to allow setting max open file descriptors
  + JETTY-1102 Wrong usage of deliver() in private chat messages
  + JETTY-1108 SSL EOF detection
+ + JETTY-1109 Improper handling of cookies in Terracotta tests
+ + JETTY-1112 Response fails if header exceeds buffer size
  + 282543 HttpClient SSL buffer size fix
  + 288055 fix jetty-client for failed listener state machine
  + 288153 reset exchange when resending
  + 288182 PUT request fails during retry
- + JETTY-1109 Improper handling of cookies in Terracotta tests
- + JETTY-719 Document state machine of jetty http client
 
 jetty-6.1.20 27 August 2009
  + JETTY-838 Don't log and throw
