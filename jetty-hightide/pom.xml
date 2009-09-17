@@ -617,6 +617,25 @@
           </executions>
       </plugin>     
       <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>patch-configs</id>
+            <phase>generate-resources</phase>
+            <configuration>
+              <tasks>
+                <patch dir="${assembly.directory}/contexts" 
+                       patchfile="src/main/patches/testContextPath.patch" 
+                       ignorewhitespace="true" strip="0"/>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>maven-resources-plugin</artifactId>
         <configuration>
           <includeEmptyDirs>true</includeEmptyDirs>
