@@ -3,6 +3,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-933 State == HEADER in client
  + JETTY-936 Improved servlet matching and optimized
  + JETTY-1038 ChannelId.isParentOf returns the wrong result
+ + JETTY-1061 Catch exceptions from cometd listeners
  + JETTY-1072 maven plugin handles context path not as documented
  + JETTY-1080 modified previous fix for windows
  + JETTY-1084 HEAD command not setting content-type in response under certain circumstances
@@ -20,7 +21,7 @@ jetty-6.1-SNAPSHOT
  + 288055 fix jetty-client for failed listener state machine
  + 288153 reset exchange when resending
  + 288182 PUT request fails during retry
- + JETTY-1061 Catch exceptions from cometd listeners
+ + Fix DefaultServletTest for windows
 
 jetty-6.1.20 27 August 2009
  + JETTY-838 Don't log and throw
