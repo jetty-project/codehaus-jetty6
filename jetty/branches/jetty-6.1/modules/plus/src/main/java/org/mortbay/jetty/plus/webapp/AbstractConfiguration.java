@@ -75,9 +75,9 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
         //set up our special ServletHandler to remember injections and lifecycle callbacks
         ServletHandler servletHandler = new ServletHandler();
         SecurityHandler securityHandler = getWebAppContext().getSecurityHandler();        
-        org.mortbay.jetty.servlet.ServletHandler existingHandler = getWebAppContext().getServletHandler();       
-        servletHandler.setFilterMappings(existingHandler.getFilterMappings());
+        org.mortbay.jetty.servlet.ServletHandler existingHandler = getWebAppContext().getServletHandler(); 
         servletHandler.setFilters(existingHandler.getFilters());
+        servletHandler.setFilterMappings(existingHandler.getFilterMappings());
         servletHandler.setServlets(existingHandler.getServlets());
         servletHandler.setServletMappings(existingHandler.getServletMappings());
         getWebAppContext().setServletHandler(servletHandler);
