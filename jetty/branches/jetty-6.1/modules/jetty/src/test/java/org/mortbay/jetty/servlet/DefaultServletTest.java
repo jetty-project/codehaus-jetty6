@@ -18,6 +18,7 @@ public class DefaultServletTest extends TestCase
     private Server server;
     private LocalConnector connector;
     private Context context;
+    private String os = System.getProperty("os.name").toLowerCase();
 
     protected void setUp() throws Exception
     {
@@ -98,7 +99,8 @@ public class DefaultServletTest extends TestCase
         new File(resBase, "one").mkdir();
         new File(resBase, "two").mkdir();
         new File(resBase, "three").mkdir();
-        assertTrue("Creating dir 'f??r' (Might not work in Windows)", new File(resBase, "f??r").mkdir());
+        if (!os.contains("windows"))
+            assertTrue("Creating dir 'f??r' (Might not work in Windows)", new File(resBase, "f??r").mkdir());
 
         String resBasePath = resBase.getAbsolutePath();
         defholder.setInitParameter("resourceBase",resBasePath);
@@ -116,7 +118,9 @@ public class DefaultServletTest extends TestCase
         assertResponseContains("/one/",response);
         assertResponseContains("/two/",response);
         assertResponseContains("/three/",response);
-        assertResponseContains("/f%3F%3Fr",response);
+
+        if (!os.contains("windows"))
+            assertResponseContains("/f%3F%3Fr",response);
 
         assertResponseNotContains("<script>",response);
     }
@@ -192,10 +196,12 @@ public class DefaultServletTest extends TestCase
 
         File index = new File(resBase, "index.html");
         createFile(index, "<h1>Hello Index</h1>");
-        
-        File wackyDir = new File(resBase, "dir?");
-        assertTrue(wackyDir.mkdirs());
-        
+        File wackyDir;
+        if (!os.contains("windows"))
+        {
+            wackyDir = new File(resBase, "dir?");
+            assertTrue(wackyDir.mkdirs());
+        }
         wackyDir = new File(resBase, "dir;");
         assertTrue(wackyDir.mkdirs());
 
@@ -227,10 +233,13 @@ public class DefaultServletTest extends TestCase
         connector.reopen();
         response= connector.getResponses("GET /context/dir?/ HTTP/1.0\r\n\r\n");
         assertResponseContains("404",response);
-        
+
         connector.reopen();
         response= connector.getResponses("GET /context/dir%3F/ HTTP/1.0\r\n\r\n");
-        assertResponseContains("Directory: /context/dir?/<",response);
+        if (!os.contains("windows"))
+            assertResponseContains("Directory: /context/dir?/<",response);
+        else
+            assertResponseContains("404",response);
 
         connector.reopen();
         response= connector.getResponses("GET /context/index.html HTTP/1.0\r\n\r\n");
