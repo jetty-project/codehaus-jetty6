@@ -87,7 +87,6 @@
   </repositories>
   <properties>
   	<blazeds-version>3.2.0</blazeds-version>
-  	<jetty-version>7.0.0.M3</jetty-version>
   	<jetty-6-version>6.1.18</jetty-6-version>
   </properties>
 </project>
