@@ -126,17 +126,17 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>${project.version}</version>
+            <version>${jetty-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
-            <version>${project.version}</version>
+            <version>${jetty-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-client</artifactId>
-            <version>${project.version}</version>
+            <version>${jetty-version}</version>
         </dependency>
         <dependency>
             <groupId>org.terracotta</groupId>
