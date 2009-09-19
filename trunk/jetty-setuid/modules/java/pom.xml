@@ -64,12 +64,12 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>${project.version}</version>
+            <version>${jetty-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-util</artifactId>
-            <version>${project.version}</version>
+            <version>${jetty-version}</version>
         </dependency>
     </dependencies>
 </project>
