@@ -2,7 +2,7 @@
     <parent>
         <artifactId>jetty-setuid</artifactId>
         <groupId>org.mortbay.jetty</groupId>
-        <version>7.0.0.RC6</version>
+        <version>7.0.0.RC7-SNAPSHOT</version>
 	<relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -25,12 +25,10 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.jar"
-                                      tofile="../../target/jetty-setuid-${project.version}.jar" />
+                                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.jar" tofile="../../target/jetty-setuid-${project.version}.jar" />
                                 <copy failonerror="false" file="src/main/config/etc/jetty-setuid.xml" todir="../../target" />
                                 
-                                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.jar"
-                                      tofile="../../../../lib/ext/jetty-setuid-${project.version}.jar" />
+                                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.jar" tofile="../../../../lib/ext/jetty-setuid-${project.version}.jar" />
                                 <copy failonerror="false" file="src/main/config/etc/jetty-setuid.xml" todir="../../../../etc" />
                             </tasks>
                         </configuration>
