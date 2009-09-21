@@ -115,6 +115,7 @@
   <modules>
     <module>repository</module>
     <module>jetty-maven-plugin</module>
+    <module>jetty-jspc-maven-plugin</module>
     <module>jetty-ant</module>
     <module>jetty-integration-tests</module>
     <module>jetty-runner</module>
