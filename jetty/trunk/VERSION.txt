@@ -4,9 +4,9 @@ SNAPSHOT
  + JETTY-1100 extend setuid feature to set number of open file descriptors
  + JETTY-1109 Improper handling of cookies in Terracotta tests
  + Patch test context to deploy at /test for jetty-hightide
+ + Moved example-jetty-spring to jetty-spring
  + Include jetty-jspc-maven-plugin
  + Fix jetty/jboss security integration
-
 
 jetty@codehaus 7.0.0.RC4 18 August 2009
  + created separate VERSION.txt file
