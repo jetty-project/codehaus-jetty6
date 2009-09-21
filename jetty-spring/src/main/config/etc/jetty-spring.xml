@@ -49,9 +49,9 @@
     
     <property name="beans">
       <list>
-        <bean id="ContextDeployer" class="org.mortbay.jetty.spring.ContextDeployer">
+        <bean id="ContextDeployer" class="org.eclipse.jetty.deploy.ContextDeployer">
           <property name="contexts" ref="contexts"/>
-          <property name="contextsDir" value="contexts"/>
+          <property name="directory" value="contexts"/>
           <property name="scanInterval" value="5"/>
         </bean>
 
