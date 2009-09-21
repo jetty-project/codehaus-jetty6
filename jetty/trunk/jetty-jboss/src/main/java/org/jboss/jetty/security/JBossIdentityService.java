@@ -112,11 +112,14 @@ public class JBossIdentityService extends DefaultIdentityService
 
     public Object setRunAs(UserIdentity identity, RunAsToken token)
     {
-        String role = ((RoleRunAsToken)token).getRunAsRole();
-        String user = (identity==null?null:identity.getUserPrincipal().getName());
-        RunAsIdentity runAs = new RunAsIdentity(role, user);
-        SecurityAssociation.pushRunAsIdentity(runAs);
-        return null;
+        if (token != null)
+        {
+            String role = ((RoleRunAsToken)token).getRunAsRole();
+            String user = (identity==null?null:identity.getUserPrincipal().getName());
+            RunAsIdentity runAs = new RunAsIdentity(role, user);
+            SecurityAssociation.pushRunAsIdentity(runAs);
+        }
+        return token;
     }
 
     public void unsetRunAs(Object lastToken)
