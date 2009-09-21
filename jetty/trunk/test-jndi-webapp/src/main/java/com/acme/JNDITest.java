@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -67,6 +68,19 @@ public class JNDITest extends HttpServlet {
     private Session myMailSession;
     private Double wiggle;
     private Integer woggle;
+    private Double gargle;
+    
+    private String resourceNameMappingInjectionResult;
+    private String resourceContextXmlInjectionResult;
+    private String resourceJettyEnvInjectionResult;
+    private String envEntryOverrideResult;
+    private String postConstructResult = "PostConstruct method called: FALSE";
+    private String preDestroyResult = "PreDestroy method called: NOT YET";
+    private String envEntryGlobalScopeResult;
+    private String envEntryWebAppScopeResult;
+    private String userTransactionResult;
+    private String mailSessionResult;
+    
     
     public void setMyDatasource(DataSource ds)
     {
@@ -85,15 +99,17 @@ public class JNDITest extends HttpServlet {
     
     private void postConstruct ()
     {
-        System.err.println("mydatasource="+myDS);
-        System.err.println("mydatasource2="+myDS2);
-        System.err.println("mydatasource99="+myDS99);
-        System.err.println("wiggle="+wiggle);
+        String tmp = (myDS == null?"":myDS.toString());
+        resourceNameMappingInjectionResult= "Injection of resource to locally mapped name (java:comp/env/mydatasource as java:comp/env/mydatasource1): "+myDS.toString();
+        resourceContextXmlInjectionResult = "Injection of resource from context xml file (java:comp/env/mydatasource2): "+myDS2.toString();
+        resourceJettyEnvInjectionResult = "Injection of resource from jetty-env xml file (java:comp/env/mydatasource99): "+myDS99.toString();
+        envEntryOverrideResult = "Override of EnvEntry in jetty-env.xml (java:comp/env/wiggle): "+(wiggle==55.0?"PASS":"FAIL(expected 55.0, got "+wiggle+")");
+        postConstructResult = "PostConstruct method called: PASS";
     }
     
     private void preDestroy()
     {
-        System.err.println("PreDestroy called");
+        preDestroyResult = "PreDestroy method called: PASS";
         //close datasources - necessary for Atomikos
         close(myDS);
         close(myDS2);
@@ -116,6 +132,8 @@ public class JNDITest extends HttpServlet {
         }
     }
     
+    
+    
     public void init(ServletConfig config) throws ServletException
     {
         super.init(config);
@@ -123,12 +141,13 @@ public class JNDITest extends HttpServlet {
         {
             InitialContext ic = new InitialContext();
             woggle = (Integer)ic.lookup("java:comp/env/woggle");
-            System.err.println("woggle="+woggle);
-            System.err.println("gargle="+(Double)ic.lookup("java:comp/env/gargle"));
+            envEntryGlobalScopeResult = "EnvEntry defined in context xml lookup result (java:comp/env/woggle): "+(woggle==4000?"PASS":"FAIL(expected 4000, got "+woggle+")");
+            gargle = (Double)ic.lookup("java:comp/env/gargle");
+            envEntryWebAppScopeResult = "EnvEntry defined in jetty-env.xml lookup result (java:comp/env/gargle): "+(gargle==100.0?"PASS":"FAIL(expected 100, got "+gargle+")");
             UserTransaction utx = (UserTransaction)ic.lookup("java:comp/UserTransaction");
-            System.err.println("utx="+utx);
+            userTransactionResult = "UserTransaction lookup result (java:comp/UserTransaction): "+(utx!=null?"PASS":"FAIL");
             myMailSession = (Session)ic.lookup("java:comp/env/mail/Session");
-            System.err.println("myMailSession: "+myMailSession);
+            mailSessionResult = "Mail Session lookup result (java:comp/env/mail/Session): "+(myMailSession!=null?"PASS": "FAIL");
             
             doSetup();
         }
@@ -180,8 +199,8 @@ public class JNDITest extends HttpServlet {
             if (complete != null)
             {
               doTransaction(out, doCommit);
-              out.println("<p>Value of foo in myDS after "+(doCommit?"commit":"rollback")+": <b>"+getFoo(myDS)+"</p>");
-              out.println("<p>Value of foo in myDS2 after "+(doCommit?"commit":"rollback")+": <b>"+getFoo(myDS2)+"</p>");
+              out.println("<p>Value of foo in myDS after "+(doCommit?"commit":"rollback")+": <b>"+getFoo(myDS)+"</b></p>");
+              out.println("<p>Value of foo in myDS2 after "+(doCommit?"commit":"rollback")+": <b>"+getFoo(myDS2)+"</b></p>");
             }
             else if (mailTo != null && mailFrom != null)
             {
@@ -189,7 +208,19 @@ public class JNDITest extends HttpServlet {
                 out.println("<p>Sent!</p>");
             }
             out.println("<a href=\"index.html\">Try again?</a>");
-            
+
+            out.println("<h2>Injection and JNDI Lookup Results</h2>");
+            out.println("<p>"+resourceNameMappingInjectionResult+"</p>");
+            out.println("<p>"+resourceContextXmlInjectionResult+"</p>");
+            out.println("<p>"+resourceJettyEnvInjectionResult+"</p>");
+            out.println("<p>"+envEntryOverrideResult+"</p>");
+            out.println("<p>"+postConstructResult+"</p>");
+            out.println("<p>"+preDestroyResult+"</p>");
+            out.println("<p>"+envEntryGlobalScopeResult+"</p>");
+            out.println("<p>"+envEntryWebAppScopeResult+"</p>");
+            out.println("<p>"+userTransactionResult+"</p>");
+            out.println("<p>"+mailSessionResult+"</p>");
+
             out.println("</body>");            
             out.println("</html>");
             out.flush();
@@ -310,14 +341,29 @@ public class JNDITest extends HttpServlet {
             
             s1 = c1.createStatement();
             s2 = c2.createStatement();
-            
-            s1.execute("create table "+TABLE1+" ( id INTEGER, foo INTEGER )");
-            s1.executeUpdate("insert into "+TABLE1+" (id, foo) values (1, 1)");
-            c1.commit();
-            s2.execute("create table "+TABLE2+" ( id INTEGER, foo INTEGER )");
-            s2.executeUpdate("insert into "+TABLE2+" (id, foo) values (1, 1)");
-            c2.commit();
-            
+
+            try
+            {
+                s1.execute("create table "+TABLE1+" ( id INTEGER, foo INTEGER )");
+                s1.executeUpdate("insert into "+TABLE1+" (id, foo) values (1, 1)");
+                c1.commit();
+            }
+            catch (SQLException e)
+            {
+                e.printStackTrace();
+            }
+
+            try
+            {
+                s2.execute("create table "+TABLE2+" ( id INTEGER, foo INTEGER )");
+                s2.executeUpdate("insert into "+TABLE2+" (id, foo) values (1, 1)");
+                c2.commit();
+            }
+            catch (SQLException e)
+            {
+                e.printStackTrace();
+            }
+
             setupDone = true;
         }
         finally
@@ -352,7 +398,6 @@ public class JNDITest extends HttpServlet {
         }
         catch (IllegalStateException e)
         {
-            System.err.println("Caught expected IllegalStateException from Atomikos on doTearDown");
             doTearDown();
         }
         finally

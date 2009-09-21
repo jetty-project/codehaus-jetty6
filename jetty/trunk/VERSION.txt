@@ -7,6 +7,7 @@ SNAPSHOT
  + Moved example-jetty-spring to jetty-spring
  + Include jetty-jspc-maven-plugin
  + Fix jetty/jboss security integration
+ + Remove printlns
 
 jetty@codehaus 7.0.0.RC4 18 August 2009
  + created separate VERSION.txt file

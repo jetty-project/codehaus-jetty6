@@ -155,7 +155,6 @@ public class AnnotationTest extends HttpServlet
     @PreDestroy
     private void myPreDestroyMethod()
     {
-        System.err.println("PreDestroy called");
         //necessary for Atomikos to deregister the datasource in their static map
         close(myDS);
     }
