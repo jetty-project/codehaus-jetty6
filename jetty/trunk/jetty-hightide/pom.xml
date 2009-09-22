@@ -452,7 +452,7 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.slf4j</groupId>
-                  <artifactId>jcl104-over-slf4j</artifactId>
+                  <artifactId>jcl-over-slf4j</artifactId>
                   <version>${slf4j-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
