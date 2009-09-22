@@ -99,7 +99,7 @@ public class DefaultServletTest extends TestCase
         new File(resBase, "one").mkdir();
         new File(resBase, "two").mkdir();
         new File(resBase, "three").mkdir();
-        if (!os.contains("windows"))
+        if (os.indexOf("windows")<0)
             assertTrue("Creating dir 'f??r' (Might not work in Windows)", new File(resBase, "f??r").mkdir());
 
         String resBasePath = resBase.getAbsolutePath();
@@ -119,7 +119,7 @@ public class DefaultServletTest extends TestCase
         assertResponseContains("/two/",response);
         assertResponseContains("/three/",response);
 
-        if (!os.contains("windows"))
+        if (os.indexOf("windows")<0)
             assertResponseContains("/f%3F%3Fr",response);
 
         assertResponseNotContains("<script>",response);
@@ -197,7 +197,7 @@ public class DefaultServletTest extends TestCase
         File index = new File(resBase, "index.html");
         createFile(index, "<h1>Hello Index</h1>");
         File wackyDir;
-        if (!os.contains("windows"))
+        if (os.indexOf("windows")<0)
         {
             wackyDir = new File(resBase, "dir?");
             assertTrue(wackyDir.mkdirs());
@@ -236,7 +236,7 @@ public class DefaultServletTest extends TestCase
 
         connector.reopen();
         response= connector.getResponses("GET /context/dir%3F/ HTTP/1.0\r\n\r\n");
-        if (!os.contains("windows"))
+        if (os.indexOf("windows")<0)
             assertResponseContains("Directory: /context/dir?/<",response);
         else
             assertResponseContains("404",response);
