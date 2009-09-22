@@ -150,7 +150,7 @@
     <!--module>contrib/wadi</module-->
     <module>contrib/terracotta</module>
     <module>contrib/sweeper</module>
-    <!--module>extras/setuid</module-->
+    <module>extras/setuid</module>
   </modules>
   <dependencyManagement>
     <dependencies>
