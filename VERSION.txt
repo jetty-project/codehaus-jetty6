@@ -1,4 +1,4 @@
-jetty-6.1-SNAPSHOT
+jetty-6.1.21 22 September 2009
  + JETTY-719 Document state machine of jetty http client
  + JETTY-933 State == HEADER in client
  + JETTY-936 Improved servlet matching and optimized
