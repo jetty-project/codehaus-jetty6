@@ -54,8 +54,8 @@ public abstract class SelectorManager extends AbstractLifeCycle
     private transient SelectSet[] _selectSet;
     private int _selectSets=1;
     private volatile int _set;
-    private long _warned0;
-    private long _warned1;
+    private boolean _jvmBug0;
+    private boolean _jvmBug1;
     
 
     /* ------------------------------------------------------------ */
@@ -467,19 +467,17 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     if (__JVMBUG_THRESHHOLD>0 && selected==0 && wait>__JVMBUG_THRESHHOLD && (now-before)<(wait/2) )
                     {
                         _jvmBug++;
-
-                        if (_jvmBug>1)
-                            Log.info("JVMBUG: "+(now-before)+" "+wait+" "+_jvmBug);
-                        
                         if (_jvmBug>=(__JVMBUG_THRESHHOLD2))
                         {
                             synchronized (this)
                             {
                                 // BLOODY SUN BUG !!!  Try refreshing the entire selector.
-                                if (now-_warned1>1000)
+                                if (_jvmBug1)
+                                    Log.debug("seeing JVM BUG(s) - recreating selector");
+                                else
                                 {
+                                    _jvmBug1=true;
                                     Log.info("seeing JVM BUG(s) - recreating selector");
-                                    _warned1=now;
                                 }
                                 
                                 final Selector new_selector = Selector.open();
@@ -507,10 +505,12 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         else if (_jvmBug==__JVMBUG_THRESHHOLD || _jvmBug==__JVMBUG_THRESHHOLD1)
                         {
                             // Cancel keys with 0 interested ops
-                            if (now-_warned0>1000)
+                            if (_jvmBug0)
+                                Log.debug("seeing JVM BUG(s) - cancelling interestOps==0");
+                            else
                             {
-                                Log.info("seeing JVM BUG(s) - cancelling keys");
-                                _warned0=now;
+                                _jvmBug0=true;
+                                Log.info("seeing JVM BUG(s) - cancelling interestOps==0");
                             }
                             Iterator iter = selector.keys().iterator();
                             while(iter.hasNext())
