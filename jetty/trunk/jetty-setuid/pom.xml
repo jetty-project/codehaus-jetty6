@@ -106,6 +106,7 @@
               </os>
             </activation>
             <modules>
+                <module>modules/java</module>
             </modules>
          </profile>
 
@@ -117,6 +118,7 @@
               </os>
             </activation>
             <modules>
+                <module>modules/java</module>
             </modules>
          </profile>
 
@@ -128,6 +130,7 @@
               </os>
             </activation>
             <modules>
+                <module>modules/java</module>
             </modules>
          </profile>
 
