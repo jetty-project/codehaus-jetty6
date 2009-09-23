@@ -3,6 +3,7 @@ SNAPSHOT
  + JETTY-1089 Upgrade jsp to SJSAS-9_1_1-B60F-07_Jan_2009
  + JETTY-1100 extend setuid feature to set number of open file descriptors
  + JETTY-1109 Improper handling of cookies in Terracotta tests
+ + JETTY-1115 Allow configuration of location of web.xml for jetty-jspc-maven-plugin
  + Patch test context to deploy at /test for jetty-hightide
  + Moved example-jetty-spring to jetty-spring
  + Include jetty-jspc-maven-plugin
