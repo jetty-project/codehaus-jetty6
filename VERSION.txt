@@ -8,6 +8,7 @@ SNAPSHOT
  + Include jetty-jspc-maven-plugin
  + Fix jetty/jboss security integration
  + Remove printlns
+ + Exclude setuid from hightide when building on windows
 
 jetty@codehaus 7.0.0.RC4 18 August 2009
  + created separate VERSION.txt file
