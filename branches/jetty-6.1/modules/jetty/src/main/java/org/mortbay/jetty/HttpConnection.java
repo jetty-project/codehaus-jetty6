@@ -18,16 +18,15 @@ package org.mortbay.jetty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.RuntimeIOException;
-import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
@@ -50,10 +49,10 @@ import org.mortbay.util.ajax.Continuation;
  * the duration of a connection. Where appropriate, allocated buffers are also
  * kept associated with the connection via the parser and/or generator.
  * </p>
- * 
- * 
+ *
+ *
  * @author gregw
- * 
+ *
  */
 public class HttpConnection implements Connection
 {
@@ -107,7 +106,7 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     /**
      * Constructor
-     * 
+     *
      */
     public HttpConnection(Connector connector, EndPoint endpoint, Server server)
     {
@@ -123,7 +122,7 @@ public class HttpConnection implements Connection
         _generator.setSendServerVersion(server.getSendServerVersion());
         _server = server;
     }
-    
+
     protected HttpConnection(Connector connector, EndPoint endpoint, Server server,
             Parser parser, Generator generator, Request request)
     {
@@ -253,7 +252,7 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     /**
      * Find out if the request is INTEGRAL security.
-     * 
+     *
      * @param request
      * @return <code>true</code> if there is a {@link #getConnector() connector}
      *         and it considers <code>request</code> to be
@@ -472,7 +471,14 @@ public class HttpConnection implements Connection
                         more_in_buffer = false;
                     }
 
-                    reset(!more_in_buffer);
+                    if (more_in_buffer)
+                    {
+                        reset(false);
+                        more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();
+                    }
+                    else
+                        reset(true);
+
                     no_progress = 0;
                 }
 
@@ -563,7 +569,7 @@ public class HttpConnection implements Connection
             {
                 if (e instanceof ThreadDeath)
                     throw (ThreadDeath)e;
-                
+
                 if (info==null)
                 {
                     Log.warn(_uri+": "+e);
@@ -730,7 +736,7 @@ public class HttpConnection implements Connection
         private String _charset;
 
         /*
-         * 
+         *
          * @see
          * org.mortbay.jetty.HttpParser.EventHandler#startRequest(org.mortbay
          * .io.Buffer, org.mortbay.io.Buffer, org.mortbay.io.Buffer)
@@ -933,7 +939,7 @@ public class HttpConnection implements Connection
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see org.mortbay.jetty.HttpParser.EventHandler#messageComplete(int)
          */
         public void messageComplete(long contentLength) throws IOException
@@ -947,7 +953,7 @@ public class HttpConnection implements Connection
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see
          * org.mortbay.jetty.HttpParser.EventHandler#startResponse(org.mortbay
          * .io.Buffer, int, org.mortbay.io.Buffer)
@@ -1044,13 +1050,13 @@ public class HttpConnection implements Connection
                                 _responseFields.put(HttpHeaders.CONTENT_TYPE_BUFFER, content_type);
                             else
                             {
-                                _responseFields.put(HttpHeaders.CONTENT_TYPE_BUFFER, 
+                                _responseFields.put(HttpHeaders.CONTENT_TYPE_BUFFER,
                                         contentType+";charset="+QuotedStringTokenizer.quote(enc,";= "));
                             }
                         }
                         else
                         {
-                            _responseFields.put(HttpHeaders.CONTENT_TYPE_BUFFER, 
+                            _responseFields.put(HttpHeaders.CONTENT_TYPE_BUFFER,
                                     contentType+";charset="+QuotedStringTokenizer.quote(enc,";= "));
                         }
                     }
