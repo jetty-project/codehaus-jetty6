@@ -1,5 +1,6 @@
 jetty-6.1-SNAPSHOT
  + fixed XSS issue in demo CometDump servlet
+ + JETTY-1120 Requests with no body are treated as complete even if there's a LF left to read
 
 jetty-6.1.21 22 September 2009
  + JETTY-719 Document state machine of jetty http client
