@@ -12,6 +12,7 @@ Patches:
  + Added DebugHandler
  + JETTY-1079 ResourceCollection.toString() can throw IllegalStateException
  + 286911 Clean out cache when recycling HTTP fields
+ + 283153 SSL connections may cause jetty to hang with full cpu
  + JETTY-1086 Added UncheckedPrintWriter to avoid ignored EOFs
  + Protect setConfigurations when running
  + JETTY-1100 extend setuid feature to allow config of max open file descriptors
