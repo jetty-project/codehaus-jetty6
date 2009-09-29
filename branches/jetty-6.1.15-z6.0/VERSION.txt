@@ -16,6 +16,7 @@ Patches:
  + Protect setConfigurations when running
  + JETTY-1100 extend setuid feature to allow config of max open file descriptors
  + JETTY-1108 SSL EOF detection
+ + JETTY-1087 Chunked SSL non blocking input
  
 jetty-6.1.15 4 March 2009
  + JETTY-931 Fix issue with jetty-rewrite.xml
