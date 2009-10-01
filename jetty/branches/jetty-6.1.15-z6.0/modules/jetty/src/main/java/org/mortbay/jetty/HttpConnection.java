@@ -454,7 +454,14 @@ public class HttpConnection implements Connection
                         more_in_buffer = false;
                     }
 
-                    reset(!more_in_buffer);
+                    if (more_in_buffer)
+                    {
+                        reset(false);
+                        more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();
+                    }
+                    else
+                        reset(true);
+
                     no_progress = 0;
                 }
 
@@ -525,14 +532,7 @@ public class HttpConnection implements Connection
             }
             catch (EofException e)
             {
-                Log.debug(e);
-                _request.setHandled(true);
-                error = true;
-            }
-            catch (RuntimeIOException e)
-            {
-                Log.debug(e);
-                _request.setHandled(true);
+                Log.ignore(e);
                 error = true;
             }
             catch (HttpException e)
@@ -542,11 +542,17 @@ public class HttpConnection implements Connection
                 _response.sendError(e.getStatus(),e.getReason());
                 error = true;
             }
+            catch (RuntimeIOException e)
+            {
+                Log.debug(e);
+                _request.setHandled(true);
+                error = true;
+            }
             catch (Throwable e)
             {
                 if (e instanceof ThreadDeath)
                     throw (ThreadDeath)e;
-                
+
                 if (info==null)
                 {
                     Log.warn(_uri+": "+e);

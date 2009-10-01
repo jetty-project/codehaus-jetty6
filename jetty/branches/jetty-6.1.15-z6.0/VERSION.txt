@@ -29,7 +29,7 @@ Patches:
  + JETTY-1093 Request.toString throws exception when size exceeds 4k
  + JETTY-1100 extend setuid feature to allow config of max open file descriptors
  + JETTY-1108 SSL EOF detection
-
+ + JETTY-1120 Fix skipping of LF at end of request
  
 jetty-6.1.15 4 March 2009
  + JETTY-931 Fix issue with jetty-rewrite.xml
