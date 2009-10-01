@@ -942,11 +942,16 @@ public class HttpParser implements Parser
             {   
                 if (_body.hasContent())
                 {
+                    // There is content in the body after the end of the request.
+                    // This is probably a pipelined header of the next request, so we need to
+                    // copy it to the header buffer.
                     _header.setMarkIndex(-1);
                     _header.compact();
-                    // TODO if pipelined requests received after big input - maybe this is not good?.
-                    _body.skip(_header.put(_body));
-
+                    int take=_header.space();
+                    if (take>_body.length())
+                        take=_body.length();
+                    _body.peek(_body.getIndex(),take);
+                    _body.skip(_header.put(_body.peek(_body.getIndex(),take)));
                 }
 
                 if (_body.length()==0)

@@ -26,6 +26,7 @@ import java.util.jar.Manifest;
 
 import org.mortbay.log.Log;
 import org.mortbay.util.IO;
+import org.mortbay.util.URIUtil;
 
 
 /* ------------------------------------------------------------ */
@@ -139,6 +140,7 @@ public class JarResource extends URLResource
         JarInputStream jin = new JarInputStream(is);
         JarEntry entry;
         boolean shouldExtract;
+        String directoryCanonicalPath = directory.getCanonicalPath()+"/";
         while((entry=jin.getNextJarEntry())!=null)
         {
             String entryName = entry.getName();
@@ -183,8 +185,16 @@ public class JarResource extends URLResource
                 continue;
             }
                 
-           
+            String dotCheck = entryName.replace('\\', '/');   
+            dotCheck = URIUtil.canonicalPath(dotCheck);
+            if (dotCheck == null)
+            {
+                if (Log.isDebugEnabled()) Log.debug("Invalid entry: "+entryName);
+                continue;
+            }
+            
             File file=new File(directory,entryName);
+          
             if (entry.isDirectory())
             {
                 // Make directory
