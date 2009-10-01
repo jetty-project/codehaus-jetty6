@@ -1,23 +1,35 @@
 Patches:
  + libsetuid -> setuid in SetUID.java
+ + Protect setConfigurations when running
+ + Added DebugHandler
+ + 286911 Clean out cache when recycling HTTP fields
+ + 283153 SSL connections may cause jetty to hang with full cpu
  + JETTY-937 Further Improvements for sun JVM selector bugs
  + JETTY-980 Fixed ResourceHandler ? handling, and bad URI creation in listings
+ + JETTY-983 Default Servlet sets accept-ranges for cached/gzipped content
  + JETTY-989 GzipFilter handles addHeader
  + JETTY-1004 Canonical path handling includes ? in path segment
  + JETTY-1018 Denial of Service Filter, plus Jetty-specific extension which better handles timeouts
+ + JETTY-1031 Handle large pipeline
  + JETTY-1042 Avoid cookie reuse on shared connection
+ + JETTY-1048 Default servlet can handle partially filtered large static content
  + JETTY-1057 Error page stack trace XSS and error page URI
+ + JETTY-1058 Handle trailing / with aliases on
  + JETTY-1066 Improved handling of URI parse exceptions
  + JETTY-1068 Avoid busy flush of async SSL and force minimal buffer size
- + Added DebugHandler
  + JETTY-1079 ResourceCollection.toString() can throw IllegalStateException
- + 286911 Clean out cache when recycling HTTP fields
- + 283153 SSL connections may cause jetty to hang with full cpu
+ + JETTY-1080 Ignore files that would be extracted outside the destination directory when unpacking WARs
+ + JETTY-1080 modified previous fix for windows
+ + JETTY-1081 Handle null content type in GzipFilter
+ + JETTY-1084 Disable GzipFilter for HEAD requests
+ + JETTY-1084 HEAD command not setting content-type in response under certain circumstances
  + JETTY-1086 Added UncheckedPrintWriter to avoid ignored EOFs
- + Protect setConfigurations when running
+ + JETTY-1087 Chunked SSL non blocking input
+ + JETTY-1092 MultiPartFilter can be pushed into infinite loop
+ + JETTY-1093 Request.toString throws exception when size exceeds 4k
  + JETTY-1100 extend setuid feature to allow config of max open file descriptors
  + JETTY-1108 SSL EOF detection
- + JETTY-1087 Chunked SSL non blocking input
+
  
 jetty-6.1.15 4 March 2009
  + JETTY-931 Fix issue with jetty-rewrite.xml
