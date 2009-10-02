@@ -44,7 +44,7 @@ import org.mortbay.thread.Timeout;
  */
 public abstract class SelectorManager extends AbstractLifeCycle
 {
-    private static final int __JVMBUG_THRESHHOLD=Integer.getInteger("org.mortbay.io.nio.JVMBUG_THRESHHOLD",128).intValue();
+    private static final int __JVMBUG_THRESHHOLD=Integer.getInteger("org.mortbay.io.nio.JVMBUG_THRESHHOLD",8).intValue();
     private static final int __JVMBUG_THRESHHOLD2=__JVMBUG_THRESHHOLD*2;
     private static final int __JVMBUG_THRESHHOLD1=(__JVMBUG_THRESHHOLD2+__JVMBUG_THRESHHOLD)/2;
     private boolean _delaySelectKeyUpdate=true;
