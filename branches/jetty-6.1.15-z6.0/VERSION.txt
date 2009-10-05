@@ -5,6 +5,7 @@ Patches:
  + 286911 Clean out cache when recycling HTTP fields
  + 283153 SSL connections may cause jetty to hang with full cpu
  + JETTY-937 Further Improvements for sun JVM selector bugs
+ + JETTY-937 More JVM bug work arounds. Insert pause if all else fails
  + JETTY-980 Fixed ResourceHandler ? handling, and bad URI creation in listings
  + JETTY-983 Default Servlet sets accept-ranges for cached/gzipped content
  + JETTY-989 GzipFilter handles addHeader
