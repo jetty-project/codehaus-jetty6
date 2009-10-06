@@ -15,7 +15,6 @@
 package org.mortbay.io.nio;
 
 import java.io.IOException;
-import java.nio.channels.ByteChannel;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
@@ -27,7 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.mortbay.component.AbstractLifeCycle;
-import org.mortbay.component.LifeCycle;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.log.Log;
