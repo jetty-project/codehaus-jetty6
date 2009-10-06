@@ -584,7 +584,8 @@ public abstract class SelectorManager extends AbstractLifeCycle
                                 }
                             }
 
-                            _jvmFix1++;
+                            if (cancelled>0)
+				_jvmFix0++;
                             
                             return;
                         }
