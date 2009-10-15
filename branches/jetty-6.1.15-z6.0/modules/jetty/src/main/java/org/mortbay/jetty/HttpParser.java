@@ -465,7 +465,15 @@ public class HttpParser implements Parser
                                         case HttpHeaders.CONTENT_LENGTH_ORDINAL:
                                             if (_contentLength != HttpTokens.CHUNKED_CONTENT)
                                             {
-                                                _contentLength=BufferUtil.toLong(value);
+                                                try
+                                                {
+                                                    _contentLength=BufferUtil.toLong(value);
+                                                }
+                                                catch(NumberFormatException e)
+                                                {
+                                                    Log.warn(e);
+                                                    throw new HttpException(HttpServletResponse.SC_BAD_REQUEST);
+                                                }
                                                 if (_contentLength <= 0)
                                                     _contentLength=HttpTokens.NO_CONTENT;
                                             }
