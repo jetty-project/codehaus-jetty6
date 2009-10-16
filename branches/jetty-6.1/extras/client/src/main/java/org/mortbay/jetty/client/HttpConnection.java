@@ -53,10 +53,10 @@ public class HttpConnection implements Connection
     boolean _requestComplete;
     public String _message;
     public boolean _reserved;
-
-    /* The current exchange waiting for a response */
+    // The current exchange waiting for a response
     volatile HttpExchange _exchange;
     HttpExchange _pipeline;
+    private final Timeout.Task _timeout = new TimeoutTask();
 
     public void dump() throws IOException
     {
@@ -67,44 +67,6 @@ public class HttpConnection implements Connection
         if (_endp instanceof SslHttpChannelEndPoint)
             ((SslHttpChannelEndPoint)_endp).dump();
     }
-
-    Timeout.Task _timeout = new Timeout.Task()
-    {
-        public void expired()
-        {
-            HttpExchange ex=null;
-            try
-            {
-                synchronized (HttpConnection.this)
-                {
-                    ex = _exchange;
-                    _exchange = null;
-                    if (ex != null)
-                        _destination.returnConnection(HttpConnection.this,true);
-                }
-            }
-            catch (Exception e)
-            {
-                Log.debug(e);
-            }
-            finally
-            {
-                try
-                {
-                    close();
-                }
-                catch (IOException e)
-                {
-                    Log.ignore(e);
-                }
-
-                if (ex!=null && ex.getStatus() < HttpExchange.STATUS_COMPLETED)
-                {
-                    ex.setStatus(HttpExchange.STATUS_EXPIRED);
-                }
-            }
-        }
-    };
 
     /* ------------------------------------------------------------ */
     HttpConnection(Buffers buffers, EndPoint endp, int hbs, int cbs)
@@ -155,19 +117,19 @@ public class HttpConnection implements Connection
             if (!_endp.isOpen())
                 return false;
 
-            ex.setStatus(HttpExchange.STATUS_WAITING_FOR_COMMIT);
             _exchange = ex;
+            _exchange.setStatus(HttpExchange.STATUS_WAITING_FOR_COMMIT);
 
             if (_endp.isBlocking())
+            {
                 this.notify();
+            }
             else
             {
                 SelectChannelEndPoint scep = (SelectChannelEndPoint)_endp;
                 scep.scheduleWrite();
             }
-
-            if (!_endp.isBlocking())
-                _destination.getHttpClient().schedule(_timeout);
+            _destination.getHttpClient().schedule(_timeout);
 
             return true;
         }
@@ -204,10 +166,9 @@ public class HttpConnection implements Connection
                         _parser.skipCRLF();
                         if (_parser.isMoreInBuffer())
                         {
-                            Log.warn("unexpected data");
+                            Log.warn("Unexpected data received but no request sent");
                             close();
                         }
-
                         return;
                     }
                 }
@@ -262,6 +223,11 @@ public class HttpConnection implements Connection
                     }
                 }
 
+                if (_generator.isComplete() && !_requestComplete)
+                {
+                    _requestComplete = true;
+                    _exchange.getEventListener().onRequestComplete();
+                }
 
                 // If we are not ended then parse available
                 if (!_parser.isComplete() && _generator.isCommitted())
@@ -285,27 +251,30 @@ public class HttpConnection implements Connection
             }
             catch (Throwable e)
             {
+                Log.debug("Failure on " + _exchange, e);
+
                 if (e instanceof ThreadDeath)
                     throw (ThreadDeath)e;
-                
+
                 synchronized (this)
                 {
                     if (_exchange != null)
                     {
-                        _exchange.getEventListener().onException(e);
                         _exchange.setStatus(HttpExchange.STATUS_EXCEPTED);
+                        _exchange.getEventListener().onException(e);
                     }
                 }
+
                 failed = true;
                 if (e instanceof IOException)
                     throw (IOException)e;
- 
+
                 if (e instanceof Error)
                     throw (Error)e;
-                
+
                 if (e instanceof RuntimeException)
                     throw (RuntimeException)e;
-                
+
                throw new RuntimeException(e);
             }
             finally
@@ -341,8 +310,8 @@ public class HttpConnection implements Connection
                             close = shouldClose();
 
                         reset(true);
+
                         no_progress = 0;
-                        flushed = -1;
                         if (_exchange != null)
                         {
                             _exchange = null;
@@ -351,8 +320,6 @@ public class HttpConnection implements Connection
                             {
                                 if (!isReserved())
                                     _destination.returnConnection(this,close);
-                                if (close)
-                                    return;
                             }
                             else
                             {
@@ -360,15 +327,17 @@ public class HttpConnection implements Connection
                                 {
                                     if (!isReserved())
                                         _destination.returnConnection(this,close);
-                                    _destination.send(_pipeline);
+
+                                    HttpExchange exchange = _pipeline;
                                     _pipeline = null;
-                                    return;
+                                    _destination.send(exchange);
                                 }
-
-                                HttpExchange ex = _pipeline;
-                                _pipeline = null;
-
-                                send(ex);
+                                else
+                                {
+                                    HttpExchange exchange = _pipeline;
+                                    _pipeline = null;
+                                    send(exchange);
+                                }
                             }
                         }
                     }
@@ -445,11 +414,6 @@ public class HttpConnection implements Connection
             else
             {
                 _exchange._requestFields.remove(HttpHeaders.CONTENT_LENGTH); // TODO
-                // :
-                // should
-                // not
-                // be
-                // needed
                 _generator.completeHeader(_exchange._requestFields,true);
             }
 
@@ -578,16 +542,43 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     public void close() throws IOException
     {
-        try
-        {
-            _endp.close();
-        }
-        finally
-        {
+        _endp.close();
+    }
 
-            if (_exchange != null)
+    private class TimeoutTask extends Timeout.Task
+    {
+        public void expired()
+        {
+            HttpExchange ex=null;
+            try
             {
-                _exchange.onException(new IOException("Connection closed"));
+                synchronized (HttpConnection.this)
+                {
+                    ex = _exchange;
+                    _exchange = null;
+                    if (ex != null)
+                        _destination.returnConnection(HttpConnection.this,true);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.debug(e);
+            }
+            finally
+            {
+                try
+                {
+                    close();
+                }
+                catch (IOException e)
+                {
+                    Log.ignore(e);
+                }
+
+                if (ex!=null && ex.getStatus() < HttpExchange.STATUS_COMPLETED)
+                {
+                    ex.setStatus(HttpExchange.STATUS_EXPIRED);
+                }
             }
         }
     }

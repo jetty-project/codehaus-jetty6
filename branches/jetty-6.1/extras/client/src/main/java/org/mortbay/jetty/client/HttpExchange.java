@@ -76,32 +76,25 @@ public class HttpExchange
     public static final int STATUS_EXPIRED = 8;
     public static final int STATUS_EXCEPTED = 9;
 
-    Address _address;
     String _method = HttpMethods.GET;
     Buffer _scheme = HttpSchemes.HTTP_BUFFER;
-    int _version = HttpVersions.HTTP_1_1_ORDINAL;
     String _uri;
-    int _status = STATUS_START;
+    int _version = HttpVersions.HTTP_1_1_ORDINAL;
+    Address _address;
     HttpFields _requestFields = new HttpFields();
     Buffer _requestContent;
     InputStream _requestContentSource;
+
+    volatile int _status = STATUS_START;
     Buffer _requestContentChunk;
     boolean _retryStatus = false;
-
-
-    /**
-     * boolean controlling if the exchange will have listeners autoconfigured by
-     * the destination
-     */
+    // controls if the exchange will have listeners autoconfigured by the destination
     boolean _configureListeners = true;
-
-
     private HttpEventListener _listener = new Listener();
 
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    // methods to build request
+    boolean _onRequestCompleteDone;
+    boolean _onResponseCompleteDone;
+    boolean _onDone; // == onConnectionFail || onException || onExpired || onCancelled || onResponseCompleted && onRequestCompleted
 
     /* ------------------------------------------------------------ */
     public int getStatus()
@@ -125,14 +118,29 @@ public class HttpExchange
     }
 
 
+    /**
+     * Wait until the exchange is "done".  
+     * Done is defined as when a final state has been passed to the 
+     * HttpExchange via the associated onXxx call.  Note that an
+     * exchange can transit a final state when being used as part
+     * of a dialog (eg {@link SecurityListener}.   Done status
+     * is thus defined as:<pre>
+     *   done == onConnectionFailed 
+     *        || onException
+     *        || onExpire
+     *        || onRequestComplete && onResponseComplete
+     * </pre>
+     * @return
+     * @throws InterruptedException
+     */
     public int waitForDone () throws InterruptedException
     {
         synchronized (this)
         {
             while (!isDone(_status))
                 this.wait();
+            return _status;
         }
-        return _status;
     }
 
 
@@ -141,62 +149,70 @@ public class HttpExchange
     /* ------------------------------------------------------------ */
     public void reset()
     {
-        setStatus(STATUS_START);
+        // TODO - this should do a cancel and wakeup everybody that was waiting.
+        // might need a version number concept 
+        synchronized(this)
+        {
+            _onRequestCompleteDone=false;
+            _onResponseCompleteDone=false;
+            _onDone=false;
+            setStatus(STATUS_START);
+        }
     }
 
     /* ------------------------------------------------------------ */
     void setStatus(int status)
     {
-        synchronized (this)
+        // _status is volatile
+        _status = status;
+
+        try
         {
-            _status = status;
-            this.notifyAll();
-
-            try
+            switch (status)
             {
-                switch (status)
-                {
-                    case STATUS_WAITING_FOR_CONNECTION:
-                        break;
+                case STATUS_WAITING_FOR_CONNECTION:
+                    break;
 
-                    case STATUS_WAITING_FOR_COMMIT:
-                        break;
+                case STATUS_WAITING_FOR_COMMIT:
+                    break;
 
-                    case STATUS_SENDING_REQUEST:
-                        break;
+                case STATUS_SENDING_REQUEST:
+                    break;
 
-                    case HttpExchange.STATUS_WAITING_FOR_RESPONSE:
-                        getEventListener().onRequestCommitted();
-                        break;
+                case HttpExchange.STATUS_WAITING_FOR_RESPONSE:
+                    getEventListener().onRequestCommitted();
+                    break;
 
-                    case STATUS_PARSING_HEADERS:
-                        break;
+                case STATUS_PARSING_HEADERS:
+                    break;
 
-                    case STATUS_PARSING_CONTENT:
-                        getEventListener().onResponseHeaderComplete();
-                        break;
+                case STATUS_PARSING_CONTENT:
+                    getEventListener().onResponseHeaderComplete();
+                    break;
 
-                    case STATUS_COMPLETED:
-                        getEventListener().onResponseComplete();
-                        break;
+                case STATUS_COMPLETED:
+                    getEventListener().onResponseComplete();
+                    break;
 
-                    case STATUS_EXPIRED:
-                        getEventListener().onExpire();
-                        break;
+                case STATUS_EXPIRED:
+                    getEventListener().onExpire();
+                    break;
 
-                }
             }
-            catch (IOException e)
-            {
-                Log.warn(e);
-            }
+        }
+        catch (IOException e)
+        {
+            Log.warn(e);
         }
     }
 
     /* ------------------------------------------------------------ */
     public boolean isDone (int status)
     {
-        return ((status == STATUS_COMPLETED) || (status == STATUS_EXPIRED) || (status == STATUS_EXCEPTED));
+        synchronized (this)
+        {
+            return _onDone;
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -482,7 +498,7 @@ public class HttpExchange
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "HttpExchange@" + hashCode() + "=" + _method + "//" + _address.getHost() + ":" + _address.getPort() + _uri + "#" + _status;
+        return getClass().getName() + "@" + hashCode() + "=" + _method + "//" + _address + _uri + "#" + _status;
     }
 
 
@@ -587,7 +603,8 @@ public class HttpExchange
      * @throws IOException
      */
     protected void onRetry() throws IOException
-    {}
+    {
+    }
 
     /**
      * true of the exchange should have listeners configured for it by the destination
@@ -610,17 +627,50 @@ public class HttpExchange
     {
         public void onConnectionFailed(Throwable ex)
         {
-            HttpExchange.this.onConnectionFailed(ex);
+            try
+            {
+                HttpExchange.this.onConnectionFailed(ex);
+            }
+            finally
+            {
+                synchronized(HttpExchange.this)
+                {
+                    _onDone=true;
+                    HttpExchange.this.notifyAll();
+                }
+            }
         }
 
         public void onException(Throwable ex)
         {
-            HttpExchange.this.onException(ex);
+            try
+            {
+                HttpExchange.this.onException(ex);
+            }
+            finally
+            {
+                synchronized(HttpExchange.this)
+                {
+                    _onDone=true;
+                    HttpExchange.this.notifyAll();
+                }
+            }
         }
 
         public void onExpire()
         {
-            HttpExchange.this.onExpire();
+            try
+            {
+                HttpExchange.this.onExpire();
+            }
+            finally
+            {
+                synchronized(HttpExchange.this)
+                {
+                    _onDone=true;
+                    HttpExchange.this.notifyAll();
+                }
+            }
         }
 
         public void onRequestCommitted() throws IOException
@@ -630,12 +680,36 @@ public class HttpExchange
 
         public void onRequestComplete() throws IOException
         {
-            HttpExchange.this.onRequestComplete();
+            try
+            {
+                HttpExchange.this.onRequestComplete();
+            }
+            finally
+            {
+                synchronized(HttpExchange.this)
+                {
+                    _onRequestCompleteDone=true;
+                    _onDone=_onResponseCompleteDone;
+                    HttpExchange.this.notifyAll();
+                }
+            }
         }
 
         public void onResponseComplete() throws IOException
         {
-            HttpExchange.this.onResponseComplete();
+            try
+            {
+                HttpExchange.this.onResponseComplete();
+            }
+            finally
+            {
+                synchronized(HttpExchange.this)
+                {
+                    _onResponseCompleteDone=true;
+                    _onDone=_onRequestCompleteDone;
+                    HttpExchange.this.notifyAll();
+                }
+            }
         }
 
         public void onResponseContent(Buffer content) throws IOException
@@ -667,7 +741,7 @@ public class HttpExchange
             }
             catch (IOException e)
             {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                Log.debug(e);
             }
         }
     }
