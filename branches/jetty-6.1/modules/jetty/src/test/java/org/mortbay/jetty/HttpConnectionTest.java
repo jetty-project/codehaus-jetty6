@@ -28,6 +28,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import org.mortbay.log.Log;
+
 
 import junit.framework.TestCase;
 
@@ -363,14 +365,23 @@ public class HttpConnectionTest extends TestCase
         {
             public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
             {
-                Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
-                base_request.setHandled(true);
-                response.setHeader(HttpHeaders.CONTENT_TYPE,MimeTypes.TEXT_HTML);
-                response.setHeader("LongStr", longstr);
-                PrintWriter writer = response.getWriter();
-                writer.write("<html><h1>FOO</h1></html>");  
-                writer.flush();
-                writer.close();
+                try
+                {
+                    Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
+                    base_request.setHandled(true);
+                    response.setHeader(HttpHeaders.CONTENT_TYPE,MimeTypes.TEXT_HTML);
+                    response.setHeader("LongStr", longstr);
+                    PrintWriter writer = response.getWriter();
+                    writer.write("<html><h1>FOO</h1></html>");  
+                    writer.flush();
+                    writer.close();
+                    throw new RuntimeException("SHOULD NOT GET HERE");
+                }
+                catch(ArrayIndexOutOfBoundsException e)
+                {
+                    Log.debug(e);
+                    Log.info("correctly ignored "+e);
+                }
             }
         });
         server.start();
