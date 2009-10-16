@@ -55,7 +55,7 @@ public class AsyncStressTest extends TestCase
         _stress= Boolean.getBoolean("STRESS");
         _threads.setMaxThreads(50);
         if (_stress)
-            _threads.setMinThreads(200);
+            _threads.setMaxThreads(200);
         _server.setThreadPool(_threads);
         _connector = new SelectChannelConnector();
         _server.setConnectors(new Connector[]{ _connector });
@@ -206,7 +206,7 @@ public class AsyncStressTest extends TestCase
         if (_stress)
         {
             System.err.println("STRESS! ");
-            doThreads(100,100);
+            doThreads(40,100);
         }
         else
             doThreads(20,20);
