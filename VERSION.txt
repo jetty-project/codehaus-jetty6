@@ -3,6 +3,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1120 Requests with no body are treated as complete even if there's a LF left to read
  + JETTY-937 More JVM bug work arounds. Insert pause if all else fails
  + COMETD-28 Improved concurrency usage in Bayeux and channel handling
+ + JETTY-1121 Merge Multipart query parameters
  + JETTY-1122 Handle multi-byte utf that causes buffer overflow
  + JETTY-1129 Filter control characters out of StdErrLog
 
