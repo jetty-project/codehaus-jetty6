@@ -244,6 +244,7 @@ public class HttpDestination
         }
         catch(Exception e)
         {
+            Log.debug(e);
             onConnectionFailed(e);
         }
     }
@@ -264,6 +265,7 @@ public class HttpDestination
             else if (_queue.size()>0)
             {
                 HttpExchange ex=_queue.removeFirst();
+                ex.setStatus(HttpExchange.STATUS_EXCEPTED);
                 ex.getEventListener().onConnectionFailed(throwable);
             }
         }
@@ -290,8 +292,8 @@ public class HttpDestination
             if (_queue.size()>0)
             {
                 HttpExchange ex=_queue.removeFirst();
-                ex.getEventListener().onException(throwable);
                 ex.setStatus(HttpExchange.STATUS_EXCEPTED);
+                ex.getEventListener().onException(throwable);
             }
         }
     }
