@@ -40,6 +40,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
@@ -103,16 +104,17 @@ public class MultiPartFilter implements Filter
         
         String boundary="--"+value(content_type.substring(content_type.indexOf("boundary=")));
         byte[] byteBoundary=(boundary+"--").getBytes(StringUtil.__ISO_8859_1);
-        // cross-container
-        MultiMap params = new MultiMap(request.getParameterMap());
         
-        // jetty-specific but more efficient
-        /*MultiMap params = new MultiMap();
-        if(srequest instanceof org.mortbay.jetty.Request)
+        MultiMap params = new MultiMap();
+        for (Iterator i = request.getParameterMap().entrySet().iterator();i.hasNext();)
         {
-            org.mortbay.jetty.Request req = ((org.mortbay.jetty.Request)srequest);
-            req.getUri().decodeQueryTo(params, req.getQueryEncoding());
-        }*/
+            Map.Entry entry=(Map.Entry)i.next();
+            Object value=entry.getValue();
+            if (value instanceof String[])
+                params.addValues(entry.getKey(),(String[])value);
+            else
+                params.add(entry.getKey(),value);
+        }
         
         try
         {
@@ -196,7 +198,7 @@ public class MultiPartFilter implements Filter
                         if(_fileOutputBuffer>0)
                             out = new BufferedOutputStream(out, _fileOutputBuffer);
                         request.setAttribute(name,file);
-                        params.put(name, filename);
+                        params.add(name, filename);
                         
                         if (_deleteFiles)
                         {
@@ -381,6 +383,9 @@ public class MultiPartFilter implements Filter
         public String getParameter(String name)
         {
             Object o=map.get(name);
+            if (!(o instanceof byte[]) && LazyList.size(o)>0)
+                o=LazyList.get(o,0);
+            
             if (o instanceof byte[])
             {
                 try
@@ -393,13 +398,8 @@ public class MultiPartFilter implements Filter
                     e.printStackTrace();
                 }
             }
-            else if (o instanceof String)
-                return (String)o;
-            else if (o instanceof String[])
-            {
-                String[] s = (String[])o;
-                return s.length>0 ? s[0] : null;
-            }
+            else if (o!=null)
+                return String.valueOf(o);
             return null;
         }
         
@@ -409,7 +409,7 @@ public class MultiPartFilter implements Filter
          */
         public Map getParameterMap()
         {
-            return map;
+            return Collections.unmodifiableMap(map.toStringArrayMap());
         }
         
         /* ------------------------------------------------------------------------------- */
