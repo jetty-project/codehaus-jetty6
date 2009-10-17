@@ -1,6 +1,7 @@
 jetty-6.1-SNAPSHOT
  + fixed XSS issue in demo CometDump servlet
  + JETTY-937 More JVM bug work arounds. Insert pause if all else fails
+ + JETTY-983 Send content-length with multipart ranges
  + JETTY-1120 Requests with no body are treated as complete even if there's a LF left to read
  + JETTY-1121 Merge Multipart query parameters
  + JETTY-1122 Handle multi-byte utf that causes buffer overflow
