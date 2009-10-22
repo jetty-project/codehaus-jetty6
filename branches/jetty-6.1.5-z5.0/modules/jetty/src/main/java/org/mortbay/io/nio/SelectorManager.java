@@ -363,7 +363,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                                 key.attach(endpoint);
                                 endpoint.dispatch();
                             }
-                            else
+                            else if (channel.isOpen())
                             {
                                 channel.register(_selector,SelectionKey.OP_CONNECT,att);
                             }
@@ -377,7 +377,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         else
                             throw new IllegalArgumentException(o.toString());
                     }
-                    catch (CancelledKeyException e)
+                    catch (Exception e)
                     {
 			Log.ignore(e);
                     }
