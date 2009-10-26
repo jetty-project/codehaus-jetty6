@@ -17,6 +17,7 @@ package org.mortbay.jetty.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Buffers;
@@ -49,7 +50,6 @@ public class HttpConnection implements Connection
     boolean _http11 = true;
     Buffer _connectionHeader;
     Buffer _requestContentChunk;
-    long _last;
     boolean _requestComplete;
     public String _message;
     public boolean _reserved;
@@ -57,6 +57,7 @@ public class HttpConnection implements Connection
     volatile HttpExchange _exchange;
     HttpExchange _pipeline;
     private final Timeout.Task _timeout = new TimeoutTask();
+    private AtomicBoolean _idle = new AtomicBoolean(false);
 
     public void dump() throws IOException
     {
@@ -521,30 +522,42 @@ public class HttpConnection implements Connection
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * @return the last
-     */
-    public long getLast()
-    {
-        return _last;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param last
-     *            the last to set
-     */
-    public void setLast(long last)
-    {
-        _last = last;
-    }
-
-    /* ------------------------------------------------------------ */
     public void close() throws IOException
     {
         _endp.close();
     }
 
+
+    /* ------------------------------------------------------------ */
+    public void setIdleTimeout(long expire)
+    {
+        synchronized (this)
+        {
+            if (_idle.compareAndSet(false,true))
+                _destination.getHttpClient().scheduleIdle(_timeout);
+            else
+                throw new IllegalStateException();
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean cancelIdleTimeout()
+    {
+        synchronized (this)
+        {
+            if (_idle.compareAndSet(true,false))
+            {
+                _destination.getHttpClient().cancel(_timeout);
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     private class TimeoutTask extends Timeout.Task
     {
         public void expired()
@@ -557,7 +570,13 @@ public class HttpConnection implements Connection
                     ex = _exchange;
                     _exchange = null;
                     if (ex != null)
+                    {
                         _destination.returnConnection(HttpConnection.this,true);
+                    }
+                    else if (_idle.compareAndSet(true,false))
+                    {
+                        _destination.returnIdleConnection(HttpConnection.this);
+                    }
                 }
             }
             catch (Exception e)
@@ -582,4 +601,5 @@ public class HttpConnection implements Connection
             }
         }
     }
+
 }

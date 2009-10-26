@@ -106,6 +106,24 @@ public class HttpDestination
     }
 
     /* ------------------------------------------------------------ */
+    public int getConnections()
+    {
+        synchronized (this)
+        {
+            return _connections.size();
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public int getIdleConnections()
+    {
+        synchronized (this)
+        {
+            return _idle.size();
+        }
+    }
+
+    /* ------------------------------------------------------------ */
     public void addAuthorization(String pathSpec,Authorization authorization)
     {
         synchronized (this)
@@ -204,7 +222,7 @@ public class HttpDestination
     /* ------------------------------------------------------------------------------- */
     public HttpConnection getIdleConnection() throws IOException
     {
-        long now = System.currentTimeMillis();
+        long now = _client.getNow();
         long idleTimeout=_client.getIdleTimeout();
         HttpConnection connection = null;
         while (true)
@@ -224,8 +242,7 @@ public class HttpDestination
             if (connection==null)
                 return null;
 
-            long last = connection.getLast();
-            if (connection.getEndPoint().isOpen() && (last==0 || ((now-last)<idleTimeout)) )
+            if (connection.cancelIdleTimeout() )
                 return connection;
 
         }
@@ -364,7 +381,7 @@ public class HttpDestination
             {
                 if (_queue.size()==0)
                 {
-                    connection.setLast(System.currentTimeMillis());
+                    connection.setIdleTimeout(_client.getNow()+_client.getIdleTimeout());
                     _idle.add(connection);
                 }
                 else
@@ -385,6 +402,28 @@ public class HttpDestination
             }
         }
     }
+
+    /* ------------------------------------------------------------ */
+    public void returnIdleConnection(HttpConnection connection) throws IOException
+    {
+        try
+        {
+            connection.close();
+        }
+        catch (IOException e)
+        {
+            Log.ignore(e);
+        }
+
+        synchronized (this)
+        {
+            _idle.remove(connection);
+            _connections.remove(connection);
+            if (!_queue.isEmpty() && _client.isStarted())
+                startNewConnection();
+        }
+    }
+
 
     /* ------------------------------------------------------------ */
     public void send(HttpExchange ex) throws IOException
