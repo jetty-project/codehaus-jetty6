@@ -118,13 +118,10 @@ public class Timeout
     }
 
     /* ------------------------------------------------------------ */
-    public void tick(final long now)
+    public void tick()
     {
-        long _expiry = -1;
-
-        if (now!=-1)
-            _now=now;
-        final long tick=_now;
+        final long expiry = _now-_duration;
+        
         Task task=null;
         while (true)
         {
@@ -132,11 +129,8 @@ public class Timeout
             {
                 synchronized (_lock)
                 {
-                    if (_expiry==-1)
-                        _expiry = tick-_duration;
-                        
                     task= _head._next;
-                    if (task==_head || task._timestamp>_expiry)
+                    if (task==_head || task._timestamp>expiry)
                         break;
                     task.unlink();
                     task._expired=true;
@@ -153,9 +147,10 @@ public class Timeout
     }
 
     /* ------------------------------------------------------------ */
-    public void tick()
+    public void tick(long now)
     {
-        tick(-1);
+        _now=now;
+        tick();
     }
 
     /* ------------------------------------------------------------ */
@@ -278,9 +273,13 @@ public class Timeout
         /* ------------------------------------------------------------ */
         public long getAge()
         {
-            Timeout t = _timeout;
-            if (t!=null && t._now!=0 && _timestamp!=0)
-                return t._now-_timestamp;
+            final Timeout t = _timeout;
+            if (t!=null)
+            {
+                final long now=t._now;
+                if (now!=0 && _timestamp!=0)
+                    return now-_timestamp;
+            }
             return 0;
         }
 
