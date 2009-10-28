@@ -521,7 +521,12 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
                     {
                         Log.ignore(e);
                     }
-                    catch(Exception e)
+                    catch(ThreadDeath e)
+                    {
+                        Log.warn(e);
+			throw e;
+                    }
+                    catch(Throwable e)
                     {
                         Log.warn(e);
                     }
