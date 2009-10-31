@@ -1,7 +1,7 @@
 Patches:
  + libsetuid -> setuid in SetUID.java
  + Protect setConfigurations when running
- + Added DebugHandler
+ + Added DebugHandler with scheme and port
  + 286911 Clean out cache when recycling HTTP fields
  + 283153 SSL connections may cause jetty to hang with full cpu
  + JETTY-937 Further Improvements for sun JVM selector bugs
