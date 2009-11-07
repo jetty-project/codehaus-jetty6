@@ -25,6 +25,9 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.ByteArrayEndPoint;
 import org.mortbay.io.SimpleBuffers;
 import org.mortbay.io.View;
+import org.mortbay.jetty.AbstractGenerator.Output;
+import org.mortbay.jetty.AbstractGenerator.OutputWriter;
+import org.mortbay.util.StringUtil;
 
 /**
  * @author gregw
@@ -274,4 +277,35 @@ public class HttpGeneratorTest extends TestCase
 
     }
 
+    public void testOutput()
+        throws Exception
+    {
+        Buffer sb=new ByteArrayBuffer(1500);
+        Buffer bb=new ByteArrayBuffer(8096);
+        HttpFields fields = new HttpFields();
+        ByteArrayEndPoint endp = new ByteArrayEndPoint(new byte[0],4096);
+        HttpGenerator hb = new HttpGenerator(new SimpleBuffers(new Buffer[]{sb,bb}),endp, sb.capacity(), bb.capacity());
+
+        hb.setResponse(200,"OK");
+        
+        Output output = new Output(hb,10000);
+        OutputWriter writer = new OutputWriter(output);
+        writer.setCharacterEncoding(StringUtil.__UTF8);
+        
+        char[] chars = new char[1024];
+        for (int i=0;i<chars.length;i++)
+            chars[i]=(char)('0'+(i%10));
+        chars[0]='\u0553';
+        writer.write(chars);
+        
+        hb.completeHeader(fields,true);
+        hb.flush();
+        String response = new String(endp.getOut().asArray());
+        assertTrue(response.startsWith("HTTP/1.1 200 OK\r\nContent-Length: 1025\r\n\r\n\u05531234567890"));
+        System.err.println(new String(endp.getOut().asArray()));
+        
+        
+        
+        
+    }       
 }
