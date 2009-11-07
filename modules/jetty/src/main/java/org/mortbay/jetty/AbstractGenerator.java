@@ -806,6 +806,11 @@ public abstract class AbstractGenerator implements Generator
                             if ((code & 0xffffff80) == 0) 
                             {
                                 // 1b
+                                if (bytes+1>buffer.length)
+                                {
+                                    chars=i;
+                                    break;
+                                }
                                 buffer[bytes++]=(byte)(code);
                             }
                             else
