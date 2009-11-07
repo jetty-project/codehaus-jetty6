@@ -302,10 +302,6 @@ public class HttpGeneratorTest extends TestCase
         hb.flush();
         String response = new String(endp.getOut().asArray());
         assertTrue(response.startsWith("HTTP/1.1 200 OK\r\nContent-Length: 1025\r\n\r\n\u05531234567890"));
-        System.err.println(new String(endp.getOut().asArray()));
-        
-        
-        
-        
+                
     }       
 }
