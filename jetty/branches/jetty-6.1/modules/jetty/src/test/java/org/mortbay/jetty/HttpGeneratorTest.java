@@ -275,7 +275,6 @@ public class HttpGeneratorTest extends TestCase
         }
     }
 
-    /* TODO fails on bamboo ???
     public void testOutput()
         throws Exception
     {
@@ -299,10 +298,8 @@ public class HttpGeneratorTest extends TestCase
         
         hb.completeHeader(fields,true);
         hb.flush();
-        String response = new String(endp.getOut().asArray());
-        System.err.println(response);
+        String response = new String(endp.getOut().asArray(),StringUtil.__UTF8);
         assertTrue(response.startsWith("HTTP/1.1 200 OK\r\nContent-Length: 1025\r\n\r\n\u05531234567890"));
                 
-    }     
-    */  
+    }    
 }
