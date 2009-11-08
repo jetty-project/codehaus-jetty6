@@ -596,10 +596,10 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         SelectionKey busy = (SelectionKey)selector.selectedKeys().iterator().next();
                         if (busy==_busyKey)
                         {
-                            if (++_busyKeyCount>__BUSY_KEY)
+                            if (++_busyKeyCount>__BUSY_KEY && !(busy.channel() instanceof ServerSocketChannel))
                             {
                                 SelectChannelEndPoint endpoint = (SelectChannelEndPoint)busy.attachment();
-                                Log.warn("Busy Key "+busy+" "+endpoint);
+                                Log.warn("Busy Key "+busy.channel()+" "+endpoint);
                                 busy.cancel();
                                 if (endpoint!=null)
                                     endpoint.close();
@@ -636,8 +636,9 @@ public abstract class SelectorManager extends AbstractLifeCycle
                                 endpoint.doUpdateKey();
                             continue;
                         }
-
+                        
                         Object att = key.attachment();
+                        
                         if (att instanceof SelectChannelEndPoint)
                         {
                             SelectChannelEndPoint endpoint = (SelectChannelEndPoint)att;
