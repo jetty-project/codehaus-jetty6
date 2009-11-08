@@ -4,6 +4,7 @@ jetty@codehaus 7.0.0.v20091005 5 October 2009
  + JETTY-1100 extend setuid feature to set number of open file descriptors
  + JETTY-1109 Improper handling of cookies in Terracotta tests
  + JETTY-1115 Allow configuration of location of web.xml for jetty-jspc-maven-plugin
+ + JETTY-1143 port of j2se6 to jetty7 for serving scalable webservices
  + Patch test context to deploy at /test for jetty-hightide
  + Moved example-jetty-spring to jetty-spring
  + Include jetty-jspc-maven-plugin
