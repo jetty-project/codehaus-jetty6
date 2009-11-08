@@ -59,7 +59,7 @@ public class DebugHandler extends HandlerWrapper
         boolean retry=false;
         String name=(String)request.getAttribute("org.mortbay.jetty.thread.name");
         if (name==null)
-	    name=old_name+":"+baseRequest.getScheme()+"://"+baseRequest.getLocalAddr()+":"+baseRequest.getLocalPort()+baseRequest.getUri();
+	    name=old_name+":"+srequest.getScheme()+"://"+srequest.getLocalAddr()+":"+srequest.getLocalPort()+srequest.getUri();
         else
             retry=true;
         
