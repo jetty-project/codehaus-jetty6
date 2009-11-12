@@ -13,6 +13,7 @@ jetty-6.1-SNAPSHOT
  + 290761 HttpExchange.waitForDone() 
  + 291340 state==HEADER (Race condition in onException() notifications)
  + 292546 Proactively enforce HttpClient idle timeout
+ + CVE-2009-3555 Prevent SSL renegotiate for SSL vulnerability
 
 jetty-6.1.21 22 September 2009
  + JETTY-719 Document state machine of jetty http client

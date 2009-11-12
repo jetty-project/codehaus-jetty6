@@ -59,6 +59,10 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     private boolean _closing=false;
     private SSLEngineResult _result;
     
+    private boolean _handshook=false;
+    private boolean _allowRenegotiate=false;
+
+
     // ssl
     protected SSLSession _session;
     
@@ -80,6 +84,30 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         _inBuffer=_inNIOBuffer.getByteBuffer();
     }
 
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return True if SSL re-negotiation is allowed (default false)
+     */
+    public boolean isAllowRenegotiate()
+    {
+        return _allowRenegotiate;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set if SSL re-negotiation is allowed. CVE-2009-3555 discovered
+     * a vulnerability in SSL/TLS with re-negotiation.  If your JVM
+     * does not have CVE-2009-3555 fixed, then re-negotiation should 
+     * not be allowed.
+     * @param allowRenegotiate true if re-negotiation is allowed (default false)
+     */
+    public void setAllowRenegotiate(boolean allowRenegotiate)
+    {
+        _allowRenegotiate = allowRenegotiate;
+    }
+
+    /* ------------------------------------------------------------ */
     // TODO get rid of these dumps
     public void dump()
     {
@@ -148,10 +176,12 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                     }
                 }
 
+                // System.err.println(_channel+" close "+_engine.getHandshakeStatus()+" "+_closing);
                 switch(_engine.getHandshakeStatus())
                 {
                     case FINISHED:
                     case NOT_HANDSHAKING:
+                        _handshook=true;
                         break loop;
                         
                     case NEED_UNWRAP:
@@ -228,6 +258,8 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         }   
     }
 
+
+    
     /* ------------------------------------------------------------ */
     /* 
      */
@@ -252,6 +284,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                             break loop;
                     }
 
+                    // System.err.println(_channel+" fill  "+_engine.getHandshakeStatus()+" "+_closing);
                     switch(_engine.getHandshakeStatus())
                     {
                         case FINISHED:
@@ -261,6 +294,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                             break loop;
 
                         case NEED_UNWRAP:
+                            checkRenegotiate();
                             if (!unwrap(bbuf) && _engine.getHandshakeStatus()==HandshakeStatus.NEED_UNWRAP)
                             {
                                 break loop;
@@ -289,6 +323,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
 
                         case NEED_WRAP:
                         {
+                            checkRenegotiate();
                             wraps++;
                             synchronized(_outBuffer)
                             {
@@ -334,9 +369,13 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                 buffer.setPutIndex(bbuf.position());
                 bbuf.position(0);
             }
+            
+            int filled=buffer.length()-size; 
+            if (filled>0)
+                _handshook=true;
+            return filled; 
         }
-        return buffer.length()-size; 
-
+        
     }
 
     /* ------------------------------------------------------------ */
@@ -365,12 +404,12 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                 if (isBufferingOutput())
                     break loop;
             }
-            
+
+            // System.err.println(_channel+" flush "+_engine.getHandshakeStatus()+" "+_closing);
             switch(_engine.getHandshakeStatus())
             {
                 case FINISHED:
                 case NOT_HANDSHAKING:
-
                     if (_closing || available==0)
                     {
                         if (consumed==0)
@@ -391,6 +430,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                     
                     if (c>0)
                     {
+                        _handshook=true;
                         consumed+=c;
                         available-=c;
                     }
@@ -404,6 +444,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                     break;
 
                 case NEED_UNWRAP:
+                    checkRenegotiate();
                     Buffer buf =_buffers.getBuffer(_engine.getSession().getApplicationBufferSize());
                     try
                     {
@@ -432,6 +473,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
 
                 case NEED_WRAP:
                 {
+                    checkRenegotiate();
                     synchronized(_outBuffer)
                     {
                         try
@@ -485,6 +527,16 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                 len=_outNIOBuffer.length();
             }
         }
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void checkRenegotiate() throws IOException
+    {
+        if (_handshook && !_allowRenegotiate && _channel!=null && _channel.isOpen())
+        {
+            Log.warn("SSL renegotiate denied: "+_channel);
+            close();
+        }   
     }
 
     /* ------------------------------------------------------------ */
