@@ -31,6 +31,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.net.ssl.HandshakeCompletedEvent;
+import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -629,7 +631,22 @@ public class SslSocketConnector extends SocketConnector
                 if (handshakeTimeout > 0)            
                     _socket.setSoTimeout(handshakeTimeout);
 
-                ((SSLSocket)_socket).startHandshake();
+                final SSLSocket ssl=(SSLSocket)_socket;
+                ssl.addHandshakeCompletedListener(new HandshakeCompletedListener()
+                {
+                    boolean handshook=false;
+                    public void handshakeCompleted(HandshakeCompletedEvent event)
+                    {
+                        if (handshook)
+                        {
+                            Log.warn("SSL renegotiate denied: "+ssl);
+                            try{ssl.close();}catch(IOException e){Log.warn(e);}
+                        }
+                        else
+                            handshook=true;
+                    }
+                });
+                ssl.startHandshake();
 
                 if (handshakeTimeout>0)
                     _socket.setSoTimeout(oldTimeout);
