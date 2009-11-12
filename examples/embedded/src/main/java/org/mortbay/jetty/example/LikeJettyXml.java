@@ -62,6 +62,15 @@ public class LikeJettyXml
         ssl_connector.setTrustPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
         server.addConnector(ssl_connector);  
         
+        SslSocketConnector ssl_b_connector=new SslSocketConnector();
+        ssl_b_connector.setPort(8444);
+        ssl_b_connector.setKeystore(jetty_home+"/etc/keystore");
+        ssl_b_connector.setPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
+        ssl_b_connector.setKeyPassword("OBF:1u2u1wml1z7s1z7a1wnl1u2g");
+        ssl_b_connector.setTruststore(jetty_home+"/etc/keystore");
+        ssl_b_connector.setTrustPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
+        server.addConnector(ssl_b_connector);  
+        
         HandlerCollection handlers = new HandlerCollection();
         ContextHandlerCollection contexts = new ContextHandlerCollection();
         RequestLogHandler requestLogHandler = new RequestLogHandler();
