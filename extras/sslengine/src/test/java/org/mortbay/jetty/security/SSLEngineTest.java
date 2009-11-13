@@ -125,7 +125,7 @@ public class SSLEngineTest extends TestCase
         { connector });
         server.setHandler(new HelloWorldHandler());
         final int numConns=200;
-        Socket[] client=new Socket[numConns];
+        Socket[] socket=new Socket[numConns];
         
         try
         {
@@ -139,8 +139,8 @@ public class SSLEngineTest extends TestCase
             for (int i=0; i<numConns; ++i)
             {
                 // System.err.println("write:"+i);
-                client[i]=ctx.getSocketFactory().createSocket("localhost",port);
-                OutputStream os=client[i].getOutputStream();
+                socket[i]=ctx.getSocketFactory().createSocket("localhost",port);
+                OutputStream os=socket[i].getOutputStream();
 
                 os.write(REQUEST0.getBytes());
                 os.write(REQUEST0.getBytes());
@@ -150,7 +150,7 @@ public class SSLEngineTest extends TestCase
             for (int i=0; i<numConns; ++i)
             {
                 // System.err.println("flush:"+i);
-                OutputStream os=client[i].getOutputStream();
+                OutputStream os=socket[i].getOutputStream();
                 os.write(REQUEST1.getBytes());
                 os.flush();
             }
@@ -159,7 +159,7 @@ public class SSLEngineTest extends TestCase
             {
                 // System.err.println("read:"+i);
                 // Read the response.
-                String responses=readResponse(client[i]);
+                String responses=readResponse(socket[i]);
                 // Check the response
                 assertEquals(String.format("responses %d",i),RESPONSE0+RESPONSE0+RESPONSE1,responses);
             }
@@ -168,9 +168,9 @@ public class SSLEngineTest extends TestCase
         {
             for (int i=0; i<numConns; ++i)
             {
-                if (client[i]!=null)
+                if (socket[i]!=null)
                 {
-                    client[i].close();
+                    socket[i].close();
                 }
             }
             server.stop();
