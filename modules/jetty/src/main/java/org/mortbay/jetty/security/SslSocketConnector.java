@@ -154,6 +154,7 @@ public class SslSocketConnector extends SocketConnector
     private boolean _wantClientAuth = false;
     private int _handshakeTimeout = 0; //0 means use maxIdleTime
 
+    private boolean _allowRenegotiate =false;
 
     /* ------------------------------------------------------------ */
     /**
@@ -164,6 +165,28 @@ public class SslSocketConnector extends SocketConnector
         super();
     }
 
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return True if SSL re-negotiation is allowed (default false)
+     */
+    public boolean isAllowRenegotiate()
+    {
+        return _allowRenegotiate;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set if SSL re-negotiation is allowed. CVE-2009-3555 discovered
+     * a vulnerability in SSL/TLS with re-negotiation.  If your JVM
+     * does not have CVE-2009-3555 fixed, then re-negotiation should 
+     * not be allowed.
+     * @param allowRenegotiate true if re-negotiation is allowed (default false)
+     */
+    public void setAllowRenegotiate(boolean allowRenegotiate)
+    {
+        _allowRenegotiate = allowRenegotiate;
+    }
 
     /* ------------------------------------------------------------ */
     public void accept(int acceptorID)
@@ -639,8 +662,11 @@ public class SslSocketConnector extends SocketConnector
                     {
                         if (handshook)
                         {
-                            Log.warn("SSL renegotiate denied: "+ssl);
-                            try{ssl.close();}catch(IOException e){Log.warn(e);}
+                            if (!_allowRenegotiate)
+                            {
+                                Log.warn("SSL renegotiate denied: "+ssl);
+                                try{ssl.close();}catch(IOException e){Log.warn(e);}
+                            }
                         }
                         else
                             handshook=true;
