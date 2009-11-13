@@ -35,6 +35,7 @@ Patches:
  + JETTY-1129 Filter control characters out of StdErrLog
  + JETTY-1135 Handle connection closed before accepted during JVM bug work around
  + JETTY-1144 Fixed multi-byte character overflow
+ + CVE-2009-3555 Prevent SSL renegotiate for SSL vulnerability
  
 jetty-6.1.15 4 March 2009
  + JETTY-931 Fix issue with jetty-rewrite.xml
