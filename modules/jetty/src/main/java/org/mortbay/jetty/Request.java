@@ -183,6 +183,21 @@ public class Request implements HttpServletRequest
     /* ------------------------------------------------------------ */
     protected void recycle()
     {
+        if (_inputState==__READER)
+        {
+            try
+            {
+                int r=_reader.read();
+                while(r!=-1)
+                    r=_reader.read();
+            }
+            catch(Exception e)
+            {
+                Log.ignore(e);
+                _reader=null;
+            }
+        }
+        
         _handled=false;
         if (_context!=null)
             throw new IllegalStateException("Request in context!");

@@ -2,12 +2,13 @@ jetty-6.1.22 16 November 2009
  + Fixed XSS issue in demo CometDump servlet
  + JETTY-937 More JVM bug work arounds. Insert pause if all else fails
  + JETTY-983 Send content-length with multipart ranges
- + JETTY-1144 Fixed multi-byte character overflow
  + JETTY-1120 Requests with no body are treated as complete even if there's a LF left to read
  + JETTY-1121 Merge Multipart query parameters
  + JETTY-1122 Handle multi-byte utf that causes buffer overflow
  + JETTY-1129 Filter control characters out of StdErrLog
  + JETTY-1135 Handle connection closed before accepted during JVM bug work around
+ + JETTY-1144 Fixed multi-byte character overflow
+ + JETTY-1148 Reset partially read request reader.
  + COMETD-28 Improved concurrency usage in Bayeux and channel handling
  + 289221 HttpExchange does not timeout when using blocking connector
  + 290761 HttpExchange.waitForDone() 
