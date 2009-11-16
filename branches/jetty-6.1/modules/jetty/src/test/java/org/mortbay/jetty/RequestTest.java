@@ -17,6 +17,7 @@ package org.mortbay.jetty;
 
 
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 
 import javax.servlet.ServletException;
@@ -30,6 +31,7 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.util.IO;
+import org.mortbay.util.StringUtil;
 
 /**
  * @author gregw
@@ -172,6 +174,51 @@ public class RequestTest extends TestCase
         }
     }
 
+
+    public void testPartialRead()
+        throws Exception
+    {
+        Handler handler = new AbstractHandler()
+        {
+            public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+            {
+                Request baseRequest = (Request)request;
+                baseRequest.setHandled(true);
+                Reader reader=request.getReader();
+                byte[] b=("read="+reader.read()+"\n").getBytes(StringUtil.__UTF8);
+                response.setContentLength(b.length);
+                response.getOutputStream().write(b);
+                response.flushBuffer();
+            }
+            
+        };
+        _server.stop();
+        _server.setHandler(handler);
+        _server.start();
+
+        String request="GET / HTTP/1.1\r\n"+
+        "Host: whatever\r\n"+
+        "Content-Type: text/plane\r\n"+
+        "Content-Length: "+10+"\r\n"+
+        "\r\n"+
+        "0123456789\r\n"+
+        "GET / HTTP/1.1\r\n"+
+        "Host: whatever\r\n"+
+        "Content-Type: text/plane\r\n"+
+        "Content-Length: "+10+"\r\n"+
+        "Connection: close\r\n"+
+        "\r\n"+
+        "ABCDEFGHIJ\r\n";
+
+        String responses = _connector.getResponses(request);
+        
+        int index=responses.indexOf("read="+(int)'0');
+        assertTrue(index>0);
+        
+        index=responses.indexOf("read="+(int)'A',index+7);
+        assertTrue(index>0);
+        
+    }
     public void testConnectionClose()
         throws Exception
     {
