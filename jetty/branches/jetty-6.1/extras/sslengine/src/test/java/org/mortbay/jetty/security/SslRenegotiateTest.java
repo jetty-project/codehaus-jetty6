@@ -181,6 +181,12 @@ public class SslRenegotiateTest extends TestCase
                 _inAppB.flip();
                 response=new IndirectNIOBuffer(_inAppB,true).toString();
                 assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+                if (response.indexOf("HELLO WORLD")<0)
+                {
+                    doUnwrap();
+                    _inAppB.flip();
+                    response=new IndirectNIOBuffer(_inAppB,true).toString();
+                }
                 assertTrue(response.indexOf("HELLO WORLD")>0);
 
                 assertTrue(reneg);
