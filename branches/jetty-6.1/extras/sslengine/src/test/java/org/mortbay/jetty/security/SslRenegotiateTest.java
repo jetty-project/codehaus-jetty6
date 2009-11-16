@@ -32,8 +32,6 @@ import org.mortbay.util.StringUtil;
 
 public class SslRenegotiateTest extends TestCase
 {
-
-
     static TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager()
     {
         public java.security.cert.X509Certificate[] getAcceptedIssuers()
