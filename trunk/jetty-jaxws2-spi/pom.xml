@@ -30,4 +30,12 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+    <repositories>
+      <repository>
+        <id>javanet-maven2</id>
+        <name>Java.net maven2 Repository</name>
+        <layout>default</layout>
+        <url>http://download.java.net/maven/2</url>
+      </repository>
+    </repositories>
 </project>
