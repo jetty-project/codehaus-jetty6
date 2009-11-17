@@ -1,3 +1,6 @@
+jetty@codehaus 7.0.1.v20091116 16 November 2009
+ + JETTY-1143 make Jetty7 serve WebService request
+
 jetty@codehaus 7.0.0.v20091005 5 October 2009
  + JETTY-1021 jetty-maven-plugin overlay or reload issue
  + JETTY-1089 Upgrade jsp to SJSAS-9_1_1-B60F-07_Jan_2009
