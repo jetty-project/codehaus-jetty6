@@ -14,9 +14,9 @@
 
 package org.mortbay.jetty;
 
-import java.io.IOException;
+import java.io.EOFException;
 
-public class EofException extends IOException
+public class EofException extends EOFException
 {
     public EofException()
     {

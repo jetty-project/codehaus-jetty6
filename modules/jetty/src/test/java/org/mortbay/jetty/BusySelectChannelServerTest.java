@@ -1,11 +1,25 @@
+//========================================================================
+//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 package org.mortbay.jetty;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.View;
+import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
@@ -30,9 +44,9 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
                 {
                     int write;
                     int read;
-                    NIOBuffer one = new NIOBuffer(1,false);
-                    NIOBuffer two = new NIOBuffer(2,false);
-                    NIOBuffer three = new NIOBuffer(3,false);
+                    NIOBuffer one = new IndirectNIOBuffer(1);
+                    NIOBuffer two = new IndirectNIOBuffer(2);
+                    NIOBuffer three = new IndirectNIOBuffer(3);
                     
                     /* ------------------------------------------------------------ */
                     /* (non-Javadoc)

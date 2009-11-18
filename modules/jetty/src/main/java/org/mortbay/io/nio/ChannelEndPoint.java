@@ -27,6 +27,7 @@ import java.nio.channels.SocketChannel;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
+import org.mortbay.log.Log;
 
 
 /**
@@ -92,15 +93,17 @@ public class ChannelEndPoint implements EndPoint
                 {
                     // TODO - is this really required?
                     Socket socket= ((SocketChannel)_channel).socket();
-                    try
-                    {
+                    if (!socket.isClosed() && !socket.isOutputShutdown())
                         socket.shutdownOutput();
-                    }
-                    finally
-                    {
-                        socket.close();
-                    }
                 }
+            }
+            catch(IOException e)
+            {
+                Log.ignore(e);
+            }
+            catch(UnsupportedOperationException e)
+            {
+                Log.ignore(e);
             }
             finally
             {
@@ -369,7 +372,9 @@ public class ChannelEndPoint implements EndPoint
         
         if (_remote==null)
             _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
-        
+
+        if (_remote==null)
+            return null;
         return _remote.getAddress().getCanonicalHostName();
     }
 
@@ -384,7 +389,9 @@ public class ChannelEndPoint implements EndPoint
         
         if (_remote==null)
             _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
-        
+
+        if (_remote==null)
+            return -1;
         return _remote==null?-1:_remote.getPort();
     }
 

@@ -52,23 +52,17 @@ public class MultiPartOutputStream extends FilterOutputStream
     
     /* ------------------------------------------------------------ */
     public MultiPartOutputStream(OutputStream out)
-         throws IOException
+    throws IOException
     {
         super(out);
-        try
-        {
-            boundary = "jetty"+System.identityHashCode(this)+
-                Long.toString(System.currentTimeMillis(),36);
-            boundaryBytes=boundary.getBytes(StringUtil.__ISO_8859_1);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace(); System.exit(1);
-        }
-        
+
+        boundary = "jetty"+System.identityHashCode(this)+
+        Long.toString(System.currentTimeMillis(),36);
+        boundaryBytes=boundary.getBytes(StringUtil.__ISO_8859_1);
+
         inPart=false;
     }
-    
+
     
 
     /* ------------------------------------------------------------ */

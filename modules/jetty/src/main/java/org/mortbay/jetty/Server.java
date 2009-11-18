@@ -1,5 +1,5 @@
 // ========================================================================
-// Copyright 2004-2005 Mort Bay Consulting Pty. Ltd.
+// Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.log.Log;
-import org.mortbay.thread.BoundedThreadPool;
+import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
@@ -50,10 +50,12 @@ import org.mortbay.util.MultiException;
  */
 public class Server extends HandlerWrapper implements Attributes
 {
+    public final static String UNKNOWN_VERSION="6.1.x";
+    public final static String SNAPSHOT_VERSION="6.1-SNAPSHOT";
     private static ShutdownHookThread hookThread = new ShutdownHookThread();
     private static String _version = (Server.class.getPackage()!=null && Server.class.getPackage().getImplementationVersion()!=null)
         ?Server.class.getPackage().getImplementationVersion()
-        :"6.1.x";
+        :UNKNOWN_VERSION;
 
     private ThreadPool _threadPool;
     private Connector[] _connectors;
@@ -185,6 +187,11 @@ public class Server extends HandlerWrapper implements Attributes
         HttpGenerator.setServerVersion(_version);
         MultiException mex=new MultiException();
       
+        for (int i=0;_realms !=null && i<_realms.length; i++)
+        {
+            if (_realms[i] instanceof LifeCycle)
+                ((LifeCycle)_realms[i]).start();
+        }
 
         Iterator itor = _dependentLifeCycles.iterator();
         while (itor.hasNext())
@@ -198,8 +205,8 @@ public class Server extends HandlerWrapper implements Attributes
         
         if (_threadPool==null)
         {
-            BoundedThreadPool btp=new BoundedThreadPool();
-            setThreadPool(btp);
+            QueuedThreadPool tp=new QueuedThreadPool();
+            setThreadPool(tp);
         }
         
         if (_sessionIdManager!=null)
@@ -239,6 +246,12 @@ public class Server extends HandlerWrapper implements Attributes
     protected void doStop() throws Exception
     {
         MultiException mex=new MultiException();
+        
+        for (int i=0;_realms !=null && i<_realms.length; i++)
+        {
+            if (_realms[i] instanceof LifeCycle)
+                ((LifeCycle)_realms[i]).stop();
+        }
         
         if (_graceful>0)
         {

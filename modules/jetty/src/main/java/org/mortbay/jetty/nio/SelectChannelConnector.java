@@ -63,7 +63,7 @@ import org.mortbay.util.ajax.Continuation;
  */
 public class SelectChannelConnector extends AbstractNIOConnector 
 {
-    private transient ServerSocketChannel _acceptChannel;
+    protected transient ServerSocketChannel _acceptChannel;
     private long _lowResourcesConnections;
     private long _lowResourcesMaxIdleTime;
 
@@ -125,21 +125,25 @@ public class SelectChannelConnector extends AbstractNIOConnector
     }
     
     /* ------------------------------------------------------------ */
-    public void stopAccept(int acceptorID) throws Exception
-    {
-        _manager.doStop(acceptorID);
-    }
-    
-    /* ------------------------------------------------------------ */
     public void close() throws IOException
     {
         synchronized(this)
         {
+            if(_manager.isRunning())
+            {
+                try
+                {
+                    _manager.stop();
+                }
+                catch (Exception e)
+                {
+                    Log.warn(e);
+                }
+            }
             if (_acceptChannel != null)
                 _acceptChannel.close();
             _acceptChannel = null;
         }
-
     }
     
     /* ------------------------------------------------------------------------------- */
@@ -207,11 +211,13 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 _acceptChannel = ServerSocketChannel.open();
 
                 // Bind the server socket to the local host and port
+                _acceptChannel.socket().setReuseAddress(getReuseAddress());
                 InetSocketAddress addr = getHost()==null?new InetSocketAddress(getPort()):new InetSocketAddress(getHost(),getPort());
                 _acceptChannel.socket().bind(addr,getAcceptQueueSize());
 
                 // Set to non blocking mode
                 _acceptChannel.configureBlocking(false);
+                
             }
         }
     }
@@ -316,8 +322,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
      * @see org.mortbay.jetty.AbstractConnector#doStop()
      */
     protected void doStop() throws Exception
-    {
-        _manager.stop();
+    {        
         super.doStop();
     }
 
@@ -346,9 +351,13 @@ public class SelectChannelConnector extends AbstractNIOConnector
 
         public void close() throws IOException
         {
-            RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
-            if (continuation != null && continuation.isPending())
-                continuation.reset();
+            Connection con=getConnection();
+            if (con instanceof HttpConnection)
+            {
+                RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
+                if (continuation != null && continuation.isPending())
+                    continuation.reset();
+            }
 
             super.close();
         }
@@ -356,20 +365,25 @@ public class SelectChannelConnector extends AbstractNIOConnector
         /* ------------------------------------------------------------ */
         public void undispatch()
         {
-            RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
-
-            if (continuation != null)
+            Connection con=getConnection();
+            if (con instanceof HttpConnection)
             {
-                // We have a continuation
-                Log.debug("continuation {}", continuation);
-                if (continuation.undispatch())
+                RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
+
+                if (continuation != null)
+                {
+                    // We have a continuation
+                    Log.debug("continuation {}", continuation);
+                    if (continuation.undispatch())
+                        super.undispatch();
+                }
+                else
+                {
                     super.undispatch();
+                }
             }
             else
-            {
                 super.undispatch();
-            }
-               
         }
     }
 

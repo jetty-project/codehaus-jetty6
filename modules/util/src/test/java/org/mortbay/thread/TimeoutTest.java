@@ -19,7 +19,8 @@ import junit.framework.TestCase;
 
 public class TimeoutTest extends TestCase
 {
-    Timeout timeout = new Timeout();
+    Object lock = new Object();
+    Timeout timeout = new Timeout(null);
     Timeout.Task[] tasks;
 
     /* ------------------------------------------------------------ */
@@ -30,8 +31,7 @@ public class TimeoutTest extends TestCase
     {
         super.setUp();
         
-        timeout=new Timeout();
-        timeout.setDuration(1000000);
+        timeout=new Timeout(lock);
         tasks= new Timeout.Task[10]; 
         
         for (int i=0;i<tasks.length;i++)
@@ -89,8 +89,7 @@ public class TimeoutTest extends TestCase
     {
         timeout.setDuration(200);
         timeout.setNow(1350);
-        tasks[2].reschedule();
-        
+        timeout.schedule(tasks[2]);
         
         timeout.setNow(1500);
         timeout.tick();
@@ -129,5 +128,4 @@ public class TimeoutTest extends TestCase
         timeout.tick();
         assertEquals("delay", true, task.isExpired());
     }
-
 }

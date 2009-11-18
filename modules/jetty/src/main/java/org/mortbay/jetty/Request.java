@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
-import java.net.URLDecoder;
+import java.nio.ByteBuffer;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,10 +34,13 @@ import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequestAttributeEvent;
 import javax.servlet.ServletRequestAttributeListener;
+import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletRequestWrapper;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -46,12 +49,14 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
+import org.mortbay.io.nio.DirectNIOBuffer;
+import org.mortbay.io.nio.IndirectNIOBuffer;
+import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandler.SContext;
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.security.UserRealm;
-import org.mortbay.jetty.servlet.AbstractSessionManager.Session;
 import org.mortbay.log.Log;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
@@ -98,12 +103,6 @@ import org.mortbay.util.ajax.Continuation;
  */
 public class Request implements HttpServletRequest
 {
-    private static final byte STATE_DELIMITER = 1;
-    private static final byte STATE_NAME = 2;
-    private static final byte STATE_VALUE = 4;
-    private static final byte STATE_QUOTED_VALUE = 8;
-    private static final byte STATE_UNQUOTED_VALUE = 16;
-
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
     private static final int __NONE=0, _STREAM=1, __READER=2;
     
@@ -117,6 +116,8 @@ public class Request implements HttpServletRequest
     private String _characterEncoding;
     private String _queryEncoding;
     private String _serverName;
+    private String _remoteAddr;
+    private String _remoteHost;
     private String _method;
     private String _pathInfo;
     private int _port;
@@ -136,17 +137,19 @@ public class Request implements HttpServletRequest
     private boolean _paramsExtracted;
     private int _inputState=__NONE;
     private BufferedReader _reader;
+    private String _readerEncoding;
     private boolean _dns=false;
     private ContextHandler.SContext _context;
     private HttpSession _session;
     private SessionManager _sessionManager;
     private boolean _cookiesExtracted=false;
     private Cookie[] _cookies;
-    private String[] _lastCookies;
+    private String[] _unparsedCookies;
     private long _timeStamp;
     private Buffer _timeStampBuffer;
     private Continuation _continuation;
     private Object _requestAttributeListeners;
+    private Object _requestListeners;
     private Map _savedNewSessions;
     private UserRealm _userRealm;
     
@@ -170,8 +173,31 @@ public class Request implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
+    protected void setConnection(HttpConnection connection)
+    {
+        _connection=connection;
+        _endp=connection.getEndPoint();
+        _dns=connection.getResolveNames();
+    }
+    
+    /* ------------------------------------------------------------ */
     protected void recycle()
     {
+        if (_inputState==__READER)
+        {
+            try
+            {
+                int r=_reader.read();
+                while(r!=-1)
+                    r=_reader.read();
+            }
+            catch(Exception e)
+            {
+                Log.ignore(e);
+                _reader=null;
+            }
+        }
+        
         _handled=false;
         if (_context!=null)
             throw new IllegalStateException("Request in context!");
@@ -202,7 +228,7 @@ public class Request implements HttpServletRequest
         _parameters=null;
         _paramsExtracted=false;
         _inputState=__NONE;
-        _reader=null; 
+        
         _cookiesExtracted=false;
         if (_savedNewSessions!=null)
             _savedNewSessions.clear();
@@ -297,6 +323,13 @@ public class Request implements HttpServletRequest
         return _characterEncoding;
     }
     
+    public long getContentRead()
+    {
+        if (_connection==null || _connection.getParser()==null)
+            return -1;
+        
+        return ((HttpParser)_connection.getParser()).getContentRead();
+    }
 
     /* ------------------------------------------------------------ */
     /* 
@@ -334,7 +367,7 @@ public class Request implements HttpServletRequest
     {
         return _contextPath;
     }
-
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.http.HttpServletRequest#getCookies()
@@ -349,26 +382,26 @@ public class Request implements HttpServletRequest
         {
             _cookies = null;
             _cookiesExtracted = true;
-            _lastCookies = null;
+            _unparsedCookies = null;
             return _cookies;
         }
 
         // Check if cookie headers match last cookies
-        if (_lastCookies != null)
+        if (_unparsedCookies != null)
         {
             int last = 0;
             Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
             while (enm.hasMoreElements())
             {
                 String c = (String)enm.nextElement();
-                if (last >= _lastCookies.length || !c.equals(_lastCookies[last]))
+                if (last >= _unparsedCookies.length || !c.equals(_unparsedCookies[last]))
                 {
-                    _lastCookies = null;
+                    _unparsedCookies = null;
                     break;
                 }
                 last++;
             }
-            if (_lastCookies != null && _lastCookies.length==last)
+            if (_unparsedCookies != null && _unparsedCookies.length==last)
             {
                 _cookiesExtracted = true;
                 return _cookies;
@@ -381,125 +414,178 @@ public class Request implements HttpServletRequest
         Object lastCookies = null;
 
         int version = 0;
-
+        
         // For each cookie header
         Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
         while (enm.hasMoreElements())
         {
-
             try
             {
-
                 // Save a copy of the unparsed header as cache.
                 String hdr = (String)enm.nextElement();
                 lastCookies = LazyList.add(lastCookies, hdr);
-
+                
                 // Parse the header
                 String name = null;
                 String value = null;
 
                 Cookie cookie = null;
 
-                byte state = STATE_NAME;
-                for (int i = 0, tokenstart = 0, length = hdr.length(); i < length; i++)
+                boolean invalue=false;
+                boolean quoted=false;
+                boolean escaped=false;
+                int tokenstart=-1;
+                int tokenend=-1;
+                for (int i = 0, length = hdr.length(), last=length-1; i < length; i++)
                 {
                     char c = hdr.charAt(i);
-                    switch (c)
+                    
+                    // Handle quoted values for name or value
+                    if (quoted)
                     {
-                        case ',':
-                        case ';':
-                            switch (state)
-                            {
-                                case STATE_DELIMITER:
-                                    state = STATE_NAME;
-                                    tokenstart = i + 1;
-                                    break;
-                                case STATE_UNQUOTED_VALUE:
-                                    state = STATE_NAME;
-                                    value = hdr.substring(tokenstart, i).trim();
-                                    if(isRequestedSessionIdFromURL())
-                                        value = URIUtil.decodePath(value);
-                                    tokenstart = i + 1;
-                                    break;
-                                case STATE_NAME:
-                                    name = hdr.substring(tokenstart, i);
-                                    value = "";
-                                    tokenstart = i + 1;
-                                    break;
-                                case STATE_VALUE:
-                                    state = STATE_NAME;
-                                    value = "";
-                                    tokenstart = i + 1;
-                                    break;
-                            }
-                            break;
-                        case '=':
-                            switch (state)
-                            {
-                                case STATE_NAME:
-                                    state = STATE_VALUE;
-                                    name = hdr.substring(tokenstart, i);
-                                    tokenstart = i + 1;
-                                    break;
-                                case STATE_VALUE:
-                                    state = STATE_UNQUOTED_VALUE;
-                                    tokenstart = i;
-                                    break;
-                            }
-                            break;
-                        case '"':
-                            switch (state)
-                            {
-                                case STATE_VALUE:
-                                    state = STATE_QUOTED_VALUE;
-                                    tokenstart = i + 1;
-                                    break;
-                                case STATE_QUOTED_VALUE:
-                                    state = STATE_DELIMITER;
-                                    value = hdr.substring(tokenstart, i);
-                                    break;
-                            }
-                            break;
-                        case ' ':
-                        case '\t':
-                            break;
-                        default:
-                            switch (state)
-                            {
-                                case STATE_VALUE:
-                                    state = STATE_UNQUOTED_VALUE;
-                                    tokenstart = i;
-                                    break;
-                                case STATE_DELIMITER:
-                                    state = STATE_NAME;
-                                    tokenstart = i;
-                                    break;
-                            }
-                    }
-
-                    if (i + 1 == length)
-                    {
-                        switch (state)
+                        if (escaped)
                         {
-                            case STATE_UNQUOTED_VALUE:
-                                value = hdr.substring(tokenstart).trim();
-                                if(isRequestedSessionIdFromURL())
-                                    value = URIUtil.decodePath(value);
+                            escaped=false;
+                            continue;
+                        }
+                        
+                        switch (c)
+                        {
+                            case '"':
+                                tokenend=i;
+                                quoted=false;
+
+                                // handle quote as last character specially
+                                if (i==last)
+                                {
+                                    if (invalue)
+                                        value = hdr.substring(tokenstart, tokenend+1);
+                                    else
+                                    {
+                                        name = hdr.substring(tokenstart, tokenend+1);
+                                        value = "";
+                                    }
+                                }
                                 break;
-                            case STATE_NAME:
-                                name = hdr.substring(tokenstart);
-                                value = "";
-                                break;
-                            case STATE_VALUE:
-                                value = "";
-                                break;
+                                
+                            case '\\':
+                                escaped=true;
+                                continue;
+                            default:
+                                continue;
+                        }
+                    }
+                    else
+                    {
+                        // Handle name and value state machines
+                        if (invalue)
+                        {
+                            // parse the value
+                            switch (c)
+                            {
+                                case ' ':
+                                case '\t':
+                                    continue;
+                                    
+                                case '"':
+                                    if (tokenstart<0)
+                                    {
+                                        quoted=true;
+                                        tokenstart=i;
+                                    }
+                                    tokenend=i;
+                                    if (i==last)
+                                    {
+                                        value = hdr.substring(tokenstart, tokenend+1);
+                                        break;
+                                    }
+                                    continue;
+
+                                case ';':
+                                case ',':
+                                    if (tokenstart>=0)
+                                        value = hdr.substring(tokenstart, tokenend+1);
+                                    else
+                                        value="";
+                                    tokenstart = -1;
+                                    invalue=false;
+                                    break;
+                                    
+                                default:
+                                    if (tokenstart<0)
+                                        tokenstart=i;
+                                    tokenend=i;
+                                    if (i==last)
+                                    {
+                                        value = hdr.substring(tokenstart, tokenend+1);
+                                        break;
+                                    }
+                                    continue;
+                            }
+                        }
+                        else
+                        {
+                            // parse the name
+                            switch (c)
+                            {
+                                case ' ':
+                                case '\t':
+                                    continue;
+                                    
+                                case '"':
+                                    if (tokenstart<0)
+                                    {
+                                        quoted=true;
+                                        tokenstart=i;
+                                    }
+                                    tokenend=i;
+                                    if (i==last)
+                                    {
+                                        name = hdr.substring(tokenstart, tokenend+1);
+                                        value = "";
+                                        break;
+                                    }
+                                    continue;
+
+                                case ';':
+                                case ',':
+                                    if (tokenstart>=0)
+                                    {
+                                        name = hdr.substring(tokenstart, tokenend+1);
+                                        value = "";
+                                    }
+                                    tokenstart = -1;
+                                    break;
+
+                                case '=':
+                                    if (tokenstart>=0)
+                                        name = hdr.substring(tokenstart, tokenend+1);
+                                    tokenstart = -1;
+                                    invalue=true;
+                                    continue;
+                                    
+                                default:
+                                    if (tokenstart<0)
+                                        tokenstart=i;
+                                    tokenend=i;
+                                    if (i==last)
+                                    {
+                                        name = hdr.substring(tokenstart, tokenend+1);
+                                        value = "";
+                                        break;
+                                    }
+                                    continue;
+                            }
                         }
                     }
 
-                    if (name != null && value != null)
+                    // If after processing the current character we have a value and a name, then it is a cookie
+                    if (value!=null && name!=null)
                     {
-                        name = name.trim();
-
+                        // TODO handle unquoting during parsing!  But quoting is uncommon
+                        name=QuotedStringTokenizer.unquote(name);
+                        value=QuotedStringTokenizer.unquote(value);
+                        
                         try
                         {
                             if (name.startsWith("$"))
@@ -507,11 +593,18 @@ public class Request implements HttpServletRequest
                                 String lowercaseName = name.toLowerCase();
                                 if ("$path".equals(lowercaseName))
                                 {
-                                    cookie.setPath(value);
+                                    if (cookie!=null)
+                                        cookie.setPath(value);
                                 }
                                 else if ("$domain".equals(lowercaseName))
                                 {
-                                    cookie.setDomain(value);
+                                    if (cookie!=null)
+                                        cookie.setDomain(value);
+                                }
+                                else if ("$port".equals(lowercaseName))
+                                {
+                                    if (cookie!=null)
+                                        cookie.setComment("port="+value);
                                 }
                                 else if ("$version".equals(lowercaseName))
                                 {
@@ -521,18 +614,15 @@ public class Request implements HttpServletRequest
                             else
                             {
                                 cookie = new Cookie(name, value);
-
                                 if (version > 0)
-                                {
                                     cookie.setVersion(version);
-                                }
-
                                 cookies = LazyList.add(cookies, cookie);
                             }
                         }
                         catch (Exception e)
                         {
-                            Log.ignore(e);
+                            Log.warn(e.toString());
+                            Log.debug(e);
                         }
 
                         name = null;
@@ -546,23 +636,31 @@ public class Request implements HttpServletRequest
                 Log.warn(e);
             }
         }
-
+        
+        // how many cookies did we find?
         int l = LazyList.size(cookies);
         _cookiesExtracted = true;
         if (l>0)
         {
+            // Do we need a new cookie array
             if (_cookies == null || _cookies.length != l) 
                 _cookies = new Cookie[l];
+            
+            // Copy the cookies into the array
             for (int i = 0; i < l; i++)
                 _cookies[i] = (Cookie) LazyList.get(cookies, i);
 
+            // 
             l = LazyList.size(lastCookies);
-            _lastCookies = new String[l];
+            _unparsedCookies = new String[l];
             for (int i = 0; i < l; i++)
-                _lastCookies[i] = (String) LazyList.get(lastCookies, i);
+                _unparsedCookies[i] = (String) LazyList.get(lastCookies, i);
         }
         else
+        {
             _cookies=null;
+            _unparsedCookies=null;
+        }
 
 
         if (_cookies==null || _cookies.length==0)
@@ -835,13 +933,25 @@ public class Request implements HttpServletRequest
     {
         if (_inputState!=__NONE && _inputState!=__READER)
             throw new IllegalStateException("STREAMED");
-        if (_reader==null)
+
+        if (_inputState==__READER)
+            return _reader;
+        
+        String encoding=getCharacterEncoding();
+        if (encoding==null)
+            encoding=StringUtil.__ISO_8859_1;
+        
+        if (_reader==null || !encoding.equalsIgnoreCase(_readerEncoding))
         {
-            String encoding=getCharacterEncoding();
-            if (encoding==null)
-                encoding=StringUtil.__ISO_8859_1;
-            _reader=new BufferedReader(new InputStreamReader(getInputStream(),encoding));
-            
+            final ServletInputStream in = getInputStream();
+            _readerEncoding=encoding;
+            _reader=new BufferedReader(new InputStreamReader(in,encoding))
+            {
+                public void close() throws IOException
+                {
+                    in.close();
+                }   
+            };
         }
         _inputState=__READER;
         return _reader;
@@ -864,6 +974,8 @@ public class Request implements HttpServletRequest
      */
     public String getRemoteAddr()
     {
+        if (_remoteAddr != null)
+            return _remoteAddr;	
         return _endp==null?null:_endp.getRemoteAddr();
     }
 
@@ -874,8 +986,14 @@ public class Request implements HttpServletRequest
     public String getRemoteHost()
     {
         if (_dns)
+        {
+            if (_remoteHost != null)
+            {
+                return _remoteHost;
+            }
             return _endp==null?null:_endp.getRemoteHost();
-        return _endp==null?null:_endp.getRemoteAddr();
+        }
+        return getRemoteAddr();
     }
 
     /* ------------------------------------------------------------ */
@@ -1170,7 +1288,12 @@ public class Request implements HttpServletRequest
     public String getQueryString()
     {
         if (_queryString==null && _uri!=null)
-            _queryString=_uri.getQuery(_queryEncoding);
+        {
+            if (_queryEncoding==null)
+                _queryString=_uri.getQuery();
+            else
+                _queryString=_uri.getQuery(_queryEncoding);
+        }
         return _queryString;
     }
     
@@ -1259,11 +1382,18 @@ public class Request implements HttpServletRequest
         {
             if (_requestAttributeListeners!=null)
             {
-                ServletRequestAttributeEvent event =
+                final ServletRequestAttributeEvent event =
                     new ServletRequestAttributeEvent(_context,this,name, old_value);
-
-                for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
-                    ((ServletRequestAttributeListener)LazyList.get(_requestAttributeListeners,i)).attributeRemoved(event);
+                final int size=LazyList.size(_requestAttributeListeners);
+                for(int i=0;i<size;i++)
+                {
+                    final EventListener listener = (ServletRequestAttributeListener)LazyList.get(_requestAttributeListeners,i);
+                    if (listener instanceof ServletRequestAttributeListener)
+                    {
+                        final ServletRequestAttributeListener l = (ServletRequestAttributeListener)listener;
+                        ((ServletRequestAttributeListener)l).attributeRemoved(event);
+                    }
+                }
             }
         }
     }
@@ -1273,6 +1403,9 @@ public class Request implements HttpServletRequest
      * Set a request attribute.
      * if the attribute name is "org.mortbay.jetty.Request.queryEncoding" then
      * the value is also passed in a call to {@link #setQueryEncoding}.
+     *
+     * if the attribute name is "org.mortbay.jetty.ResponseBuffer", then
+     * the response buffer is flushed with @{link #flushResponseBuffer}  
      * 
      * @see javax.servlet.ServletRequest#setAttribute(java.lang.String, java.lang.Object)
      */
@@ -1282,26 +1415,49 @@ public class Request implements HttpServletRequest
         
         if ("org.mortbay.jetty.Request.queryEncoding".equals(name))
             setQueryEncoding(value==null?null:value.toString());
-        
+        else if("org.mortbay.jetty.ResponseBuffer".equals(name))
+        {
+            try 
+            {
+                ByteBuffer byteBuffer=(ByteBuffer)value;
+                synchronized (byteBuffer)
+                {
+                    NIOBuffer buffer = byteBuffer.isDirect()
+                        ?(NIOBuffer)new DirectNIOBuffer(byteBuffer,true)
+                        :(NIOBuffer)new IndirectNIOBuffer(byteBuffer,true);
+                    ((HttpConnection.Output)getServletResponse().getOutputStream()).sendResponse(buffer);
+                }
+            } 
+            catch (IOException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+
+
         if (_attributes==null)
             _attributes=new AttributesMap();
         _attributes.setAttribute(name, value);
         
         if (_requestAttributeListeners!=null)
         {
-            ServletRequestAttributeEvent event =
+            final ServletRequestAttributeEvent event =
                 new ServletRequestAttributeEvent(_context,this,name, old_value==null?value:old_value);
-
-            for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+            final int size=LazyList.size(_requestAttributeListeners);
+            for(int i=0;i<size;i++)
             {
-                ServletRequestAttributeListener l = (ServletRequestAttributeListener)LazyList.get(_requestAttributeListeners,i);
-                
-                if (old_value==null)
-                    l.attributeAdded(event);
-                else if (value==null)
-                    l.attributeRemoved(event);
-                else
-                    l.attributeReplaced(event);
+                final EventListener listener = (ServletRequestAttributeListener)LazyList.get(_requestAttributeListeners,i);
+                if (listener instanceof ServletRequestAttributeListener)
+                {
+                    final ServletRequestAttributeListener l = (ServletRequestAttributeListener)listener;
+
+                    if (old_value==null)
+                        l.attributeAdded(event);
+                    else if (value==null)
+                        l.attributeRemoved(event);
+                    else
+                        l.attributeReplaced(event);
+                }
             }
         }
     }
@@ -1316,9 +1472,10 @@ public class Request implements HttpServletRequest
             return;
 
         _characterEncoding=encoding;
-        
+
         // check encoding is supported
-        "".getBytes(encoding);
+        if (!StringUtil.isUTF8(encoding))
+            "".getBytes(encoding);
     }
 
     /* ------------------------------------------------------------ */
@@ -1350,19 +1507,26 @@ public class Request implements HttpServletRequest
         _paramsExtracted = true;
 
         // Handle query string
-        if (_uri!=null && _uri.getQuery()!=null)
+        if (_uri!=null && _uri.hasQuery())
         {
-            try
+            if (_queryEncoding==null)
+                _uri.decodeQueryTo(_baseParameters);
+            else
             {
-                _uri.decodeQueryTo(_baseParameters,_queryEncoding);
+                try
+                {
+                    _uri.decodeQueryTo(_baseParameters,_queryEncoding);
+
+                }
+                catch (UnsupportedEncodingException e)
+                {
+                    if (Log.isDebugEnabled())
+                        Log.warn(e);
+                    else
+                        Log.warn(e.toString());
+                }
             }
-            catch (UnsupportedEncodingException e)
-            {
-                if (Log.isDebugEnabled())
-                    Log.warn(e);
-                else
-                    Log.warn(e.toString());
-            }
+
         }
 
         // handle any _content.
@@ -1372,7 +1536,8 @@ public class Request implements HttpServletRequest
         {
             content_type = HttpFields.valueParameters(content_type, null);
             
-            if (MimeTypes.FORM_ENCODED.equalsIgnoreCase(content_type) && HttpMethods.POST.equals(getMethod()))
+            if (MimeTypes.FORM_ENCODED.equalsIgnoreCase(content_type) && 
+                    (HttpMethods.POST.equals(getMethod()) || HttpMethods.PUT.equals(getMethod())))
             {
                 int content_length = getContentLength();
                 if (content_length != 0)
@@ -1438,11 +1603,29 @@ public class Request implements HttpServletRequest
     
     /* ------------------------------------------------------------ */
     /**
-     * @param host The host to set.
+     * @param port The port to set.
      */
     public void setServerPort(int port)
     {
         _port = port;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param addr The address to set.
+     */
+    public void setRemoteAddr(String addr)
+    {
+        _remoteAddr = addr;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param host The host to set.
+     */
+    public void setRemoteHost(String host)
+    {
+        _remoteHost = host;
     }
     
     /* ------------------------------------------------------------ */
@@ -1765,20 +1948,39 @@ public class Request implements HttpServletRequest
         return HttpConnection.getCurrentConnection().getRequest();
     }
     
-
     /* ------------------------------------------------------------ */
-    public synchronized void addEventListener(EventListener listener) 
+    public void addEventListener(final EventListener listener) 
     {
         if (listener instanceof ServletRequestAttributeListener)
             _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
     }
     
     /* ------------------------------------------------------------ */
-    public synchronized void removeEventListener(EventListener listener) 
+    public void removeEventListener(final EventListener listener) 
     {
         _requestAttributeListeners= LazyList.remove(_requestAttributeListeners, listener);
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @param requestListeners {@link LazyList} of {@link ServletRequestListener}s
+     */
+    public void setRequestListeners(Object requestListeners)
+    {
+        _requestListeners=requestListeners;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return {@link LazyList} of {@link ServletRequestListener}s
+     */
+    public Object takeRequestListeners()
+    {
+        final Object listeners=_requestListeners;
+        _requestListeners=null;
+        return listeners;
+    }
+    
     /* ------------------------------------------------------------ */
     public void saveNewSession(Object key,HttpSession session)
     {
@@ -1844,6 +2046,18 @@ public class Request implements HttpServletRequest
     public Map getRoleMap()
     {
         return _roleMap;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public ServletContext getServletContext()
+    {
+        return _context;
+    }
+
+    /* ------------------------------------------------------------ */
+    public ServletResponse getServletResponse()
+    {
+        return _connection.getResponse();
     }
 }
 

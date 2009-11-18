@@ -56,8 +56,8 @@ public class Ajp13SocketConnector extends SocketConnector
 
     protected void doStart() throws Exception
     {
-        Log.info("AJP13 is not a secure protocol. Please protect port {}",Integer.toString(getPort()));
         super.doStart();
+        Log.info("AJP13 is not a secure protocol. Please protect port {}",Integer.toString(getLocalPort()));
     }
     
     
@@ -83,14 +83,14 @@ public class Ajp13SocketConnector extends SocketConnector
     // Secured on a packet by packet bases not by connection
     public boolean isConfidential(Request request)
     {
-        throw new UnsupportedOperationException();
+        return ((Ajp13Request) request).isSslSecure();
     }
 
     /* ------------------------------------------------------------ */
     // Secured on a packet by packet bases not by connection
     public boolean isIntegral(Request request)
     {
-        throw new UnsupportedOperationException();
+        return ((Ajp13Request) request).isSslSecure();
     }
 
     /* ------------------------------------------------------------ */

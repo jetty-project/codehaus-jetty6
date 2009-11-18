@@ -1,3 +1,17 @@
+//========================================================================
+//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 /*
  * Created on 9/01/2004
  *
@@ -5,6 +19,17 @@
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package org.mortbay.jetty;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
+
+import org.mortbay.log.Log;
+
 
 import junit.framework.TestCase;
 
@@ -34,7 +59,9 @@ public class HttpConnectionTest extends TestCase
     protected void setUp() throws Exception
     {
         super.setUp();
-        
+        connector.setHeaderBufferSize(1024);
+        connector.setRequestBufferSize(2048);
+        connector.setResponseBufferSize(4096);
         server.start();
     }
 
@@ -94,6 +121,21 @@ public class HttpConnectionTest extends TestCase
             if (response!=null)
                 System.err.println(response);
         }
+    }
+
+    /* --------------------------------------------------------------- */
+    public void testEmpty() throws Exception
+    {        
+        String response=connector.getResponses("GET /R1 HTTP/1.1\n"+
+                "Host: localhost\n"+
+                "Transfer-Encoding: chunked\n"+
+                "Content-Type: text/plain\n"+
+                "\015\012"+
+        "0\015\012\015\012");
+
+        int offset=0;
+        offset = checkContains(response,offset,"HTTP/1.1 200");
+        offset = checkContains(response,offset,"/R1");
     }
 
     /* --------------------------------------------------------------- */
@@ -180,6 +222,78 @@ public class HttpConnectionTest extends TestCase
         }
     }
 
+    /* --------------------------------------------------------------- */
+    public void testPipeline()
+    {        
+        
+        String response=null;
+        String requests=null;
+        try
+        {
+            int offset=0;
+            
+            offset=0; connector.reopen();
+            requests="GET /R1 HTTP/1.1\n"+
+                "Host: localhost\n"+
+                "Content-Type: text/plain; charset=utf-8\n"+
+                "Content-Length: 10\n"+
+                "\n"+
+                "0123456789\n"+
+                "GET /R2 HTTP/1.1\n"+
+                "Host: localhost\n"+
+                "Content-Type: text/plain; charset=utf-8\n"+
+                "Content-Length: 10\n"+
+                "\n"+
+                "abcdefghij\n";
+            
+            response=connector.getResponses(requests);
+            offset = checkContains(response,offset,"HTTP/1.1 200");
+            offset = checkContains(response,offset,"/R1");
+            offset = checkContains(response,offset,"encoding=utf-8");
+            offset = checkContains(response,offset,"0123456789");
+            offset = checkContains(response,offset,"HTTP/1.1 200");
+            offset = checkContains(response,offset,"/R2");
+            offset = checkContains(response,offset,"encoding=utf-8");
+            offset = checkContains(response,offset,"abcdefghij");
+
+
+            offset=0; connector.reopen();
+            requests="GET /R1 HTTP/1.1\n"+
+                "Host: localhost\n"+
+                "Content-Type: text/plain; charset=utf-8\n"+
+                "Content-Length: 1026\n"+
+                "\n";
+            
+            for (int i=0;i<100;i++)
+                requests+="0123456789";
+            requests+="abcdefghijklmnopqrstuvwxyz";
+            requests+=
+                "GET /R2 HTTP/1.1\n"+
+                "Host: localhost\n"+
+                "Content-Type: text/plain; charset=utf-8\n"+
+                "Content-Length: 10\n"+
+                "\n"+
+                "0987654321\n";
+            
+            response=connector.getResponses(requests);
+            offset = checkContains(response,offset,"HTTP/1.1 200");
+            offset = checkContains(response,offset,"/R1");
+            offset = checkContains(response,offset,"encoding=utf-8");
+            offset = checkContains(response,offset,"abcdefghijklmnopqrstuvwxyz");
+            offset = checkContains(response,offset,"HTTP/1.1 200");
+            offset = checkContains(response,offset,"/R2");
+            offset = checkContains(response,offset,"encoding=utf-8");
+            offset = checkContains(response,offset,"0987654321");
+            
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            assertTrue(false);
+            if (response!=null)
+                System.err.println(response);
+        }
+    }
     
     public void testConnection ()
     { 
@@ -206,11 +320,146 @@ public class HttpConnectionTest extends TestCase
             e.printStackTrace();
             assertTrue(false);
             if (response!=null)
+                 System.err.println(response);
+        }
+    }
+    
+    public void testOversizedBuffer() 
+    {
+        String response = null;
+        connector.reopen();
+        try 
+        {
+            int offset = 0;
+            String cookie = "thisisastringthatshouldreachover1kbytes";
+            for (int i=0;i<100;i++)
+                cookie+="xxxxxxxxxxxx";
+            response = connector.getResponses("GET / HTTP/1.1\n"+
+                "Host: localhost\n" +
+                "Cookie: "+cookie+"\n"+
+                "\015\012"
+             );
+            offset = checkContains(response, offset, "HTTP/1.1 413");
+        } 
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            assertTrue(false);
+            if(response != null)
                 System.err.println(response);
+                
         }
     }
     
     
+    public void testOversizedResponse ()
+    throws Exception
+    {  
+        String str = "thisisastringthatshouldreachover1kbytes";
+        for (int i=0;i<400;i++)
+            str+="xxxxxxxxxxxx";
+        final String longstr = str;
+        String response = null;
+        server.stop();
+        server.setHandler(new DumpHandler()
+        {
+            public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+            {
+                try
+                {
+                    Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
+                    base_request.setHandled(true);
+                    response.setHeader(HttpHeaders.CONTENT_TYPE,MimeTypes.TEXT_HTML);
+                    response.setHeader("LongStr", longstr);
+                    PrintWriter writer = response.getWriter();
+                    writer.write("<html><h1>FOO</h1></html>");  
+                    writer.flush();
+                    writer.close();
+                    throw new RuntimeException("SHOULD NOT GET HERE");
+                }
+                catch(ArrayIndexOutOfBoundsException e)
+                {
+                    Log.debug(e);
+                    Log.info("correctly ignored "+e);
+                }
+            }
+        });
+        server.start();
+        
+        connector.reopen();
+        try 
+        {
+            int offset = 0;
+          
+            response = connector.getResponses("GET / HTTP/1.1\n"+
+                "Host: localhost\n" +
+                "\015\012"
+             );
+          
+            offset = checkContains(response, offset, "HTTP/1.1 500");
+        } 
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            if(response != null)
+                System.err.println(response);
+            fail("Exception");      
+        }
+    }
+    
+    public void testAsterisk()
+    {
+        String response = null;
+
+        try 
+        {
+            int offset=0;
+            
+            offset=0; connector.reopen();
+            response=connector.getResponses("OPTIONS * HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Transfer-Encoding: chunked\n"+
+                                           "Content-Type: text/plain; charset=utf-8\n"+
+                                           "\015\012"+
+                                           "5;\015\012"+
+                                           "12345\015\012"+
+                                           "0;\015\012\015\012");
+            offset = checkContains(response,offset,"HTTP/1.1 200");
+            offset = checkContains(response,offset,"*");
+            
+            // to prevent the DumpHandler from picking this up and returning 200 OK
+            server.setHandler(null);
+            offset=0; connector.reopen();
+            response=connector.getResponses("GET * HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Transfer-Encoding: chunked\n"+
+                                           "Content-Type: text/plain; charset=utf-8\n"+
+                                           "\015\012"+
+                                           "5;\015\012"+
+                                           "12345\015\012"+
+                                           "0;\015\012\015\012");
+            offset = checkContains(response,offset,"HTTP/1.1 404 Not Found");
+
+            offset=0; connector.reopen();
+            response=connector.getResponses("GET ** HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Transfer-Encoding: chunked\n"+
+                                           "Content-Type: text/plain; charset=utf-8\n"+
+                                           "\015\012"+
+                                           "5;\015\012"+
+                                           "12345\015\012"+
+                                           "0;\015\012\015\012");
+            offset = checkContains(response,offset,"HTTP/1.1 400 Bad Request");
+        } 
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            assertTrue(false);
+            if (response!=null)
+                 System.err.println(response);
+        }
+
+    }
     
     private int checkContains(String s,int offset,String c)
     {

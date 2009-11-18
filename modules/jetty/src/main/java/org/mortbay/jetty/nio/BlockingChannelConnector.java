@@ -21,7 +21,6 @@ import java.nio.channels.ByteChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
-import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.jetty.EofException;
@@ -154,9 +153,10 @@ public class BlockingChannelConnector extends AbstractNIOConnector
                     {
                         if (getServer().getThreadPool().isLowOnThreads())
                         {
-                            if (_sotimeout!=getLowResourceMaxIdleTime())
+                            int lrmit = getLowResourceMaxIdleTime();
+                            if (lrmit>=0 && _sotimeout!= lrmit)
                             {
-                                _sotimeout=getLowResourceMaxIdleTime();
+                                _sotimeout=lrmit;
                                 ((SocketChannel)getTransport()).socket().setSoTimeout(_sotimeout);
                             }
                         }

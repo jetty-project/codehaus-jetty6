@@ -17,13 +17,10 @@ package org.mortbay.jetty.security;
 import java.io.IOException;
 import java.security.Principal;
 
-import javax.net.ssl.SSLSocket;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
-import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------ */
 /** Client Certificate Authenticator.

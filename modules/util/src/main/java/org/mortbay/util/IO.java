@@ -20,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.io.StringWriter;
@@ -231,6 +232,17 @@ public class IO extends BoundedThreadPool
                     break;
                 
                 byteCount -= len;
+                out.write(buffer,0,len);
+            }
+        }
+        else if (out instanceof PrintWriter)
+        {
+            PrintWriter pout=(PrintWriter)out;
+            while (!pout.checkError())
+            {
+                len=in.read(buffer,0,bufferSize);
+                if (len==-1)
+                    break;
                 out.write(buffer,0,len);
             }
         }

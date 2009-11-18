@@ -17,27 +17,21 @@ package org.mortbay.jetty;
 
 
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSessionContext;
-
-import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.servlet.AbstractSessionManager;
-import org.mortbay.jetty.servlet.HashSessionIdManager;
-import org.mortbay.jetty.servlet.HashSessionManager;
-import org.mortbay.util.IO;
-
-import java.util.Locale;
 
 import junit.framework.TestCase;
+
+import org.mortbay.jetty.Request;
+import org.mortbay.jetty.handler.AbstractHandler;
+import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.util.IO;
+import org.mortbay.util.StringUtil;
 
 /**
  * @author gregw
@@ -147,12 +141,14 @@ public class RequestTest extends TestCase
     public void testContent()
         throws Exception
     {
+      
         final int[] length=new int[1];
         
         _handler._checker = new RequestTester()
         {
             public boolean check(HttpServletRequest request,HttpServletResponse response)
             {
+                assertEquals(request.getContentLength(), ((Request)request).getContentRead());
                 length[0]=request.getContentLength();
                 return true;
             }  
@@ -168,17 +164,61 @@ public class RequestTest extends TestCase
             "Content-Length: "+l+"\r\n"+
             "Connection: close\r\n"+
             "\r\n"+
-            content;
-            content+="x";
-            
+            content;           
             _connector.reopen();
             String response = _connector.getResponses(request);
             assertEquals(l,length[0]);
             if (l>0)
                 assertEquals(l,_handler._content.length());
+            content+="x";
         }
     }
-    
+
+
+    public void testPartialRead()
+        throws Exception
+    {
+        Handler handler = new AbstractHandler()
+        {
+            public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+            {
+                Request baseRequest = (Request)request;
+                baseRequest.setHandled(true);
+                Reader reader=request.getReader();
+                byte[] b=("read="+reader.read()+"\n").getBytes(StringUtil.__UTF8);
+                response.setContentLength(b.length);
+                response.getOutputStream().write(b);
+                response.flushBuffer();
+            }
+            
+        };
+        _server.stop();
+        _server.setHandler(handler);
+        _server.start();
+
+        String request="GET / HTTP/1.1\r\n"+
+        "Host: whatever\r\n"+
+        "Content-Type: text/plane\r\n"+
+        "Content-Length: "+10+"\r\n"+
+        "\r\n"+
+        "0123456789\r\n"+
+        "GET / HTTP/1.1\r\n"+
+        "Host: whatever\r\n"+
+        "Content-Type: text/plane\r\n"+
+        "Content-Length: "+10+"\r\n"+
+        "Connection: close\r\n"+
+        "\r\n"+
+        "ABCDEFGHIJ\r\n";
+
+        String responses = _connector.getResponses(request);
+        
+        int index=responses.indexOf("read="+(int)'0');
+        assertTrue(index>0);
+        
+        index=responses.indexOf("read="+(int)'A',index+7);
+        assertTrue(index>0);
+        
+    }
     public void testConnectionClose()
         throws Exception
     {
@@ -294,31 +334,29 @@ public class RequestTest extends TestCase
         assertTrue(response.indexOf("200")>0);
         assertTrue(response.indexOf("Connection: close")>0);
         assertTrue(response.indexOf("Hello World")>0);
-
-        
-        
-        
     }
-    
-    
-
     
     public void testCookie()
         throws Exception
     {
-      
-        final String[] cookie=new String[10];
+
+        final String[] name=new String[20];
+        final String[] cookie=new String[20];
         
         _handler._checker = new RequestTester()
         {
             public boolean check(HttpServletRequest request,HttpServletResponse response)
             {
                 for (int i=0;i<cookie.length; i++)
+                {
+                    name[i]=null;
                     cookie[i]=null;
+                }
                 
                 Cookie[] cookies = request.getCookies();
                 for (int i=0;cookies!=null && i<cookies.length; i++)
                 {
+                    name[i]=cookies[i].getName();
                     cookie[i]=cookies[i].getValue();
                 }
                 return true;
@@ -328,15 +366,16 @@ public class RequestTest extends TestCase
         
         String request="POST / HTTP/1.1\r\n"+
         "Host: whatever\r\n"+
-        "Cookie: name=value\r\n"+
+        "Cookie: name=\"quoted=\\\"value\\\"\"\n" +
         "Connection: close\r\n"+
         "\r\n";
 
         _connector.reopen();
         _connector.getResponses(request);
 
-        assertEquals("value",cookie[0]);
+        assertEquals("quoted=\"value\"",cookie[0]);
         assertEquals(null,cookie[1]);
+        
         
         request="POST / HTTP/1.1\r\n"+
         "Host: whatever\r\n"+
@@ -372,7 +411,34 @@ public class RequestTest extends TestCase
         assertEquals("value",cookie[0]);
         assertEquals(null,cookie[1]);
         
-        
+
+        request="POST / HTTP/1.1\r\n"+
+        "Host: whatever\r\n"+
+        "Cookie: name0=value0; name1 = value1 , \"\\\"name2\\\"\"  =  \"\\\"value2\\\"\"  \n" +
+        "Cookie: $Version=2; name3=value3=value3;$path=/path;$domain=acme.com;$port=8080, name4=; name5 =  ; name6\n" +
+        "Cookie: name7=value7;\n" +
+        "Connection: close\r\n"+
+        "\r\n";
+
+        _connector.reopen();
+        _connector.getResponses(request);
+
+        assertEquals("name0" ,name[0]);
+        assertEquals("value0" ,cookie[0]);
+        assertEquals("name1" ,name[1]);
+        assertEquals("value1" ,cookie[1]);
+        assertEquals("\"name2\"" ,name[2]);
+        assertEquals("\"value2\"" ,cookie[2]);
+        assertEquals("name3" ,name[3]);
+        assertEquals("value3=value3" ,cookie[3]);
+        assertEquals("name4" ,name[4]);
+        assertEquals("" ,cookie[4]);
+        assertEquals("name5" ,name[5]);
+        assertEquals("" ,cookie[5]);
+        assertEquals("name6" ,name[6]);
+        assertEquals("" ,cookie[6]);
+        assertEquals("name7" ,name[7]);
+        assertEquals("value7" ,cookie[7]);
     }
     
     
