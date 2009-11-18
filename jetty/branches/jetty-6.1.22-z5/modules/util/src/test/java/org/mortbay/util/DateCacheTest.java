@@ -63,7 +63,7 @@ public class DateCacheTest extends junit.framework.TestCase
                               last.substring(0,17),
                               date.substring(0,17));
                 
-                if (last.substring(17).equals(date.substring(17)))
+                if (!last.substring(17).equals(date.substring(17)))
                     change=true;
                 else
                 {
@@ -75,10 +75,7 @@ public class DateCacheTest extends junit.framework.TestCase
                     int ds=Integer.parseInt(date.substring(23,25));
 
                     // This won't work at midnight!
-                    assertTrue(  "Time changed",
-                                 ds==ls+1 ||
-                                 ds==0 && dm==lm+1 ||
-                                 ds==0 && dm==0 && dh==lh+1);
+                    change|= ds!=ls || dm!=lm || dh!=lh;
                 }
                 last=date;
             }

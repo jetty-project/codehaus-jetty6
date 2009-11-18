@@ -124,14 +124,14 @@ public class ConstraintTest extends TestCase
         _connector.reopen();
         response=_connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n\r\n");
         assertTrue(response.startsWith("HTTP/1.1 401 Unauthorized"));
-        assertTrue(response.indexOf("WWW-Authenticate: basic realm=\"TestRealm\"")>0);
+        assertTrue(response.indexOf("WWW-Authenticate: Basic realm=\"TestRealm\"")>0);
 
         _connector.reopen();
         response=_connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n"+
             "Authorization: "+B64Code.encode("user:wrong")+"\r\n"+
             "\r\n");
         assertTrue(response.startsWith("HTTP/1.1 401 Unauthorized"));
-        assertTrue(response.indexOf("WWW-Authenticate: basic realm=\"TestRealm\"")>0);
+        assertTrue(response.indexOf("WWW-Authenticate: Basic realm=\"TestRealm\"")>0);
         
         _connector.reopen();
         response=_connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n"+

@@ -14,10 +14,20 @@
 
 package org.mortbay.jetty;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
+import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.log.Log;
 
 /**
+ * Cached HTTP Header values.
+ * This class caches the conversion of common HTTP Header values to and from {@link ByteArrayBuffer} instances.
+ * The resource "/org/mortbay/jetty/useragents" is checked for a list of common user agents, so that repeated
+ * creation of strings for these agents can be avoided.
  * 
  * @author gregw
  */
@@ -31,7 +41,9 @@ public class HttpHeaderValues extends BufferCache
         KEEP_ALIVE="keep-alive",
         CONTINUE="100-continue",
         PROCESSING="102-processing",
-        TE="TE";
+        TE="TE",
+        BYTES="bytes",
+        NO_CACHE="no-cache";
 
     public final static int
         CLOSE_ORDINAL=1,
@@ -41,7 +53,9 @@ public class HttpHeaderValues extends BufferCache
         KEEP_ALIVE_ORDINAL=5,
         CONTINUE_ORDINAL=6,
         PROCESSING_ORDINAL=7,
-        TE_ORDINAL=8;
+        TE_ORDINAL=8,
+        BYTES_ORDINAL=9,
+        NO_CACHE_ORDINAL=10;
     
     public final static HttpHeaderValues CACHE= new HttpHeaderValues();
 
@@ -53,7 +67,9 @@ public class HttpHeaderValues extends BufferCache
         KEEP_ALIVE_BUFFER=CACHE.add(KEEP_ALIVE,KEEP_ALIVE_ORDINAL),
         CONTINUE_BUFFER=CACHE.add(CONTINUE, CONTINUE_ORDINAL),
         PROCESSING_BUFFER=CACHE.add(PROCESSING, PROCESSING_ORDINAL),
-        TE_BUFFER=CACHE.add(TE,TE_ORDINAL);
+        TE_BUFFER=CACHE.add(TE,TE_ORDINAL),
+        BYTES_BUFFER=CACHE.add(BYTES,BYTES_ORDINAL),
+        NO_CACHE_BUFFER=CACHE.add(NO_CACHE,NO_CACHE_ORDINAL);
         
     static
     {  
@@ -61,13 +77,25 @@ public class HttpHeaderValues extends BufferCache
         CACHE.add("gzip",index++);
         CACHE.add("gzip,deflate",index++);
         CACHE.add("deflate",index++);
-        CACHE.add("Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)",index++);
-        CACHE.add("Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)",index++);
-        CACHE.add("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.0.7) Gecko/20060909 Firefox/1.5.0.7",index++);
-        CACHE.add("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",index++);
-        CACHE.add("Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)",index++);
-        CACHE.add("Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)",index++);
-        CACHE.add("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1) Gecko/20061010 Firefox/2.0",index++);
-        CACHE.add("msnbot/1.0 (+http://search.msn.com/msnbot.htm)",index++);
+        
+        try
+        {
+            InputStream ua = HttpHeaderValues.class.getResourceAsStream("/org/mortbay/jetty/useragents");
+            if (ua!=null)
+            {
+                LineNumberReader in = new LineNumberReader(new InputStreamReader(ua));
+                String line = in.readLine();
+                while (line!=null)
+                {
+                    CACHE.add(line,index++);
+                    line = in.readLine();
+                }
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            Log.ignore(e);
+        }
     }
 }

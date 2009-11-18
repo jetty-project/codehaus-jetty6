@@ -146,14 +146,15 @@ public class DigestAuthenticator implements Authenticator
                               boolean stale)
         throws IOException
     {
-        String contextPath=request.getContextPath();
+        String domain=request.getContextPath();
+        if (domain==null)
+            domain="/";
         response.setHeader(HttpHeaders.WWW_AUTHENTICATE,
 			    "Digest realm=\""+realm.getName()+
-			    "\", domain=\""+contextPath +
+			    "\", domain=\""+domain +
 			    "\", nonce=\""+newNonce(request)+
 			    "\", algorithm=MD5, qop=\"auth\"" + (useStale?(" stale="+stale):"")
                           );
-        
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
     }
 

@@ -60,13 +60,22 @@ public class Ajp13Parser implements Parser
     
 
     /* ------------------------------------------------------------------------------- */
-    public Ajp13Parser(Buffers buffers, EndPoint endPoint, EventHandler handler, Ajp13Generator generator)
+    public Ajp13Parser(Buffers buffers, EndPoint endPoint)
     {
         _buffers = buffers;
         _endp = endPoint;
-        _handler = handler;
-        _generator = generator;
-
+    }
+    
+    /* ------------------------------------------------------------------------------- */
+    public void setEventHandler(EventHandler handler)
+    {
+        _handler=handler;
+    }
+    
+    /* ------------------------------------------------------------------------------- */
+    public void setGenerator(Ajp13Generator generator)
+    {
+        _generator=generator;
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -170,8 +179,12 @@ public class Ajp13Parser implements Parser
             }
 
             _buffer = _body;
-            filled = _buffer.length();
-            return filled;
+            
+            if (_buffer.length()>0)
+            {            
+                filled = _buffer.length();
+                return filled;
+            }
         }
 
         if (_buffer.markIndex() == 0 && _buffer.putIndex() == _buffer.capacity())
@@ -342,7 +355,7 @@ public class Ajp13Parser implements Parser
                 if (bufHeaderName != null && bufHeaderName.toString().equals(Ajp13RequestHeaders.CONTENT_LENGTH))
                 {
                     _contentLength = BufferUtil.toLong(bufHeaderValue);
-                    if (_contentLength <= 0)
+                    if (_contentLength == 0)
                         _contentLength = HttpTokens.NO_CONTENT;
                 }
 
@@ -404,7 +417,8 @@ public class Ajp13Parser implements Parser
                         
                     case Ajp13RequestHeaders.SSL_KEYSIZE_ATTR:
                         
-                        // This has been implemented as either a string or a integer.
+                        // This has been implemented in AJP13 as either a string or a integer.
+                        // Servlet specs say javax.servlet.request.key_size must be an Integer
                         
                         // Does it look like a string containing digits?
                         int length = Ajp13RequestPacket.getInt(_buffer);
@@ -413,10 +427,10 @@ public class Ajp13Parser implements Parser
                         {
                             // this must be a string length rather than a key length
                             _buffer.skip(-2);
-                            _handler.parsedRequestAttribute("javax.servlet.request.key_size", Ajp13RequestPacket.getString(_buffer, _tok1));
+                            _handler.parsedSslKeySize(Integer.parseInt(Ajp13RequestPacket.getString(_buffer, _tok1).toString()));
                         }
                         else
-                            _handler.parsedRequestAttribute("javax.servlet.request.key_size",length);
+                            _handler.parsedSslKeySize(length);
                         
                         break;
 
@@ -464,13 +478,26 @@ public class Ajp13Parser implements Parser
             _contentPosition = 0;
             switch ((int) _contentLength)
             {
-                case HttpTokens.UNKNOWN_CONTENT:
+
                 case HttpTokens.NO_CONTENT:
                     _state = STATE_END;
                     _handler.headerComplete();
                     _handler.messageComplete(_contentPosition);
 
                     break;
+
+                case HttpTokens.UNKNOWN_CONTENT:
+
+                    _generator.getBodyChunk();
+                    if (_buffers != null && _body == null && _buffer == _header && _header.length() <= 0)
+                    {
+                        _body = _buffers.getBuffer(Ajp13Packet.MAX_PACKET_SIZE);
+                        _body.clear();
+                    }
+                    _state = STATE_AJP13CHUNK_START;
+                    _handler.headerComplete(); // May recurse here!
+
+                    return total_filled;
 
                 default:
 
@@ -514,6 +541,7 @@ public class Ajp13Parser implements Parser
                     if (_chunkLength==0)
                     {
                         _state=STATE_END;
+                         _generator.gotBody();
                         _handler.messageComplete(_contentPosition);
                         return total_filled;
                     }
@@ -561,7 +589,7 @@ public class Ajp13Parser implements Parser
                     if (remaining==0)
                     {
                         _state=STATE_AJP13CHUNK_START;
-                        if (_contentPosition<_contentLength)
+                        if (_contentPosition<_contentLength || _contentLength == HttpTokens.UNKNOWN_CONTENT)
                         {
                             _generator.getBodyChunk();
                         }
@@ -740,7 +768,7 @@ public class Ajp13Parser implements Parser
 
         public void parsedSslSession(Buffer sslSession) throws IOException;
 
-
+        public void parsedSslKeySize(int keySize) throws IOException;
 
 
 

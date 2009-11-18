@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.StringTokenizer;
+import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -262,8 +263,6 @@ public class DoSFilter implements Filter
         final HttpServletRequest srequest = (HttpServletRequest)request;
         final HttpServletResponse sresponse = (HttpServletResponse)response;
         
-
-        
         final long now=_requestTimeoutQ.getNow();
         
         // Look for the rate tracker for this request
@@ -350,6 +349,7 @@ public class DoSFilter implements Filter
                             _passes.acquire();
                             accepted = true;
                         }
+                        // can fall through if this was a waiting continuation
                     }
                 }
                 // else were we resumed?
@@ -415,7 +415,7 @@ public class DoSFilter implements Filter
         
         final Timeout.Task requestTimeout = new Timeout.Task()
         {
-            public void expire()
+            public void expired()
             {
                 closeConnection(request, response, thread);
             }
@@ -441,8 +441,6 @@ public class DoSFilter implements Filter
     /**
      * Takes drastic measures to return this response and stop this thread.
      * Due to the way the connection is interrupted, may return mixed up headers.
-     * For a cleaner, but Jetty-specific, way of handling the timeout, see
-     * @{link CloseableDoSFilter}
      * @param request current request
      * @param response current response, which must be stopped
      * @param thread the handling thread
@@ -535,7 +533,7 @@ public class DoSFilter implements Filter
         }
 
         RateTracker tracker=_rateTrackers.get(loadId);
-    	
+        
         if (tracker==null)
         {
             RateTracker t;
@@ -624,6 +622,7 @@ public class DoSFilter implements Filter
             }
 
             boolean exceeded=last!=0 && (now-last)<1000L;
+            // System.err.println("rateExceeded? "+last+" "+(now-last)+" "+exceeded);
             return exceeded;
         }
 
@@ -648,7 +647,7 @@ public class DoSFilter implements Filter
             _rateTrackers.remove(_id);
         }
         
-        public void expire()
+        public void expired()
         {
             long now = _trackerTimeoutQ.getNow();
             int latestIndex = _next == 0 ? 3 : (_next - 1 ) % _timestamps.length; 

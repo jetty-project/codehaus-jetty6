@@ -1,6 +1,21 @@
+//========================================================================
+//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 package org.mortbay.jetty;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,7 +25,6 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.Socket;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -20,7 +34,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.util.IO;
@@ -30,7 +43,8 @@ import org.mortbay.util.IO;
  */
 public class HttpServerTestBase extends TestCase
 {
-
+    private static boolean stress=Boolean.getBoolean("STRESS");
+    
     // ~ Static fields/initializers
     // ---------------------------------------------
 
@@ -59,16 +73,27 @@ public class HttpServerTestBase extends TestCase
 
     private static final String REQUEST2=REQUEST2_HEADER+REQUEST2_CONTENT.getBytes().length+"\n\n"+REQUEST2_CONTENT;
 
-    private static final String RESPONSE2_CONTENT="<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"
-            +"<nimbus xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"+"        xsi:noNamespaceSchemaLocation=\"nimbus.xsd\" version=\"1.0\">\n"
-            +"    <request requestId=\"1\">\n"+"        <getJobDetails>\n"+"            <jobId>73</jobId>\n"+"        </getJobDetails>\n"+"    </request>\n"
+    private static final String RESPONSE2_CONTENT=
+            "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"+
+            "<nimbus xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"+
+            "        xsi:noNamespaceSchemaLocation=\"nimbus.xsd\" version=\"1.0\">\n"+
+            "    <request requestId=\"1\">\n"+
+            "        <getJobDetails>\n"+
+            "            <jobId>73</jobId>\n"+
+            "        </getJobDetails>\n"+
+            "    </request>\n"
             +"</nimbus>\n";
-    private static final String RESPONSE2="HTTP/1.1 200 OK\n"+"Content-Length: "+RESPONSE2_CONTENT.getBytes().length+"\n"+"Server: Jetty(6.1.x)\n"+"\n"
-            +RESPONSE2_CONTENT;
+    private static final String RESPONSE2=
+        "HTTP/1.1 200 OK\n"+
+        "Content-Type: text/xml; charset=iso-8859-1\n"+
+        "Content-Length: "+RESPONSE2_CONTENT.getBytes().length+"\n"+
+        "Server: Jetty(6.1.x)\n"+
+        "\n"+
+        RESPONSE2_CONTENT;
 
     // Useful constants
     private static final long PAUSE=15L;
-    private static final int LOOPS=250;
+    private static final int LOOPS=stress?250:25;
     private static final String HOST="localhost";
 
     private Connector _connector;
@@ -358,7 +383,6 @@ public class HttpServerTestBase extends TestCase
         {   
             String[] encoding = {"NONE","UTF-8","ISO-8859-1","ISO-8859-2"};
 
-
             for (int e =0; e<encoding.length;e++)
             {
                 for (int b=1;b<=128;b=b==1?2:b==2?32:b==32?128:129)
@@ -372,14 +396,11 @@ public class HttpServerTestBase extends TestCase
                             InputStream in = (InputStream)url.getContent();
                             String response=IO.toString(in,e==0?null:encoding[e]);
                             
-                            // System.err.println(test+": "+(b*w)+" "+response.length()+" "+(response.length()-(b*w))/w);
                             assertEquals(test,b*w,response.length());
                         }
                     }
                 }
             }
-
-
         }
         finally
         {
@@ -387,7 +408,6 @@ public class HttpServerTestBase extends TestCase
             server.stop();
             Thread.yield();
         }
-
     }
 
     /**
@@ -454,7 +474,7 @@ public class HttpServerTestBase extends TestCase
         }
 
     }
-    
+
 
     /**
      * After several iterations, I generated some known bad fragment points.
@@ -527,6 +547,141 @@ public class HttpServerTestBase extends TestCase
         server.stop();
     }
     
+
+    /**
+     */
+    public void testRecycledWriters() throws Exception
+    {
+        Server server=startServer(new EchoHandler());
+        
+        try
+        {   
+            long start=System.currentTimeMillis();
+            Socket client=new Socket(HOST,port);
+            OutputStream os=client.getOutputStream();
+            InputStream is=client.getInputStream();
+
+            os.write((
+                    "POST /echo?charset=utf-8 HTTP/1.1\r\n"+
+                    "host: "+HOST+":"+port+"\r\n"+
+                    "content-type: text/plain; charset=utf-8\r\n"+
+                    "content-length: 10\r\n"+
+                    "\r\n").getBytes("iso-8859-1"));
+            
+            os.write((
+                    "123456789\n"
+            ).getBytes("utf-8"));
+
+            os.write((
+                    "POST /echo?charset=utf-8 HTTP/1.1\r\n"+
+                    "host: "+HOST+":"+port+"\r\n"+
+                    "content-type: text/plain; charset=utf-8\r\n"+
+                    "content-length: 10\r\n"+
+                    "\r\n"
+            ).getBytes("iso-8859-1"));
+
+            os.write((
+                    "abcdefghi\n"
+            ).getBytes("utf-8"));
+
+            String content="Wibble";
+            byte[] contentB=content.getBytes("utf-8");
+            os.write((
+                    "POST /echo?charset=utf-16 HTTP/1.1\r\n"+
+                    "host: "+HOST+":"+port+"\r\n"+
+                    "content-type: text/plain; charset=utf-8\r\n"+
+                    "content-length: "+contentB.length+"\r\n"+
+                    "connection: close\r\n"+
+                    "\r\n"
+            ).getBytes("iso-8859-1"));
+            os.write(contentB);
+
+            os.flush();
+            
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            IO.copy(is,bout);
+            byte[] b=bout.toByteArray();
+            String in = new String(b,0,b.length,"utf-8");
+            assertTrue(in.indexOf("123456789")>=0);
+            assertTrue(in.indexOf("abcdefghi")>=0);
+            assertTrue(in.indexOf("Wibble")<0);
+            in = new String(b,0,b.length,"utf-16");
+            assertTrue(in.indexOf("123456789")<0);
+            assertTrue(in.indexOf("abcdefghi")<0);
+            assertTrue(in.indexOf("Wibble")>=0);
+            
+        }
+        finally
+        {
+            // Shut down
+            server.stop();
+            Thread.yield();
+        }
+    }
+
+    /**
+     */
+    public void testRecycledReaders() throws Exception
+    {
+        Server server=startServer(new EchoHandler());
+        
+        try
+        {   
+            long start=System.currentTimeMillis();
+            Socket client=new Socket(HOST,port);
+            OutputStream os=client.getOutputStream();
+            InputStream is=client.getInputStream();
+
+            os.write((
+                    "POST /echo?charset=utf-8 HTTP/1.1\r\n"+
+                    "host: "+HOST+":"+port+"\r\n"+
+                    "content-type: text/plain; charset=utf-8\r\n"+
+                    "content-length: 10\r\n"+
+                    "\r\n").getBytes("iso-8859-1"));
+            
+            os.write((
+                    "123456789\n"
+            ).getBytes("utf-8"));
+
+            os.write((
+                    "POST /echo?charset=utf-8 HTTP/1.1\r\n"+
+                    "host: "+HOST+":"+port+"\r\n"+
+                    "content-type: text/plain; charset=utf-8\r\n"+
+                    "content-length: 10\r\n"+
+                    "\r\n"
+            ).getBytes("iso-8859-1"));
+
+            os.write((
+                    "abcdefghi\n"
+            ).getBytes("utf-8"));
+
+            String content="Wibble";
+            byte[] contentB=content.getBytes("utf-16");
+            os.write((
+                    "POST /echo?charset=utf-8 HTTP/1.1\r\n"+
+                    "host: "+HOST+":"+port+"\r\n"+
+                    "content-type: text/plain; charset=utf-16\r\n"+
+                    "content-length: "+contentB.length+"\r\n"+
+                    "connection: close\r\n"+
+                    "\r\n"
+            ).getBytes("iso-8859-1"));
+            os.write(contentB);
+
+            os.flush();
+            
+            String in = IO.toString(is);
+            assertTrue(in.indexOf("123456789")>=0);
+            assertTrue(in.indexOf("abcdefghi")>=0);
+            assertTrue(in.indexOf("Wibble")>=0);
+            
+        }
+        finally
+        {
+            // Shut down
+            server.stop();
+            Thread.yield();
+        }
+    }
     
     /**
      * Read entire response from the client. Close the output.
@@ -621,29 +776,41 @@ public class HttpServerTestBase extends TestCase
     // ----------------------------------------------------------
     private static class EchoHandler extends AbstractHandler
     {
-
         // ~ Methods
         // ------------------------------------------------------------
         public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
-
             Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
             base_request.setHandled(true);
 
+            if (request.getContentType()!=null)
+                response.setContentType(request.getContentType());
+            if (request.getParameter("charset")!=null)
+                response.setCharacterEncoding(request.getParameter("charset"));
+            else if (request.getCharacterEncoding()!=null)
+                response.setCharacterEncoding(request.getCharacterEncoding());
+            
             PrintWriter writer=response.getWriter();
             BufferedReader reader=request.getReader();
             int count=0;
             String line;
-
+            
             while ((line=reader.readLine())!=null)
             {
                 writer.print(line);
-                writer.print('\n');
+                writer.print("\n");
                 count+=line.length();
             }
 
             if (count==0)
                 throw new IllegalStateException("no input recieved");
+            
+            // just to be difficult
+            reader.close();
+            writer.close();
+            
+            if (reader.read()>=0)
+                throw new IllegalStateException("Not closed");
         }
     }
 

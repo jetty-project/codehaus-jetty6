@@ -1,9 +1,22 @@
+//========================================================================
+//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 package org.mortbay.jetty.ajp;
 
 import java.io.IOException;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.ByteArrayEndPoint;
 import org.mortbay.io.EndPoint;
@@ -25,7 +38,9 @@ public class TestAjpParser extends TestCase
         
         EndPoint endp = new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
         
-        Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+        Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+        parser.setEventHandler(new EH());
+        parser.setGenerator(new Ajp13Generator(buffers,endp,0,0));
         
         parser.parseAvailable();
         
@@ -40,7 +55,9 @@ public class TestAjpParser extends TestCase
         SimpleBuffers buffers=new SimpleBuffers(new Buffer[]
         { buffer });
         EndPoint endp=new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
-        Ajp13Parser parser=new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+        Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+        parser.setEventHandler(new EH());
+        parser.setGenerator(new Ajp13Generator(buffers,endp,0,0));
         parser.parse();
         assertTrue(true);
     }    
@@ -53,13 +70,15 @@ public class TestAjpParser extends TestCase
         SimpleBuffers buffers=new SimpleBuffers(new Buffer[]
         { buffer });
         EndPoint endp=new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
-        Ajp13Parser parser=new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+        Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+        parser.setEventHandler(new EH());
+        parser.setGenerator(new Ajp13Generator(buffers,endp,0,0));
         parser.parse();
         assertTrue(true);
     }
     
     
-    public void testSSLPacket() throws Exception
+    public void testSSLPacketWithIntegerKeySize() throws Exception
     {
         String packet = "1234025002020008485454502f312e3100000f2f746573742f64756d702f696e666f00000e3139322e3136382e3130302e343000ffff000c776562746964652d746573740001bb01000ca00b000c776562746964652d7465737400a00e005a4d6f7a696c6c612f352e30202857696e646f77733b20553b2057696e646f7773204e5420352e313b20656e2d55533b2072763a312e382e312e3129204765636b6f2f32303036313230342046697265666f782f322e302e302e3100a0010063746578742f786d6c2c6170706c69636174696f6e2f786d6c2c6170706c69636174696f6e2f7868746d6c2b786d6c2c746578742f68746d6c3b713d302e392c746578742f706c61696e3b713d302e382c696d6167652f706e672c2a2f2a3b713d302e3500a004000e656e2d75732c656e3b713d302e3500a003000c677a69702c6465666c61746500a002001e49534f2d383835392d312c7574662d383b713d302e372c2a3b713d302e3700000a4b6565702d416c69766500000333303000a006000a6b6565702d616c69766500a00d001a68747470733a2f2f776562746964652d746573742f746573742f00a00900174a53455353494f4e49443d69326c6e307539773573387300000d43616368652d436f6e74726f6c0000096d61782d6167653d3000000c4d61782d466f7277617264730000023130000800124448452d5253412d4145533235362d5348410009004032413037364245323330433238393130383941414132303631344139384441443131314230323132343030374130363642454531363742303941464337383942000b0100ff";
         byte[] src = TypeUtil.fromHexString(packet);
@@ -69,12 +88,33 @@ public class TestAjpParser extends TestCase
         
         EndPoint endp = new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
         
-        Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+        Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+        parser.setEventHandler(new EH());
+        parser.setGenerator(new Ajp13Generator(buffers,endp,0,0));
         
         parser.parseAvailable();
         
         assertTrue(true);
-    }    
+    }
+
+    public void testSSLPacketWithStringKeySize() throws Exception
+    {
+        String packet = "1234025002020008485454502f312e3100000f2f746573742f64756d702f696e666f00000e3139322e3136382e3130302e343000ffff000c776562746964652d746573740001bb01000ca00b000c776562746964652d7465737400a00e005a4d6f7a696c6c612f352e30202857696e646f77733b20553b2057696e646f7773204e5420352e313b20656e2d55533b2072763a312e382e312e3129204765636b6f2f32303036313230342046697265666f782f322e302e302e3100a0010063746578742f786d6c2c6170706c69636174696f6e2f786d6c2c6170706c69636174696f6e2f7868746d6c2b786d6c2c746578742f68746d6c3b713d302e392c746578742f706c61696e3b713d302e382c696d6167652f706e672c2a2f2a3b713d302e3500a004000e656e2d75732c656e3b713d302e3500a003000c677a69702c6465666c61746500a002001e49534f2d383835392d312c7574662d383b713d302e372c2a3b713d302e3700000a4b6565702d416c69766500000333303000a006000a6b6565702d616c69766500a00d001a68747470733a2f2f776562746964652d746573742f746573742f00a00900174a53455353494f4e49443d69326c6e307539773573387300000d43616368652d436f6e74726f6c0000096d61782d6167653d3000000c4d61782d466f7277617264730000023130000800124448452d5253412d4145533235362d5348410009004032413037364245323330433238393130383941414132303631344139384441443131314230323132343030374130363642454531363742303941464337383942000b000332353600ff";
+        byte[] src = TypeUtil.fromHexString(packet);
+        
+        ByteArrayBuffer buffer= new ByteArrayBuffer(Ajp13Packet.MAX_PACKET_SIZE);
+        SimpleBuffers buffers=new SimpleBuffers(new Buffer[]{buffer});
+        
+        EndPoint endp = new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
+        
+        Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+        parser.setEventHandler(new EH());
+        parser.setGenerator(new Ajp13Generator(buffers,endp,0,0));
+        
+        parser.parseAvailable();
+        
+        assertTrue(true);
+    }
     
     
     public void testSSLPacketFragment() throws Exception
@@ -96,7 +136,9 @@ public class TestAjpParser extends TestCase
             ByteArrayEndPoint endp = new ByteArrayEndPoint(frag0,Ajp13Packet.MAX_PACKET_SIZE);
             endp.setNonBlocking(true);
         
-            Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+            Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+            parser.setEventHandler(new EH());
+            parser.setGenerator(new Ajp13Generator(buffers,endp,0,0));
             parser.parseNext();
             
             endp.setIn(new ByteArrayBuffer(frag1));
@@ -110,17 +152,98 @@ public class TestAjpParser extends TestCase
     
     public void testPacketWithBody() throws Exception
     {
-        String packet=getPacketWithBody();
+        String packet=getTestHeader();
         byte[] src=TypeUtil.fromHexString(packet);
         ByteArrayBuffer buffer=new ByteArrayBuffer(Ajp13Packet.MAX_PACKET_SIZE);
         SimpleBuffers buffers=new SimpleBuffers(new Buffer[]
         { buffer });
-        EndPoint endp=new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
-        Ajp13Parser parser=new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
-        parser.parse();
+        ByteArrayEndPoint endp=new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
+        endp.setNonBlocking(true);
+        
+        final int count[]={0};
+        Ajp13Generator gen = new Ajp13Generator(buffers,endp,0,0)
+        {
+            public void getBodyChunk() throws IOException
+            {
+                count[0]++;
+                super.getBodyChunk();
+            }
+        };
+        Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+        parser.setEventHandler(new EH());
+        parser.setGenerator(gen);
+        
+        parser.parseNext();
+        assertEquals(1,parser.getState());
+        assertEquals(0,count[0]);
+        
+        endp.setIn(new ByteArrayBuffer(TypeUtil.fromHexString(getTestShortBody())));
+
+        parser.parseNext();
+        assertEquals(1,parser.getState());
+        assertEquals(1,count[0]);
+        
+        endp.setIn(new ByteArrayBuffer(TypeUtil.fromHexString(getTestTinyBody())));
+
+        parser.parseNext();
+        parser.parseNext();
+        assertEquals(0,parser.getState());
+        assertEquals(1,count[0]);
+        
         assertTrue(true);
     }
 
+
+    
+    public void testPacketWithChunkedBody() throws Exception
+    {
+        String packet="123400ff02040008485454502f312e3100000f2f746573742f64756d702f696e666f0000093132372e302e302e3100ffff00096c6f63616c686f7374000050000007a00e000d4a6176612f312e352e305f313100a00b00096c6f63616c686f737400a0010034746578742f68746d6c2c20696d6167652f6769662c20696d6167652f6a7065672c202a3b20713d2e322c202a2f2a3b20713d2e3200a006000a6b6565702d616c69766500a00700216170706c69636174696f6e2f782d7777772d666f726d2d75726c656e636f6465640000115472616e736665722d456e636f64696e670000076368756e6b656400000c4d61782d466f727761726473000002313000ff";
+        byte[] src=TypeUtil.fromHexString(packet);
+        ByteArrayBuffer buffer=new ByteArrayBuffer(Ajp13Packet.MAX_PACKET_SIZE);
+        SimpleBuffers buffers=new SimpleBuffers(new Buffer[]
+        { buffer });
+        ByteArrayEndPoint endp=new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
+        endp.setNonBlocking(true);
+        
+        final int count[]={0};
+        Ajp13Generator gen = new Ajp13Generator(buffers,endp,0,0)
+        {
+            public void getBodyChunk() throws IOException
+            {
+                count[0]++;
+                super.getBodyChunk();
+            }
+        };
+        Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+        parser.setEventHandler(new EH());
+        parser.setGenerator(gen);
+        
+        parser.parseNext();
+        assertEquals(1,parser.getState());
+        assertEquals(1,count[0]);
+        
+        endp.setIn(new ByteArrayBuffer(TypeUtil.fromHexString("1234007e007c7468656e616d653d746865253230717569636b25323062726f776e253230666f782532306a756d70732532306f766572253230746f2532307468652532306c617a79253230646f67253230544845253230515549434b25323042524f574e253230464f582532304a554d50532532304f564552253230544f25323054")));
+
+        while (parser.parseNext()>0);
+        assertEquals(1,parser.getState());
+        assertEquals(2,count[0]);
+        
+        endp.setIn(new ByteArrayBuffer(TypeUtil.fromHexString("12340042004048452532304c415a59253230444f472532302676616c75656f66323d6162636465666768696a6b6c6d6e6f707172737475767778797a31323334353637383930")));
+
+        while (parser.parseNext()>0);
+        assertEquals(1,parser.getState());
+        assertEquals(3,count[0]);
+        
+        endp.setIn(new ByteArrayBuffer(TypeUtil.fromHexString("123400020000")));
+
+        while (parser.getState()!=0 && parser.parseNext()>0);
+        assertEquals(0,parser.getState());
+        assertEquals(3,count[0]);
+        
+        assertTrue(true);
+    }
+
+    
 
     
     public void testPacketFragment() throws Exception
@@ -142,7 +265,9 @@ public class TestAjpParser extends TestCase
             ByteArrayEndPoint endp = new ByteArrayEndPoint(frag0,Ajp13Packet.MAX_PACKET_SIZE);
             endp.setNonBlocking(true);
         
-            Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+            Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+            parser.setEventHandler(new EH());
+            parser.setGenerator(new Ajp13Generator(buffers,endp,0,0));
             parser.parseNext();
             
             endp.setIn(new ByteArrayBuffer(frag1));
@@ -156,7 +281,7 @@ public class TestAjpParser extends TestCase
     
     public void testPacketFragmentWithBody() throws Exception
     {
-        String packet = getPacketWithBody();
+        String packet = getTestHeader()+getTestBody();
         byte[] src = TypeUtil.fromHexString(packet);
         
         for (int f=1;f<src.length;f++)
@@ -172,8 +297,10 @@ public class TestAjpParser extends TestCase
         
             ByteArrayEndPoint endp = new ByteArrayEndPoint(frag0,Ajp13Packet.MAX_PACKET_SIZE);
             endp.setNonBlocking(true);
-        
-            Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+            
+            Ajp13Parser parser = new Ajp13Parser(buffers,endp);
+            parser.setEventHandler(new EH());
+            parser.setGenerator(new Ajp13Generator(buffers,endp,0,0));
             parser.parseNext();
             
             endp.setIn(new ByteArrayBuffer(frag1));
@@ -184,10 +311,9 @@ public class TestAjpParser extends TestCase
     }
     
     
-    private String getPacketWithBody()
+    private String getTestHeader()
     {
         StringBuffer header = new StringBuffer("");
-        StringBuffer body = new StringBuffer("");
         
         
         header.append("1234026902040008485454502f31");
@@ -231,6 +357,13 @@ public class TestAjpParser extends TestCase
         header.append("64313d32266964323d696d673200ff");
 
         
+        return header.toString();
+        
+    }
+
+    private String getTestBody()
+    {
+        StringBuffer body = new StringBuffer("");
         
         
         
@@ -284,9 +417,75 @@ public class TestAjpParser extends TestCase
         body.append("33383332353432363038372d2d0d0a");
         
        
+        return  body.toString();
         
+    }
+    
+    
+    private String getTestShortBody()
+    {
+        StringBuffer body = new StringBuffer("");
         
-        return header.toString() + body.toString();
+        body.append("123402f702f52d2d2d2d2d2d2d2d");
+        body.append("2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d");
+        body.append("2d2d2d2d2d3934333833323534323630");
+        body.append("38370d0a436f6e74656e742d44697370");
+        body.append("6f736974696f6e3a20666f726d2d6461");
+        body.append("74613b206e616d653d227265636f7264");
+        body.append("4964220d0a0d0a320d0a2d2d2d2d2d2d");
+        body.append("2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d");
+        body.append("2d2d2d2d2d2d2d393433383332353432");
+        body.append("363038370d0a436f6e74656e742d4469");
+        body.append("73706f736974696f6e3a20666f726d2d");
+        body.append("646174613b206e616d653d226e616d65");
+        body.append("220d0a0d0a4974656d0d0a2d2d2d2d2d");
+        body.append("2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d");
+        body.append("2d2d2d2d2d2d2d2d3934333833323534");
+        body.append("32363038370d0a436f6e74656e742d44");
+        body.append("6973706f736974696f6e3a20666f726d");
+        body.append("2d646174613b206e616d653d22746e49");
+        body.append("6d674964220d0a0d0a696d67320d0a2d");
+        body.append("2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d");
+        body.append("2d2d2d2d2d2d2d2d2d2d2d2d39343338");
+        body.append("3332353432363038370d0a436f6e7465");
+        body.append("6e742d446973706f736974696f6e3a20");
+        body.append("666f726d2d646174613b206e616d653d");
+        body.append("227468756d624e61696c496d61676546");
+        body.append("696c65223b2066696c656e616d653d22");
+        body.append("6161612e747874220d0a436f6e74656e");
+        body.append("742d547970653a20746578742f706c61");
+        body.append("696e0d0a0d0a61616161616161616161");
+        body.append("61616161616161616161616161616161");
+        body.append("61616161616161616161616161616161");
+        body.append("61616161616161616161616161616161");
+        body.append("0d0a2d2d2d2d2d2d2d2d2d2d2d2d2d2d");
+        body.append("2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d39");
+        body.append("3433383332353432363038370d0a436f");
+        body.append("6e74656e742d446973706f736974696f");
+        body.append("6e3a20666f726d2d646174613b206e61");
+        body.append("6d653d226c61726765496d6167654669");
+        body.append("6c65223b2066696c656e616d653d2261");
+        body.append("61612e747874220d0a436f6e74656e74");
+        body.append("2d547970653a20746578742f706c6169");
+        body.append("6e0d0a0d0a6161616161616161616161");
+        body.append("61616161616161616161616161616161");
+        body.append("61616161616161616161616161616161");
+        body.append("6161616161616161616161616161610d");
+        body.append("0a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d");
+        body.append("2d2d2d2d2d2d2d2d2d2d2d2d2d2d3934");
+        body.append("33383332353432363038372d2d");
+        
+       
+        return  body.toString();
+        
+    }
+    private String getTestTinyBody()
+    {
+        StringBuffer body = new StringBuffer("");
+        
+        body.append("123400042d2d0d0a");
+       
+        return  body.toString();
         
     }
     
@@ -406,6 +605,11 @@ public class TestAjpParser extends TestCase
         public void parsedSslSession(Buffer sslSession) throws IOException
         {
             //To change body of implemented methods use File | Settings | File Templates.
+        }
+        
+        public void parsedSslKeySize(int keySize) throws IOException
+        {
+            // System.err.println(key+":: "+value);
         }
 
         public void parsedRequestAttribute(String key, int value) throws IOException

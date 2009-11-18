@@ -18,86 +18,86 @@ package org.mortbay.jetty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.RuntimeIOException;
-import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.io.UncheckedPrintWriter;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
-import org.mortbay.util.DateCache;
+import org.mortbay.util.QuotedStringTokenizer;
+import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.ajax.Continuation;
 
 /**
- * <p>A HttpConnection represents the connection of a HTTP client to the server
- * and is created by an instance of a {@link Connector}. It's prime function is 
- * to associate {@link Request} and {@link Response} instances with a {@link EndPoint}.
+ * <p>
+ * A HttpConnection represents the connection of a HTTP client to the server and
+ * is created by an instance of a {@link Connector}. It's prime function is to
+ * associate {@link Request} and {@link Response} instances with a
+ * {@link EndPoint}.
  * </p>
  * <p>
- * A connection is also the prime mechanism used by jetty to recycle objects without
- * pooling.  The {@link Request},  {@link Response}, {@link HttpParser}, {@link HttpGenerator}
- * and {@link HttpFields} instances are all recycled for the duraction of
- * a connection. Where appropriate, allocated buffers are also kept associated
- * with the connection via the parser and/or generator.
+ * A connection is also the prime mechanism used by jetty to recycle objects
+ * without pooling. The {@link Request},{@link Response}, {@link HttpParser},
+ * {@link HttpGenerator} and {@link HttpFields} instances are all recycled for
+ * the duration of a connection. Where appropriate, allocated buffers are also
+ * kept associated with the connection via the parser and/or generator.
  * </p>
- * 
- * 
+ *
+ *
  * @author gregw
- * 
+ *
  */
 public class HttpConnection implements Connection
 {
     private static int UNKNOWN = -2;
     private static ThreadLocal __currentConnection = new ThreadLocal();
 
-    private long _timeStamp=System.currentTimeMillis();
+    private long _timeStamp = System.currentTimeMillis();
     private int _requests;
     private boolean _handling;
     private boolean _destroy;
-    
-    
-    protected Connector _connector;
-    protected EndPoint _endp;
-    protected Server _server;
 
-    protected HttpURI _uri=new HttpURI();
+    protected final Connector _connector;
+    protected final EndPoint _endp;
+    protected final Server _server;
+    protected final HttpURI _uri;
 
-    protected Parser _parser;
-    protected HttpFields _requestFields;
-    protected Request _request;
+    protected final Parser _parser;
+    protected final HttpFields _requestFields;
+    protected final Request _request;
     protected ServletInputStream _in;
 
-    protected Generator _generator;
-    protected HttpFields _responseFields;
-    protected Response _response;
+    protected final Generator _generator;
+    protected final HttpFields _responseFields;
+    protected final Response _response;
     protected Output _out;
     protected OutputWriter _writer;
     protected PrintWriter _printWriter;
 
     int _include;
-    
+
     private Object _associatedObject; // associated object
-    
+
     private transient int _expect = UNKNOWN;
     private transient int _version = UNKNOWN;
     private transient boolean _head = false;
     private transient boolean _host = false;
-    private transient boolean  _delayedHandling=false;
+    private transient boolean _delayedHandling = false;
 
     /* ------------------------------------------------------------ */
     public static HttpConnection getCurrentConnection()
     {
-        return (HttpConnection) __currentConnection.get();
+        return (HttpConnection)__currentConnection.get();
     }
-    
+
     /* ------------------------------------------------------------ */
     protected static void setCurrentConnection(HttpConnection connection)
     {
@@ -105,19 +105,37 @@ public class HttpConnection implements Connection
     }
 
     /* ------------------------------------------------------------ */
-    /** Constructor
-     * 
+    /**
+     * Constructor
+     *
      */
     public HttpConnection(Connector connector, EndPoint endpoint, Server server)
     {
+        _uri = URIUtil.__CHARSET==StringUtil.__UTF8?new HttpURI():new EncodedHttpURI(URIUtil.__CHARSET);
         _connector = connector;
         _endp = endpoint;
-        _parser = new HttpParser(_connector, endpoint, new RequestHandler(), _connector.getHeaderBufferSize(), _connector.getRequestBufferSize());
+        _parser = new HttpParser(_connector,endpoint,new RequestHandler(),_connector.getHeaderBufferSize(),_connector.getRequestBufferSize());
         _requestFields = new HttpFields();
         _responseFields = new HttpFields();
         _request = new Request(this);
         _response = new Response(this);
-        _generator = new HttpGenerator(_connector, _endp, _connector.getHeaderBufferSize(), _connector.getResponseBufferSize());
+        _generator = new HttpGenerator(_connector,_endp,_connector.getHeaderBufferSize(),_connector.getResponseBufferSize());
+        _generator.setSendServerVersion(server.getSendServerVersion());
+        _server = server;
+    }
+
+    protected HttpConnection(Connector connector, EndPoint endpoint, Server server,
+            Parser parser, Generator generator, Request request)
+    {
+        _uri = URIUtil.__CHARSET==StringUtil.__UTF8?new HttpURI():new EncodedHttpURI(URIUtil.__CHARSET);
+        _connector = connector;
+        _endp = endpoint;
+        _parser = parser;
+        _requestFields = new HttpFields();
+        _responseFields = new HttpFields();
+        _request = request;
+        _response = new Response(this);
+        _generator = generator;
         _generator.setSendServerVersion(server.getSendServerVersion());
         _server = server;
     }
@@ -125,37 +143,36 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     public void destroy()
     {
-        synchronized(this)
+        synchronized (this)
         {
-            _destroy=true;
-            if (!_handling)   
+            _destroy = true;
+            if (!_handling)
             {
-                if (_parser!=null)
+                if (_parser != null)
                     _parser.reset(true);
 
-                if (_generator!=null)
+                if (_generator != null)
                     _generator.reset(true);
 
-                if (_requestFields!=null)
+                if (_requestFields != null)
                     _requestFields.destroy();
 
-                if (_responseFields!=null)
+                if (_responseFields != null)
                     _responseFields.destroy();
 
-                _server=null;
             }
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return the parser used by this connection
-     */        
+     */
     public Parser getParser()
     {
         return _parser;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return the number of requests handled by this connection
@@ -173,7 +190,7 @@ public class HttpConnection implements Connection
     {
         return _timeStamp;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the associatedObject.
@@ -185,7 +202,8 @@ public class HttpConnection implements Connection
 
     /* ------------------------------------------------------------ */
     /**
-     * @param associatedObject The associatedObject to set.
+     * @param associatedObject
+     *            The associatedObject to set.
      */
     public void setAssociatedObject(Object associatedObject)
     {
@@ -221,26 +239,29 @@ public class HttpConnection implements Connection
 
     /* ------------------------------------------------------------ */
     /**
-     * @return The result of calling {@link #getConnector}.{@link Connector#isConfidential(Request) isCondidential}(request), or false
-     *  if there is no connector.
+     * @return The result of calling {@link #getConnector}.
+     *         {@link Connector#isConfidential(Request) isCondidential}
+     *         (request), or false if there is no connector.
      */
     public boolean isConfidential(Request request)
     {
-        if (_connector!=null)
+        if (_connector != null)
             return _connector.isConfidential(request);
         return false;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Find out if the request is INTEGRAL security.
+     *
      * @param request
-     * @return <code>true</code> if there is a {@link #getConnector() connector} and it considers <code>request</code>
-     *         to be {@link Connector#isIntegral(Request) integral}
+     * @return <code>true</code> if there is a {@link #getConnector() connector}
+     *         and it considers <code>request</code> to be
+     *         {@link Connector#isIntegral(Request) integral}
      */
     public boolean isIntegral(Request request)
     {
-        if (_connector!=null)
+        if (_connector != null)
             return _connector.isIntegral(request);
         return false;
     }
@@ -283,43 +304,64 @@ public class HttpConnection implements Connection
 
     /* ------------------------------------------------------------ */
     /**
-     * @return The input stream for this connection. The stream will be created if it does not already exist.
+     * @return The input stream for this connection. The stream will be created
+     *         if it does not already exist.
      */
     public ServletInputStream getInputStream()
     {
-        if (_in == null) 
+        if (_in == null)
             _in = new HttpParser.Input(((HttpParser)_parser),_connector.getMaxIdleTime());
         return _in;
     }
 
     /* ------------------------------------------------------------ */
     /**
-     * @return The output stream for this connection. The stream will be created if it does not already exist.
+     * @return The output stream for this connection. The stream will be created
+     *         if it does not already exist.
      */
     public ServletOutputStream getOutputStream()
     {
-        if (_out == null) 
+        if (_out == null)
             _out = new Output();
         return _out;
     }
 
     /* ------------------------------------------------------------ */
     /**
-     * @return A {@link PrintWriter} wrapping the {@link #getOutputStream output stream}. The writer is created if it
-     *    does not already exist.
+     * @return A {@link PrintWriter} wrapping the {@link #getOutputStream output
+     *         stream}. The writer is created if it does not already exist.
      */
     public PrintWriter getPrintWriter(String encoding)
     {
         getOutputStream();
-        if (_writer==null)
+        if (_writer == null)
         {
-            _writer=new OutputWriter();
-            _printWriter=new UncheckedPrintWriter(_writer);
+            _writer = new OutputWriter();
+            _printWriter = new UncheckedPrintWriter(_writer)
+            {
+                /* ------------------------------------------------------------ */
+                /*
+                 * @see java.io.PrintWriter#close()
+                 */
+                public void close()
+                {
+                    try
+                    {
+                        out.close();
+                    }
+                    catch (IOException e)
+                    {
+                        Log.debug(e);
+                        setError();
+                    }
+                }
+
+            };
         }
         _writer.setCharacterEncoding(encoding);
         return _printWriter;
     }
-    
+
     /* ------------------------------------------------------------ */
     public boolean isResponseCommitted()
     {
@@ -330,64 +372,64 @@ public class HttpConnection implements Connection
     public void handle() throws IOException
     {
         // Loop while more in buffer
-        boolean more_in_buffer =true; // assume true until proven otherwise
-        int no_progress=0;
-        
+        boolean more_in_buffer = true; // assume true until proven otherwise
+        int no_progress = 0;
+
         while (more_in_buffer)
         {
             try
             {
-                synchronized(this)
+                synchronized (this)
                 {
                     if (_handling)
-                    {
-                        throw new IllegalStateException(); // TODO delete this check
-                    }
-                    _handling=true;
+                        throw new IllegalStateException(); // TODO delete this
+                                                           // check
+                    _handling = true;
                 }
-                
+
                 setCurrentConnection(this);
-                long io=0;
-                
+                long io = 0;
+
                 Continuation continuation = _request.getContinuation();
                 if (continuation != null && continuation.isPending())
                 {
                     Log.debug("resume continuation {}",continuation);
-                    if (_request.getMethod()==null)
+                    if (_request.getMethod() == null)
                         throw new IllegalStateException();
                     handleRequest();
                 }
                 else
                 {
                     // If we are not ended then parse available
-                    if (!_parser.isComplete()) 
-                        io=_parser.parseAvailable();
-                    
+                    if (!_parser.isComplete())
+                        io = _parser.parseAvailable();
+
                     // Do we have more generating to do?
                     // Loop here because some writes may take multiple steps and
-                    // we need to flush them all before potentially blocking in the
+                    // we need to flush them all before potentially blocking in
+                    // the
                     // next loop.
                     while (_generator.isCommitted() && !_generator.isComplete())
                     {
-                        long written=_generator.flush();
-                        io+=written;
-                        if (written<=0)
+                        long written = _generator.flush();
+                        io += written;
+                        if (written <= 0)
                             break;
-                        else if (_endp.isBufferingOutput())
+                        if (_endp.isBufferingOutput())
                             _endp.flush();
                     }
-                    
+
                     // Flush buffers
                     if (_endp.isBufferingOutput())
                     {
                         _endp.flush();
                         if (!_endp.isBufferingOutput())
-                            no_progress=0;
+                            no_progress = 0;
                     }
-                    
-                    if (io>0)
-                        no_progress=0;
-                    else if (no_progress++>=2) 
+
+                    if (io > 0)
+                        no_progress = 0;
+                    else if (no_progress++ >= 2)
                         return;
                 }
             }
@@ -395,12 +437,12 @@ public class HttpConnection implements Connection
             {
                 if (Log.isDebugEnabled())
                 {
-                    Log.debug("uri="+_uri);
-                    Log.debug("fields="+_requestFields);
+                    Log.debug("uri=" + _uri);
+                    Log.debug("fields=" + _requestFields);
                     Log.debug(e);
                 }
-                _generator.sendError(e.getStatus(), e.getReason(), null, true);
-                
+                _generator.sendError(e.getStatus(),e.getReason(),null,true);
+
                 _parser.reset(true);
                 _endp.close();
                 throw e;
@@ -408,38 +450,48 @@ public class HttpConnection implements Connection
             finally
             {
                 setCurrentConnection(null);
-                
-                more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();  
-                
-                synchronized(this)
+
+                more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();
+
+                synchronized (this)
                 {
-                    _handling=false;
-                    
+                    _handling = false;
+
                     if (_destroy)
-                    { 
+                    {
                         destroy();
                         return;
                     }
                 }
-                
+
                 if (_parser.isComplete() && _generator.isComplete() && !_endp.isBufferingOutput())
-                {  
+                {
                     if (!_generator.isPersistent())
                     {
                         _parser.reset(true);
-                        more_in_buffer=false;
+                        more_in_buffer = false;
                     }
-                    
-                    reset(!more_in_buffer);
-                    no_progress=0;
+
+                    if (more_in_buffer)
+                    {
+                        reset(false);
+                        more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();
+                    }
+                    else
+                        reset(true);
+
+                    no_progress = 0;
                 }
-                
+
                 Continuation continuation = _request.getContinuation();
                 if (continuation != null && continuation.isPending())
                 {
                     break;
                 }
-                else if (_generator.isCommitted() && !_generator.isComplete() && _endp instanceof SelectChannelEndPoint) // TODO remove SelectChannel dependency
+                else if (_generator.isCommitted() && !_generator.isComplete() && _endp instanceof SelectChannelEndPoint) // TODO
+                                                                                                                         // remove
+                                                                                                                         // SelectChannel
+                                                                                                                         // dependency
                     ((SelectChannelEndPoint)_endp).setWritable(false);
             }
         }
@@ -448,56 +500,65 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     public void reset(boolean returnBuffers)
     {
-        _parser.reset(returnBuffers); // TODO maybe only release when low on resources
+        _parser.reset(returnBuffers); // TODO maybe only release when low on
+                                      // resources
         _requestFields.clear();
         _request.recycle();
-        
-        _generator.reset(returnBuffers); // TODO maybe only release when low on resources
+
+        _generator.reset(returnBuffers); // TODO maybe only release when low on
+                                         // resources
         _responseFields.clear();
         _response.recycle();
-        
-        _uri.clear(); 
+
+        _uri.clear();
     }
-    
+
     /* ------------------------------------------------------------ */
     protected void handleRequest() throws IOException
     {
-        if (_server != null)
+        if (_server.isRunning())
         {
             boolean retrying = false;
             boolean error = false;
-            String threadName=null;
+            String threadName = null;
+            String info=null;
             try
             {
-                // TODO try to do this lazily or more efficiently
-                String info=URIUtil.canonicalPath(_uri.getDecodedPath());
-                if (info==null)
+                info = URIUtil.canonicalPath(_uri.getDecodedPath());
+                if (info == null)
                     throw new HttpException(400);
                 _request.setPathInfo(info);
-                
-                if (_out!=null)
+
+                if (_out != null)
                     _out.reopen();
-                
+
                 if (Log.isDebugEnabled())
                 {
-                    threadName=Thread.currentThread().getName();
-                    Thread.currentThread().setName(threadName+" - "+_uri);
+                    threadName = Thread.currentThread().getName();
+                    Thread.currentThread().setName(threadName + " - " + _uri);
                 }
-                
-                _connector.customize(_endp, _request);
-                
+
+                _connector.customize(_endp,_request);
+
                 _server.handle(this);
             }
             catch (RetryRequest r)
             {
-                Log.ignore(r);
+                if (Log.isDebugEnabled())
+                    Log.ignore(r);
                 retrying = true;
             }
             catch (EofException e)
             {
+                Log.ignore(e);
+                error = true;
+            }
+            catch (HttpException e)
+            {
                 Log.debug(e);
                 _request.setHandled(true);
-                error=true;
+                _response.sendError(e.getStatus(),e.getReason());
+                error = true;
             }
             catch (RuntimeIOException e)
             {
@@ -505,46 +566,45 @@ public class HttpConnection implements Connection
                 _request.setHandled(true);
                 error = true;
             }
-            catch (HttpException e)
+            catch (Throwable e)
             {
-                Log.debug(e);
-                _request.setHandled(true);
-                _response.sendError(e.getStatus(), e.getReason());
-                error=true;
-            }
-            catch (Exception e)
-            {
-                Log.warn(e);
-                _request.setHandled(true);
-                _generator.sendError(500, null, null, true);
-                error=true;
-            }
-            catch (Error e)
-            {
-                Log.warn(e);
-                _request.setHandled(true);
-                _generator.sendError(500, null, null, true);
-                error=true;
+                if (e instanceof ThreadDeath)
+                    throw (ThreadDeath)e;
+
+                if (info==null)
+                {
+                    Log.warn(_uri+": "+e);
+                    Log.debug(e);
+                    _request.setHandled(true);
+                    _generator.sendError(400,null,null,true);
+                }
+                else
+                {
+                    Log.warn(""+_uri,e);
+                    _request.setHandled(true);
+                    _generator.sendError(500,null,null,true);
+                }
+                error = true;
             }
             finally
-            {   
-                if (threadName!=null)
+            {
+                if (threadName != null)
                     Thread.currentThread().setName(threadName);
-                
+
                 if (!retrying)
                 {
-                    if (_request.getContinuation()!=null)
+                    if (_request.getContinuation() != null)
                     {
                         Log.debug("continuation still pending {}");
                         _request.getContinuation().reset();
                     }
-                    
-                    if(_endp.isOpen())
+
+                    if (_endp.isOpen())
                     {
                         if (_generator.isPersistent())
                             _connector.persist(_endp);
-                        
-                        if (error) 
+
+                        if (error)
                             _endp.close();
                         else
                         {
@@ -567,10 +627,30 @@ public class HttpConnection implements Connection
     {
         if (!_generator.isCommitted())
         {
-            _generator.setResponse(_response.getStatus(), _response.getReason());
-            _generator.completeHeader(_responseFields, last);
+            _generator.setResponse(_response.getStatus(),_response.getReason());
+            try
+            {
+                _generator.completeHeader(_responseFields,last);
+            }
+            catch(IOException io)
+            {
+                throw io;
+            }
+            catch(RuntimeException e)
+            {
+                Log.warn("header full: "+e);
+                if (Log.isDebugEnabled() && _generator instanceof HttpGenerator)
+                    Log.debug(((HttpGenerator)_generator)._header.toDetailString(),e);
+                
+                _response.reset();
+                _generator.reset(true);
+                _generator.setResponse(HttpStatus.ORDINAL_500_Internal_Server_Error,null);
+                _generator.completeHeader(_responseFields,HttpGenerator.LAST);
+                _generator.complete();
+                throw e;
+            }
         }
-        if (last) 
+        if (last)
             _generator.complete();
     }
 
@@ -579,8 +659,27 @@ public class HttpConnection implements Connection
     {
         if (!_generator.isCommitted())
         {
-            _generator.setResponse(_response.getStatus(), _response.getReason());
-            _generator.completeHeader(_responseFields, HttpGenerator.LAST);
+            _generator.setResponse(_response.getStatus(),_response.getReason());
+            try
+            {
+                _generator.completeHeader(_responseFields,HttpGenerator.LAST);
+            }
+            catch(IOException io)
+            {
+                throw io;
+            }
+            catch(RuntimeException e)
+            {
+                Log.warn("header full: "+e);
+                Log.debug(e);
+
+                _response.reset();
+                _generator.reset(true);
+                _generator.setResponse(HttpStatus.ORDINAL_500_Internal_Server_Error,null);
+                _generator.completeHeader(_responseFields,HttpGenerator.LAST);
+                _generator.complete();
+                throw e;
+            }
         }
 
         _generator.complete();
@@ -594,9 +693,9 @@ public class HttpConnection implements Connection
             commitResponse(HttpGenerator.MORE);
             _generator.flush();
         }
-        catch(IOException e)
+        catch (IOException e)
         {
-            throw (e instanceof EofException) ? e:new EofException(e);
+            throw (e instanceof EofException)?e:new EofException(e);
         }
     }
 
@@ -605,12 +704,11 @@ public class HttpConnection implements Connection
     {
         return _generator;
     }
-    
 
     /* ------------------------------------------------------------ */
     public boolean isIncluding()
     {
-        return _include>0;
+        return _include > 0;
     }
 
     /* ------------------------------------------------------------ */
@@ -623,7 +721,7 @@ public class HttpConnection implements Connection
     public void included()
     {
         _include--;
-        if (_out!=null)
+        if (_out != null)
             _out.reopen();
     }
 
@@ -632,49 +730,52 @@ public class HttpConnection implements Connection
     {
         return _generator.isIdle() && (_parser.isIdle() || _delayedHandling);
     }
-    
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     private class RequestHandler extends HttpParser.EventHandler
     {
         private String _charset;
-        
+
         /*
-         * 
-         * @see org.mortbay.jetty.HttpParser.EventHandler#startRequest(org.mortbay.io.Buffer,
-         *      org.mortbay.io.Buffer, org.mortbay.io.Buffer)
+         *
+         * @see
+         * org.mortbay.jetty.HttpParser.EventHandler#startRequest(org.mortbay
+         * .io.Buffer, org.mortbay.io.Buffer, org.mortbay.io.Buffer)
          */
         public void startRequest(Buffer method, Buffer uri, Buffer version) throws IOException
         {
             _host = false;
             _expect = UNKNOWN;
-            _delayedHandling=false;
-            _charset=null;
+            _delayedHandling = false;
+            _charset = null;
 
-            if(_request.getTimeStamp()==0)
+            if (_request.getTimeStamp() == 0)
                 _request.setTimeStamp(System.currentTimeMillis());
             _request.setMethod(method.toString());
 
             try
             {
-                _uri.parse(uri.array(), uri.getIndex(), uri.length());
+                _uri.parse(uri.array(),uri.getIndex(),uri.length());
                 _request.setUri(_uri);
 
-                if (version==null)
+                if (version == null)
                 {
                     _request.setProtocol(HttpVersions.HTTP_0_9);
-                    _version=HttpVersions.HTTP_0_9_ORDINAL;
+                    _version = HttpVersions.HTTP_0_9_ORDINAL;
                 }
                 else
                 {
-                    version= HttpVersions.CACHE.get(version);
+                    version = HttpVersions.CACHE.get(version);
                     _version = HttpVersions.CACHE.getOrdinal(version);
-                    if (_version <= 0) _version = HttpVersions.HTTP_1_0_ORDINAL;
+                    if (_version <= 0)
+                        _version = HttpVersions.HTTP_1_0_ORDINAL;
                     _request.setProtocol(version.toString());
                 }
 
-                _head = method == HttpMethods.HEAD_BUFFER; // depends on method being decached.
+                _head = method == HttpMethods.HEAD_BUFFER; // depends on method
+                                                           // being decached.
             }
             catch (Exception e)
             {
@@ -683,7 +784,9 @@ public class HttpConnection implements Connection
         }
 
         /*
-         * @see org.mortbay.jetty.HttpParser.EventHandler#parsedHeaderValue(org.mortbay.io.Buffer)
+         * @see
+         * org.mortbay.jetty.HttpParser.EventHandler#parsedHeaderValue(org.mortbay
+         * .io.Buffer)
          */
         public void parsedHeader(Buffer name, Buffer value)
         {
@@ -694,37 +797,38 @@ public class HttpConnection implements Connection
                     // TODO check if host matched a host in the URI.
                     _host = true;
                     break;
-                    
+
                 case HttpHeaders.EXPECT_ORDINAL:
                     value = HttpHeaderValues.CACHE.lookup(value);
                     _expect = HttpHeaderValues.CACHE.getOrdinal(value);
                     break;
-                    
+
                 case HttpHeaders.ACCEPT_ENCODING_ORDINAL:
                 case HttpHeaders.USER_AGENT_ORDINAL:
                     value = HttpHeaderValues.CACHE.lookup(value);
                     break;
-                    
+
                 case HttpHeaders.CONTENT_TYPE_ORDINAL:
                     value = MimeTypes.CACHE.lookup(value);
-                    _charset=MimeTypes.getCharsetFromContentType(value);
+                    _charset = MimeTypes.getCharsetFromContentType(value);
                     break;
 
                 case HttpHeaders.CONNECTION_ORDINAL:
-                    //looks rather clumsy, but the idea is to optimize for a single valued header
+                    // looks rather clumsy, but the idea is to optimize for a
+                    // single valued header
                     int ordinal = HttpHeaderValues.CACHE.getOrdinal(value);
-                    switch(ordinal)
+                    switch (ordinal)
                     {
                         case -1:
-                        { 
+                        {
                             String[] values = value.toString().split(",");
-                            for  (int i=0;values!=null && i<values.length;i++)
+                            for (int i = 0; values != null && i < values.length; i++)
                             {
                                 CachedBuffer cb = HttpHeaderValues.CACHE.get(values[i].trim());
 
-                                if (cb!=null)
+                                if (cb != null)
                                 {
-                                    switch(cb.getOrdinal())
+                                    switch (cb.getOrdinal())
                                     {
                                         case HttpHeaderValues.CLOSE_ORDINAL:
                                             _responseFields.add(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.CLOSE_BUFFER);
@@ -732,7 +836,7 @@ public class HttpConnection implements Connection
                                             break;
 
                                         case HttpHeaderValues.KEEP_ALIVE_ORDINAL:
-                                            if (_version==HttpVersions.HTTP_1_0_ORDINAL)
+                                            if (_version == HttpVersions.HTTP_1_0_ORDINAL)
                                                 _responseFields.add(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.KEEP_ALIVE_BUFFER);
                                             break;
                                     }
@@ -746,13 +850,13 @@ public class HttpConnection implements Connection
                             break;
 
                         case HttpHeaderValues.KEEP_ALIVE_ORDINAL:
-                            if (_version==HttpVersions.HTTP_1_0_ORDINAL)
+                            if (_version == HttpVersions.HTTP_1_0_ORDINAL)
                                 _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.KEEP_ALIVE_BUFFER);
                             break;
-                    } 
+                    }
             }
 
-            _requestFields.add(name, value);
+            _requestFields.add(name,value);
         }
 
         /*
@@ -771,16 +875,15 @@ public class HttpConnection implements Connection
                     break;
                 case HttpVersions.HTTP_1_1_ORDINAL:
                     _generator.setHead(_head);
-                    
+
                     if (_server.getSendDateHeader())
-                        _responseFields.put(HttpHeaders.DATE_BUFFER, _request.getTimeStampBuffer());
-                   
-                    
+                        _responseFields.put(HttpHeaders.DATE_BUFFER,_request.getTimeStampBuffer(),_request.getTimeStamp());
+
                     if (!_host)
                     {
-                        _generator.setResponse(HttpStatus.ORDINAL_400_Bad_Request, null);
-                        _responseFields.put(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
-                        _generator.completeHeader(_responseFields, true);
+                        _generator.setResponse(HttpStatus.ORDINAL_400_Bad_Request,null);
+                        _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.CLOSE_BUFFER);
+                        _generator.completeHeader(_responseFields,true);
                         _generator.complete();
                         return;
                     }
@@ -789,11 +892,12 @@ public class HttpConnection implements Connection
                     {
                         if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
                         {
-                            // TODO delay sending 100 response until a read is attempted.
-                            if (((HttpParser)_parser).getHeaderBuffer()==null || ((HttpParser)_parser).getHeaderBuffer().length()<2)
+                            // TODO delay sending 100 response until a read is
+                            // attempted.
+                            if (((HttpParser)_parser).getHeaderBuffer() == null || ((HttpParser)_parser).getHeaderBuffer().length() < 2)
                             {
-                                _generator.setResponse(HttpStatus.ORDINAL_100_Continue, null);
-                                _generator.completeHeader(null, true);
+                                _generator.setResponse(HttpStatus.ORDINAL_100_Continue,null);
+                                _generator.completeHeader(null,true);
                                 _generator.complete();
                                 _generator.reset(false);
                             }
@@ -803,71 +907,77 @@ public class HttpConnection implements Connection
                         }
                         else
                         {
-                            _generator.sendError(HttpStatus.ORDINAL_417_Expectation_Failed, null, null, true);
+                            _generator.sendError(HttpStatus.ORDINAL_417_Expectation_Failed,null,null,true);
                             return;
                         }
                     }
-                    
+
                     break;
                 default:
             }
 
-            if(_charset!=null)
+            if (_charset != null)
                 _request.setCharacterEncodingUnchecked(_charset);
-            
+
             // Either handle now or wait for first content
-            if (((HttpParser)_parser).getContentLength()<=0 && !((HttpParser)_parser).isChunking())
+            if (((HttpParser)_parser).getContentLength() <= 0 && !((HttpParser)_parser).isChunking())
                 handleRequest();
             else
-                _delayedHandling=true;
+                _delayedHandling = true;
         }
 
         /* ------------------------------------------------------------ */
         /*
-         * @see org.mortbay.jetty.HttpParser.EventHandler#content(int, org.mortbay.io.Buffer)
+         * @see org.mortbay.jetty.HttpParser.EventHandler#content(int,
+         * org.mortbay.io.Buffer)
          */
         public void content(Buffer ref) throws IOException
         {
             if (_delayedHandling)
             {
-                _delayedHandling=false;
+                _delayedHandling = false;
                 handleRequest();
             }
         }
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see org.mortbay.jetty.HttpParser.EventHandler#messageComplete(int)
          */
-        public void messageComplete(long contextLength) throws IOException
+        public void messageComplete(long contentLength) throws IOException
         {
+            if (_delayedHandling)
+            {
+                _delayedHandling = false;
+                handleRequest();
+            }
         }
 
         /*
          * (non-Javadoc)
-         * 
-         * @see org.mortbay.jetty.HttpParser.EventHandler#startResponse(org.mortbay.io.Buffer, int,
-         *      org.mortbay.io.Buffer)
+         *
+         * @see
+         * org.mortbay.jetty.HttpParser.EventHandler#startResponse(org.mortbay
+         * .io.Buffer, int, org.mortbay.io.Buffer)
          */
         public void startResponse(Buffer version, int status, Buffer reason)
         {
-            throw new IllegalStateException("response");
+            Log.debug("Bad request!: " + version + " " + status + " " + reason);
         }
 
     }
 
-    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public class Output extends AbstractGenerator.Output 
+    public class Output extends AbstractGenerator.Output
     {
         Output()
         {
             super((AbstractGenerator)HttpConnection.this._generator,_connector.getMaxIdleTime());
         }
-        
+
         /* ------------------------------------------------------------ */
         /*
          * @see java.io.OutputStream#close()
@@ -876,16 +986,15 @@ public class HttpConnection implements Connection
         {
             if (_closed)
                 return;
-            
+
             if (!isIncluding() && !_generator.isCommitted())
                 commitResponse(HttpGenerator.LAST);
             else
                 flushResponse();
-            
+
             super.close();
         }
 
-        
         /* ------------------------------------------------------------ */
         /*
          * @see java.io.OutputStream#flush()
@@ -898,99 +1007,127 @@ public class HttpConnection implements Connection
         }
 
         /* ------------------------------------------------------------ */
-        /* 
+        /*
          * @see javax.servlet.ServletOutputStream#print(java.lang.String)
          */
         public void print(String s) throws IOException
         {
             if (_closed)
                 throw new IOException("Closed");
-            PrintWriter writer=getPrintWriter(null);
+            PrintWriter writer = getPrintWriter(null);
             writer.print(s);
+        }
+
+        /* ------------------------------------------------------------ */
+        public void sendResponse(Buffer response) throws IOException
+        {
+            ((HttpGenerator)_generator).sendResponse(response);
         }
 
         /* ------------------------------------------------------------ */
         public void sendContent(Object content) throws IOException
         {
-            Resource resource=null;
-            
+            Resource resource = null;
+
             if (_closed)
                 throw new IOException("Closed");
-            
-            if (_generator.getContentWritten() > 0) throw new IllegalStateException("!empty");
+
+            if (_generator.getContentWritten() > 0)
+                throw new IllegalStateException("!empty");
 
             if (content instanceof HttpContent)
             {
-                HttpContent c = (HttpContent) content;
-                if (c.getContentType() != null && !_responseFields.containsKey(HttpHeaders.CONTENT_TYPE_BUFFER)) 
-                    _responseFields.add(HttpHeaders.CONTENT_TYPE_BUFFER, c.getContentType());
-                if (c.getContentLength() > 0) 
-                    _responseFields.putLongField(HttpHeaders.CONTENT_LENGTH_BUFFER, c.getContentLength());
-                Buffer lm = c.getLastModified();
-                if (lm != null) 
-                    _responseFields.put(HttpHeaders.LAST_MODIFIED_BUFFER, lm);
-                else if (c.getResource()!=null)
+                HttpContent c = (HttpContent)content;
+                Buffer contentType = c.getContentType();
+                if (contentType != null && !_responseFields.containsKey(HttpHeaders.CONTENT_TYPE_BUFFER))
                 {
-                    long lml=c.getResource().lastModified();
-                    if (lml!=-1)
-                        _responseFields.putDateField(HttpHeaders.LAST_MODIFIED_BUFFER, lml);
+                    String enc = _response.getSetCharacterEncoding();
+                    if(enc==null)
+                        _responseFields.add(HttpHeaders.CONTENT_TYPE_BUFFER, contentType);
+                    else
+                    {
+                        if(contentType instanceof CachedBuffer)
+                        {
+                            CachedBuffer content_type = ((CachedBuffer)contentType).getAssociate(enc);
+                            if(content_type!=null)
+                                _responseFields.put(HttpHeaders.CONTENT_TYPE_BUFFER, content_type);
+                            else
+                            {
+                                _responseFields.put(HttpHeaders.CONTENT_TYPE_BUFFER,
+                                        contentType+";charset="+QuotedStringTokenizer.quote(enc,";= "));
+                            }
+                        }
+                        else
+                        {
+                            _responseFields.put(HttpHeaders.CONTENT_TYPE_BUFFER,
+                                    contentType+";charset="+QuotedStringTokenizer.quote(enc,";= "));
+                        }
+                    }
                 }
-                    
+                if (c.getContentLength() > 0)
+                    _responseFields.putLongField(HttpHeaders.CONTENT_LENGTH_BUFFER,c.getContentLength());
+                Buffer lm = c.getLastModified();
+                long lml = c.getResource().lastModified();
+                if (lm != null)
+                    _responseFields.put(HttpHeaders.LAST_MODIFIED_BUFFER,lm,lml);
+                else if (c.getResource() != null)
+                {
+                    if (lml != -1)
+                        _responseFields.putDateField(HttpHeaders.LAST_MODIFIED_BUFFER,lml);
+                }
+
                 content = c.getBuffer();
-                if (content==null)
-                    content=c.getInputStream();
+                if (content == null)
+                    content = c.getInputStream();
             }
             else if (content instanceof Resource)
             {
-                resource=(Resource)content;
-                _responseFields.putLongField(HttpHeaders.LAST_MODIFIED_BUFFER, resource.lastModified());
-                content=resource.getInputStream();
+                resource = (Resource)content;
+                _responseFields.putDateField(HttpHeaders.LAST_MODIFIED_BUFFER,resource.lastModified());
+                content = resource.getInputStream();
             }
-            
-            
-            
+
             if (content instanceof Buffer)
             {
-                _generator.addContent((Buffer) content, HttpGenerator.LAST);
+                _generator.addContent((Buffer)content,HttpGenerator.LAST);
                 commitResponse(HttpGenerator.LAST);
             }
             else if (content instanceof InputStream)
             {
                 InputStream in = (InputStream)content;
-                
+
                 try
                 {
                     int max = _generator.prepareUncheckedAddContent();
                     Buffer buffer = _generator.getUncheckedBuffer();
 
-                    int len=buffer.readFrom(in,max);
+                    int len = buffer.readFrom(in,max);
 
-                    while (len>=0)
+                    while (len >= 0)
                     {
                         _generator.completeUncheckedAddContent();
                         _out.flush();
 
                         max = _generator.prepareUncheckedAddContent();
                         buffer = _generator.getUncheckedBuffer();
-                        len=buffer.readFrom(in,max);
+                        len = buffer.readFrom(in,max);
                     }
                     _generator.completeUncheckedAddContent();
-                    _out.flush();   
+                    _out.flush();
                 }
                 finally
                 {
-                    if (resource!=null)
+                    if (resource != null)
                         resource.release();
                     else
                         in.close();
-                      
+
                 }
             }
             else
                 throw new IllegalArgumentException("unknown content type?");
-            
-            
-        }     
+
+        }
     }
 
     /* ------------------------------------------------------------ */

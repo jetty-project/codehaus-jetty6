@@ -120,6 +120,34 @@ public class LocalConnector extends AbstractConnector
         _out=_endp.getOut();
         return _out.toString();
     }
+    
+    /* ------------------------------------------------------------ */
+    public ByteArrayBuffer getResponses(ByteArrayBuffer buf, boolean keepOpen)
+    throws Exception
+    {
+        if (_in.space()<buf.length())
+        {
+            ByteArrayBuffer n = new ByteArrayBuffer(_in.length()+buf.length());
+            n.put(_in);
+            _in=n;
+            _endp.setIn(_in);
+        }
+        _in.put(buf);
+        
+        synchronized (this)
+        {
+            _keepOpen=keepOpen;
+            _accepting=true;
+            this.notify();
+            
+            while(_accepting)
+                this.wait();
+        }
+        
+        // System.err.println("\nRESPONSES:\n"+out);
+        _out=_endp.getOut();
+        return _out;
+    }
 
     /* ------------------------------------------------------------ */
     protected Buffer newBuffer(int size)

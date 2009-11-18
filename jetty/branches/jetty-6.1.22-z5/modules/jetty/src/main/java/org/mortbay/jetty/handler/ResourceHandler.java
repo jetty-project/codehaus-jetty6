@@ -34,7 +34,9 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.handler.ContextHandler.SContext;
 import org.mortbay.log.Log;
+import org.mortbay.resource.FileResource;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 import org.mortbay.util.URIUtil;
 
@@ -56,18 +58,55 @@ public class ResourceHandler extends AbstractHandler
     String[] _welcomeFiles={"index.html"};
     MimeTypes _mimeTypes = new MimeTypes();
     ByteArrayBuffer _cacheControl;
+    boolean _aliases;
 
     /* ------------------------------------------------------------ */
     public ResourceHandler()
     {
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public MimeTypes getMimeTypes()
+    {
+        return _mimeTypes;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setMimeTypes(MimeTypes mimeTypes)
+    {
+        _mimeTypes = mimeTypes;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return True if resource aliases are allowed.
+     */
+    public boolean isAliases()
+    {
+        return _aliases;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set if resource aliases (eg symlink, 8.3 names, case insensitivity) are allowed.
+     * Allowing aliases can significantly increase security vulnerabilities.
+     * @param aliases True if aliases are supported.
+     */
+    public void setAliases(boolean aliases)
+    {
+        _aliases = aliases;
+    }
+
     /* ------------------------------------------------------------ */
     public void doStart()
     throws Exception
     {
         SContext scontext = ContextHandler.getCurrentContext();
         _context = (scontext==null?null:scontext.getContextHandler());
+        
+        if (!_aliases && !FileResource.getCheckAliases())
+            throw new IllegalStateException("Alias checking disabled");
+        
         super.doStart();
     }
 
@@ -115,7 +154,8 @@ public class ResourceHandler extends AbstractHandler
         }
         catch (Exception e)
         {
-            Log.warn(e);
+            Log.warn(e.toString());
+            Log.debug(e);
             throw new IllegalArgumentException(resourceBase);
         }
     }
@@ -212,13 +252,26 @@ public class ResourceHandler extends AbstractHandler
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
         Request base_request = request instanceof Request?(Request)request:HttpConnection.getCurrentConnection().getRequest();
-        if (base_request.isHandled() || !request.getMethod().equals(HttpMethods.GET))
+        if (base_request.isHandled())
             return;
+        
+        boolean skipContentBody = false;
+        if(!HttpMethods.GET.equals(request.getMethod()))
+        {
+            if(!HttpMethods.HEAD.equals(request.getMethod()))
+                return;
+            skipContentBody = true;
+        }
      
         Resource resource=getResource(request);
         
         if (resource==null || !resource.exists())
             return;
+        if (!_aliases && resource.getAlias()!=null)
+        {
+            Log.info(resource+" aliased to "+resource.getAlias());
+            return;
+        }
 
         // We are going to server something
         base_request.setHandled(true);
@@ -257,7 +310,9 @@ public class ResourceHandler extends AbstractHandler
         
         // set the headers
         doResponseHeaders(response,resource,mime!=null?mime.toString():null);
-
+        response.setDateHeader(HttpHeaders.LAST_MODIFIED,last_modified);
+        if(skipContentBody)
+            return;
         // Send the content
         OutputStream out =null;
         try {out = response.getOutputStream();}
@@ -267,13 +322,11 @@ public class ResourceHandler extends AbstractHandler
         if (out instanceof HttpConnection.Output)
         {
             // TODO file mapped buffers
-            response.setDateHeader(HttpHeaders.LAST_MODIFIED,last_modified);
             ((HttpConnection.Output)out).sendContent(resource.getInputStream());
         }
         else
         {
             // Write content normally
-            response.setDateHeader(HttpHeaders.LAST_MODIFIED,last_modified);
             resource.writeTo(out,0,resource.length());
         }
     }

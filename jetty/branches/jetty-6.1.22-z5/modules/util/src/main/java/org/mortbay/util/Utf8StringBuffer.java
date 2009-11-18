@@ -34,12 +34,12 @@ public class Utf8StringBuffer
     int _bits;
     boolean _errors;
     
-    Utf8StringBuffer()
+    public Utf8StringBuffer()
     {
         _buffer=new StringBuffer();
     }
     
-    Utf8StringBuffer(int capacity)
+    public Utf8StringBuffer(int capacity)
     {
         _buffer=new StringBuffer(capacity);
     }
@@ -53,7 +53,7 @@ public class Utf8StringBuffer
     
     public void append(byte b)
     {
-        if (b>0)
+        if (b>=0)
         {
             if (_more>0)
             {

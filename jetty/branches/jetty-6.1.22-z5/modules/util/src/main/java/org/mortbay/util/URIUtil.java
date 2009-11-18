@@ -76,13 +76,17 @@ public class URIUtil
                 char c=path.charAt(i);
                 switch(c)
                 {
-                  case '%':
-                  case '?':
-                  case ';':
-                  case '#':
-                  case ' ':
-                      buf=new StringBuffer(path.length()<<1);
-                      break loop;
+                    case '%':
+                    case '?':
+                    case ';':
+                    case '#':
+                    case '\'':
+                    case '"':
+                    case '<':
+                    case '>':
+                    case ' ':
+                        buf=new StringBuffer(path.length()<<1);
+                        break loop;
                 }
             }
             if (buf==null)
@@ -107,6 +111,18 @@ public class URIUtil
                       continue;
                   case '#':
                       buf.append("%23");
+                      continue;
+                  case '"':
+                      buf.append("%22");
+                      continue;
+                  case '\'':
+                      buf.append("%27");
+                      continue;
+                  case '<':
+                      buf.append("%3C");
+                      continue;
+                  case '>':
+                      buf.append("%3E");
                       continue;
                   case ' ':
                       buf.append("%20");
@@ -278,19 +294,10 @@ public class URIUtil
             
             bytes[n++]=b;
         }
-        
-        try
-        {
-            if (bytes==null)
-                return new String(buf,offset,length,__CHARSET);
-            return new String(bytes,0,n,__CHARSET);
-        }
-        catch(UnsupportedEncodingException e)
-        {
-            if (bytes==null)
-                return new String(buf,offset,length);
-            return new String(bytes,0,n);
-        }
+
+        if (bytes==null)
+            return StringUtil.toString(buf,offset,length,__CHARSET);
+        return StringUtil.toString(bytes,0,n,__CHARSET);
     }
 
     
@@ -298,8 +305,8 @@ public class URIUtil
     /** Add two URI path segments.
      * Handles null and empty paths, path and query params (eg ?a=b or
      * ;JSESSIONID=xxx) and avoids duplicate '/'
-     * @param p1 URI path segment 
-     * @param p2 URI path segment
+     * @param p1 URI path segment (should be encoded)
+     * @param p2 URI path segment (should be encoded)
      * @return Legally combined path segments.
      */
     public static String addPaths(String p1, String p2)
@@ -549,7 +556,8 @@ public class URIUtil
             return path;
         
         StringBuffer buf = new StringBuffer(path.length());
-        buf.append(path,0,i);
+        char[] chars = path.toCharArray();
+        buf.append(chars,0,i);
         
         loop2:
         while (i<end)
@@ -558,7 +566,7 @@ public class URIUtil
             switch(c)
             {
                 case '?':
-                    buf.append(path,i,end);
+                    buf.append(chars,i,end-i);
                     break loop2;
                 case '/':
                     if (state++==0)

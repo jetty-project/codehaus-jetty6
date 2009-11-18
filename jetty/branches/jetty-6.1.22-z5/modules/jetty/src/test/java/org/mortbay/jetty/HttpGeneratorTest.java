@@ -25,6 +25,9 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.ByteArrayEndPoint;
 import org.mortbay.io.SimpleBuffers;
 import org.mortbay.io.View;
+import org.mortbay.jetty.AbstractGenerator.Output;
+import org.mortbay.jetty.AbstractGenerator.OutputWriter;
+import org.mortbay.util.StringUtil;
 
 /**
  * @author gregw
@@ -78,7 +81,7 @@ public class HttpGeneratorTest extends TestCase
                         endp.reset();
                         fields.clear();
                         
-                        tr[r].build(v,hb,null,connect[c],null,chunks, fields);
+                        tr[r].build(v,hb,"OK\r\nTest",connect[c],null,chunks, fields);
                         String response=endp.getOut().toString();
                         // System.out.println("RESPONSE: "+t+"\n"+response+(hb.isPersistent()?"...\n":"---\n"));
                         
@@ -108,6 +111,9 @@ public class HttpGeneratorTest extends TestCase
                             assertTrue(t,hb.isPersistent() || tr[r].values[1]==null || c==2 || c==0);
                         else
                             assertTrue(t,hb.isPersistent() ||  c==2 || c==3);
+                        
+                        if (v>9)
+                            assertEquals("OK  Test",f2);
                         
                         assertTrue(t,tr[r].values[1]==null || content.length()==Integer.parseInt(tr[r].values[1]));
                     }
@@ -199,7 +205,6 @@ public class HttpGeneratorTest extends TestCase
       /* 7 */  new TR(200,"text/html",""+CONTENT.length(),CONTENT),
     };
     
-
     String content;
     String f0;
     String f1;
@@ -268,8 +273,33 @@ public class HttpGeneratorTest extends TestCase
         public void messageComplete(long contentLength)
         {
         }
-
-
     }
 
+    public void testOutput()
+        throws Exception
+    {
+        Buffer sb=new ByteArrayBuffer(1500);
+        Buffer bb=new ByteArrayBuffer(8096);
+        HttpFields fields = new HttpFields();
+        ByteArrayEndPoint endp = new ByteArrayEndPoint(new byte[0],4096);
+        HttpGenerator hb = new HttpGenerator(new SimpleBuffers(new Buffer[]{sb,bb}),endp, sb.capacity(), bb.capacity());
+
+        hb.setResponse(200,"OK");
+        
+        Output output = new Output(hb,10000);
+        OutputWriter writer = new OutputWriter(output);
+        writer.setCharacterEncoding(StringUtil.__UTF8);
+        
+        char[] chars = new char[1024];
+        for (int i=0;i<chars.length;i++)
+            chars[i]=(char)('0'+(i%10));
+        chars[0]='\u0553';
+        writer.write(chars);
+        
+        hb.completeHeader(fields,true);
+        hb.flush();
+        String response = new String(endp.getOut().asArray(),StringUtil.__UTF8);
+        assertTrue(response.startsWith("HTTP/1.1 200 OK\r\nContent-Length: 1025\r\n\r\n\u05531234567890"));
+                
+    }    
 }

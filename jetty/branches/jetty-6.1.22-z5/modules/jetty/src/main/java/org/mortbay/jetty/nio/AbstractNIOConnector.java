@@ -1,9 +1,25 @@
+//========================================================================
+//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 /**
  * 
  */
 package org.mortbay.jetty.nio;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.io.nio.DirectNIOBuffer;
+import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
 
@@ -50,9 +66,11 @@ public abstract class AbstractNIOConnector extends AbstractConnector implements 
         // 
         Buffer buf = null;
         if (size==getHeaderBufferSize())
-            buf= new NIOBuffer(size, NIOBuffer.INDIRECT);
+            buf= new IndirectNIOBuffer(size);
         else
-            buf = new NIOBuffer(size, _useDirectBuffers?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
+            buf = _useDirectBuffers
+                ?(NIOBuffer)new DirectNIOBuffer(size)
+                :(NIOBuffer)new IndirectNIOBuffer(size);
         return buf;
     }
     

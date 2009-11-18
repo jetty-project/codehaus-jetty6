@@ -14,6 +14,7 @@
 package org.mortbay.servlet;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,6 +40,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
@@ -64,6 +66,7 @@ public class MultiPartFilter implements Filter
     private File tempdir;
     private boolean _deleteFiles;
     private ServletContext _context;
+    private int _fileOutputBuffer = 0;
 
     /* ------------------------------------------------------------------------------- */
     /**
@@ -73,6 +76,9 @@ public class MultiPartFilter implements Filter
     {
         tempdir=(File)filterConfig.getServletContext().getAttribute("javax.servlet.context.tempdir");
         _deleteFiles="true".equals(filterConfig.getInitParameter("deleteFiles"));
+        String fileOutputBuffer = filterConfig.getInitParameter("fileOutputBuffer");
+        if(fileOutputBuffer!=null)
+            _fileOutputBuffer = Integer.parseInt(fileOutputBuffer);
         _context=filterConfig.getServletContext();
     }
 
@@ -98,7 +104,17 @@ public class MultiPartFilter implements Filter
         
         String boundary="--"+value(content_type.substring(content_type.indexOf("boundary=")));
         byte[] byteBoundary=(boundary+"--").getBytes(StringUtil.__ISO_8859_1);
+        
         MultiMap params = new MultiMap();
+        for (Iterator i = request.getParameterMap().entrySet().iterator();i.hasNext();)
+        {
+            Map.Entry entry=(Map.Entry)i.next();
+            Object value=entry.getValue();
+            if (value instanceof String[])
+                params.addValues(entry.getKey(),(String[])value);
+            else
+                params.add(entry.getKey(),value);
+        }
         
         try
         {
@@ -160,7 +176,13 @@ public class MultiPartFilter implements Filter
                 {
                     continue;
                 }
-                if(name==null||name.length()==0)
+                
+                //It is valid for reset and submit buttons to have an empty name.
+                //If no name is supplied, the browser skips sending the info for that field.
+                //However, if you supply the empty string as the name, the browser sends the
+                //field, with name as the empty string. So, only continue this loop if we
+                //have not yet seen a name field.
+                if(name==null)
                 {
                     continue;
                 }
@@ -173,8 +195,10 @@ public class MultiPartFilter implements Filter
                     {
                         file = File.createTempFile("MultiPart", "", tempdir);
                         out = new FileOutputStream(file);
+                        if(_fileOutputBuffer>0)
+                            out = new BufferedOutputStream(out, _fileOutputBuffer);
                         request.setAttribute(name,file);
-                        params.put(name, filename);
+                        params.add(name, filename);
                         
                         if (_deleteFiles)
                         {
@@ -359,6 +383,9 @@ public class MultiPartFilter implements Filter
         public String getParameter(String name)
         {
             Object o=map.get(name);
+            if (!(o instanceof byte[]) && LazyList.size(o)>0)
+                o=LazyList.get(o,0);
+            
             if (o instanceof byte[])
             {
                 try
@@ -371,8 +398,8 @@ public class MultiPartFilter implements Filter
                     e.printStackTrace();
                 }
             }
-            else if (o instanceof String)
-                return (String)o;
+            else if (o!=null)
+                return String.valueOf(o);
             return null;
         }
         
@@ -382,7 +409,7 @@ public class MultiPartFilter implements Filter
          */
         public Map getParameterMap()
         {
-            return map;
+            return Collections.unmodifiableMap(map.toStringArrayMap());
         }
         
         /* ------------------------------------------------------------------------------- */

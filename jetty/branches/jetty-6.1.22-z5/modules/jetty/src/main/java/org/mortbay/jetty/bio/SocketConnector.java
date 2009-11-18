@@ -71,6 +71,7 @@ public class SocketConnector extends AbstractConnector
         // Create a new server socket and set to non blocking mode
         if (_serverSocket==null || _serverSocket.isClosed())
         _serverSocket= newServerSocket(getHost(),getPort(),getAcceptQueueSize());
+        _serverSocket.setReuseAddress(getReuseAddress());
     }
 
     /* ------------------------------------------------------------ */
@@ -185,7 +186,7 @@ public class SocketConnector extends AbstractConnector
         
         public void dispatch() throws InterruptedException, IOException
         {
-            if (!getThreadPool().dispatch(this))
+            if (getThreadPool()==null || !getThreadPool().dispatch(this))
             {
                 Log.warn("dispatch failed for {}",_connection);
                 close();

@@ -15,9 +15,6 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,7 +39,7 @@ import org.mortbay.io.BufferDateCache;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.View;
-import org.mortbay.util.DateCache;
+import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringMap;
@@ -193,7 +190,7 @@ public class HttpFields
             __dateReceive[i].setTimeZone(__GMT);
         }
     }
-    public final static String __01Jan1970 = formatDate(0, false);
+    public final static String __01Jan1970 = formatDate(0, false).trim();
     public final static Buffer __01Jan1970_BUFFER = new ByteArrayBuffer(__01Jan1970);
 
     /* -------------------------------------------------------------- */
@@ -530,8 +527,9 @@ public class HttpFields
      * 
      * @param name the name of the field
      * @param value the value of the field. If null the field is cleared.
+     * @param numValue the numeric value of the field (must match value) or -1
      */
-    private void put(Buffer name, Buffer value, long numValue)
+    public void put(Buffer name, Buffer value, long numValue)
     {
         if (value == null)
         {
@@ -964,12 +962,10 @@ public class HttpFields
         String name_value_params = null;
         synchronized (buf)
         {
-            buf.append(name);
+            QuotedStringTokenizer.quoteIfNeeded(buf, name);
             buf.append('=');
             if (value != null && value.length() > 0)
-            {
-                URIUtil.encodePath(buf,value);
-            }
+                QuotedStringTokenizer.quoteIfNeeded(buf, value);
 
             if (version > 0)
             {
@@ -986,13 +982,16 @@ public class HttpFields
             if (path != null && path.length() > 0)
             {
                 buf.append(";Path=");
-                buf.append(URIUtil.encodePath(path));
+                if (path.startsWith("\""))
+                    buf.append(path);
+                else
+                    QuotedStringTokenizer.quoteIfNeeded(buf,path);
             }
             String domain = cookie.getDomain();
             if (domain != null && domain.length() > 0)
             {
                 buf.append(";Domain=");
-                buf.append(domain.toLowerCase());// lowercase for IE
+                QuotedStringTokenizer.quoteIfNeeded(buf,domain.toLowerCase());
             }
 
             long maxAge = cookie.getMaxAge();
@@ -1021,27 +1020,14 @@ public class HttpFields
             {
                 buf.append(";Secure");
             }
-            if (cookie instanceof HttpOnlyCookie) buf.append(";HttpOnly");
+            if (cookie instanceof HttpOnlyCookie)
+                buf.append(";HttpOnly");
 
             // TODO - straight to Buffer?
             name_value_params = buf.toString();
         }
         put(HttpHeaders.EXPIRES_BUFFER, __01Jan1970_BUFFER);
         add(HttpHeaders.SET_COOKIE_BUFFER, new ByteArrayBuffer(name_value_params));
-    }
-
-    /* -------------------------------------------------------------- */
-    public void write(Writer writer) throws IOException
-    {
-        synchronized (writer)
-        {
-            for (int i = 0; i < _fields.size(); i++)
-            {
-                Field field = (Field) _fields.get(i);
-                if (field != null && field._revision == _revision) field.write(writer);
-            }
-            writer.write(StringUtil.CRLF);
-        }
     }
 
     /* -------------------------------------------------------------- */
@@ -1060,9 +1046,24 @@ public class HttpFields
     {
         try
         {
-            ByteArrayBuffer buffer = new ByteArrayBuffer(4096);
-            put(buffer);
-            return BufferUtil.to8859_1_String(buffer);
+            StringBuffer buffer = new StringBuffer();
+          
+            for (int i = 0; i < _fields.size(); i++)
+            {
+                Field field = (Field) _fields.get(i);
+                if (field != null && field._revision == _revision)
+                {
+                    String tmp = field.getName();
+                    if (tmp != null) buffer.append(tmp);
+                    buffer.append(": ");
+                    tmp = field.getValue();
+                    if (tmp != null) buffer.append(tmp);
+                    buffer.append("\r\n");
+                }
+            } 
+            buffer.append("\r\n");
+            return buffer.toString();
+            
         }
         catch (Exception e)
         {
@@ -1102,8 +1103,8 @@ public class HttpFields
             {
                 Field field = (Field) _fields.get(i);
                 if (field != null) {
-                	_bufferMap.remove(field.getNameBuffer());
-                	field.destroy();
+                    _bufferMap.remove(field.getNameBuffer());
+                    field.destroy();
                 }
             }
         }
@@ -1373,23 +1374,58 @@ public class HttpFields
                 }
             }
         }
-
-        /* ------------------------------------------------------------ */
-        public void write(Writer writer) throws IOException
-        {
-            writer.write(BufferUtil.to8859_1_String(_name));
-            writer.write(":");
-            writer.write(BufferUtil.to8859_1_String(_value));
-            writer.write(StringUtil.CRLF);
-        }
+        
+        
 
         /* ------------------------------------------------------------ */
         public void put(Buffer buffer) throws IOException
         {
-            buffer.put(_name);
+            int o=(_name instanceof CachedBuffer)?((CachedBuffer)_name).getOrdinal():-1;
+            if (o>=0)
+                buffer.put(_name);
+            else
+            {
+                int s=_name.getIndex();
+                int e=_name.putIndex();
+                while (s<e)
+                {
+                    byte b=_name.peek(s++);
+                    switch(b)
+                    {
+                        case '\r':
+                        case '\n':
+                        case ':' :
+                            continue;
+                        default:
+                            buffer.put(b);
+                    }
+                }
+            }
+            
             buffer.put((byte) ':');
             buffer.put((byte) ' ');
-            buffer.put(_value);
+            
+            o=(_value instanceof CachedBuffer)?((CachedBuffer)_value).getOrdinal():-1;
+            if (o>=0 || _numValue>=0)
+                buffer.put(_value);
+            else
+            {
+                int s=_value.getIndex();
+                int e=_value.putIndex();
+                while (s<e)
+                {
+                    byte b=_value.peek(s++);
+                    switch(b)
+                    {
+                        case '\r':
+                        case '\n':
+                            continue;
+                        default:
+                            buffer.put(b);
+                    }
+                }
+            }
+
             BufferUtil.putCRLF(buffer);
         }
 

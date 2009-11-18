@@ -17,6 +17,8 @@ package org.mortbay.io;
 
 import junit.framework.TestCase;
 
+import org.mortbay.io.nio.DirectNIOBuffer;
+import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.util.StringUtil;
 
@@ -42,8 +44,8 @@ public class BufferTest extends TestCase
         super.setUp();
         buffer=new Buffer[]{
           new ByteArrayBuffer(10),
-          new NIOBuffer(10,false),
-          new NIOBuffer(10,true)
+          new IndirectNIOBuffer(10),
+          new DirectNIOBuffer(10)
         };
     }
 
@@ -96,7 +98,17 @@ public class BufferTest extends TestCase
             assertEquals(t,2,bg[1]);
             assertEquals(t,3,bg[2]);
             
+            //test getting 0 bytes returns 0
+            int count = b.get(bg,0,0);
+            assertEquals(t,0, count);
             
+            //read up to end
+            count = b.get(bg,0,2);
+            assertEquals(t, 2, count);
+            
+            //test reading past end returns -1
+            count = b.get(bg,0,1);
+            assertEquals(t, -1, count);
         }
     }
     
@@ -107,12 +119,43 @@ public class BufferTest extends TestCase
         {
                 new ByteArrayBuffer("Test1234 "),
                 new ByteArrayBuffer("tEST1234 "),
-                new NIOBuffer(4096,true),
+                new DirectNIOBuffer(4096),
         };
         b[2].put("TeSt1234 ".getBytes(StringUtil.__UTF8));
         
         for (int i=0;i<b.length;i++)
             assertEquals("t"+i,b[0].hashCode(),b[i].hashCode()); 
+    }
+    
+    public void testGet () 
+    throws Exception
+    {
+        Buffer buff = new ByteArrayBuffer(new byte[]{(byte)0,(byte)1,(byte)2,(byte)3,(byte)4,(byte)5});
+        
+        byte[] readbuff = new byte[2];
+        
+        int count = buff.get(readbuff, 0, 2);
+        assertEquals(2, count);
+        assertEquals(readbuff[0], (byte)0);
+        assertEquals(readbuff[1], (byte)1);
+        
+        count = buff.get(readbuff, 0, 2);
+        assertEquals(2, count);
+        assertEquals(readbuff[0], (byte)2);
+        assertEquals(readbuff[1], (byte)3);
+        
+        count = buff.get(readbuff, 0, 0);
+        assertEquals(0, count);
+        
+        readbuff[0]=(byte)9;
+        readbuff[1]=(byte)9;
+        
+        count = buff.get(readbuff, 0, 2);
+        assertEquals(2, count);
+        
+        count = buff.get(readbuff, 0, 2);
+        assertEquals(-1, count);
+        
     }
     
     public void testInsensitive()

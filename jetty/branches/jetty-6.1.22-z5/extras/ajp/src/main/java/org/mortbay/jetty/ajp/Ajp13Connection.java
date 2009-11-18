@@ -14,14 +14,21 @@
 
 package org.mortbay.jetty.ajp;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.Iterator;
 
 import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 
@@ -34,27 +41,27 @@ import org.mortbay.jetty.Server;
  */
 public class Ajp13Connection extends HttpConnection
 {
-    private boolean _sslSecure = false;
-
     public Ajp13Connection(Connector connector, EndPoint endPoint, Server server)
     {
-        super(connector, endPoint, server);
-        _request = new Ajp13Request(this);
-        _generator = new Ajp13Generator(_connector, _endp, _connector.getHeaderBufferSize(), _connector.getResponseBufferSize());
-        _parser = new Ajp13Parser(_connector, _endp, new RequestHandler(), (Ajp13Generator) _generator);
-        _generator.setSendServerVersion(server.getSendServerVersion());
-        _server = server;
-
+        super(connector, endPoint, server,
+                new Ajp13Parser(connector, endPoint),
+                new Ajp13Generator(connector, endPoint, connector.getHeaderBufferSize(), connector.getResponseBufferSize()),
+                new Ajp13Request()
+                );
+        
+        ((Ajp13Parser)_parser).setEventHandler(new RequestHandler());
+        ((Ajp13Parser)_parser).setGenerator((Ajp13Generator)_generator);
+        ((Ajp13Request)_request).setConnection(this);
     }
 
     public boolean isConfidential(Request request)
     {
-        return _sslSecure;
+        return ((Ajp13Request) request).isSslSecure();
     }
 
     public boolean isIntegral(Request request)
     {
-        return _sslSecure;
+        return ((Ajp13Request) request).isSslSecure();
     }
 
     public ServletInputStream getInputStream()
@@ -72,7 +79,7 @@ public class Ajp13Connection extends HttpConnection
         {
             _delayedHandling = false;
             _uri.clear();
-            _sslSecure = false;
+            ((Ajp13Request) _request).setSslSecure(false);
             _request.setTimeStamp(System.currentTimeMillis());
             _request.setUri(_uri);
             
@@ -100,7 +107,28 @@ public class Ajp13Connection extends HttpConnection
 
         public void parsedSslCert(Buffer sslCert) throws IOException
         {
-            _request.setAttribute("javax.servlet.request.X509Certificate", sslCert.toString());
+            try 
+            {
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                ByteArrayInputStream bis = new ByteArrayInputStream(sslCert.toString().getBytes());
+
+                Collection certCollection = cf.generateCertificates(bis);
+                X509Certificate[] certificates = new X509Certificate[certCollection.size()];
+
+                int i=0;
+                Iterator iter=certCollection.iterator();
+                while(iter.hasNext())
+                    certificates[i++] = (X509Certificate)iter.next();
+
+                _request.setAttribute("javax.servlet.request.X509Certificate", certificates);
+            } 
+            catch (Exception e) 
+            {
+                org.mortbay.log.Log.warn(e.toString());
+                org.mortbay.log.Log.ignore(e);
+                if (sslCert!=null)
+                    _request.setAttribute("javax.servlet.request.X509Certificate", sslCert.toString());
+            }
         }
 
         public void parsedSslCipher(Buffer sslCipher) throws IOException
@@ -112,9 +140,16 @@ public class Ajp13Connection extends HttpConnection
         {
             _request.setAttribute("javax.servlet.request.ssl_session", sslSession.toString());
         }
+        
+        public void parsedSslKeySize(int keySize) throws IOException
+        {
+           _request.setAttribute("javax.servlet.request.key_size", new Integer(keySize));
+        }
 
         public void parsedMethod(Buffer method) throws IOException
         {
+            if (method == null)
+                throw new HttpException(HttpServletResponse.SC_BAD_REQUEST);
             _request.setMethod(method.toString());
         }
 
@@ -162,7 +197,7 @@ public class Ajp13Connection extends HttpConnection
 
         public void parsedSslSecure(boolean secure) throws IOException
         {
-            _sslSecure = secure;
+            ((Ajp13Request) _request).setSslSecure(secure);
         }
 
         public void parsedQueryString(Buffer value) throws IOException

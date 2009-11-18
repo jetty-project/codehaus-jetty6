@@ -316,46 +316,104 @@ public class QuotedStringTokenizer
         synchronized(buf)
         {
             buf.append('"');
-            for (int i=0;i<s.length();i++)
+            char[] chars = null;
+            int i=0;
+            loop:
+            for (;i<s.length();i++)
             {
                 char c = s.charAt(i);
                 switch(c)
                 {
                     case '"':
+                        chars = s.toCharArray();
+                        buf.append(chars,0,i);
                         buf.append("\\\"");
-                        continue;
+                        break loop;
                     case '\\':
+                        chars = s.toCharArray();
+                        buf.append(chars,0,i);
                         buf.append("\\\\");
-                        continue;
+                        break loop;
                     case '\n':
+                        chars = s.toCharArray();
+                        buf.append(chars,0,i);
                         buf.append("\\n");
-                        continue;
+                        break loop;
                     case '\r':
+                        chars = s.toCharArray();
+                        buf.append(chars,0,i);
                         buf.append("\\r");
-                        continue;
+                        break loop;
                     case '\t':
+                        chars = s.toCharArray();
+                        buf.append(chars,0,i);
                         buf.append("\\t");
-                        continue;
+                        break loop;
                     case '\f':
+                        chars = s.toCharArray();
+                        buf.append(chars,0,i);
                         buf.append("\\f");
-                        continue;
+                        break loop;
                     case '\b':
+                        chars = s.toCharArray();
+                        buf.append(chars,0,i);
                         buf.append("\\b");
-                        continue;
+                        break loop;
                         
                     default:
-                        buf.append(c);
                         continue;
                 }
             }
+            if (chars==null)
+                buf.append(s);
+            else
+            {
+                i++;
+                for (;i<s.length();i++)
+                {
+                    char c = s.charAt(i);
+                    switch(c)
+                    {
+                        case '"':
+                            buf.append("\\\"");
+                            continue;
+                        case '\\':
+                            buf.append("\\\\");
+                            continue;
+                        case '\n':
+                            buf.append("\\n");
+                            continue;
+                        case '\r':
+                            buf.append("\\r");
+                            continue;
+                        case '\t':
+                            buf.append("\\t");
+                            continue;
+                        case '\f':
+                            buf.append("\\f");
+                            continue;
+                        case '\b':
+                            buf.append("\\b");
+                            continue;
+
+                        default:
+                            buf.append(c);
+                        continue;
+                    }
+                }
+            }
+            
             buf.append('"');
-        } 
+        }     
     }
 
     
     /* ------------------------------------------------------------ */
     /** Quote a string into a StringBuffer.
-     * The characters ", \, \n, \r, \t, \f and \b are escaped
+     * The characters ", \, \n, \r, \t, \f, \b are escaped.
+     * Quotes are forced if any escaped characters are present or there
+     * is a ", ', space, +, =, ; or % character.
+     * 
      * @param buf The StringBuffer
      * @param s The String to quote.
      */
@@ -377,7 +435,11 @@ public class QuotedStringTokenizer
                     case '\t':
                     case '\f':
                     case '\b':
+                    case '%':
+                    case '+':
                     case ' ':
+                    case ';':
+                    case '=':
                         e=i;
                         buf.append('"');
                         // TODO when 1.4 support is dropped: buf.append(s,0,e);

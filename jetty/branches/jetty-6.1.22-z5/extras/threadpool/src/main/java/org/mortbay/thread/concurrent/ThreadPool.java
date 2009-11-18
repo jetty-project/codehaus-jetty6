@@ -184,5 +184,16 @@ public class ThreadPool extends ThreadPoolExecutor implements org.mortbay.thread
         if (!super.awaitTermination(60,TimeUnit.SECONDS))
             super.shutdownNow();
     }
+
+    /* ------------------------------------------------------------ */
+    public void addLifeCycleListener(LifeCycle.Listener listener)
+    {
+        throw new UnsupportedOperationException();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void removeLifeCycleListener(LifeCycle.Listener listener)
+    {
+    }
     
 }

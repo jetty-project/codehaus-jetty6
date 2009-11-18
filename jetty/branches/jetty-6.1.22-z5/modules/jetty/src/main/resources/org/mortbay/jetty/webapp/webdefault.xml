@@ -69,6 +69,10 @@
   <!--   dirAllowed       If true, directory listings are returned if no    -->
   <!--                    welcome file is found. Else 403 Forbidden.        -->
   <!--                                                                      -->
+  <!--   welcomeServlets  If true, attempt to dispatch to welcome files     -->
+  <!--                    that are servlets, if no matching static          --> 
+  <!--                    resources can be found.                           -->
+  <!--                                                                      -->
   <!--   redirectWelcome  If true, redirect welcome file requests           -->
   <!--                    else use request dispatcher forwards              -->
   <!--                                                                      -->
@@ -118,16 +122,20 @@
       <param-value>true</param-value>
     </init-param>
     <init-param>
+      <param-name>welcomeServlets</param-name>
+      <param-value>false</param-value>
+    </init-param>
+    <init-param>
       <param-name>redirectWelcome</param-name>
       <param-value>false</param-value>
     </init-param>
     <init-param>
       <param-name>maxCacheSize</param-name>
-      <param-value>4000000</param-value>
+      <param-value>256000000</param-value>
     </init-param>
     <init-param>
       <param-name>maxCachedFileSize</param-name>
-      <param-value>254000</param-value>
+      <param-value>10000000</param-value>
     </init-param>
     <init-param>
       <param-name>maxCachedFiles</param-name>

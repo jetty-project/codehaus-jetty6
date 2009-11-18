@@ -51,7 +51,9 @@ public class FileResource extends URLResource
             (System.getProperty("org.mortbay.util.FileResource.checkAliases","true"));
  
        if (__checkAliases)
-            Log.debug("Checking Resource aliases");
+           Log.debug("Checking Resource aliases");
+       else
+           Log.warn("Resource alias checking is disabled");
     }
     
     /* ------------------------------------------------------------ */
