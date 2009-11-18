@@ -110,35 +110,19 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
         super(name);
         setConfig(config);
         Loader.loadClass(this.getClass(),_jdbcDriver).newInstance();
-        connectDatabase();
-    }
-    
-    public String getName()
-    {
-        return super.getName();
-    }
-    
-    public void setName(String name)
-    {
-        super.setName(name);
-    }
-    public String getConfig()
-    {
-        return super.getConfig();    
-    }
+    }    
+
     /* ------------------------------------------------------------ */
     /** Load JDBC connection configuration from properties file.
-     *
-     * @param config Filename or url of user properties file.
+     *     
      * @exception IOException 
      */
-    public void setConfig(String config)
+    protected void loadConfig()
         throws IOException
-    {
-        super.setConfig(config);
+    {        
         Properties properties = new Properties();
-        Resource resource=Resource.newResource(config);
-        properties.load(resource.getInputStream());
+        
+        properties.load(getConfigResource().getInputStream());
         
         _jdbcDriver = properties.getProperty("jdbcdriver");
         _url = properties.getProperty("url");
@@ -154,7 +138,9 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
         _userRoleTable = properties.getProperty("userroletable");
         _userRoleTableUserKey = properties.getProperty("userroletableuserkey");
         _userRoleTableRoleKey = properties.getProperty("userroletablerolekey");
-        _cacheTime = new Integer(properties.getProperty("cachetime")).intValue();
+        // default cachetime = 30s
+        String cachetime = properties.getProperty("cachetime");
+        _cacheTime = cachetime!=null ? new Integer(cachetime).intValue() : 30;
         
         if (_jdbcDriver == null || _jdbcDriver.equals("")
             || _url == null || _url.equals("")
@@ -218,6 +204,7 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
                 _users.clear();
                 _roles.clear();
                 _lastHashPurge = now;
+                closeConnection(); //force a fresh connection
             }
             Principal user = super.getPrincipal(username);
             if (user == null)
@@ -229,7 +216,18 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
         return super.authenticate(username, credentials, request);
     }
     
-    
+    /* ------------------------------------------------------------ */
+    /** Check if a user is in a role.
+     * @param user The user, which must be from this realm 
+     * @param roleName 
+     * @return True if the user can act in the role.
+     */
+    public synchronized boolean isUserInRole(Principal user, String roleName)
+    {
+        if(super.getPrincipal(user.getName())==null)
+            loadUser(user.getName());
+        return super.isUserInRole(user, roleName);
+    }
     
 
 
@@ -269,7 +267,20 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
         {
             Log.warn("UserRealm " + getName()
                       + " could not load user information from database", e);
-            connectDatabase();
+           closeConnection();
         }
+    }
+    
+    /**
+     * Close an existing connection
+     */
+    private void closeConnection ()
+    {
+        if (_con != null)
+        {
+            if (Log.isDebugEnabled()) Log.debug("Closing db connection for JDBCUserRealm");
+            try { _con.close(); }catch (Exception e) {Log.ignore(e);}
+        }
+        _con = null;
     }
 }

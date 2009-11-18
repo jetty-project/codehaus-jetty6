@@ -1,8 +1,23 @@
+//========================================================================
+//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 package org.mortbay.jetty.security;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -19,7 +34,6 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
@@ -30,6 +44,8 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.bio.SocketEndPoint;
+import org.mortbay.io.nio.DirectNIOBuffer;
+import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
@@ -99,6 +115,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     private int _applicationBufferSize;
     private ConcurrentLinkedQueue<Buffer> _packetBuffers = new ConcurrentLinkedQueue<Buffer>();
     private ConcurrentLinkedQueue<Buffer> _applicationBuffers = new ConcurrentLinkedQueue<Buffer>();
+    private boolean _allowRenegotiate=false;
     
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
@@ -111,13 +128,15 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         {   
             buffer = _applicationBuffers.poll();
             if (buffer==null)
-                buffer=new NIOBuffer(size,false); 
+                buffer=new IndirectNIOBuffer(size); 
         }
         else if (size==_packetBufferSize)
         {   
             buffer = _packetBuffers.poll();
             if (buffer==null)
-                buffer=new NIOBuffer(size,getUseDirectBuffers()); 
+                buffer=getUseDirectBuffers()
+                    ?(NIOBuffer)new DirectNIOBuffer(size)
+                    :(NIOBuffer)new IndirectNIOBuffer(size);
         }
         else 
             buffer=super.getBuffer(size);
@@ -132,11 +151,6 @@ public class SslSelectChannelConnector extends SelectChannelConnector
      */
     public void returnBuffer(Buffer buffer)
     {
-        if (_loss++>BUFFER_LOSS_RATE)
-        {
-            _loss=0;
-            return;
-        }
         buffer.clear();
         int size=buffer.capacity();
         ByteBuffer bbuf = ((NIOBuffer)buffer).getByteBuffer();
@@ -147,6 +161,8 @@ public class SslSelectChannelConnector extends SelectChannelConnector
             _applicationBuffers.add(buffer);
         else if (size==_packetBufferSize)
             _packetBuffers.add(buffer);
+        else 
+            super.returnBuffer(buffer);
     }
     
     
@@ -186,8 +202,9 @@ public class SslSelectChannelConnector extends SelectChannelConnector
 
             return javaCerts;
         }
-        catch (SSLPeerUnverifiedException pue)
+        catch (SSLPeerUnverifiedException e)
         {
+            Log.ignore(e);
             return null;
         }
         catch (Exception e)
@@ -272,6 +289,28 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @return True if SSL re-negotiation is allowed (default false)
+     */
+    public boolean isAllowRenegotiate()
+    {
+        return _allowRenegotiate;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set if SSL re-negotiation is allowed. CVE-2009-3555 discovered
+     * a vulnerability in SSL/TLS with re-negotiation.  If your JVM
+     * does not have CVE-2009-3555 fixed, then re-negotiation should 
+     * not be allowed.
+     * @param allowRenegotiate true if re-negotiation is allowed (default false)
+     */
+    public void setAllowRenegotiate(boolean allowRenegotiate)
+    {
+        _allowRenegotiate = allowRenegotiate;
+    }
+    
     /**
      * 
      * @deprecated As of Java Servlet API 2.0, with no replacement.
@@ -500,7 +539,9 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     /* ------------------------------------------------------------------------------- */
     protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
     {
-        return new SslHttpChannelEndPoint(this,channel,selectSet,key,createSSLEngine());
+        SslHttpChannelEndPoint endp = new SslHttpChannelEndPoint(this,channel,selectSet,key,createSSLEngine());
+        endp.setAllowRenegotiate(_allowRenegotiate);
+        return endp;
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -518,6 +559,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         try
         {
             engine=_context.createSSLEngine();
+            engine.setUseClientMode(false);
             
             if (_wantClientAuth)
                 engine.setWantClientAuth(_wantClientAuth);
@@ -541,7 +583,6 @@ public class SslSelectChannelConnector extends SelectChannelConnector
 
                 engine.setEnabledCipherSuites(enabledCipherSuites);
             }
-
         }
         catch (Exception e)
         {
@@ -551,62 +592,73 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         }
         return engine;
     }
-
    
     protected void doStart() throws Exception
     {
         _context=createSSLContext();
-        
-        SSLEngine engine=createSSLEngine();
-        SSLSession ssl_session=engine.getSession();
-        
-        setHeaderBufferSize(ssl_session.getApplicationBufferSize());
-        setRequestBufferSize(ssl_session.getApplicationBufferSize());
-        setResponseBufferSize(ssl_session.getApplicationBufferSize());
-        
+        SSLEngine engine=_context.createSSLEngine();
+        SSLSession session=engine.getSession();
+        if (getHeaderBufferSize()<session.getApplicationBufferSize())
+            setHeaderBufferSize(session.getApplicationBufferSize());
+        if (getRequestBufferSize()<session.getApplicationBufferSize())
+            setRequestBufferSize(session.getApplicationBufferSize());
         super.doStart();
     }
 
     protected SSLContext createSSLContext() throws Exception
     {
-        if (_password==null)
-            _password=new Password("");
-        if (_keyPassword==null)
-            _keyPassword=_password;
-        if (_trustPassword==null)
-            _trustPassword=_password;
-
         if (_truststore==null)
         {
             _truststore=_keystore;
             _truststoreType=_keystoreType;
         }
 
-        KeyManager[] keyManagers=null;
-        if (_keystore!=null)
-        {
-            KeyStore keyStore=KeyStore.getInstance(_keystoreType);
-            if (_password==null)
-                throw new SSLException("_password is not set");
-            keyStore.load(Resource.newResource(_keystore).getInputStream(),_password.toString().toCharArray());
+        InputStream keystoreInputStream = null;
 
-            KeyManagerFactory keyManagerFactory=KeyManagerFactory.getInstance(_sslKeyManagerFactoryAlgorithm);
-            if (_keyPassword==null)
-                throw new SSLException("_keypassword is not set");
-            keyManagerFactory.init(keyStore,_keyPassword.toString().toCharArray());
-            keyManagers=keyManagerFactory.getKeyManagers();
+        KeyManager[] keyManagers=null;
+        KeyStore keyStore = null;
+        try
+        {
+            if (_keystore!=null)
+            {
+                keystoreInputStream=Resource.newResource(_keystore).getInputStream();
+                keyStore = KeyStore.getInstance(_keystoreType);
+                keyStore.load(keystoreInputStream,_password==null?null:_password.toString().toCharArray());
+            }
         }
+        finally
+        {
+            if (keystoreInputStream != null)
+                keystoreInputStream.close();
+        }
+
+        KeyManagerFactory keyManagerFactory=KeyManagerFactory.getInstance(_sslKeyManagerFactoryAlgorithm);
+        keyManagerFactory.init(keyStore,_keyPassword==null?(_password==null?null:_password.toString().toCharArray()):_keyPassword.toString().toCharArray());
+        keyManagers=keyManagerFactory.getKeyManagers();
+
 
         TrustManager[] trustManagers=null;
-        if (_truststore!=null)
+        InputStream truststoreInputStream = null;
+        KeyStore trustStore = null;
+        try
         {
-            KeyStore trustStore=KeyStore.getInstance(_truststoreType);
-            trustStore.load(Resource.newResource(_truststore).getInputStream(),_trustPassword.toString().toCharArray());
-
-            TrustManagerFactory trustManagerFactory=TrustManagerFactory.getInstance(_sslTrustManagerFactoryAlgorithm);
-            trustManagerFactory.init(trustStore);
-            trustManagers=trustManagerFactory.getTrustManagers();
+            if (_truststore!=null)
+            {
+                truststoreInputStream = Resource.newResource(_truststore).getInputStream();
+                trustStore=KeyStore.getInstance(_truststoreType);
+                trustStore.load(truststoreInputStream,_trustPassword==null?null:_trustPassword.toString().toCharArray());
+            }
         }
+        finally
+        {
+            if (truststoreInputStream != null)
+                truststoreInputStream.close();
+        }
+
+
+        TrustManagerFactory trustManagerFactory=TrustManagerFactory.getInstance(_sslTrustManagerFactoryAlgorithm);
+        trustManagerFactory.init(trustStore);
+        trustManagers=trustManagerFactory.getTrustManagers();
 
         SecureRandom secureRandom=_secureRandomAlgorithm==null?null:SecureRandom.getInstance(_secureRandomAlgorithm);
         SSLContext context=_provider==null?SSLContext.getInstance(_protocol):SSLContext.getInstance(_protocol,_provider);

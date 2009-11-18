@@ -36,11 +36,11 @@ public abstract class AbstractBuffer implements Buffer
     protected int _get;
     protected int _put;
     protected int _hash;
-    private int _hashGet;
-    private int _hashPut;
-    private int _mark;
+    protected int _hashGet;
+    protected int _hashPut;
+    protected int _mark;
     protected String _string;
-    private View _view;
+    protected View _view;
 
     /**
      * Constructor for BufferView
@@ -171,10 +171,12 @@ public abstract class AbstractBuffer implements Buffer
         }
 
         // Nothing for it but to do the hard grind.
-        for (int i = length(); i-- > 0;)
+        int get=getIndex();
+        int bi=b.putIndex();
+        for (int i = putIndex(); i-->get;)
         {
-            byte b1 = peek(getIndex() + i);
-            byte b2 = b.peek(b.getIndex() + i);
+            byte b1 = peek(i);
+            byte b2 = b.peek(--bi);
             if (b1 != b2) return false;
         }
         return true;
@@ -196,15 +198,37 @@ public abstract class AbstractBuffer implements Buffer
         }
 
         // Nothing for it but to do the hard grind.
-        for (int i = length(); i-- > 0;)
+        int get=getIndex();
+        int bi=b.putIndex();
+        
+        byte[] array = array();
+        byte[] barray= b.array();
+        if (array!=null && barray!=null)
         {
-            byte b1 = peek(getIndex() + i);
-            byte b2 = b.peek(b.getIndex() + i);
-            if (b1 != b2)
+            for (int i = putIndex(); i-->get;)
             {
-                if ('a' <= b1 && b1 <= 'z') b1 = (byte) (b1 - 'a' + 'A');
-                if ('a' <= b2 && b2 <= 'z') b2 = (byte) (b2 - 'a' + 'A');
-                if (b1 != b2) return false;
+                byte b1 = array[i];
+                byte b2 = barray[--bi];
+                if (b1 != b2)
+                {
+                    if ('a' <= b1 && b1 <= 'z') b1 = (byte) (b1 - 'a' + 'A');
+                    if ('a' <= b2 && b2 <= 'z') b2 = (byte) (b2 - 'a' + 'A');
+                    if (b1 != b2) return false;
+                }
+            }
+        }
+        else
+        {
+            for (int i = putIndex(); i-->get;)
+            {
+                byte b1 = peek(i);
+                byte b2 = b.peek(--bi);
+                if (b1 != b2)
+                {
+                    if ('a' <= b1 && b1 <= 'z') b1 = (byte) (b1 - 'a' + 'A');
+                    if ('a' <= b2 && b2 <= 'z') b2 = (byte) (b2 - 'a' + 'A');
+                    if (b1 != b2) return false;
+                }
             }
         }
         return true;
@@ -219,10 +243,15 @@ public abstract class AbstractBuffer implements Buffer
     {
         int gi = getIndex();
         int l=length();
+        if (l==0)
+            return -1;
+        
         if (length>l)
             length=l;
+        
         length = peek(gi, b, offset, length);
-        setGetIndex(gi + length);
+        if (length>0)
+            setGetIndex(gi + length);
         return length;
     }
 
@@ -248,15 +277,33 @@ public abstract class AbstractBuffer implements Buffer
     {
         if (_hash == 0 || _hashGet!=_get || _hashPut!=_put) 
         {
-            for (int i = putIndex(); i-- > getIndex();)
+            int get=getIndex();
+            byte[] array = array();
+            if (array==null)
             {
-                byte b = peek(i);
-                if ('a' <= b && b <= 'z') b = (byte) (b - 'a' + 'A');
-                _hash = 31 * _hash + b;
+                for (int i = putIndex(); i-- >get;)
+                {
+                    byte b = peek(i);
+                    if ('a' <= b && b <= 'z') 
+                        b = (byte) (b - 'a' + 'A');
+                    _hash = 31 * _hash + b;
+                }
             }
-            if (_hash == 0) _hash = -1;
+            else
+            {
+                for (int i = putIndex(); i-- >get;)
+                {
+                    byte b = array[i];
+                    if ('a' <= b && b <= 'z') 
+                        b = (byte) (b - 'a' + 'A');
+                    _hash = 31 * _hash + b;
+                }
+            }
+            if (_hash == 0) 
+                _hash = -1;
             _hashGet=_get;
             _hashPut=_put;
+            
         }
         return _hash;
     }
@@ -322,15 +369,21 @@ public abstract class AbstractBuffer implements Buffer
     public int poke(int index, Buffer src)
     {
         _hash=0;
-        if (isReadOnly()) throw new IllegalStateException(__READONLY);
-        if (index < 0) throw new IllegalArgumentException("index<0: " + index + "<0");
+        /* 
+        if (isReadOnly()) 
+            throw new IllegalStateException(__READONLY);
+        if (index < 0) 
+            throw new IllegalArgumentException("index<0: " + index + "<0");
+        */
         
         int length=src.length();
         if (index + length > capacity())
         {
             length=capacity()-index;
+            /*
             if (length<0)
                 throw new IllegalArgumentException("index>capacity(): " + index + ">" + capacity());
+            */
         }
         
         byte[] src_array = src.array();
@@ -363,14 +416,18 @@ public abstract class AbstractBuffer implements Buffer
     public int poke(int index, byte[] b, int offset, int length)
     {
         _hash=0;
-        if (isReadOnly()) throw new IllegalStateException(__READONLY);
-        if (index < 0) throw new IllegalArgumentException("index<0: " + index + "<0");
-
+        /*
+        if (isReadOnly()) 
+            throw new IllegalStateException(__READONLY);
+        if (index < 0) 
+            throw new IllegalArgumentException("index<0: " + index + "<0");
+        */
         if (index + length > capacity())
         {
             length=capacity()-index;
-            if (length<0)
+            /* if (length<0)
                 throw new IllegalArgumentException("index>capacity(): " + index + ">" + capacity());
+            */
         }
         
         byte[] dst_array = array();
@@ -432,13 +489,15 @@ public abstract class AbstractBuffer implements Buffer
         setMarkIndex(-1);
     }
 
-
     public void setGetIndex(int getIndex)
     {
         /* bounds checking
-        if (isImmutable()) new throw IllegalStateException(__IMMUTABLE);
-        if (getIndex < 0) throw new IllegalArgumentException("getIndex<0: " + getIndex + "<0");
-        if (getIndex > putIndex()) throw new IllegalArgumentException("getIndex>putIndex: " + getIndex + ">" + putIndex());
+        if (isImmutable()) 
+            throw new IllegalStateException(__IMMUTABLE);
+        if (getIndex < 0)
+            throw new IllegalArgumentException("getIndex<0: " + getIndex + "<0");
+        if (getIndex > putIndex())
+            throw new IllegalArgumentException("getIndex>putIndex: " + getIndex + ">" + putIndex());
          */
         _get = getIndex;
         _hash=0;
@@ -446,14 +505,18 @@ public abstract class AbstractBuffer implements Buffer
 
     public void setMarkIndex(int index)
     {
-        if (index>=0 && isImmutable()) throw new IllegalStateException(__IMMUTABLE);
+        /*
+        if (index>=0 && isImmutable()) 
+            throw new IllegalStateException(__IMMUTABLE);
+        */
         _mark = index;
     }
 
     public void setPutIndex(int putIndex)
     {
         /* bounds checking
-        if (isImmutable()) new throw IllegalStateException(__IMMUTABLE);
+        if (isImmutable()) 
+            throw new IllegalStateException(__IMMUTABLE);
         if (putIndex > capacity())
                 throw new IllegalArgumentException("putIndex>capacity: " + putIndex + ">" + capacity());
         if (getIndex() > putIndex)
@@ -490,7 +553,7 @@ public abstract class AbstractBuffer implements Buffer
 
     public int space()
     {
-        return capacity() - putIndex();
+        return capacity() - _put;
     }
 
     public String toDetailString()
@@ -570,7 +633,7 @@ public abstract class AbstractBuffer implements Buffer
     public void writeTo(OutputStream out)
     	throws IOException
     {
-        byte array[] = array();
+        byte[] array = array();
         
         if (array!=null)
         {
@@ -578,11 +641,16 @@ public abstract class AbstractBuffer implements Buffer
         }
         else
         {
-            // System.err.println(this.getClass()+" OUCH!!!! Abstract writeTo: ? "+getIndex()+"-"+putIndex());
-            
-            // TODO perhaps in buffer?
-            for (int i=_get;i<_put;i++)
-                out.write(peek(i));
+            int len = this.length();
+            byte[] buf=new byte[len>1024?1024:len];
+            int offset=_get;
+            while (len>0)
+            {
+                int l=peek(offset,buf,0,len>buf.length?buf.length:len);
+                out.write(buf,0,l);
+                offset+=l;
+                len-=l;
+            }
         } 
         clear();
     }
@@ -590,17 +658,32 @@ public abstract class AbstractBuffer implements Buffer
     /* ------------------------------------------------------------ */
     public int readFrom(InputStream in,int max) throws IOException
     {
-        // System.err.println(this.getClass()+" OUCH!!!! Abstract readFrom "+max+" "+getIndex()+"-"+putIndex());
-        int len=0;
-        while (space()>0)
+        byte[] array = array();
+        int s=space();
+        if (s>max)
+            s=max;
+
+        if (array!=null)
         {
-            // TODO perhaps buffer
-            int b = in.read();
-            if (b<0)
-                return -1;
-            put((byte)b);
-            len++;
+            int l=in.read(array,_put,s);
+            if (l>0)
+                _put+=l;
+            return l;
         }
-        return len;
+        else
+        {
+            byte[] buf=new byte[s>1024?1024:s];
+            int total=0;
+            while (s>0)
+            {
+                int l=in.read(buf,0,buf.length);
+                if (l<0)
+                    return total>0?total:-1;
+                int p=put(buf,0,l);
+                assert l==p;
+                s-=l;
+            }
+            return total; 
+        }
     }
 }

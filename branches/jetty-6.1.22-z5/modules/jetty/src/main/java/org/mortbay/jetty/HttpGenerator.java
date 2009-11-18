@@ -103,10 +103,7 @@ public class HttpGenerator extends AbstractGenerator
     public void addContent(Buffer content, boolean last) throws IOException
     {
         if (_noContent)
-        {
-            content.clear();
-            return;
-        }
+            throw new IllegalStateException("NO CONTENT");
 
         if (_last || _state==STATE_END) 
         {
@@ -154,7 +151,29 @@ public class HttpGenerator extends AbstractGenerator
                 _content = null;
         }
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * send complete response.
+     * 
+     * @param response
+     */
+    public void sendResponse(Buffer response) throws IOException
+    {
+        if (_noContent || _state!=STATE_HEADER || _content!=null && _content.length()>0 || _bufferChunked || _head )
+            throw new IllegalStateException();
+
+        _last = true;
+
+        _content = response;
+        _bypass = true;
+        _state = STATE_FLUSHING;
+
+        // TODO this is not exactly right, but should do.
+        _contentLength =_contentWritten = response.length();
+        
+    }
+
     /* ------------------------------------------------------------ */
     /**
      * Add content.
@@ -166,7 +185,7 @@ public class HttpGenerator extends AbstractGenerator
     public boolean addContent(byte b) throws IOException
     {
         if (_noContent)
-            return false;
+            throw new IllegalStateException("NO CONTENT");
         
         if (_last || _state==STATE_END) 
         {
@@ -404,6 +423,8 @@ public class HttpGenerator extends AbstractGenerator
                         break;
 
                     case HttpHeaders.CONNECTION_ORDINAL:
+                        if (_method!=null)
+                            field.put(_header);
                         
                         int connection_value = field.getValueOrdinal();
                         switch (connection_value)
@@ -424,7 +445,7 @@ public class HttpGenerator extends AbstractGenerator
                                                 if (_method==null)
                                                     _close=true;
                                                 keep_alive=false;
-                                                if (_close && _contentLength == HttpTokens.UNKNOWN_CONTENT) 
+                                                if (_close && _method==null && _contentLength == HttpTokens.UNKNOWN_CONTENT) 
                                                     _contentLength = HttpTokens.EOF_CONTENT;
                                                 break;
 
@@ -462,7 +483,7 @@ public class HttpGenerator extends AbstractGenerator
                                 close=true;
                                 if (_method==null)
                                     _close=true;
-                                if (_close && _contentLength == HttpTokens.UNKNOWN_CONTENT) 
+                                if (_close && _method==null && _contentLength == HttpTokens.UNKNOWN_CONTENT) 
                                     _contentLength = HttpTokens.EOF_CONTENT;
                                 break;
                             }
@@ -520,7 +541,7 @@ public class HttpGenerator extends AbstractGenerator
                 // written yet?
 
                 // Response known not to have a body
-                if (_contentWritten == 0 && (_status < 200 || _status == 204 || _status == 304))
+                if (_contentWritten == 0 && _method==null && (_status < 200 || _status == 204 || _status == 304))
                     _contentLength = HttpTokens.NO_CONTENT;
                 else if (_last)
                 {
@@ -541,12 +562,16 @@ public class HttpGenerator extends AbstractGenerator
                     // No idea, so we must assume that a body is coming
                     _contentLength = (_close || _version < HttpVersions.HTTP_1_1_ORDINAL ) ? HttpTokens.EOF_CONTENT : HttpTokens.CHUNKED_CONTENT;
                     if (_method!=null && _contentLength==HttpTokens.EOF_CONTENT)
-                        throw new IllegalStateException("No Content-Length");
+                    {
+                        _contentLength=HttpTokens.NO_CONTENT;
+                        _noContent=true;
+                    }
                 }
                 break;
 
             case HttpTokens.NO_CONTENT:
-                if (content_length == null && _status >= 200 && _status != 204 && _status != 304) _header.put(CONTENT_LENGTH_0);
+                if (content_length == null && _method==null && _status >= 200 && _status != 204 && _status != 304) 
+                    _header.put(CONTENT_LENGTH_0);
                 break;
 
             case HttpTokens.EOF_CONTENT:
@@ -583,34 +608,37 @@ public class HttpGenerator extends AbstractGenerator
             keep_alive=false;
             _close=true;
         }
-                
-        if (_close && (close || _version > HttpVersions.HTTP_1_0_ORDINAL))
+               
+        if (_method==null)
         {
-            _header.put(CONNECTION_CLOSE);
-            if (connection!=null)
+            if (_close && (close || _version > HttpVersions.HTTP_1_0_ORDINAL))
             {
-                _header.setPutIndex(_header.putIndex()-2);
-                _header.put((byte)',');
+                _header.put(CONNECTION_CLOSE);
+                if (connection!=null)
+                {
+                    _header.setPutIndex(_header.putIndex()-2);
+                    _header.put((byte)',');
+                    _header.put(connection.toString().getBytes());
+                    _header.put(CRLF);
+                }
+            }
+            else if (keep_alive)
+            {
+                _header.put(CONNECTION_KEEP_ALIVE);
+                if (connection!=null)
+                {
+                    _header.setPutIndex(_header.putIndex()-2);
+                    _header.put((byte)',');
+                    _header.put(connection.toString().getBytes());
+                    _header.put(CRLF);
+                }
+            }
+            else if (connection!=null)
+            {
+                _header.put(CONNECTION_);
                 _header.put(connection.toString().getBytes());
                 _header.put(CRLF);
             }
-        }
-        else if (keep_alive)
-        {
-            _header.put(CONNECTION_KEEP_ALIVE);
-            if (connection!=null)
-            {
-                _header.setPutIndex(_header.putIndex()-2);
-                _header.put((byte)',');
-                _header.put(connection.toString().getBytes());
-                _header.put(CRLF);
-            }
-        }
-        else if (connection!=null)
-        {
-            _header.put(CONNECTION_);
-            _header.put(connection.toString().getBytes());
-            _header.put(CRLF);
         }
         
         if (!has_server && _status>100 && getSendServerVersion())
@@ -741,15 +769,14 @@ public class HttpGenerator extends AbstractGenerator
                     }
                 }
                 
-                // If we failed to flush anything twice in a row break
-                if (len <= 0)
-                {
-                    if (last_len <= 0) 
-                        break Flushing;
-                    break;
-                }
+                
+                // break If we failed to flush
+                if (len > 0)
+                    total+=len;
+                else 
+                    break Flushing;
+          
                 last_len = len;
-                total+=len;
             }
             
             return total;
@@ -867,5 +894,25 @@ public class HttpGenerator extends AbstractGenerator
 
     }
 
+    public int getBytesBuffered()
+    {
+        return(_header==null?0:_header.length())+
+        (_buffer==null?0:_buffer.length())+
+        (_content==null?0:_content.length());
+    }
 
+    public boolean isEmpty()
+    {
+        return (_header==null||_header.length()==0) &&
+        (_buffer==null||_buffer.length()==0) &&
+        (_content==null||_content.length()==0);
+    }
+    
+    public String toString()
+    {
+        return "HttpGenerator s="+_state+
+        " h="+(_header==null?"null":(""+_header.length()))+
+        " b="+(_buffer==null?"null":(""+_buffer.length()))+
+        " c="+(_content==null?"null":(""+_content.length()));
+    }
 }

@@ -16,12 +16,13 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.net.UnknownHostException;
 
-import org.mortbay.component.AbstractLifeCycle;
+import javax.servlet.ServletRequest;
+
 import org.mortbay.component.LifeCycle;
-import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.thread.ThreadPool;
@@ -30,12 +31,13 @@ import org.mortbay.util.ajax.WaitingContinuation;
 
 
 /** Abstract Connector implementation.
- * This abstract implemenation of the Connector interface provides:<ul>
+ * This abstract implementation of the Connector interface provides:<ul>
  * <li>AbstractLifeCycle implementation</li>
  * <li>Implementations for connector getters and setters</li>
  * <li>Buffer management</li>
  * <li>Socket configuration</li>
  * <li>Base acceptor thread</li>
+ * <li>Optional reverse proxy headers checking</li>
  * </ul>
  * 
  * @author gregw
@@ -45,6 +47,7 @@ import org.mortbay.util.ajax.WaitingContinuation;
 public abstract class AbstractConnector extends AbstractBuffers implements Connector
 {
     private String _name;
+    
     private Server _server;
     private ThreadPool _threadPool;
     private String _host;
@@ -57,6 +60,12 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     private int _acceptors=1;
     private int _acceptorPriorityOffset=0;
     private boolean _useDNS;
+    private boolean _forwarded;
+    private String _hostHeader;
+    private String _forwardedHostHeader = "X-Forwarded-Host";             // default to mod_proxy_http header
+    private String _forwardedServerHeader = "X-Forwarded-Server";         // default to mod_proxy_http header
+    private String _forwardedForHeader = "X-Forwarded-For";               // default to mod_proxy_http header
+    private boolean _reuseAddress=true;
     
     protected int _maxIdleTime=200000; 
     protected int _lowResourceMaxIdleTime=-1; 
@@ -163,6 +172,28 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     
     /* ------------------------------------------------------------ */
     /**
+     * Set the maximum Idle time for a connection, which roughly translates
+     * to the {@link Socket#setSoTimeout(int)} call, although with NIO 
+     * implementations other mechanisms may be used to implement the timeout.  
+     * The max idle time is applied:<ul>
+     * <li>When waiting for a new request to be received on a connection</li>
+     * <li>When reading the headers and content of a request</li>
+     * <li>When writing the headers and content of a response</li>
+     * </ul>
+     * Jetty interprets this value as the maximum time between some progress being
+     * made on the connection. So if a single byte is read or written, then the 
+     * timeout (if implemented by jetty) is reset.  However, in many instances,
+     * the reading/writing is delegated to the JVM, and the semantic is more
+     * strictly enforced as the maximum time a single read/write operation can
+     * take.  Note, that as Jetty supports writes of memory mapped file buffers,
+     * then a write may take many 10s of seconds for large content written to a 
+     * slow device.
+     * <p>
+     * Previously, Jetty supported separate idle timeouts and IO operation timeouts,
+     * however the expense of changing the value of soTimeout was significant, so
+     * these timeouts were merged. With the advent of NIO, it may be possible to
+     * again differentiate these values (if there is demand).
+     * 
      * @param maxIdleTime The maxIdleTime to set.
      */
     public void setMaxIdleTime(int maxIdleTime)
@@ -192,7 +223,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     /**
      * @return Returns the soLingerTime.
      */
-    public long getSoLingerTime()
+    public int getSoLingerTime()
     {
         return _soLingerTime;
     }
@@ -245,6 +276,9 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     /* ------------------------------------------------------------ */
     protected void doStart() throws Exception
     {
+        if (_server==null)
+            throw new IllegalStateException("No server");
+        
         // open listener port
         open();
         
@@ -337,9 +371,82 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     /* ------------------------------------------------------------ */
     public void customize(EndPoint endpoint, Request request)
         throws IOException
-    {      
+    {
+        if (isForwarded())
+            checkForwardedHeaders(endpoint, request);
     }
-    
+
+    /* ------------------------------------------------------------ */
+    protected void checkForwardedHeaders(EndPoint endpoint, Request request)
+        throws IOException
+    {
+        HttpFields httpFields = request.getConnection().getRequestFields();
+        
+        // Retrieving headers from the request
+        String forwardedHost = getLeftMostValue(httpFields.getStringField(getForwardedHostHeader()));
+        String forwardedServer = getLeftMostValue(httpFields.getStringField(getForwardedServerHeader()));
+        String forwardedFor = getLeftMostValue(httpFields.getStringField(getForwardedForHeader()));
+        
+        if (_hostHeader!=null)
+        {
+            // Update host header       
+            httpFields.put(HttpHeaders.HOST_BUFFER, _hostHeader);
+            request.setServerName(null);
+            request.setServerPort(-1);
+            request.getServerName();
+        }
+        else if (forwardedHost != null)
+        {
+            // Update host header	
+            httpFields.put(HttpHeaders.HOST_BUFFER, forwardedHost);
+            request.setServerName(null);
+            request.setServerPort(-1);
+            request.getServerName();
+        }
+        else if (forwardedServer != null)
+        {
+            // Use provided server name
+            request.setServerName(forwardedServer);
+        }
+        
+        if (forwardedFor != null)
+        {
+            request.setRemoteAddr(forwardedFor);
+            InetAddress inetAddress = null;
+            
+            if (_useDNS)
+            {
+                try
+                {
+                    inetAddress = InetAddress.getByName(forwardedFor);
+                }
+                catch (UnknownHostException e)
+                {
+                    Log.ignore(e);
+                }
+            }
+            
+            request.setRemoteHost(inetAddress==null?forwardedFor:inetAddress.getHostName());
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    protected String getLeftMostValue(String headerValue) {
+        if (headerValue == null)
+            return null;
+        
+        int commaIndex = headerValue.indexOf(',');
+        
+        if (commaIndex == -1)
+        {
+            // Single value
+            return headerValue;
+        }
+
+        // The left-most value is the farthest downstream client
+        return headerValue.substring(0, commaIndex);
+    }
+
     /* ------------------------------------------------------------ */
     public void persist(EndPoint endpoint)
         throws IOException
@@ -466,6 +573,91 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     }
     
     /* ------------------------------------------------------------ */
+    /** 
+     * Is reverse proxy handling on?
+     * @return true if this connector is checking the x-forwarded-for/host/server headers
+     */
+    public boolean isForwarded()
+    {
+        return _forwarded;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Set reverse proxy handling
+     * @param check true if this connector is checking the x-forwarded-for/host/server headers
+     */
+    public void setForwarded(boolean check)
+    {
+        if (check)
+            Log.debug(this+" is forwarded");
+        _forwarded=check;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getHostHeader()
+    {
+        return _hostHeader;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * Set a forced valued for the host header to control what is returned
+     * by {@link ServletRequest#getServerName()} and {@link ServletRequest#getServerPort()}.
+     * This value is only used if {@link #isForwarded()} is true.
+     * @param hostHeader The value of the host header to force.
+     */
+    public void setHostHeader(String hostHeader)
+    {
+        _hostHeader=hostHeader;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getForwardedHostHeader()
+    {
+        return _forwardedHostHeader;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param forwardedHostHeader The header name for forwarded hosts (default x-forwarded-host)
+     */
+    public void setForwardedHostHeader(String forwardedHostHeader)
+    {
+        _forwardedHostHeader=forwardedHostHeader;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getForwardedServerHeader()
+    {
+        return _forwardedServerHeader;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param forwardedServerHeader The header name for forwarded server (default x-forwarded-server)
+     */
+    public void setForwardedServerHeader(String forwardedServerHeader)
+    {
+        _forwardedServerHeader=forwardedServerHeader;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getForwardedForHeader()
+    {
+        return _forwardedForHeader;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param forwardedRemoteAddressHeader The header name for forwarded for (default x-forwarded-for)
+     */
+    public void setForwardedForHeader(String forwardedRemoteAddressHeader)
+    {
+        _forwardedForHeader=forwardedRemoteAddressHeader;
+    }
+    
+    /* ------------------------------------------------------------ */
     public String toString()
     {
         String name = this.getClass().getName();
@@ -493,15 +685,16 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
         public void run()
         {   
             Thread current = Thread.currentThread();
+            String name;
             synchronized(AbstractConnector.this)
             {
                 if (_acceptorThread==null)
                     return;
                 
                 _acceptorThread[_acceptor]=current;
+                name =_acceptorThread[_acceptor].getName();
+                current.setName(name+" - Acceptor"+_acceptor+" "+AbstractConnector.this);
             }
-            String name =_acceptorThread[_acceptor].getName();
-            current.setName(name+" - Acceptor"+_acceptor+" "+AbstractConnector.this);
             int old_priority=current.getPriority();
             
             try
@@ -523,8 +716,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
                     }
                     catch(ThreadDeath e)
                     {
-                        Log.warn(e);
-			throw e;
+                        throw e;
                     }
                     catch(Throwable e)
                     {
@@ -781,6 +973,24 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     public void setAcceptorPriorityOffset(int offset)
     {
         _acceptorPriorityOffset=offset;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return True if the the server socket will be opened in SO_REUSEADDR mode.
+     */
+    public boolean getReuseAddress()
+    {
+        return _reuseAddress;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param reuseAddress True if the the server socket will be opened in SO_REUSEADDR mode.
+     */
+    public void setReuseAddress(boolean reuseAddress)
+    {
+        _reuseAddress=reuseAddress;
     }
 
 }

@@ -92,6 +92,22 @@ public class HttpHeaderTest extends TestCase
         assertEquals(false, e.hasMoreElements());
     }
     
+    public void testCRLF()
+    throws Exception
+    {
+        HttpFields header = new HttpFields();
+
+        header.put("name0", "value\r\n0");
+        header.put("name\r\n1", "value1");
+        header.put("name:2", "value:\r\n2");
+        
+        ByteArrayBuffer buffer = new ByteArrayBuffer(1024);
+        header.put(buffer);
+        assertTrue(buffer.toString().indexOf("name0: value0")>=0);
+        assertTrue(buffer.toString().indexOf("name1: value1")>=0);
+        assertTrue(buffer.toString().indexOf("name2: value:2")>=0);       
+    }
+    
     public void testCachedPut()
         throws Exception
     {
@@ -290,19 +306,19 @@ public class HttpHeaderTest extends TestCase
     }
     
     public void testDestroy()
-	    throws Exception
-	{
-	    HttpFields header = new HttpFields();
-	    
-	    header.put(new ByteArrayBuffer("name0"), new View(new ByteArrayBuffer("value0")));
-	    assertTrue(header.getFieldNames().hasMoreElements());
-	    assertNotNull(header.getStringField("name0"));
-	    assertNull(header.getStringField("name1"));
-	    
-	    header.destroy();
-	
-	    assertNull(header.getStringField("name0"));
-	}
+        throws Exception
+    {
+        HttpFields header = new HttpFields();
+        
+        header.put(new ByteArrayBuffer("name0"), new View(new ByteArrayBuffer("value0")));
+        assertTrue(header.getFieldNames().hasMoreElements());
+        assertNotNull(header.getStringField("name0"));
+        assertNull(header.getStringField("name1"));
+        
+        header.destroy();
+
+        assertNull(header.getStringField("name0"));
+    }
 
     public void testCase()
     throws Exception

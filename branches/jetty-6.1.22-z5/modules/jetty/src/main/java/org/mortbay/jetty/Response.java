@@ -138,7 +138,9 @@ public class Response implements HttpServletResponse
         if (sessionManager==null)
             return url;
         String sessionURLPrefix = sessionManager.getSessionURLPrefix();
-        
+        if (sessionURLPrefix==null)
+            return url;
+
         // should not encode if cookies in evidence
         if (url==null || request==null || request.isRequestedSessionIdFromCookie())
         {
@@ -273,6 +275,7 @@ public class Response implements HttpServletResponse
             }
             else
             {
+                setHeader(HttpHeaders.CACHE_CONTROL, "must-revalidate,no-cache,no-store");
                 setContentType(MimeTypes.TEXT_HTML_8859_1);
                 ByteArrayISO8859Writer writer= new ByteArrayISO8859Writer(2048);
                 if (message != null)
@@ -298,11 +301,12 @@ public class Response implements HttpServletResponse
                 writer.write(message);
                 writer.write("</title>\n</head>\n<body>\n<h2>HTTP ERROR: ");
                 writer.write(Integer.toString(code));
-                writer.write("</h2><pre>");
-                writer.write(message);
-                writer.write("</pre>\n<p>RequestURI=");
+                writer.write("</h2>\n<p>Problem accessing ");
                 writer.write(uri);
-                writer.write("</p>\n");
+                writer.write(". Reason:\n<pre>    ");
+                writer.write(message);
+                writer.write("</pre>");
+                writer.write("</p>\n<hr /><i><small>Powered by Jetty://</small></i>");
                 
                 for (int i= 0; i < 20; i++)
                     writer.write("\n                                                ");
@@ -382,21 +386,44 @@ public class Response implements HttpServletResponse
             throw new IllegalArgumentException();
 
         if (!URIUtil.hasScheme(location))
-        {
+        {   
             StringBuffer buf = _connection.getRequest().getRootURL();
             if (location.startsWith("/"))
-                buf.append(URIUtil.canonicalPath(location));
+                buf.append(location);
             else
             {
                 String path=_connection.getRequest().getRequestURI();
                 String parent=(path.endsWith("/"))?path:URIUtil.parentPath(path);
-                location=URIUtil.canonicalPath(URIUtil.addPaths(parent,location));
+                location=URIUtil.addPaths(parent,location);
+                if(location==null)
+                    throw new IllegalStateException("path cannot be above root");
                 if (!location.startsWith("/"))
                     buf.append('/');
                 buf.append(location);
             }
 
             location=buf.toString();
+            HttpURI uri = new HttpURI(location);
+            String path=uri.getDecodedPath();
+            String canonical=URIUtil.canonicalPath(path);
+            if (canonical==null)
+                throw new IllegalArgumentException();
+            if (!canonical.equals(path))
+            {
+                buf = _connection.getRequest().getRootURL();
+                buf.append(canonical);
+                if (uri.getQuery()!=null)
+                {
+                    buf.append('?');
+                    buf.append(uri.getQuery());
+                }
+                if (uri.getFragment()!=null)
+                {
+                    buf.append('#');
+                    buf.append(uri.getFragment());
+                }
+                location=buf.toString();
+            }
         }
         resetBuffer();
 
@@ -538,6 +565,12 @@ public class Response implements HttpServletResponse
             _characterEncoding=StringUtil.__ISO_8859_1;
         return _characterEncoding;
     }
+    
+    /* ------------------------------------------------------------ */
+    String getSetCharacterEncoding()
+    {
+        return _characterEncoding;
+    }    
 
     /* ------------------------------------------------------------ */
     /*
@@ -615,8 +648,6 @@ public class Response implements HttpServletResponse
     {
     	if (_connection.isIncluding())
     		return;
-    	
-        // TODO throw unsupported encoding exception ???
         
         if (this._outputState==0 && !isCommitted())
         {
@@ -966,7 +997,10 @@ public class Response implements HttpServletResponse
         }
         
         if (_connection.getConnector().getServer().getSendDateHeader())
-            response_fields.put(HttpHeaders.DATE_BUFFER, _connection.getRequest().getTimeStampBuffer());
+        {
+            Request request=_connection.getRequest();
+            response_fields.put(HttpHeaders.DATE_BUFFER, request.getTimeStampBuffer(),request.getTimeStamp());
+        }
         
         _status=200;
         _reason=null;

@@ -21,9 +21,9 @@ import org.mortbay.log.Log;
 /* ------------------------------------------------------------ */
 /** Timeout queue.
  * This class implements a timeout queue for timers that are at least as likely to be cancelled as they are to expire.
- * Unlike the util timeout class, the duration of the timouts is shared by all scheduled tasks and if the duration 
+ * Unlike the util timeout class, the duration of the timeouts is shared by all scheduled tasks and if the duration 
  * is changed, this affects all scheduled tasks.
- * 
+ * <p>
  * The nested class Task should be extended by users of this class to obtain call back notification of 
  * expiries. 
  * 
@@ -32,13 +32,22 @@ import org.mortbay.log.Log;
  */
 public class Timeout
 {
-    
+    private Object _lock;
     private long _duration;
-    private long _now=System.currentTimeMillis();
+    private volatile long _now=System.currentTimeMillis();
     private Task _head=new Task();
-    
+
+    /* ------------------------------------------------------------ */
     public Timeout()
     {
+        _lock=new Object();
+        _head._timeout=this;
+    }
+
+    /* ------------------------------------------------------------ */
+    public Timeout(Object lock)
+    {
+        _lock=lock;
         _head._timeout=this;
     }
 
@@ -61,9 +70,10 @@ public class Timeout
     }
 
     /* ------------------------------------------------------------ */
-    public void setNow()
+    public long setNow()
     {
         _now=System.currentTimeMillis();
+        return _now; 
     }
     
     /* ------------------------------------------------------------ */
@@ -79,41 +89,55 @@ public class Timeout
     }
 
     /* ------------------------------------------------------------ */
+    /** Get an expired tasks.
+     * This is called instead of {@link #tick()} to obtain the next
+     * expired Task, but without calling it's {@link Task#expire()} or
+     * {@link Task#expired()} methods.
+     * 
+     * @returns the next expired task or null.
+     */
     public Task expired()
     {
-        long _expiry = _now-_duration;
-        
-        if (_head._next!=_head)
+        long now=_now;
+        synchronized (_lock)
         {
-            Task task = _head._next;
-            if (task._timestamp>_expiry)
-                return null;
-            
-            task.unlink();
-            synchronized (task)
+            long _expiry = now-_duration;
+
+            if (_head._next!=_head)
             {
+                Task task = _head._next;
+                if (task._timestamp>_expiry)
+                    return null;
+
+                task.unlink();
                 task._expired=true;
+                return task;
             }
-            return task;
+            return null;
         }
-        return null;
     }
 
     /* ------------------------------------------------------------ */
     public void tick()
     {
-        long _expiry = _now-_duration;
+        final long expiry = _now-_duration;
         
-        while (_head._next!=_head)
+        Task task=null;
+        while (true)
         {
-            Task task = _head._next;
-            if (task._timestamp>_expiry)
-                break;
-            
-            task.unlink();
             try
             {
-                task.doExpire();
+                synchronized (_lock)
+                {
+                    task= _head._next;
+                    if (task==_head || task._timestamp>expiry)
+                        break;
+                    task.unlink();
+                    task._expired=true;
+                    task.expire();
+                }
+                
+                task.expired();
             }
             catch(Throwable th)
             {
@@ -123,53 +147,77 @@ public class Timeout
     }
 
     /* ------------------------------------------------------------ */
+    public void tick(long now)
+    {
+        _now=now;
+        tick();
+    }
+
+    /* ------------------------------------------------------------ */
     public void schedule(Task task)
     {
         schedule(task,0L);
     }
     
     /* ------------------------------------------------------------ */
+    /**
+     * @param task
+     * @param delay A delay in addition to the default duration of the timeout
+     */
     public void schedule(Task task,long delay)
     {
-        if (task._timestamp!=0)
+        synchronized (_lock)
         {
-            task.unlink();
-            task._timestamp=0;
+            if (task._timestamp!=0)
+            {
+                task.unlink();
+                task._timestamp=0;
+            }
+            task._timeout=this;
+            task._expired=false;
+            task._delay=delay;
+            task._timestamp = _now+delay;
+
+            Task last=_head._prev;
+            while (last!=_head)
+            {
+                if (last._timestamp <= task._timestamp)
+                    break;
+                last=last._prev;
+            }
+            last.link(task);
         }
-        task._expired=false;
-        task._delay=delay;
-        task._timestamp = _now+delay;
-        
-        Task last=_head._prev;
-        while (last!=_head)
-        {
-            if (last._timestamp <= task._timestamp)
-                break;
-            last=last._prev;
-        }
-        last.setNext(task);
     }
 
 
     /* ------------------------------------------------------------ */
     public void cancelAll()
     {
-        _head._next=_head._prev=_head;
+        synchronized (_lock)
+        {
+            _head._next=_head._prev=_head;
+        }
     }
 
     /* ------------------------------------------------------------ */
     public boolean isEmpty()
     {
-        return _head._next==_head;
+        synchronized (_lock)
+        {
+            return _head._next==_head;
+        }
     }
 
     /* ------------------------------------------------------------ */
     public long getTimeToNext()
     {
-        if (_head._next==_head)
-            return -1;
-        long to_next = _duration+_head._next._timestamp-_now;
-        return to_next<0?0:to_next;
+        synchronized (_lock)
+        {
+            if (_head._next==_head)
+                return -1;
+            long to_next = _duration+_head._next._timestamp-_now;
+            return to_next<0?0:to_next;
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -210,45 +258,48 @@ public class Timeout
         long _timestamp=0;
         boolean _expired=false;
 
+        /* ------------------------------------------------------------ */
         public Task()
         {
             _next=_prev=this;
         }
 
+        /* ------------------------------------------------------------ */
         public long getTimestamp()
         {
             return _timestamp;
         }
-        
+
+        /* ------------------------------------------------------------ */
         public long getAge()
         {
-            Timeout t = _timeout;
-            if (t!=null && t._now!=0 && _timestamp!=0)
-                return t._now-_timestamp;
+            final Timeout t = _timeout;
+            if (t!=null)
+            {
+                final long now=t._now;
+                if (now!=0 && _timestamp!=0)
+                    return now-_timestamp;
+            }
             return 0;
         }
-        
-        public void unlink()
+
+        /* ------------------------------------------------------------ */
+        private void unlink()
         {
             _next._prev=_prev;
             _prev._next=_next;
             _next=_prev=this;
-            _timeout=null;
             _expired=false;
         }
 
-        public void setNext(Task task)
+        /* ------------------------------------------------------------ */
+        private void link(Task task)
         {
-            if (_timeout==null || 
-                task._timeout!=null && task._timeout!=_timeout ||    
-                task._next!=task)
-                throw new IllegalStateException();
             Task next_next = _next;
             _next._prev=task;
             _next=task;
             _next._next=next_next;
             _next._prev=this;   
-            _next._timeout=_timeout;
         }
         
         /* ------------------------------------------------------------ */
@@ -258,7 +309,6 @@ public class Timeout
          */
         public void schedule(Timeout timer)
         {
-            unlink();
             timer.schedule(this);
         }
         
@@ -269,20 +319,19 @@ public class Timeout
          */
         public void schedule(Timeout timer, long delay)
         {
-            unlink();
             timer.schedule(this,delay);
         }
         
         /* ------------------------------------------------------------ */
         /** Reschedule the task on the current timeout.
-         * The task timeout is rescheduled as if it had been canceled and
+         * The task timeout is rescheduled as if it had been cancelled and
          * scheduled on the current timeout.
          */
         public void reschedule()
         {
-            Timeout timer = _timeout;
-            unlink();
-            timer.schedule(this,_delay);
+            Timeout timeout = _timeout;
+            if (timeout!=null)
+                timeout.schedule(this,_delay);
         }
         
         /* ------------------------------------------------------------ */
@@ -291,27 +340,40 @@ public class Timeout
          */
         public void cancel()
         {
-            _timestamp=0;
-            unlink();
+            Timeout timeout = _timeout;
+            if (timeout!=null)
+            {
+                synchronized (timeout._lock)
+                {
+                    unlink();
+                    _timestamp=0;
+                }
+            }
         }
         
+        /* ------------------------------------------------------------ */
         public boolean isExpired() { return _expired; }
+
+        /* ------------------------------------------------------------ */
+	public boolean isScheduled() { return _next!=this; }
         
         /* ------------------------------------------------------------ */
         /** Expire task.
-         * This method is called when the timeout expires.
-         * 
+         * This method is called when the timeout expires. It is called
+         * in the scope of the synchronize block (on this) that sets 
+         * the {@link #isExpired()} state to true.
+         * @see #expired() For an unsynchronized callback.
          */
         public void expire(){}
-        
-        private void doExpire()
-        {
-            synchronized (this)
-            {
-                _expired=true;
-                expire();
-            }
-        }
+
+        /* ------------------------------------------------------------ */
+        /** Expire task.
+         * This method is called when the timeout expires. It is called 
+         * outside of any synchronization scope and may be delayed. 
+         * 
+         */
+        public void expired(){}
+
     }
 
 }

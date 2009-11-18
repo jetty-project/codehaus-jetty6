@@ -14,25 +14,11 @@
 
 package org.mortbay.jetty;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.URL;
 import java.util.Random;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.DefaultHandler;
-import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.servlet.ServletMapping;
-import org.mortbay.util.IO;
 
 /**
  * @version $Revision$

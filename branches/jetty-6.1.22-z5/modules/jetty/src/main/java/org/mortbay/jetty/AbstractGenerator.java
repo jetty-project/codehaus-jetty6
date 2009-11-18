@@ -361,8 +361,10 @@ public abstract class AbstractGenerator implements Generator
             for (int i=0;i<len;i++)
             {
                 char ch = reason.charAt(i);
-                if (ch==' ' || Character.isJavaIdentifierPart(ch))
+                if (ch!='\r'&&ch!='\n')
                     _reason.put((byte)ch);
+                else
+                    _reason.put((byte)' ');
             }
         }
     }
@@ -401,12 +403,14 @@ public abstract class AbstractGenerator implements Generator
     /* ------------------------------------------------------------ */
     public boolean isBufferFull()
     {
-        // Should we flush the buffers?
-        boolean full =  
-            (_buffer != null && _buffer.space() == 0) ||
-            (_content!=null && _content.length()>0);
-             
-        return full;
+        if (_buffer != null && _buffer.space()==0)
+        {
+            if (_buffer.length()==0 && !_buffer.isImmutable())
+                _buffer.compact();
+            return _buffer.space()==0;
+        }
+
+        return _content!=null && _content.length()>0;
     }
     
     /* ------------------------------------------------------------ */
@@ -559,7 +563,7 @@ public abstract class AbstractGenerator implements Generator
             // block until everything is flushed
             Buffer content = _generator._content;
             Buffer buffer = _generator._buffer;
-            if (content!=null && content.length()>0 ||buffer!=null && buffer.length()>0)
+            if (content!=null && content.length()>0 || buffer!=null && buffer.length()>0 || _generator.isBufferFull())
             {
                 _generator.flush();
                 
@@ -591,15 +595,19 @@ public abstract class AbstractGenerator implements Generator
          */
         public void write(int b) throws IOException
         {
-            if (_closed || !_generator._endp.isOpen())
+            if (_closed)
                 throw new IOException("Closed");
+            if (!_generator._endp.isOpen())
+                throw new EofException();
             
             // Block until we can add _content.
             while (_generator.isBufferFull())
             {
                 blockForOutput();
-                if (_closed || !_generator._endp.isOpen())
+                if (_closed)
                     throw new IOException("Closed");
+                if (!_generator._endp.isOpen())
+                    throw new EofException();
             }
 
             // Add the _content
@@ -617,15 +625,19 @@ public abstract class AbstractGenerator implements Generator
         /* ------------------------------------------------------------ */
         private void write(Buffer buffer) throws IOException
         {
-            if (_closed || !_generator._endp.isOpen())
+            if (_closed)
                 throw new IOException("Closed");
+            if (!_generator._endp.isOpen())
+                throw new EofException();
             
             // Block until we can add _content.
             while (_generator.isBufferFull())
             {
                 blockForOutput();
-                if (_closed || !_generator._endp.isOpen())
+                if (_closed)
                     throw new IOException("Closed");
+                if (!_generator._endp.isOpen())
+                    throw new EofException();
             }
 
             // Add the _content
@@ -794,92 +806,90 @@ public abstract class AbstractGenerator implements Generator
                             if ((code & 0xffffff80) == 0) 
                             {
                                 // 1b
+                                if (bytes+1>buffer.length)
+                                {
+                                    chars=i;
+                                    break;
+                                }
                                 buffer[bytes++]=(byte)(code);
                             }
-                            else if((code&0xfffff800)==0)
-                            {
-                                // 2b
-                                if (bytes+2>buffer.length)
-                                {
-                                    chars=i;
-                                    break;
-                                }
-                                buffer[bytes++]=(byte)(0xc0|(code>>6));
-                                buffer[bytes++]=(byte)(0x80|(code&0x3f));
-
-                                if (bytes+chars-i-1>buffer.length)
-                                    chars-=1;
-                            }
-                            else if((code&0xffff0000)==0)
-                            {
-                                // 3b
-                                if (bytes+3>buffer.length)
-                                {
-                                    chars=i;
-                                    break;
-                                }
-                                buffer[bytes++]=(byte)(0xe0|(code>>12));
-                                buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|(code&0x3f));
-
-                                if (bytes+chars-i-1>buffer.length)
-                                    chars-=2;
-                            }
-                            else if((code&0xff200000)==0)
-                            {
-                                // 4b
-                                if (bytes+4>buffer.length)
-                                {
-                                    chars=i;
-                                    break;
-                                }
-                                buffer[bytes++]=(byte)(0xf0|(code>>18));
-                                buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|(code&0x3f));
-
-                                if (bytes+chars-i-1>buffer.length)
-                                    chars-=3;
-                            }
-                            else if((code&0xf4000000)==0)
-                            {
-                                // 5b
-                                if (bytes+5>buffer.length)
-                                {
-                                    chars=i;
-                                    break;
-                                }
-                                buffer[bytes++]=(byte)(0xf8|(code>>24));
-                                buffer[bytes++]=(byte)(0x80|((code>>18)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|(code&0x3f));
-
-                                if (bytes+chars-i-1>buffer.length)
-                                    chars-=4;
-                            }
-                            else if((code&0x80000000)==0)
-                            {
-                                // 6b
-                                if (bytes+6>buffer.length)
-                                {
-                                    chars=i;
-                                    break;
-                                }
-                                buffer[bytes++]=(byte)(0xfc|(code>>30));
-                                buffer[bytes++]=(byte)(0x80|((code>>24)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|((code>>18)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
-                                buffer[bytes++]=(byte)(0x80|(code&0x3f));
-
-                                if (bytes+chars-i-1>buffer.length)
-                                    chars-=5;
-                            }
                             else
-                            {
-                                buffer[bytes++]=(byte)('?');
-                            }
+			    {
+				if((code&0xfffff800)==0)
+				{
+				    // 2b
+				    if (bytes+2>buffer.length)
+				    {
+					chars=i;
+					break;
+				    }
+				    buffer[bytes++]=(byte)(0xc0|(code>>6));
+				    buffer[bytes++]=(byte)(0x80|(code&0x3f));
+				}
+				else if((code&0xffff0000)==0)
+				{
+				    // 3b
+				    if (bytes+3>buffer.length)
+				    {
+					chars=i;
+					break;
+				    }
+				    buffer[bytes++]=(byte)(0xe0|(code>>12));
+				    buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
+				    buffer[bytes++]=(byte)(0x80|(code&0x3f));
+				}
+				else if((code&0xff200000)==0)
+				{
+				    // 4b
+				    if (bytes+4>buffer.length)
+				    {
+					chars=i;
+					break;
+				    }
+				    buffer[bytes++]=(byte)(0xf0|(code>>18));
+				    buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
+				    buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
+				    buffer[bytes++]=(byte)(0x80|(code&0x3f));
+				}
+				else if((code&0xf4000000)==0)
+				{
+				    // 5b
+				    if (bytes+5>buffer.length)
+				    {
+					chars=i;
+					break;
+				    }
+				    buffer[bytes++]=(byte)(0xf8|(code>>24));
+				    buffer[bytes++]=(byte)(0x80|((code>>18)&0x3f));
+				    buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
+				    buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
+				    buffer[bytes++]=(byte)(0x80|(code&0x3f));
+				}
+				else if((code&0x80000000)==0)
+				{
+				    // 6b
+				    if (bytes+6>buffer.length)
+				    {
+					chars=i;
+					break;
+				    }
+				    buffer[bytes++]=(byte)(0xfc|(code>>30));
+				    buffer[bytes++]=(byte)(0x80|((code>>24)&0x3f));
+				    buffer[bytes++]=(byte)(0x80|((code>>18)&0x3f));
+				    buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
+				    buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
+				    buffer[bytes++]=(byte)(0x80|(code&0x3f));
+				}
+				else
+				{
+				    buffer[bytes++]=(byte)('?');
+				}
+				if (bytes==buffer.length)
+				{
+				    chars=i+1;
+				    break;
+				}
+			    }
                         }
                         out._bytes.setCount(bytes);
                         break;

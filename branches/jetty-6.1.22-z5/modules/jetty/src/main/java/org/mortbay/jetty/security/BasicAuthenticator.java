@@ -95,7 +95,7 @@ public class BasicAuthenticator implements Authenticator
     public void sendChallenge(UserRealm realm,Response response)
         throws IOException
     {
-        response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\""+realm.getName()+'"');
+        response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\""+realm.getName()+'"');
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
     }
     

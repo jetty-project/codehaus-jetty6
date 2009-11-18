@@ -30,7 +30,7 @@ public class ContinuationSupport
         Continuation continuation = (Continuation) request.getAttribute("org.mortbay.jetty.ajax.Continuation");
         if (continuation==null)
             continuation=new WaitingContinuation(lock);
-        else if (continuation instanceof WaitingContinuation && continuation.isNew() && lock!=null)
+        else if (continuation instanceof WaitingContinuation  && lock!=null)
             ((WaitingContinuation)continuation).setMutex(lock);
         return continuation;
     }

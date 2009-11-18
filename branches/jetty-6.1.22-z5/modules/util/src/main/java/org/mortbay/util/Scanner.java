@@ -21,7 +21,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,16 +44,17 @@ import org.mortbay.log.Log;
 public class Scanner
 {
     private int _scanInterval;
-
-    
     private List _listeners = Collections.synchronizedList(new ArrayList());
-    private Map _prevScan = Collections.EMPTY_MAP;
+    private Map _prevScan = new HashMap();
+    private Map _currentScan = new HashMap();
     private FilenameFilter _filter;
     private List _scanDirs;
     private volatile boolean _running = false;
     private boolean _reportExisting = true;
     private Timer _timer;
     private TimerTask _task;
+    private boolean _recursive=true;
+
 
     /**
      * Listener
@@ -102,13 +102,8 @@ public class Scanner
      */
     public synchronized void setScanInterval(int scanInterval)
     {
-        if (_running)
-            _task.cancel();
-        
         this._scanInterval = scanInterval;
-        
-        if (_running && _scanInterval >0)
-            _timer.scheduleAtFixedRate(_task,1000L*getScanInterval(),1000L*getScanInterval());
+        schedule();
     }
 
     /**
@@ -142,6 +137,15 @@ public class Scanner
         return _scanDirs;
     }
     
+    public void setRecursive (boolean recursive)
+    {
+        _recursive=recursive;
+    }
+    
+    public boolean getRecursive ()
+    {
+        return _recursive;
+    }
     /**
      * Apply a filter to files found in the scan directory.
      * Only files matching the filter will be reported as added/changed/removed.
@@ -180,7 +184,6 @@ public class Scanner
     {
         if (listener == null)
             return;
-
         _listeners.add(listener);   
     }
 
@@ -216,21 +219,41 @@ public class Scanner
         else
         {
             //just register the list of existing files and only report changes
-            _prevScan = scanFiles();
+            scanFiles();
+            _prevScan.putAll(_currentScan);
         }
+        schedule();
+    }
 
-        _timer = new Timer();
-        _task = new TimerTask()
+    public TimerTask newTimerTask ()
+    {
+        return new TimerTask()
         {
             public void run() { scan(); }
         };
-
-        if (getScanInterval()>0)
-            _timer.scheduleAtFixedRate(_task,1000L*getScanInterval(),1000L*getScanInterval());
-        
     }
 
-
+    public Timer newTimer ()
+    {
+        return new Timer(true);
+    }
+    
+    public void schedule ()
+    {  
+        if (_running)
+        {
+            if (_timer!=null)
+                _timer.cancel();
+            if (_task!=null)
+                _task.cancel();
+            if (getScanInterval() > 0)
+            {
+                _timer = newTimer();
+                _task = newTimerTask();
+                _timer.schedule(_task, 1000L*getScanInterval(),1000L*getScanInterval());
+            }
+        }
+    }
     /**
      * Stop the scanning.
      */
@@ -239,7 +262,10 @@ public class Scanner
         if (_running)
         {
             _running = false; 
-            _task.cancel();
+            if (_timer!=null)
+                _timer.cancel();
+            if (_task!=null)
+                _task.cancel();
             _task=null;
             _timer=null;
         }
@@ -250,31 +276,30 @@ public class Scanner
      */
     public void scan ()
     {
-        Map currentScan = scanFiles();
-        reportDifferences(currentScan, _prevScan);
-        _prevScan = currentScan;     
+        scanFiles();
+        reportDifferences(_currentScan, _prevScan);
+        _prevScan.clear();
+        _prevScan.putAll(_currentScan);
     }
 
     /**
      * Recursively scan all files in the designated directories.
      * @return Map of name of file to last modified time
      */
-    public Map scanFiles ()
+    public void scanFiles ()
     {
         if (_scanDirs==null)
-            return Collections.EMPTY_MAP;
+            return;
         
-        HashMap scanInfo = new HashMap();
+        _currentScan.clear();
         Iterator itor = _scanDirs.iterator();
         while (itor.hasNext())
         {
             File dir = (File)itor.next();
             
             if ((dir != null) && (dir.exists()))
-                scanFile(dir, scanInfo);
+                scanFile(dir, _currentScan);
         }
-        
-        return scanInfo;
     }
 
 
@@ -350,7 +375,7 @@ public class Scanner
                     scanInfoMap.put(name, new Long(lastModified));
                 }
             }
-            else if (f.isDirectory())
+            else if (f.isDirectory() && (_recursive || _scanDirs.contains(f)))
             {
                 File[] files = f.listFiles();
                 for (int i=0;i<files.length;i++)
@@ -363,6 +388,11 @@ public class Scanner
         }
     }
 
+    private void warn(Object listener,String filename,Throwable th)
+    {
+        Log.warn(th);
+        Log.warn(listener+" failed on '"+filename);
+    }
 
     /**
      * Report a file addition to the registered FileAddedListeners
@@ -373,19 +403,19 @@ public class Scanner
         Iterator itor = _listeners.iterator();
         while (itor.hasNext())
         {
+            Object l = itor.next();
             try
             {
-                Object l = itor.next();
                 if (l instanceof DiscreteListener)
                     ((DiscreteListener)l).fileAdded(filename);
             }
             catch (Exception e)
             {
-                Log.warn(e);
+                warn(l,filename,e);
             }
             catch (Error e)
             {
-                Log.warn(e);
+                warn(l,filename,e);
             }
         }
     }
@@ -400,19 +430,19 @@ public class Scanner
         Iterator itor = _listeners.iterator();
         while (itor.hasNext())
         {
+            Object l = itor.next();
             try
             {
-                Object l = itor.next();
                 if (l instanceof DiscreteListener)
                     ((DiscreteListener)l).fileRemoved(filename);
             }
             catch (Exception e)
             {
-                Log.warn(e);
+                warn(l,filename,e);
             }
             catch (Error e)
             {
-                Log.warn(e);
+                warn(l,filename,e);
             }
         }
     }
@@ -427,19 +457,19 @@ public class Scanner
         Iterator itor = _listeners.iterator();
         while (itor.hasNext())
         {
+            Object l = itor.next();
             try
             {
-                Object l = itor.next();
                 if (l instanceof DiscreteListener)
                     ((DiscreteListener)l).fileChanged(filename);
             }
             catch (Exception e)
             {
-                Log.warn(e);
+                warn(l,filename,e);
             }
             catch (Error e)
             {
-                Log.warn(e);
+                warn(l,filename,e);
             }
         }
     }
@@ -449,19 +479,19 @@ public class Scanner
         Iterator itor = _listeners.iterator();
         while (itor.hasNext())
         {
+            Object l = itor.next();
             try
             {
-                Object l = itor.next();
                 if (l instanceof BulkListener)
                     ((BulkListener)l).filesChanged(filenames);
             }
             catch (Exception e)
             {
-                Log.warn(e);
+                warn(l,filenames.toString(),e);
             }
             catch (Error e)
             {
-                Log.warn(e);
+                warn(l,filenames.toString(),e);
             }
         }
     }

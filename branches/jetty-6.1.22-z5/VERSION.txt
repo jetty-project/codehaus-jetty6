@@ -1,4 +1,5 @@
 Patches:
+ + Updated util and jetty modules to 6.1.22-z6 equivalent
  + JETTY-443 Catch Throwable in acceptor
  + JETTY-989 GzipFilter handles addHeader
  + JETTY-489 parse cookies with unquoted values containing separators

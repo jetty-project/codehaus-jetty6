@@ -14,6 +14,8 @@
 
 package org.mortbay.log;
 import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import org.mortbay.util.Loader;
 
@@ -40,67 +42,81 @@ public class Log
     public final static String IGNORED_FMT= "IGNORED: {}";
     public final static String NOT_IMPLEMENTED= "NOT IMPLEMENTED ";
     
-    private static String logClass=System.getProperty("org.mortbay.log.class","org.mortbay.log.Slf4jLog");
-    private static boolean verbose = System.getProperty("VERBOSE",null)!=null;
-    private static Logger log;
-   
+    public static String __logClass;
+    public static boolean __verbose;
+    public static boolean __ignored;
+    
+    private static Logger __log;
+    
     static
     {
+        AccessController.doPrivileged(new PrivilegedAction() 
+            {
+                public Object run() 
+                { 
+                    __logClass = System.getProperty("org.mortbay.log.class","org.mortbay.log.Slf4jLog"); 
+                    __verbose = System.getProperty("VERBOSE",null)!=null; 
+                    __ignored = System.getProperty("IGNORED",null)!=null; 
+                    return new Boolean(true); 
+                }
+            });
+   
         Class log_class=null;
         try
         {
-            log_class=Loader.loadClass(Log.class, logClass);
-            log=(Logger) log_class.newInstance();
+            log_class=Loader.loadClass(Log.class, __logClass);
+            __log=(Logger) log_class.newInstance();
         }
-        catch(Exception e)
+        catch(Throwable e)
         {
-            log_class=StdErrLog.class;
-            log=new StdErrLog();
-            if(verbose)
+            log_class = StdErrLog.class;
+            __log = new StdErrLog();
+            __logClass = log_class.getName();
+            if(__verbose)
                 e.printStackTrace();
         }
         
-        log.info("Logging to {} via {}",log,log_class.getName());
+        __log.info("Logging to {} via {}",__log,log_class.getName());
     }
     
     public static void setLog(Logger log)
     {
-        Log.log=log;
+        Log.__log=log;
     }
     
     public static Logger getLog()
     {
-        return log;
+        return __log;
     }
     
     
     public static void debug(Throwable th)
     {
-        if (log==null)
+        if (__log==null || !isDebugEnabled())
             return;
-        log.debug(EXCEPTION,th);
+        __log.debug(EXCEPTION,th);
         unwind(th);
     }
 
     public static void debug(String msg)
     {
-        if (log==null)
+        if (__log==null)
             return;
-        log.debug(msg,null,null);
+        __log.debug(msg,null,null);
     }
     
     public static void debug(String msg,Object arg)
     {
-        if (log==null)
+        if (__log==null) 
             return;
-        log.debug(msg,arg,null);
+        __log.debug(msg,arg,null);
     }
     
     public static void debug(String msg,Object arg0, Object arg1)
     {
-        if (log==null)
+        if (__log==null)
             return;
-        log.debug(msg,arg0,arg1);
+        __log.debug(msg,arg0,arg1);
     }
     
     /* ------------------------------------------------------------ */
@@ -110,77 +126,82 @@ public class Log
      */
     public static void ignore(Throwable th)
     {
-        if (log==null)
+        if (__log==null)
             return;
-        if (verbose)
+	if (__ignored)
+	{
+            __log.warn(IGNORED,th);
+            unwind(th);
+	}
+        else if (__verbose)
         {
-            log.debug(IGNORED,th);
+            __log.debug(IGNORED,th);
             unwind(th);
         }
     }
     
     public static void info(String msg)
     {
-        if (log==null)
+        if (__log==null)
             return;
-        log.info(msg,null,null);
+        __log.info(msg,null,null);
     }
     
     public static void info(String msg,Object arg)
     {
-        if (log==null)
+        if (__log==null)
             return;
-        log.info(msg,arg,null);
+        __log.info(msg,arg,null);
     }
     
     public static void info(String msg,Object arg0, Object arg1)
     {
-        if (log==null)
+        if (__log==null)
             return;
-        log.info(msg,arg0,arg1);
+        __log.info(msg,arg0,arg1);
     }
     
     public static boolean isDebugEnabled()
     {
-        if (log==null)
+        if (__log==null)
             return false;
-        return log.isDebugEnabled();
+        return __log.isDebugEnabled();
     }
     
     public static void warn(String msg)
     {
-        if (log==null)
+        if (__log==null)
             return;
-        log.warn(msg,null,null);
+        __log.warn(msg,null,null);
     }
     
     public static void warn(String msg,Object arg)
     {
-        if (log==null)
+        if (__log==null)
             return;
-        log.warn(msg,arg,null);        
+        __log.warn(msg,arg,null);        
     }
     
     public static void warn(String msg,Object arg0, Object arg1)
     {
-        if (log==null)
+        if (__log==null)
             return;
-        log.warn(msg,arg0,arg1);        
+        __log.warn(msg,arg0,arg1);        
     }
     
     public static void warn(String msg, Throwable th)
     {
-        if (log==null)
+        if (__log==null)
             return;
-        log.warn(msg,th);
+        __log.warn(msg,th);
         unwind(th);
     }
 
     public static void warn(Throwable th)
     {
-        if (log==null)
+        if (__log==null)
             return;
-        log.warn(EXCEPTION,th);
+        __log.warn(EXCEPTION,th);
         unwind(th);
     }
 
@@ -189,11 +210,11 @@ public class Log
      */
     public static Logger getLogger(String name)
     {
-        if (log==null)
-            return log;
+        if (__log==null)
+            return __log;
         if (name==null)
-          return log;
-        return log.getLogger(name);
+          return __log;
+        return __log.getLogger(name);
     }
 
     private static void unwind(Throwable th)
@@ -206,7 +227,7 @@ public class Log
             {
                 Method get_target = th.getClass().getMethod(__nestedEx[i],__noArgs);
                 Throwable th2=(Throwable)get_target.invoke(th,(Object[])null);
-                if (th2!=null)
+                if (th2!=null && th2!=th)
                     warn("Nested in "+th+":",th2);
             }
             catch(Exception ignore){}

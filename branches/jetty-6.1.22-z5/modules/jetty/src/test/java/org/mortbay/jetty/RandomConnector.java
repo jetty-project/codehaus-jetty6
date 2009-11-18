@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.nio.ChannelEndPoint;
+import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.nio.AbstractNIOConnector;
 import org.mortbay.jetty.servlet.Context;
@@ -265,7 +266,7 @@ public class RandomConnector extends AbstractNIOConnector
                 len=buffer.space();
             
             // Load a length limited slice via a temp buffer
-            NIOBuffer temp= new NIOBuffer(len,false);
+            NIOBuffer temp= new IndirectNIOBuffer(len);
             int len2=super.fill(temp);
             if (len2<0)
             {

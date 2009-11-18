@@ -20,7 +20,7 @@ public class Utf8StringBufferTest extends junit.framework.TestCase
     public void testUtfStringBuffer()
         throws Exception
     {
-        String source="abcd012345\n\r\uffff\u0fff\u00ff\u000f";
+        String source="abcd012345\n\r\uffff\u0fff\u00ff\u000f\u0000jetty";
         byte[] bytes = source.getBytes(StringUtil.__UTF8);
         Utf8StringBuffer buffer = new Utf8StringBuffer();
         for (int i=0;i<bytes.length;i++)

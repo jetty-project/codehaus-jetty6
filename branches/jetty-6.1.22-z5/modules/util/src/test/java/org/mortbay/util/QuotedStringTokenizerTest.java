@@ -105,6 +105,10 @@ public class QuotedStringTokenizerTest extends TestCase
         assertEquals("\"abcefg\"",buf.toString());
         
         buf.setLength(0);
+        QuotedStringTokenizer.quote(buf,"abcefg\"");
+        assertEquals("\"abcefg\\\"\"",buf.toString());
+        
+        buf.setLength(0);
         QuotedStringTokenizer.quoteIfNeeded(buf,"abc \n efg");
         assertEquals("\"abc \\n efg\"",buf.toString());
         

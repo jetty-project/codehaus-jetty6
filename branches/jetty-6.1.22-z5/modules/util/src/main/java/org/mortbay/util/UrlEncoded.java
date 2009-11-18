@@ -16,6 +16,8 @@ package org.mortbay.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Map;
@@ -240,9 +242,17 @@ public class UrlEncoded extends MultiMap
      */
     public static void decodeUtf8To(byte[] raw,int offset, int length, MultiMap map)
     {
+        decodeUtf8To(raw,offset,length,map,new Utf8StringBuffer());
+    }
+
+    /* -------------------------------------------------------------- */
+    /** Decoded parameters to Map.
+     * @param data the byte[] containing the encoded parameters
+     */
+    public static void decodeUtf8To(byte[] raw,int offset, int length, MultiMap map,Utf8StringBuffer buffer)
+    {
         synchronized(map)
         {
-            Utf8StringBuffer buffer = new Utf8StringBuffer();
             String key = null;
             String value = null;
             
@@ -301,6 +311,86 @@ public class UrlEncoded extends MultiMap
             else if (buffer.length()>0)
             {
                 map.add(buffer.toString(),"");
+            }
+        }
+    }
+
+    /* -------------------------------------------------------------- */
+    /** Decoded parameters to Map.
+     * @param in InputSteam to read
+     * @param map MultiMap to add parameters to
+     * @param maxLength maximum length of content to read 0r -1 for no limit
+     */
+    public static void decode88591To(InputStream in, MultiMap map, int maxLength)
+    throws IOException
+    {
+        synchronized(map)
+        {
+            StringBuffer buffer = new StringBuffer();
+            String key = null;
+            String value = null;
+            
+            int b;
+
+            // TODO cache of parameter names ???
+            int totalLength=0;
+            while ((b=in.read())>=0)
+            {
+                switch ((char) b)
+                {
+                    case '&':
+                        value = buffer.length()==0?"":buffer.toString();
+                        buffer.setLength(0);
+                        if (key != null)
+                        {
+                            map.add(key,value);
+                        }
+                        else if (value!=null&&value.length()>0)
+                        {
+                            map.add(value,"");
+                        }
+                        key = null;
+                        value=null;
+                        break;
+                        
+                    case '=':
+                        if (key!=null)
+                        {
+                            buffer.append((char)b);
+                            break;
+                        }
+                        key = buffer.toString();
+                        buffer.setLength(0);
+                        break;
+                        
+                    case '+':
+                        buffer.append((char)' ');
+                        break;
+                        
+                    case '%':
+                        int dh=in.read();
+                        int dl=in.read();
+                        if (dh<0||dl<0)
+                            break;
+                        buffer.append((char)((TypeUtil.convertHexDigit((byte)dh)<<4) + TypeUtil.convertHexDigit((byte)dl)));
+                        break;
+                    default:
+                        buffer.append((char)b);
+                    break;
+                }
+                if (maxLength>=0 && (++totalLength > maxLength))
+                    throw new IllegalStateException("Form too large");
+            }
+            
+            if (key != null)
+            {
+                value = buffer.length()==0?"":buffer.toString();
+                buffer.setLength(0);
+                map.add(key,value);
+            }
+            else if (buffer.length()>0)
+            {
+                map.add(buffer.toString(), "");
             }
         }
     }
@@ -386,21 +476,49 @@ public class UrlEncoded extends MultiMap
     }
     
     /* -------------------------------------------------------------- */
+    public static void decodeUtf16To(InputStream in, MultiMap map, int maxLength) throws IOException
+    {
+        InputStreamReader input = new InputStreamReader(in,StringUtil.__UTF16);
+        StringBuffer buf = new StringBuffer();
+
+        int c;
+        int length=0;
+        if (maxLength<0)
+            maxLength=Integer.MAX_VALUE;
+        while ((c=input.read())>0 && length++<maxLength)
+            buf.append((char)c);
+        decodeTo(buf.toString(),map,StringUtil.__UTF8);
+    }
+    
+    /* -------------------------------------------------------------- */
     /** Decoded parameters to Map.
      * @param in the stream containing the encoded parameters
      */
     public static void decodeTo(InputStream in, MultiMap map, String charset, int maxLength)
     throws IOException
     {
+
         if (charset==null || StringUtil.__UTF8.equalsIgnoreCase(charset))
         {
             decodeUtf8To(in,map,maxLength);
             return;
         }
         
+        if (StringUtil.__ISO_8859_1.equals(charset))
+        {
+            decode88591To(in,map,maxLength);
+            return;
+        }
+
+        if (StringUtil.__UTF16.equalsIgnoreCase(charset)) // Should be all 2 byte encodings
+        {
+            decodeUtf16To(in,map,maxLength);
+            return;
+        }
+        
+
         synchronized(map)
         {
-            ByteArrayOutputStream2 buf=new ByteArrayOutputStream2(256);
             String key = null;
             String value = null;
             
@@ -408,79 +526,76 @@ public class UrlEncoded extends MultiMap
             int digit=0;
             int digits=0;
             
-            // TODO cache of parameter names ???
-            byte[] bytes=new byte[256]; // TODO Configure ?? size??? tune??? // reuse???
-            int l=-1;
             int totalLength = 0;
-            while ((l=in.read(bytes))>=0)
+            ByteArrayOutputStream2 output = new ByteArrayOutputStream2();
+            
+            int size=0;
+            
+            while ((c=in.read())>0)
             {
-                for (int i=0;i<l;i++)
+                switch ((char) c)
                 {
-                    c=bytes[i];
-                    switch ((char) c)
-                    {
-                        case '&':
-                            value = buf.size()==0?"":new String(buf.getBuf(), 0, buf.size(), charset);
-                            buf.reset();
-                            if (key != null)
-                            {
-                                map.add(key,value);
-                            }
-                            else if (value!=null&&value.length()>0)
-                            {
-                                map.add(value,"");
-                            }
-                            key = null;
-                            value=null;
-                            break;
-                        case '=':
-                            if (key!=null)
-                            {
-                                buf.write(c);
-                                break;
-                            }
-                            key = new String(buf.getBuf(), 0, buf.size(), charset);
-                            buf.reset();
-                            break;
-                        case '+':
-                            buf.write(' ');
-                            break;
-                        case '%':
-                            digits=2;
-                            break;
-                        default:
-                            if (digits==2)
-                            {
-                                digit=TypeUtil.convertHexDigit((byte)c);
-                                digits=1;
-                            }
-                            else if (digits==1)
-                            {
-                                buf.write((digit<<4) + TypeUtil.convertHexDigit((byte)c));
-                                digits=0;
-                            }
-                            else
-                                buf.write(c);
+                    case '&':
+                        size=output.size();
+                        value = size==0?"":output.toString(charset);
+                        output.setCount(0);
+                        if (key != null)
+                        {
+                            map.add(key,value);
+                        }
+                        else if (value!=null&&value.length()>0)
+                        {
+                            map.add(value,"");
+                        }
+                        key = null;
+                        value=null;
                         break;
-                    }
+                    case '=':
+                        if (key!=null)
+                        {
+                            output.write(c);
+                            break;
+                        }
+                        size=output.size();
+                        key = size==0?"":output.toString(charset);
+                        output.setCount(0);
+                        break;
+                    case '+':
+                        output.write(' ');
+                        break;
+                    case '%':
+                        digits=2;
+                        break;
+                    default:
+                        if (digits==2)
+                        {
+                            digit=TypeUtil.convertHexDigit((byte)c);
+                            digits=1;
+                        }
+                        else if (digits==1)
+                        {
+                            output.write((digit<<4) + TypeUtil.convertHexDigit((byte)c));
+                            digits=0;
+                        }
+                        else
+                            output.write(c);
+                    break;
                 }
                 
-                totalLength += l;
+                totalLength++;
                 if (maxLength>=0 && totalLength > maxLength)
                     throw new IllegalStateException("Form too large");
             }
-            
+
+            size=output.size();
             if (key != null)
             {
-                value = buf.size()==0?"":new String(buf.getBuf(), 0, buf.size(), charset);
-                buf.reset();
+                value = size==0?"":output.toString(charset);
+                output.setCount(0);
                 map.add(key,value);
             }
-            else if (buf.size()>0)
-            {
-                map.add(new String(buf.getBuf(), 0, buf.size(), charset),"");
-            }
-
+            else if (size>0)
+                map.add(output.toString(charset),"");
         }
     }
     
@@ -491,74 +606,174 @@ public class UrlEncoded extends MultiMap
      */
     public static String decodeString(String encoded,int offset,int length,String charset)
     {
-        if (charset==null)
-            charset=StringUtil.__UTF8;
-        byte[] bytes=null;
-        int n=0;
-        
-        for (int i=0;i<length;i++)
+        if (charset==null || StringUtil.isUTF8(charset))
         {
-            char c = encoded.charAt(offset+i);
-            if (c<0||c>0xff)
-                throw new IllegalArgumentException("Not encoded");
-            
-            if (c=='+')
-            {
-                if (bytes==null)
-                {
-                    bytes=new byte[length*2];
-                    encoded.getBytes(offset, offset+i, bytes, 0);
-                    n=i;
-                }
-                bytes[n++] = (byte) ' ';
-            }
-            else if (c=='%' && (i+2)<length)
-            {
-                byte b;
-                char cn = encoded.charAt(offset+i+1);
-                if (cn>='a' && cn<='z')
-                    b=(byte)(10+cn-'a');
-                else if (cn>='A' && cn<='Z')
-                    b=(byte)(10+cn-'A');
-                else
-                    b=(byte)(cn-'0');
-                cn = encoded.charAt(offset+i+2);
-                if (cn>='a' && cn<='z')
-                    b=(byte)(b*16+10+cn-'a');
-                else if (cn>='A' && cn<='Z')
-                    b=(byte)(b*16+10+cn-'A');
-                else
-                    b=(byte)(b*16+cn-'0');
+            Utf8StringBuffer buffer=null;
 
-                if (bytes==null)
+            for (int i=0;i<length;i++)
+            {
+                char c = encoded.charAt(offset+i);
+                if (c<0||c>0xff)
                 {
-                    bytes=new byte[length];
-                    encoded.getBytes(offset, offset+i, bytes, 0);
-                    n=i;
+                    if (buffer==null)
+                    {
+                        buffer=new Utf8StringBuffer(length);
+                        buffer.getStringBuffer().append(encoded.substring(offset,offset+i+1));
+                    }
+                    else
+                        buffer.getStringBuffer().append(c);
                 }
-                i+=2;
-                bytes[n++]=b;
-            }
-            else if (n>0)
-                bytes[n++] = (byte) c;
-        }
+                else if (c=='+')
+                {
+                    if (buffer==null)
+                    {
+                        buffer=new Utf8StringBuffer(length);
+                        buffer.getStringBuffer().append(encoded.substring(offset,offset+i));
+                    }
+                    
+                    buffer.getStringBuffer().append(' ');
+                }
+                else if (c=='%' && (i+2)<length)
+                {
+                    if (buffer==null)
+                    {
+                        buffer=new Utf8StringBuffer(length);
+                        buffer.getStringBuffer().append(encoded.substring(offset,offset+i));
+                    }
 
-        if (bytes==null)
-        {
-            if (offset==0 && encoded.length()==length)
-                return encoded;
-            return encoded.substring(offset,offset+length);
+                    while(c=='%' && (i+2)<length)
+                    {
+                        try
+                        {
+                            byte b=(byte)TypeUtil.parseInt(encoded,offset+i+1,2,16);
+                            buffer.append(b);
+                            i+=3;
+                        }
+                        catch(NumberFormatException nfe)
+                        {
+                            buffer.getStringBuffer().append('%');
+                            for(char next; ((next=encoded.charAt(++i+offset))!='%');)
+                                buffer.getStringBuffer().append((next=='+' ? ' ' : next));
+                        }
+
+                        if (i<length)
+                            c = encoded.charAt(offset+i);
+                    }
+                    i--;
+                }
+                else if (buffer!=null)
+                    buffer.getStringBuffer().append(c);
+            }
+
+            if (buffer==null)
+            {
+                if (offset==0 && encoded.length()==length)
+                    return encoded;
+                return encoded.substring(offset,offset+length);
+            }
+
+            return buffer.toString();
         }
-        
-        try
+        else
         {
-            return new String(bytes,0,n,charset);
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            Log.warn(e.toString());
-            Log.debug(e);
-            return new String(bytes,0,n);
+            StringBuffer buffer=null;
+
+            try
+            {
+                for (int i=0;i<length;i++)
+                {
+                    char c = encoded.charAt(offset+i);
+                    if (c<0||c>0xff)
+                    {
+                        if (buffer==null)
+                        {
+                            buffer=new StringBuffer(length);
+                            buffer.append(encoded.substring(offset,offset+i+1));
+                        }
+                        else
+                            buffer.append(c);
+                    }
+                    else if (c=='+')
+                    {
+                        if (buffer==null)
+                        {
+                            buffer=new StringBuffer(length);
+                            buffer.append(encoded.substring(offset,offset+i));
+                        }
+                        
+                        buffer.append(' ');
+                    }
+                    else if (c=='%' && (i+2)<length)
+                    {
+                        if (buffer==null)
+                        {
+                            buffer=new StringBuffer(length);
+                            buffer.append(encoded.substring(offset,offset+i));
+                        }
+
+                        byte[] ba=new byte[length];
+                        int n=0;
+                        while(c>=0 && c<=0xff)
+                        {
+                            if (c=='%')
+                            {   
+                                if(i+2<length)
+                                {
+                                    try
+                                    {
+                                        ba[n++]=(byte)TypeUtil.parseInt(encoded,offset+i+1,2,16);
+                                        i+=3;
+                                    }
+                                    catch(NumberFormatException nfe)
+                                    {                                        
+                                        ba[n-1] = (byte)'%';                                    
+                                        for(char next; ((next=encoded.charAt(++i+offset))!='%');)
+                                            ba[n++] = (byte)(next=='+' ? ' ' : next);
+                                    }
+                                }
+                                else
+                                {
+                                    ba[n++] = (byte)'%';
+                                    i++;
+                                }
+                            }
+                            else if (c=='+')
+                            {
+                                ba[n++]=(byte)' ';
+                                i++;
+                            }
+                            else
+                            {
+                                ba[n++]=(byte)c;
+                                i++;
+                            }
+                            
+                            if (i>=length)
+                                break;
+                            c = encoded.charAt(offset+i);
+                        }
+
+                        i--;
+                        buffer.append(new String(ba,0,n,charset));
+
+                    }
+                    else if (buffer!=null)
+                        buffer.append(c);
+                }
+
+                if (buffer==null)
+                {
+                    if (offset==0 && encoded.length()==length)
+                        return encoded;
+                    return encoded.substring(offset,offset+length);
+                }
+
+                return buffer.toString();
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                throw new RuntimeException(e);
+            }
         }
         
     }

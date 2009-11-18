@@ -151,6 +151,24 @@ public class HttpParserTest extends TestCase
         assertEquals(-1, h);
     }
 
+    public void testConnect()
+        throws Exception
+    {
+        StringEndPoint io=new StringEndPoint();
+        io.setInput("CONNECT 192.168.1.2:80 HTTP/1.1\015\012" + "\015\012");
+        ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
+        SimpleBuffers buffers=new SimpleBuffers(new Buffer[]{buffer});
+
+        Handler handler = new Handler();
+        HttpParser parser= new HttpParser(buffers,io, handler, buffer.capacity(), 0);
+        parser.parse();
+        assertTrue(handler.request);
+        assertEquals("CONNECT", f0);
+        assertEquals("192.168.1.2:80", f1);
+        assertEquals("HTTP/1.1", f2);
+        assertEquals(-1, h);
+    }
+    
     public void testHeaderParse()
 	throws Exception
     {
@@ -163,6 +181,7 @@ public class HttpParserTest extends TestCase
                 + "Header3: \015\012"
                 + "Header4 \015\012"
                 + "  value4\015\012"
+                + "Server5: notServer\015\012"
                 + "\015\012");
         ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
         SimpleBuffers buffers=new SimpleBuffers(new Buffer[]{buffer});
@@ -181,7 +200,9 @@ public class HttpParserTest extends TestCase
         assertEquals("", val[2]);
         assertEquals("Header4", hdr[3]);
         assertEquals("value4", val[3]);
-        assertEquals(3, h);
+        assertEquals("Server5", hdr[4]);
+        assertEquals("notServer", val[4]);
+        assertEquals(4, h);
     }
 
     public void testChunkParse()
@@ -453,6 +474,7 @@ public class HttpParserTest extends TestCase
 
     class Handler extends HttpParser.EventHandler
     {   
+        boolean request;
         HttpFields fields;
         
         public void content(Buffer ref)
@@ -467,6 +489,7 @@ public class HttpParserTest extends TestCase
         {
             try
             {
+                request=true;
                 h= -1;
                 hdr= new String[9];
                 val= new String[9];
@@ -519,6 +542,7 @@ public class HttpParserTest extends TestCase
 
         public void startResponse(Buffer version, int status, Buffer reason)
         {
+            request=false;
             f0 = version.toString();
 	    f1 = Integer.toString(status);
 	    f2 = reason.toString();

@@ -71,7 +71,6 @@ public class XmlParser
         String validating_prop = System.getProperty("org.mortbay.xml.XmlParser.Validating", validating_dft ? "true" : "false");
         boolean notValidating = Boolean.getBoolean("org.mortbay.xml.XmlParser.NotValidating"); // deprecated!
         boolean validating = !notValidating && Boolean.valueOf(validating_prop).booleanValue();
-
         setValidating(validating);
     }
 
@@ -107,8 +106,9 @@ public class XmlParser
             }
 
             _parser.getXMLReader().setFeature("http://xml.org/sax/features/validation", validating);
-            _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespaces", validating);
-            _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespace-prefixes", validating);  }
+            _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespaces", true);
+            _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespace-prefixes", false);  
+        }
         catch (Exception e)
         {
             Log.warn(Log.EXCEPTION, e);

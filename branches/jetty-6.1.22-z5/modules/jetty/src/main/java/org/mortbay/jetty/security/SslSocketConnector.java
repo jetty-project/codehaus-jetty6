@@ -17,6 +17,7 @@ package org.mortbay.jetty.security;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -30,6 +31,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.net.ssl.HandshakeCompletedEvent;
+import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -151,6 +154,7 @@ public class SslSocketConnector extends SocketConnector
     private boolean _wantClientAuth = false;
     private int _handshakeTimeout = 0; //0 means use maxIdleTime
 
+    private boolean _allowRenegotiate =false;
 
     /* ------------------------------------------------------------ */
     /**
@@ -163,14 +167,52 @@ public class SslSocketConnector extends SocketConnector
 
 
     /* ------------------------------------------------------------ */
+    /**
+     * @return True if SSL re-negotiation is allowed (default false)
+     */
+    public boolean isAllowRenegotiate()
+    {
+        return _allowRenegotiate;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set if SSL re-negotiation is allowed. CVE-2009-3555 discovered
+     * a vulnerability in SSL/TLS with re-negotiation.  If your JVM
+     * does not have CVE-2009-3555 fixed, then re-negotiation should 
+     * not be allowed.
+     * @param allowRenegotiate true if re-negotiation is allowed (default false)
+     */
+    public void setAllowRenegotiate(boolean allowRenegotiate)
+    {
+        _allowRenegotiate = allowRenegotiate;
+    }
+
+    /* ------------------------------------------------------------ */
     public void accept(int acceptorID)
         throws IOException, InterruptedException
     {   
-        Socket socket = _serverSocket.accept();
-        configure(socket);
-        
-        Connection connection=new SslConnection(socket);
-        connection.dispatch();
+        try
+        {
+            Socket socket = _serverSocket.accept();
+            configure(socket);
+
+            Connection connection=new SslConnection(socket);
+            connection.dispatch();
+        }
+        catch(SSLException e)
+        {
+            Log.warn(e);
+            try
+            {
+                stop();
+            }
+            catch(Exception e2)
+            {
+                Log.warn(e2);
+                throw new IllegalStateException(e2.getMessage());
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -184,13 +226,6 @@ public class SslSocketConnector extends SocketConnector
     protected SSLServerSocketFactory createFactory() 
         throws Exception
     {
-        if (_password==null)
-            _password=new Password("");
-        if (_keyPassword==null)
-            _keyPassword=_password;
-        if (_trustPassword==null)
-            _trustPassword=_password;
-
         if (_truststore==null)
         {
             _truststore=_keystore;
@@ -198,30 +233,27 @@ public class SslSocketConnector extends SocketConnector
         }
 
         KeyManager[] keyManagers = null;
+        InputStream keystoreInputStream = null;
         if (_keystore != null)
-        {
-            KeyStore keyStore = KeyStore.getInstance(_keystoreType);
-            if (_password == null) 
-                throw new SSLException("_password is not set");
-            keyStore.load(Resource.newResource(_keystore).getInputStream(), _password.toString().toCharArray());
-    
-            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_sslKeyManagerFactoryAlgorithm);        
-            if (_keyPassword == null) 
-                throw new SSLException("_keypassword is not set");
-            keyManagerFactory.init(keyStore,_keyPassword.toString().toCharArray());
-            keyManagers = keyManagerFactory.getKeyManagers();
-        }
+        	keystoreInputStream = Resource.newResource(_keystore).getInputStream();
+        KeyStore keyStore = KeyStore.getInstance(_keystoreType);
+        keyStore.load(keystoreInputStream, _password==null?null:_password.toString().toCharArray());
+
+        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_sslKeyManagerFactoryAlgorithm);        
+        keyManagerFactory.init(keyStore,_keyPassword==null?null:_keyPassword.toString().toCharArray());
+        keyManagers = keyManagerFactory.getKeyManagers();
 
         TrustManager[] trustManagers = null;
+        InputStream truststoreInputStream = null;
         if (_truststore != null)
-        {
-            KeyStore trustStore = KeyStore.getInstance(_truststoreType);
-            trustStore.load(Resource.newResource(_truststore).getInputStream(), _trustPassword.toString().toCharArray());
-            
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(_sslTrustManagerFactoryAlgorithm);
-            trustManagerFactory.init(trustStore);
-            trustManagers = trustManagerFactory.getTrustManagers();
-        }
+        	truststoreInputStream = Resource.newResource(_truststore).getInputStream();
+        KeyStore trustStore = KeyStore.getInstance(_truststoreType);
+        trustStore.load(truststoreInputStream,_trustPassword==null?null:_trustPassword.toString().toCharArray());
+        
+        TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(_sslTrustManagerFactoryAlgorithm);
+        trustManagerFactory.init(trustStore);
+        trustManagers = trustManagerFactory.getTrustManagers();
+        
 
         SecureRandom secureRandom = _secureRandomAlgorithm==null?null:SecureRandom.getInstance(_secureRandomAlgorithm);
 
@@ -451,8 +483,9 @@ public class SslSocketConnector extends SocketConnector
         }
         catch (Exception e)
         {
-            Log.warn(Log.EXCEPTION, e);
-            throw new IOException("Could not create JsseListener: " + e.toString());
+            Log.warn(e.toString());
+            Log.debug(e);
+            throw new IOException("!JsseListener: " + e);
         }
         return socket;
     }
@@ -472,6 +505,9 @@ public class SslSocketConnector extends SocketConnector
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * @param keystore The resource path to the keystore, or null for built in keystores.
+     */
     public void setKeystore(String keystore)
     {
         _keystore = keystore;
@@ -618,12 +654,36 @@ public class SslSocketConnector extends SocketConnector
                 if (handshakeTimeout > 0)            
                     _socket.setSoTimeout(handshakeTimeout);
 
-                ((SSLSocket)_socket).startHandshake();
+                final SSLSocket ssl=(SSLSocket)_socket;
+                ssl.addHandshakeCompletedListener(new HandshakeCompletedListener()
+                {
+                    boolean handshook=false;
+                    public void handshakeCompleted(HandshakeCompletedEvent event)
+                    {
+                        if (handshook)
+                        {
+                            if (!_allowRenegotiate)
+                            {
+                                Log.warn("SSL renegotiate denied: "+ssl);
+                                try{ssl.close();}catch(IOException e){Log.warn(e);}
+                            }
+                        }
+                        else
+                            handshook=true;
+                    }
+                });
+                ssl.startHandshake();
 
                 if (handshakeTimeout>0)
                     _socket.setSoTimeout(oldTimeout);
 
                 super.run();
+            }
+            catch (SSLException e)
+            {
+                Log.warn(e); 
+                try{close();}
+                catch(IOException e2){Log.ignore(e2);}
             }
             catch (IOException e)
             {

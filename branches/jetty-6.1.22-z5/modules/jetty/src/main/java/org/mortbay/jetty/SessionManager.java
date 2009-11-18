@@ -37,7 +37,7 @@ public interface SessionManager extends LifeCycle
     /* ------------------------------------------------------------ */
     /** Session cookie name.
      * Defaults to JSESSIONID, but can be set with the
-     * org.mortbay.jetty.servlet.SessionCookie system property.
+     * org.mortbay.jetty.servlet.SessionCookie context init parameter.
      */
     public final static String __SessionCookieProperty = "org.mortbay.jetty.servlet.SessionCookie";
     public final static String __DefaultSessionCookie = "JSESSIONID";   
@@ -46,7 +46,8 @@ public interface SessionManager extends LifeCycle
     /* ------------------------------------------------------------ */
     /** Session URL parameter name.
      * Defaults to jsessionid, but can be set with the
-     * org.mortbay.jetty.servlet.SessionURL system property.
+     * org.mortbay.jetty.servlet.SessionURL context init parameter.  If set to null or 
+     * "none" no URL rewriting will be done.
      */
     public final static String __SessionURLProperty = "org.mortbay.jetty.servlet.SessionURL";
     public final static String __DefaultSessionURL = "jsessionid";
