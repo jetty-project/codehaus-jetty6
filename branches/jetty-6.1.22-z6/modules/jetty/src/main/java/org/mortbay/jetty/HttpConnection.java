@@ -27,6 +27,7 @@ import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.RuntimeIOException;
+import org.mortbay.io.UncheckedPrintWriter;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
@@ -336,7 +337,7 @@ public class HttpConnection implements Connection
         if (_writer == null)
         {
             _writer = new OutputWriter();
-            _printWriter = new PrintWriter(_writer)
+            _printWriter = new UncheckedPrintWriter(_writer)
             {
                 /* ------------------------------------------------------------ */
                 /*
