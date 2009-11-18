@@ -43,7 +43,7 @@ import org.mortbay.servlet.GzipFilter;
  */
 public class IncludableGzipFilter extends GzipFilter
 {
-    boolean _uncheckedPrintWriter=false;
+    boolean _uncheckedPrintWriter=true;
     
     public void init(FilterConfig filterConfig) throws ServletException
     {
