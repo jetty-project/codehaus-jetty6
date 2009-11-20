@@ -239,7 +239,6 @@
 
   </build>
   <modules>
-    <module>modules/servlet-api-2.5</module>
     <module>modules/util</module>
     <module>modules/util5</module>
     <module>modules/jetty</module>
