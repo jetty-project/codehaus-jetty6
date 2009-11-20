@@ -64,7 +64,7 @@ public class SetUID
         
         try 
         {
-            System.loadLibrary("libsetuid");
+            System.loadLibrary("setuid");
             return;
         } 
         catch (Throwable e) 
