@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-integration-project</artifactId>
-  <version>7.0.2-SNAPSHOT</version>
+  <version>7.0.1.v20091122</version>
   <name>Jetty :: Codehaus Integration Project</name>
   <packaging>pom</packaging>
 
@@ -18,9 +18,9 @@
     <jna-version>3.2.2</jna-version>
   </properties>
   <scm>
-    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</developerConnection>
-    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</url>
+    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-7.0.1.v20091122</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-7.0.1.v20091122</developerConnection>
+    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-7.0.1.v20091122</url>
   </scm>
 
   <build>
