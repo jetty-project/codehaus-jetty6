@@ -1,7 +1,0 @@
-etc/default
-etc/jetty7
-etc/jetty7/contexts
-usr/share/jetty7
-var/lib/jetty7/webapps
-var/log/jetty7
-var/cache/jetty7
