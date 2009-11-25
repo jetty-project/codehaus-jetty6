@@ -496,6 +496,15 @@
                   <includes>**</includes>
                   <outputDirectory>${assembly.directory}/lib/spring</outputDirectory>
                 </artifactItem>
+                <artifactItem>
+                  <groupId>org.eclipse.jetty</groupId>
+                  <artifactId>jetty-websocket</artifactId>
+                  <version>${jetty-version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/lib</outputDirectory>
+                </artifactItem>  
               </artifactItems>
             </configuration>
           </execution>
@@ -756,6 +765,11 @@
     <dependency>
     	<groupId>org.eclipse.jetty</groupId>
     	<artifactId>jetty-policy</artifactId>
+    	<version>${jetty-version}</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.eclipse.jetty</groupId>
+    	<artifactId>jetty-websocket</artifactId>
     	<version>${jetty-version}</version>
     </dependency>
     <dependency>
