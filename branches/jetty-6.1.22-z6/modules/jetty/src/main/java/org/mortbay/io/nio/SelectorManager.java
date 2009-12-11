@@ -47,7 +47,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
     private static final int __MONITOR_PERIOD=Integer.getInteger("org.mortbay.io.nio.MONITOR_PERIOD",1000).intValue();
     private static final int __MAX_SELECTS=Integer.getInteger("org.mortbay.io.nio.MAX_SELECTS",15000).intValue();
     private static final int __BUSY_PAUSE=Integer.getInteger("org.mortbay.io.nio.BUSY_PAUSE",50).intValue();
-    private static final int __BUSY_KEY=Integer.getInteger("org.mortbay.io.nio.BUSY_KEY",4).intValue();
+    private static final int __BUSY_KEY=Integer.getInteger("org.mortbay.io.nio.BUSY_KEY",8).intValue();
     
     private boolean _delaySelectKeyUpdate=true;
     private long _maxIdleTime;
@@ -598,11 +598,26 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         {
                             if (++_busyKeyCount>__BUSY_KEY && !(busy.channel() instanceof ServerSocketChannel))
                             {
-                                SelectChannelEndPoint endpoint = (SelectChannelEndPoint)busy.attachment();
+                                final SelectChannelEndPoint endpoint = (SelectChannelEndPoint)busy.attachment();
                                 Log.warn("Busy Key "+busy.channel()+" "+endpoint);
                                 busy.cancel();
                                 if (endpoint!=null)
-                                    endpoint.close();
+                                {
+                                    dispatch(new Runnable()
+                                    {
+                                        public void run()
+                                        {
+                                            try
+                                            {
+                                                endpoint.close();
+                                            }
+                                            catch (IOException e)
+                                            {
+                                                Log.ignore(e);
+                                            }
+                                        }
+                                    });
+                                }
                             }
                         }
                         else
