@@ -1,8 +1,11 @@
 jetty-6.1-SNAPSHOT
  + JSON parses NaN as null
  + Updated JSP to 2.1.v20091210
+ + COMETD-58 Extension.rcv() return null causes NPE in AbstractBayeux.PublishHandler.publish
+ + COMETD-59 AcknowledgeExtension does not handle null channel in Message
  + JETTY-1156 SSL blocking close with JVM Bug busy key fix
  + JETTY-1157 Don't hold array passed in write(byte[])
+ + JETTY-1161 An Extension that measures round-trip delay for cometd messages.
 
 jetty-6.1.22 16 November 2009
  + Fixed XSS issue in demo CometDump servlet
