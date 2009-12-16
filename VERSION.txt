@@ -6,6 +6,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1156 SSL blocking close with JVM Bug busy key fix
  + JETTY-1157 Don't hold array passed in write(byte[])
  + JETTY-1161 An Extension that measures round-trip delay for cometd messages.
+ + JETTY-1162 Add support for async/sync message delivery to BayeuxClient
 
 jetty-6.1.22 16 November 2009
  + Fixed XSS issue in demo CometDump servlet
