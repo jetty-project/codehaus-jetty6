@@ -103,6 +103,8 @@ public class ContentExchange extends CachedExchange
     /* ------------------------------------------------------------ */
     protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
     {
+        if (_responseContent!=null)
+            _responseContent.reset();
         _responseStatus = status;
         super.onResponseStatus(version,status,reason);
     }
