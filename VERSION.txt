@@ -1,6 +1,7 @@
 jetty-6.1-SNAPSHOT
  + JSON parses NaN as null
  + Updated JSP to 2.1.v20091210
+ + COMETD-46 reset ContentExchange content on resend
  + COMETD-58 Extension.rcv() return null causes NPE in AbstractBayeux.PublishHandler.publish
  + COMETD-59 AcknowledgeExtension does not handle null channel in Message
  + JETTY-1156 SSL blocking close with JVM Bug busy key fix
