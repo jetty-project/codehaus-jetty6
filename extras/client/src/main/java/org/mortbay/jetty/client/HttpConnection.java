@@ -524,7 +524,20 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     public void close() throws IOException
     {
-        _endp.close();
+        try
+        {
+            _endp.close();
+        }
+        finally
+        {
+            HttpExchange exchange=_exchange;
+            if (exchange!=null)
+            {
+                int status = exchange.getStatus();
+                if (status>HttpExchange.STATUS_START && status<HttpExchange.STATUS_COMPLETED)
+                    exchange.onException(new IOException("CLOSED"));
+            }
+        }
     }
 
 
