@@ -82,6 +82,6 @@
   <properties>
      <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
      <servlet-version>2.5</servlet-version>
-     <jsp21-version>9.1.1.B60.25.p2</jsp21-version>
+     <jsp21-version>2.1.v20091210</jsp21-version>
   </properties>
 </project>
