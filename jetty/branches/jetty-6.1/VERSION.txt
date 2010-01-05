@@ -4,8 +4,6 @@ jetty-6.1-SNAPSHOT
  + COMETD-46 reset ContentExchange content on resend
  + COMETD-58 Extension.rcv() return null causes NPE in AbstractBayeux.PublishHandler.publish
  + COMETD-59 AcknowledgeExtension does not handle null channel in Message
- + COMETD-62 Delay add listeners until after client construction
- + JETTY-1153 System property for UrlEncoded charset
  + JETTY-1155 HttpConnection.close notifies HttpExchange
  + JETTY-1156 SSL blocking close with JVM Bug busy key fix
  + JETTY-1157 Don't hold array passed in write(byte[])
