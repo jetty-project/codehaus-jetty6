@@ -15,8 +15,6 @@
 
 package org.mortbay.thread;
 
-import org.mortbay.component.LifeCycle;
-
 /* ------------------------------------------------------------ */
 /** ThreadPool.
  * @author gregw
@@ -29,7 +27,7 @@ public interface ThreadPool
 
     /* ------------------------------------------------------------ */
     /**
-     * Blocks until the thread pool is {@link LifeCycle#stop stopped}.
+     * Blocks until the thread pool is {@link org.mortbay.component.LifeCycle#stop stopped}.
      */
     public void join() throws InterruptedException;
 
