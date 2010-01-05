@@ -149,16 +149,16 @@ public class ContentExchange extends CachedExchange
         }
         else if (_requestContentSource != null) 
         {
-			if (_requestContentSource.markSupported()) 
-			{
-				_requestContent = null;
-				_requestContentSource.reset();
-			} 
-			else 
-			{
-				throw new IOException("Unsupported retry attempt");
-			}
-		}
+            if (_requestContentSource.markSupported()) 
+            {
+                _requestContent = null;
+                _requestContentSource.reset();
+            } 
+            else 
+            {
+                throw new IOException("Unsupported retry attempt");
+            }
+        }
 
         super.onRetry();
     }
