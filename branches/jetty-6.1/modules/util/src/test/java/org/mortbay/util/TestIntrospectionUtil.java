@@ -18,7 +18,6 @@ package org.mortbay.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-
 import junit.framework.TestCase;
 
 /**

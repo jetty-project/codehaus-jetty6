@@ -1,8 +1,8 @@
 package org.mortbay.component;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import junit.framework.Test;
 import junit.textui.TestRunner;
 
 public class LifeCycleListenerTest extends TestCase

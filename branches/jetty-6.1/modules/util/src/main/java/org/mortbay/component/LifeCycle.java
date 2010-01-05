@@ -16,8 +16,6 @@ package org.mortbay.component;
 
 import java.util.EventListener;
 
-import org.mortbay.util.LazyList;
-
 /* ------------------------------------------------------------ */
 /**
  * The lifecycle interface for generic components.
