@@ -33,16 +33,20 @@ import org.mortbay.log.Log;
  * <p><h4>Notes</h4>
  * The hashtable either contains String single values, vectors
  * of String or arrays of Strings.
- *
- * This class is only partially synchronised.  In particular, simple
+ * <p>
+ * The UTF-8 charset is assumed, unless otherwise defined by either
+ * passing a parameter or setting the "org.mortbay.util.UrlEncoding.charset"
+ * System property.
+ * <p>
+ * This class is only partially synchronized.  In particular, simple
  * get operations are not protected from concurrent updates.
  *
  * @see java.net.URLEncoder
- * @author Greg Wilkins (gregw)
  */
 public class UrlEncoded extends MultiMap
 {
-
+    public static final String ENCODING = System.getProperty("org.mortbay.util.UrlEncoding.charset",StringUtil.__UTF8);
+    
     /* ----------------------------------------------------------------- */
     public UrlEncoded(UrlEncoded url)
     {
@@ -59,7 +63,7 @@ public class UrlEncoded extends MultiMap
     public UrlEncoded(String s)
     {
         super(6);
-        decode(s,StringUtil.__UTF8);
+        decode(s,ENCODING);
     }
     
     /* ----------------------------------------------------------------- */
@@ -72,7 +76,7 @@ public class UrlEncoded extends MultiMap
     /* ----------------------------------------------------------------- */
     public void decode(String query)
     {
-        decodeTo(query,this,StringUtil.__UTF8);
+        decodeTo(query,this,ENCODING);
     }
     
     /* ----------------------------------------------------------------- */
@@ -86,7 +90,7 @@ public class UrlEncoded extends MultiMap
      */
     public String encode()
     {
-        return encode(StringUtil.__UTF8,false);
+        return encode(ENCODING,false);
     }
     
     /* -------------------------------------------------------------- */
@@ -115,7 +119,7 @@ public class UrlEncoded extends MultiMap
     public static String encode(MultiMap map, String charset, boolean equalsForNullValue)
     {
         if (charset==null)
-            charset=StringUtil.__UTF8;
+            charset=ENCODING;
         
         StringBuffer result = new StringBuffer(128);
         synchronized(result)
@@ -174,7 +178,7 @@ public class UrlEncoded extends MultiMap
     public static void decodeTo(String content, MultiMap map, String charset)
     {
         if (charset==null)
-            charset=StringUtil.__UTF8;
+            charset=ENCODING;
 
         synchronized(map)
         {
@@ -399,7 +403,7 @@ public class UrlEncoded extends MultiMap
     /** Decoded parameters to Map.
      * @param in InputSteam to read
      * @param map MultiMap to add parameters to
-     * @param maxLength maximum length of conent to read 0r -1 for no limit
+     * @param maxLength maximum length of content to read 0r -1 for no limit
      */
     public static void decodeUtf8To(InputStream in, MultiMap map, int maxLength)
     throws IOException
@@ -487,7 +491,7 @@ public class UrlEncoded extends MultiMap
             maxLength=Integer.MAX_VALUE;
         while ((c=input.read())>0 && length++<maxLength)
             buf.append((char)c);
-        decodeTo(buf.toString(),map,StringUtil.__UTF8);
+        decodeTo(buf.toString(),map,ENCODING);
     }
     
     /* -------------------------------------------------------------- */
@@ -780,13 +784,12 @@ public class UrlEncoded extends MultiMap
     
     /* ------------------------------------------------------------ */
     /** Perform URL encoding.
-     * Assumes 8859 charset
      * @param string 
      * @return encoded string.
      */
     public static String encodeString(String string)
     {
-        return encodeString(string,StringUtil.__UTF8);
+        return encodeString(string,ENCODING);
     }
     
     /* ------------------------------------------------------------ */
@@ -797,7 +800,7 @@ public class UrlEncoded extends MultiMap
     public static String encodeString(String string,String charset)
     {
         if (charset==null)
-            charset=StringUtil.__UTF8;
+            charset=ENCODING;
         byte[] bytes=null;
         try
         {
