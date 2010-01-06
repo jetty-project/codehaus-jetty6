@@ -8,6 +8,10 @@
   <artifactId>jetty-jsp-2.1</artifactId>
   <name>Jetty :: Jetty JSP Additions</name>
   <description>Additions to Jasper implementation from Glassfish</description>
+  <properties>
+     <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
+     <servlet-version>2.5</servlet-version>
+  </properties>
   <licenses>
     <license>
       <name>CDDL 1.0</name>
@@ -58,7 +62,7 @@
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jsp-2.1-glassfish</artifactId>
-      <version>${jsp21-version}</version>
+      <version>${jsp-2-1-version}</version>
       <exclusions>
         <exclusion>
           <groupId>org.mortbay.jetty</groupId>
@@ -79,9 +83,4 @@
       <version>1.6.5</version>
     </dependency -->
   </dependencies>
-  <properties>
-     <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
-     <servlet-version>2.5</servlet-version>
-     <jsp21-version>2.1.v20091210</jsp21-version>
-  </properties>
 </project>
