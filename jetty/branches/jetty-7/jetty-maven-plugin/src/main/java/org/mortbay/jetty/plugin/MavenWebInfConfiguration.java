@@ -162,9 +162,8 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
         }
         
         List<Resource> superList = super.findJars(context);
-          
-        list.addAll(superList);
-     
+        if (superList != null)
+            list.addAll(superList);
         return list;
     }
 
