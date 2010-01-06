@@ -1,3 +1,5 @@
+ + Updated JSP to 2.1.v20091210
+
 jetty@codehaus 7.0.1.v20091123 22 November 2009
  + JETTY-1143 make Jetty7 serve WebService request
  + Change name of setuid lib to "setuid" to be mac friendly
