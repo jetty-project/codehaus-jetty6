@@ -1,4 +1,5 @@
  + Updated JSP to 2.1.v20091210
+ + JETTY-1160 jetty-maven-plugin needs target directory
 
 jetty@codehaus 7.0.1.v20091123 22 November 2009
  + JETTY-1143 make Jetty7 serve WebService request

@@ -107,8 +107,8 @@ public class JettyRunMojo extends AbstractJettyMojo
     /**
      * Root directory for all html/jsp etc files
      *
-     * @parameter expression="${basedir}/src/main/webapp"
-     * @required
+     * @parameter expression="${maven.war.src}"
+     * 
      */
     private File webAppSourceDirectory;
     
@@ -199,12 +199,12 @@ public class JettyRunMojo extends AbstractJettyMojo
         try
         {
             if ((getWebAppSourceDirectory() == null) || !getWebAppSourceDirectory().exists())
-                throw new MojoExecutionException("Webapp source directory "
-                        + (getWebAppSourceDirectory() == null ? "null" : getWebAppSourceDirectory().getCanonicalPath())
-                        + " does not exist");
+            {
+                webAppSourceDirectory = new File (project.getBasedir(), "src"+File.separator+"main"+File.separator+"webapp");
+                getLog().info("webAppSourceDirectory "+getWebAppSourceDirectory() +" does not exist. Defaulting to "+webAppSourceDirectory.getAbsolutePath());   
+            }
             else
-                getLog().info( "Webapp source directory = "
-                        + getWebAppSourceDirectory().getCanonicalPath());
+                getLog().info( "Webapp source directory = " + getWebAppSourceDirectory().getCanonicalPath());
         }
         catch (IOException e)
         {

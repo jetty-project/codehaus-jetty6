@@ -119,7 +119,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
 
     /**
      * The temporary directory to use for the webapp.
-     * Defaults to target/jetty-tmp
+     * Defaults to target/tmp
      *
      * @parameter expression="${project.build.directory}/tmp"
      * @required
@@ -503,7 +503,12 @@ public abstract class AbstractJettyMojo extends AbstractMojo
 
         //If no tmp directory was specified, and we have one, use it
         if (webAppConfig.getTempDirectory() == null && tmpDirectory != null)
+        {
+            if (!tmpDirectory.exists())
+                tmpDirectory.mkdirs();
+            
             webAppConfig.setTempDirectory(tmpDirectory);
+        }
       
         getLog().info("Context path = " + webAppConfig.getContextPath());
         getLog().info("Tmp directory = "+ (webAppConfig.getTempDirectory()== null? " determined at runtime": webAppConfig.getTempDirectory()));
