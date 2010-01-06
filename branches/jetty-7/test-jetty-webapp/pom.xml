@@ -53,7 +53,7 @@
                 <goal>jspc</goal>
               </goals>
               <configuration>
-                 <webXml>target/foo/WEB-INF/web.xml</webXml>
+                 <webXml>${basedir}/target/foo/WEB-INF/web.xml</webXml>
                  <includes>**/*.foo</includes>
                  <excludes>**/*.fff</excludes>
               </configuration>
@@ -84,7 +84,7 @@
             <phase>package</phase>
             <configuration>
               <warSourceDirectory>target/foo</warSourceDirectory>
-              <webXml>target/web.xml</webXml>
+              <webXml>${basedir}/target/web.xml</webXml>
             </configuration>
           </execution>
         </executions>
