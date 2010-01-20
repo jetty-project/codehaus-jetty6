@@ -113,7 +113,7 @@ public class HttpDestination
             return _connections.size();
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     public int getIdleConnections()
     {
@@ -164,11 +164,10 @@ public class HttpDestination
 
         while ((connection == null) && (connection = getIdleConnection()) == null && timeout>0)
         {
-            int totalConnections = 0;
             boolean starting = false;
             synchronized (this)
             {
-                totalConnections = _connections.size() + _pendingConnections;
+                int totalConnections = _connections.size() + _pendingConnections;
                 if (totalConnections < _maxConnections)
                 {
                     _newConnection++;
@@ -181,7 +180,7 @@ public class HttpDestination
             {
                 try
                 {
-                    Thread.currentThread().sleep(200);
+                    Thread.sleep(200);
                     timeout-=200;
                 }
                 catch (InterruptedException e)
@@ -222,8 +221,6 @@ public class HttpDestination
     /* ------------------------------------------------------------------------------- */
     public HttpConnection getIdleConnection() throws IOException
     {
-        long now = _client.getNow();
-        long idleTimeout=_client.getIdleTimeout();
         HttpConnection connection = null;
         while (true)
         {
@@ -332,6 +329,7 @@ public class HttpDestination
             }
             else if (_queue.size()==0)
             {
+                connection.setIdleTimeout();
                 _idle.add(connection);
             }
             else
@@ -381,7 +379,7 @@ public class HttpDestination
             {
                 if (_queue.size()==0)
                 {
-                    connection.setIdleTimeout(_client.getNow()+_client.getIdleTimeout());
+                    connection.setIdleTimeout();
                     _idle.add(connection);
                 }
                 else
@@ -496,7 +494,7 @@ public class HttpDestination
         {
             Authorization auth= (Authorization)_authorizations.match(ex.getURI());
             if (auth !=null)
-                ((Authorization)auth).setCredentials(ex);
+                auth.setCredentials(ex);
         }
 
         HttpConnection connection = getIdleConnection();
