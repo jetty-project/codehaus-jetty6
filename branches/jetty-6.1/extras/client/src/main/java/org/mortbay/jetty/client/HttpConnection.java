@@ -51,7 +51,6 @@ public class HttpConnection implements Connection
     Buffer _connectionHeader;
     Buffer _requestContentChunk;
     boolean _requestComplete;
-    public String _message;
     public boolean _reserved;
     // The current exchange waiting for a response
     volatile HttpExchange _exchange;
@@ -140,7 +139,6 @@ public class HttpConnection implements Connection
     public void handle() throws IOException
     {
         int no_progress = 0;
-        long flushed = 0;
 
         boolean failed = false;
         while (_endp.isBufferingInput() || _endp.isOpen())
@@ -200,7 +198,7 @@ public class HttpConnection implements Connection
                     {
                         if (_exchange == null)
                             continue;
-                        flushed = _generator.flush();
+                        long flushed = _generator.flush();
                         io += flushed;
                     }
 
@@ -542,7 +540,7 @@ public class HttpConnection implements Connection
 
 
     /* ------------------------------------------------------------ */
-    public void setIdleTimeout(long expire)
+    public void setIdleTimeout()
     {
         synchronized (this)
         {
@@ -552,7 +550,7 @@ public class HttpConnection implements Connection
                 throw new IllegalStateException();
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     public boolean cancelIdleTimeout()
     {
@@ -564,7 +562,7 @@ public class HttpConnection implements Connection
                 return true;
             }
         }
-        
+
         return false;
     }
 
