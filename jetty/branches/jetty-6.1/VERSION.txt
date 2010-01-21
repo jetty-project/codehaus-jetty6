@@ -12,8 +12,9 @@ jetty-6.1-SNAPSHOT
  + JETTY-1157 Don't hold array passed in write(byte[])
  + JETTY-1161 An Extension that measures round-trip delay for cometd messages.
  + JETTY-1162 Add support for async/sync message delivery to BayeuxClient
- + 300178 HttpClients opens too many connections that are immediately closed
+ + JETTY-1168 Don't hold sessionIdManager lock when invalidating sessions
  + JETTY-1170 NPE on client when server-side extension returns null
+ + 300178 HttpClients opens too many connections that are immediately closed
 
 jetty-6.1.22 16 November 2009
  + Fixed XSS issue in demo CometDump servlet

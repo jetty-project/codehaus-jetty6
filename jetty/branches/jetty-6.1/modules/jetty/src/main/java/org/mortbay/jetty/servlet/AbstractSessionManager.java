@@ -639,27 +639,22 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     public void removeSession(Session session, boolean invalidate)
     {
         // Remove session from context and global maps
-        synchronized (_sessionIdManager)
+        boolean removed = false;
+        synchronized (this)
         {
-            boolean removed = false;
-            
-            synchronized (this)
+            //take this session out of the map of sessions for this context
+            if (getSession(session.getClusterId()) != null)
             {
-                //take this session out of the map of sessions for this context
-                if (getSession(session.getClusterId()) != null)
-                {
-                    removed = true;
-                    removeSession(session.getClusterId());
-                }
-            }   
-            
-            if (removed)
-            {
-                // Remove session from all context and global id maps
-                _sessionIdManager.removeSession(session);
-                if (invalidate)
-                    _sessionIdManager.invalidateAll(session.getClusterId());
+                removed = true;
+                removeSession(session.getClusterId());
             }
+        }  
+
+        if (removed && invalidate)
+        {
+            // Remove session from all context and global id maps
+            _sessionIdManager.removeSession(session);
+            _sessionIdManager.invalidateAll(session.getClusterId());
         }
         
         if (invalidate && _sessionListeners!=null)
