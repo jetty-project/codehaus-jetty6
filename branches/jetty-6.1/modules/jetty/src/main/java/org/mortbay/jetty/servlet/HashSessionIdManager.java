@@ -187,18 +187,21 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
      */
     public void invalidateAll(String id)
     {
-        synchronized (this)
+        while (true)
         {
-            // Do not use interators as this method tends to be called recursively 
-            // by the invalidate calls.
-            while (_sessions.containsKey(id))
+            Session session=null;
+            synchronized (this)
             {
-                Session session=(Session)_sessions.getValue(id,0);
-                if (session.isValid())
-                    session.invalidate();
-                else
+                if (_sessions.containsKey(id))
+                {
+                    session=(Session)_sessions.getValue(id,0);
                     _sessions.removeValue(id,session);
+                }
+                else
+                    return;
             }
+            if (session.isValid())
+                session.invalidate();
         }
     }
 
