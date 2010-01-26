@@ -14,98 +14,25 @@
 
 package org.mortbay.terracotta.servlet;
 
-import java.io.IOException;
-import java.util.Random;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.eclipse.jetty.http.HttpMethods;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.client.ContentExchange;
-import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.server.session.AbstractNewSessionTest;
+import org.eclipse.jetty.server.session.AbstractTestServer;
 import org.testng.annotations.Test;
 
 /**
  * @version $Revision$ $Date$
  */
-public class NewSessionTest
+public class NewSessionTest extends AbstractNewSessionTest
 {
-    @Test
+    @Test(groups={"tc-all"})
     public void testNewSession() throws Exception
     {
-        Random random = new Random(System.nanoTime());
-
-        String contextPath = "";
-        String servletMapping = "/server";
-        int port = random.nextInt(50000) + 10000;
-        int scavengePeriod = 3;
-        TerracottaJettyServer server = new TerracottaJettyServer(port, 1, scavengePeriod);
-        ServletContextHandler context = server.addContext(contextPath);
-        context.addServlet(TestServlet.class, servletMapping);
-        server.start();
-        try
-        {
-            HttpClient client = new HttpClient();
-            client.setConnectorType(HttpClient.CONNECTOR_SOCKET);
-            client.start();
-            try
-            {
-                ContentExchange exchange = new ContentExchange(true);
-                exchange.setMethod(HttpMethods.GET);
-                exchange.setURL("http://localhost:" + port + contextPath + servletMapping + "?action=create");
-                client.send(exchange);
-                exchange.waitForDone();
-                assert exchange.getResponseStatus() == HttpServletResponse.SC_OK;
-                String sessionCookie = exchange.getResponseFields().getStringField("Set-Cookie");
-                assert sessionCookie != null;
-                // Mangle the cookie, replacing Path with $Path, etc.
-                sessionCookie = sessionCookie.replaceFirst("(\\W)(P|p)ath=", "$1\\$Path=");
-
-                // Let's wait for the scavenger to run, waiting 2.5 times the scavenger period
-                Thread.sleep(scavengePeriod * 2500L);
-
-                // The session is not there anymore, but we present an old cookie
-                // The server creates a new session, we must ensure we released all locks
-                exchange = new ContentExchange(true);
-                exchange.setMethod(HttpMethods.GET);
-                exchange.setURL("http://localhost:" + port + contextPath + servletMapping + "?action=old-create");
-                exchange.getRequestFields().add("Cookie", sessionCookie);
-                client.send(exchange);
-                exchange.waitForDone();
-                assert exchange.getResponseStatus() == HttpServletResponse.SC_OK;
-            }
-            finally
-            {
-                client.stop();
-            }
-        }
-        finally
-        {
-            server.stop();
-        }
-
+      super.testNewSession();
     }
-    public static class TestServlet extends HttpServlet
+
+    @Override
+    public AbstractTestServer createServer(int port, int max, int scavenge)
     {
-        @Override
-        protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-        {
-            String action = request.getParameter("action");
-            if ("create".equals(action))
-            {
-                request.getSession(true);
-            }
-            else if ("old-create".equals(action))
-            {
-                request.getSession(true);
-            }
-            else
-            {
-                assert false;
-            }
-        }
+        return new TerracottaJettyServer(port,max,scavenge);
     }
+   
 }

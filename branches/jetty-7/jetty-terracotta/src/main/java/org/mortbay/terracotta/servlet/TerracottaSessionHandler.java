@@ -54,85 +54,93 @@ public class TerracottaSessionHandler extends SessionHandler
         super(manager);
     }
 
-    @Override
-    public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+    public void doScope(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
     throws IOException, ServletException
     {
-        setRequestedId(baseRequest, request);
+        setRequestedId(baseRequest,request);
 
-        Request currentRequest = (request instanceof Request) ? (Request)request : HttpConnection.getCurrentConnection().getRequest();
-
-        SessionManager requestSessionManager = currentRequest.getSessionManager();
-        HttpSession requestSession = currentRequest.getSession(false);
-
+        SessionManager old_session_manager=null;
+        HttpSession old_session=null;
         TerracottaSessionManager sessionManager = (TerracottaSessionManager)getSessionManager();
-        Log.debug("SessionManager = {}", sessionManager);
-
-        // Is it a cross context dispatch or a direct hit to this context ?
-        if (sessionManager != requestSessionManager)
-        {
-            // Setup the request for this context
-            currentRequest.setSessionManager(sessionManager);
-            currentRequest.setSession(null);
-        }
-
-        // Tell the session manager that the request is entering
-        if (sessionManager != null) sessionManager.enter(currentRequest);
+        Request currentRequest = (request instanceof Request) ? (Request)request : HttpConnection.getCurrentConnection().getRequest();
         try
         {
-            HttpSession currentSession = null;
-            if (sessionManager != null)
+            old_session_manager = baseRequest.getSessionManager();
+            old_session = baseRequest.getSession(false);
+           
+            if (old_session_manager != sessionManager)
             {
-                currentSession = currentRequest.getSession(false);
-                if (currentSession != null)
+                // new session context
+                baseRequest.setSessionManager(sessionManager);
+                baseRequest.setSession(null);
+            }
+            // Tell the session manager that the request is entering
+            if (sessionManager != null) 
+                sessionManager.enter(currentRequest);
+            
+            // access any existing session
+            HttpSession session=null;
+            if (sessionManager!=null)
+            {
+                session=baseRequest.getSession(false);
+                if (session!=null)
                 {
-                    if (currentSession != requestSession)
+                    if(session!=old_session)
                     {
-                        // Access the session only if we did not already
-                        HttpCookie cookie = sessionManager.access(currentSession, request.isSecure());
-                        if (cookie != null)
-                        {
-                            // Handle changed session id or cookie max-age refresh
+                        HttpCookie cookie = sessionManager.access(session,request.isSecure());
+                        if (cookie!=null ) // Handle changed ID or max-age refresh
                             baseRequest.getResponse().addCookie(cookie);
-                        }
-                    }
-                    else
-                    {
-                        // Handle resume of the request
-                        currentSession = currentRequest.recoverNewSession(sessionManager);
-                        if (currentSession != null) currentRequest.setSession(currentSession);
                     }
                 }
+                else
+                {
+                    session=baseRequest.recoverNewSession(sessionManager);
+                    if (session!=null)
+                        baseRequest.setSession(session);
+                }
             }
-            Log.debug("Session = {}", currentSession);
-            getHandler().handle(target, baseRequest, request, response);
-        }
-        catch (ContinuationThrowable x)
-        {
-            // User may have invalidated the session, must get it again
-            HttpSession currentSession = currentRequest.getSession(false);
-            if (currentSession != null && currentSession.isNew())
-                currentRequest.saveNewSession(sessionManager, currentSession);
 
-            throw x;
+            if(Log.isDebugEnabled())
+            {
+                Log.debug("sessionManager="+sessionManager);
+                Log.debug("session="+session);
+            }
+
+            // start manual inline of nextScope(target,baseRequest,request,response);
+            //noinspection ConstantIfStatement
+            if (false)
+                nextScope(target,baseRequest,request,response);
+            else if (_nextScope!=null)
+                _nextScope.doScope(target,baseRequest,request, response);
+            else if (_outerScope!=null)
+                _outerScope.doHandle(target,baseRequest,request, response);
+            else 
+                doHandle(target,baseRequest,request, response);
+            // end manual inline (pathentic attempt to reduce stack depth)
+
         }
         finally
         {
+            HttpSession session=request.getSession(false);
             if (sessionManager != null)
             {
                 // User may have invalidated the session, must get it again
                 HttpSession currentSession = currentRequest.getSession(false);
-                if (currentSession != null) sessionManager.complete(currentSession);
+                if (currentSession != null) 
+                    sessionManager.complete(currentSession);
 
                 sessionManager.exit(currentRequest);
             }
-
-            // Restore cross context dispatch
-            if (sessionManager != requestSessionManager)
+            
+            if (old_session_manager != sessionManager)
             {
-                currentRequest.setSessionManager(requestSessionManager);
-                currentRequest.setSession(requestSession);
+                //leaving context, free up the session
+                if (session!=null)
+                    sessionManager.complete(session);
+                baseRequest.setSessionManager(old_session_manager);
+                baseRequest.setSession(old_session);
             }
         }
     }
+    
 }
