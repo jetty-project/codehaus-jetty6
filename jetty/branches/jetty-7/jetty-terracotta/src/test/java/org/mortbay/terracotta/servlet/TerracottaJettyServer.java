@@ -17,82 +17,61 @@ package org.mortbay.terracotta.servlet;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.SessionIdManager;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.SessionManager;
+import org.eclipse.jetty.server.session.AbstractSessionManager;
+import org.eclipse.jetty.server.session.AbstractTestServer;
 import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
  * @version $Revision$ $Date$
  */
-public class TerracottaJettyServer
+public class TerracottaJettyServer extends AbstractTestServer
 {
-    private final Server server;
-    private final int maxInactivePeriod;
-    private final int scavengePeriod;
-    private final ContextHandlerCollection contexts;
-    private SessionIdManager sessionIdManager;
 
     public TerracottaJettyServer(int port)
     {
-        this(port, 30, 10);
+        super(port);
     }
 
     public TerracottaJettyServer(int port, int maxInactivePeriod, int scavengePeriod)
     {
-        this.server = new Server(port);
-        this.maxInactivePeriod = maxInactivePeriod;
-        this.scavengePeriod = scavengePeriod;
-        this.contexts = new ContextHandlerCollection();
-        this.sessionIdManager = new TerracottaSessionIdManager(server);
+       super(port,maxInactivePeriod,scavengePeriod);
     }
 
-    public void start() throws Exception
+    /** 
+     * @see org.eclipse.jetty.server.session.AbstractTestServer#newSessionHandler(org.eclipse.jetty.server.SessionManager)
+     */
+    @Override
+    public SessionHandler newSessionHandler(SessionManager sessionManager)
     {
-        // server -> contexts collection -> context handler -> session handler -> servlet handler
-        server.setHandler(contexts);
-        server.start();
+        return new TerracottaSessionHandler(sessionManager);
     }
 
-    public ServletContextHandler addContext(String contextPath)
+    /** 
+     * @see org.eclipse.jetty.server.session.AbstractTestServer#newSessionIdManager()
+     */
+    @Override
+    public SessionIdManager newSessionIdManager()
     {
-        ServletContextHandler context = new ServletContextHandler(contexts, contextPath);
-
-        TerracottaSessionManager sessionManager = new TestTerracottaSessionManager();
-        sessionManager.setIdManager(sessionIdManager);
-        sessionManager.setMaxInactiveInterval(maxInactivePeriod);
-        sessionManager.setScavengePeriodMs(TimeUnit.SECONDS.toMillis(scavengePeriod));
-
-        SessionHandler sessionHandler = new TerracottaSessionHandler(sessionManager);
-        sessionManager.setSessionHandler(sessionHandler);
-        context.setSessionHandler(sessionHandler);
-
-        return context;
+        TerracottaSessionIdManager idManager = new TerracottaSessionIdManager(_server);     
+        idManager.setWorkerName(String.valueOf(System.currentTimeMillis()));
+        return idManager;
     }
 
-    public void stop() throws Exception
+    /** 
+     * @see org.eclipse.jetty.server.session.AbstractTestServer#newSessionManager()
+     */
+    @Override
+    public AbstractSessionManager newSessionManager()
     {
-        server.stop();
+        TerracottaSessionManager manager =  new TerracottaSessionManager();
+        manager.setScavengePeriodMs(TimeUnit.SECONDS.toMillis(_scavengePeriod));
+        manager.setMaxInactiveInterval(_maxInactivePeriod);
+        return manager;
     }
 
-    public WebAppContext addWebAppContext(String warPath, String contextPath)
-    {
-        WebAppContext context = new WebAppContext(contexts, warPath, contextPath);
-
-        TerracottaSessionManager sessionManager = new TestTerracottaSessionManager();
-        sessionManager.setIdManager(sessionIdManager);
-        sessionManager.setMaxInactiveInterval(maxInactivePeriod);
-        sessionManager.setScavengePeriodMs(TimeUnit.SECONDS.toMillis(scavengePeriod));
-
-        SessionHandler sessionHandler = new TerracottaSessionHandler(sessionManager);
-        sessionManager.setSessionHandler(sessionHandler);
-        context.setSessionHandler(sessionHandler);
-
-        return context;
-	}
-
+    
     public static class TestTerracottaSessionManager extends TerracottaSessionManager
     {
         private static final ThreadLocal<Integer> depth = new ThreadLocal<Integer>()
@@ -122,4 +101,5 @@ public class TerracottaJettyServer
             }
         }
     }
+
 }

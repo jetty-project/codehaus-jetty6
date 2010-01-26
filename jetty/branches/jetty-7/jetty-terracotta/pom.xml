@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty-integration-project</artifactId>
-        <version>7.0.0.RC7-SNAPSHOT</version>
+        <version>7.0.2-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -81,9 +81,10 @@
                         <artifactId>tc-maven-plugin</artifactId>
                         <configuration>
                             <config>src/test/resources/tc-config.xml</config>
-                            <excludes>
+                            <groups>tc-all</groups>
+                            <!-- excludes>
                                 <exclude>**/TIM*</exclude>
-                            </excludes>
+                            </excludes-->
                         </configuration>
                     </plugin>
                 </plugins>
@@ -137,6 +138,12 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-client</artifactId>
             <version>${jetty-version}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.eclipse.jetty.tests</groupId>
+            <artifactId>test-sessions-common</artifactId>
+            <version>${jetty-version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.terracotta</groupId>

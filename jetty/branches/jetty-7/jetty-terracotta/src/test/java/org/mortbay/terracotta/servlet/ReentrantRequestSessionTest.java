@@ -14,112 +14,25 @@
 
 package org.mortbay.terracotta.servlet;
 
-import java.io.IOException;
-import java.util.Random;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.eclipse.jetty.http.HttpMethods;
-import org.eclipse.jetty.client.ContentExchange;
-import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.server.session.AbstractReentrantRequestSessionTest;
+import org.eclipse.jetty.server.session.AbstractTestServer;
 import org.testng.annotations.Test;
 
 /**
  * @version $Revision$ $Date$
  */
-public class ReentrantRequestSessionTest
+public class ReentrantRequestSessionTest extends AbstractReentrantRequestSessionTest
 {
-    @Test
+    @Test(groups={"tc-all"})
     public void testReentrantRequestSession() throws Exception
     {
-        Random random = new Random(System.nanoTime());
-
-        String contextPath = "";
-        String servletMapping = "/server";
-        int port = random.nextInt(50000) + 10000;
-        TerracottaJettyServer server = new TerracottaJettyServer(port);
-        server.addContext(contextPath).addServlet(TestServlet.class, servletMapping);
-        server.start();
-        try
-        {
-            HttpClient client = new HttpClient();
-            client.setConnectorType(HttpClient.CONNECTOR_SOCKET);
-            client.start();
-            try
-            {
-                ContentExchange exchange = new ContentExchange(true);
-                exchange.setMethod(HttpMethods.GET);
-                exchange.setURL("http://localhost:" + port + contextPath + servletMapping + "?action=reenter&port=" + port + "&path=" + contextPath + servletMapping);
-                client.send(exchange);
-                exchange.waitForDone();
-                assert exchange.getResponseStatus() == HttpServletResponse.SC_OK;
-            }
-            finally
-            {
-                client.stop();
-            }
-        }
-        finally
-        {
-            server.stop();
-        }
+       super.testReentrantRequestSession();
     }
 
-    public static class TestServlet extends HttpServlet
+    @Override
+    public AbstractTestServer createServer(int port)
     {
-        @Override
-        protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-        {
-            doPost(request, response);
-        }
-
-        @Override
-        protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-        {
-            HttpSession session = request.getSession(false);
-            if (session == null) session = request.getSession(true);
-
-            String action = request.getParameter("action");
-            if ("reenter".equals(action))
-            {
-                int port = Integer.parseInt(request.getParameter("port"));
-                String path = request.getParameter("path");
-
-                // We want to make another request with a different session
-                // while this request is still pending, to see if the locking is
-                // fine grained (per session at least).
-                try
-                {
-                    HttpClient client = new HttpClient();
-                    client.setConnectorType(HttpClient.CONNECTOR_SOCKET);
-                    client.start();
-                    try
-                    {
-                        ContentExchange exchange = new ContentExchange(true);
-                        exchange.setMethod(HttpMethods.GET);
-                        exchange.setURL("http://localhost:" + port + path + "?action=none");
-                        client.send(exchange);
-                        exchange.waitForDone();
-                        assert exchange.getResponseStatus() == HttpServletResponse.SC_OK;
-                    }
-                    finally
-                    {
-                        client.stop();
-                    }
-                }
-                catch (Exception x)
-                {
-                    throw new ServletException(x);
-                }
-            }
-            else
-            {
-                // Reentrancy was successful, just return
-            }
-        }
+       return new TerracottaJettyServer(port);
     }
+
 }
