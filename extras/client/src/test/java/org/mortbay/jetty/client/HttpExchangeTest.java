@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
-import junit.framework.TestResult;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
@@ -40,7 +39,6 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.client.security.ProxyAuthorization;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.thread.QueuedThreadPool;
 
 /**
  * Functional testing for HttpExchange.
@@ -237,18 +235,6 @@ public class HttpExchangeTest extends TestCase
             assertEquals(HttpExchange.STATUS_COMPLETED, status);
             Thread.sleep(5);
         }
-    }
-
-    public void testSun() throws Exception
-    {
-        ContentExchange httpExchange=new ContentExchange();
-        httpExchange.setURL(_scheme+"www.sun.com/");
-        httpExchange.setMethod(HttpMethods.GET);
-        _httpClient.send(httpExchange);
-        int status = httpExchange.waitForDone();
-        String result=httpExchange.getResponseContent();
-        assertEquals(HttpExchange.STATUS_COMPLETED, status);
-        assertEquals(200,httpExchange.getResponseStatus());
     }
 
     public void testProxy() throws Exception
