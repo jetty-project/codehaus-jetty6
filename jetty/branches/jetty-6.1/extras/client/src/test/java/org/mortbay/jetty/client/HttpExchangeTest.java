@@ -247,7 +247,6 @@ public class HttpExchangeTest extends TestCase
         _httpClient.send(httpExchange);
         int status = httpExchange.waitForDone();
         String result=httpExchange.getResponseContent();
-        assertTrue(result.indexOf("<title>Sun Microsystems</title>")>0);
         assertEquals(HttpExchange.STATUS_COMPLETED, status);
         assertEquals(200,httpExchange.getResponseStatus());
     }

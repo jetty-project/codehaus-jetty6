@@ -15,6 +15,8 @@ jetty-6.1-SNAPSHOT
  + JETTY-1168 Don't hold sessionIdManager lock when invalidating sessions
  + JETTY-1170 NPE on client when server-side extension returns null
  + 300178 HttpClients opens too many connections that are immediately closed
+ + Remove references to old content in HttpClient client tests for www.sun.com
+
 
 jetty-6.1.22 16 November 2009
  + Fixed XSS issue in demo CometDump servlet
