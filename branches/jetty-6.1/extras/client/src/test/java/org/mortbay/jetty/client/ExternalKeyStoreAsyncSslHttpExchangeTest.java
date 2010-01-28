@@ -36,7 +36,4 @@ public class ExternalKeyStoreAsyncSslHttpExchangeTest extends SslHttpExchangeTes
         _httpClient.start();
     }
 
-    public void testSun() throws Exception
-    {
-    }
 }
