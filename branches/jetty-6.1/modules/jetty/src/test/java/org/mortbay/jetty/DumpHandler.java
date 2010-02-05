@@ -64,6 +64,13 @@ public class DumpHandler extends AbstractHandler
         if (!isStarted())
             return;
 
+        if (request.getParameter("read")!=null)
+        {
+            InputStream in = request.getInputStream();
+            for (int i=Integer.parseInt(request.getParameter("read"));i-->0;)
+                in.read();
+        }
+        
         if (request.getParameter("ISE")!=null)
         {
             throw new IllegalStateException();
