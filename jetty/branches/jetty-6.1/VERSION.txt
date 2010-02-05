@@ -17,6 +17,7 @@ jetty-6.1-SNAPSHOT
  + 300178 HttpClients opens too many connections that are immediately closed
  + Remove references to old content in HttpClient client tests for www.sun.com
  + JETTY-1175 NPE in TimesyncExtension
+ + JETTY-1176 NPE in StatisticsExtension if client is null
 
 jetty-6.1.22 16 November 2009
  + Fixed XSS issue in demo CometDump servlet
