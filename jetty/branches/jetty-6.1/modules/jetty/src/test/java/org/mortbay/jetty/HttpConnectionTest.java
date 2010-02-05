@@ -308,10 +308,14 @@ public class HttpConnectionTest extends TestCase
         offset=0; connector.reopen();
         requests="GET /R1?error=500 HTTP/1.1\n"+
         "Host: localhost\n"+
+        "Transfer-Encoding: chunked\n"+
         "Content-Type: text/plain; charset=utf-8\n"+
-        "Content-Length: 10\n"+
-        "\n"+
-        "0123456789\n"+
+        "\015\012"+
+        "5;\015\012"+
+        "12345\015\012"+
+        "5;\015\012"+
+        "67890\015\012"+
+        "0;\015\012\015\012"+
         "GET /R2 HTTP/1.1\n"+
         "Host: localhost\n"+
         "Content-Type: text/plain; charset=utf-8\n"+
@@ -338,10 +342,14 @@ public class HttpConnectionTest extends TestCase
         offset=0; connector.reopen();
         requests="GET /R1?ISE=true HTTP/1.1\n"+
         "Host: localhost\n"+
+        "Transfer-Encoding: chunked\n"+
         "Content-Type: text/plain; charset=utf-8\n"+
-        "Content-Length: 10\n"+
-        "\n"+
-        "0123456789\n"+
+        "\015\012"+
+        "5;\015\012"+
+        "12345\015\012"+
+        "5;\015\012"+
+        "67890\015\012"+
+        "0;\015\012\015\012"+
         "GET /R2 HTTP/1.1\n"+
         "Host: localhost\n"+
         "Content-Type: text/plain; charset=utf-8\n"+
