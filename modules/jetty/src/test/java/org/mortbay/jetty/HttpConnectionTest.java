@@ -211,7 +211,7 @@ public class HttpConnectionTest extends TestCase
             offset = checkContains(response,offset,"HTTP/1.1 200");
             offset = checkContains(response,offset,"encoding=unknown");
             offset = checkContains(response,offset,"/R1");
-            offset = checkContains(response,offset,"12345");
+            offset = checkContains(response,offset,"UnsupportedEncodingException");
 
             
         }
