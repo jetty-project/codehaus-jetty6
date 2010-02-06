@@ -14,6 +14,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1162 Add support for async/sync message delivery to BayeuxClient
  + JETTY-1168 Don't hold sessionIdManager lock when invalidating sessions
  + JETTY-1170 NPE on client when server-side extension returns null
+ + JETTY-1177 Allow error handler to set cacheControl
  + 300178 HttpClients opens too many connections that are immediately closed
  + Remove references to old content in HttpClient client tests for www.sun.com
  + JETTY-1175 NPE in TimesyncExtension
