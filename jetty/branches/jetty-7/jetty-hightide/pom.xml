@@ -14,7 +14,7 @@
     <activation-version>1.1</activation-version>
     <jta-spec-version>1.1.1</jta-spec-version>
     <mail-version>1.4</mail-version>
-    <cometd-version>1.0.0rc0</cometd-version>
+    <cometd-version>1.0.2-SNAPSHOT</cometd-version>
     <slf4j-version>1.5.6</slf4j-version>
     <ant-version>1.6.5</ant-version>
     <atomikos-version>3.5.5</atomikos-version>
