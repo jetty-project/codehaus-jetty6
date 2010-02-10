@@ -20,6 +20,8 @@ jetty-6.1-SNAPSHOT
  + JETTY-1175 NPE in TimesyncExtension
  + JETTY-1176 NPE in StatisticsExtension if client is null
  + JETTY-1178 Make continuation servlet to log the incoming JSON in case of parsing errors
+ + JETTY-875 Allow setting of advice field in response to Handshake
+ + JETTY-1134 BayeuxClient: Connect msg should be sent as array
 
 jetty-6.1.22 16 November 2009
  + Fixed XSS issue in demo CometDump servlet
