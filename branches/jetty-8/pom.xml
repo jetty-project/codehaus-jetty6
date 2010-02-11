@@ -8,20 +8,23 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-integration-project</artifactId>
-  <version>7.0.2-SNAPSHOT</version>
+  <version>8.0.0.M0-SNAPSHOT</version>
   <name>Jetty :: Codehaus Integration Project</name>
   <packaging>pom</packaging>
 
   <properties>
-    <jetty-version>7.0.1.v20091125</jetty-version>
+    <jetty-version>8.0.0.M0-SNAPSHOT</jetty-version>
     <felix.bundle.version>2.0.0</felix.bundle.version>
     <jna-version>3.2.2</jna-version>
-    <jsp-2-1-version>2.1.v20091210</jsp-2-1-version>
+    <jsp-version>2.2</jsp-version>
+    <servlet.spec.groupId>org.mortbay.jetty</servlet.spec.groupId>
+    <servlet.spec.artifactId>servlet-api</servlet.spec.artifactId>
+    <servlet.spec.version>3.0-SNAPSHOT</servlet.spec.version>
   </properties>
   <scm>
-    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</developerConnection>
-    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</url>
+    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/branches/jetty-8</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/branches/jetty-8</developerConnection>
+    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/branches/jetty-8</url>
   </scm>
 
   <build>
@@ -30,8 +33,8 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
+          <source>1.6</source>
+          <target>1.6</target>
           <verbose>false</verbose>
         </configuration>
       </plugin>
@@ -117,12 +120,12 @@
     <module>repository</module>
     <module>jetty-maven-plugin</module>
     <module>jetty-jspc-maven-plugin</module>
-    <module>jetty-ant</module>
-    <module>jetty-integration-tests</module>
-    <module>jetty-runner</module>
-    <module>jetty-blazeds</module>
-    <module>jetty-pkcs12</module>
-    <module>jetty-j2sehttp-spi</module>
+    <!-- module>jetty-ant</module -->
+    <!-- module>jetty-integration-tests</module -->
+    <!-- module>jetty-runner</module -->
+    <!-- module>jetty-blazeds</module -->
+    <!-- module>jetty-pkcs12</module -->
+    <!-- module>jetty-j2sehttp-spi</module -->
     <module>jetty-setuid</module>
     <module>test-jndi-webapp</module>
     <module>test-jetty-webapp</module>
@@ -130,9 +133,9 @@
     <module>test-annotation-webapp</module>
     <module>jetty-spring</module>
     <module>example-async-rest-webapp</module>
-    <module>jetty-jsp-2.1</module>
+    <!-- module>jetty-jsp-2.1</module -->
     <module>jetty-hightide</module>
-    <module>jetty-jboss</module>
+    <!-- module>jetty-jboss</module -->
   </modules>
 
   <!-- Temporarily added until release of jetty-integration-parent allows modules to find oss repo -->
@@ -147,6 +150,18 @@
       </snapshots>
       <releases>
         <enabled>false</enabled>
+      </releases>
+   </repository>
+    <repository>
+      <id>download.java.net</id>
+      <name>Java.net Repository</name>
+      <layout>default</layout>
+      <url>http://download.java.net/maven/2/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
       </releases>
    </repository>
   </repositories>

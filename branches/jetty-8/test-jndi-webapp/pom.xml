@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-integration-project</artifactId>
-    <version>7.0.2-SNAPSHOT</version>
+    <version>8.0.0.M0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
@@ -142,9 +142,9 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.5</version>
+      <groupId>${servlet.spec.groupId}</groupId>
+      <artifactId>${servlet.spec.artifactId}</artifactId>
+      <version>${servlet.spec.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

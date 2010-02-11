@@ -19,6 +19,9 @@ package com.acme;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.naming.InitialContext;
 import javax.servlet.ServletConfig;
@@ -33,6 +36,8 @@ import javax.annotation.Resource;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.security.RunAs;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.annotation.WebInitParam;
 
 /**
  * AnnotationTest
@@ -45,8 +50,10 @@ import javax.annotation.security.RunAs;
  */
 
 @RunAs("special")
+@WebServlet(urlPatterns = { "/test/*"}, name="AnnotationTest", initParams={@WebInitParam(name="fromAnnotation", value="xyz")})
 public class AnnotationTest extends HttpServlet 
 {
+    static List<String> __HandlesTypes; 
     private String postConstructResult = "";
     private String dsResult = "";
     private String envResult = "";
@@ -59,6 +66,7 @@ public class AnnotationTest extends HttpServlet
     private String txResult = "";
     private String txLookupResult = "";
     private DataSource myDS;
+    private ServletConfig config;
     
     @Resource(mappedName="UserTransaction")
     private UserTransaction myUserTransaction;
@@ -178,6 +186,7 @@ public class AnnotationTest extends HttpServlet
     public void init(ServletConfig config) throws ServletException
     {
         super.init(config);
+        this.config = config;
     }
 
     
@@ -198,6 +207,47 @@ public class AnnotationTest extends HttpServlet
             out.println("<html>");
             out.println("<h1>Jetty Annotation Results</h1>");
             out.println("<body>");
+
+            out.println("<h2>Init Params</h2>");
+            out.println("<pre>");
+            out.println("initParams={@WebInitParam(name=\"fromAnnotation\", value=\"xyz\")}");
+            out.println("</pre>");
+            out.println("<br/><b>Result: "+("xyz".equals(config.getInitParameter("fromAnnotation"))? "TRUE": "FAIL"));
+
+             __HandlesTypes = Arrays.asList("org.apache.jasper.runtime.HttpJspBase",
+                                             "javax.servlet.jsp.HttpJspPage",
+                                             "org.apache.jasper.servlet.JspServlet",
+                                             "javax.servlet.GenericServlet", 
+                                             "javax.servlet.jsp.JspPage", 
+                                             "javax.servlet.http.HttpServlet", 
+                                             "com.acme.AnnotationTest", 
+                                             "com.acme.TestListener" );
+             out.println("<h2>@ContainerInitializer</h2>");
+             out.println("<pre>");
+             out.println("@HandlesTypes({javax.servlet.Servlet.class, Foo.class})");
+             out.println("</pre>");
+             out.print("<br/><b>Result: ");
+             List<Class> classes = (List<Class>)config.getServletContext().getAttribute("com.acme.Foo");
+             List<String> classNames = new ArrayList<String>();
+             if (classes != null)
+             {
+                 for (Class c: classes)
+                 {
+                     classNames.add(c.getName());
+                     out.print(c.getName()+" ");
+                 }
+                
+                 if (classNames.size() != __HandlesTypes.size())
+                     out.println("<br/>FAIL");
+                 else if (!classNames.containsAll(__HandlesTypes))
+                     out.println("<br/>FAIL");
+                 else
+                     out.println("<br/>PASS");
+             }
+             else
+                 out.print("FAIL");
+             out.println("</b>");
+
             
             out.println("<h2>@PostConstruct Callback</h2>");
             out.println("<pre>");
