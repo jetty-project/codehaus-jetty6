@@ -205,14 +205,22 @@ public class AnnotationTest extends HttpServlet
             response.setContentType("text/html");
             ServletOutputStream out = response.getOutputStream();
             out.println("<html>");
-            out.println("<h1>Jetty Annotation Results</h1>");
+            out.println("<h1>Results</h1>");
             out.println("<body>");
 
-            out.println("<h2>Init Params</h2>");
+            out.println("<h2>Init Params from Annotation</h2>");
             out.println("<pre>");
             out.println("initParams={@WebInitParam(name=\"fromAnnotation\", value=\"xyz\")}");
             out.println("</pre>");
-            out.println("<br/><b>Result: "+("xyz".equals(config.getInitParameter("fromAnnotation"))? "TRUE": "FAIL"));
+            out.println("<br/><b>Result: "+("xyz".equals(config.getInitParameter("fromAnnotation"))? "PASS": "FAIL"));
+
+            out.println("<h2>Init Params from web-fragment</h2>");
+            out.println("<pre>");
+            out.println("extra1=123, extra2=345");
+            out.println("</pre>");
+            boolean fragInitParamResult = "123".equals(config.getInitParameter("extra1")) && "345".equals(config.getInitParameter("extra2"));
+            out.println("<br/><b>Result: "+(fragInitParamResult? "PASS": "FAIL"));
+
 
              __HandlesTypes = Arrays.asList("org.apache.jasper.runtime.HttpJspBase",
                                              "javax.servlet.jsp.HttpJspPage",
@@ -221,6 +229,7 @@ public class AnnotationTest extends HttpServlet
                                              "javax.servlet.jsp.JspPage", 
                                              "javax.servlet.http.HttpServlet", 
                                              "com.acme.AnnotationTest", 
+                                             "com.acme.FragmentServlet", 
                                              "com.acme.TestListener" );
              out.println("<h2>@ContainerInitializer</h2>");
              out.println("<pre>");

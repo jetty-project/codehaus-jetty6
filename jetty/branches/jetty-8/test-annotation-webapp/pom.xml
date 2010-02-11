@@ -154,9 +154,9 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.geronimo.specs</groupId>
-      <artifactId>geronimo-servlet_3.0_spec</artifactId>
-      <version>1.0-EA-SNAPSHOT</version>
+      <groupId>${servlet.spec.groupId}</groupId>
+      <artifactId>${servlet.spec.artifactId}</artifactId>
+      <version>${servlet.spec.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -168,6 +168,11 @@
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>test-container-initializer</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>test-fragment</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
