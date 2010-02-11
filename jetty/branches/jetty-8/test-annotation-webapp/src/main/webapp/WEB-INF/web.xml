@@ -8,9 +8,9 @@
 
   <display-name>Test Annotations WebApp</display-name>
   
-  <listener>
+  <!-- listener>
     <listener-class>com.acme.TestListener</listener-class>
-  </listener>
+  </listener -->
 
 
   <servlet>
