@@ -63,6 +63,8 @@ public class InclusiveByteRange
         return last;
     }    
 
+
+    
     /* ------------------------------------------------------------ */
     /** 
      * @param headers Enumeration of Range header fields.
@@ -115,6 +117,7 @@ public class InclusiveByteRange
                     else
                         first = Long.parseLong(t.substring(0,d).trim());
 
+                    
                     if (first == -1 && last == -1)
                         continue headers;
                     
