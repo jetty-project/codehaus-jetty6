@@ -682,14 +682,14 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                             Enumeration reqRanges)
     throws IOException
     {
-        long content_length=resource.length();
+        long content_length=content==null?resource.length():content.getContentLength();
         
         // Get the output stream (or writer)
         OutputStream out =null;
         try{out = response.getOutputStream();}
         catch(IllegalStateException e) {out = new WriterOutputStream(response.getWriter());}
         
-        if ( reqRanges == null || !reqRanges.hasMoreElements())
+        if ( reqRanges == null || !reqRanges.hasMoreElements() || content_length<0)
         {
             //  if there were no ranges, send entire entity
             if (include)
@@ -735,8 +735,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             {
                 writeHeaders(response, content, content_length);
                 response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-                response.setHeader(HttpHeaders.CONTENT_RANGE, 
-                        InclusiveByteRange.to416HeaderRangeString(content_length));
+                response.setHeader(HttpHeaders.CONTENT_RANGE,InclusiveByteRange.to416HeaderRangeString(content_length));
                 resource.writeTo(out,0,content_length);
                 return;
             }
