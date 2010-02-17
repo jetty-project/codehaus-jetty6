@@ -23,6 +23,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-875 Allow setting of advice field in response to Handshake
  + JETTY-1134 BayeuxClient: Connect msg should be sent as array
  + JETTY-1180 Extension methods are wrongly called
+ + JETTY-1182 Reduce synchronization in ContinuationCometdServlet
 
 jetty-6.1.22 16 November 2009
  + Fixed XSS issue in demo CometDump servlet
