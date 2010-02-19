@@ -104,6 +104,7 @@ public class ThreadPoolTest extends TestCase
         tp.setThreadsPriority(Thread.NORM_PRIORITY-1);
         
         tp.start();
+        Thread.sleep(100);
         assertEquals(2,tp.getThreads());
         assertEquals(2,tp.getIdleThreads());
         _sleep=200;
