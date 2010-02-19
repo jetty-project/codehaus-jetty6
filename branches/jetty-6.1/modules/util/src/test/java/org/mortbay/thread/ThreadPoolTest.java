@@ -22,6 +22,7 @@ public class ThreadPoolTest extends TestCase
 {
     int _jobs;
     long _result;
+    volatile long _sleep=100;
     
     Runnable _job = new Runnable()
     {
@@ -29,7 +30,7 @@ public class ThreadPoolTest extends TestCase
         {
             try 
             {
-                Thread.sleep(100);
+                Thread.sleep(_sleep);
             }
             catch(Exception e)
             {
@@ -53,6 +54,7 @@ public class ThreadPoolTest extends TestCase
     
     public void testQueuedThreadPool() throws Exception
     {
+        _sleep=100;
         QueuedThreadPool tp= new QueuedThreadPool();
         tp.setMinThreads(5);
         tp.setMaxThreads(10);
@@ -90,9 +92,48 @@ public class ThreadPoolTest extends TestCase
         Thread.sleep(1500);
         assertTrue(tp.getThreads()<threads);
     }
+
+    
+    public void testQueuedThreadPoolShrink() throws Exception
+    {
+        QueuedThreadPool tp= new QueuedThreadPool();
+        tp.setMinThreads(2);
+        tp.setMaxThreads(10);
+        tp.setMaxIdleTimeMs(400);
+        tp.setSpawnOrShrinkAt(2);
+        tp.setThreadsPriority(Thread.NORM_PRIORITY-1);
+        
+        tp.start();
+        assertEquals(2,tp.getThreads());
+        assertEquals(2,tp.getIdleThreads());
+        _sleep=200;
+        tp.dispatch(_job);
+        tp.dispatch(_job);
+        for (int i=0;i<20;i++)
+            tp.dispatch(_job);
+        Thread.sleep(100);
+        assertEquals(10,tp.getThreads());
+        assertEquals(0,tp.getIdleThreads());
+        
+        _sleep=1;
+        for (int i=0;i<500;i++)
+        {
+            tp.dispatch(_job);
+            Thread.sleep(10);
+            if (i%100==0)
+            {
+                System.err.println(i+" threads="+tp.getThreads()+" idle="+tp.getIdleThreads());
+            }
+        }
+        System.err.println("500 threads="+tp.getThreads()+" idle="+tp.getIdleThreads());
+        assertEquals(2,tp.getThreads());
+        assertEquals(2,tp.getIdleThreads());
+        
+    }
     
     public void testStress() throws Exception
     {
+        _sleep=100;
         boolean stress=Boolean.getBoolean("STRESS");
         
         QueuedThreadPool tp= new QueuedThreadPool();
