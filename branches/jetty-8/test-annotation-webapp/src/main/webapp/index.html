@@ -24,12 +24,19 @@ This example shows how to use annotations.
 This demo uses <a href="http://www.atomikos.com">Atomikos</a> as a transaction manager by default, however it also supports JOTM. You can activate JOTM by editing the contexts/test-annotations.xml file and uncommenting the JOTM section, and by placing the JOTM jars in lib/.
 </p>
 
-<h2>The Test</h2>
-<p>
-</p>
+<h2>The Tests</h2>
+
+<h3>Test Servlet 2.5/3.0 Annotations</h3>
 <form action="test" method="post">
   <button type="submit">Test Servlet Annotations</button>
 </form>
+
+<h3>Test Servlet 3.0 Multipart Mime</h3>
+<form ENCTYPE="multipart/form-data" ACTION="multi" METHOD=POST>
+    File to upload: <INPUT NAME="userfile1" TYPE="file">
+ <input TYPE="submit" VALUE="Test Upload">
+</form>
+
 
 <center>
   <hr/>
