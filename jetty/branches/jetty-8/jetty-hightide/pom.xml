@@ -10,13 +10,11 @@
   <packaging>pom</packaging>
   <properties>
     <assembly.directory>target/hightide</assembly.directory>
-    <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
     <activation-version>1.1</activation-version>
     <jta-spec-version>1.1.1</jta-spec-version>
     <mail-version>1.4</mail-version>
     <cometd-version>1.0.2-SNAPSHOT</cometd-version>
     <slf4j-version>1.5.6</slf4j-version>
-    <ant-version>1.6.5</ant-version>
     <atomikos-version>3.5.5</atomikos-version>
     <derby-version>10.4.1.3</derby-version>
     <asm-version>3.1</asm-version>
@@ -533,18 +531,6 @@
             </goals>
             <configuration>
               <artifactItems>
-                <artifactItem>
-                  <groupId>ant</groupId>
-                  <artifactId>ant</artifactId>
-                  <version>${ant-version}</version>
-                  <outputDirectory>${assembly.directory}/lib/jsp</outputDirectory>
-                </artifactItem>
-               <artifactItem>
-                  <groupId>org.eclipse.jdt</groupId>
-                  <artifactId>core</artifactId>
-                  <version>${eclipse-compiler-version}</version>
-                  <outputDirectory>${assembly.directory}/lib/jsp</outputDirectory>
-                </artifactItem>
                <artifactItem>
                   <groupId>javax.servlet.jsp</groupId>
                   <artifactId>jsp-api</artifactId>
