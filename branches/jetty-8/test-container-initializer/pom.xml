@@ -23,9 +23,9 @@
   </build>
   <dependencies>
     <dependency>
-      <groupId>org.apache.geronimo.specs</groupId>
-      <artifactId>geronimo-servlet_3.0_spec</artifactId>
-      <version>1.0-EA-SNAPSHOT</version>
+      <groupId>${servlet.spec.groupId}</groupId>
+      <artifactId>${servlet.spec.artifactId}</artifactId>
+      <version>${servlet.spec.version}</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
