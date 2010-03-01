@@ -137,20 +137,7 @@
     <!-- module>jetty-jboss</module -->
   </modules>
 
-  <!-- Temporarily added until release of jetty-integration-parent allows modules to find oss repo -->
   <repositories>
-    <repository>
-      <id>oss.sonatype.org</id>
-      <name>Jetty Snapshot Repository</name>
-      <layout>default</layout>
-      <url>http://oss.sonatype.org/content/repositories/jetty-snapshots/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-   </repository>
     <repository>
       <id>download.java.net</id>
       <name>Java.net Repository</name>
@@ -164,18 +151,4 @@
       </releases>
    </repository>
   </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>oss.sonatype.org</id>
-      <name>Jetty Snapshot Plugin Repository</name>
-      <layout>default</layout>
-      <url>http://oss.sonatype.org/content/repositories/jetty-snapshots/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-   </pluginRepository>
-  </pluginRepositories>
 </project>
