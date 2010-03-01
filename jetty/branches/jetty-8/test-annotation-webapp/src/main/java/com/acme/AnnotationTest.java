@@ -222,13 +222,10 @@ public class AnnotationTest extends HttpServlet
             out.println("<br/><b>Result: "+(fragInitParamResult? "PASS": "FAIL"));
 
 
-             __HandlesTypes = Arrays.asList("org.apache.jasper.runtime.HttpJspBase",
-                                             "javax.servlet.jsp.HttpJspPage",
-                                             "org.apache.jasper.servlet.JspServlet",
-                                             "javax.servlet.GenericServlet", 
-                                             "javax.servlet.jsp.JspPage", 
+             __HandlesTypes = Arrays.asList( "javax.servlet.GenericServlet", 
                                              "javax.servlet.http.HttpServlet", 
                                              "com.acme.AnnotationTest", 
+                                             "com.acme.MultiPartTest", 
                                              "com.acme.FragmentServlet", 
                                              "com.acme.TestListener" );
              out.println("<h2>@ContainerInitializer</h2>");
