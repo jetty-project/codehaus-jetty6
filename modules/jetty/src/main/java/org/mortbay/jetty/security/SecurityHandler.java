@@ -379,7 +379,7 @@ public class SecurityHandler extends HandlerWrapper
                         if (request.getQueryString() != null)
                             url += "?" + request.getQueryString();
                         response.setContentLength(0);
-                        response.sendRedirect(url);
+                        response.sendRedirect(response.encodeRedirectURL(url));
                     }
                     else
                         response.sendError(Response.SC_FORBIDDEN,null);
@@ -401,7 +401,7 @@ public class SecurityHandler extends HandlerWrapper
                             url += "?" + request.getQueryString();
 
                         response.setContentLength(0);
-                        response.sendRedirect(url);
+                        response.sendRedirect(response.encodeRedirectURL(url));
                     }
                     else
                         response.sendError(Response.SC_FORBIDDEN,null);

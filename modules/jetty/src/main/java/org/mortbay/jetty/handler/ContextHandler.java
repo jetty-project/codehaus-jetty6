@@ -691,9 +691,9 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                     {
                         base_request.setHandled(true);
                         if (request.getQueryString()!=null)
-                            response.sendRedirect(URIUtil.addPaths(request.getRequestURI(),URIUtil.SLASH)+"?"+request.getQueryString());
+                            response.sendRedirect(response.encodeRedirectURL(URIUtil.addPaths(request.getRequestURI(),URIUtil.SLASH)+"?"+request.getQueryString()));
                         else 
-                            response.sendRedirect(URIUtil.addPaths(request.getRequestURI(),URIUtil.SLASH));
+                            response.sendRedirect(response.encodeRedirectURL(URIUtil.addPaths(request.getRequestURI(),URIUtil.SLASH)));
                         return;
                     }
                     if (_contextPath.length()>1)
