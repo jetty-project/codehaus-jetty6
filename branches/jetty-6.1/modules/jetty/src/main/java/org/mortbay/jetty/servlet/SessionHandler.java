@@ -254,21 +254,27 @@ public class SessionHandler extends HandlerWrapper
         if (requested_session_id==null || session==null)
         {
             String uri = request.getRequestURI();
-            
-            int semi = uri.lastIndexOf(';');
-            if (semi>=0)
-            {   
-                // check if there is a url encoded session param.
-                String param=sessionManager.getSessionURL();
-                if (param!=null)
-                {
-                    int p=uri.indexOf(param,semi+1);
-                    if (p>0)
+
+            String prefix=sessionManager.getSessionURLPrefix();
+            if (prefix!=null)
+            {
+                int s = uri.indexOf(prefix);
+                if (s>=0)
+                {   
+                    s+=prefix.length();
+                    int i=s;
+                    while (i<uri.length())
                     {
-                        requested_session_id = uri.substring(p+param.length()+1);
-                        requested_session_id_from_cookie = false;
-                        if(Log.isDebugEnabled())Log.debug("Got Session ID "+requested_session_id+" from URL");
+                        char c=uri.charAt(i);
+                        if (c==';'||c=='#'||c=='?'||c=='/')
+                            break;
+                        i++;
                     }
+
+                    requested_session_id = uri.substring(s,i);
+                    requested_session_id_from_cookie = false;
+                    if(Log.isDebugEnabled())
+                        Log.debug("Got Session ID "+requested_session_id+" from URL");                    
                 }
             }
         }
