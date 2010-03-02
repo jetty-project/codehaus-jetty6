@@ -129,8 +129,7 @@ public class FormAuthenticator implements Authenticator
             return null;
         
         // Handle a request for authentication.
-        // TODO perhaps j_securitycheck can be uri suffix?
-        if ( uri.endsWith(__J_SECURITY_CHECK) )
+        if (isJSecurityCheck(uri) )
         {
             // Check the session object for login info.
             FormCredential form_cred=new FormCredential();
@@ -261,11 +260,27 @@ public class FormAuthenticator implements Authenticator
         return null;
     }
 
+    /* ------------------------------------------------------------ */
     public boolean isLoginOrErrorPage(String pathInContext)
     {
         return pathInContext!=null &&
          (pathInContext.equals(_formErrorPath) || pathInContext.equals(_formLoginPath));
     }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isJSecurityCheck(String uri)
+    {
+        int jsc = uri.indexOf(__J_SECURITY_CHECK);
+        
+        if (jsc<0)
+            return false;
+        int e=jsc+__J_SECURITY_CHECK.length();
+        if (e==uri.length())
+            return true;
+        char c = uri.charAt(e);
+        return c==';'||c=='#'||c=='/'||c=='?';
+    }
+    
     
     /* ------------------------------------------------------------ */
     /** FORM Authentication credential holder.
