@@ -139,6 +139,7 @@ public class HttpFields
             buf.append('-');
             buf.append(MONTHS[month]);
             buf.append('-');
+            StringUtil.append2digits(buf, century);
             StringUtil.append2digits(buf, year);
         }
         else
@@ -190,7 +191,7 @@ public class HttpFields
             __dateReceive[i].setTimeZone(__GMT);
         }
     }
-    public final static String __01Jan1970 = formatDate(0, false).trim();
+    public final static String __01Jan1970 = formatDate(0, true).trim();
     public final static Buffer __01Jan1970_BUFFER = new ByteArrayBuffer(__01Jan1970);
 
     /* -------------------------------------------------------------- */
