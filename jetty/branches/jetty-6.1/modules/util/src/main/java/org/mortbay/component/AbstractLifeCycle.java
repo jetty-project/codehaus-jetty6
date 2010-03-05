@@ -127,7 +127,7 @@ public abstract class AbstractLifeCycle implements LifeCycle
 
     public void removeLifeCycleListener(LifeCycle.Listener listener)
     {
-        LazyList.removeFromArray(_listeners,listener);
+        _listeners = (LifeCycle.Listener[])LazyList.removeFromArray(_listeners,listener);
     }
 
     private void setStarted()
