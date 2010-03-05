@@ -29,6 +29,9 @@ jetty-6.1-SNAPSHOT
  + JETTY-1183 AcknowledgedMessagesClientExtension does not handle correctly message resend when client long polls again
  + JETTY-1133 Handle multiple URL ; parameters
  + JETTY-1186 Better document JMX setup in jetty-jmx.xml
+ + 304658 Inconsistent Expires date format in Set-Cookie headers with maxAge=0
+ + 304698 org.eclipse.jetty.http.HttpFields$DateGenerator.formatCookieDate() uses wrong (?) date format
+
 
 jetty-6.1.22 16 November 2009
  + Fixed XSS issue in demo CometDump servlet
