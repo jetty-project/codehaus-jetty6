@@ -142,25 +142,13 @@ public class ContentExchange extends CachedExchange
     /* ------------------------------------------------------------ */
     protected void onRetry() throws IOException
     {
-        if ( _fileForUpload != null  )
+        if (_fileForUpload != null)
         {
-            _requestContent = null;
-            _requestContentSource =  getInputStream();
+            setRequestContent(null);
+            setRequestContentSource(getInputStream());
         }
-        else if (_requestContentSource != null) 
-        {
-            if (_requestContentSource.markSupported()) 
-            {
-                _requestContent = null;
-                _requestContentSource.reset();
-            } 
-            else 
-            {
-                throw new IOException("Unsupported retry attempt");
-            }
-        }
-
-        super.onRetry();
+        else
+            super.onRetry();
     }
 
     /* ------------------------------------------------------------ */
