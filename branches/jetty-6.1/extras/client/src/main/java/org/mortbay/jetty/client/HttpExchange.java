@@ -428,6 +428,7 @@ public class HttpExchange
     public void setRequestContent(Buffer requestContent)
     {
         _requestContent = requestContent;
+        _requestContent.mark(_requestContent.getIndex());
     }
 
     /* ------------------------------------------------------------ */
@@ -437,6 +438,10 @@ public class HttpExchange
     public void setRequestContentSource(InputStream in)
     {
         _requestContentSource = in;
+        if (_requestContentSource.markSupported())
+        {
+            _requestContentSource.mark(Integer.MAX_VALUE);
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -476,11 +481,13 @@ public class HttpExchange
         return _requestContent;
     }
 
+    /* ------------------------------------------------------------ */
     public boolean getRetryStatus()
     {
         return _retryStatus;
     }
 
+    /* ------------------------------------------------------------ */
     public void setRetryStatus( boolean retryStatus )
     {
         _retryStatus = retryStatus;
@@ -604,6 +611,25 @@ public class HttpExchange
      */
     protected void onRetry() throws IOException
     {
+        if (_requestContentSource != null)
+        {
+            if (_requestContentSource.markSupported())
+            {
+                _requestContent = null;
+                _requestContentSource.reset();
+            }
+            else
+            {
+                throw new IOException("Unsupported retry attempt");
+            }
+        }
+        else
+        {
+            if (_requestContent != null)
+            { 
+                _requestContent.reset();
+            }
+        }
     }
 
     /**
@@ -741,7 +767,7 @@ public class HttpExchange
             }
             catch (IOException e)
             {
-                Log.debug(e);
+                onException(e);
             }
         }
     }
