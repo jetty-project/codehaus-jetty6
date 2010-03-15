@@ -421,7 +421,9 @@ public class HttpParser implements Parser
                             _handler.startResponse(HttpVersions.CACHE.lookup(_tok0), _responseStatus,_buffer.sliceFromMark());
                         } 
                         else
+                        {
                             _handler.startRequest(method, _tok1,HttpVersions.CACHE.lookup(_buffer.sliceFromMark()));
+                        }
                         _eol=ch;
                         _state=STATE_HEADER;
                         _tok0.setPutIndex(_tok0.getIndex());
@@ -710,8 +712,7 @@ public class HttpParser implements Parser
         
         // Handle _content
         length=_buffer.length();
-        if (_input!=null)
-            _input._contentView=_contentView;
+       
         Buffer chunk; 
         while (_state > STATE_END && length > 0)
         {
@@ -931,9 +932,8 @@ public class HttpParser implements Parser
     {   
         synchronized (this) 
         {
-            if (_input!=null && _contentView.length()>0)
-                _input._contentView=_contentView.duplicate(Buffer.READWRITE);
-            
+            _contentView.setGetIndex(_contentView.putIndex());
+
             _state=STATE_START;
             _contentLength=HttpTokens.UNKNOWN_CONTENT;
             _contentPosition=0;
@@ -1088,7 +1088,7 @@ public class HttpParser implements Parser
         protected HttpParser _parser;
         protected EndPoint _endp;
         protected long _maxIdleTime;
-        protected Buffer _contentView;
+        protected Buffer _content;
         
         /* ------------------------------------------------------------ */
         public Input(HttpParser parser, long maxIdleTime)
@@ -1096,7 +1096,7 @@ public class HttpParser implements Parser
             _parser=parser;
             _endp=parser._endp;
             _maxIdleTime=maxIdleTime;
-            _contentView=_parser._contentView;
+            _content=_parser._contentView;
             _parser._input=this;
         }
         
@@ -1108,7 +1108,7 @@ public class HttpParser implements Parser
         {
             int c=-1;
             if (blockForContent())
-                c= 0xff & _contentView.get();
+                c= 0xff & _content.get();
             return c;
         }
         
@@ -1120,14 +1120,14 @@ public class HttpParser implements Parser
         {
             int l=-1;
             if (blockForContent())
-                l= _contentView.get(b, off, len);
+                l= _content.get(b, off, len);
             return l;
         }
         
         /* ------------------------------------------------------------ */
         private boolean blockForContent() throws IOException
         {
-            if (_contentView.length()>0)
+            if (_content.length()>0)
                 return true;
             if (_parser.getState() <= HttpParser.STATE_END) 
                 return false;
@@ -1144,7 +1144,7 @@ public class HttpParser implements Parser
                     _parser.parseNext();
                     
                     // parse until some progress is made (or IOException thrown for timeout)
-                    while(_contentView.length() == 0 && !_parser.isState(HttpParser.STATE_END) && _endp.isOpen())
+                    while(_content.length() == 0 && !_parser.isState(HttpParser.STATE_END) && _endp.isOpen())
                     {
                         // Try to get more _parser._content
                         _parser.parseNext();
@@ -1161,7 +1161,7 @@ public class HttpParser implements Parser
                 _parser.parseNext();
                 
                 // parse until some progress is made (or IOException thrown for timeout)
-                while(_contentView.length() == 0 && !_parser.isState(HttpParser.STATE_END) && _endp.isOpen())
+                while(_content.length() == 0 && !_parser.isState(HttpParser.STATE_END) && _endp.isOpen())
                 {
                     if (_endp.isBufferingInput() && _parser.parseNext()>0)
                         continue;
@@ -1177,7 +1177,7 @@ public class HttpParser implements Parser
                 }
             }
             
-            return _contentView.length()>0; 
+            return _content.length()>0; 
         }   
 
         /* ------------------------------------------------------------ */
@@ -1186,12 +1186,12 @@ public class HttpParser implements Parser
          */
         public int available() throws IOException
         {
-            if (_contentView!=null && _contentView.length()>0)
-                return _contentView.length();
+            if (_content!=null && _content.length()>0)
+                return _content.length();
             if (!_endp.isBlocking())
                 _parser.parseNext();
             
-            return _contentView==null?0:_contentView.length();
+            return _content==null?0:_content.length();
         }
     }
 

@@ -106,7 +106,7 @@ public class DigestAuthenticator implements Authenticator
                               digest.uri=tok;
                           else if ("response".equalsIgnoreCase(name))
                               digest.response=tok;
-                          break;
+                          name=null;
                       }
                 }
             }            
