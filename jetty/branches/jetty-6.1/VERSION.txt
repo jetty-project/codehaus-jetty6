@@ -5,7 +5,11 @@ jetty-6.1-SNAPSHOT
  + COMETD-58 Extension.rcv() return null causes NPE in AbstractBayeux.PublishHandler.publish
  + COMETD-59 AcknowledgeExtension does not handle null channel in Message
  + COMETD-62 Delay add listeners until after client construction
+ + 296569 removeLifeCycleListener() has no effect
+ + 292800 ContextDeployer - recursive setting is undone by FilenameFilter
  + 300178 HttpClients opens too many connections that are immediately closed
+ + 304658 Inconsistent Expires date format in Set-Cookie headers with maxAge=0
+ + 304698 org.eclipse.jetty.http.HttpFields$DateGenerator.formatCookieDate() uses wrong (?) date format
  + Remove references to old content in HttpClient client tests for www.sun.com
  + JETTY-983 Range handling cleanup
  + JETTY-875 Allow setting of advice field in response to Handshake
@@ -29,12 +33,8 @@ jetty-6.1-SNAPSHOT
  + JETTY-1183 AcknowledgedMessagesClientExtension does not handle correctly message resend when client long polls again
  + JETTY-1133 Handle multiple URL ; parameters
  + JETTY-1186 Better document JMX setup in jetty-jmx.xml
- + JETTY-1192 Fixed Digested POST and HttpExchange onRetry
- + 296569 removeLifeCycleListener() has no effect
- + 292800 ContextDeployer - recursive setting is undone by FilenameFilter
- + 304658 Inconsistent Expires date format in Set-Cookie headers with maxAge=0
- + 304698 org.eclipse.jetty.http.HttpFields$DateGenerator.formatCookieDate() uses wrong (?) date format
  + JETTY-1191 Limit size of ChannelId cache
+ + JETTY-1192 Fixed Digested POST and HttpExchange onRetry
  + JETTY-1195 Coalesce buffers in ChannelEndPoint.flush()
  + JETTY-1196 Enable TCP_NODELAY by default in client connectors
 
