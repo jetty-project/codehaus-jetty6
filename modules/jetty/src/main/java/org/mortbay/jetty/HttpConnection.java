@@ -778,6 +778,7 @@ public class HttpConnection implements Connection
             }
             catch (Exception e)
             {
+                Log.debug(e);
                 throw new HttpException(HttpStatus.ORDINAL_400_Bad_Request,null,e);
             }
         }

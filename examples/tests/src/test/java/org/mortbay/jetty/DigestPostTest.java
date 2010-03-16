@@ -27,6 +27,7 @@ import org.mortbay.jetty.security.HashUserRealm;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.servlet.Context;
+import org.mortbay.log.Log;
 import org.mortbay.util.IO;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
@@ -196,6 +197,88 @@ public class DigestPostTest extends TestCase
         assertEquals(__message,_received);
     }
 
+
+    public void testServerDirectlyHTTP11Chunked() throws Exception
+    {
+        // Log.getLog().setDebugEnabled(true);
+        
+        Socket socket = new Socket("127.0.0.2",_server.getConnectors()[0].getLocalPort());
+        byte[] bytes = __message.getBytes("UTF-8");
+
+        _received=null;
+        socket.getOutputStream().write(
+                ("POST /test HTTP/1.1\r\n"+
+                "Host: 127.0.0.2:"+_server.getConnectors()[0].getLocalPort()+"\r\n"+
+                "Content-Type: text/plain\r\n"+
+                "Transfer-Encoding: chunked\r\n"+
+                "\r\n").getBytes("UTF-8"));
+        socket.getOutputStream().flush();
+        Thread.sleep(10);
+        socket.getOutputStream().write("10\r\n".getBytes("UTF-8"));
+        socket.getOutputStream().write(bytes,0,16);
+        socket.getOutputStream().flush();
+        Thread.sleep(10);
+        socket.getOutputStream().write("\r\n20\r\n".getBytes("UTF-8"));
+        socket.getOutputStream().write(bytes,16,32);
+        socket.getOutputStream().flush();
+        Thread.sleep(10);
+        socket.getOutputStream().write(("\r\n"+Integer.toHexString(bytes.length-48)+"\r\n").getBytes("UTF-8"));
+        socket.getOutputStream().write(bytes,48,bytes.length-48);
+        socket.getOutputStream().write("\r\n0\r\n".getBytes("UTF-8"));
+        socket.getOutputStream().flush();
+
+        Thread.sleep(100);
+        
+        byte[] buf=new byte[4096];
+        int len=socket.getInputStream().read(buf);
+        String result=new String(buf,0,len,"UTF-8");
+
+        assertTrue(result.startsWith("HTTP/1.1 401 Unauthorized"));
+        assertEquals(null,_received);
+        
+        int n=result.indexOf("nonce=");
+        String nonce=result.substring(n+7,result.indexOf('"',n+7));
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] b= md.digest(String.valueOf(System.currentTimeMillis()).getBytes(StringUtil.__ISO_8859_1));            
+        String cnonce=encode(b);
+        String digest="Digest username=\"testuser\" realm=\"test\" nonce=\""+nonce+"\" uri=\"/test\" algorithm=MD5 response=\""+
+        newResponse("POST","/test",cnonce,"testuser","test","password",nonce,"auth")+
+        "\" qop=auth nc="+NC+" cnonce=\""+cnonce+"\"";
+
+        _received=null;
+        socket.getOutputStream().write(
+                ("POST /test HTTP/1.1\r\n"+
+                "Host: 127.0.0.2:"+_server.getConnectors()[0].getLocalPort()+"\r\n"+
+                "Content-Type: text/plain\r\n"+
+                "Transfer-Encoding: Chunked\r\n"+
+                "Authorization: "+digest+"\r\n"+
+                "\r\n").getBytes("UTF-8"));
+        socket.getOutputStream().flush();
+        Thread.sleep(10);
+        socket.getOutputStream().write("10\r\n".getBytes("UTF-8"));
+        socket.getOutputStream().write(bytes,0,16);
+        socket.getOutputStream().flush();
+        Thread.sleep(10);
+        socket.getOutputStream().write("\r\n20\r\n".getBytes("UTF-8"));
+        socket.getOutputStream().write(bytes,16,32);
+        socket.getOutputStream().flush();
+        Thread.sleep(10);
+        socket.getOutputStream().write(("\r\n"+Integer.toHexString(bytes.length-48)+"\r\n").getBytes("UTF-8"));
+        socket.getOutputStream().write(bytes,48,bytes.length-48);
+        socket.getOutputStream().write("\r\n0\r\n".getBytes("UTF-8"));
+        socket.getOutputStream().flush();
+        
+        Thread.sleep(100);
+        buf=new byte[4096];
+        len=socket.getInputStream().read(buf);
+        result=new String(buf,0,len,"UTF-8");
+        
+        assertTrue(result.startsWith("HTTP/1.1 200 OK"));
+        assertEquals(__message,_received);
+        
+        socket.close();
+    }
+
     public void testServerWithHttpClientStringContent() throws Exception
     {
         HttpClient client = new HttpClient();
@@ -269,6 +352,8 @@ public class DigestPostTest extends TestCase
         {
             String received = IO.toString(request.getInputStream());
             _received = received;
+            
+            // System.out.println("received: "+received.length()+":\n"+received);
 
             response.setStatus(200);
             response.getWriter().println("Received "+received.length()+" bytes");
