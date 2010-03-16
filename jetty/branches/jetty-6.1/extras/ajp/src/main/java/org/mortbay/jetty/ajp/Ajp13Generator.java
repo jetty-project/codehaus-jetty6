@@ -15,6 +15,7 @@
 package org.mortbay.jetty.ajp;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -25,6 +26,7 @@ import org.mortbay.io.EndPoint;
 import org.mortbay.jetty.*;
 import org.mortbay.jetty.HttpFields.Field;
 import org.mortbay.log.Log;
+import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 
 /**
@@ -727,7 +729,7 @@ public class Ajp13Generator extends AbstractGenerator
     }
 
     /* ------------------------------------------------------------ */
-    private void addString(String str)
+    private void addString(String str) throws UnsupportedEncodingException
     {
         if (str == null)
         {
@@ -737,7 +739,7 @@ public class Ajp13Generator extends AbstractGenerator
 
         // TODO - need to use a writer to convert, to avoid this hacky
         // conversion and temp buffer
-        byte[] b = str.getBytes();
+        byte[] b = str.getBytes(StringUtil.__ISO_8859_1);
 
         addInt(b.length);
 
