@@ -35,6 +35,7 @@ jetty-6.1-SNAPSHOT
  + 304658 Inconsistent Expires date format in Set-Cookie headers with maxAge=0
  + 304698 org.eclipse.jetty.http.HttpFields$DateGenerator.formatCookieDate() uses wrong (?) date format
  + JETTY-1191 Limit size of ChannelId cache
+ + JETTY-1195 Coalesce buffers in ChannelEndPoint.flush()
 
 jetty-6.1.22 16 November 2009
  + Fixed XSS issue in demo CometDump servlet
