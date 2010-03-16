@@ -17,13 +17,11 @@ package org.mortbay.jetty.client;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.io.Buffer;
-import org.mortbay.io.Buffers;
 import org.mortbay.io.Connection;
 import org.mortbay.io.nio.IndirectNIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
@@ -68,7 +66,7 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
         Address address = destination.isProxied() ? destination.getProxy() : destination.getAddress();
         channel.configureBlocking( false );
         channel.connect(address.toSocketAddress());
-        channel.socket().setSoTimeout( _httpClient.getSoTimeout());
+        channel.socket().setTcpNoDelay(true);
         _selectorManager.register( channel, destination );
     }
 
