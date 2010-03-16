@@ -102,13 +102,13 @@ public class DigestPostTest extends TestCase
 
     public void testServerDirectlyHTTP10() throws Exception
     {
-        Socket socket = new Socket("127.0.0.2",_server.getConnectors()[0].getLocalPort());
+        Socket socket = new Socket("127.0.0.1",_server.getConnectors()[0].getLocalPort());
         byte[] bytes = __message.getBytes("UTF-8");
 
         _received=null;
         socket.getOutputStream().write(
                 ("POST /test HTTP/1.0\r\n"+
-                "Host: 127.0.0.2:"+_server.getConnectors()[0].getLocalPort()+"\r\n"+
+                "Host: 127.0.0.1:"+_server.getConnectors()[0].getLocalPort()+"\r\n"+
                 "Content-Length: "+bytes.length+"\r\n"+
                 "\r\n").getBytes("UTF-8"));
         socket.getOutputStream().write(bytes);
@@ -130,12 +130,12 @@ public class DigestPostTest extends TestCase
         "\" qop=auth nc="+NC+" cnonce=\""+cnonce+"\"";
               
         
-        socket = new Socket("127.0.0.2",_server.getConnectors()[0].getLocalPort());
+        socket = new Socket("127.0.0.1",_server.getConnectors()[0].getLocalPort());
 
         _received=null;
         socket.getOutputStream().write(
                 ("POST /test HTTP/1.0\r\n"+
-                "Host: 127.0.0.2:"+_server.getConnectors()[0].getLocalPort()+"\r\n"+
+                "Host: 127.0.0.1:"+_server.getConnectors()[0].getLocalPort()+"\r\n"+
                 "Content-Length: "+bytes.length+"\r\n"+
                 "Authorization: "+digest+"\r\n"+
                 "\r\n").getBytes("UTF-8"));
@@ -150,13 +150,13 @@ public class DigestPostTest extends TestCase
 
     public void testServerDirectlyHTTP11() throws Exception
     {
-        Socket socket = new Socket("127.0.0.2",_server.getConnectors()[0].getLocalPort());
+        Socket socket = new Socket("127.0.0.1",_server.getConnectors()[0].getLocalPort());
         byte[] bytes = __message.getBytes("UTF-8");
 
         _received=null;
         socket.getOutputStream().write(
                 ("POST /test HTTP/1.1\r\n"+
-                "Host: 127.0.0.2:"+_server.getConnectors()[0].getLocalPort()+"\r\n"+
+                "Host: 127.0.0.1:"+_server.getConnectors()[0].getLocalPort()+"\r\n"+
                 "Content-Length: "+bytes.length+"\r\n"+
                 "\r\n").getBytes("UTF-8"));
         socket.getOutputStream().write(bytes);
@@ -183,7 +183,7 @@ public class DigestPostTest extends TestCase
         _received=null;
         socket.getOutputStream().write(
                 ("POST /test HTTP/1.0\r\n"+
-                "Host: 127.0.0.2:"+_server.getConnectors()[0].getLocalPort()+"\r\n"+
+                "Host: 127.0.0.1:"+_server.getConnectors()[0].getLocalPort()+"\r\n"+
                 "Content-Length: "+bytes.length+"\r\n"+
                 "Authorization: "+digest+"\r\n"+
                 "\r\n").getBytes("UTF-8"));
@@ -203,7 +203,7 @@ public class DigestPostTest extends TestCase
         client.setRealmResolver(new SimpleRealmResolver(new TestRealm()));
         client.start();
 
-        String srvUrl = "http://127.0.0.2:" + _server.getConnectors()[0].getLocalPort() + "/test";
+        String srvUrl = "http://127.0.0.1:" + _server.getConnectors()[0].getLocalPort() + "/test";
 
         ContentExchange ex = new ContentExchange();
         ex.setMethod(HttpMethods.POST);
@@ -226,7 +226,7 @@ public class DigestPostTest extends TestCase
         client.setRealmResolver(new SimpleRealmResolver(new TestRealm()));
         client.start();
 
-        String srvUrl = "http://127.0.0.2:" + _server.getConnectors()[0].getLocalPort() + "/test";
+        String srvUrl = "http://127.0.0.1:" + _server.getConnectors()[0].getLocalPort() + "/test";
 
         ContentExchange ex = new ContentExchange();
         ex.setMethod(HttpMethods.POST);
