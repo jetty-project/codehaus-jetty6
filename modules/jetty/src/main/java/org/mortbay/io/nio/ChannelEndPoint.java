@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
-//You may obtain a copy of the License at 
+//You may obtain a copy of the License at
 //http://www.apache.org/licenses/LICENSE-2.0
 //Unless required by applicable law or agreed to in writing, software
 //distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,9 +43,9 @@ public class ChannelEndPoint implements EndPoint
     protected Socket _socket;
     protected InetSocketAddress _local;
     protected InetSocketAddress _remote;
-    
+
     /**
-     * 
+     *
      */
     public ChannelEndPoint(ByteChannel channel)
     {
@@ -54,25 +54,25 @@ public class ChannelEndPoint implements EndPoint
         if (channel instanceof SocketChannel)
             _socket=((SocketChannel)channel).socket();
     }
-    
+
     public boolean isBlocking()
     {
         if (_channel instanceof SelectableChannel)
             return ((SelectableChannel)_channel).isBlocking();
         return true;
     }
-    
+
     public boolean blockReadable(long millisecs) throws IOException
     {
         return true;
     }
-    
+
     public boolean blockWritable(long millisecs) throws IOException
     {
         return true;
     }
 
-    /* 
+    /*
      * @see org.mortbay.io.EndPoint#isOpen()
      */
     public boolean isOpen()
@@ -143,7 +143,7 @@ public class ChannelEndPoint implements EndPoint
         {
             throw new IOException("Not Implemented");
         }
-        
+
         return len;
     }
 
@@ -159,7 +159,7 @@ public class ChannelEndPoint implements EndPoint
             NIOBuffer nbuf = (NIOBuffer)buf;
             ByteBuffer bbuf=nbuf.getByteBuffer();
 
-            // TODO synchronize 
+            // TODO synchronize
             synchronized(bbuf)
             {
                 try
@@ -200,9 +200,9 @@ public class ChannelEndPoint implements EndPoint
 
         Buffer buf0 = header==null?null:header.buffer();
         Buffer buf1 = buffer==null?null:buffer.buffer();
-        
+
         if (_channel instanceof GatheringByteChannel &&
-            header!=null && header.length()!=0 && header instanceof NIOBuffer && 
+            header!=null && header.length()!=0 && header instanceof NIOBuffer &&
             buffer!=null && buffer.length()!=0 && buffer instanceof NIOBuffer)
         {
             NIOBuffer nbuf0 = (NIOBuffer)buf0;
@@ -241,7 +241,7 @@ public class ChannelEndPoint implements EndPoint
                             {
                                 header.skip(length);
                             }
-                            
+
                         }
                         finally
                         {
@@ -262,8 +262,20 @@ public class ChannelEndPoint implements EndPoint
         }
         else
         {
-            // TODO - consider copying buffers buffer and trailer into header if there is space!
-            
+            if (header!=null)
+            {
+                if (buffer!=null && buffer.length()>0 && header.space()>buffer.length())
+                {
+                    header.put(buffer);
+                    buffer.clear();
+                }
+                if (trailer!=null && trailer.length()>0 && header.space()>trailer.length())
+                {
+                    header.put(trailer);
+                    trailer.clear();
+                }
+            }
+
             // flush header
             if (header!=null && header.length()>0)
                 length=flush(header);
@@ -279,7 +291,7 @@ public class ChannelEndPoint implements EndPoint
                  trailer!=null && trailer.length()>0)
                 length+=flush(trailer);
         }
-        
+
         return length;
     }
 
@@ -293,50 +305,50 @@ public class ChannelEndPoint implements EndPoint
 
 
     /* ------------------------------------------------------------ */
-    /* 
+    /*
      * @see org.mortbay.io.EndPoint#getLocalAddr()
      */
     public String getLocalAddr()
     {
         if (_socket==null)
             return null;
-        
+
         if (_local==null)
             _local=(InetSocketAddress)_socket.getLocalSocketAddress();
-        
+
        if (_local==null || _local.getAddress()==null || _local.getAddress().isAnyLocalAddress())
            return Portable.ALL_INTERFACES;
-        
+
         return _local.getAddress().getHostAddress();
     }
 
     /* ------------------------------------------------------------ */
-    /* 
+    /*
      * @see org.mortbay.io.EndPoint#getLocalHost()
      */
     public String getLocalHost()
     {
         if (_socket==null)
             return null;
-        
+
         if (_local==null)
             _local=(InetSocketAddress)_socket.getLocalSocketAddress();
-        
+
        if (_local==null || _local.getAddress()==null || _local.getAddress().isAnyLocalAddress())
            return Portable.ALL_INTERFACES;
-        
+
         return _local.getAddress().getCanonicalHostName();
     }
 
     /* ------------------------------------------------------------ */
-    /* 
+    /*
      * @see org.mortbay.io.EndPoint#getLocalPort()
      */
     public int getLocalPort()
     {
         if (_socket==null)
             return 0;
-        
+
         if (_local==null)
             _local=(InetSocketAddress)_socket.getLocalSocketAddress();
         if (_local==null)
@@ -345,31 +357,31 @@ public class ChannelEndPoint implements EndPoint
     }
 
     /* ------------------------------------------------------------ */
-    /* 
+    /*
      * @see org.mortbay.io.EndPoint#getRemoteAddr()
      */
     public String getRemoteAddr()
     {
         if (_socket==null)
             return null;
-        
+
         if (_remote==null)
             _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
-        
+
         if (_remote==null)
             return null;
         return _remote.getAddress().getHostAddress();
     }
 
     /* ------------------------------------------------------------ */
-    /* 
+    /*
      * @see org.mortbay.io.EndPoint#getRemoteHost()
      */
     public String getRemoteHost()
     {
         if (_socket==null)
             return null;
-        
+
         if (_remote==null)
             _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
 
@@ -379,14 +391,14 @@ public class ChannelEndPoint implements EndPoint
     }
 
     /* ------------------------------------------------------------ */
-    /* 
+    /*
      * @see org.mortbay.io.EndPoint#getRemotePort()
      */
     public int getRemotePort()
     {
         if (_socket==null)
             return 0;
-        
+
         if (_remote==null)
             _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
 
@@ -396,7 +408,7 @@ public class ChannelEndPoint implements EndPoint
     }
 
     /* ------------------------------------------------------------ */
-    /* 
+    /*
      * @see org.mortbay.io.EndPoint#getConnection()
      */
     public Object getTransport()
@@ -407,7 +419,7 @@ public class ChannelEndPoint implements EndPoint
     /* ------------------------------------------------------------ */
     public void flush()
         throws IOException
-    {   
+    {
     }
 
     /* ------------------------------------------------------------ */
