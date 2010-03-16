@@ -428,7 +428,6 @@ public class HttpExchange
     public void setRequestContent(Buffer requestContent)
     {
         _requestContent = requestContent;
-        _requestContent.mark(_requestContent.getIndex());
     }
 
     /* ------------------------------------------------------------ */
@@ -439,9 +438,7 @@ public class HttpExchange
     {
         _requestContentSource = in;
         if (_requestContentSource.markSupported())
-        {
             _requestContentSource.mark(Integer.MAX_VALUE);
-        }
     }
 
     /* ------------------------------------------------------------ */
@@ -621,13 +618,6 @@ public class HttpExchange
             else
             {
                 throw new IOException("Unsupported retry attempt");
-            }
-        }
-        else
-        {
-            if (_requestContent != null)
-            { 
-                _requestContent.reset();
             }
         }
     }

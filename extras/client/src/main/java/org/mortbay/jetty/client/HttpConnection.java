@@ -24,6 +24,7 @@ import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
+import org.mortbay.io.View;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.jetty.HttpGenerator;
 import org.mortbay.jetty.HttpHeaderValues;
@@ -394,7 +395,7 @@ public class HttpConnection implements Connection
             {
                 _exchange._requestFields.putLongField(HttpHeaders.CONTENT_LENGTH,_exchange._requestContent.length());
                 _generator.completeHeader(_exchange._requestFields,false);
-                _generator.addContent(_exchange._requestContent,true);
+                _generator.addContent(new View(_exchange._requestContent),true);
             }
             else if (_exchange._requestContentSource != null)
             {
