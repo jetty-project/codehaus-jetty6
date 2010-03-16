@@ -588,7 +588,8 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                         if (_queued>0)
                         {
                             _queued--;
-                            job=_jobs[_nextJob++];
+                            job=_jobs[_nextJob];
+                            _jobs[_nextJob++]=null;
                             if (_nextJob==_jobs.length)
                                 _nextJob=0;
                             continue;
