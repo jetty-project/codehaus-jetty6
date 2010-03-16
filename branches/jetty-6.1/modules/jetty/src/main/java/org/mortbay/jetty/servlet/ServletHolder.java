@@ -389,7 +389,7 @@ public class ServletHolder extends Holder
         if (_unavailableEx==e && _unavailable!=0)
             return;
 
-        _servletHandler.getServletContext().log("unavailable",e);
+        _servletHandler.getServletContext().log("Unavailable "+e);
         
         _unavailableEx=e;
         _unavailable=-1;
