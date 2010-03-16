@@ -11,27 +11,27 @@ jetty-6.1-SNAPSHOT
  + 304658 Inconsistent Expires date format in Set-Cookie headers with maxAge=0
  + 304698 org.eclipse.jetty.http.HttpFields$DateGenerator.formatCookieDate() uses wrong (?) date format
  + Remove references to old content in HttpClient client tests for www.sun.com
- + JETTY-983 Range handling cleanup
  + JETTY-875 Allow setting of advice field in response to Handshake
- + JETTY-1182 Reduce synchronization in ContinuationCometdServlet
- + JETTY-1180 Extension methods are wrongly called
- + JETTY-1178 Make continuation servlet to log the incoming JSON in case of parsing errors
- + JETTY-1177 Allow error handler to set cacheControl
- + JETTY-1176 NPE in StatisticsExtension if client is null
- + JETTY-1175 NPE in TimesyncExtension
- + JETTY-1170 NPE on client when server-side extension returns null
- + JETTY-1168 Don't hold sessionIdManager lock when invalidating sessions
- + JETTY-1162 Add support for async/sync message delivery to BayeuxClient
- + JETTY-1161 An Extension that measures round-trip delay for cometd messages.
- + JETTY-1157 Don't hold array passed in write(byte[])
- + JETTY-1156 SSL blocking close with JVM Bug busy key fix
- + JETTY-1155 HttpConnection.close notifies HttpExchange
- + JETTY-1153 System property for UrlEncoded charset
- + JETTY-1149 transient should be volatile in AbstractLifeCycle
- + JETTY-1134 BayeuxClient: Connect msg should be sent as array
- + JETTY-1182 COMETD-76 do not lock client while sending messages.
- + JETTY-1183 AcknowledgedMessagesClientExtension does not handle correctly message resend when client long polls again
+ + JETTY-983 Range handling cleanup
  + JETTY-1133 Handle multiple URL ; parameters
+ + JETTY-1134 BayeuxClient: Connect msg should be sent as array
+ + JETTY-1149 transient should be volatile in AbstractLifeCycle
+ + JETTY-1153 System property for UrlEncoded charset
+ + JETTY-1155 HttpConnection.close notifies HttpExchange
+ + JETTY-1156 SSL blocking close with JVM Bug busy key fix
+ + JETTY-1157 Don't hold array passed in write(byte[])
+ + JETTY-1161 An Extension that measures round-trip delay for cometd messages.
+ + JETTY-1162 Add support for async/sync message delivery to BayeuxClient
+ + JETTY-1168 Don't hold sessionIdManager lock when invalidating sessions
+ + JETTY-1170 NPE on client when server-side extension returns null
+ + JETTY-1175 NPE in TimesyncExtension
+ + JETTY-1176 NPE in StatisticsExtension if client is null
+ + JETTY-1177 Allow error handler to set cacheControl
+ + JETTY-1178 Make continuation servlet to log the incoming JSON in case of parsing errors
+ + JETTY-1180 Extension methods are wrongly called
+ + JETTY-1182 COMETD-76 do not lock client while sending messages.
+ + JETTY-1182 Reduce synchronization in ContinuationCometdServlet
+ + JETTY-1183 AcknowledgedMessagesClientExtension does not handle correctly message resend when client long polls again
  + JETTY-1186 Better document JMX setup in jetty-jmx.xml
  + JETTY-1191 Limit size of ChannelId cache
  + JETTY-1192 Fixed Digested POST and HttpExchange onRetry
