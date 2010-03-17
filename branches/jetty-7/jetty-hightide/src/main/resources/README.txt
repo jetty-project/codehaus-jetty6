@@ -54,8 +54,12 @@ RUNNING JETTY
 =============
 
 The run directory is either the top-level of a distribution
-or jetty-distribution/target/distribution directory when built from
+or jetty-hightide/target/hightide directory when built from
 source.
+
+Jetty start.jar provides a cross platform replacement for startup scripts.
+It makes use of executable JAR that builds the classpath and then executes
+jetty.
 
 To run with all the demo options:
 
@@ -64,6 +68,10 @@ To run with all the demo options:
 To run with the default options:
 
   java -jar start.jar
+
+The default options may be specified in the start.ini file, or if
+that is not present, they are defined in the start.config file that
+is within the start.jar.
 
 To run with specific configuration file(s)
 
