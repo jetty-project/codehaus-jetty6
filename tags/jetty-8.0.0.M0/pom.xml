@@ -117,7 +117,9 @@
     </pluginManagement>
   </build>
   <modules>
+    <!-- uncomment to build
     <module>repository</module>
+     -->
     <module>jetty-maven-plugin</module>
     <module>jetty-jspc-maven-plugin</module>
     <!-- module>jetty-ant</module -->
@@ -139,6 +141,7 @@
     <!-- module>jetty-jboss</module -->
   </modules>
 
+<!-- uncomment to build
   <repositories>
     <repository>
       <id>download.java.net</id>
@@ -153,4 +156,5 @@
       </releases>
    </repository>
   </repositories>
+-->
 </project>
