@@ -1,3 +1,5 @@
+ 
+jetty@codehaus 7.0.2.RC0.17 March 2010
  + Updated JSP to 2.1.v20091210
  + JETTY-776 Make new session tests module to concentrate all reusable session clustering test code
  + JETTY-1159 jetty-maven-plugin doesn't work if no WEB-INF
