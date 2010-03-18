@@ -56,6 +56,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
+        <inherited>true</inherited>
         <configuration>
           <source>1.4</source>
           <target>1.4</target>
