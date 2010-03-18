@@ -13,7 +13,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <jetty-version>8.0.0.M0</jetty-version>
+    <jetty-version>8.0.0.M1-SNAPSHOT</jetty-version>
     <felix.bundle.version>2.0.0</felix.bundle.version>
     <jna-version>3.2.2</jna-version>
     <jsp-version>2.2</jsp-version>
@@ -147,6 +147,18 @@
       <url>http://download.java.net/maven/2/</url>
       <snapshots>
         <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+   </repository>
+    <repository>
+      <id>glassfish.download.java.net</id>
+      <name>Java.net Repository for Glassfish</name>
+      <layout>default</layout>
+      <url>http://download.java.net/maven/glassfish/</url>
+      <snapshots>
+        <enabled>false</enabled>
       </snapshots>
       <releases>
         <enabled>true</enabled>
