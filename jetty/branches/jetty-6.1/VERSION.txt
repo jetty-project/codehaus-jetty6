@@ -39,6 +39,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1192 Fixed Digested POST and HttpExchange onRetry
  + JETTY-1195 Coalesce buffers in ChannelEndPoint.flush()
  + JETTY-1196 Enable TCP_NODELAY by default in client connectors
+ + JETTY-1197 SetUID module test fails when using Java 1.6 to build
 
 jetty-6.1.22 16 November 2009
  + Fixed XSS issue in demo CometDump servlet

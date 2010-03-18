@@ -11,13 +11,6 @@
   <name>Jetty AJP</name>
   <build>
      <plugins>
-       <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.4</source>
-          <target>1.4</target>
-        </configuration>
-      </plugin>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
