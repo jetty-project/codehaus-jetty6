@@ -25,6 +25,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1163 AJP13 forces 8859-1 encoding
  + JETTY-1168 Don't hold sessionIdManager lock when invalidating sessions
  + JETTY-1170 NPE on client when server-side extension returns null
+ + JETTY-1174 Close rather than finish Gzipstreams to avoid JVM leak
  + JETTY-1175 NPE in TimesyncExtension
  + JETTY-1176 NPE in StatisticsExtension if client is null
  + JETTY-1177 Allow error handler to set cacheControl
