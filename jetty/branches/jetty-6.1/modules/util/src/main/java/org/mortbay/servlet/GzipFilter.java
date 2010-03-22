@@ -466,8 +466,9 @@ public class GzipFilter extends UserAgentFilter
                 }
 
                 if (_gzOut!=null)
-                    _gzOut.finish();
-                _out.close();
+                    _gzOut.close();
+                else
+                    _out.close();
                 _closed=true;
             }
         }  
@@ -484,8 +485,11 @@ public class GzipFilter extends UserAgentFilter
                         doGzip();
                 }
                 
-                if (_gzOut!=null)
-                    _gzOut.finish();
+                if (_gzOut!=null && !_closed)
+                {
+                    _closed=true;
+                    _gzOut.close();
+                }
             }
         }  
 
