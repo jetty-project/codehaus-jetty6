@@ -51,6 +51,7 @@ import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.security.SslSelectChannelConnector;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.util.IO;
 
 /**
  * HttpServer Tester.
@@ -101,6 +102,51 @@ public class SSLEngineTest extends TestCase
     
     private static final TrustManager[] s_dummyTrustManagers=new TrustManager[]  { new CredulousTM() };
 
+
+    /**
+     * Feed the server the entire request at once.
+     * 
+     * @throws Exception
+     */
+    public void testBigResponse() throws Exception
+    {
+
+        Server server=new Server();
+        SslSelectChannelConnector connector=new SslSelectChannelConnector();
+
+        String keystore = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+"keystore";
+        
+        connector.setPort(0);
+        connector.setKeystore(keystore);
+        connector.setPassword("storepwd");
+        connector.setKeyPassword("keypwd");
+
+        server.setConnectors(new Connector[]
+        { connector });
+        server.setHandler(new HelloWorldHandler());
+        server.start();
+        
+        SSLContext ctx=SSLContext.getInstance("SSLv3");
+        ctx.init(null,s_dummyTrustManagers,new java.security.SecureRandom());
+
+        int port=connector.getLocalPort();
+
+        Socket client=ctx.getSocketFactory().createSocket("localhost",port);
+        OutputStream os=client.getOutputStream();
+
+        String request = 
+            "GET /?dump=102400 HTTP/1.1\r\n"+
+            "Host: localhost:8080\r\n"+
+            "Connection: close\r\n"+
+            "\r\n";
+        
+        os.write(request.getBytes());
+        os.flush();
+        
+        String response = IO.toString(client.getInputStream());
+        System.err.println("response "+response.length());
+        assertTrue(response.length()>102400);
+    }
     // ~ Methods
     // ----------------------------------------------------------------
 
@@ -224,6 +270,13 @@ public class SSLEngineTest extends TestCase
             try
             {
                 out.print(HELLO_WORLD);
+                if (request.getParameter("dump")!=null)
+                {
+                    char[] buf = new char[Integer.valueOf(request.getParameter("dump"))];
+                    for (int i=0;i<buf.length;i++)
+                        buf[i]=(char)('0'+(i%10));
+                    out.write(buf);
+                }   
             }
             finally
             {
