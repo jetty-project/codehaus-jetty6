@@ -1488,7 +1488,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             }
 
             setManagedAttribute(name,value);
-            Object old_value=_contextAttributes==null?null:_contextAttributes.getAttribute(name);
+            Object old_value=_contextAttributes.getAttribute(name);
             
             if (value==null)
                 _contextAttributes.removeAttribute(name);
