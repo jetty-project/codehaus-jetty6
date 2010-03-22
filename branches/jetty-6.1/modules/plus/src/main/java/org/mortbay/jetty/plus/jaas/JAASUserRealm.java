@@ -172,7 +172,7 @@ public class JAASUserRealm implements UserRealm
             
             thePrincipal = (JAASUserPrincipal)user;
         }
-        return ((JAASUserPrincipal)user).isUserInRole(role);
+        return thePrincipal!=null && thePrincipal.isUserInRole(role);
     }
 
 
