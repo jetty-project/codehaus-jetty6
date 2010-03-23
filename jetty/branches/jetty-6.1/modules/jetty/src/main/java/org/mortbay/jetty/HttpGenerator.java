@@ -387,6 +387,7 @@ public class HttpGenerator extends AbstractGenerator
         HttpFields.Field transfer_encoding = null;
         boolean keep_alive = false;
         boolean close=false;
+        boolean content_type =false;
         StringBuffer connection = null;
 
         if (fields != null)
@@ -411,8 +412,9 @@ public class HttpGenerator extends AbstractGenerator
                         break;
 
                     case HttpHeaders.CONTENT_TYPE_ORDINAL:
-                        if (BufferUtil.isPrefix(MimeTypes.MULTIPART_BYTERANGES_BUFFER, field.getValueBuffer())) _contentLength = HttpTokens.SELF_DEFINING_CONTENT;
-
+                        if (BufferUtil.isPrefix(MimeTypes.MULTIPART_BYTERANGES_BUFFER, field.getValueBuffer())) 
+                            _contentLength = HttpTokens.SELF_DEFINING_CONTENT;
+                        content_type=true;
                         // write the field to the header buffer
                         field.put(_header);
                         break;
@@ -547,7 +549,7 @@ public class HttpGenerator extends AbstractGenerator
                 {
                     // we have seen all the _content there is
                     _contentLength = _contentWritten;
-                    if (content_length == null)
+                    if (content_length == null && (_method==null || content_type || _contentLength>0))
                     {
                         // known length but not actually set.
                         _header.put(HttpHeaders.CONTENT_LENGTH_BUFFER);
