@@ -1,6 +1,7 @@
 jetty-6.1-SNAPSHOT
  + JSON parses NaN as null
  + Updated JSP to 2.1.v20091210
+ + COMETD-28 Improved concurrency usage in Bayeux and channel handling
  + COMETD-46 reset ContentExchange content on resend
  + COMETD-58 Extension.rcv() return null causes NPE in AbstractBayeux.PublishHandler.publish
  + COMETD-59 AcknowledgeExtension does not handle null channel in Message
@@ -55,7 +56,6 @@ jetty-6.1.22 16 November 2009
  + JETTY-1135 Handle connection closed before accepted during JVM bug work around
  + JETTY-1144 Fixed multi-byte character overflow
  + JETTY-1148 Reset partially read request reader.
- + COMETD-28 Improved concurrency usage in Bayeux and channel handling
  + 289221 HttpExchange does not timeout when using blocking connector
  + 290761 HttpExchange.waitForDone()
  + 291340 state==HEADER (Race condition in onException() notifications)
