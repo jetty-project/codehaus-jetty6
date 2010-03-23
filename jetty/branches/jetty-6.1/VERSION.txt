@@ -42,6 +42,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1196 Enable TCP_NODELAY by default in client connectors
  + JETTY-1197 SetUID module test fails when using Java 1.6 to build
  + JETTY-1199 FindBugs cleanups
+ + JETTY-1174 Memory leak in ChannelImpl/ContinuationClient
 
 jetty-6.1.22 16 November 2009
  + Fixed XSS issue in demo CometDump servlet
