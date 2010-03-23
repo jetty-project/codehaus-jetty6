@@ -21,6 +21,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1155 HttpConnection.close notifies HttpExchange
  + JETTY-1156 SSL blocking close with JVM Bug busy key fix
  + JETTY-1157 Don't hold array passed in write(byte[])
+ + JETTY-1158 NPE in StdErrLog when Throwable is null
  + JETTY-1161 An Extension that measures round-trip delay for cometd messages.
  + JETTY-1162 Add support for async/sync message delivery to BayeuxClient
  + JETTY-1163 AJP13 forces 8859-1 encoding
