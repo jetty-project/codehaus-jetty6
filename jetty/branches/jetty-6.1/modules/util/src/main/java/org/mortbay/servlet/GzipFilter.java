@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
-//You may obtain a copy of the License at 
+//You may obtain a copy of the License at
 //http://www.apache.org/licenses/LICENSE-2.0
 //Unless required by applicable law or agreed to in writing, software
 //distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPOutputStream;
-
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
@@ -46,18 +45,18 @@ import org.mortbay.util.StringUtil;
  * if no mimeTypes are defined the content-type is not "application/gzip"</li>
  * <li>No content-encoding is specified by the resource</li>
  * </ul>
- * 
+ *
  * <p>
  * Compressing the content can greatly improve the network bandwidth usage, but at a cost of memory and
- * CPU cycles.   If this filter is mapped for static content, then use of efficient direct NIO may be 
- * prevented, thus use of the gzip mechanism of the {@link org.mortbay.jetty.servlet.DefaultServlet} is 
+ * CPU cycles.   If this filter is mapped for static content, then use of efficient direct NIO may be
+ * prevented, thus use of the gzip mechanism of the {@link org.mortbay.jetty.servlet.DefaultServlet} is
  * advised instead.
  * </p>
  * <p>
- * This filter extends {@link UserAgentFilter} and if the the initParameter <code>excludedAgents</code> 
+ * This filter extends {@link UserAgentFilter} and if the the initParameter <code>excludedAgents</code>
  * is set to a comma separated list of user agents, then these agents will be excluded from gzip content.
  * </p>
- *  
+ *
  * @author gregw
  *
  */
@@ -67,11 +66,11 @@ public class GzipFilter extends UserAgentFilter
     protected int _bufferSize=8192;
     protected int _minGzipSize=0;
     protected Set _excluded;
-    
+
     public void init(FilterConfig filterConfig) throws ServletException
     {
         super.init(filterConfig);
-        
+
         String tmp=filterConfig.getInitParameter("bufferSize");
         if (tmp!=null)
             _bufferSize=Integer.parseInt(tmp);
@@ -79,7 +78,7 @@ public class GzipFilter extends UserAgentFilter
         tmp=filterConfig.getInitParameter("minGzipSize");
         if (tmp!=null)
             _minGzipSize=Integer.parseInt(tmp);
-        
+
         tmp=filterConfig.getInitParameter("mimeTypes");
         if (tmp!=null)
         {
@@ -88,7 +87,7 @@ public class GzipFilter extends UserAgentFilter
             while (tok.hasMoreTokens())
                 _mimeTypes.add(tok.nextToken());
         }
-        
+
         tmp=filterConfig.getInitParameter("excludedAgents");
         if (tmp!=null)
         {
@@ -103,7 +102,7 @@ public class GzipFilter extends UserAgentFilter
     {
     }
 
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) 
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
         throws IOException, ServletException
     {
         HttpServletRequest request=(HttpServletRequest)req;
@@ -125,7 +124,7 @@ public class GzipFilter extends UserAgentFilter
             }
 
             GZIPResponseWrapper wrappedResponse=newGZIPResponseWrapper(request,response);
-            
+
             boolean exceptional=true;
             try
             {
@@ -155,7 +154,7 @@ public class GzipFilter extends UserAgentFilter
             super.doFilter(request,response,chain);
         }
     }
-    
+
     protected GZIPResponseWrapper newGZIPResponseWrapper(HttpServletRequest request, HttpServletResponse response)
     {
         return new GZIPResponseWrapper(request,response);
@@ -194,7 +193,7 @@ public class GzipFilter extends UserAgentFilter
                     ct=ct.substring(0,colon);
             }
 
-            if ((_gzStream==null || _gzStream._out==null) && 
+            if ((_gzStream==null || _gzStream._out==null) &&
                 (_mimeTypes==null && "application/gzip".equalsIgnoreCase(ct) ||
                  _mimeTypes!=null && (ct==null||!_mimeTypes.contains(StringUtil.asciiToLowerCase(ct)))))
             {
@@ -202,7 +201,7 @@ public class GzipFilter extends UserAgentFilter
             }
         }
 
-        
+
         public void setStatus(int sc, String sm)
         {
             super.setStatus(sc,sm);
@@ -223,7 +222,7 @@ public class GzipFilter extends UserAgentFilter
             if (_gzStream!=null)
                 _gzStream.setContentLength(length);
         }
-        
+
         public void addHeader(String name, String value)
         {
             if ("content-length".equalsIgnoreCase(name))
@@ -233,11 +232,11 @@ public class GzipFilter extends UserAgentFilter
                     _gzStream.setContentLength(_contentLength);
             }
             else if ("content-type".equalsIgnoreCase(name))
-            {   
+            {
                 setContentType(value);
             }
             else if ("content-encoding".equalsIgnoreCase(name))
-            {   
+            {
                 super.addHeader(name,value);
                 if (!isCommitted())
                 {
@@ -247,7 +246,7 @@ public class GzipFilter extends UserAgentFilter
             else
                 super.addHeader(name,value);
         }
-        
+
         public void setHeader(String name, String value)
         {
             if ("content-length".equalsIgnoreCase(name))
@@ -257,11 +256,11 @@ public class GzipFilter extends UserAgentFilter
                     _gzStream.setContentLength(_contentLength);
             }
             else if ("content-type".equalsIgnoreCase(name))
-            {   
+            {
                 setContentType(value);
             }
             else if ("content-encoding".equalsIgnoreCase(name))
-            {   
+            {
                 super.setHeader(name,value);
                 if (!isCommitted())
                 {
@@ -304,7 +303,7 @@ public class GzipFilter extends UserAgentFilter
             _noGzip=false;
             _contentLength=-1;
         }
-        
+
         public void resetBuffer()
         {
             super.resetBuffer();
@@ -313,19 +312,19 @@ public class GzipFilter extends UserAgentFilter
             _writer=null;
             _gzStream=null;
         }
-        
+
         public void sendError(int sc, String msg) throws IOException
         {
             resetBuffer();
             super.sendError(sc,msg);
         }
-        
+
         public void sendError(int sc) throws IOException
         {
             resetBuffer();
             super.sendError(sc);
         }
-        
+
         public void sendRedirect(String location) throws IOException
         {
             resetBuffer();
@@ -338,29 +337,29 @@ public class GzipFilter extends UserAgentFilter
             {
                 if (getResponse().isCommitted() || _noGzip)
                     return getResponse().getOutputStream();
-                
+
                 _gzStream=newGzipStream(_request,(HttpServletResponse)getResponse(),_contentLength,_bufferSize,_minGzipSize);
             }
             else if (_writer!=null)
                 throw new IllegalStateException("getWriter() called");
-            
-            return _gzStream;   
+
+            return _gzStream;
         }
 
         public PrintWriter getWriter() throws IOException
         {
             if (_writer==null)
-            { 
+            {
                 if (_gzStream!=null)
                     throw new IllegalStateException("getOutputStream() called");
-                
+
                 if (getResponse().isCommitted() || _noGzip)
                     return getResponse().getWriter();
-                
+
                 _gzStream=newGzipStream(_request,(HttpServletResponse)getResponse(),_contentLength,_bufferSize,_minGzipSize);
                 _writer=newWriter(_gzStream,getCharacterEncoding());
             }
-            return _writer;   
+            return _writer;
         }
 
         void noGzip()
@@ -378,7 +377,7 @@ public class GzipFilter extends UserAgentFilter
                 }
             }
         }
-        
+
         void finish() throws IOException
         {
             if (_writer!=null && !_gzStream._closed)
@@ -386,14 +385,14 @@ public class GzipFilter extends UserAgentFilter
             if (_gzStream!=null)
                 _gzStream.finish();
         }
-     
+
         protected GzipStream newGzipStream(HttpServletRequest request,HttpServletResponse response,long contentLength,int bufferSize, int minGzipSize) throws IOException
         {
             return new GzipStream(request,response,contentLength,bufferSize,minGzipSize);
         }
     }
 
-    
+
     public static class GzipStream extends ServletOutputStream
     {
         protected HttpServletRequest _request;
@@ -431,7 +430,7 @@ public class GzipFilter extends UserAgentFilter
         {
             _contentLength=length;
         }
-        
+
         public void flush() throws IOException
         {
             if (_out==null || _bOut!=null)
@@ -441,13 +440,13 @@ public class GzipFilter extends UserAgentFilter
                 else
                     doGzip();
             }
-            
+
             _out.flush();
         }
 
         public void close() throws IOException
         {
-            if (_request.getAttribute("javax.servlet.include.request_uri")!=null)            
+            if (_request.getAttribute("javax.servlet.include.request_uri")!=null)
                 flush();
             else
             {
@@ -471,7 +470,7 @@ public class GzipFilter extends UserAgentFilter
                     _out.close();
                 _closed=true;
             }
-        }  
+        }
 
         public void finish() throws IOException
         {
@@ -484,17 +483,17 @@ public class GzipFilter extends UserAgentFilter
                     else
                         doGzip();
                 }
-                
+
                 if (_gzOut!=null && !_closed)
                 {
                     _closed=true;
                     _gzOut.close();
                 }
             }
-        }  
+        }
 
         public void write(int b) throws IOException
-        {    
+        {
             checkOut(1);
             _out.write(b);
         }
@@ -510,20 +509,20 @@ public class GzipFilter extends UserAgentFilter
             checkOut(len);
             _out.write(b,off,len);
         }
-        
+
         protected boolean setContentEncodingGzip()
         {
             _response.setHeader("Content-Encoding", "gzip");
             return _response.containsHeader("Content-Encoding");
         }
-        
+
         public void doGzip() throws IOException
         {
-            if (_gzOut==null) 
+            if (_gzOut==null)
             {
                 if (_response.isCommitted())
                     throw new IllegalStateException();
-                
+
                 if (setContentEncodingGzip())
                 {
                     _out=_gzOut=new GZIPOutputStream(_response.getOutputStream(),_bufferSize);
@@ -534,14 +533,14 @@ public class GzipFilter extends UserAgentFilter
                         _bOut=null;
                     }
                 }
-                else 
+                else
                     doNotGzip();
             }
         }
-        
+
         public void doNotGzip() throws IOException
         {
-            if (_gzOut!=null) 
+            if (_gzOut!=null)
                 throw new IllegalStateException();
             if (_out==null || _bOut!=null )
             {
@@ -557,17 +556,14 @@ public class GzipFilter extends UserAgentFilter
                 if (_bOut!=null)
                     _out.write(_bOut.getBuf(),0,_bOut.getCount());
                 _bOut=null;
-            }   
-        }
-        
-        private void checkOut(int length) throws IOException 
-        {
-            if (_closed) 
-            {
-                new Throwable().printStackTrace();
-                throw new IOException("CLOSED");
             }
-            
+        }
+
+        private void checkOut(int length) throws IOException
+        {
+            if (_closed)
+                throw new IOException("CLOSED");
+
             if (_out==null)
             {
                 if (_response.isCommitted() || (_contentLength>=0 && _contentLength<_minGzipSize))
