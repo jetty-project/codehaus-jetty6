@@ -53,12 +53,24 @@ public class JettyWebAppContext extends WebAppContext
     private TagLibConfiguration tagConfig = new TagLibConfiguration();
     private Configuration[] configs;
     private List<Resource> overlays;
+    private boolean unpackOverlays;
     
+
     public JettyWebAppContext ()
     throws Exception
     {
         super();   
         configs = new Configuration[]{webInfConfig, webXmlConfig,  metaInfConfig,  fragConfig, envConfig, plusConfig, annotationConfig, jettyWebConfig, tagConfig };
+    }
+    
+    public boolean getUnpackOverlays()
+    {
+        return unpackOverlays;
+    }
+
+    public void setUnpackOverlays(boolean unpackOverlays)
+    {
+        this.unpackOverlays = unpackOverlays;
     }
     
     public void setClassPathFiles(List<File> classpathFiles)
