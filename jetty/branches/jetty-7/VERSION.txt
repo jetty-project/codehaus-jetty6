@@ -1,3 +1,6 @@
+jetty@codehaus SNAPSHOT
+ + JETTY-1027 mvn jetty:run does not seem to support WAR overlays...
+
  
 jetty@codehaus 7.0.2.RC0.17 March 2010
  + Updated JSP to 2.1.v20091210
