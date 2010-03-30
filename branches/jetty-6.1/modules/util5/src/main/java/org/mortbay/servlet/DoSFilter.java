@@ -250,7 +250,7 @@ public class DoSFilter implements Filter
                 }
                 finally
                 {
-                    Log.info("DoSFilter timer exited");
+                    Log.debug("DoSFilter timer exited ");
                 }
             }
         });
@@ -659,6 +659,11 @@ public class DoSFilter implements Filter
             else
                 _rateTrackers.remove(_id);
         }
+        
+        public String toString()
+        {
+            return "RateTracker/"+_id+"/"+_type;
+        }
     }
     
     class FixedRateTracker extends RateTracker
@@ -680,6 +685,11 @@ public class DoSFilter implements Filter
             }
 
             return false;
-        }        
+        }     
+        
+        public String toString()
+        {
+            return "Fixed"+super.toString();
+        }   
     }
 }

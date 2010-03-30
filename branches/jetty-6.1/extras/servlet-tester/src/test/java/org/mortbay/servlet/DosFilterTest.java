@@ -257,11 +257,17 @@ public class DosFilterTest extends TestCase
         String sessionId1=sessions[0].substring(sessions[0].indexOf("Set-Cookie: ")+12, sessions[0].indexOf(";"));
         String sessionId2=sessions[1].substring(sessions[1].indexOf("Set-Cookie: ")+12, sessions[1].indexOf(";"));
 
-        // alternate between sessions
         String request1="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\nCookie: " + sessionId1 + "\r\n\r\n";
         String request2="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\nCookie: " + sessionId2 + "\r\n\r\n";
         String last="GET /ctx/dos/test HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\nCookie: " + sessionId2 + "\r\n\r\n";
-        String responses = doRequests(request1+request2+request1+request2+request1,2,1100,1100,last);
+        
+        // Make sure the sessions are not new.
+        String responses = doRequests(request1+request2+request1+request2+request1,1,1100,1100,last);
+        
+        Thread.sleep(1000);
+        
+        // alternate between sessions
+        responses = doRequests(request1+request2+request1+request2+request1,2,1100,1100,last);
 
         assertEquals(11,count(responses,"HTTP/1.1 200 OK"));
         assertEquals(0,count(responses,"DoSFilter: delayed"));
