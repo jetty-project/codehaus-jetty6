@@ -216,6 +216,7 @@ public class Request implements HttpServletRequest
         _requestedSessionId=null;
         _requestedSessionIdFromCookie=false;
         _session=null;
+        _sessionManager=null;
         _requestURI=null;
         _scheme=URIUtil.HTTP;
         _servletPath=null;
