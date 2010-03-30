@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <artifactId>project</artifactId>
         <groupId>org.mortbay.jetty</groupId>
@@ -24,12 +24,9 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <delete failonerror="false"
-                                    file="../../lib/ext/jetty-setuid-${project.version}.jar" />
-                                <delete failonerror="false"
-                                    file="../../lib/ext/libsetuid.so" />
-                                <delete failonerror="false"
-                                    file="../../etc/jetty-setuid.xml" />
+                                <delete failonerror="false" file="../../lib/ext/jetty-setuid-${project.version}.jar"/>
+                                <delete failonerror="false" file="../../lib/ext/libsetuid.so"/>
+                                <delete failonerror="false" file="../../etc/jetty-setuid.xml"/>
                             </tasks>
                         </configuration>
                     </execution>
@@ -39,6 +36,7 @@
         </plugins>
     </build>
     <profiles>
+
         <profile>
             <id>env-linux</id>
             <activation>
@@ -51,15 +49,14 @@
                 <module>modules/native</module>
             </modules>
             <properties>
-                <jetty-setuid-compilerStartOption>-O -fPIC</jetty-setuid-compilerStartOption>
                 <jetty-setuid-linkerStartOption>-shared -lc -ldl</jetty-setuid-linkerStartOption>
-		<jetty-setuid-linkerEndOption>target/libsetuid.so</jetty-setuid-linkerEndOption>
+                <jetty-setuid-linkerEndOption>target/libsetuid.so</jetty-setuid-linkerEndOption>
             </properties>
         </profile>
 
 
         <profile>
-            <id>env-SunOS</id>
+            <id>env-SunOs</id>
             <activation>
                 <os>
                     <name>SunOS</name>
@@ -70,13 +67,12 @@
                 <module>modules/native</module>
             </modules>
             <properties>
-                <jetty-setuid-compilerStartOption>-O -fPIC</jetty-setuid-compilerStartOption>
                 <jetty-setuid-linkerStartOption>-lc -ldl</jetty-setuid-linkerStartOption>
-		<jetty-setuid-linkerEndOption>target/libsetuid.so</jetty-setuid-linkerEndOption>
+                <jetty-setuid-linkerEndOption>target/libsetuid.so</jetty-setuid-linkerEndOption>
             </properties>
         </profile>
 
-        <profile>
+         <profile>
             <id>env-unix</id>
             <activation>
                 <os>
@@ -89,44 +85,9 @@
                 <module>modules/native</module>
             </modules>
             <properties>
-                <jetty-setuid-compilerStartOption>-O -fPIC</jetty-setuid-compilerStartOption>
                 <jetty-setuid-linkerStartOption>-lc -ldl</jetty-setuid-linkerStartOption>
-		<jetty-setuid-linkerEndOption>target/libsetuid.so</jetty-setuid-linkerEndOption>
+                <jetty-setuid-linkerEndOption>target/libsetuid.so</jetty-setuid-linkerEndOption>
             </properties>
-        </profile>
-
-        <profile>
-            <id>env-mac-x86_64</id>
-            <activation>
-                <os>
-                    <family>mac</family>
-                    <arch>x86_64</arch>
-                </os>
-            </activation>
-            <modules>
-                <module>modules/java</module>
-                <module>modules/native</module>
-            </modules>
-            <properties>
-                <jetty-setuid-compilerStartOption>-O -fPIC -arch x86_64 </jetty-setuid-compilerStartOption>
-                <jetty-setuid-linkerStartOption>-lc -ldl -dynamiclib
-                    -arch x86_64
-                    -undefined dynamic_lookup -single_module</jetty-setuid-linkerStartOption>
-            </properties>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.codehaus.mojo</groupId>
-                            <artifactId>native-maven-plugin</artifactId>
-                            <configuration>
-                                <javahOS>mac</javahOS>
-                                <jdkIncludePath>${java.home}/../Headers</jdkIncludePath>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
         </profile>
 
         <profile>
@@ -134,7 +95,6 @@
             <activation>
                 <os>
                     <family>mac</family>
-                    <arch>!x86_64</arch>
                 </os>
             </activation>
             <modules>
@@ -142,59 +102,57 @@
                 <module>modules/native</module>
             </modules>
             <properties>
-                <jetty-setuid-compilerStartOption>-O -fPIC </jetty-setuid-compilerStartOption>
-                <jetty-setuid-linkerStartOption>-lc -ldl -dynamiclib
-                    -undefined
-                    dynamic_lookup -single_module</jetty-setuid-linkerStartOption>
+                <jetty-setuid-linkerStartOption>-lc -ldl -dynamiclib -undefined dynamic_lookup -single_module</jetty-setuid-linkerStartOption>
+                <jetty-setuid-linkerEndOption>target/libsetuid.so</jetty-setuid-linkerEndOption>
             </properties>
             <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.codehaus.mojo</groupId>
-                            <artifactId>native-maven-plugin</artifactId>
-                            <configuration>
-                                <javahOS>mac</javahOS>
-                                <jdkIncludePath>${java.home}/../Headers</jdkIncludePath>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
+              <pluginManagement>
+                <plugins>
+                  <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>native-maven-plugin</artifactId>
+                    <configuration>
+                      <javahOS>mac</javahOS>
+                      <jdkIncludePath>${java.home}/../Headers</jdkIncludePath>
+                    </configuration>
+                  </plugin>
+                </plugins>
+              </pluginManagement>
             </build>
         </profile>
 
         <profile>
             <id>env-dos</id>
             <activation>
-                <os>
-                    <family>dos</family>
-                </os>
+              <os>
+                 <family>dos</family>
+              </os>
             </activation>
             <modules>
             </modules>
-        </profile>
+         </profile>
 
         <profile>
             <id>env-windows</id>
             <activation>
-                <os>
-                    <family>windows</family>
-                </os>
+              <os>
+                 <family>windows</family>
+              </os>
             </activation>
             <modules>
             </modules>
-        </profile>
+         </profile>
 
         <profile>
-            <id>env-win9x</id>
+            <id>env-windows</id>
             <activation>
-                <os>
-                    <family>win9x</family>
-                </os>
+              <os>
+                 <family>win9x</family>
+              </os>
             </activation>
             <modules>
             </modules>
-        </profile>
+         </profile>
 
     </profiles>
 </project>
