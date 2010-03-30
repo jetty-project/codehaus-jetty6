@@ -1,5 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <artifactId>jetty-setuid</artifactId>
@@ -17,13 +18,6 @@ http://maven.apache.org/maven-v4_0_0.xsd">
         <finalName>libsetuid</finalName>
         <defaultGoal>install</defaultGoal>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <argLine>-Djava.library.path=./target</argLine>
-                </configuration>
-            </plugin>
 
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
@@ -36,12 +30,14 @@ http://maven.apache.org/maven-v4_0_0.xsd">
                         </goals>
                         <configuration>
                             <tasks>
-                                <copy failonerror="false"
-                                    file="src/main/native/org_mortbay_setuid_SetUID.c"
-                                    todir="target/generated" />
+                                <copy failonerror="false" 
+file="src/main/native/org_mortbay_setuid_SetUID.c"
+                                      todir="target/generated"/>
+
                             </tasks>
                         </configuration>
                     </execution>
+
                     <execution>
                         <id>copy-native-library</id>
                         <phase>package</phase>
@@ -50,10 +46,14 @@ http://maven.apache.org/maven-v4_0_0.xsd">
                         </goals>
                         <configuration>
                             <tasks>
-                                <copy failonerror="false"
-                                    file="target/libsetuid.so" todir="../../target" />
-                                <copy failonerror="false"
-                                    file="target/libsetuid.so" todir="../../../../lib/ext" />
+                                <copy failonerror="false" 
+file="target/libsetuid.so"
+                                      todir="../../target"/>
+                                <copy failonerror="false" 
+file="target/libsetuid.so"
+                                      todir="../../../../lib/ext"/>
+                                      
+                                
                             </tasks>
                         </configuration>
                     </execution>
@@ -65,30 +65,56 @@ http://maven.apache.org/maven-v4_0_0.xsd">
                 <extensions>true</extensions>
                 <configuration>
                     <javahOS>linux</javahOS>
-                    <javahClassNames>
-                        <javahClassName>org.mortbay.setuid.SetUID</javahClassName>
-                    </javahClassNames>
-                    <javahOutputDirectory>target/generated</javahOutputDirectory>
                     <compilerStartOptions>
-                        <compilerStartOption>${jetty-setuid-compilerStartOption}</compilerStartOption>
+                        <compilerStartOption>-fPIC -O</compilerStartOption>
                     </compilerStartOptions>
                     <sources>
                         <source>
                             <directory>target/generated</directory>
                             <fileNames>
-                                <fileName>org_mortbay_setuid_SetUID.c</fileName>
+                                
+<fileName>org_mortbay_setuid_SetUID.c</fileName>
                             </fileNames>
                         </source>
                     </sources>
                     <linkerStartOptions>
-                        <linkerStartOption>${jetty-setuid-linkerStartOption}</linkerStartOption>
+                        
+<linkerStartOption>${jetty-setuid-linkerStartOption}</linkerStartOption>
                     </linkerStartOptions>
                     <linkerEndOptions>
-                        <linkerEndOption>-o
-                            ${project.build.directory}/libsetuid.so</linkerEndOption>
+                        <linkerEndOptions>-o 
+${project.build.directory}/libsetuid.so</linkerEndOptions>
                     </linkerEndOptions>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>javah</id>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <classNames>
+                                
+<className>org.mortbay.setuid.SetUID</className>
+                            </classNames>
+                            
+<outputDirectory>target/generated</outputDirectory>
+                        </configuration>
+                        <goals>
+                            <goal>javah</goal>
+                        </goals>
+                    </execution>
+
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
+            
+        
+
         </plugins>
     </build>
     <dependencies>
@@ -97,10 +123,12 @@ http://maven.apache.org/maven-v4_0_0.xsd">
             <artifactId>jetty-setuid-java</artifactId>
             <version>${project.version}</version>
         </dependency>
+        
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <scope>test</scope>
         </dependency>
     </dependencies>
+
 </project>
