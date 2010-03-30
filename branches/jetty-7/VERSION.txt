@@ -1,5 +1,6 @@
 jetty@codehaus SNAPSHOT
  + JETTY-1027 mvn jetty:run does not seem to support WAR overlays...
+ + Move declaration of container JDNI resources into jetty.xml
 
  
 jetty@codehaus 7.0.2.RC0.17 March 2010

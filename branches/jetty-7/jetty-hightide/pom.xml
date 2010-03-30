@@ -651,6 +651,7 @@
             <configuration>
               <tasks>
                 <patch dir="${assembly.directory}/contexts" patchfile="src/main/patches/testContextPath.patch" ignorewhitespace="true" strip="0" />
+                <patch dir="${assembly.directory}/etc" patchfile="src/main/patches/jettyxml.patch" ignorewhitespace="true" strip="0" />
               </tasks>
             </configuration>
             <goals>

@@ -20,13 +20,12 @@
 This example shows how to configure and lookup resources such as DataSources, a JTA transaction manager and a java.mail.Session in JNDI. The demo shows you how to perform a distributed transaction across two different databases, and how to send email.
 </p>
 
-<h2>Preparation</h2>
-<p>
-This demonstration will use the Atomikos transaction manager and the Derby database by default. If you wish to use JOTM instead, edit the context/test-jndi.xml file and the webapps/test-jndi/WEB-INF/jetty-env.xml file and uncomment the JOTM setup. If you prefer to use a different database then edit these same files and replace the DataSource definitions to correspond to the database of your choice. 
-</p>
-<p>If you want to use the Mail demonstration, you will need to edit the <code>$JETTY-HOME/contexts/test-jndi.xml</code> file and change the smtp authentication information and properties appropriately for your environment.
-</p>
 <h2>The Datasources/Transaction Demo</h2>
+<h3>Preparation</h3>
+<p>
+This demonstration will use the Atomikos transaction manager and the Derby database by default.  Consult the jetty documentation for instructions on how to replace these.
+</p>
+<h3>Execution</h3>
 <p>
 Click <code>Commit</code> to make a distributed update to 2 different databases, or <code>Rollback</code> to prevent the update from happening.
 </p>
@@ -37,7 +36,11 @@ Click <code>Commit</code> to make a distributed update to 2 different databases,
       <button type="submit">Completion</button>
 </form>
 <h2> The Mail Demo </h2>
+<h3>Preparation</h3>
+<p>Edit the <code>$JETTY-HOME/contexts/test-jndi.xml</code> file and change the smtp authentication information and properties appropriately for your environment.
+</p>
 
+<h3>Execution</h3>
 
 <form action="test" method="post">
     <p>Send a test email to:&nbsp;<input type="text" name="mailto" maxlength="30"/></p>
