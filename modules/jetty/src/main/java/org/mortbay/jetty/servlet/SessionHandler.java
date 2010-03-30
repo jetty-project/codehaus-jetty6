@@ -197,8 +197,13 @@ public class SessionHandler extends HandlerWrapper
                 //leaving context, free up the session
                 if (session!=null)
                     _sessionManager.complete(session);
-                base_request.setSessionManager(old_session_manager);
-                base_request.setSession(old_session);
+                
+                // Leave last session in place
+                if (old_session_manager != null)
+                {
+                    base_request.setSessionManager(old_session_manager);
+                    base_request.setSession(old_session);
+                }
             }
         }
     }

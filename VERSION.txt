@@ -11,6 +11,7 @@ jetty-6.1-SNAPSHOT
  + 300178 HttpClients opens too many connections that are immediately closed
  + 304658 Inconsistent Expires date format in Set-Cookie headers with maxAge=0
  + 304698 org.eclipse.jetty.http.HttpFields$DateGenerator.formatCookieDate() uses wrong (?) date format
+ + 306331 Session manager is kept after call to doScope
  + 306840 suppress content-length in requests without content
  + Remove references to old content in HttpClient client tests for www.sun.com
  + JETTY-875 Allow setting of advice field in response to Handshake
