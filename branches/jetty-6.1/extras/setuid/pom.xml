@@ -53,6 +53,7 @@
             <properties>
                 <jetty-setuid-compilerStartOption>-O -fPIC</jetty-setuid-compilerStartOption>
                 <jetty-setuid-linkerStartOption>-shared -lc -ldl</jetty-setuid-linkerStartOption>
+		<jetty-setuid-linkerEndOption>target/libsetuid.so</jetty-setuid-linkerEndOption>
             </properties>
         </profile>
 
@@ -71,6 +72,7 @@
             <properties>
                 <jetty-setuid-compilerStartOption>-O -fPIC</jetty-setuid-compilerStartOption>
                 <jetty-setuid-linkerStartOption>-lc -ldl</jetty-setuid-linkerStartOption>
+		<jetty-setuid-linkerEndOption>target/libsetuid.so</jetty-setuid-linkerEndOption>
             </properties>
         </profile>
 
@@ -89,6 +91,7 @@
             <properties>
                 <jetty-setuid-compilerStartOption>-O -fPIC</jetty-setuid-compilerStartOption>
                 <jetty-setuid-linkerStartOption>-lc -ldl</jetty-setuid-linkerStartOption>
+		<jetty-setuid-linkerEndOption>target/libsetuid.so</jetty-setuid-linkerEndOption>
             </properties>
         </profile>
 
