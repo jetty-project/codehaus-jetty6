@@ -47,6 +47,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1199 FindBugs cleanups
  + JETTY-1174 Memory leak in ChannelImpl/ContinuationClient
  + JETTY-1205 Memory leak in browser-to-client mapping
+ + JETTY-1193 Exception details are lost in AbstractCometdServlet.getMessages
 
 jetty-6.1.22 16 November 2009
  + Fixed XSS issue in demo CometDump servlet
