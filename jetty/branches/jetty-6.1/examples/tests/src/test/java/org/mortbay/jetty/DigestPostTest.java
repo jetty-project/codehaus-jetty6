@@ -202,13 +202,13 @@ public class DigestPostTest extends TestCase
     {
         // Log.getLog().setDebugEnabled(true);
         
-        Socket socket = new Socket("127.0.0.2",_server.getConnectors()[0].getLocalPort());
+        Socket socket = new Socket("127.0.0.1",_server.getConnectors()[0].getLocalPort());
         byte[] bytes = __message.getBytes("UTF-8");
 
         _received=null;
         socket.getOutputStream().write(
                 ("POST /test HTTP/1.1\r\n"+
-                "Host: 127.0.0.2:"+_server.getConnectors()[0].getLocalPort()+"\r\n"+
+                "Host: 127.0.0.1:"+_server.getConnectors()[0].getLocalPort()+"\r\n"+
                 "Content-Type: text/plain\r\n"+
                 "Transfer-Encoding: chunked\r\n"+
                 "\r\n").getBytes("UTF-8"));
@@ -248,7 +248,7 @@ public class DigestPostTest extends TestCase
         _received=null;
         socket.getOutputStream().write(
                 ("POST /test HTTP/1.1\r\n"+
-                "Host: 127.0.0.2:"+_server.getConnectors()[0].getLocalPort()+"\r\n"+
+                "Host: 127.0.0.1:"+_server.getConnectors()[0].getLocalPort()+"\r\n"+
                 "Content-Type: text/plain\r\n"+
                 "Transfer-Encoding: Chunked\r\n"+
                 "Authorization: "+digest+"\r\n"+
