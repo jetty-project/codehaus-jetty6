@@ -167,42 +167,40 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         if (!_sessionIdManager.isStarted())
             _sessionIdManager.start();
 
-        // Look for a session cookie name
-        String tmp=_context.getInitParameter(SessionManager.__SessionCookieProperty);
-        if (tmp!=null)
-            _sessionCookie=tmp;
-        
-        tmp=_context.getInitParameter(SessionManager.__SessionURLProperty);
-        if (tmp!=null)
+        if (_context != null)
         {
-            _sessionURL=(tmp==null||"none".equals(tmp))?null:tmp;
-            _sessionURLPrefix=(tmp==null||"none".equals(tmp))?null:(";"+_sessionURL+"=");
-        }
+            // Look for a session cookie name
+            String tmp=_context.getInitParameter(SessionManager.__SessionCookieProperty);
+            if (tmp!=null)
+                _sessionCookie=tmp;
 
-        // set up the max session cookie age if it isn't already
-        if (_maxCookieAge==-1)
-        {
-            if (_context!=null)
+            tmp=_context.getInitParameter(SessionManager.__SessionURLProperty);
+            if (tmp!=null)
             {
-                String str=_context.getInitParameter(SessionManager.__MaxAgeProperty);
-                if (str!=null)
-                    _maxCookieAge=Integer.parseInt(str.trim());
+                _sessionURL=(tmp==null||"none".equals(tmp))?null:tmp;
+                _sessionURLPrefix=(tmp==null||"none".equals(tmp))?null:(";"+_sessionURL+"=");
             }
-        }
-        // set up the session domain if it isn't already
-        if (_sessionDomain==null)
-        {
-            // only try the context initParams
-            if (_context!=null)
-                _sessionDomain=_context.getInitParameter(SessionManager.__SessionDomainProperty);
-        }
 
-        // set up the sessionPath if it isn't already
-        if (_sessionPath==null)
-        {
-            // only the context initParams
-            if (_context!=null)
+            // set up the max session cookie age if it isn't already
+            if (_maxCookieAge==-1)
+            {
+                tmp=_context.getInitParameter(SessionManager.__MaxAgeProperty);
+                if (tmp!=null)
+                    _maxCookieAge=Integer.parseInt(tmp.trim());
+            }
+            // set up the session domain if it isn't already
+            if (_sessionDomain==null)
+            {
+                // only try the context initParams
+                _sessionDomain=_context.getInitParameter(SessionManager.__SessionDomainProperty);
+            }
+
+            // set up the sessionPath if it isn't already
+            if (_sessionPath==null)
+            {
+                // only the context initParams
                 _sessionPath=_context.getInitParameter(SessionManager.__SessionPathProperty);
+            }
         }
 
         super.doStart();
