@@ -1,0 +1,11 @@
+--- test.xml	2009-09-17 16:50:11.000000000 +1000
++++ contexts/test.xml	2009-09-17 16:26:57.000000000 +1000
+@@ -19,7 +19,7 @@
+   <!--  + contextPath                                                  -->
+   <!--  + war OR resourceBase                                          -->
+   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+-  <Set name="contextPath">/</Set>
++  <Set name="contextPath">/test</Set>
+   <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/test.war</Set>
+ 
+   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
