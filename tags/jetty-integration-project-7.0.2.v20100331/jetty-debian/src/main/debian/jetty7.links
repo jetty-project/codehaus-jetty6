@@ -1,0 +1,4 @@
+var/lib/jetty7/webapps usr/share/jetty7/webapps
+var/log/jetty7 usr/share/jetty7/logs
+etc/jetty7 usr/share/jetty7/etc
+etc/jetty7/contexts usr/share/jetty7/contexts
