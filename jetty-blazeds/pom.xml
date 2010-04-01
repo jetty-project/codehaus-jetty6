@@ -76,6 +76,7 @@
     	<optional>false</optional>
     </dependency>
   </dependencies>
+<!--
   <repositories>
     <repository>
       <id>project-repo</id>
@@ -85,6 +86,7 @@
       <snapshots><enabled>true</enabled></snapshots>
     </repository>
   </repositories>
+-->
   <properties>
   	<blazeds-version>3.2.0</blazeds-version>
   	<jetty-6-version>6.1.18</jetty-6-version>

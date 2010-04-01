@@ -109,7 +109,7 @@
             </build>
         </profile>
     </profiles>
-
+<!--
     <repositories>
         <repository>
             <id>terracotta-repository</id>
@@ -122,7 +122,7 @@
             <url>http://www.terracotta.org/download/reflector/maven2</url>
         </pluginRepository>
     </pluginRepositories>
-
+-->
     <dependencies>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
