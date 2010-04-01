@@ -29,6 +29,7 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+<!--
     <repositories>
       <repository>
         <id>javanet-maven2</id>
@@ -37,4 +38,5 @@
         <url>http://download.java.net/maven/2</url>
       </repository>
     </repositories>
+-->
 </project>
