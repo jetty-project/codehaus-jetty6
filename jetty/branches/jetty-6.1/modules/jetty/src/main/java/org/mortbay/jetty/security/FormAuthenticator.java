@@ -134,9 +134,9 @@ public class FormAuthenticator implements Authenticator
             // Check the session object for login info.
             FormCredential form_cred=new FormCredential();
             form_cred.authenticate(realm,
-                                            request.getParameter(__J_USERNAME),
-                                            request.getParameter(__J_PASSWORD),
-                                            request);
+                    request.getParameter(__J_USERNAME),
+                    request.getParameter(__J_PASSWORD),
+                    request);
             
             String nuri=(String)session.getAttribute(__J_URI);
             if (nuri==null || nuri.length()==0)
@@ -160,7 +160,8 @@ public class FormAuthenticator implements Authenticator
                     ((SSORealm)realm).setSingleSignOn(request,response,form_cred._userPrincipal,new Password(form_cred._jPassword));
 
                 // Redirect to original request
-                if (response != null) {
+                if (response != null) 
+                {
                     response.setContentLength(0);
                     response.sendRedirect(response.encodeRedirectURL(nuri));
                 }
@@ -168,18 +169,20 @@ public class FormAuthenticator implements Authenticator
             else
             {
                 if(Log.isDebugEnabled())Log.debug("Form authentication FAILED for "+StringUtil.printable(form_cred._jUserName));
-                if (_formErrorPage==null)
+                
+                if (response!=null)
                 {
-                    if (response != null) 
+                    if (_formErrorPage==null)
+                    {
                         response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                }
-                else
-                {
-                    if (response != null)
+                    }
+                    else 
+                    {
                         response.setContentLength(0);
                         response.sendRedirect(response.encodeRedirectURL
-                                          (URIUtil.addPaths(request.getContextPath(),
-                                                        _formErrorPage)));
+                                (URIUtil.addPaths(request.getContextPath(),
+                                        _formErrorPage)));
+                    }
                 }
             }
             
