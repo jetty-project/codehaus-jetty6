@@ -49,6 +49,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-1205 Memory leak in browser-to-client mapping
  + JETTY-1193 Exception details are lost in AbstractCometdServlet.getMessages
  + JETTY-1197 SetUID module test fails when using Java 1.6 to build
+ + JETTY-1207 NPE protection in FormAuthenticator
 
 jetty-6.1.22 16 November 2009
  + Fixed XSS issue in demo CometDump servlet
