@@ -13,6 +13,7 @@ jetty-6.1.23 2 April 2010
  + 304698 org.eclipse.jetty.http.HttpFields$DateGenerator.formatCookieDate() uses wrong (?) date format
  + 306331 Session manager is kept after call to doScope
  + 306840 suppress content-length in requests without content
+ + 307847 Fixed combining mime type parameters
  + Remove references to old content in HttpClient client tests for www.sun.com
  + JETTY-875 Allow setting of advice field in response to Handshake
  + JETTY-983 Range handling cleanup
