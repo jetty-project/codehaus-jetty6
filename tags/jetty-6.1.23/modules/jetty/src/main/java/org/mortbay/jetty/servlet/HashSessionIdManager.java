@@ -34,8 +34,6 @@ import org.mortbay.util.MultiMap;
 public class HashSessionIdManager extends AbstractLifeCycle implements SessionIdManager
 {
     private final static String __NEW_SESSION_ID="org.mortbay.jetty.newSessionId";  
-    protected final static String SESSION_ID_RANDOM_ALGORITHM = "SHA1PRNG";
-    protected final static String SESSION_ID_RANDOM_ALGORITHM_ALT = "IBMSecureRandom";
 
     MultiMap _sessions;
     protected Random _random;
@@ -119,24 +117,15 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
                 //for workaround suggestions:
                 //http://docs.codehaus.org/display/JETTY/Connectors+slow+to+startup
                 Log.debug("Init SecureRandom."); 
-                _random=SecureRandom.getInstance(SESSION_ID_RANDOM_ALGORITHM);
+                _random=new SecureRandom();
             }
-            catch (NoSuchAlgorithmException e)
+            catch (Exception e)
             {
-                try
-                {
-                    _random=SecureRandom.getInstance(SESSION_ID_RANDOM_ALGORITHM_ALT);
-                    _weakRandom=false;
-                }
-                catch (NoSuchAlgorithmException e_alt)
-                {
-                    Log.warn("Could not generate SecureRandom for session-id randomness",e);
-                    _random=new Random();
-                    _weakRandom=true;
-                }
+		Log.warn("Could not generate SecureRandom for session-id randomness",e);
+		_random=new Random();
+		_weakRandom=true;
             }
         }
-        _random.setSeed(_random.nextLong()^System.currentTimeMillis()^hashCode()^Runtime.getRuntime().freeMemory());
         _sessions=new MultiMap();
     }
 
@@ -237,17 +226,21 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
             String id=null;
             while (id==null||id.length()==0||idInUse(id))
             {
-                long r=_weakRandom
+                long r0=_weakRandom
                 ?(hashCode()^Runtime.getRuntime().freeMemory()^_random.nextInt()^(((long)request.hashCode())<<32))
                 :_random.nextLong();
-                r^=created;
-                if (request!=null && request.getRemoteAddr()!=null)
-                    r^=request.getRemoteAddr().hashCode();
-                if (r<0)
-                    r=-r;
-                id=Long.toString(r,36);
+		long r1=_random.nextLong();
+                if (r0<0)
+                    r0=-r0;
+                if (r1<0)
+                    r1=-r1;
+                id=Long.toString(r0,36)+Long.toString(r1,36);
             }
 
+            // make the id unique to generating node
+            if (_workerName!=null)
+                id=_workerName+id;
+            
             request.setAttribute(__NEW_SESSION_ID,id);
             return id;
         }
