@@ -696,7 +696,7 @@ public class Response implements HttpServletResponse
                         int i1=_contentType.indexOf("charset=",i0);
                         if (i1<0)
                         {
-                            _contentType = _contentType+" charset="+QuotedStringTokenizer.quote(_characterEncoding,";= "); 
+                            _contentType = _contentType+"; charset="+QuotedStringTokenizer.quote(_characterEncoding,";= "); 
                         }
                         else
                         {
@@ -884,7 +884,7 @@ public class Response implements HttpServletResponse
                 else // No encoding in the params.
                 {
                     _cachedMimeType=null;
-                    _contentType=_characterEncoding==null?contentType:contentType+" charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
+                    _contentType=_characterEncoding==null?contentType:contentType+"; charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
                     _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
                 }
             }
