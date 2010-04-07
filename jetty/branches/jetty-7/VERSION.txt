@@ -1,5 +1,6 @@
 jetty@codehaus 7.1.0-SNAPSHOT
  + JETTY-979 remove unneeded ant.jar from lib/jsp
+ + Ensure test-jetty-webapp uses ${jetty-version}
 
 
 jetty@codehaus 7.0.2.v20100331
