@@ -17,8 +17,6 @@
 
     <!-- ======================================================== -->
     <!-- An example JAAS realm setup                              -->
-    <!-- For more information see the jetty wiki at               -->
-    <!--   http://http://docs.codehaus.org/display/JETTY/JAAS     -->
     <!-- ======================================================== -->
     <Call name="addBean">
       <Arg>

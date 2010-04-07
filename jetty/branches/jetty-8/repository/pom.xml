@@ -38,10 +38,12 @@
       <version>${atomikos.version}</version>
     </dependency>
   </dependencies>
+<!--
   <repositories>
     <repository>
       <id>local</id>
       <url>file:${basedir}/src/repository</url>
     </repository>
   </repositories>
+-->
 </project>

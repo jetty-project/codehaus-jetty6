@@ -1,4 +1,20 @@
+jetty@codehaus 8.0.0.M1-SNAPSHOT
+ + Updated to jetty core 7.0.2.v20100331
+ + Updated to jetty core 8.0.0.M1
+ + Add jetty-util.jar to test-annotation-webapp
+ + Add ContainerInitializerConfiguration to jetty.xml
+
 jetty@codehaus 8.0.0.M0 28 February 2010
+ + Updated JSP to 2.1.v20091210
+ + JETTY-776 Make new session tests module to concentrate all reusable session clustering test code
+ + JETTY-1159 jetty-maven-plugin doesn't work if no WEB-INF
+ + JETTY-1160 jetty-maven-plugin needs target directory
+
+jetty@codehaus 7.0.2.v20100331
+ + JETTY-1027 mvn jetty:run does not seem to support WAR overlays...
+ + Move declaration of container JDNI resources into jetty.xml
+
+jetty@codehaus 7.0.2.RC0.17 March 2010
  + Updated JSP to 2.1.v20091210
  + JETTY-776 Make new session tests module to concentrate all reusable session clustering test code
  + JETTY-1159 jetty-maven-plugin doesn't work if no WEB-INF

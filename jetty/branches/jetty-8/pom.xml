@@ -10,6 +10,7 @@
   <artifactId>jetty-integration-project</artifactId>
   <version>8.0.0.M1-SNAPSHOT</version>
   <name>Jetty :: Codehaus Integration Project</name>
+  <description>Jetty integrations and distributions</description>
   <packaging>pom</packaging>
 
   <properties>
@@ -139,6 +140,7 @@
     <!-- module>jetty-jboss</module -->
   </modules>
 
+<!--
   <repositories>
     <repository>
       <id>download.java.net</id>
@@ -165,4 +167,5 @@
       </releases>
    </repository>
   </repositories>
+-->
 </project>
