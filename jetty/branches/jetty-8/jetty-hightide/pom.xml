@@ -100,7 +100,7 @@
                   <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
-                  <includes>**</includes>
+                  <excludes>etc/jetty-plus.xml</excludes>
                   <outputDirectory>${assembly.directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
