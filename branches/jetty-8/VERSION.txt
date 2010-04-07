@@ -4,6 +4,7 @@ jetty@codehaus 8.0.0.M1-SNAPSHOT
  + Add jetty-util.jar to test-annotation-webapp
  + Add ContainerInitializerConfiguration to jetty.xml
  + Update transactions.properties to put atomikos logs in jetty logs dir
+ + Remove redundant jetty-plus.xml from jetty-hightide
  + Update to atomikos 3.6.4
 
 jetty@codehaus 8.0.0.M0 28 February 2010
