@@ -95,7 +95,7 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>test-jetty-webapp</artifactId>
-      <version>7.0.1.v20091125</version>
+      <version>${jetty-version}</version>
       <type>war</type>
     </dependency>
     <dependency>
