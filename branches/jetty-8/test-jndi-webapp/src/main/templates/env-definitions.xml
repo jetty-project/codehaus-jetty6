@@ -1,11 +1,4 @@
 
-<!-- Define a couple of system properties. These are jdbc and jta impl specific.  -->
-  <Call class="java.lang.System" name="setProperty">
-    <Arg>derby.system.home</Arg>
-    <Arg><SystemProperty name="java.io.tmpdir"/></Arg>
-  </Call>
-
-
   <!-- Define an env entry with Server scope for java:comp/env                   -->
   <New id="woggle"  class="org.eclipse.jetty.plus.jndi.EnvEntry">   
     <Arg><Property name='server'/></Arg>
@@ -41,24 +34,6 @@
        </New>
      </Arg>
  </New>
-
-  <!-- =============================================================== -->
-  <!-- Configuring Transactions and XA Datasources                     -->
-  <!-- Uncomment EITHER the setup for Atomikos OR for Jotm             -->
-  <!-- =============================================================== -->
-
-
-  
-
-  <New id="tx" class="org.eclipse.jetty.plus.jndi.Transaction">
-   <Arg>
-     <New class="com.atomikos.icatch.jta.UserTransactionImp"/>
-   </Arg>
-  </New>
-
-
-  
-
 
   <New id="mydatasource" class="org.eclipse.jetty.plus.jndi.Resource">
     <Arg><Ref id='wac'/></Arg>

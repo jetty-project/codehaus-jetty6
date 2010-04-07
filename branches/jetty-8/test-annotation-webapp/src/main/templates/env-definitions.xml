@@ -1,14 +1,4 @@
 
-  <!-- =============================================================== -->
-  <!-- Set up some env entrys                                          -->
-  <!-- =============================================================== -->
-  <Call class="java.lang.System" name="setProperty">
-    <Arg>derby.system.home</Arg>
-    <Arg><SystemProperty name="java.io.tmpdir"/></Arg>
-  </Call>
-
-
-
   <New id="maxAmount"  class="org.eclipse.jetty.plus.jndi.EnvEntry">
     <Arg><Ref id='wac'/></Arg>
     <Arg>maxAmount</Arg>
@@ -16,21 +6,6 @@
     <Arg type="boolean">true</Arg>
   </New>
 
-
-
-
-  <!-- =============================================================== -->
-  <!-- Configuring Transactions and XA Datasources                     -->
-  <!-- Uncomment EITHER the setup for Atomikos OR for Jotm             -->
-  <!-- =============================================================== -->
-
-  
-
-  <New id="tx" class="org.eclipse.jetty.plus.jndi.Transaction">
-   <Arg>
-     <New class="com.atomikos.icatch.jta.UserTransactionImp"/>
-   </Arg>
-  </New>
 
   <New id="mydatasource" class="org.eclipse.jetty.plus.jndi.Resource">
     <Arg><Ref id='wac'/></Arg>

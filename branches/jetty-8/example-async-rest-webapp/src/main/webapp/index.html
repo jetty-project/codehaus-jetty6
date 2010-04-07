@@ -8,9 +8,17 @@
 <body>
 <h1>Blocking vs Asynchronous REST</h1>
 <p>
-This demo calls the EBay WS API both synchronously and asynchronously,
-to obtain items matching each of the keywords passed on the query
-string.  The time the request thread is head is displayed for both.
+This webapp demonstrates the advantages of calling webservices using 
+Asynchronous APIs.   In this case it calls the EBay REST API using
+the jetty async HTTP Client and Jetty Continuations to free the servlet
+thread while waiting for the response.   The results are compared to a 
+normal synchronous call and both the total and thread times are charted
+below.
+<p>
+It can be seen that for the synchronous case, the thread is held for the
+entire waiting time and that multiple requests are performed serially.
+For the asynchronous case, the thread is only held for a short periods
+and multiple requests can be handled in parallel.
 </p>
 
 <table width='100%'>

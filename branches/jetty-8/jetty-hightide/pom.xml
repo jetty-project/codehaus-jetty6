@@ -144,6 +144,15 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>example-async-rest-webapp</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly.directory}/webapps/async-rest</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
                   <artifactId>test-annotation-webapp</artifactId>
                   <version>${project.version}</version>
                   <classifier>config</classifier>
@@ -647,6 +656,7 @@
             <configuration>
               <tasks>
                 <patch dir="${assembly.directory}/contexts" patchfile="src/main/patches/testContextPath.patch" ignorewhitespace="true" strip="0" />
+                <patch dir="${assembly.directory}/etc" patchfile="src/main/patches/jettyxml.patch" ignorewhitespace="true" strip="0" />
               </tasks>
             </configuration>
             <goals>
@@ -814,6 +824,12 @@
     	<artifactId>jetty-spring</artifactId>
     	<version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>example-async-rest-webapp</artifactId>
+      <type>war</type>
+      <version>${project.version}</version>
+    </dependency>               
   </dependencies>
   <profiles>
     <profile>

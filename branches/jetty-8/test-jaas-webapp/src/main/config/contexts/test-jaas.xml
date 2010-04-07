@@ -9,11 +9,6 @@
   <Set name="contextPath">/test-jaas</Set>
   <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/test-jaas</Set>
 
-  <Call class="java.lang.System" name="setProperty">
-    <Arg>java.security.auth.login.config</Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/etc/login.conf</Arg>
-  </Call>
- 
   <Set name="securityHandler">
     <New class="org.eclipse.jetty.security.ConstraintSecurityHandler">
      <Set name="loginService">
