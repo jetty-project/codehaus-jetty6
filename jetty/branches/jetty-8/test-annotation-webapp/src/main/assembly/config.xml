@@ -23,12 +23,5 @@
         <include>**/test-annotations.xml</include>
       </includes>
     </fileSet>
-    <fileSet>
-      <directory>target</directory>
-      <outputDirectory></outputDirectory>
-      <includes>
-        <include>**/transactions.properties</include>
-      </includes>
-    </fileSet>
   </fileSets>
 </assembly>
