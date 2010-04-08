@@ -6,6 +6,7 @@ jetty@codehaus 8.0.0.M1-SNAPSHOT
  + Update transactions.properties to put atomikos logs in jetty logs dir
  + Remove redundant jetty-plus.xml from jetty-hightide
  + Update to atomikos 3.6.4
+ + Update test-jndi-webapp/README
 
 jetty@codehaus 8.0.0.M0 28 February 2010
  + Updated JSP to 2.1.v20091210
