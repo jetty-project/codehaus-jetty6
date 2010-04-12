@@ -1,3 +1,6 @@
+jetty-6-SNAPSHOT
+ + 308925 Protect the test webapp from remote access
+
 jetty-6.1.23 2 April 2010
  + JSON parses NaN as null
  + Updated JSP to 2.1.v20091210
