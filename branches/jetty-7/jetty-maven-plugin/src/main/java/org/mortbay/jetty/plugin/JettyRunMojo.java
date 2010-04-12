@@ -33,6 +33,7 @@ import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.resource.JarResource;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceCollection;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.xml.XmlConfiguration;
 
 /**
@@ -392,6 +393,36 @@ public class JettyRunMojo extends AbstractJettyMojo
             }
         }
 
+        if (webAppConfig.getDefaultsDescriptor() != null)
+        {
+            try
+            {
+                if (!WebAppContext.WEB_DEFAULTS_XML.equals(webAppConfig.getDefaultsDescriptor()))
+                {
+                    Resource r = Resource.newResource(webAppConfig.getDefaultsDescriptor());
+                    scanList.add(r.getFile());
+                }
+            }
+            catch (IOException e)
+            {
+                throw new MojoExecutionException("Problem configuring scanner for webdefaults.xml", e);
+            }
+        }
+        
+        if (webAppConfig.getOverrideDescriptor() != null)
+        {
+            try
+            {
+                Resource r = Resource.newResource(webAppConfig.getOverrideDescriptor());
+                scanList.add(r.getFile());
+            }
+            catch (IOException e)
+            {
+                throw new MojoExecutionException("Problem configuring scanner for webdefaults.xml", e);
+            }
+        }
+        
+        
         File jettyWebXmlFile = findJettyWebXmlFile(new File(getWebAppSourceDirectory(),"WEB-INF"));
         if (jettyWebXmlFile != null)
             scanList.add(jettyWebXmlFile);

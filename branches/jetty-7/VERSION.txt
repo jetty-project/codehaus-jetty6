@@ -4,6 +4,7 @@ jetty@codehaus 7.1.0-SNAPSHOT
  + Update transactions.properties to put atomikos logs in jetty logs dir
  + Remove redundant jetty-plus.xml from jetty-hightide
  + Update test-jndi-webapp/README
+ + 308906 mvn jetty:run does not scan web override or default descriptors
 
 
 jetty@codehaus 7.0.2.v20100331
