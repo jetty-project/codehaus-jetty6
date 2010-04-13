@@ -310,6 +310,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     /* ------------------------------------------------------------ */
     protected void doStop() throws Exception
     {
+        Log.info("Stopped {}",this);
         try{close();} catch(IOException e) {Log.warn(e);}
         
         if (_threadPool==_server.getThreadPool())
