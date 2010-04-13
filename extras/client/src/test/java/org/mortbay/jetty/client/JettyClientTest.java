@@ -3,10 +3,8 @@ package org.mortbay.jetty.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Socket;
 import java.util.Arrays;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -14,262 +12,268 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
+import org.mortbay.io.EndPoint;
+import org.mortbay.io.bio.SocketEndPoint;
 import org.mortbay.jetty.HttpHeaders;
+import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.client.CachedExchange;
-import org.mortbay.jetty.client.HttpClient;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.log.Log;
-import org.mortbay.log.StdErrLog;
 
+public class JettyClientTest extends TestCase
+{
+    private volatile Server _server;
+    private volatile SocketConnector _connector;
+    private volatile EndPoint _endp;
 
-public class JettyClientTest extends TestCase {
-    private Server server;
-    
-    private HttpClient client;
-    
-    private static int _PORT = 0;
-    private static String _url;
-    
+    private volatile HttpClient _client;
+
+    private volatile static int _PORT = 0;
+    private volatile static String _url;
+
     // Restart the Jetty server
-    public void restartServer() throws Exception {
-        if (server != null) {
-            server.stop();
-            server = null;
+    public synchronized void breakConnection() 
+    {
+        try
+        {
+            if (_endp!=null)
+            {
+                ((Socket)((SocketEndPoint)_endp).getTransport()).close();
+                _endp=null;
+            }
         }
-        
+        catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public synchronized void startServer() throws Exception
+    {
         // Create a Jetty server with a simple servlet that returns immediately
-        server = new Server();
-        SocketConnector connector = new SocketConnector();
-        connector.setHost("127.0.0.1");
-       
+        _server = new Server();
+        _connector = new SocketConnector()
+        {
+            @Override
+            public void customize(EndPoint endpoint, Request request) throws IOException
+            {
+                super.customize(endpoint,request);
+                if (_endp!=null)
+                    throw new IllegalStateException("ENDP SET");
+                _endp=endpoint;
+            }
+
+        };
+        _connector.setHost("127.0.0.1");
+        _connector.setStatsOn(true);
+
         if (_PORT == 0)
         {
-        	connector.setPort( 0 );
+            _connector.setPort(0);
         }
         else
         {
-        	connector.setPort( _PORT );
+            _connector.setPort(_PORT);
         }
-        
-        server.addConnector(connector);
-        Context context = new Context(server, "", Context.NO_SECURITY | Context.NO_SESSIONS);
-        ServletHolder h = new ServletHolder(new HttpServlet() {
+
+        _server.addConnector(_connector);
+        Context context = new Context(_server,"",Context.NO_SECURITY | Context.NO_SESSIONS);
+        ServletHolder h = new ServletHolder(new HttpServlet()
+        {
             private static final long serialVersionUID = 1L;
 
             @Override
-            protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
+            protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException
+            {
                 resp.setContentType("text/plain");
                 resp.setStatus(HttpServletResponse.SC_OK);
                 resp.getWriter().write("ok\n");
             }
 
             @Override
-            protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
+            protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException
+            {
                 resp.setContentType("text/plain");
                 resp.setStatus(HttpServletResponse.SC_OK);
                 resp.getWriter().write("ok\n");
             }
 
         });
-        context.addServlet(h, "/ping");
-        server.start();
-        _PORT = connector.getLocalPort();
-        _url = String.format("http://localhost:%d/ping", _PORT);
-    }
-    
-    // Restart the Jetty client
-    public void restartClient() throws Exception {
-        if (client != null) {
-            client.stop();
-            client = null;
-        }
-        
-        client = new HttpClient();
-        client.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
-        client.setIdleTimeout(60000);
-        client.setMaxRetries(0);
-        client.setTimeout(60000);
-        client.setSoTimeout(60000);
-        client.setMaxConnectionsPerAddress(1);
-        client.start();
+        context.addServlet(h,"/ping");
+        _server.start();
+        _PORT = _connector.getLocalPort();
+        _url = String.format("http://localhost:%d/ping",_PORT);
+
     }
 
-    public static enum Status {
-        PENDING,
-        SUCCESS,
-        ERROR,
-        TIMEOUT
+    // Restart the Jetty client
+    public void startClient() throws Exception
+    {
+        if (_client != null)
+        {
+            _client.stop();
+            _client = null;
+        }
+
+        _client = new HttpClient();
+        _client.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
+        _client.setIdleTimeout(60000);
+        _client.setMaxRetries(0);
+        _client.setTimeout(60000);
+        _client.setSoTimeout(60000);
+        _client.setMaxConnectionsPerAddress(1);
+        _client.start();
     }
 
     // Simple HTTP exchange
-    public static class SimpleExchange extends CachedExchange {
-        private Status status = Status.PENDING;
-        
-        SimpleExchange() {
+    public static class SimpleExchange extends CachedExchange
+    {
+        SimpleExchange()
+        {
             super(true);
         }
-        
-        public void setup(String url) throws IOException {
+
+        public void setup(String url) throws IOException
+        {
             setMethod("POST");
             setURL(url);
             byte[] content = "hello".getBytes();
-            setRequestHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
-            setRequestHeader(HttpHeaders.CONTENT_LENGTH,
-                    Integer.toString(content.length));
+            setRequestHeader(HttpHeaders.CONTENT_TYPE,"text/plain");
+            setRequestHeader(HttpHeaders.CONTENT_LENGTH,Integer.toString(content.length));
             setRequestContentSource(new ByteArrayInputStream(content));
         }
-        
+
         @Override
-        protected void onResponseComplete() throws IOException {
-            super.onResponseComplete();
-            synchronized (this) {
-                status = Status.SUCCESS;
-                notifyAll();
-            }
+        protected void onException(Throwable exc)
+        {
+            // super.onException(exc);
         }
-        
+
         @Override
-        protected void onException(Throwable exc) {
-            super.onException(exc);
-            innerOnException(exc);
+        protected void onConnectionFailed(Throwable exc)
+        {
+            // super.onConnectionFailed(exc);
         }
-        
+
         @Override
-        protected void onConnectionFailed(Throwable exc) {
-            super.onConnectionFailed(exc);
-            innerOnException(exc);
+        protected void onExpire()
+        {
+            // super.onExpire();
         }
-        
-        @Override
-        protected void onExpire() {
-            super.onExpire();
-            synchronized (this) {
-                status = Status.TIMEOUT;
-                notifyAll();
-            }
-        }
-        
-        private void innerOnException(Throwable exc) {
-            synchronized (this) {
-                status = Status.ERROR;
-                notifyAll();
-            }
-        }
-        
-        public Status waitForCompletion() throws InterruptedException {
-            synchronized (this) {
-                while (status == Status.PENDING)
-                    wait();
-                return status;
-            }
-        }
+
     }
 
-    private static final int NUM_BYTES = 4096 * 3;
-    private static final int RESET_INTERVAL = 4096;
     // An exchange that restarts the server while flushing data, to simulate
     // the case where the server dies while the client is sending.
-    public class InterruptedExchange extends SimpleExchange {
+    public class InterruptedExchange extends SimpleExchange
+    {
         @Override
-        public void setup(String url) {
+        public void setup(String url)
+        {
             setMethod("POST");
             setURL(url);
-            final byte[] content = new byte[NUM_BYTES];
-            Arrays.fill(content, (byte)0);
-            setRequestHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
-            setRequestHeader(HttpHeaders.CONTENT_LENGTH,
-                    Integer.toString(content.length));
-            
+            final byte[] content = new byte[4096];
+            final int content_length=4096*4096;
+            Arrays.fill(content,(byte)'x');
+            setRequestHeader(HttpHeaders.CONTENT_TYPE,"text/plain");
+            setRequestHeader(HttpHeaders.CONTENT_LENGTH,Integer.toString(content_length));
+
             // Restart the server every RESET_INTERVAL bytes
-            setRequestContentSource(new InputStream() {
+            setRequestContentSource(new InputStream()
+            {
                 private int pos = 0;
-                private void checkReset() throws IOException {
-                    if (pos != 0 && pos < content.length && (pos % RESET_INTERVAL) == 0) {
-                        try {
-                            restartServer();
-                        } catch (Exception e) {
-                            throw new IOException(e.toString());  // XXX
-                        }
+
+                private void checkReset() throws IOException
+                {
+                    if (_endp!=null)
+                    {
+                        breakConnection();
                     }
                 }
-                
+
                 @Override
-                public int read() throws IOException {
+                public int read() throws IOException
+                {
                     checkReset();
-                    return (pos < content.length ? (int)content[pos++] : -1);
+                    return (pos < content_length?(int)'x':-1);
                 }
-                
+
                 @Override
-                public int available() {
-                    int nextReset = ((pos / RESET_INTERVAL) + 1) * RESET_INTERVAL;
-                    if (nextReset > content.length)
-                        nextReset = content.length;
-                    return nextReset - pos;
+                public int available()
+                {
+                    return content_length-pos;
                 }
-                
+
                 @Override
-                public int read(byte[] b, int offset, int length) throws IOException {
+                public int read(byte[] b, int offset, int length) throws IOException
+                {
                     checkReset();
                     int available = available();
                     if (available == 0)
                         return -1;
-                    length = Math.min(length, available);
-                    System.arraycopy(content, pos, b, offset, length);
+                    if (length>4096)
+                        length=4096;
+                    length = Math.min(length,available);
+                    System.arraycopy(content,0,b,offset,length);
                     pos += length;
                     return length;
                 }
             });
         }
-        
+
     }
-    
-    public Status runExchange(SimpleExchange exchange) throws Exception {
+
+    public int runExchange(SimpleExchange exchange) throws Exception
+    {
         exchange.setup(_url);
-        client.send(exchange);
-        return exchange.waitForCompletion();
+        _client.send(exchange);
+        exchange.waitForDone();
+        return exchange.getStatus();
     }
-    
-    public void setUp() throws Exception {
-        restartServer();
-        restartClient();
-    }
-    
-    public void tearDown() throws Exception {
-        server.stop();
-        server = null;
-        client.stop();
-        client = null;
-    }
-    
-    public void testSimple() throws Exception {
-        assertEquals(Status.SUCCESS, runExchange(new SimpleExchange()));
-    }
-    /*
-    public void testReconnect() throws Exception {
 
-        assertEquals(Status.ERROR, runExchange(new InterruptedExchange()));
-        
-        // The bug causes the exchange above to be stuck in an infinite loop.
-        // This means that the connection won't be reused, and so (as we set
-        // max connections per host to 1) that the second exchange (below)
-        // won't get to run.  We'll give it some time (500ms should be more than enough),
-        // after which we get an InterruptedException which will cause the test to fail.
-        final Thread t = Thread.currentThread();
-        ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
-        
-        timer.schedule(new Runnable() {
-            public void run() {
-                t.interrupt();
-            }
-        }, 500, TimeUnit.MILLISECONDS);
-
-        Log.warn("EXPECTED  EoFException above");
-        assertEquals(Status.SUCCESS, runExchange(new SimpleExchange()));
+    public void setUp() throws Exception
+    {
+        startServer();
+        startClient();
     }
-    */
+
+    public void tearDown() throws Exception
+    {
+        _server.stop();
+        _server = null;
+        _client.stop();
+        _client = null;
+    }
+
+    public void testSimple() throws Exception
+    {
+        assertEquals(HttpExchange.STATUS_COMPLETED,runExchange(new SimpleExchange()));
+    }
+
+    public void testReconnect() throws Exception
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            final int id=i;
+            // System.err.println("\nerror "+i);
+            assertEquals("error " + i,HttpExchange.STATUS_EXCEPTED,runExchange(new InterruptedExchange()
+            {
+
+                /* (non-Javadoc)
+                 * @see org.mortbay.jetty.client.JettyClientTest.SimpleExchange#onException(java.lang.Throwable)
+                 */
+                @Override
+                protected void onException(Throwable exc)
+                {
+                    // System.err.println(exc+" "+id);
+                    super.onException(exc);
+                }
+                
+            }));
+            // System.err.println("success "+i);
+            assertEquals("reconnect " + i,HttpExchange.STATUS_COMPLETED,runExchange(new SimpleExchange()));
+        }
+    }
+
 }
