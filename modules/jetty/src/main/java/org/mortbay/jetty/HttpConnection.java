@@ -864,6 +864,8 @@ public class HttpConnection implements Connection
          */
         public void headerComplete() throws IOException
         {
+            if (_endp instanceof SelectChannelEndPoint)
+                ((SelectChannelEndPoint)_endp).scheduleIdle();
             _requests++;
             _generator.setVersion(_version);
             switch (_version)
@@ -933,6 +935,8 @@ public class HttpConnection implements Connection
          */
         public void content(Buffer ref) throws IOException
         {
+            if (_endp instanceof SelectChannelEndPoint)
+                ((SelectChannelEndPoint)_endp).scheduleIdle();
             if (_delayedHandling)
             {
                 _delayedHandling = false;
