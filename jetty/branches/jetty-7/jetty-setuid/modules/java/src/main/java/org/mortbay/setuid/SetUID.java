@@ -61,6 +61,8 @@ public class SetUID
         catch (Throwable e) 
         {
            //Ignorable if there is another way to find the lib 
+           if (Boolean.valueOf(System.getProperty("DEBUG")).booleanValue())
+               e.printStackTrace();
         }
         
         try 
@@ -71,6 +73,8 @@ public class SetUID
         catch (Throwable e) 
         {
            //Ignorable if ther eis another way to find the lib
+           if (Boolean.valueOf(System.getProperty("DEBUG")).booleanValue())
+               e.printStackTrace();
         }
         
         // try to load from usual path @ jetty.home/lib/ext
@@ -89,6 +93,8 @@ public class SetUID
         } 
         catch (Throwable e) 
         {
+           if (Boolean.valueOf(System.getProperty("DEBUG")).booleanValue())
+               e.printStackTrace();
         }
         
         // try to load from jetty.lib where rpm puts this file
@@ -107,6 +113,8 @@ public class SetUID
         } 
         catch (Throwable e) 
         {
+           if (Boolean.valueOf(System.getProperty("DEBUG")).booleanValue())
+               e.printStackTrace();
         }
 
         System.err.println("Error: libsetuid.so could not be found");
