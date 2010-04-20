@@ -127,12 +127,10 @@
     <module>jetty-j2sehttp-spi</module>
     <module>jetty-setuid</module>
     <module>test-jndi-webapp</module>
-    <module>test-jetty-webapp</module>
     <module>test-jaas-webapp</module>
     <module>test-annotation-webapp</module>
     <module>jetty-spring</module>
     <module>example-async-rest-webapp</module>
-    <module>jetty-jsp-2.1</module>
     <module>jetty-hightide</module>
     <module>jetty-jboss</module>
   </modules>

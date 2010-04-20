@@ -393,7 +393,7 @@
                   <outputDirectory>${assembly.directory}/lib/jsp</outputDirectory>
                 </artifactItem>               
                 <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
+                  <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-jsp-2.1</artifactId>
                   <version>${version}</version>
                   <type>jar</type>
@@ -429,7 +429,7 @@
                   <outputDirectory>${assembly.directory}/lib</outputDirectory>
                 </artifactItem>
                  <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
+                  <groupId>org.eclipse.jetty</groupId>
                   <artifactId>test-jetty-webapp</artifactId>
                   <version>${project.version}</version>
                   <type>war</type>
@@ -729,7 +729,7 @@
     	<version>${jetty-version}</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
+      <groupId>org.eclipse.jetty</groupId>
         <artifactId>test-jetty-webapp</artifactId>
         <type>war</type>
         <version>${project.version}</version>
