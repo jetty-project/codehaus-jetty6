@@ -290,6 +290,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
             finally
             {
                 _writeBlocked=false;
+                scheduleIdle();
             }
         }
         return true;
