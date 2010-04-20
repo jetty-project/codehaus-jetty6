@@ -3,6 +3,7 @@ jetty-6-SNAPSHOT
  + COMETD-99 ClientImpl logs exceptions in listeners with "debug" level
  + COMETD-100 ClientImpl logs "null" as clientId
  + JETTY-1198 reset idle timeout on request body chunks
+ + COMETD-107  Reloading the application with reload extension does not fire /meta/connect handlers until long poll timeout expires
 
 jetty-6.1.23 2 April 2010
  + JSON parses NaN as null
