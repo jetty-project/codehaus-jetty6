@@ -14,6 +14,7 @@
 
 package org.mortbay.jetty.client;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,6 +30,7 @@ import junit.framework.TestCase;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.io.nio.DirectNIOBuffer;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
@@ -39,6 +41,8 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.client.security.ProxyAuthorization;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.log.Log;
+import org.mortbay.util.IO;
 
 /**
  * Functional testing for HttpExchange.
@@ -236,7 +240,44 @@ public class HttpExchangeTest extends TestCase
             Thread.sleep(5);
         }
     }
+    public void testBigPostWithContentExchange() throws Exception
+    {   
+        int size =32;
+        ContentExchange httpExchange=new ContentExchange();
 
+        Buffer babuf = new ByteArrayBuffer(size*36*1024);
+        Buffer niobuf = new DirectNIOBuffer(size*36*1024);
+
+        byte[] bytes="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".getBytes();
+
+        for (int i=0;i<size*1024;i++)
+        {
+            babuf.put(bytes);
+            niobuf.put(bytes);
+        }
+        
+        httpExchange.setURL(_scheme+"localhost:"+_port+"/");
+        httpExchange.setMethod(HttpMethods.POST);
+        httpExchange.setRequestContentType("application/data");
+        httpExchange.setRequestContent(babuf);
+        
+        _httpClient.send(httpExchange);
+        int status = httpExchange.waitForDone();
+        String result=httpExchange.getResponseContent();
+        assertEquals(babuf.length(),result.length());
+        assertEquals(HttpExchange.STATUS_COMPLETED, status);
+
+        httpExchange.reset();
+        httpExchange.setURL(_scheme+"localhost:"+_port+"/");
+        httpExchange.setMethod(HttpMethods.POST);
+        httpExchange.setRequestContentType("application/data");
+        httpExchange.setRequestContent(niobuf);
+        _httpClient.send(httpExchange);
+        status = httpExchange.waitForDone();
+        result=httpExchange.getResponseContent();
+        assertEquals(niobuf.length(),result.length());
+        assertEquals(HttpExchange.STATUS_COMPLETED, status);
+    }
     public void testProxy() throws Exception
     {
         if (_scheme.equals("https://"))
@@ -360,8 +401,11 @@ public class HttpExchangeTest extends TestCase
                     }
                     else
                     {
-                        // System.err.println("HANDLING "+request.getMethod());
-                        copyStream(request.getInputStream(),response.getOutputStream());
+                        response.setContentType(request.getContentType());
+                        int size=request.getContentLength();
+                        ByteArrayOutputStream bout = new ByteArrayOutputStream(size>0?size:32768);
+                        IO.copy(request.getInputStream(),bout);
+                        response.getOutputStream().write(bout.toByteArray());
                     }
                 }
                 catch(IOException e)
