@@ -27,6 +27,7 @@
           <skip>true</skip>
         </configuration>
       </plugin>
+      <!--
       <plugin>
         <artifactId>maven-plugin-plugin</artifactId>
         <executions>
@@ -39,6 +40,7 @@
           </execution>
         </executions>
       </plugin>
+      -->
       <plugin>
         <artifactId>maven-site-plugin</artifactId>
         <executions>
