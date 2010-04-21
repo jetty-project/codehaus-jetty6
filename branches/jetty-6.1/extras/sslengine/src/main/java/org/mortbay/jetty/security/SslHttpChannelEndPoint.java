@@ -52,8 +52,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     private NIOBuffer _inNIOBuffer;
     private ByteBuffer _outBuffer;
     private NIOBuffer _outNIOBuffer;
-
-    private NIOBuffer[] _reuseBuffer=new NIOBuffer[2];    
+    
     private ByteBuffer[] _gather=new ByteBuffer[2];
 
     private boolean _closing=false;
@@ -252,10 +251,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                 _buffers.returnBuffer(_inNIOBuffer);
             if (_outNIOBuffer!=null)
                 _buffers.returnBuffer(_outNIOBuffer);
-            if (_reuseBuffer[0]!=null)
-                _buffers.returnBuffer(_reuseBuffer[0]);
-            if (_reuseBuffer[1]!=null)
-                _buffers.returnBuffer(_reuseBuffer[1]);
         }   
     }
 
@@ -635,26 +630,13 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         }
     }
 
-    
     /* ------------------------------------------------------------ */
     private ByteBuffer extractOutputBuffer(Buffer buffer,int n)
     {
-        NIOBuffer nBuf=null;
-
         if (buffer.buffer() instanceof NIOBuffer)
-        {
-            nBuf=(NIOBuffer)buffer.buffer();
-            return nBuf.getByteBuffer();
-        }
-        else
-        {
-            if (_reuseBuffer[n]==null)
-                _reuseBuffer[n] = (NIOBuffer)_buffers.getBuffer(_session.getApplicationBufferSize());
-            NIOBuffer buf = _reuseBuffer[n];
-            buf.clear();
-            buf.put(buffer);
-            return buf.getByteBuffer();
-        }
+            return ((NIOBuffer)buffer.buffer()).getByteBuffer();
+        
+        return ByteBuffer.wrap(buffer.array());
     }
 
     /* ------------------------------------------------------------ */
