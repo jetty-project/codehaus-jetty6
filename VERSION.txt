@@ -6,6 +6,7 @@ jetty-6.1.24 21 April 2010
  + JETTY-1198 reset idle timeout on request body chunks
  + JETTY-1200 SSL NIO Endpoint wraps non NIO buffers
  + JETTY-1211 SetUID loadlibrary name and debug
+ + JETTY-1212 Long content lengths
  + 308925 Protect the test webapp from remote access
  + COMETD-99 ClientImpl logs exceptions in listeners with "debug" level
  + COMETD-100 ClientImpl logs "null" as clientId
