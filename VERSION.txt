@@ -1,6 +1,7 @@
 Jetty-6-SNAPSHOT 
  Jetty-6 is now in maintenance mode.
  + JETTY-1212 Long content lengths
+ + JETTY-1214 Avoid ISE when scavenging invalid session
  
 jetty-6.1.24 21 April 2010
  + JETTY-903 Stop both caches
