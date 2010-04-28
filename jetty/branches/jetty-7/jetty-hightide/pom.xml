@@ -405,7 +405,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-jsp-2.1</artifactId>
-                  <version>${version}</version>
+                  <version>${jetty-version}</version>
                   <type>jar</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
