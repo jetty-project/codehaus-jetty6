@@ -20,9 +20,9 @@
     <jsp-2-1-version>2.1.v20091210</jsp-2-1-version>
   </properties>
   <scm>
-    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</developerConnection>
-    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</url>
+    <connection>scm:svn:http://svn.codehaus.org/jetty/jetty/branches/jetty-7</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/branches/jetty-7</developerConnection>
+    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/branches/jetty-7</url>
   </scm>
 
   <build>
