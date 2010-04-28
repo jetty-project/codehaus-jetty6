@@ -1,4 +1,4 @@
-jetty@codehaus 7.1.0-SNAPSHOT
+jetty@codehaus 7.1.0.RC0
  + JETTY-979 remove unneeded ant.jar from lib/jsp
  + Ensure test-jetty-webapp uses ${jetty-version}
  + Update transactions.properties to put atomikos logs in jetty logs dir
@@ -6,7 +6,6 @@ jetty@codehaus 7.1.0-SNAPSHOT
  + Update test-jndi-webapp/README
  + 308906 mvn jetty:run does not scan web override or default descriptors
  + 309765 moved JSP and test webapp to eclipse
-
 
 jetty@codehaus 7.0.2.v20100331
  + JETTY-1027 mvn jetty:run does not seem to support WAR overlays...
