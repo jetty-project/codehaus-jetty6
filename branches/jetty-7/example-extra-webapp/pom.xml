@@ -8,6 +8,17 @@
   <groupId>org.mortbay.jetty.example</groupId>
   <artifactId>jetty-extra-example-webapp</artifactId>
   <name>Jetty Example :: Extra Webapp tests</name>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>

@@ -39,7 +39,6 @@
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
-         <tag>jetty-${project.version}</tag>
          <tagBase>https://svn.codehaus.org/jetty/jetty/tags</tagBase>
         </configuration>
       </plugin>
@@ -81,25 +80,7 @@
          <artifactId>maven-surefire-plugin</artifactId>
          <version>2.4.2</version>
        </plugin>
-<!--
-       <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <version>2.0.0</version>
-        <extensions>true</extensions>
-        <configuration>        
-          <instructions>
-            <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
-            <Bundle-DocURL>${jetty.url}</Bundle-DocURL>
-            <Bundle-Vendor>Eclipse Jetty Project</Bundle-Vendor>
-            <Bundle-Localization>plugin</Bundle-Localization>
-            <Bundle-Classpath>.</Bundle-Classpath>
-            <Bundle-Copyright>Copyright (c) 2008-2009 Mort Bay Consulting Pty. Ltd.</Bundle-Copyright>
-            <_versionpolicy>[$(version;==;$(@)),$(version;+;$(@)))</_versionpolicy>
-          </instructions>
-        </configuration>
-       </plugin>
--->
+
        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
@@ -135,35 +116,4 @@
     <module>jetty-jboss</module>
   </modules>
 
-  <!-- Temporarily added until release of jetty-integration-parent allows modules to find oss repo -->
-<!--
-  <repositories>
-    <repository>
-      <id>oss.sonatype.org</id>
-      <name>Jetty Snapshot Repository</name>
-      <layout>default</layout>
-      <url>http://oss.sonatype.org/content/repositories/jetty-snapshots/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-   </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>oss.sonatype.org</id>
-      <name>Jetty Snapshot Plugin Repository</name>
-      <layout>default</layout>
-      <url>http://oss.sonatype.org/content/repositories/jetty-snapshots/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-   </pluginRepository>
-  </pluginRepositories>
--->
 </project>
