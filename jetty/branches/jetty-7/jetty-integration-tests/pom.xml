@@ -9,6 +9,17 @@
   <artifactId>jetty-integration-tests</artifactId>
   <name>Jetty :: Integration Tests</name>
   <description>This module is for testing all classes that require external dependencies not suitable for being included in migration to Eclipse</description>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
