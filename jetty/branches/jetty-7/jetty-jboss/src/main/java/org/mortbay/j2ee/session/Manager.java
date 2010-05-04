@@ -94,7 +94,8 @@ public class Manager implements org.eclipse.jetty.server.SessionManager
      * or URLs only.
      */
     protected boolean _usingCookies = true;
-
+    protected boolean _checkingRemoteSessionIdEncoding = false;
+    
     public WebAppContext getContext()
     {
         return _context;
@@ -108,6 +109,8 @@ public class Manager implements org.eclipse.jetty.server.SessionManager
     // ----------------------------------------
     protected int _scavengerPeriod = 60; // every 1 min
 
+    private boolean _checkingRemoteSessionIdEncoding;
+
     public void setScavengerPeriod(int period)
     {
         _scavengerPeriod = period;
@@ -117,7 +120,17 @@ public class Manager implements org.eclipse.jetty.server.SessionManager
     {
         return _scavengerPeriod;
     }
-
+    
+    public void setCheckingRemoteSessionIdEncoding(boolean checking)
+    {
+        _checkingRemoteSessionIdEncoding=checking;
+    }
+    
+    public boolean isCheckingRemoteSessionIdEncoding()
+    {
+        return _checkingRemoteSessionIdEncoding;
+    }
+    
     // ----------------------------------------
     protected StateInterceptor[] _interceptorStack = null;
 
