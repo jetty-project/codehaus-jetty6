@@ -109,8 +109,6 @@ public class Manager implements org.eclipse.jetty.server.SessionManager
     // ----------------------------------------
     protected int _scavengerPeriod = 60; // every 1 min
 
-    private boolean _checkingRemoteSessionIdEncoding;
-
     public void setScavengerPeriod(int period)
     {
         _scavengerPeriod = period;
