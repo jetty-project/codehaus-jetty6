@@ -7,6 +7,7 @@ jetty@codehaus 7.1.0.RC0
  + Update test-jndi-webapp/README
  + 308906 mvn jetty:run does not scan web override or default descriptors
  + 309765 moved JSP and test webapp to eclipse
+ + Update to atomikos 3.6.4
 
 jetty@codehaus 7.0.2.v20100331
  + JETTY-1027 mvn jetty:run does not seem to support WAR overlays...
