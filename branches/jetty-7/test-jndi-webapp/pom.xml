@@ -105,27 +105,27 @@
           <dependency>
             <groupId>com.atomikos</groupId>
             <artifactId>atomikos-util</artifactId>
-            <version>3.5.5</version>
+            <version>3.6.4</version>
           </dependency>
           <dependency>
             <groupId>com.atomikos</groupId>
             <artifactId>transactions-api</artifactId>
-            <version>3.5.5</version>
+            <version>3.6.4</version>
             </dependency>
             <dependency>
               <groupId>com.atomikos</groupId>
               <artifactId>transactions</artifactId>
-              <version>3.5.5</version>
+              <version>3.6.4</version>
             </dependency>
             <dependency>
               <groupId>com.atomikos</groupId>
               <artifactId>transactions-jdbc</artifactId>
-              <version>3.5.5</version>
+              <version>3.6.4</version>
             </dependency>
             <dependency>
               <groupId>com.atomikos</groupId>
               <artifactId>transactions-jta</artifactId>
-              <version>3.5.5</version>
+              <version>3.6.4</version>
             </dependency>
             <dependency>
                <groupId>org.apache.derby</groupId>
