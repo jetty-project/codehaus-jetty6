@@ -1,8 +1,9 @@
-Jetty-6-SNAPSHOT 
+Jetty-6-SNAPSHOT
  + Jetty-6 is now in maintenance mode.
  + JETTY-1212 Long content lengths
  + JETTY-1214 Avoid ISE when scavenging invalid session
- 
+ + COMETD-112 if two threads create the same channel, then create events may occur after subscribe events
+
 jetty-6.1.24 21 April 2010
  + JETTY-903 Stop both caches
  + JETTY-1198 reset idle timeout on request body chunks
