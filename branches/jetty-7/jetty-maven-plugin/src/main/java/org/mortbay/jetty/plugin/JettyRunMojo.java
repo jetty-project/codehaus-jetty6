@@ -192,7 +192,7 @@ public class JettyRunMojo extends AbstractJettyMojo
     /**
      * Verify the configuration given in the pom.
      * 
-     * @see org.eclipse.jetty.server.plugin.AbstractJettyMojo#checkPomConfiguration()
+     * @see org.mortbay.jetty.plugin.AbstractJettyMojo#checkPomConfiguration()
      */
     public void checkPomConfiguration () throws MojoExecutionException
     {
