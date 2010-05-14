@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-integration-project</artifactId>
-    <version>7.1.1-SNAPSHOT</version>
+    <version>7.1.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
@@ -10,6 +10,8 @@
   <packaging>maven-plugin</packaging>
   <name>Jetty :: Jetty Maven Plugin</name>
   <properties>
+    <mavenVersion>2.0.8</mavenVersion>
+    <pluginToolsVersion>2.5.1</pluginToolsVersion>
   </properties>
   <build>
     <plugins>
@@ -21,6 +23,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-plugin-plugin</artifactId>
+        <version>${pluginToolsVersion}</version>
         <executions>
           <execution>
             <id>exec-plugin-doc</id>
@@ -54,22 +57,22 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-project</artifactId>
-      <version>2.0.8</version>
+      <version>${mavenVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
-      <version>2.0.8</version>
+      <version>${mavenVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-artifact</artifactId>
-      <version>2.0.8</version>
+      <version>${mavenVersion}</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.maven</groupId>
+      <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-tools-api</artifactId>
-      <version>2.0.5</version>
+      <version>${pluginToolsVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
@@ -96,11 +99,6 @@
       <artifactId>jetty-annotations</artifactId>
       <version>${jetty-version}</version>
      </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-jsp-2.1</artifactId>
-      <version>${jetty-version}</version>
-    </dependency>
      <dependency>
       <groupId>org.eclipse.jetty</groupId>
        <artifactId>jetty-start</artifactId>
