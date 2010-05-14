@@ -19,6 +19,7 @@ package org.mortbay.jetty.plugin;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.RequestLog;
+import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
@@ -43,9 +44,6 @@ public class JettyServer extends org.eclipse.jetty.server.Server
     private ContextHandlerCollection contexts;
     
     
-    /**
-     * @see org.eclipse.jetty.server.plugin.JettyPluginServer#create()
-     */
     public JettyServer()
     {
         super();
@@ -61,7 +59,7 @@ public class JettyServer extends org.eclipse.jetty.server.Server
     }
 
     /**
-     * @see org.eclipse.jetty.server.plugin.JettyPluginServer#start()
+     * @see org.eclipse.jetty.server.Server#doStart()
      */
     public void doStart() throws Exception
     {
@@ -71,7 +69,7 @@ public class JettyServer extends org.eclipse.jetty.server.Server
 
  
     /**
-     * @see org.eclipse.jetty.server.plugin.JettyPluginServer#addWebApplication(java.lang.Object)
+     * @see org.eclipse.jetty.server.handler.HandlerCollection#addHandler(org.eclipse.jetty.server.Handler)
      */
     public void addWebApplication(WebAppContext webapp) throws Exception
     {  
@@ -114,9 +112,6 @@ public class JettyServer extends org.eclipse.jetty.server.Server
     
     
     
-    /**
-     * @see org.eclipse.jetty.server.plugin.JettyPluginServer#createDefaultConnector()
-     */
     public Connector createDefaultConnector(String portnum) throws Exception
     {
         SelectChannelConnector connector = new SelectChannelConnector();
