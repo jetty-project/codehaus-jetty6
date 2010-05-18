@@ -14,7 +14,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <jetty-version>7.1.0.v20100505</jetty-version>
+    <jetty-version>7.1.1.v20100517</jetty-version>
     <felix.bundle.version>2.0.0</felix.bundle.version>
     <jna-version>3.2.2</jna-version>
     <jsp-2-1-version>2.1.v20100127</jsp-2-1-version>
