@@ -1,5 +1,6 @@
 
-jetty@codehaus 7.1.0
+jetty@codehaus 7.1.0-SNAPSHOT
++ update to jetty-7.1.1.v20100517
 
 jetty@codehaus 7.1.0.RC0
  + JETTY-979 remove unneeded ant.jar from lib/jsp
