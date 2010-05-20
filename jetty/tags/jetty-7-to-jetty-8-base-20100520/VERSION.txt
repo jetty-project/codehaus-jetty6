@@ -1,0 +1,49 @@
+jetty@codehaus 7.1.1-SNAPSHOT
++ update to jetty-7.1.1.v20100517
+
+jetty@codehaus 7.1.0.v20100505 5 May 2010
+
+jetty@codehaus 7.1.0.RC0
+ + JETTY-979 remove unneeded ant.jar from lib/jsp
+ + Ensure test-jetty-webapp uses ${jetty-version}
+ + Update transactions.properties to put atomikos logs in jetty logs dir
+ + Remove redundant jetty-plus.xml from jetty-hightide
+ + Update test-jndi-webapp/README
+ + 308906 mvn jetty:run does not scan web override or default descriptors
+ + 309765 moved JSP and test webapp to eclipse
+ + Update to atomikos 3.6.4
+
+jetty@codehaus 7.0.2.v20100331
+ + JETTY-1027 mvn jetty:run does not seem to support WAR overlays...
+ + Move declaration of container JDNI resources into jetty.xml
+
+ 
+jetty@codehaus 7.0.2.RC0.17 March 2010
+ + Updated JSP to 2.1.v20091210
+ + JETTY-776 Make new session tests module to concentrate all reusable session clustering test code
+ + JETTY-1159 jetty-maven-plugin doesn't work if no WEB-INF
+ + JETTY-1160 jetty-maven-plugin needs target directory
+
+jetty@codehaus 7.0.1.v20091123 22 November 2009
+ + JETTY-1143 make Jetty7 serve WebService request
+ + Change name of setuid lib to "setuid" to be mac friendly
+
+jetty@codehaus 7.0.0.v20091005 5 October 2009
+ + JETTY-1021 jetty-maven-plugin overlay or reload issue
+ + JETTY-1089 Upgrade jsp to SJSAS-9_1_1-B60F-07_Jan_2009
+ + JETTY-1100 extend setuid feature to set number of open file descriptors
+ + JETTY-1109 Improper handling of cookies in Terracotta tests
+ + JETTY-1115 Allow configuration of location of web.xml for jetty-jspc-maven-plugin
+ + JETTY-1143 port of j2se6 to jetty7 for serving scalable webservices
+ + Patch test context to deploy at /test for jetty-hightide
+ + Moved example-jetty-spring to jetty-spring
+ + Include jetty-jspc-maven-plugin
+ + Fix jetty/jboss security integration
+ + Remove printlns
+ + Exclude setuid from hightide when building on windows
+
+jetty@codehaus 7.0.0.RC4 18 August 2009
+ + created separate VERSION.txt file
+ + 286242 Ported jetty-setuid from jetty-6
+
+
