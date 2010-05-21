@@ -3,11 +3,18 @@ jetty@codehaus 8.0.0.M1-SNAPSHOT
  + Updated to jetty core 8.0.0.M1
  + Add jetty-util.jar to test-annotation-webapp
  + Add ContainerInitializerConfiguration to jetty.xml
+
+jetty@codehaus 7.1.0.v20100505 5 May 2010
+
+jetty@codehaus 7.1.0.RC0
+ + JETTY-979 remove unneeded ant.jar from lib/jsp
+ + Ensure test-jetty-webapp uses ${jetty-version}
  + Update transactions.properties to put atomikos logs in jetty logs dir
  + Remove redundant jetty-plus.xml from jetty-hightide
  + Update to atomikos 3.6.4
  + Update test-jndi-webapp to use atomikos 3.6.4 with mvn jetty:run
  + Update test-jndi-webapp/README
+ + Update to atomikos 3.6.4
 
 jetty@codehaus 8.0.0.M0 28 February 2010
  + Updated JSP to 2.1.v20091210

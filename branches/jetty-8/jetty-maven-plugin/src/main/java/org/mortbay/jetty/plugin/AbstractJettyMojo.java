@@ -583,7 +583,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * Try and find a jetty-web.xml file, using some
      * historical naming conventions if necessary.
      * @param webInfDir
-     * @return
+     * @return the jetty web xml file
      */
     public File findJettyWebXmlFile (File webInfDir)
     {

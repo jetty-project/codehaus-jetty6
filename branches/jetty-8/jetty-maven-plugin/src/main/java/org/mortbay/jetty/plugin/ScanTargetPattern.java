@@ -55,7 +55,7 @@ public class ScanTargetPattern
     }
 
     /**
-     * @param _directory the _directory to set
+     * @param directory the directory to set
      */
     public void setDirectory(File directory)
     {
