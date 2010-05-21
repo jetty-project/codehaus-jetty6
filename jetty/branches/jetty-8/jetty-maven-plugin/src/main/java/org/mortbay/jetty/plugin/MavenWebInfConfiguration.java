@@ -182,7 +182,7 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
      * synthesized the classpath. Note that the classpath is not
      * set at this point, so we cannot get them from the classpath.
      * @param context
-     * @return
+     * @return the list of jars found
      */
     protected List<Resource> findJars (WebAppContext context)
     throws Exception

@@ -9,10 +9,6 @@
   <artifactId>jetty-runner</artifactId>
   <name>Jetty :: Runner</name>
 
-  <properties>
-    <atomikos-version>3.2.3</atomikos-version>
-  </properties>
-
   <build>
     <plugins>
       <plugin>
@@ -35,7 +31,6 @@
               <goal>unpack-dependencies</goal>
             </goals>
             <configuration>
-              <excludeGroupIds>com.atomikos</excludeGroupIds>
               <includes>**</includes>
               <excludes>**/MANIFEST.MF</excludes>
               <outputDirectory>${project.build.directory}/classes</outputDirectory>

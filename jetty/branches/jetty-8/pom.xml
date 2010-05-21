@@ -22,6 +22,7 @@
     <servlet.spec.artifactId>servlet-api</servlet.spec.artifactId>
     <servlet.spec.version>3.0.20100224</servlet.spec.version>
   </properties>
+
   <scm>
     <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/branches/jetty-8</connection>
     <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/branches/jetty-8</developerConnection>
@@ -118,7 +119,6 @@
     </pluginManagement>
   </build>
   <modules>
-    <module>repository</module>
     <module>jetty-maven-plugin</module>
     <module>jetty-jspc-maven-plugin</module>
     <!-- module>jetty-ant</module -->
@@ -140,7 +140,6 @@
     <!-- module>jetty-jboss</module -->
   </modules>
 
-<!--
   <repositories>
     <repository>
       <id>download.java.net</id>
@@ -167,5 +166,4 @@
       </releases>
    </repository>
   </repositories>
--->
 </project>
