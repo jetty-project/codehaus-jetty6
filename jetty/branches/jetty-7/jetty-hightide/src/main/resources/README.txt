@@ -61,37 +61,24 @@ Jetty start.jar provides a cross platform replacement for startup scripts.
 It makes use of executable JAR that builds the classpath and then executes
 jetty.
 
-To run with all the demo options:
-
-  java -jar start.jar OPTIONS=All
-
 To run with the default options:
 
   java -jar start.jar
 
-The default options may be specified in the start.ini file, or if
-that is not present, they are defined in the start.config file that
-is within the start.jar.
-
-To run with specific configuration file(s)
-
-  java -jar start.jar etc/jetty.xml
-
-To see the available options
+To see the available options and the default arguments
+provided by the start.ini file:
 
   java -jar start.jar --help
 
-To run with JSP support (if available)
+To run with add configuration file(s), eg SSL
+
+  java -jar start.jar etc/jetty-ssl.xml
+
+To run without the args from start.ini
+
+  java -jar start.jar --ini OPTIONS=Server,websocket etc/jetty.xml etc/jetty-deploy.xml etc/jetty-ssl.xml
+
+To run with JNDI support
 
   java -jar start.jar OPTIONS=Server,jsp
 
-To run with JMX support
-
-  java -jar start.jar OPTIONS=Server,jmx etc/jetty-jmx.xml etc/jetty.xml
-
-To run with JSP & JMX support
-
-  java -jar start.jar OPTIONS=Server,jsp,jmx etc/jetty-jmx.xml etc/jetty.xml
-
-
-~                                              
