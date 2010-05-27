@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-integration-project</artifactId>
-  <version>7.1.3.v20100526</version>
+  <version>7.1.4-SNAPSHOT</version>
   <name>Jetty :: Codehaus Integration Project</name>
   <description>Jetty integrations and distributions</description>
   <packaging>pom</packaging>
@@ -21,9 +21,9 @@
   </properties>
 
   <scm>
-    <connection>scm:svn:http://svn.codehaus.org/jetty/jetty/tags/jetty-7.1.3.v20100526</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-7.1.3.v20100526</developerConnection>
-    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-7.1.3.v20100526</url>
+    <connection>scm:svn:http://svn.codehaus.org/jetty/jetty/branches/jetty-7</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/branches/jetty-7</developerConnection>
+    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/branches/jetty-7</url>
   </scm>
 
   <build>
