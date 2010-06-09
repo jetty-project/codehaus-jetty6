@@ -1,4 +1,5 @@
 
+ + 316254 Add @DeclareRoles to test-annotation-webapp
  + JETTY-1213 upgraded to blazeDS4
 
 jetty@codehaus 7.1.3.v20100526 26 May 2010

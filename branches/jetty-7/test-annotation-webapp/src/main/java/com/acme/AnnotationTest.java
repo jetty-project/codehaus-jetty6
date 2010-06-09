@@ -33,6 +33,7 @@ import javax.annotation.Resource;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.security.RunAs;
+import javax.annotation.security.DeclareRoles;
 
 /**
  * AnnotationTest
@@ -45,6 +46,7 @@ import javax.annotation.security.RunAs;
  */
 
 @RunAs("special")
+@DeclareRoles({"user","client"})
 public class AnnotationTest extends HttpServlet 
 {
     private String postConstructResult = "";
@@ -243,10 +245,17 @@ public class AnnotationTest extends HttpServlet
             out.println("<br/><b>JNDI Lookup Result: "+txLookupResult+"</b>");
             
             out.println("<h2>Roles</h2>");
+            /*
             boolean result = request.isUserInRole("other");
             out.println("<br/><b>Result: isUserInRole(\"other\")="+result+":"+ (result==false?" PASS":" FAIL")+"</b>");
-            
-            
+            result = request.isUserInRole("user");
+            out.println("<br/><b>Result: isUserInRole(\"user\")="+result+":"+ (result==false?" PASS":" FAIL")+"</b>");
+            */
+            String context = request.getContextPath();
+            if (!context.endsWith("/"))
+                context += "/";
+            context += "role/";
+            out.println("<form action="+context+" method=\"post\"><button type=\"submit\">Test Role Annotations</button></form>");
             out.println("</body>");            
             out.println("</html>");
             out.flush();
