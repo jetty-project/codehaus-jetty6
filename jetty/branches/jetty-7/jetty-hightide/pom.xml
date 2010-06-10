@@ -271,6 +271,7 @@
                     <include name="**/*" />
                   </fileset>
                 </copy>
+                <chmod dir="${assembly-directory}/bin" perm="755" includes="**/*.sh" />
               </tasks>
             </configuration>
           </execution>
