@@ -1,0 +1,22 @@
+--- start.ini	2010-06-10 10:27:01.000000000 +1000
++++ start.ini	2010-06-10 10:26:35.000000000 +1000
+@@ -42,7 +42,7 @@
+ # for a full listing do
+ #   java -jar start.jar --list-options
+ #-----------------------------------------------------------
+-OPTIONS=Server,jsp,jmx,resources,websocket,ext
++OPTIONS=Server,plus,jmx,jta,jdbc,annotations,jsp,resources,websocket,ext
+ #-----------------------------------------------------------
+ 
+ 
+@@ -53,8 +53,10 @@
+ #-----------------------------------------------------------
+ #etc/jetty-jmx.xml
+ etc/jetty.xml
++etc/jetty-hightide.xml
+ # etc/jetty-ssl.xml
+ # etc/jetty-requestlog.xml
+ etc/jetty-deploy.xml
+ etc/jetty-testrealm.xml
++etc/jetty-jaas.xml
+ #===========================================================
