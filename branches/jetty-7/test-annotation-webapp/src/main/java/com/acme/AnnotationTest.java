@@ -245,12 +245,7 @@ public class AnnotationTest extends HttpServlet
             out.println("<br/><b>JNDI Lookup Result: "+txLookupResult+"</b>");
             
             out.println("<h2>Roles</h2>");
-            /*
-            boolean result = request.isUserInRole("other");
-            out.println("<br/><b>Result: isUserInRole(\"other\")="+result+":"+ (result==false?" PASS":" FAIL")+"</b>");
-            result = request.isUserInRole("user");
-            out.println("<br/><b>Result: isUserInRole(\"user\")="+result+":"+ (result==false?" PASS":" FAIL")+"</b>");
-            */
+            out.println("<p>Login as user \"admin\" with password \"admin\" when prompted after clicking the button below to test @DeclareRoles annotation</p>");
             String context = request.getContextPath();
             if (!context.endsWith("/"))
                 context += "/";

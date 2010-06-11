@@ -1,5 +1,7 @@
 
  + update to jetty-7.1.4.v20100609
+ + fix title of JNDI test response page
+ + change test-annotation-webapp to use form auth
  + 316254 Add @DeclareRoles to test-annotation-webapp
  + JETTY-1213 upgraded to blazeDS4
 
