@@ -39,10 +39,12 @@ import javax.annotation.security.DeclareRoles;
 @DeclareRoles({"server-administrator","user"})
 public class RoleAnnotationTest extends HttpServlet 
 {
+    private ServletConfig _config;
     
     public void init(ServletConfig config) throws ServletException
     {
         super.init(config);
+        _config = config;
     }
 
     
@@ -72,6 +74,11 @@ public class RoleAnnotationTest extends HttpServlet
             out.println("<br/><b>Result: isUserInRole(\"manager\")="+result+":"+ (result?" PASS":" FAIL")+"</b>");
             result = request.isUserInRole("user");
             out.println("<br/><b>Result: isUserInRole(\"user\")="+result+":"+ (result==false?" PASS":" FAIL")+"</b>");
+            String context = _config.getServletContext().getContextPath();
+            if (!context.endsWith("/"))
+                context += "/";
+            
+            out.println("<p><A HREF=\""+context+"logout.jsp\">Logout</A></p>");
             
             out.println("</body>");            
             out.println("</html>");

@@ -194,7 +194,7 @@ public class JNDITest extends HttpServlet {
             response.setContentType("text/html");
             ServletOutputStream out = response.getOutputStream();
             out.println("<html>");
-            out.println("<h1>Jetty6 JNDI & Transaction Tests</h1>");
+            out.println("<h1>Jetty JNDI & Transaction Tests</h1>");
             out.println("<body>");
             if (complete != null)
             {
