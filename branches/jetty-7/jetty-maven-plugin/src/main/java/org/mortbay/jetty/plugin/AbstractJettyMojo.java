@@ -397,15 +397,19 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             // if the user hasn't configured their project's pom to use a
             // different set of connectors,
             // use the default
-           
-            this.server.setConnectors(this.connectors);
             Connector[] connectors = this.server.getConnectors();
-
             if (connectors == null|| connectors.length == 0)
             {
-                //if a SystemProperty -Djetty.port=<portnum> has been supplied, use that as the default port
-                this.connectors = new Connector[] { this.server.createDefaultConnector(System.getProperty(PORT_SYSPROPERTY, null)) };
+                //try using ones configured in pom
                 this.server.setConnectors(this.connectors);
+
+                connectors = this.server.getConnectors();
+                if (connectors == null || connectors.length == 0)
+                {
+                    //if a SystemProperty -Djetty.port=<portnum> has been supplied, use that as the default port
+                    this.connectors = new Connector[] { this.server.createDefaultConnector(System.getProperty(PORT_SYSPROPERTY, null)) };
+                    this.server.setConnectors(this.connectors);
+                }
             }
 
 
