@@ -1,4 +1,6 @@
+ + JETTY-1236 connectors added with jettyConfig ignored by maven plugin
 
+jetty@codehaus 7.1.4.v20100610 10 June 2010
  + update to jetty-7.1.4.v20100609
  + fix title of JNDI test response page
  + change test-annotation-webapp to use form auth
