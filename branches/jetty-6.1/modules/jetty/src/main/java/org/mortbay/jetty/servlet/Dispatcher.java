@@ -189,9 +189,6 @@ public class Dispatcher implements RequestDispatcher
                 
                 base_request.setAttributes(attr);
                 
-                if (base_request.getConnection().getResponse().isWriting())
-                    response.getWriter().flush();
-                
                 _contextHandler.handle(_named==null?_path:_named, (HttpServletRequest)request, (HttpServletResponse)response, Handler.INCLUDE);
             }
         }
