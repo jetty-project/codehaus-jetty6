@@ -31,9 +31,9 @@ import org.mortbay.log.Log;
  */
 public class SocketEndPoint extends StreamEndPoint
 {
-    Socket _socket;
-    InetSocketAddress _local;
-    InetSocketAddress _remote;
+    final Socket _socket;
+    final InetSocketAddress _local;
+    final InetSocketAddress _remote;
 
     /**
      * 
@@ -43,6 +43,8 @@ public class SocketEndPoint extends StreamEndPoint
     {
         super(socket.getInputStream(),socket.getOutputStream());
         _socket=socket;
+        _local=(InetSocketAddress)_socket.getLocalSocketAddress();
+        _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
     }
 
     /* (non-Javadoc)
@@ -86,9 +88,6 @@ public class SocketEndPoint extends StreamEndPoint
      */
     public String getLocalAddr()
     {
-        if (_local==null)
-            _local=(InetSocketAddress)_socket.getLocalSocketAddress();
-        
        if (_local==null || _local.getAddress()==null || _local.getAddress().isAnyLocalAddress())
            return Portable.ALL_INTERFACES;
         
@@ -101,9 +100,6 @@ public class SocketEndPoint extends StreamEndPoint
      */
     public String getLocalHost()
     {
-        if (_local==null)
-            _local=(InetSocketAddress)_socket.getLocalSocketAddress();
-        
        if (_local==null || _local.getAddress()==null || _local.getAddress().isAnyLocalAddress())
            return Portable.ALL_INTERFACES;
         
@@ -117,8 +113,6 @@ public class SocketEndPoint extends StreamEndPoint
     public int getLocalPort()
     {
         if (_local==null)
-            _local=(InetSocketAddress)_socket.getLocalSocketAddress();
-        if (_local==null)
             return -1;
         return _local.getPort();
     }
@@ -129,8 +123,6 @@ public class SocketEndPoint extends StreamEndPoint
      */
     public String getRemoteAddr()
     {
-        if (_remote==null)
-            _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
         if (_remote==null)
             return null;
         InetAddress addr = _remote.getAddress();
@@ -144,8 +136,6 @@ public class SocketEndPoint extends StreamEndPoint
     public String getRemoteHost()
     {
         if (_remote==null)
-            _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
-        if (_remote==null)
             return null;
         return _remote.getAddress().getCanonicalHostName();
     }
@@ -156,8 +146,6 @@ public class SocketEndPoint extends StreamEndPoint
      */
     public int getRemotePort()
     {
-        if (_remote==null)
-            _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
         if (_remote==null)
             return -1;
         return _remote.getPort();
