@@ -38,11 +38,11 @@ import org.mortbay.log.Log;
  */
 public class ChannelEndPoint implements EndPoint
 {
-    protected ByteChannel _channel;
-    protected ByteBuffer[] _gather2=new ByteBuffer[2];
-    protected Socket _socket;
-    protected InetSocketAddress _local;
-    protected InetSocketAddress _remote;
+    protected final ByteChannel _channel;
+    protected final ByteBuffer[] _gather2=new ByteBuffer[2];
+    protected final Socket _socket;
+    protected final InetSocketAddress _local;
+    protected final InetSocketAddress _remote;
 
     /**
      *
@@ -52,7 +52,17 @@ public class ChannelEndPoint implements EndPoint
         super();
         this._channel = channel;
         if (channel instanceof SocketChannel)
+        {
             _socket=((SocketChannel)channel).socket();
+            _local=(InetSocketAddress)_socket.getLocalSocketAddress();
+            _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
+        }
+        else
+        {
+            _socket=null;
+            _local=null;
+            _remote=null;
+        }
     }
 
     public boolean isBlocking()
@@ -313,9 +323,6 @@ public class ChannelEndPoint implements EndPoint
         if (_socket==null)
             return null;
 
-        if (_local==null)
-            _local=(InetSocketAddress)_socket.getLocalSocketAddress();
-
        if (_local==null || _local.getAddress()==null || _local.getAddress().isAnyLocalAddress())
            return Portable.ALL_INTERFACES;
 
@@ -331,9 +338,6 @@ public class ChannelEndPoint implements EndPoint
         if (_socket==null)
             return null;
 
-        if (_local==null)
-            _local=(InetSocketAddress)_socket.getLocalSocketAddress();
-
        if (_local==null || _local.getAddress()==null || _local.getAddress().isAnyLocalAddress())
            return Portable.ALL_INTERFACES;
 
@@ -348,9 +352,6 @@ public class ChannelEndPoint implements EndPoint
     {
         if (_socket==null)
             return 0;
-
-        if (_local==null)
-            _local=(InetSocketAddress)_socket.getLocalSocketAddress();
         if (_local==null)
             return -1;
         return _local.getPort();
@@ -364,9 +365,6 @@ public class ChannelEndPoint implements EndPoint
     {
         if (_socket==null)
             return null;
-
-        if (_remote==null)
-            _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
 
         if (_remote==null)
             return null;
@@ -383,9 +381,6 @@ public class ChannelEndPoint implements EndPoint
             return null;
 
         if (_remote==null)
-            _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
-
-        if (_remote==null)
             return null;
         return _remote.getAddress().getCanonicalHostName();
     }
@@ -398,9 +393,6 @@ public class ChannelEndPoint implements EndPoint
     {
         if (_socket==null)
             return 0;
-
-        if (_remote==null)
-            _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
 
         if (_remote==null)
             return -1;
