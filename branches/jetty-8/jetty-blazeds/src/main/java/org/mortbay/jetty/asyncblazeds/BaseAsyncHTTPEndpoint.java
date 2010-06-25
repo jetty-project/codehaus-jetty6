@@ -29,17 +29,6 @@
 
 package org.mortbay.jetty.asyncblazeds;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.eclipse.jetty.continuation.Continuation;
-import org.eclipse.jetty.continuation.ContinuationSupport;
-import org.eclipse.jetty.continuation.ContinuationThrowable;
-
 import flex.messaging.FlexContext;
 import flex.messaging.FlexSession;
 import flex.messaging.client.AsyncPollHandler;
@@ -54,9 +43,21 @@ import flex.messaging.endpoints.BaseHTTPEndpoint;
 import flex.messaging.io.MessageIOConstants;
 import flex.messaging.io.amf.ActionContext;
 import flex.messaging.log.Log;
+import flex.messaging.log.HTTPRequestLog;
 import flex.messaging.messages.CommandMessage;
 import flex.messaging.util.SettingsReplaceUtil;
 import flex.messaging.util.UserAgentManager;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.eclipse.jetty.continuation.Continuation;
+import org.eclipse.jetty.continuation.ContinuationSupport;
+import org.eclipse.jetty.continuation.ContinuationThrowable;
 
 
 /**
@@ -177,7 +178,9 @@ public abstract class BaseAsyncHTTPEndpoint extends BaseHTTPEndpoint implements 
                         addNoCacheHeaders(req, res);
 
                     ByteArrayOutputStream outBuffer = context.getResponseOutput();
+
                     res.setContentType(getResponseContentType());
+
                     res.setContentLength(outBuffer.size());
                     outBuffer.writeTo(res.getOutputStream());
                     res.flushBuffer();
@@ -195,6 +198,7 @@ public abstract class BaseAsyncHTTPEndpoint extends BaseHTTPEndpoint implements 
                         }
                         catch (IllegalStateException alreadyFlushed)
                         {
+                            // ignore
                         }
                     }
                 }
@@ -202,16 +206,21 @@ public abstract class BaseAsyncHTTPEndpoint extends BaseHTTPEndpoint implements 
         }
         catch (ContinuationThrowable ct)
         {
-            throw ct;
+            // This causes blazeds4 to issue a HTTP 500 error due to an added try/catch Throwable added to MessageBrokerServlet->service
+            //throw ct;
         }
         catch (IOException ioe)
         {
             // This happens when client closes the connection, log it at info level
             log.info(ioe.getMessage());
+            // Store exception information for latter logging
+            req.setAttribute(HTTPRequestLog.HTTP_ERROR_INFO, ioe.toString());
         }
         catch (Throwable t)
         {
             log.error(t.getMessage(), t);
+            // Store exception information for latter logging
+            req.setAttribute(HTTPRequestLog.HTTP_ERROR_INFO, t.toString());
         }
         finally
         {
@@ -466,41 +475,44 @@ public abstract class BaseAsyncHTTPEndpoint extends BaseHTTPEndpoint implements 
     {
         ConfigMap endpointConfig = super.describeEndpoint();
 
-        boolean createdProperties = false;
-        ConfigMap properties = endpointConfig.getPropertyAsMap("properties",null);
-
-        if (properties == null)
+        if (loginAfterDisconnect)
         {
-            properties = new ConfigMap();
-            createdProperties = true;
-        }
-
-        if (pollingEnabled)
-        {
-            ConfigMap pollingEnabled = new ConfigMap();
+            ConfigMap loginAfterDisconnect = new ConfigMap();
             // Adding as a value rather than attribute to the parent
-            pollingEnabled.addProperty("","true");
-            properties.addProperty(POLLING_ENABLED,pollingEnabled);
-        }
+            loginAfterDisconnect.addProperty(EMPTY_STRING, TRUE_STRING);
 
-        if (pollingIntervalMillis > -1)
-        {
-            ConfigMap pollingInterval = new ConfigMap();
-            // Adding as a value rather than attribute to the parent
-            pollingInterval.addProperty("",String.valueOf(pollingIntervalMillis));
-            properties.addProperty(POLLING_INTERVAL_MILLIS,pollingInterval);
-        }
+            ConfigMap properties = endpointConfig.getPropertyAsMap(PROPERTIES_ELEMENT, null);
+            if (properties == null)
+            {
+                properties = new ConfigMap();
+                endpointConfig.addProperty(PROPERTIES_ELEMENT, properties);
+            }
+            properties.addProperty(ConfigurationConstants.LOGIN_AFTER_DISCONNECT_ELEMENT, loginAfterDisconnect);
 
-        if (piggybackingEnabled)
-        {
-            ConfigMap piggybackingEnabled = new ConfigMap();
-            // Adding as a value rather than attribute to the parent
-            piggybackingEnabled.addProperty("",String.valueOf(piggybackingEnabled));
-            properties.addProperty(ConfigurationConstants.PIGGYBACKING_ENABLED_ELEMENT,piggybackingEnabled);
-        }
+            if (pollingEnabled)
+            {
+                ConfigMap pollingEnabled = new ConfigMap();
+                // Adding as a value rather than attribute to the parent
+                pollingEnabled.addProperty("","true");
+                properties.addProperty(POLLING_ENABLED,pollingEnabled);
+            }
 
-        if (createdProperties && properties.size() > 0)
-            endpointConfig.addProperty(ConfigurationConstants.PROPERTIES_ELEMENT,properties);
+            if (pollingIntervalMillis > -1)
+            {
+                ConfigMap pollingInterval = new ConfigMap();
+                // Adding as a value rather than attribute to the parent
+                pollingInterval.addProperty("",String.valueOf(pollingIntervalMillis));
+                properties.addProperty(POLLING_INTERVAL_MILLIS,pollingInterval);
+            }
+
+            if (piggybackingEnabled)
+            {
+                ConfigMap piggybackingEnabled = new ConfigMap();
+                // Adding as a value rather than attribute to the parent
+                piggybackingEnabled.addProperty("",String.valueOf(piggybackingEnabled));
+                properties.addProperty(ConfigurationConstants.PIGGYBACKING_ENABLED_ELEMENT,piggybackingEnabled);
+            }
+        }
 
         return endpointConfig;
     }
@@ -636,7 +648,7 @@ public abstract class BaseAsyncHTTPEndpoint extends BaseHTTPEndpoint implements 
                 {
                     if (agentSettings != null)
                     {
-                        session.maxConnectionsPerSession = agentSettings.getMaxStreamingConnectionsPerSession();
+                        session.maxConnectionsPerSession = agentSettings.getMaxPersistentConnectionsPerSession();
                     }
 
                     ++session.streamingConnectionsCount;
