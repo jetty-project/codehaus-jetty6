@@ -3,6 +3,21 @@ jetty@codehaus 8.0.0.M1-SNAPSHOT
  + Updated to jetty core 8.0.0.M1
  + Add jetty-util.jar to test-annotation-webapp
  + Add ContainerInitializerConfiguration to jetty.xml
+ + JETTY-1236 connectors added with jettyConfig ignored by maven plugin
+
+jetty@codehaus 7.1.4.v20100610 10 June 2010
+ + update to jetty-7.1.4.v20100609
+ + fix title of JNDI test response page
+ + change test-annotation-webapp to use form auth
+ + 316254 Add @DeclareRoles to test-annotation-webapp
+ + JETTY-1213 upgraded to blazeDS4
+
+jetty@codehaus 7.1.3.v20100526 26 May 2010
+ + JETTY-1230 Add WebSocket support for the Maven plugin
+
+ + update to jetty-7.1.3.v20100526
+ + update to jetty-7.1.2.v20100523
+ + update to jetty-7.1.1.v20100517
 
 jetty@codehaus 7.1.0.v20100505 5 May 2010
 

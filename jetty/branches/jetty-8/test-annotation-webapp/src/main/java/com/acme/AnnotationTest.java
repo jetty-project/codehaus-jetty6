@@ -38,6 +38,7 @@ import javax.annotation.PreDestroy;
 import javax.annotation.security.RunAs;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.annotation.WebInitParam;
+import javax.annotation.security.DeclareRoles;
 
 /**
  * AnnotationTest
@@ -51,6 +52,7 @@ import javax.servlet.annotation.WebInitParam;
 
 @RunAs("special")
 @WebServlet(urlPatterns = { "/test/*"}, name="AnnotationTest", initParams={@WebInitParam(name="fromAnnotation", value="xyz")})
+@DeclareRoles({"user","client"})
 public class AnnotationTest extends HttpServlet 
 {
     static List<String> __HandlesTypes; 
@@ -225,6 +227,7 @@ public class AnnotationTest extends HttpServlet
              __HandlesTypes = Arrays.asList( "javax.servlet.GenericServlet", 
                                              "javax.servlet.http.HttpServlet", 
                                              "com.acme.AnnotationTest", 
+                                             "com.acme.RoleAnnotationTest", 
                                              "com.acme.MultiPartTest", 
                                              "com.acme.FragmentServlet", 
                                              "com.acme.TestListener" );
@@ -299,10 +302,12 @@ public class AnnotationTest extends HttpServlet
             out.println("<br/><b>JNDI Lookup Result: "+txLookupResult+"</b>");
             
             out.println("<h2>Roles</h2>");
-            boolean result = request.isUserInRole("other");
-            out.println("<br/><b>Result: isUserInRole(\"other\")="+result+":"+ (result==false?" PASS":" FAIL")+"</b>");
-            
-            
+            out.println("<p>Login as user \"admin\" with password \"admin\" when prompted after clicking the button below to test @DeclareRoles annotation</p>");
+            String context = request.getContextPath();
+            if (!context.endsWith("/"))
+                context += "/";
+            context += "role/";
+            out.println("<form action="+context+" method=\"post\"><button type=\"submit\">Test Role Annotations</button></form>");
             out.println("</body>");            
             out.println("</html>");
             out.flush();

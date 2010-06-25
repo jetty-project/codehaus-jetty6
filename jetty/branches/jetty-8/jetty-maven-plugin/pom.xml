@@ -27,7 +27,7 @@
         <executions>
           <execution>
             <id>exec-plugin-doc</id>
-            <phase>generate-sources</phase>            
+            <phase>generate-sources</phase>
             <goals>
               <goal>xdoc</goal>
               <goal>helpmojo</goal>
@@ -118,8 +118,13 @@
       <groupId>org.eclipse.jetty</groupId>
        <artifactId>jetty-start</artifactId>
        <version>${jetty-version}</version>
-     </dependency>        
-  </dependencies>	
+     </dependency>
+     <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+       <artifactId>jetty-websocket</artifactId>
+       <version>${jetty-version}</version>
+     </dependency>
+  </dependencies>
   <reporting>
   <plugins>
     <plugin>

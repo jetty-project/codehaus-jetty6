@@ -68,23 +68,13 @@ To run with the default options:
 
   java -jar start.jar
 
-To run with all options enabled:
-
-  java -jar start.jar OPTIONS=All
-
-The default options may be specified in the start.ini file, or if
-that is not present, they are defined in the start.config file that
-is within the start.jar.
-
-To run with specific configuration file(s):
-
-  java -jar start.jar etc/jetty.xml
-
-To see the available options:
+To see the available options and the default arguments
+provided by the start.ini file:
 
   java -jar start.jar --help
 
-To run with JMX support
+To run with add configuration file(s), eg SSL
 
-  java -jar start.jar OPTIONS=Server,jmx etc/jetty-jmx.xml etc/jetty.xml
+  java -jar start.jar etc/jetty-ssl.xml
+
 
