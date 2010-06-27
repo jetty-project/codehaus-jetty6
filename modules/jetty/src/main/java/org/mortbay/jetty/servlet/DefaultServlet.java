@@ -178,7 +178,10 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         {
             try
             {
-                _resourceBase = _context.getContextHandler().getResource(URIUtil.SLASH).addPath(rrb);
+                Resource root = _context.getContextHandler().getResource(URIUtil.SLASH);
+                if (root == null)
+                    throw new UnavailableException("No base resourceBase for relativeResourceBase in"+_context.getContextPath());
+                _resourceBase = root.addPath(rrb);
             }
             catch (Exception e) 
             {
