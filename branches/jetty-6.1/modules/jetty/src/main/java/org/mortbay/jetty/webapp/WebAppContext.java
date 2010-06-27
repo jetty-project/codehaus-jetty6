@@ -94,30 +94,8 @@ public class WebAppContext extends Context
     private boolean _logUrlOnStart =false;
     private boolean _parentLoaderPriority= Boolean.getBoolean("org.mortbay.jetty.webapp.parentLoaderPriority");
     private PermissionCollection _permissions;
-    private String[] _systemClasses =
-    {
-        "java.",                            // Java SE classes (per servlet spec v2.5 / SRV.9.7.2) 
-        "javax.",                           // Java SE classes (per servlet spec v2.5 / SRV.9.7.2)
-        "org.xml.",                         // needed by javax.xml
-        "org.w3c.",                         // needed by javax.xml
-        "org.apache.commons.logging.",      // special case 
-        "org.apache.log4j.",                // special case
-        "org.mortbay.cometd.continuation.",   // cannot change
-        "org.mortbay.jetty.plus.annotation.", // cannot change
-        "org.mortbay.jetty.plus.jaas.",       // cannot change
-        "org.mortbay.jetty.plus.naming.",     // cannot change
-        "org.mortbay.jetty.servlet.DefaultServlet" // cannot change
-    };
-    private String[] _serverClasses = 
-    {
-        "-org.mortbay.cometd.continuation.",    // don't hide
-        "-org.mortbay.jetty.plus.annotation.", // don't hide
-        "-org.mortbay.jetty.plus.jaas.",       // don't hide 
-        "-org.mortbay.jetty.plus.naming.",     // don't hide
-        "-org.mortbay.jetty.servlet.DefaultServlet", // don't hide
-        "org.slf4j.",                          // special case
-        "org.mortbay."                         // hide jetty classes
-    };
+    private String[] _systemClasses = {"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c.", "org.apache.commons.logging.", "org.apache.log4j."};
+    private String[] _serverClasses = {"-org.mortbay.jetty.plus.jaas.", "org.mortbay.jetty.", "org.slf4j."}; // TODO hide all mortbay classes
     private File _tmpDir;
     private boolean _isExistingTmpDir;
     private String _war;
