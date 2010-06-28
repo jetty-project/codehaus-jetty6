@@ -60,6 +60,9 @@ public class JettyRunTask extends Task
     /** List of system properties to be set. */
     private SystemProperties systemProperties;
 
+    /** Port Jetty will use for the default connector */
+    private int jettyPort = 8080;
+
     /**
      * Creates a new <code>WebApp</code> Ant object.
      *
@@ -168,6 +171,16 @@ public class JettyRunTask extends Task
     }
 
     /**
+     * Sets the port Jetty uses for the default connector.
+     * 
+     * @param jettyPort The port Jetty will use for the default connector
+     */
+    public void setJettyPort(final int jettyPort)
+    {
+        this.jettyPort = jettyPort;
+    }
+
+    /**
      * Executes this Ant task. The build flow is being stopped until Jetty
      * server stops.
      *
@@ -180,8 +193,17 @@ public class JettyRunTask extends Task
         WebApplicationProxyImpl.setBaseTempDirectory(tempDirectory);
         setSystemProperties();
 
-        List connectorsList = (connectors != null ? connectors.getConnectors()
-                : Connectors.DEFAULT_CONNECTORS);
+        List connectorsList = null;
+        
+        if (connectors != null)
+        {
+            connectorsList = connectors.getConnectors();
+        }
+        else
+        {
+            connectorsList = new Connectors(jettyPort, 30000).getDefaultConnectors();
+        }
+
         List loginServicesList = (loginServices != null ? loginServices.getLoginServices() : new ArrayList());
         ServerProxy server = new ServerProxyImpl(connectorsList, loginServicesList, requestLog,
                 jettyXml);

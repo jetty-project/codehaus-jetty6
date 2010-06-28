@@ -27,26 +27,60 @@ import org.eclipse.jetty.server.nio.SelectChannelConnector;
  */
 public class Connectors
 {
+    private List connectors = new ArrayList();
+    private List defaultConnectors = new ArrayList();
 
-    public static final List DEFAULT_CONNECTORS = new ArrayList();
-
-    static
-    {
-        org.eclipse.jetty.server.Connector defaultConnector = new SelectChannelConnector();
-        defaultConnector.setPort(8080);
-        defaultConnector.setMaxIdleTime(30000);
-        DEFAULT_CONNECTORS.add(defaultConnector);
+    /**
+     * Default constructor.
+     */
+    public Connectors() {
+        this(8080, 30000);
     }
 
-    private List connectors = new ArrayList();
+    /**
+     * Constructor.
+     * 
+     * @param port The port that the default connector will listen on
+     * @param maxIdleTime The maximum idle time for the default connector
+     */
+    public Connectors(int port, int maxIdleTime) {
+        /** Create/configure the default connectors */
+        org.eclipse.jetty.server.Connector defaultConnector = new SelectChannelConnector();
 
+        defaultConnector.setPort(port);
+        defaultConnector.setMaxIdleTime(maxIdleTime);
+
+        defaultConnectors.add(defaultConnector);
+    }
+
+    /**
+     * Adds a connector to the list of connectors to deploy.
+     * 
+     * @param connector A connector to add to the list
+     */
     public void add(Connector connector)
     {
         connectors.add(connector);
     }
 
+    /**
+     * Returns the list of known connectors to deploy.
+     * 
+     * @return The list of known connectors
+     */
     public List getConnectors()
     {
         return connectors;
+    }
+
+    /**
+     * Gets the default list of connectors to deploy when no connectors
+     * were explicitly added to the list.
+     * 
+     * @return The list of default connectors
+     */
+    public List getDefaultConnectors()
+    {
+        return defaultConnectors;
     }
 }
