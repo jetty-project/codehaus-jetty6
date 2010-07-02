@@ -208,6 +208,24 @@
                   <includes>**</includes>
                   <outputDirectory>${assembly-directory}/lib/jsp</outputDirectory>
                 </artifactItem>
+                <artifactItem>
+                  <groupId>javax.servlet.jsp.jstl</groupId>
+                  <artifactId>jstl-api</artifactId>
+                  <version>1.2</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly-directory}/lib/jsp</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.glassfish.web</groupId>
+                  <artifactId>jstl-impl</artifactId>
+                  <version>1.2</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <includes>**</includes>
+                  <outputDirectory>${assembly-directory}/lib/jsp</outputDirectory>
+                </artifactItem>
                <artifactItem>
                   <groupId>javax.mail</groupId>
                   <artifactId>mail</artifactId>
