@@ -22,6 +22,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -286,7 +287,7 @@ public class Runner
 
                             ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
                             securityHandler.setLoginService(loginService);
-                            securityHandler.setConstraintMappings(new ConstraintMapping[]{cm});
+                            securityHandler.setConstraintMappings(Collections.singletonList(cm));
                             securityHandler.setAuthenticator(new BasicAuthenticator());
                             statsContext.setSecurityHandler(securityHandler);
                         }
