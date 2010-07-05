@@ -76,7 +76,8 @@ public class JettyDeployer extends AbstractWebDeployer
 
     public void performDeploy(WebApplication webApp, String warUrl, WebDescriptorParser parser) throws DeploymentException
     {
-    	if (log.isDebugEnabled()) log.debug("deploying webapp at "+warUrl);        
+        warUrl = warUrl.replace(" ", "%20");
+        if (log.isDebugEnabled()) log.debug("deploying webapp at "+warUrl);        
         try
         {
             String contextPath = webApp.getMetaData().getContextRoot();
@@ -186,6 +187,7 @@ public class JettyDeployer extends AbstractWebDeployer
      */
     public void performUndeploy(String warUrl, WebApplication wa) throws DeploymentException
     {
+        warUrl = warUrl.replace(" ", "%20");
         JBossWebAppContext app = (JBossWebAppContext) _deployed.get(warUrl);
 
         if (app == null)
