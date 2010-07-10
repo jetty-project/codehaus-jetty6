@@ -1,10 +1,13 @@
 jetty@codehaus 8.0.0.M1-SNAPSHOT
- + Updated to jetty core 7.0.2.v20100331
  + Updated to jetty core 8.0.0.M1
  + Add jetty-util.jar to test-annotation-webapp
  + Add ContainerInitializerConfiguration to jetty.xml
+
+jetty@codehaus 7.1.5.v20100705 
  + JETTY-1236 connectors added with jettyConfig ignored by maven plugin
  + 318561 Unable to resolve JSTL libraries when using jetty-maven-plugin
+ + JETTY-1241 enhance jetty-ant port support
+ + 318894 Spaces in jboss URLs
 
 jetty@codehaus 7.1.4.v20100610 10 June 2010
  + update to jetty-7.1.4.v20100609
