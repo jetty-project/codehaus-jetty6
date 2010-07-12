@@ -126,6 +126,8 @@
     <!-- module>jetty-jboss</module -->
   </modules>
 
+<!-- Uncomment repositories to build -->
+<!--
   <repositories>
     <repository>
       <id>download.java.net</id>
@@ -152,4 +154,5 @@
       </releases>
    </repository>
   </repositories>
+-->
 </project>
