@@ -2,6 +2,8 @@ jetty@codehaus 8.0.0.M1-SNAPSHOT
  + Updated to jetty core 8.0.0.M1
  + Add jetty-util.jar to test-annotation-webapp
  + Add ContainerInitializerConfiguration to jetty.xml
+ + Update to derby 10.6.1.0
+ + Simplify test-jndi-webapp
 
 jetty@codehaus 7.1.5.v20100705 
  + JETTY-1236 connectors added with jettyConfig ignored by maven plugin
