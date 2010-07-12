@@ -19,11 +19,11 @@ package org.jboss.jetty;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.webapp.WebAppClassLoader;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.jboss.jetty.security.JBossLoginService;
 import org.jboss.logging.Logger;
 import org.jboss.web.WebApplication;
 import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
-import org.mortbay.j2ee.J2EEWebAppContext;
 import org.mortbay.jetty.servlet.jsr77.Jsr77ServletHandler;
 
 
@@ -34,7 +34,7 @@ import org.mortbay.jetty.servlet.jsr77.Jsr77ServletHandler;
  * Customize the jetty WebAppContext to jboss environment.
  *
  */
-public class JBossWebAppContext extends J2EEWebAppContext
+public class JBossWebAppContext extends WebAppContext
 {
     protected static Logger __log=Logger.getLogger(JBossWebAppContext.class);
 
