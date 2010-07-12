@@ -1,4 +1,4 @@
-jetty@codehaus 8.0.0.M1-SNAPSHOT
+jetty@codehaus 8.0.0.M1 12 July 2010
  + Updated to jetty core 8.0.0.M1
  + Add jetty-util.jar to test-annotation-webapp
  + Add ContainerInitializerConfiguration to jetty.xml
