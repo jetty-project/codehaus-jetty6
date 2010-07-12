@@ -40,25 +40,7 @@
     </injection-target>
   </resource-ref>
 
-  <resource-ref>
-    <res-ref-name>jdbc/mydatasource2</res-ref-name>
-    <res-type>javax.sql.DataSource</res-type>
-    <res-auth>Container</res-auth>
-    <injection-target>
-      <injection-target-class>com.acme.JNDITest</injection-target-class>
-      <injection-target-name>myDatasource2</injection-target-name>
-    </injection-target>
-  </resource-ref>
 
-  <resource-ref>
-    <res-ref-name>jdbc/mydatasource99</res-ref-name>
-    <res-type>javax.sql.DataSource</res-type>
-    <res-auth>Container</res-auth>
-    <injection-target>
-      <injection-target-class>com.acme.JNDITest</injection-target-class>
-      <injection-target-name>myDatasource99</injection-target-name>
-    </injection-target>
-  </resource-ref>
 
   <resource-ref>
     <res-ref-name>mail/Session</res-ref-name>
