@@ -371,6 +371,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 // Make any key changes required
                 for (int i = 0; i < changes.size(); i++)
                 {
+                    SocketChannel channel=null;
                     try
                     {
                         Object o = changes.get(i);
@@ -388,11 +389,11 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         else if (o instanceof ChangeSelectableChannel)
                         {
                             // finish accepting/connecting this connection
-                            final ChangeSelectableChannel asc = (ChangeSelectableChannel)o;
-                            final SelectableChannel channel=asc._channel;
-                            final Object att = asc._attachment;
+                            ChangeSelectableChannel asc = (ChangeSelectableChannel)o;
+                            channel=(SocketChannel)asc._channel;
+                            Object att = asc._attachment;
 
-                            if ((channel instanceof SocketChannel) && ((SocketChannel)channel).isConnected())
+                            if (channel.isConnected())
                             {
                                 key = channel.register(selector,SelectionKey.OP_READ,att);
                                 SelectChannelEndPoint endpoint = newEndPoint((SocketChannel)channel,this,key);
@@ -406,7 +407,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         }
                         else if (o instanceof SocketChannel)
                         {
-                            final SocketChannel channel=(SocketChannel)o;
+                            channel=(SocketChannel)o;
 
                             if (channel.isConnected())
                             {
@@ -422,8 +423,8 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         }
                         else if (o instanceof ServerSocketChannel)
                         {
-                            ServerSocketChannel channel = (ServerSocketChannel)o;
-                            channel.register(getSelector(),SelectionKey.OP_ACCEPT);
+                            ServerSocketChannel ssc = (ServerSocketChannel)o;
+                            ssc.register(getSelector(),SelectionKey.OP_ACCEPT);
                         }
                         else if (o instanceof ChangeTask)
                         {
@@ -438,6 +439,18 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             Log.warn(e);
                         else
                             Log.debug(e);
+                        
+                        if (channel!=null)
+                        {
+                            try
+                            {
+                                channel.close();
+                            }
+                            catch(Exception e2)
+                            {
+                                Log.ignore(e2);
+                            }
+                        }
                     }
                 }
                 changes.clear();

@@ -367,6 +367,10 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                                     _key.cancel();
                                 }
                                 cancelIdle();
+                                if (_channel.isOpen())
+                                {
+                                    try{_channel.close();} catch(Exception e2){Log.ignore(e2);}
+                                }
                                 _manager.endPointClosed(this);
                                 _key = null;
                             }
@@ -379,7 +383,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                 }
                 else
                 {
-                    if (_key!=null && _key.isValid())
+                    if (_key!=null &&_key.isValid())
                         _key.interestOps(0);
                     else
                         _key=null;
