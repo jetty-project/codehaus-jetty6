@@ -46,11 +46,12 @@ public class JettyDeployer extends AbstractWebDeployer
     private static String[] __dftConfigurationClasses =  
     { 
         "org.eclipse.jetty.webapp.WebInfConfiguration", 
-        "org.jboss.jetty.JBossWebXmlConfiguration", 
+        "org.eclipse.jetty.webapp.WebXmlConfiguration",
         "org.eclipse.jetty.webapp.MetaInfConfiguration",
         "org.eclipse.jetty.webapp.FragmentConfiguration",
+        "org.jboss.jetty.JBossWebXmlConfiguration", 
         "org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
-        "org.eclipse.jetty.webapp.TagLibConfiguration" 
+        "org.eclipse.jetty.annotations.ContainerInitializerConfiguration" 
     } ;
     /**
      * use Hashtable because is is synchronised
