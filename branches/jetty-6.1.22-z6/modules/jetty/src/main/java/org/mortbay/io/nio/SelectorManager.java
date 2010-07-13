@@ -16,6 +16,7 @@ package org.mortbay.io.nio;
 
 import java.io.IOException;
 import java.nio.channels.CancelledKeyException;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -578,8 +579,16 @@ public abstract class SelectorManager extends AbstractLifeCycle
                                     else
                                         addChange(channel,attachment);
                                 }
-                                _selector.close();
+                                Selector old_selector=_selector;
                                 _selector=new_selector;
+                                try 
+                                {
+                                    old_selector.close();
+                                }
+                                catch(Exception e)
+                                {
+                                    Log.warn(e);
+                                }
                                 return;
                             }
                         }
@@ -766,6 +775,10 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 _idleTimeout.tick(now);
                 _retryTimeout.tick(now);
                 
+            }
+            catch (ClosedSelectorException e)
+            {
+                Log.warn(e);
             }
             catch (CancelledKeyException e)
             {
