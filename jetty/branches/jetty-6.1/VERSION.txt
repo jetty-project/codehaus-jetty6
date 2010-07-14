@@ -5,6 +5,7 @@ Jetty-6-SNAPSHOT
  + JETTY-1223 DefaultServlet: NPE when setting relativeResourceBase and resourceBase is not set
  + JETTY-1226 javax.activation needs to be listed in the system classes
  + JETTY-1237 Remember local/remote details of endpoint
+ + JETTY-1251 protected against closed selector
  + COMETD-112 if two threads create the same channel, then create events may occur after subscribe events
 
 jetty-6.1.24 21 April 2010
