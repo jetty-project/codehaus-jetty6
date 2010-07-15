@@ -1,3 +1,5 @@
+jetty@codehaus 7.1.6.v20100715
+
 jetty@codehaus 7.1.5.v20100705 
  + JETTY-1236 connectors added with jettyConfig ignored by maven plugin
  + JETTY-1241 enhance jetty-ant port support
