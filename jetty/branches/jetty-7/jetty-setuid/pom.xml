@@ -123,7 +123,7 @@
          </profile>
 
         <profile>
-            <id>env-windows</id>
+            <id>env-windows-9x</id>
             <activation>
               <os>
                  <family>win9x</family>
