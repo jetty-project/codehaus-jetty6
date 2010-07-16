@@ -491,6 +491,7 @@ public class SpnegoUserRealm implements UserRealm
         Log.debug(" - ldapUrl = " + _ldapUrl);
         Log.debug(" - ldapLoginName = " + _ldapLoginName);
         Log.debug(" - ldapLoginPassword = " + _ldapLoginPassword);
+        Log.debug(" - ldapSearchBase = " + _ldapSearchBase);
         Log.debug(" - ldapContextFactory = " + _ldapContextFactory);
     }
 }
