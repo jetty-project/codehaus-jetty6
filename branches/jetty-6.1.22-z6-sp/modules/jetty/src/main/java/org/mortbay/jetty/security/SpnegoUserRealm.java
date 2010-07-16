@@ -1,4 +1,5 @@
 package org.mortbay.jetty.security;
+
 //========================================================================
 //Copyright 1998-2010 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
@@ -44,7 +45,6 @@ import org.mortbay.jetty.Request;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 
-
 /*
  * Implementation of a jetty user realm for spnego support. 
  *	
@@ -65,11 +65,12 @@ public class SpnegoUserRealm implements UserRealm
     private String _ldapLoginName;
     private String _ldapLoginPassword;
     private String _ldapSearchBase;
-    private String _ldapContextFactory; 
+    private String _ldapContextFactory;
 
     private Base64 base64 = new Base64();
-    //private BASE64Decoder base64Decoder = new BASE64Decoder();
-    //private BASE64Encoder base64Encoder = new BASE64Encoder();
+
+    // private BASE64Decoder base64Decoder = new BASE64Decoder();
+    // private BASE64Encoder base64Encoder = new BASE64Encoder();
 
     public SpnegoUserRealm()
     {
@@ -79,7 +80,7 @@ public class SpnegoUserRealm implements UserRealm
     public SpnegoUserRealm(String name, String config) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException
     {
         super();
-        
+
         setName(name);
         setConfig(config);
 
@@ -116,41 +117,41 @@ public class SpnegoUserRealm implements UserRealm
         Properties properties = new Properties();
 
         properties.load(getConfigResource().getInputStream());
-        
+
         _targetName = properties.getProperty("targetName");
-        
+
         String populate = properties.getProperty("populateRoleData");
-        if ( populate != null )
+        if (populate != null)
         {
             _populateRoleData = populate.equalsIgnoreCase("true");
         }
-        
+
         _ldapUrl = properties.getProperty("ldapUrl");
         _ldapLoginName = properties.getProperty("ldapLoginName");
         _ldapLoginPassword = properties.getProperty("ldapLoginPassword");
         _ldapContextFactory = properties.getProperty("ldapContextFactory");
         _ldapSearchBase = properties.getProperty("ldapSearchBase");
-        
+
         // we need a default for the ldap context factory
-        if (_ldapContextFactory == null )
+        if (_ldapContextFactory == null)
         {
             _ldapContextFactory = "com.sun.jndi.ldap.LdapCtxFactory";
         }
-        
+
         dumpConfig(); // display configuration if debug enabled
     }
 
     public Principal authenticate(String username, Object credentials, Request request)
     {
         try
-        {     
-            //byte[] token = base64Decoder.decodeBuffer(username);
-        	byte[] token = base64.decode(username);
-        	
+        {
+            // byte[] token = base64Decoder.decodeBuffer(username);
+            byte[] token = base64.decode(username);
+
             GSSManager manager = GSSManager.getInstance();
-            
+
             Oid krb5Oid = new Oid("1.3.6.1.5.5.2"); // http://java.sun.com/javase/6/docs/technotes/guides/security/jgss/jgss-features.html
-            GSSName gssName = manager.createName(_targetName, null);// GSSName.NT_USER_NAME);
+            GSSName gssName = manager.createName(_targetName,null);// GSSName.NT_USER_NAME);
             GSSCredential serverCreds = manager.createCredential(gssName,GSSCredential.INDEFINITE_LIFETIME,krb5Oid,GSSCredential.ACCEPT_ONLY);
             GSSContext gContext = manager.createContext(serverCreds);
 
@@ -172,10 +173,10 @@ public class SpnegoUserRealm implements UserRealm
 
                     GSSName srcName = gContext.getSrcName();
                     String encodedToken = base64.encodeToString(token);
-                    
+
                     SpnegoUser user = new SpnegoUser(srcName.toString(),encodedToken);
-                    
-                    if ( _populateRoleData )
+
+                    if (_populateRoleData)
                     {
                         try
                         {
@@ -187,7 +188,7 @@ public class SpnegoUserRealm implements UserRealm
                             e.printStackTrace();
                         }
                     }
-                   
+
                     return user;
                 }
                 else
@@ -249,10 +250,10 @@ public class SpnegoUserRealm implements UserRealm
             }
             _roles.add(role);
         }
-        
+
         public List getRoles()
         {
-            if ( _roles != null )
+            if (_roles != null)
             {
                 return _roles;
             }
@@ -261,9 +262,8 @@ public class SpnegoUserRealm implements UserRealm
                 return Collections.EMPTY_LIST;
             }
         }
-        
+
     }
-    
 
     @Override
     public String getName()
@@ -286,122 +286,136 @@ public class SpnegoUserRealm implements UserRealm
     @Override
     public boolean isUserInRole(Principal user, String role)
     {
-        if ( user instanceof SpnegoUser )
+        if (user instanceof SpnegoUser)
         {
             List roles = ((SpnegoUser)user).getRoles();
-            
-            for ( Iterator i = roles.iterator();i.hasNext();)
+
+            for (Iterator i = roles.iterator(); i.hasNext();)
             {
                 if (role.equals((String)i.next()))
                 {
-                   return true; 
+                    return true;
                 }
             }
         }
-        
+
         return false;
     }
 
-	@Override
-	public void disassociate(Principal user) {
+    @Override
+    public void disassociate(Principal user)
+    {
 
-	}
+    }
 
-	@Override
-	public Principal pushRole(Principal user, String role) {
-		if (user instanceof SpnegoUser) {
-			((SpnegoUser) user).addRole(role);
-		}
-		return user;
-	}
+    @Override
+    public Principal pushRole(Principal user, String role)
+    {
+        if (user instanceof SpnegoUser)
+        {
+            ((SpnegoUser)user).addRole(role);
+        }
+        return user;
+    }
 
-	@Override
-	public Principal popRole(Principal user) {
-		return null;
-	}
+    @Override
+    public Principal popRole(Principal user)
+    {
+        return null;
+    }
 
-	@Override
-	public void logout(Principal user) {
+    @Override
+    public void logout(Principal user)
+    {
 
-	}
+    }
 
-	public void populateRoleData(Principal user) throws Exception {
-		String at = "@";
-		DirContext ctx = null;
-		int indexOfAt = user.getName().toString().indexOf(at);
-		String userName = user.getName().toString().substring(0, indexOfAt);
-		SearchControls searchCtls = new SearchControls();
-		String returnedAtts[] = { "primaryGroupID", "memberOf", "objectSid;binary" };
-		String searchFilter = "(&(objectClass=user)(cn=" + userName + "))";
-		String groupSearchFilter = null;
-		int totalResults = 0;
-		try {
-			ctx = getConnection();
-			if (ctx == null) {
-				Log.info("SpnegoUserRealm: Failed to get a directory context object");
-				throw new Exception(
-						"SpnegoUserRealm: Failed to get a directory context object");
-			}
-			searchCtls.setReturningAttributes(returnedAtts);
-			searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-			// Search for objects using the filter
-			NamingEnumeration<SearchResult> answer = ctx.search(_ldapSearchBase,
-					searchFilter, searchCtls);
-			// Loop through the search results
-			while (answer.hasMoreElements()) {
-				SearchResult sr = answer.next();
-				totalResults++;
-				Attributes attrs = sr.getAttributes();
-				if (attrs != null) {
-					try {
-						byte[] userSid = (byte[]) attrs.get("objectSid;binary")
-								.get();
-						Integer primaryGroupId = new Integer((String) attrs
-								.get("primaryGroupID").get());
-						byte[] groupRid = integerToFourBytes(primaryGroupId);
-						byte[] groupSid = userSid.clone();
-						// Replace the last four bytes to construct
-						// groupSid
-						for (int i = 0; i < 4; ++i) {
-							groupSid[groupSid.length - 1 - i] = groupRid[i];
-						}
-						groupSearchFilter = "(&(objectSid="
-								+ binaryToStringSID(groupSid) + "))";
-						Attribute answer1 = attrs.get("memberOf");
-						for (int i = 0; i < answer1.size(); i++) {
-							String str = answer1.get(i).toString();
-							String str1[] = str.split("CN=");
-							pushRole(user,
-									str1[1].substring(0, str1[1].indexOf(",")));
-						}
-					} catch (NullPointerException e) {
-						throw new Exception(
-								"SpnegoUserRealm: Errors listing attributes: "
-										+ e);
-					}
-				}
-			}
-			// Search for objects using the group search filter
-			NamingEnumeration<SearchResult> answer2 = ctx.search(_ldapSearchBase,
-					groupSearchFilter, searchCtls);
-			// Loop through the search results
-			while (answer2.hasMoreElements()) {
-				SearchResult sr = answer2.next();
-				String str1[] = sr.getName().split("CN=");
-				pushRole(user, str1[1].substring(0, str1[1].indexOf(",")));
-			}
+    public void populateRoleData(Principal user) throws Exception
+    {
+        String at = "@";
+        DirContext ctx = null;
+        int indexOfAt = user.getName().toString().indexOf(at);
+        String userName = user.getName().toString().substring(0,indexOfAt);
+        SearchControls searchCtls = new SearchControls();
+        String returnedAtts[] =
+        { "primaryGroupID", "memberOf", "objectSid;binary" };
+        String searchFilter = "(&(objectClass=user)(cn=" + userName + "))";
+        String groupSearchFilter = null;
+        int totalResults = 0;
+        try
+        {
+            ctx = getConnection();
+            if (ctx == null)
+            {
+                Log.info("SpnegoUserRealm: Failed to get a directory context object");
+                throw new Exception("SpnegoUserRealm: Failed to get a directory context object");
+            }
+            searchCtls.setReturningAttributes(returnedAtts);
+            searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+            // Search for objects using the filter
+            NamingEnumeration<SearchResult> answer = ctx.search(_ldapSearchBase,searchFilter,searchCtls);
+            // Loop through the search results
+            while (answer.hasMoreElements())
+            {
+                SearchResult sr = answer.next();
+                totalResults++;
+                Attributes attrs = sr.getAttributes();
+                if (attrs != null)
+                {
+                    try
+                    {
+                        byte[] userSid = (byte[])attrs.get("objectSid;binary").get();
+                        Integer primaryGroupId = new Integer((String)attrs.get("primaryGroupID").get());
+                        byte[] groupRid = integerToFourBytes(primaryGroupId);
+                        byte[] groupSid = userSid.clone();
+                        // Replace the last four bytes to construct
+                        // groupSid
+                        for (int i = 0; i < 4; ++i)
+                        {
+                            groupSid[groupSid.length - 1 - i] = groupRid[i];
+                        }
+                        groupSearchFilter = "(&(objectSid=" + binaryToStringSID(groupSid) + "))";
+                        Attribute answer1 = attrs.get("memberOf");
+                        for (int i = 0; i < answer1.size(); i++)
+                        {
+                            String str = answer1.get(i).toString();
+                            String str1[] = str.split("CN=");
+                            pushRole(user,str1[1].substring(0,str1[1].indexOf(",")));
+                        }
+                    }
+                    catch (NullPointerException e)
+                    {
+                        throw new Exception("SpnegoUserRealm: Errors listing attributes: " + e);
+                    }
+                }
+            }
+            // Search for objects using the group search filter
+            NamingEnumeration<SearchResult> answer2 = ctx.search(_ldapSearchBase,groupSearchFilter,searchCtls);
+            // Loop through the search results
+            while (answer2.hasMoreElements())
+            {
+                SearchResult sr = answer2.next();
+                String str1[] = sr.getName().split("CN=");
+                pushRole(user,str1[1].substring(0,str1[1].indexOf(",")));
+            }
 
-		} finally {
-			if (ctx != null) {
-				try {
-					ctx.close();
-				} catch (Exception e) {
-				}
-			}
-		}
+        }
+        finally
+        {
+            if (ctx != null)
+            {
+                try
+                {
+                    ctx.close();
+                }
+                catch (Exception e)
+                {
+                }
+            }
+        }
 
-	}
- 
+    }
+
     /*
      * Establishes a connection with the Ldap server
      */
@@ -468,16 +482,15 @@ public class SpnegoUserRealm implements UserRealm
         b[3] = (byte)((i & 0x000000ff));
         return b;
     }
-    
-    
+
     private void dumpConfig()
     {
         Log.debug("SpnegoUserRealm");
         Log.debug(" - targetName = " + _targetName);
         Log.debug(" - populateRoleData = " + _populateRoleData);
-        Log.debug(" - ldapUrl = " + _ldapUrl );
-        Log.debug(" - ldapLoginName = " + _ldapLoginName );
-        Log.debug(" - ldapLoginPassword = " + _ldapLoginPassword );
-        Log.debug(" - ldapContextFactory = " + _ldapContextFactory );
+        Log.debug(" - ldapUrl = " + _ldapUrl);
+        Log.debug(" - ldapLoginName = " + _ldapLoginName);
+        Log.debug(" - ldapLoginPassword = " + _ldapLoginPassword);
+        Log.debug(" - ldapContextFactory = " + _ldapContextFactory);
     }
 }
