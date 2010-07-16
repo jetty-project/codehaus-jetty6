@@ -183,10 +183,8 @@ public class SpnegoUserRealm implements UserRealm
                             e.printStackTrace();
                         }
                     }
-                    else
-                    {
-                        return user;
-                    }
+                   
+                    return user;
                 }
                 else
                 {
