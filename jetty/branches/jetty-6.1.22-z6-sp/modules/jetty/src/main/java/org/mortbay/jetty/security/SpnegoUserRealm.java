@@ -48,6 +48,8 @@ import sun.misc.BASE64Encoder;
 
 /*
  * Implementation of a jetty user realm for spnego support. 
+ *	
+ * See the README.spengo file in the etc directory for information on configuring spnego
  *
  * Based on some of the work for supporting spnego in Apache Geronimo by Ashish Jain
  */
