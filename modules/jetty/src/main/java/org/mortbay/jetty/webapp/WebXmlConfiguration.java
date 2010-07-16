@@ -34,6 +34,7 @@ import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.DigestAuthenticator;
 import org.mortbay.jetty.security.FormAuthenticator;
+import org.mortbay.jetty.security.SpnegoAuthenticator;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
@@ -875,6 +876,8 @@ public class WebXmlConfiguration implements Configuration
                 authenticator=new ClientCertAuthenticator();
             else if(Constraint.__CERT_AUTH2.equals(m))
                 authenticator=new ClientCertAuthenticator();
+            else if(Constraint.__SPNEGO_AUTH.equals(m))
+                authenticator=new SpnegoAuthenticator();
             else
                 Log.warn("UNKNOWN AUTH METHOD: "+m);
             getWebAppContext().getSecurityHandler().setAuthenticator(authenticator);
