@@ -1,3 +1,5 @@
+This setup will enable you to authenticate a user via spnego into your 
+webapp.
 
 For Spnego authentication you should run with the latest java 6.
 
@@ -54,3 +56,20 @@ Important Configuration Files:
 spengo.properties - configures the user realm with runtime properties
 krb5.ini - configures the underlying kerberos setup
 spnego.conf - configures the glue between gssapi and kerberos
+
+It is important to note that the keytab file referenced in the krb5.ini and the spengo.conf files needs to
+contain the keytab for the targetName for the http server.  To do this use a process similar to this:
+
+On the windows active domain controller run:
+
+> setspn -A HTTP/linux.mortbay.org ADUser
+
+To create the keytab file use the following process:
+
+> ktpass -out c:\dir\krb5.keytab -princ HTTP/linux.mortbay.org@MORTBAY.ORG -mapUser ADUser -mapOp set -pass ADUserPWD -crypto RC4-HMAC-NT -pType KRB5_NT_PRINCIPAL
+
+This step should give you the keytab file which should then be copied over to the machine running this 
+http server and referenced from the configuration files.  For our testing we put the keytab into the etc
+directory of jetty and referenced it from there.
+
+I 
