@@ -15,9 +15,12 @@
 
 package org.jboss.jetty;
 
+import org.eclipse.jetty.security.SecurityHandler;
+import org.eclipse.jetty.webapp.Configuration;
+import org.eclipse.jetty.webapp.Descriptor;
+import org.eclipse.jetty.webapp.IterativeDescriptorProcessor;
+import org.eclipse.jetty.webapp.MetaData;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.webapp.WebXmlConfiguration;
-import org.eclipse.jetty.webapp.WebXmlProcessor;
 import org.eclipse.jetty.xml.XmlParser;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.WebMetaData;
@@ -28,23 +31,51 @@ import org.jboss.metadata.WebMetaData;
  * Extends the jetty WebXmlConfiguration to provide jboss
  * handling of various elements in the web.xml
  */
-public class JBossWebXmlConfiguration extends WebXmlConfiguration
+public class JBossWebXmlConfiguration implements Configuration
 {
     protected static Logger __log=Logger.getLogger(JBossWebAppContext.class); 
-
+    protected WebAppContext _context;
+    protected MetaData _metaData;
+    protected SecurityHandler _securityHandler;
   
-    public class JBossWebXmlProcessor extends WebXmlProcessor
+    public class JBossWebXmlProcessor extends IterativeDescriptorProcessor
     {
 
-        public JBossWebXmlProcessor(WebAppContext context) throws ClassNotFoundException
+        public JBossWebXmlProcessor() throws ClassNotFoundException
         {
-            super(context);
+            try
+            {
+                registerVisitor("login-config",getClass().getDeclaredMethod("visitLoginConfig", __signature));
+            }
+            catch (Exception e)   
+            {
+                throw new IllegalStateException(e);
+            }
+
         }
         
-        protected void initLoginConfig(XmlParser.Node node) throws Exception
+        /**
+         * @see org.eclipse.jetty.webapp.IterativeDescriptorProcessor#start(org.eclipse.jetty.webapp.Descriptor)
+         */
+        public void start(Descriptor descriptor)
         {
-            super.initLoginConfig(node);
-            
+            _metaData = descriptor.getMetaData();
+            _context = _metaData.getContext();
+            _securityHandler = (SecurityHandler)_context.getSecurityHandler();
+        }
+
+
+        /**
+         * @see org.eclipse.jetty.webapp.IterativeDescriptorProcessor#end(org.eclipse.jetty.webapp.Descriptor)
+         */
+        public void end(Descriptor descriptor)
+        {
+            _metaData = null;
+            _context = null;
+        }
+
+        protected void visitLoginConfig(Descriptor descriptor, XmlParser.Node node) throws Exception
+        {
             //use a security domain name from jboss-web.xml
             if (null==_securityHandler.getRealmName())
             {
@@ -67,25 +98,21 @@ public class JBossWebXmlConfiguration extends WebXmlConfiguration
     }
 
     public void configure(WebAppContext context) throws Exception
-    {
-        super.configure(context);
+    {     
     }
 
 
     public void deconfigure(WebAppContext context) throws Exception
     {
-        super.deconfigure(context);
     }
 
 
     public void postConfigure(WebAppContext context) throws Exception
     {
-        super.postConfigure(context);
     }
 
 
     public void preConfigure(WebAppContext context) throws Exception
     {
-        super.preConfigure(context);
     }
 }

@@ -550,10 +550,6 @@ public class TerracottaSessionManager extends AbstractSessionManager implements 
                     }
                 }
             }
-
-            int sessionCount = getSessions();
-            if (sessionCount < _minSessions) _minSessions = sessionCount;
-            if (sessionCount > _maxSessions) _maxSessions = sessionCount;
         }
         catch (Throwable x)
         {

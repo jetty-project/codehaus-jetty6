@@ -24,7 +24,7 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppClassLoader;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.webapp.WebXmlProcessor;
+
 
 /**
  * This configuration object provides additional way to inject application
@@ -96,17 +96,11 @@ public class JettyWebAppConfiguration extends WebXmlConfiguration
             TaskLog.log("Cannot configure webapp after it is started");
             return;
         }
-        WebXmlProcessor processor = (WebXmlProcessor)context.getAttribute(WebXmlProcessor.WEB_PROCESSOR); 
-        if (processor == null)
-        {
-            processor = new WebXmlProcessor (context);
-            context.setAttribute(WebXmlProcessor.WEB_PROCESSOR, processor);
-        }
+       
 
         if (webXmlFile.exists())
         {
-            processor.parseWebXml(Resource.newResource(webXmlFile.toURL()));
-            processor.processWebXml();
+            context.setDescriptor(webXmlFile.getCanonicalPath());
         }
 
         super.configure(context);

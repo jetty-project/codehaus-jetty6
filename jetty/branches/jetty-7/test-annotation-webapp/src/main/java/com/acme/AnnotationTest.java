@@ -79,6 +79,7 @@ public class AnnotationTest extends HttpServlet
     @Resource(mappedName="jdbc/mydatasource")
     public void setMyDatasource(DataSource ds)
     {
+System.err.println("Setter injected jdbc/mydatasource");
         myDS=ds;
     }
   
@@ -86,6 +87,7 @@ public class AnnotationTest extends HttpServlet
     @PostConstruct
     private void myPostConstructMethod ()
     {       
+System.err.println("Postconstruct callback");
         postConstructResult = "Called";
        try 
        {
@@ -209,6 +211,7 @@ public class AnnotationTest extends HttpServlet
             out.println("</pre>");
             out.println("<br/><b>Result: "+postConstructResult+"</b>");
            
+System.err.println("post construct result="+postConstructResult);
             
             out.println("<h2>@Resource Injection for DataSource</h2>");    
             out.println("<pre>");         
@@ -220,6 +223,8 @@ public class AnnotationTest extends HttpServlet
             out.println("</pre>");
             out.println("<br/><b>Result: "+dsResult+"</b>");
             out.println("<br/><b>JNDI Lookup Result: "+dsLookupResult+"</b>");
+
+System.err.println("dslookup result="+dsLookupResult);
 
             
             out.println("<h2>@Resource Injection for env-entry </h2>");
@@ -235,6 +240,9 @@ public class AnnotationTest extends HttpServlet
             out.println("<br/><b>JNDI Lookup Result: "+envLookupResult2+"</b>");
             out.println("<br/><b>Result: "+envResult3+": "+(avgAmount.compareTo(new Double("1.25"))==0?" PASS":" FAIL")+"</b>");     
             out.println("<br/><b>JNDI Lookup Result: "+envLookupResult3+"</b>");          
+
+System.err.println("jndi results="+envResult+", "+envResult2+","+envResult3);
+System.err.println("jndi lookup results="+envLookupResult+", "+envLookupResult2+","+envLookupResult3);
          
             out.println("<h2>@Resource Injection for UserTransaction </h2>");
             out.println("<pre>");
@@ -243,6 +251,8 @@ public class AnnotationTest extends HttpServlet
             out.println("</pre>");
             out.println("<br/><b>Result: "+txResult+"</b>");
             out.println("<br/><b>JNDI Lookup Result: "+txLookupResult+"</b>");
+
+System.err.println("txresult="+txResult+" lookup="+txLookupResult);
             
             out.println("<h2>Roles</h2>");
             out.println("<p>Login as user \"admin\" with password \"admin\" when prompted after clicking the button below to test @DeclareRoles annotation</p>");

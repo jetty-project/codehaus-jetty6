@@ -18,7 +18,6 @@ package org.mortbay.jetty.plugin;
 import java.io.File;
 import java.util.List;
 
-import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.plus.webapp.EnvConfiguration;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.Configuration;
@@ -28,6 +27,7 @@ import org.eclipse.jetty.webapp.MetaInfConfiguration;
 import org.eclipse.jetty.webapp.TagLibConfiguration;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
+import org.eclipse.jetty.annotations.AnnotationConfiguration;
 
 /**
  * JettyWebAppContext
@@ -47,8 +47,8 @@ public class JettyWebAppContext extends WebAppContext
     private MetaInfConfiguration metaInfConfig = new MetaInfConfiguration();
     private FragmentConfiguration fragConfig = new FragmentConfiguration();
     private EnvConfiguration envConfig =  new EnvConfiguration();
+    private AnnotationConfiguration annotationConfig = new AnnotationConfiguration();
     private org.eclipse.jetty.plus.webapp.Configuration plusConfig = new org.eclipse.jetty.plus.webapp.Configuration();
-    private AnnotationConfiguration annotationConfig = new MavenAnnotationConfiguration();
     private JettyWebXmlConfiguration jettyWebConfig =  new JettyWebXmlConfiguration();
     private TagLibConfiguration tagConfig = new TagLibConfiguration();
     private Configuration[] configs;
