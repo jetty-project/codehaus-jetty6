@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+
+
+<!-- =============================================================== -->
+<!-- Configure the test-annotations webapp                           -->
+<!-- =============================================================== -->
+
+<Configure id='wac' class="org.eclipse.jetty.webapp.WebAppContext">
+
+  <!-- =============================================================== -->
+  <!-- Configure the webapp                                            -->
+  <!-- =============================================================== -->
+  <Set name="contextPath">/test-annotations</Set>
+  <Set name="war"><SystemProperty name="jetty.home"/>/webapps/test-annotations</Set>
+  <Set name="configurationDiscovered">true</Set>
+
+  <Get name="securityHandler">
+    <Set name="loginService">
+      <New class="org.eclipse.jetty.security.HashLoginService">
+        <Set name="name">Test Realm</Set>
+        <Set name="config"><SystemProperty name="jetty.home" default="."/>/etc/realm.properties</Set>
+      </New>
+    </Set>
+  </Get>
+
