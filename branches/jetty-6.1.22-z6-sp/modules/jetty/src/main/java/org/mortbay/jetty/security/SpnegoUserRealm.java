@@ -33,6 +33,7 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 
+import org.apache.commons.codec.binary.Base64;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
@@ -43,8 +44,6 @@ import org.mortbay.jetty.Request;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 /*
  * Implementation of a jetty user realm for spnego support. 
@@ -68,8 +67,9 @@ public class SpnegoUserRealm implements UserRealm
     private String _searchBase;
     private String _ldapContextFactory; 
 
-    private BASE64Decoder base64Decoder = new BASE64Decoder();
-    private BASE64Encoder base64Encoder = new BASE64Encoder();
+    private Base64 base64 = new Base64();
+    //private BASE64Decoder base64Decoder = new BASE64Decoder();
+    //private BASE64Encoder base64Encoder = new BASE64Encoder();
 
     public SpnegoUserRealm()
     {
@@ -143,8 +143,9 @@ public class SpnegoUserRealm implements UserRealm
     {
         try
         {     
-            byte[] token = base64Decoder.decodeBuffer(username);
-
+            //byte[] token = base64Decoder.decodeBuffer(username);
+        	byte[] token = base64.decode(username);
+        	
             GSSManager manager = GSSManager.getInstance();
             
             Oid krb5Oid = new Oid("1.3.6.1.5.5.2"); // http://java.sun.com/javase/6/docs/technotes/guides/security/jgss/jgss-features.html
@@ -169,7 +170,7 @@ public class SpnegoUserRealm implements UserRealm
                     Log.debug("Server Principal is: " + gContext.getTargName());
 
                     GSSName srcName = gContext.getSrcName();
-                    String encodedToken = base64Encoder.encode(token);
+                    String encodedToken = base64.encodeToString(token);
                     
                     SpnegoUser user = new SpnegoUser(srcName.toString(),encodedToken);
                     
@@ -195,10 +196,6 @@ public class SpnegoUserRealm implements UserRealm
             }
         }
         catch (GSSException e)
-        {
-            e.printStackTrace();
-        }
-        catch (IOException e)
         {
             e.printStackTrace();
         }
