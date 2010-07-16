@@ -64,7 +64,7 @@ public class SpnegoUserRealm implements UserRealm
     private String _ldapUrl;
     private String _ldapLoginName;
     private String _ldapLoginPassword;
-    private String _searchBase;
+    private String _ldapSearchBase;
     private String _ldapContextFactory; 
 
     private Base64 base64 = new Base64();
@@ -129,6 +129,7 @@ public class SpnegoUserRealm implements UserRealm
         _ldapLoginName = properties.getProperty("ldapLoginName");
         _ldapLoginPassword = properties.getProperty("ldapLoginPassword");
         _ldapContextFactory = properties.getProperty("ldapContextFactory");
+        _ldapSearchBase = properties.getProperty("ldapSearchBase");
         
         // we need a default for the ldap context factory
         if (_ldapContextFactory == null )
@@ -344,7 +345,7 @@ public class SpnegoUserRealm implements UserRealm
 			searchCtls.setReturningAttributes(returnedAtts);
 			searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 			// Search for objects using the filter
-			NamingEnumeration<SearchResult> answer = ctx.search(_searchBase,
+			NamingEnumeration<SearchResult> answer = ctx.search(_ldapSearchBase,
 					searchFilter, searchCtls);
 			// Loop through the search results
 			while (answer.hasMoreElements()) {
@@ -381,7 +382,7 @@ public class SpnegoUserRealm implements UserRealm
 				}
 			}
 			// Search for objects using the group search filter
-			NamingEnumeration<SearchResult> answer2 = ctx.search(_searchBase,
+			NamingEnumeration<SearchResult> answer2 = ctx.search(_ldapSearchBase,
 					groupSearchFilter, searchCtls);
 			// Loop through the search results
 			while (answer2.hasMoreElements()) {
