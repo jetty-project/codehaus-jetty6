@@ -1,0 +1,56 @@
+
+For Spnego authentication you should run with the latest java 6.
+
+To run with spengo enabled the following command line options are required:
+
+-Djava.security.krb5.conf=/path/to/jetty/etc/krb5.ini
+-Djava.security.auth.login.config=/path/to/jetty/etc/spnego.conf 
+-Djavax.security.auth.useSubjectCredsOnly=false
+
+
+For debugging the spengo authentication the following options are helpful:
+
+-DDEBUG=true 
+-Dsun.security.spnego.debug=all 
+
+
+Spengo Authentication is enabled in the webapp with the following login-config.
+
+  <login-config>
+    <auth-method>SPNEGO</auth-method>
+    <realm-name>Test Realm</realm-name>
+  </login-config>
+  
+A corresponding UserRealm needs to be created either programmatically if 
+embedded, via the jetty.xml or in a context file for the webapp.
+
+(in the jetty.xml)
+
+    <Set name="UserRealms">
+      <Array type="org.mortbay.jetty.security.UserRealm">
+        <Item>
+          <New class="org.mortbay.jetty.security.SpnegoUserRealm">
+            <Set name="name">Test Realm</Set>
+            <Set name="config"><SystemProperty name="jetty.home" default="."/>/etc/spnego.properties</Set>
+          </New>
+        </Item>
+      </Array>
+    </Set>
+
+
+(context file)
+  <Get name="securityHandler">
+    <Set name="userRealm">
+          <New id="spnego" class="org.mortbay.jetty.security.SpnegoUserRealm">
+            <Set name="name">Test Realm</Set>
+            <Set name="config"><SystemProperty name="jetty.home" default="."/>/etc/spnego.properties</Set>
+          </New>
+    </Set>
+  </Get>
+  
+  
+Important Configuration Files:
+
+spengo.properties - configures the user realm with runtime properties
+krb5.ini - configures the underlying kerberos setup
+spnego.conf - configures the glue between gssapi and kerberos
