@@ -46,6 +46,7 @@ public class JettyDeployer extends AbstractWebDeployer
     private static String[] __dftConfigurationClasses =  
     { 
         "org.eclipse.jetty.webapp.WebInfConfiguration", 
+        "org.eclipse.jetty.webapp.WebXmlConfiguration",
         "org.jboss.jetty.JBossWebXmlConfiguration", 
         "org.eclipse.jetty.webapp.MetaInfConfiguration",
         "org.eclipse.jetty.webapp.FragmentConfiguration",

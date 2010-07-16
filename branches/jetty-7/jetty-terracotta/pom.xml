@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty-integration-project</artifactId>
-        <version>7.1.0.RC1-SNAPSHOT</version>
+        <version>7.2.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -257,6 +257,14 @@
                 <exclusion>
                     <groupId>com.h2database</groupId>
                     <artifactId>h2</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty-util</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
