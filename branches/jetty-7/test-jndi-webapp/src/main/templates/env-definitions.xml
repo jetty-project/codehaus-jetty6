@@ -58,30 +58,6 @@
    </New>
 
 
-  
-
-  <New id="mydatasource2" class="org.eclipse.jetty.plus.jndi.Resource">
-    <Arg><Ref id='wac'/></Arg>
-    <Arg>jdbc/mydatasource2</Arg>
-    <Arg>
-       <New class="com.atomikos.jdbc.AtomikosDataSourceBean">
-         <Set name="xaDataSourceClassName">org.apache.derby.jdbc.EmbeddedXADataSource</Set>
-         <Set name="xaProperties">
-           <New class="java.util.Properties">
-             <Call name="setProperty">
-               <Arg>databaseName</Arg>
-               <Arg>testdb2</Arg>
-             </Call>
-             <Call name="setProperty">
-               <Arg>createDatabase</Arg>
-               <Arg>create</Arg>
-             </Call>
-           </New>
-         </Set>
-         <Set name="UniqueResourceName">mydatasource2</Set>
-      </New>
-    </Arg>
-   </New>
 
   <!-- JOTM
   <New id="jotm" class="org.objectweb.jotm.Jotm">
@@ -134,32 +110,8 @@
     </Arg>
    </New>
 
-  <New id="myxa2Resource" class="org.eclipse.jetty.plus.jndi.Resource">
-    <Arg><Ref id='wac'/></Arg>
-    <Arg>myxadatasource2</Arg>
-    <Arg>
-      <New id="myxadatasource2" class="org.enhydra.jdbc.standard.StandardXADataSource">
-        <Set name="DriverName">org.apache.derby.jdbc.EmbeddedDriver</Set>
-        <Set name="Url">jdbc:derby:myderbyDB2;create=true</Set>
-        <Set name="User"></Set>
-        <Set name="Password"></Set>
-        <Set name="transactionManager"><Ref id="tm"/></Set>
-      </New>
-    </Arg>
-  </New>
+  
 
-  <Ref id="myxa2Resource"><Get id="myxa2NameInScope" name="jndiNameInScope"/></Ref>
-
-  <New id="mydatasource2" class="org.eclipse.jetty.plus.jndi.Resource">
-    <Arg><Ref id='wac'/></Arg>
-    <Arg>jdbc/mydatasource2</Arg>
-    <Arg>
-       <New class="org.enhydra.jdbc.pool.StandardXAPoolDataSource">
-         <Arg><Ref id="myxadatasource2"/></Arg>
-         <Set name="DataSourceName"><Ref id="myxa2NameInScope"/></Set>
-       </New>
-    </Arg>
-   </New>
   END OF JOTM -->
 
 </Configure>
