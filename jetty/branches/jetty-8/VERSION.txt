@@ -1,3 +1,6 @@
+jetty@codehaus 8.0.0.M2-SNAPSHOT
+ + 320073 Reconsile configuration mechanism
+
 jetty@codehaus 8.0.0.M1 12 July 2010
  + Updated to jetty core 8.0.0.M1
  + Add jetty-util.jar to test-annotation-webapp

@@ -28,7 +28,7 @@ public class MavenAnnotationConfiguration extends AnnotationConfiguration
             Log.debug("Scanning classes ");
             //Look for directories on the classpath and process each one of those
             
-            MetaData metaData = (MetaData)context.getAttribute(MetaData.METADATA);
+            MetaData metaData = context.getMetaData();
             if (metaData == null)
                throw new IllegalStateException ("No metadata");
 
