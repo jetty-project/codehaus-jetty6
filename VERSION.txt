@@ -6,6 +6,7 @@ Jetty-6-SNAPSHOT
  + JETTY-1226 javax.activation needs to be listed in the system classes
  + JETTY-1237 Remember local/remote details of endpoint
  + JETTY-1251 protected against closed selector
+ + 320264 remove duplicate mime entry 
  + COMETD-112 if two threads create the same channel, then create events may occur after subscribe events
 
 jetty-6.1.24 21 April 2010
