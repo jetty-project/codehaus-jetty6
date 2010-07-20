@@ -8,6 +8,7 @@ Jetty-6-SNAPSHOT
  + JETTY-1251 protected against closed selector
  + 320264 remove duplicate mime entry 
  + COMETD-112 if two threads create the same channel, then create events may occur after subscribe events
+ + 320264 Removed duplicate mime.property entries
 
 jetty-6.1.24 21 April 2010
  + JETTY-903 Stop both caches
