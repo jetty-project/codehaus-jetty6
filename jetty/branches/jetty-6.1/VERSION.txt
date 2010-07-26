@@ -1,4 +1,4 @@
-Jetty-6.1.25 22 July 2010
+Jetty-6.1.25 26 July 2010
  + Jetty-6 is now in maintenance mode.
  + JETTY-1212 Long content lengths
  + JETTY-1214 Avoid ISE when scavenging invalid session
