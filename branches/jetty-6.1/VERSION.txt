@@ -1,3 +1,6 @@
+
+Jetty-6.1-SNAPSHOT
+
 Jetty-6.1.25 26 July 2010
  + Jetty-6 is now in maintenance mode.
  + JETTY-1212 Long content lengths
