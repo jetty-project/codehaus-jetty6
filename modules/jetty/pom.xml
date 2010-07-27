@@ -29,12 +29,6 @@
                   <artifactId>servlet-api</artifactId>
                   <version>${servlet-version}</version>
                 </artifactItem>
-                <artifactItem>
-                  <groupId>commons-codec</groupId>
-                  <artifactId>commons-codec</artifactId>
-                  <version>1.4</version>
-                  <outputDirectory>../../lib/ext</outputDirectory>
-                </artifactItem>
               </artifactItems>
               <outputDirectory>../../lib</outputDirectory>
             </configuration>
@@ -97,7 +91,7 @@
                     <include name="spnego.properties"/>
                     <include name="spnego.conf"/>
                     <include name="krb5.ini"/>
-                    <include name="README.spnego"/>
+                    <include name="README.spnego">
                   </fileset>
                 </copy>
               </tasks>
@@ -169,11 +163,6 @@
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>servlet-api</artifactId>
       <version>${servlet-version}</version>
-    </dependency>
-    <dependency>
-    	<groupId>commons-codec</groupId>
-    	<artifactId>commons-codec</artifactId>
-    	<version>1.4</version>
     </dependency>
   </dependencies>
 
