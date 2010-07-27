@@ -72,4 +72,3 @@ This step should give you the keytab file which should then be copied over to th
 http server and referenced from the configuration files.  For our testing we put the keytab into the etc
 directory of jetty and referenced it from there.
 
-I 
