@@ -89,9 +89,6 @@
                     <include name="realm.properties"/>
                     <include name="jdbcRealm.properties"/>
                     <include name="spnego.properties"/>
-                    <include name="spnego.conf"/>
-                    <include name="krb5.ini"/>
-                    <include name="README.spnego">
                   </fileset>
                 </copy>
               </tasks>
