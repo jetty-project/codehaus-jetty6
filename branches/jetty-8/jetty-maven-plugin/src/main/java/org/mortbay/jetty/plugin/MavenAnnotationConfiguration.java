@@ -32,8 +32,7 @@ public class MavenAnnotationConfiguration extends AnnotationConfiguration
             if (metaData == null)
                throw new IllegalStateException ("No metadata");
 
-            List<DiscoveredAnnotation> discoveredAnnotations = new ArrayList<DiscoveredAnnotation>();
-            context.setAttribute(DISCOVERED_ANNOTATIONS, discoveredAnnotations);
+            clearAnnotationList(parser.getAnnotationHandlers());    
 
             for (File f:jwac.getClassPathFiles())
             {
@@ -59,8 +58,10 @@ public class MavenAnnotationConfiguration extends AnnotationConfiguration
                     });
                 }
             }
-            metaData.addDiscoveredAnnotations (discoveredAnnotations);
-            context.removeAttribute(DISCOVERED_ANNOTATIONS);
+            //gather together all annotations discovered
+            List<DiscoveredAnnotation> annotations = new ArrayList<DiscoveredAnnotation>();
+            gatherAnnotations(annotations, parser.getAnnotationHandlers());
+            metaData.addDiscoveredAnnotations (annotations);
         }
     }
 }
