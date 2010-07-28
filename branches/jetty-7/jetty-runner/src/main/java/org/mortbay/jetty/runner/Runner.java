@@ -67,7 +67,7 @@ public class Runner
             org.eclipse.jetty.webapp.MetaInfConfiguration.class.getCanonicalName(),
             org.eclipse.jetty.webapp.FragmentConfiguration.class.getCanonicalName(),
             org.eclipse.jetty.plus.webapp.EnvConfiguration.class.getCanonicalName(),
-            org.eclipse.jetty.plus.webapp.Configuration.class.getCanonicalName(),
+            org.eclipse.jetty.plus.webapp.PlusConfiguration.class.getCanonicalName(),
             org.eclipse.jetty.webapp.JettyWebXmlConfiguration.class.getCanonicalName(),
             org.eclipse.jetty.webapp.TagLibConfiguration.class.getCanonicalName() 
             };
