@@ -41,20 +41,19 @@ public class SpnegoAuthenticator implements Authenticator
         } 
         else if (header != null && header.startsWith(HttpHeaders.NEGOTIATE)) 
         {        	
-            Principal principal = request.getUserPrincipal();
             
             String username = header.substring(10);
             
-            principal = realm.authenticate(username, null, request);
+            user = realm.authenticate(username, null, request);
             
-            if (principal != null)
+            if (user != null)
             {
-                Log.debug("SpengoAuthenticator: obtained principal: " + principal.getName());
+                Log.debug("SpengoAuthenticator: obtained principal: " + user.getName());
 
                 request.setAuthType(Constraint.__SPNEGO_AUTH);
-                request.setUserPrincipal(principal);
+                request.setUserPrincipal(user);
                 
-                response.addHeader(HttpHeaders.WWW_AUTHENTICATE, HttpHeaders.NEGOTIATE + " " + ((SpnegoUser)principal).getToken());
+                response.addHeader(HttpHeaders.WWW_AUTHENTICATE, HttpHeaders.NEGOTIATE + " " + ((SpnegoUser)user).getToken());
                 
                 return user;
             }
