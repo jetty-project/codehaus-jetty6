@@ -15,26 +15,13 @@ package org.mortbay.jetty.security;
 //========================================================================
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import javax.naming.Context;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-import javax.naming.ldap.InitialLdapContext;
-
-import org.apache.commons.codec.binary.Base64;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
@@ -150,6 +137,12 @@ public class SpnegoUserRealm implements UserRealm
                     String encodedToken = new String(B64Code.encode(token));
 
                     SpnegoUser user = new SpnegoUser(srcName.toString(),encodedToken);
+
+                    // set the role to the logged in domain
+                    String clientPrincipal = gContext.getSrcName().toString();
+                    String role = clientPrincipal.substring(clientPrincipal.indexOf('@') + 1);
+                    user.addRole(role);
+                    Log.debug("Client Role: " + role);
 
                     return user;
                 }
