@@ -99,7 +99,7 @@ public class WebApplicationProxyImpl implements WebApplicationProxy
                                                   new FragmentConfiguration(),
                                                   new JettyWebXmlConfiguration(), 
                                                   new EnvConfiguration(), 
-                                                  new org.eclipse.jetty.plus.webapp.Configuration(),
+                                                  new org.eclipse.jetty.plus.webapp.PlusConfiguration(),
                                                   new TagLibConfiguration() };
     }
 
