@@ -318,7 +318,10 @@ public class JettyRunMojo extends AbstractJettyMojo
        if (webAppConfig.getBaseResource() == null)
                webAppConfig.setBaseResource(webAppSourceDirectoryResource);
   
-        setClassPathFiles(setUpClassPath());
+       webAppConfig.setWebInfClasses (getClassesDirs());
+       webAppConfig.setWebInfLib (getDependencyFiles());
+       
+       setClassPathFiles(setUpClassPath(webAppConfig.getWebInfClasses(), webAppConfig.getWebInfLib()));
         
         //if we have not already set web.xml location, need to set one up
         if (webAppConfig.getDescriptor() == null)
@@ -519,21 +522,12 @@ public class JettyRunMojo extends AbstractJettyMojo
     
    
 
-    private List<File> setUpClassPath()
+    private List<File> setUpClassPath(List<File> webInfClasses, List<File> webInfJars)
     {
         List<File> classPathFiles = new ArrayList<File>();       
-        
-        //if using the test classes, make sure they are first
-        //on the list
-        if (useTestClasspath && (testClassesDirectory != null))
-            classPathFiles.add(testClassesDirectory);
-        
-        if (getClassesDirectory() != null)
-            classPathFiles.add(getClassesDirectory());
-        
-        //now add all of the dependencies
-        classPathFiles.addAll(getDependencyFiles());
-        
+        classPathFiles.addAll(webInfClasses);
+        classPathFiles.addAll(webInfJars);
+      
         if (getLog().isDebugEnabled())
         {
             for (int i = 0; i < classPathFiles.size(); i++)
@@ -542,6 +536,21 @@ public class JettyRunMojo extends AbstractJettyMojo
             }
         }
         return classPathFiles;
+    }
+    
+    private List<File> getClassesDirs ()
+    {
+        List<File> classesDirs = new ArrayList<File>();
+        
+        //if using the test classes, make sure they are first
+        //on the list
+        if (useTestClasspath && (testClassesDirectory != null))
+            classesDirs.add(testClassesDirectory);
+        
+        if (getClassesDirectory() != null)
+            classesDirs.add(getClassesDirectory());
+        
+        return classesDirs;
     }
   
 
