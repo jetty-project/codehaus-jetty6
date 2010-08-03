@@ -20,7 +20,6 @@ import java.net.InetSocketAddress;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache.CachedBuffer;
-import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.HttpFields;
 import org.mortbay.jetty.HttpHeaders;
@@ -84,6 +83,7 @@ public class HttpExchange
     HttpFields _requestFields = new HttpFields();
     Buffer _requestContent;
     InputStream _requestContentSource;
+    long _timeout = -1;
 
     volatile int _status = STATUS_START;
     Buffer _requestContentChunk;
@@ -488,6 +488,18 @@ public class HttpExchange
     public void setRetryStatus( boolean retryStatus )
     {
         _retryStatus = retryStatus;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public long getTimeout()
+    {
+        return _timeout;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setTimeout(long timeout)
+    {
+        _timeout = timeout;
     }
 
     /* ------------------------------------------------------------ */
