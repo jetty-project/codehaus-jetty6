@@ -242,6 +242,12 @@ public class HttpClient extends AbstractBuffers implements Attributes
     {
         _timeoutQ.schedule(task);
     }
+    
+    /* ------------------------------------------------------------ */
+    public void schedule(Timeout.Task task, long timeout)
+    {
+        _timeoutQ.schedule(task, timeout);
+    }
 
     /* ------------------------------------------------------------ */
     public void scheduleIdle(Timeout.Task task)
