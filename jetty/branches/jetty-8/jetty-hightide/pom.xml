@@ -56,6 +56,7 @@
                   <type>zip</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
+                  <excludes>**/**/jetty-plus.xml</excludes>
                   <outputDirectory>${root-dist-directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
