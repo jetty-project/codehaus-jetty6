@@ -37,7 +37,7 @@ public class SpnegoAuthenticator implements Authenticator
         if (header == null)
         {
             sendChallenge(realm,request,response);
-            return user;
+            return null;
         } 
         else if (header != null && header.startsWith(HttpHeaders.NEGOTIATE)) 
         {        	
@@ -60,13 +60,14 @@ public class SpnegoAuthenticator implements Authenticator
             else
             {
                 Log.debug("SpengoAuthenticator: failed to negotiate principal");
-
-                return user;
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                return null;
             }
         }
         else
         {
             Log.debug("SpengoAuthenticator: unknown authorization header: " + header);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
         }
        
