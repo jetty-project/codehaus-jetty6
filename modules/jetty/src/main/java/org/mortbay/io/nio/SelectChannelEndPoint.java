@@ -482,9 +482,9 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     {
         /* ------------------------------------------------------------ */
         /*
-         * @see org.mortbay.thread.Timeout.Task#expire()
+         * @see org.mortbay.thread.Timeout.Task#expired()
          */
-        public void expire()
+        public void expired()
         {
             idleExpired();
         }
