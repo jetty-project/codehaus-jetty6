@@ -48,7 +48,7 @@ public class JettyWebAppContext extends WebAppContext
     private MetaInfConfiguration metaInfConfig = new MetaInfConfiguration();
     private FragmentConfiguration fragConfig = new FragmentConfiguration();
     private EnvConfiguration envConfig =  new EnvConfiguration();
-    private org.eclipse.jetty.plus.webapp.Configuration plusConfig = new org.eclipse.jetty.plus.webapp.Configuration();
+    private org.eclipse.jetty.plus.webapp.PlusConfiguration plusConfig = new org.eclipse.jetty.plus.webapp.PlusConfiguration();
     private AnnotationConfiguration annotationConfig = new MavenAnnotationConfiguration();
     private JettyWebXmlConfiguration jettyWebConfig =  new JettyWebXmlConfiguration();
     private ContainerInitializerConfiguration contInitConfig =  new ContainerInitializerConfiguration();
