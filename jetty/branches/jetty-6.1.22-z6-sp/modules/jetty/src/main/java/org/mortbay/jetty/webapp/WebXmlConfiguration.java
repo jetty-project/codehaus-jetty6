@@ -862,6 +862,8 @@ public class WebXmlConfiguration implements Configuration
     {
         XmlParser.Node method=node.get("auth-method");
         FormAuthenticator _formAuthenticator=null;
+        SpnegoAuthenticator _spnegoAuthenticator=null;
+
         if(method!=null)
         {
             Authenticator authenticator=null;
@@ -877,7 +879,7 @@ public class WebXmlConfiguration implements Configuration
             else if(Constraint.__CERT_AUTH2.equals(m))
                 authenticator=new ClientCertAuthenticator();
             else if(Constraint.__SPNEGO_AUTH.equals(m))
-                authenticator=new SpnegoAuthenticator();
+                authenticator=_spnegoAuthenticator=new SpnegoAuthenticator();
             else
                 Log.warn("UNKNOWN AUTH METHOD: "+m);
             getWebAppContext().getSecurityHandler().setAuthenticator(authenticator);
@@ -919,6 +921,22 @@ public class WebXmlConfiguration implements Configuration
                 {
                     String ep=errorPage.toString(false,true);
                     _formAuthenticator.setErrorPage(ep);
+                }
+            }
+        }
+        
+        XmlParser.Node spnegoConfig=node.get("spnego-login-config");
+        if(spnegoConfig!=null)
+        {
+            if(_spnegoAuthenticator==null)
+                Log.warn("SPNEGO Authentication miss-configured");
+            else
+            {
+                XmlParser.Node errorPage=formConfig.get("spnego-error-page");
+                if(errorPage!=null)
+                {
+                    String ep=errorPage.toString(false,true);
+                    _spnegoAuthenticator.setErrorPage(ep);
                 }
             }
         }

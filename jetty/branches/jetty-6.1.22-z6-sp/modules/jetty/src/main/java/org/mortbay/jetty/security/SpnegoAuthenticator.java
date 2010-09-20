@@ -24,10 +24,47 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.security.SpnegoUserRealm.SpnegoUser;
 import org.mortbay.log.Log;
+import org.mortbay.util.StringUtil;
+import org.mortbay.util.URIUtil;
 
+/**
+ * SPNEGO Authentication Authenticator
+ * 
+ */
 public class SpnegoAuthenticator implements Authenticator
 {
+    private String _errorPage;
+    private String _errorPath;
+    
+    /* ------------------------------------------------------------ */
+    public void setErrorPage(String path)
+    {
+        if (path==null || path.trim().length()==0)
+        {
+            _errorPath=null;
+            _errorPage=null;
+        }
+        else
+        {
+            if (!path.startsWith("/"))
+            {
+                Log.warn("error-page must start with /");
+                path="/"+path;
+            }
+            _errorPage=path;
+            _errorPath=path;
 
+            if (_errorPath!=null && _errorPath.indexOf('?')>0)
+                _errorPath=_errorPath.substring(0,_errorPath.indexOf('?'));
+        }
+    }    
+
+    /* ------------------------------------------------------------ */
+    public String getErrorPage()
+    {
+        return _errorPage;
+    }
+    
     public Principal authenticate(UserRealm realm, String pathInContext, Request request, Response response) throws IOException
     {        
         Principal user = null;
@@ -59,14 +96,59 @@ public class SpnegoAuthenticator implements Authenticator
             }
             else
             {
-                Log.debug("SpengoAuthenticator: failed to negotiate principal");
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                if(Log.isDebugEnabled())
+                {
+                    Log.debug("SpengoAuthenticator: authentication failed");
+                }
+                
+                if (_errorPage==null)
+                {
+                    if (response != null)
+                    {
+                        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    }
+                }
+                else
+                {
+                    if (response != null)
+                    {
+                        response.setContentLength(0);
+                        
+                        response.sendRedirect(response.encodeRedirectURL
+                                          (URIUtil.addPaths(request.getContextPath(),
+                                                        _errorPage)));
+                    }
+                }
+                
                 return null;
             }
         }
         else
         {
-            Log.debug("SpengoAuthenticator: unknown authorization header: " + header);
+            if(Log.isDebugEnabled())
+            {
+                Log.debug("SpengoAuthenticator: authentication failed, unknown header (browser is likely misconfigured for SPNEGO)");
+            }
+            
+            if (_errorPage==null)
+            {
+                if (response != null)
+                {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                }
+            }
+            else
+            {
+                if (response != null)
+                {
+                    response.setContentLength(0);
+                    
+                    response.sendRedirect(response.encodeRedirectURL
+                                      (URIUtil.addPaths(request.getContextPath(),
+                                                    _errorPage)));
+                }
+            }
+            
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
         }
