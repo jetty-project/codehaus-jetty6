@@ -31,6 +31,10 @@ Spengo Authentication is enabled in the webapp with the following setup.
   <login-config>
     <auth-method>SPNEGO</auth-method>
     <realm-name>Test Realm</realm-name>
+    (optionally to add custom error page)
+    <spnego-login-config>
+      <spengo-error-page>/loginError.html?param=foo</spnego-error-page>
+    </spnego-login-config>
   </login-config>
    
 A corresponding UserRealm needs to be created either programmatically if 
