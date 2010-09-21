@@ -117,6 +117,8 @@ public class SpnegoAuthenticator implements Authenticator
                         response.sendRedirect(response.encodeRedirectURL
                                           (URIUtil.addPaths(request.getContextPath(),
                                                         _errorPage)));
+                        
+                        return SecurityHandler.__NOBODY;
                     }
                 }
                 
@@ -146,15 +148,17 @@ public class SpnegoAuthenticator implements Authenticator
                     response.sendRedirect(response.encodeRedirectURL
                                       (URIUtil.addPaths(request.getContextPath(),
                                                     _errorPage)));
+                    
+                    return SecurityHandler.__NOBODY;
                 }
             }
             
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            
             return null;
-        }
-       
+        }        
     }
-
+    
     public void sendChallenge(UserRealm realm, Request request, Response response) throws IOException
     {
         Log.debug("SpengoAuthenticator: sending challenge");
