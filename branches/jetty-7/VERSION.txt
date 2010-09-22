@@ -3,6 +3,8 @@ jetty@codehaus 7.2.0-SNAPSHOT
  + JETTY-1107 provide virtual WEB-INF/lib for maven plugin
  + Update to derby 10.6.1.0
  + Simplify test-jndi-webapp
+ + Fix start.ini patch to reflect changes in 7.2.0
+ + Update jetty-hightide pom to reflect changes for jta in 7.2.0
 
 jetty@codehaus 7.1.6.v20100715
 
