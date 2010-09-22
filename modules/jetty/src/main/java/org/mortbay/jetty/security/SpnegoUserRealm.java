@@ -154,8 +154,14 @@ public class SpnegoUserRealm implements UserRealm
         }
         catch (GSSException e)
         {
-            e.printStackTrace();
+        	Log.debug("error processing token for spnego authentication", e.getMessage());
+        	
+        	if ( Log.isDebugEnabled() )
+        	{
+        		e.printStackTrace();
+        	}
         }
+        
         return null;
     }
 
