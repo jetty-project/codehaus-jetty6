@@ -65,12 +65,29 @@ public class SpnegoAuthenticator implements Authenticator
         return _errorPage;
     }
     
+
+    public boolean isErrorPage(String pathInContext)
+    {
+        return pathInContext!=null && (pathInContext.equals(_errorPath));
+    }
+    
     public Principal authenticate(UserRealm realm, String pathInContext, Request request, Response response) throws IOException
-    {        
+    {   
+    	/*
+    	 * if the request is for the error page, return nobody and it should present
+    	 */
+    	if ( isErrorPage(pathInContext) )
+    	{
+    		return SecurityHandler.__NOBODY;
+    	}
+    	
         Principal user = null;
         
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         
+        /*
+         * if the header is null then we need to challenge...this is after the error page check
+         */
         if (header == null)
         {
             sendChallenge(realm,request,response);
@@ -78,7 +95,10 @@ public class SpnegoAuthenticator implements Authenticator
         } 
         else if (header != null && header.startsWith(HttpHeaders.NEGOTIATE)) 
         {        	
-            
+            /*
+             * we have gotten a negotiate header to try and authenticate
+             */
+        	
             String username = header.substring(10);
             
             user = realm.authenticate(username, null, request);
@@ -96,6 +116,10 @@ public class SpnegoAuthenticator implements Authenticator
             }
             else
             {
+            	/*
+            	 * no user was returned from the authentication which means something failed
+            	 * so process error logic
+            	 */
                 if(Log.isDebugEnabled())
                 {
                     Log.debug("SpengoAuthenticator: authentication failed");
@@ -116,15 +140,16 @@ public class SpnegoAuthenticator implements Authenticator
                         
                         response.sendRedirect(response.encodeRedirectURL
                                           (URIUtil.addPaths(request.getContextPath(),
-                                                        _errorPage)));
-                        
-                        return SecurityHandler.__NOBODY;
+                                                        _errorPage)));                  
                     }
                 }
                 
                 return null;
             }
         }
+        /*
+         * the header was not null, but we didn't get a negotiate so process error logic
+         */
         else
         {
             if(Log.isDebugEnabled())
@@ -148,13 +173,9 @@ public class SpnegoAuthenticator implements Authenticator
                     response.sendRedirect(response.encodeRedirectURL
                                       (URIUtil.addPaths(request.getContextPath(),
                                                     _errorPage)));
-                    
-                    return SecurityHandler.__NOBODY;
                 }
             }
-            
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            
+                     
             return null;
         }        
     }
