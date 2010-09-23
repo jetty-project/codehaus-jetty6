@@ -128,13 +128,15 @@ public class MultiPartFilter implements Filter
             // Read each part
             boolean lastPart=false;
             String content_disposition=null;
-            while(!lastPart)
+            outer:while(!lastPart)
             {
                 while(true)
                 {
                     bytes=TypeUtil.readLine(in);
                     // If blank line, end of part headers
-                    if(bytes==null || bytes.length==0)
+                    if(bytes==null)
+                        break outer;
+                    if (bytes.length==0)
                         break;
                     line=new String(bytes,"UTF-8");
                     

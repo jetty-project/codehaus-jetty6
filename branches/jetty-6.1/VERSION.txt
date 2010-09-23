@@ -3,6 +3,7 @@ Jetty-6.1-SNAPSHOT
  + JETTY-912 add per exchange timeout
  + JETTY-1264 Idle timer deadlock
  + JETTY-1271 Handle unavailable request
+ + JETTY-1248 Infinite loop creating temp MultiPart files
 
 Jetty-6.1.25 26 July 2010
  + Jetty-6 is now in maintenance mode.
