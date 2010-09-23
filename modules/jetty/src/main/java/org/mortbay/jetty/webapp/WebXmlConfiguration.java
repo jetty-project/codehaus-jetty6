@@ -932,7 +932,7 @@ public class WebXmlConfiguration implements Configuration
                 Log.warn("SPNEGO Authentication miss-configured");
             else
             {
-                XmlParser.Node errorPage=formConfig.get("spnego-error-page");
+                XmlParser.Node errorPage=spnegoConfig.get("spnego-error-page");
                 if(errorPage!=null)
                 {
                     String ep=errorPage.toString(false,true);
