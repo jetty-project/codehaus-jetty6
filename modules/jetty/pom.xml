@@ -58,7 +58,10 @@
                     <include name="jetty-stats.xml"/>
                     <include name="jetty-xinetd.xml"/>
                     <include name="realm.properties"/>
-                    <include name="jdbcRealm.properties"/>
+                    <include name="spnego.properties"/>
+                    <include name="spnego.conf"/>
+                    <include name="krb5.ini"/>
+                    <include name="README.spnego"/>
                   </fileset>
                 </delete>
               </tasks>
@@ -85,6 +88,8 @@
                     <include name="jetty-stats.xml"/>
                     <include name="realm.properties"/>
                     <include name="jdbcRealm.properties"/>
+                    <include name="spnego.properties"/>
+                    <include name="README.spnego"/>
                   </fileset>
                 </copy>
               </tasks>
@@ -158,4 +163,5 @@
       <version>${servlet-version}</version>
     </dependency>
   </dependencies>
+
 </project>
