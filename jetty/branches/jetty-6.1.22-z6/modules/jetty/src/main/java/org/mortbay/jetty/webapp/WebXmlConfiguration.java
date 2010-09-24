@@ -34,6 +34,7 @@ import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.DigestAuthenticator;
 import org.mortbay.jetty.security.FormAuthenticator;
+import org.mortbay.jetty.security.SpnegoAuthenticator;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
@@ -861,6 +862,8 @@ public class WebXmlConfiguration implements Configuration
     {
         XmlParser.Node method=node.get("auth-method");
         FormAuthenticator _formAuthenticator=null;
+        SpnegoAuthenticator _spnegoAuthenticator=null;
+
         if(method!=null)
         {
             Authenticator authenticator=null;
@@ -875,6 +878,8 @@ public class WebXmlConfiguration implements Configuration
                 authenticator=new ClientCertAuthenticator();
             else if(Constraint.__CERT_AUTH2.equals(m))
                 authenticator=new ClientCertAuthenticator();
+            else if(Constraint.__SPNEGO_AUTH.equals(m))
+                authenticator=_spnegoAuthenticator=new SpnegoAuthenticator();
             else
                 Log.warn("UNKNOWN AUTH METHOD: "+m);
             getWebAppContext().getSecurityHandler().setAuthenticator(authenticator);
@@ -916,6 +921,22 @@ public class WebXmlConfiguration implements Configuration
                 {
                     String ep=errorPage.toString(false,true);
                     _formAuthenticator.setErrorPage(ep);
+                }
+            }
+        }
+        
+        XmlParser.Node spnegoConfig=node.get("spnego-login-config");
+        if(spnegoConfig!=null)
+        {
+            if(_spnegoAuthenticator==null)
+                Log.warn("SPNEGO Authentication miss-configured");
+            else
+            {
+                XmlParser.Node errorPage=spnegoConfig.get("spnego-error-page");
+                if(errorPage!=null)
+                {
+                    String ep=errorPage.toString(false,true);
+                    _spnegoAuthenticator.setErrorPage(ep);
                 }
             }
         }

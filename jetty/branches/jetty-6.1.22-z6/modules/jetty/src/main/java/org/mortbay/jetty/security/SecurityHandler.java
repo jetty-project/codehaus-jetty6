@@ -168,6 +168,8 @@ public class SecurityHandler extends HandlerWrapper
                _authenticator=new ClientCertAuthenticator();
             else if (Constraint.__FORM_AUTH.equalsIgnoreCase(_authMethod))
                 _authenticator=new FormAuthenticator();
+            else if (Constraint.__SPNEGO_AUTH.equalsIgnoreCase(_authMethod))
+                _authenticator=new SpnegoAuthenticator();
             else
                 Log.warn("Unknown Authentication method:"+_authMethod);
         }

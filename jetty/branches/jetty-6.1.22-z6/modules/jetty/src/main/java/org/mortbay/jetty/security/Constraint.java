@@ -28,6 +28,7 @@ public class Constraint implements Cloneable, Serializable
     public final static String __BASIC_AUTH= "BASIC";
     public final static String __FORM_AUTH= "FORM";
     public final static String __DIGEST_AUTH= "DIGEST";
+    public final static String __SPNEGO_AUTH= "SPNEGO";
     public final static String __CERT_AUTH= "CLIENT_CERT";
     public final static String __CERT_AUTH2= "CLIENT-CERT";
 
