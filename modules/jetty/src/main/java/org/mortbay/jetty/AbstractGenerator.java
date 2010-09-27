@@ -460,10 +460,11 @@ public abstract class AbstractGenerator implements Generator
      */
     public void sendError(int code, String reason, String content, boolean close) throws IOException
     {
+        if (close)
+            _close = close;
         if (!isCommitted())
         {
             setResponse(code, reason);
-            _close = close;
             completeHeader(null, false);
             if (content != null) 
                 addContent(new View(new ByteArrayBuffer(content)), Generator.LAST);
