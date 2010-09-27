@@ -292,7 +292,6 @@ public class AnnotationTest extends HttpServlet
             out.println("<br/><b>JNDI Lookup Result: "+envLookupResult2+"</b>");
             out.println("<br/><b>Result: "+envResult3+": "+(avgAmount.compareTo(new Double("1.25"))==0?" PASS":" FAIL")+"</b>");     
             out.println("<br/><b>JNDI Lookup Result: "+envLookupResult3+"</b>");          
-         
             out.println("<h2>@Resource Injection for UserTransaction </h2>");
             out.println("<pre>");
             out.println("@Resource(mappedName=\"UserTransaction\")");
@@ -300,7 +299,6 @@ public class AnnotationTest extends HttpServlet
             out.println("</pre>");
             out.println("<br/><b>Result: "+txResult+"</b>");
             out.println("<br/><b>JNDI Lookup Result: "+txLookupResult+"</b>");
-            
             out.println("<h2>Roles</h2>");
             out.println("<p>Login as user \"admin\" with password \"admin\" when prompted after clicking the button below to test @DeclareRoles annotation</p>");
             String context = request.getContextPath();
