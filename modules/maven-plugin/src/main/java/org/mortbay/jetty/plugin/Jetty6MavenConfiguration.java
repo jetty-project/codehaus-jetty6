@@ -81,10 +81,16 @@ public class Jetty6MavenConfiguration extends Configuration
         // knock out environmental maven and plexus classes from webAppContext
         String[] existingServerClasses = getWebAppContext().getServerClasses();
         String[] newServerClasses = new String[2+(existingServerClasses==null?0:existingServerClasses.length)];
-        newServerClasses[0] = "-org.apache.maven.";
-        newServerClasses[1] = "-org.codehaus.plexus.";
+        newServerClasses[0] = "org.apache.maven.";
+        newServerClasses[1] = "org.codehaus.plexus.";
         System.arraycopy( existingServerClasses, 0, newServerClasses, 2, existingServerClasses.length );
-        
+
+        if (Log.isDebugEnabled()) {
+            Log.debug("Server classes:");
+            for (int i=0;i<newServerClasses.length;i++)
+                Log.debug(newServerClasses[i]);
+        }
+
         getWebAppContext().setServerClasses( newServerClasses );
     }
 
