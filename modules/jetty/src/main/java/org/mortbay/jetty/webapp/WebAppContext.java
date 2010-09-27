@@ -972,7 +972,7 @@ public class WebAppContext extends Context
                         //only extract if the war file is newer
                         if (web_app.lastModified() > extractedWebAppDir.lastModified())
                         {
-                            extractedWebAppDir.delete();
+			    IO.delete(extractedWebAppDir);
                             extractedWebAppDir.mkdir();
                             Log.info("Extract " + _war + " to " + extractedWebAppDir);
                             JarResource.extract(web_app, extractedWebAppDir, false);
