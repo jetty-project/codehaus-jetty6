@@ -1,4 +1,6 @@
 jetty@codehaus 8.0.0.M2-SNAPSHOT
+ + JETTY-1051 offer jetty.skip flag for maven plugin
+ + JETTY-1096 exclude maven, plexus classes from maven plugin
  + JETTY-1257 Duplicate dependency on conflicting versions of servlet-api
  + 320073 Reconsile configuration mechanism
  + Remove old jetty-plus.xml
@@ -8,7 +10,6 @@ jetty@codehaus 8.0.0.M1 12 July 2010
  + Updated to jetty core 8.0.0.M1
  + Add jetty-util.jar to test-annotation-webapp
  + Add ContainerInitializerConfiguration to jetty.xml
- + JETTY-1096 exclude maven, plexus classes from maven plugin
  + JETTY-1107 provide virtual WEB-INF/lib for maven plugin
  + Update to derby 10.6.1.0
  + Simplify test-jndi-webapp
