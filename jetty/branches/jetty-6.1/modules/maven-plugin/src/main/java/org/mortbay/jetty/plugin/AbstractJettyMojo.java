@@ -176,20 +176,28 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     protected String stopKey;
 
     /**
- 	 * <p>
- 	 * Determines whether or not the server blocks when started. The default
- 	 * behavior (daemon = false) will cause the server to pause other processes
- 	 * while it continues to handle web requests. This is useful when starting the
- 	 * server with the intent to work with it interactively.
- 	 * </p><p>
- 	 * Often, it is desirable to let the server start and continue running subsequent
- 	 * processes in an automated build environment. This can be facilitated by setting
- 	 * daemon to true.
- 	 * </p>
- 	 * @parameter expression="${jetty.daemon}" default-value="false"
- 	 */
- 	protected boolean daemon;
+     * <p>
+     * Determines whether or not the server blocks when started. The default
+     * behavior (daemon = false) will cause the server to pause other processes
+     * while it continues to handle web requests. This is useful when starting the
+     * server with the intent to work with it interactively.
+     * </p><p>
+     * Often, it is desirable to let the server start and continue running subsequent
+     * processes in an automated build environment. This can be facilitated by setting
+     * daemon to true.
+     * </p>
+     * @parameter expression="${jetty.daemon}" default-value="false"
+     */
+    protected boolean daemon;
     
+    /**
+     * <p>
+     * If true, execution of the plugin is skipped.
+     * </p>
+     * @parameter expression="${jetty.skip}" default-value="false"
+     */
+    protected boolean skip;
+
     /**
      * A scanner to check for changes to the webapp
      */
@@ -378,6 +386,11 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     public void execute() throws MojoExecutionException, MojoFailureException
     {
         getLog().info("Configuring Jetty for project: " + getProject().getName());
+        if (skip)
+        {
+            getLog().info("Skipping jetty: jetty.skip==true");
+            return;
+        }
         PluginLog.setLog(getLog());
         checkPomConfiguration();
         startJetty();
