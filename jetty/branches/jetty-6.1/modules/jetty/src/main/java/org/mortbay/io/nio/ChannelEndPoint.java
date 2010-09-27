@@ -91,35 +91,26 @@ public class ChannelEndPoint implements EndPoint
     }
 
     /* (non-Javadoc)
-     * @see org.mortbay.io.EndPoint#close()
+     * @see org.eclipse.io.EndPoint#close()
+     */
+    public void shutdownOutput() throws IOException
+    {
+        if (_channel.isOpen() && _channel instanceof SocketChannel)
+        {
+            Socket socket= ((SocketChannel)_channel).socket();
+            if (!socket.isClosed()&&!socket.isOutputShutdown())
+                socket.shutdownOutput();
+        }
+    }
+    
+    /* (non-Javadoc)
+     * @see org.eclipse.io.EndPoint#close()
      */
     public void close() throws IOException
     {
-        if (_channel.isOpen())
-        {
-            try
-            {
-                if (_channel instanceof SocketChannel)
-                {
-                    // TODO - is this really required?
-                    Socket socket= ((SocketChannel)_channel).socket();
-                    if (!socket.isClosed() && !socket.isOutputShutdown())
-                        socket.shutdownOutput();
-                }
-            }
-            catch(IOException e)
-            {
-                Log.ignore(e);
-            }
-            catch(UnsupportedOperationException e)
-            {
-                Log.ignore(e);
-            }
-            finally
-            {
-                _channel.close();
-            }
-        }
+        if (_socket!=null && !_socket.isOutputShutdown())
+            _socket.shutdownOutput();
+        _channel.close();
     }
 
     /* (non-Javadoc)

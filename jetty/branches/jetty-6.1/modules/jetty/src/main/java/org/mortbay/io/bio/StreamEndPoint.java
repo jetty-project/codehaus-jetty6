@@ -73,7 +73,14 @@ public class StreamEndPoint implements EndPoint
     {
         return !isOpen();
     }
-
+    
+    /* 
+     * @see org.mortbay.io.EndPoint#shutdownOutput()
+     */
+    public void shutdownOutput() throws IOException
+    {
+    }
+    
     /* 
      * @see org.mortbay.io.BufferIO#close()
      */

@@ -144,6 +144,12 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     }
 
     /* ------------------------------------------------------------ */
+    public void shutdownOutput() throws IOException
+    {
+        close();
+    }
+    
+    /* ------------------------------------------------------------ */
     public void close() throws IOException
     {
         // TODO - this really should not be done in a loop here - but with async callbacks.

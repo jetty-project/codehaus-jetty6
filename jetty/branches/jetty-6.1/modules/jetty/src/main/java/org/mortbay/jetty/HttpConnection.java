@@ -909,7 +909,10 @@ public class HttpConnection implements Connection
                         }
                         else
                         {
-                            _generator.sendError(HttpStatus.ORDINAL_417_Expectation_Failed,null,null,true);
+                            _generator.setResponse(HttpStatus.ORDINAL_417_Expectation_Failed, null);
+                            _responseFields.put(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
+                            _generator.completeHeader(_responseFields, true);
+                            _generator.complete();
                             return;
                         }
                     }
