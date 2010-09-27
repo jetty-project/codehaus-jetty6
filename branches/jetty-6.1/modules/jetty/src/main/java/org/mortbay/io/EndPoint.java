@@ -25,7 +25,11 @@ import java.io.IOException;
  */
 public interface EndPoint
 {
-    
+    /**
+     * Shutdown any backing output stream associated with the endpoint
+     */
+    void shutdownOutput() throws IOException;
+
     /**
      * Close any backing stream associated with the buffer
      */
@@ -150,5 +154,9 @@ public interface EndPoint
      * @throws IOException 
      */
     public void flush() throws IOException;
+    
+    
+    
+    
     
 }

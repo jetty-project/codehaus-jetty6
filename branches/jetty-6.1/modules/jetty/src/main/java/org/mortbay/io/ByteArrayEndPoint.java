@@ -134,6 +134,14 @@ public class ByteArrayEndPoint implements EndPoint
 
     /* ------------------------------------------------------------ */
     /* 
+     * @see org.mortbay.io.EndPoint#shutdownOutput()
+     */
+    public void shutdownOutput() throws IOException
+    {
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
      * @see org.mortbay.io.EndPoint#close()
      */
     public void close() throws IOException
