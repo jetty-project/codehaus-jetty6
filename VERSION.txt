@@ -2,6 +2,7 @@
 Jetty-6.1-SNAPSHOT
  + JETTY-547 Improved usage of shutdownOutput before close.
  + JETTY-912 add per exchange timeout
+ + JETTY-1051 offer jetty.skip flag for maven plugin
  + JETTY-1096 exclude maven and plexus classes from jetty plugin
  + JETTY-1248 Infinite loop creating temp MultiPart files
  + JETTY-1264 Idle timer deadlock
