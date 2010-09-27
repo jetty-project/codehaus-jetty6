@@ -208,6 +208,11 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * @parameter expression="${jetty.daemon}" default-value="false"
      */
     protected boolean daemon;
+    
+    /**  
+     * @parameter expression="${jetty.skip}" default-value="false"
+     */
+    protected boolean skip;
 
     
     /**
@@ -372,6 +377,11 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     public void execute() throws MojoExecutionException, MojoFailureException
     {
         getLog().info("Configuring Jetty for project: " + getProject().getName());
+        if (skip)
+        {
+            getLog().info("Skipping Jetty start: jetty.skip==true");
+            return;
+        }
         PluginLog.setLog(getLog());
         checkPomConfiguration();
         startJetty();

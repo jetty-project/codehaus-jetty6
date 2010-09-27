@@ -1,5 +1,6 @@
 jetty@codehaus 7.2.0-SNAPSHOT
  + 320073 Reconcile jetty-8 and jetty-7 webapp configuration mechanisms
+ + JETTY-1051 offer jetty.skip flag for maven plugin
  + JETTY-1096 exclude maven, plexus classes from maven plugin
  + JETTY-1107 provide virtual WEB-INF/lib for maven plugin
  + Update to derby 10.6.1.0
