@@ -328,6 +328,35 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.7</version>
+        <configuration>
+          <includeDependencySources>true</includeDependencySources>
+          <additionalJOption>-J-Xmx256m</additionalJOption>
+          <dependencySourceExcludes>
+            <dependencySourceExclude>asm:*</dependencySourceExclude>
+            <dependencySourceExclude>com.sun.mail:*</dependencySourceExclude>
+            <dependencySourceExclude>javax.mail:*</dependencySourceExclude>
+            <dependencySourceExclude>org.mortbay.jetty:jsp-api-2.1-glassfish</dependencySourceExclude>
+            <dependencySourceExclude>org.mortbay.jetty:jsp-2.1-glassfish</dependencySourceExclude>            
+            <dependencySourceExclude>org.mortbay.jetty:jetty-setuid-java</dependencySourceExclude>            
+            <dependencySourceExclude>org.mortbay.jetty:jetty-spring</dependencySourceExclude>            
+          </dependencySourceExcludes>
+          <reportOutputDirectory>${assembly-directory}</reportOutputDirectory>
+          <destDir>javadoc</destDir>
+        </configuration>
+        <executions>
+          <execution>
+            <id>distribution-docs</id>
+            <goals>
+              <goal>javadoc</goal>
+            </goals>
+            <phase>process-sources</phase>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
   <dependencies>
