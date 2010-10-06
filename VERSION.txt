@@ -7,6 +7,7 @@ Jetty-6.1-SNAPSHOT
  + JETTY-1248 Infinite loop creating temp MultiPart files
  + JETTY-1264 Idle timer deadlock
  + JETTY-1271 Handle unavailable request
+ + JETTY-1287 rewrite handler thread safe issue resolved
  + 325468 Clean work webapp dir before unpack
 
 Jetty-6.1.25 26 July 2010
