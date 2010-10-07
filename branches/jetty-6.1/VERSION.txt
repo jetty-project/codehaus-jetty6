@@ -8,6 +8,7 @@ Jetty-6.1-SNAPSHOT
  + JETTY-1264 Idle timer deadlock
  + JETTY-1271 Handle unavailable request
  + JETTY-1287 rewrite handler thread safe issue resolved
+ + JETTY-1288 info when atypical classloader set to WebAppContext
  + 325468 Clean work webapp dir before unpack
  + 327109 Fixed AJP handling of empty packets
 
