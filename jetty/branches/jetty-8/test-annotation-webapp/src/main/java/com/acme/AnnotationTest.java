@@ -230,7 +230,8 @@ public class AnnotationTest extends HttpServlet
                                              "com.acme.RoleAnnotationTest", 
                                              "com.acme.MultiPartTest", 
                                              "com.acme.FragmentServlet", 
-                                             "com.acme.TestListener" );
+                                             "com.acme.TestListener",
+                                             "com.acme.Bar");
              out.println("<h2>@ContainerInitializer</h2>");
              out.println("<pre>");
              out.println("@HandlesTypes({javax.servlet.Servlet.class, Foo.class})");
