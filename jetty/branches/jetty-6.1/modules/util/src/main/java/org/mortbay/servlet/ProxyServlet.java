@@ -163,9 +163,17 @@ public class ProxyServlet implements Servlet
             // Proxy headers
             connection.setRequestProperty("Via","1.1 (jetty)");
             if (!xForwardedFor)
+            {
                 connection.addRequestProperty("X-Forwarded-For",
-                                              request.getRemoteAddr());
-
+                        request.getRemoteAddr());
+                connection.addRequestProperty("X-Forwarded-Proto",
+                        request.getScheme());
+                connection.addRequestProperty("X-Forwarded-Host",
+                        request.getServerName());
+                connection.addRequestProperty("X-Forwarded-Server",
+                        request.getLocalName());
+            }
+            
             // a little bit of cache control
             String cache_control = request.getHeader("Cache-Control");
             if (cache_control!=null &&

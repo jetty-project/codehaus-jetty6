@@ -11,6 +11,7 @@ Jetty-6.1-SNAPSHOT
  + JETTY-1288 info when atypical classloader set to WebAppContext
  + 325468 Clean work webapp dir before unpack
  + 327109 Fixed AJP handling of empty packets
+ + 327562 Implement all X-Forwarded headers in ProxyServlet
 
 Jetty-6.1.25 26 July 2010
  + Jetty-6 is now in maintenance mode.
