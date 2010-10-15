@@ -361,7 +361,7 @@
       <!-- 
        export the jetty directory which is then bundled via the jetty-src.xml assembly descriptor
        -->
-      <plugin>
+      <!--plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-scm-plugin</artifactId>
         <version>1.4</version>
@@ -377,7 +377,7 @@
             <phase>process-sources</phase>
           </execution>
         </executions>
-      </plugin>
+      </plugin-->
     </plugins>
   </build>
   <dependencies>
