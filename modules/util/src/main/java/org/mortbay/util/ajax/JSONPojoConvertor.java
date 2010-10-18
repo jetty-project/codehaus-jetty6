@@ -54,22 +54,38 @@ public class JSONPojoConvertor implements JSON.Convertor
     protected Map/*<String,Method>*/ _getters = new HashMap/*<String,Method>*/();
     protected Map/*<String,Setter>*/ _setters = new HashMap/*<String,Setter>*/();
     protected Set/*<String>*/ _excluded;
-    
+
+    /**
+     * @param pojoClass The class to convert
+     */
     public JSONPojoConvertor(Class pojoClass)
     {
         this(pojoClass, (Set)null, true);
     }
-    
+
+    /**
+     * @param pojoClass The class to convert
+     * @param excluded The fields to exclude
+     */
     public JSONPojoConvertor(Class pojoClass, String[] excluded)
     {
         this(pojoClass, new HashSet(Arrays.asList(excluded)), true);
     }
-    
+
+    /**
+     * @param pojoClass The class to convert
+     * @param excluded The fields to exclude
+     */
     public JSONPojoConvertor(Class pojoClass, Set excluded)
     {
         this(pojoClass, excluded, true);
     }
     
+    /**
+     * @param pojoClass The class to convert
+     * @param excluded The fields to exclude
+     * @param fromJSON If true, add a class field to the JSON
+     */
     public JSONPojoConvertor(Class pojoClass, Set excluded, boolean fromJSON)
     {
         _pojoClass = pojoClass;
@@ -77,7 +93,11 @@ public class JSONPojoConvertor implements JSON.Convertor
         _fromJSON = fromJSON;
         init();
     }    
-    
+
+    /**
+     * @param pojoClass The class to convert
+     * @param fromJSON If true, add a class field to the JSON
+     */
     public JSONPojoConvertor(Class pojoClass, boolean fromJSON)
     {
         this(pojoClass, (Set)null, fromJSON);

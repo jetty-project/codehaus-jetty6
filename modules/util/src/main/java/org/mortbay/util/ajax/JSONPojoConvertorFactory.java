@@ -19,17 +19,42 @@ import org.mortbay.util.Loader;
 import org.mortbay.util.ajax.JSON.Convertor;
 import org.mortbay.util.ajax.JSON.Output;
 
+/**
+ * {@link JSONPojoConvertor} factory convertor.
+ * <p>
+ * This {@link Convertor} will create and register {@link JSONPojoConvertor} instances for unknown classes.
+ * 
+ */
 public class JSONPojoConvertorFactory implements JSON.Convertor
 {
-    private JSON _json=null;
-
+    private final JSON _json;
+    private final boolean _fromJSON;
+    
+    /**
+     * @param json The JSON to use for conversions and registrations
+     */
     public JSONPojoConvertorFactory(JSON json)
     {
+        _json=json;
+        _fromJSON=true;
         if (json==null)
         {
             throw new IllegalArgumentException();
         }
+    }
+    
+    /**
+     * @param json The JSON to use for conversions and registrations
+     * @param fromJSON Passed to {@link JSONPojoConvertor} constructor.
+     */
+    public JSONPojoConvertorFactory(JSON json,boolean fromJSON)
+    {
         _json=json;
+        _fromJSON=fromJSON;
+        if (json==null)
+        {
+            throw new IllegalArgumentException();
+        }
     }
     
     public void toJSON(Object obj, Output out)
@@ -41,7 +66,7 @@ public class JSONPojoConvertorFactory implements JSON.Convertor
             try
             {
                 Class cls=Loader.loadClass(JSON.class,clsName);
-                convertor=new JSONPojoConvertor(cls);
+                convertor=new JSONPojoConvertor(cls,_fromJSON);
                 _json.addConvertorFor(clsName, convertor);
              }
             catch (ClassNotFoundException e)
