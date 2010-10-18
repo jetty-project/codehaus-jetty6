@@ -9,6 +9,7 @@ Jetty-6.1-SNAPSHOT
  + JETTY-1271 Handle unavailable request
  + JETTY-1287 rewrite handler thread safe issue resolved
  + JETTY-1288 info when atypical classloader set to WebAppContext
+ + JETTY-1289 MRU cache for filter chains
  + 325468 Clean work webapp dir before unpack
  + 327109 Fixed AJP handling of empty packets
  + 327562 Implement all X-Forwarded headers in ProxyServlet
