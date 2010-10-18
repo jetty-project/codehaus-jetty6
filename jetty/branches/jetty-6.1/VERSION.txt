@@ -7,6 +7,7 @@ Jetty-6.1-SNAPSHOT
  + JETTY-1248 Infinite loop creating temp MultiPart files
  + JETTY-1264 Idle timer deadlock
  + JETTY-1271 Handle unavailable request
+ + JETTY-1278 J2se6 SPI filter handling fix
  + JETTY-1287 rewrite handler thread safe issue resolved
  + JETTY-1288 info when atypical classloader set to WebAppContext
  + JETTY-1289 MRU cache for filter chains
