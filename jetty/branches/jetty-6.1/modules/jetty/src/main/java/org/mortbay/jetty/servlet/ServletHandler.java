@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -98,7 +99,7 @@ public class ServletHandler extends AbstractHandler
     private transient Map _servletNameMap=new HashMap();
     private transient PathMap _servletPathMap;
     
-    protected transient HashMap _chainCache[];
+    protected transient MruCache _chainCache[];
 
 
     /* ------------------------------------------------------------ */
@@ -130,6 +131,7 @@ public class ServletHandler extends AbstractHandler
         }
         super.setServer(server);
         
+        invalidateChainsCache();
     }
 
     /* ----------------------------------------------------------------- */
@@ -143,7 +145,16 @@ public class ServletHandler extends AbstractHandler
         updateMappings();
         
         if(_filterChainsCached)
-            _chainCache=     new HashMap[]{null,new HashMap(),new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
+            _chainCache = new MruCache[] {
+                null,
+                new MruCache(_maxFilterChainsCacheSize),
+                new MruCache(_maxFilterChainsCacheSize),
+                null,
+                new MruCache(_maxFilterChainsCacheSize),
+                null,
+                null,
+                null,
+                new MruCache(_maxFilterChainsCacheSize) };
 
         super.doStart();
         
@@ -578,8 +589,6 @@ public class ServletHandler extends AbstractHandler
                 chain= new CachedChain(filters, servletHolder);
             synchronized(this)
             {
-                if (_maxFilterChainsCacheSize>0 && _chainCache[requestType].size()>_maxFilterChainsCacheSize)
-                    _chainCache[requestType].clear();
                 _chainCache[requestType].put(key,chain);
             }
         }
@@ -588,6 +597,48 @@ public class ServletHandler extends AbstractHandler
     
         return chain;
     }
+    
+    private class MruCache extends LinkedHashMap
+    {
+        private int maxEntries = 1000;
+        
+        public MruCache()
+        {
+            super();
+        }
+
+        public MruCache(int maxSize)
+        {
+            super();
+            setMaxEntries(maxSize);
+        }
+
+        protected boolean removeEldestEntry(Map.Entry eldest)
+        {
+            return size() > maxEntries;
+        }
+        
+        public void setMaxEntries(int maxEntries)
+        {
+            this.maxEntries = maxEntries;
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void invalidateChainsCache()
+    {
+        _chainCache = new MruCache[] {
+            null,
+            new MruCache(_maxFilterChainsCacheSize),
+            new MruCache(_maxFilterChainsCacheSize),
+            null,
+            new MruCache(_maxFilterChainsCacheSize),
+            null,
+            null,
+            null,
+            new MruCache(_maxFilterChainsCacheSize) };
+    }
+    
 
     /* ------------------------------------------------------------ */
     /**
@@ -1087,6 +1138,7 @@ public class ServletHandler extends AbstractHandler
             getServer().getContainer().update(this,_filterMappings,filterMappings,"filterMapping",true);
         _filterMappings = filterMappings;
         updateMappings();
+        invalidateChainsCache();
     }
     
     /* ------------------------------------------------------------ */
@@ -1096,6 +1148,7 @@ public class ServletHandler extends AbstractHandler
             getServer().getContainer().update(this,_filters,holders,"filter",true);
         _filters=holders;
         updateNameMappings();
+        invalidateChainsCache();
     }
     
     /* ------------------------------------------------------------ */
@@ -1108,6 +1161,7 @@ public class ServletHandler extends AbstractHandler
             getServer().getContainer().update(this,_servletMappings,servletMappings,"servletMapping",true);
         _servletMappings = servletMappings;
         updateMappings();
+        invalidateChainsCache();
     }
     
     /* ------------------------------------------------------------ */
@@ -1120,6 +1174,7 @@ public class ServletHandler extends AbstractHandler
             getServer().getContainer().update(this,_servlets,holders,"servlet",true);
         _servlets=holders;
         updateNameMappings();
+        invalidateChainsCache();
     }
 
 
@@ -1253,6 +1308,13 @@ public class ServletHandler extends AbstractHandler
     public void setMaxFilterChainsCacheSize(int maxFilterChainsCacheSize)
     {
         _maxFilterChainsCacheSize = maxFilterChainsCacheSize;
+        for (int i=0; i<_chainCache.length; i++)
+        {
+            if (_chainCache[i] != null && _chainCache[i] instanceof MruCache)
+            {
+                _chainCache[i].setMaxEntries(maxFilterChainsCacheSize);
+            }
+        }
     }
     
     /**
