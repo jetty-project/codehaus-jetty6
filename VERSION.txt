@@ -1,5 +1,5 @@
 
-Jetty-6.1-SNAPSHOT
+Jetty-6.1.26.RC0 19 October 2010
  + JETTY-547 Improved usage of shutdownOutput before close.
  + JETTY-912 add per exchange timeout
  + JETTY-1051 offer jetty.skip flag for maven plugin
