@@ -393,10 +393,10 @@ public class WebAppContext extends Context
     {
         super.setClassLoader(classLoader);
         
-        if ( !(classLoader instanceof WebAppClassLoader) )
-        {
-            Log.info("NOTE: detected a classloader which is not an instance of WebAppClassLoader being set on WebAppContext, some typical class and resource locations may be missing on: " + toString() );
-        }
+//        if ( !(classLoader instanceof WebAppClassLoader) )
+//        {
+//            Log.info("NOTE: detected a classloader which is not an instance of WebAppClassLoader being set on WebAppContext, some typical class and resource locations may be missing on: " + toString() );
+//        }
         
         if (classLoader!=null && classLoader instanceof WebAppClassLoader)
             ((WebAppClassLoader)classLoader).setName(getDisplayName());
