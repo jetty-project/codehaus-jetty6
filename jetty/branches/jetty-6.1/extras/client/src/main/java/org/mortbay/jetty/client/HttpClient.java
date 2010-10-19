@@ -511,23 +511,27 @@ public class HttpClient extends AbstractBuffers implements Attributes
             }
 
             KeyManager[] keyManagers=null;
+            
             InputStream keystoreInputStream = null;
-
             keystoreInputStream= Resource.newResource(_keyStoreLocation).getInputStream();
+            
             KeyStore keyStore=KeyStore.getInstance(_keyStoreType);
-            keyStore.load(keystoreInputStream,_keyStorePassword==null?null:_keyStorePassword.toString().toCharArray());
-
+            keyStore.load(keystoreInputStream,_keyStorePassword==null?null:_keyStorePassword.toString().toCharArray());            
+            keystoreInputStream.close();
+            
             KeyManagerFactory keyManagerFactory=KeyManagerFactory.getInstance(_keyManagerAlgorithm);
             keyManagerFactory.init(keyStore,_keyManagerPassword==null?null:_keyManagerPassword.toString().toCharArray());
             keyManagers=keyManagerFactory.getKeyManagers();
 
             TrustManager[] trustManagers=null;
+            
             InputStream truststoreInputStream = null;
-
-                truststoreInputStream = Resource.newResource(_trustStoreLocation).getInputStream();
+            truststoreInputStream = Resource.newResource(_trustStoreLocation).getInputStream();
+            
             KeyStore trustStore=KeyStore.getInstance(_trustStoreType);
-            trustStore.load(truststoreInputStream,_trustStorePassword==null?null:_trustStorePassword.toString().toCharArray());
-
+            trustStore.load(truststoreInputStream,_trustStorePassword==null?null:_trustStorePassword.toString().toCharArray());           
+            truststoreInputStream.close();
+            
             TrustManagerFactory trustManagerFactory=TrustManagerFactory.getInstance(_trustManagerAlgorithm);
             trustManagerFactory.init(trustStore);
             trustManagers=trustManagerFactory.getTrustManagers();
