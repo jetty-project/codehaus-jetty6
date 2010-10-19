@@ -1,7 +1,6 @@
 Jetty-6.1.x
- + JETTY-1292 close input streams after keystore.load()
 
-Jetty-6.1.26.RC0 19 October 2010
+Jetty-6.1.26.RC0 20 October 2010
  + JETTY-547 Improved usage of shutdownOutput before close.
  + JETTY-912 add per exchange timeout
  + JETTY-1051 offer jetty.skip flag for maven plugin
@@ -14,6 +13,7 @@ Jetty-6.1.26.RC0 19 October 2010
  + JETTY-1287 rewrite handler thread safe issue resolved
  + JETTY-1288 info when atypical classloader set to WebAppContext
  + JETTY-1289 MRU cache for filter chains
+ + JETTY-1292 close input streams after keystore.load()
  + 325468 Clean work webapp dir before unpack
  + 327109 Fixed AJP handling of empty packets
  + 327562 Implement all X-Forwarded headers in ProxyServlet
