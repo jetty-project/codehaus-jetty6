@@ -1,3 +1,5 @@
+Jetty-6.1.x
+ + JETTY-1292 close input streams after keystore.load()
 
 Jetty-6.1.26.RC0 19 October 2010
  + JETTY-547 Improved usage of shutdownOutput before close.
