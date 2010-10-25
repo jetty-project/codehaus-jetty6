@@ -1,4 +1,6 @@
+
 jetty@codehaus 8.0.0.M2-SNAPSHOT
+ + 320073 Reconcile jetty-8 and jetty-7 webapp configuration mechanisms
  + JETTY-1051 offer jetty.skip flag for maven plugin
  + JETTY-1096 exclude maven, plexus classes from maven plugin
  + JETTY-1257 Duplicate dependency on conflicting versions of servlet-api
@@ -6,6 +8,10 @@ jetty@codehaus 8.0.0.M2-SNAPSHOT
  + Remove old jetty-plus.xml
  + Merge with jetty-7 as of 20100927
  + 327416 Change meaning of @HandlesTypes in line with latest interpretation by JSR315
+
+jetty@codehaus 7.2.0.v20101020 20 October 2010
+
+jetty@codehaus 7.2.0.RC0 1 October 2010
 
 jetty@codehaus 8.0.0.M1 12 July 2010
  + Updated to jetty core 8.0.0.M1
@@ -16,6 +22,7 @@ jetty@codehaus 8.0.0.M1 12 July 2010
  + Simplify test-jndi-webapp
  + Fix start.ini patch to reflect changes in 7.2.0
  + Update jetty-hightide pom to reflect changes for jta in 7.2.0
+ + Update to cometd-2.0.0
 
 jetty@codehaus 7.1.5.v20100705 
  + JETTY-1236 connectors added with jettyConfig ignored by maven plugin
