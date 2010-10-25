@@ -42,7 +42,7 @@ import org.eclipse.jetty.util.IO;
  *
  */
 
-@MultipartConfig(maxFileSize=10240, maxRequestSize=-1, fileSizeThreshold=2048)
+@MultipartConfig(location="foo/bar", maxFileSize=10240, maxRequestSize=-1, fileSizeThreshold=2048)
 public class MultiPartTest extends HttpServlet 
 {
     private ServletConfig config;
