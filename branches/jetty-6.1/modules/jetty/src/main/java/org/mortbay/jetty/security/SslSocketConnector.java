@@ -673,7 +673,12 @@ public class SslSocketConnector extends SocketConnector
             super(socket);
         }
         
-        public void run()
+        public void shutdownOutput() throws IOException
+        {
+			close();
+		}
+
+		public void run()
         {
             try
             {
