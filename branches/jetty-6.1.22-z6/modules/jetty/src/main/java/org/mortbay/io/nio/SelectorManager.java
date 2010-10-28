@@ -455,6 +455,25 @@ public abstract class SelectorManager extends AbstractLifeCycle
 				}
 			    }
 			}
+			catch (Error e)
+			{
+			    if (isRunning())
+				Log.warn(e);
+			    else
+				Log.debug(e);
+			    
+			    if (channel!=null)
+			    {
+				try
+				{
+				    channel.close();
+				}
+				catch(Exception e2)
+				{
+				    Log.ignore(e2);
+				}
+			    }
+			}
 		    }
 		}
 		finally
