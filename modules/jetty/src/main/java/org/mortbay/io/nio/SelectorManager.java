@@ -370,79 +370,85 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 }
 
                 // Make any key changes required
-                for (int i = 0; i < changes.size(); i++)
+                try
                 {
-                    try
-                    {
-                        Object o = changes.get(i);
-                        
-                        if (o instanceof EndPoint)
-                        {
-                            // Update the operations for a key.
-                            SelectChannelEndPoint endpoint = (SelectChannelEndPoint)o;
-                            endpoint.doUpdateKey();
-                        }
-                        else if (o instanceof Runnable)
-                        {
-                            dispatch((Runnable)o);
-                        }
-                        else if (o instanceof ChangeSelectableChannel)
-                        {
-                            // finish accepting/connecting this connection
-                            final ChangeSelectableChannel asc = (ChangeSelectableChannel)o;
-                            final SelectableChannel channel=asc._channel;
-                            final Object att = asc._attachment;
+                	for (int i = 0; i < changes.size(); i++)
+                	{
+                		try
+                		{
+                			Object o = changes.get(i);
 
-                            if ((channel instanceof SocketChannel) && ((SocketChannel)channel).isConnected())
-                            {
-                                key = channel.register(selector,SelectionKey.OP_READ,att);
-                                SelectChannelEndPoint endpoint = newEndPoint((SocketChannel)channel,this,key);
-                                key.attach(endpoint);
-                                endpoint.dispatch();
-                            }
-                            else if (channel.isOpen())
-                            {
-                                channel.register(selector,SelectionKey.OP_CONNECT,att);
-                            }
-                        }
-                        else if (o instanceof SocketChannel)
-                        {
-                            final SocketChannel channel=(SocketChannel)o;
+                			if (o instanceof EndPoint)
+                			{
+                				// Update the operations for a key.
+                				SelectChannelEndPoint endpoint = (SelectChannelEndPoint)o;
+                				endpoint.doUpdateKey();
+                			}
+                			else if (o instanceof Runnable)
+                			{
+                				dispatch((Runnable)o);
+                			}
+                			else if (o instanceof ChangeSelectableChannel)
+                			{
+                				// finish accepting/connecting this connection
+                				final ChangeSelectableChannel asc = (ChangeSelectableChannel)o;
+                				final SelectableChannel channel=asc._channel;
+                				final Object att = asc._attachment;
 
-                            if (channel.isConnected())
-                            {
-                                key = channel.register(selector,SelectionKey.OP_READ,null);
-                                SelectChannelEndPoint endpoint = newEndPoint(channel,this,key);
-                                key.attach(endpoint);
-                                endpoint.dispatch();
-                            }
-                            else if (channel.isOpen())
-                            {
-                                channel.register(selector,SelectionKey.OP_CONNECT,null);
-                            }
-                        }
-                        else if (o instanceof ServerSocketChannel)
-                        {
-                            ServerSocketChannel channel = (ServerSocketChannel)o;
-                            channel.register(getSelector(),SelectionKey.OP_ACCEPT);
-                        }
-                        else if (o instanceof ChangeTask)
-                        {
-                            ((ChangeTask)o).run();
-                        }
-                        else
-                            throw new IllegalArgumentException(o.toString());
-                    }
-                    catch (Exception e)
-                    {
-                        if (isRunning())
-                            Log.warn(e);
-                        else
-                            Log.debug(e);
-                    }
+                				if ((channel instanceof SocketChannel) && ((SocketChannel)channel).isConnected())
+                				{
+                					key = channel.register(selector,SelectionKey.OP_READ,att);
+                					SelectChannelEndPoint endpoint = newEndPoint((SocketChannel)channel,this,key);
+                					key.attach(endpoint);
+                					endpoint.dispatch();
+                				}
+                				else if (channel.isOpen())
+                				{
+                					channel.register(selector,SelectionKey.OP_CONNECT,att);
+                				}
+                			}
+                			else if (o instanceof SocketChannel)
+                			{
+                				final SocketChannel channel=(SocketChannel)o;
+
+                				if (channel.isConnected())
+                				{
+                					key = channel.register(selector,SelectionKey.OP_READ,null);
+                					SelectChannelEndPoint endpoint = newEndPoint(channel,this,key);
+                					key.attach(endpoint);
+                					endpoint.dispatch();
+                				}
+                				else if (channel.isOpen())
+                				{
+                					channel.register(selector,SelectionKey.OP_CONNECT,null);
+                				}
+                			}
+                			else if (o instanceof ServerSocketChannel)
+                			{
+                				ServerSocketChannel channel = (ServerSocketChannel)o;
+                				channel.register(getSelector(),SelectionKey.OP_ACCEPT);
+                			}
+                			else if (o instanceof ChangeTask)
+                			{
+                				((ChangeTask)o).run();
+                			}
+                			else
+                				throw new IllegalArgumentException(o.toString());
+                		}
+                		catch (Exception e)
+                		{
+                			if (isRunning())
+                				Log.warn(e);
+                			else
+                				Log.debug(e);
+                		}
+                	}
                 }
-                changes.clear();
-
+                finally
+                {
+                	changes.clear();
+                }
+                
                 long idle_next = 0;
                 long retry_next = 0;
                 long now=System.currentTimeMillis();
