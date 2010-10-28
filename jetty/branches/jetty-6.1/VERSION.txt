@@ -1,4 +1,5 @@
 Jetty-6.1.x
+ + JETTY-1291 Extract query parameters even if POST content consumed
  + JETTY-1296 Always clear changes list in selectManager
 
 Jetty-6.1.26.RC0 20 October 2010
