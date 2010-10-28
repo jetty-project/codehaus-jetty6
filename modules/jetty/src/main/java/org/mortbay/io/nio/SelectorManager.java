@@ -370,91 +370,97 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 }
 
                 // Make any key changes required
-                for (int i = 0; i < changes.size(); i++)
-                {
-                    SocketChannel channel=null;
-                    try
-                    {
-                        Object o = changes.get(i);
-                        
-                        if (o instanceof EndPoint)
-                        {
-                            // Update the operations for a key.
-                            SelectChannelEndPoint endpoint = (SelectChannelEndPoint)o;
-                            endpoint.doUpdateKey();
-                        }
-                        else if (o instanceof Runnable)
-                        {
-                            dispatch((Runnable)o);
-                        }
-                        else if (o instanceof ChangeSelectableChannel)
-                        {
-                            // finish accepting/connecting this connection
-                            ChangeSelectableChannel asc = (ChangeSelectableChannel)o;
-                            channel=(SocketChannel)asc._channel;
-                            Object att = asc._attachment;
+		try
+		{
+		    for (int i = 0; i < changes.size(); i++)
+		    {
+			SocketChannel channel=null;
+			try
+			{
+			    Object o = changes.get(i);
+			    
+			    if (o instanceof EndPoint)
+			    {
+				// Update the operations for a key.
+				SelectChannelEndPoint endpoint = (SelectChannelEndPoint)o;
+				endpoint.doUpdateKey();
+			    }
+			    else if (o instanceof Runnable)
+			    {
+				dispatch((Runnable)o);
+			    }
+			    else if (o instanceof ChangeSelectableChannel)
+			    {
+				// finish accepting/connecting this connection
+				ChangeSelectableChannel asc = (ChangeSelectableChannel)o;
+				channel=(SocketChannel)asc._channel;
+				Object att = asc._attachment;
 
-                            if (channel.isConnected())
-                            {
-                                key = channel.register(selector,SelectionKey.OP_READ,att);
-                                SelectChannelEndPoint endpoint = newEndPoint((SocketChannel)channel,this,key);
-                                key.attach(endpoint);
-                                endpoint.dispatch();
-                            }
-                            else if (channel.isOpen())
-                            {
-                                channel.register(selector,SelectionKey.OP_CONNECT,att);
-                            }
-                        }
-                        else if (o instanceof SocketChannel)
-                        {
-                            channel=(SocketChannel)o;
+				if (channel.isConnected())
+				{
+				    key = channel.register(selector,SelectionKey.OP_READ,att);
+				    SelectChannelEndPoint endpoint = newEndPoint((SocketChannel)channel,this,key);
+				    key.attach(endpoint);
+				    endpoint.dispatch();
+				}
+				else if (channel.isOpen())
+				{
+				    channel.register(selector,SelectionKey.OP_CONNECT,att);
+				}
+			    }
+			    else if (o instanceof SocketChannel)
+			    {
+				channel=(SocketChannel)o;
 
-                            if (channel.isConnected())
-                            {
-                                key = channel.register(selector,SelectionKey.OP_READ,null);
-                                SelectChannelEndPoint endpoint = newEndPoint(channel,this,key);
-                                key.attach(endpoint);
-                                endpoint.dispatch();
-                            }
-                            else if (channel.isOpen())
-                            {
-                                channel.register(selector,SelectionKey.OP_CONNECT,null);
-                            }
-                        }
-                        else if (o instanceof ServerSocketChannel)
-                        {
-                            ServerSocketChannel ssc = (ServerSocketChannel)o;
-                            ssc.register(getSelector(),SelectionKey.OP_ACCEPT);
-                        }
-                        else if (o instanceof ChangeTask)
-                        {
-                            ((ChangeTask)o).run();
-                        }
-                        else
-                            throw new IllegalArgumentException(o.toString());
-                    }
-                    catch (Exception e)
-                    {
-                        if (isRunning())
-                            Log.warn(e);
-                        else
-                            Log.debug(e);
-                        
-                        if (channel!=null)
-                        {
-                            try
-                            {
-                                channel.close();
-                            }
-                            catch(Exception e2)
-                            {
-                                Log.ignore(e2);
-                            }
-                        }
-                    }
-                }
-                changes.clear();
+				if (channel.isConnected())
+				{
+				    key = channel.register(selector,SelectionKey.OP_READ,null);
+				    SelectChannelEndPoint endpoint = newEndPoint(channel,this,key);
+				    key.attach(endpoint);
+				    endpoint.dispatch();
+				}
+				else if (channel.isOpen())
+				{
+				    channel.register(selector,SelectionKey.OP_CONNECT,null);
+				}
+			    }
+			    else if (o instanceof ServerSocketChannel)
+			    {
+				ServerSocketChannel ssc = (ServerSocketChannel)o;
+				ssc.register(getSelector(),SelectionKey.OP_ACCEPT);
+			    }
+			    else if (o instanceof ChangeTask)
+			    {
+				((ChangeTask)o).run();
+			    }
+			    else
+				throw new IllegalArgumentException(o.toString());
+			}
+			catch (Exception e)
+			{
+			    if (isRunning())
+				Log.warn(e);
+			    else
+				Log.debug(e);
+			    
+			    if (channel!=null)
+			    {
+				try
+				{
+				    channel.close();
+				}
+				catch(Exception e2)
+				{
+				    Log.ignore(e2);
+				}
+			    }
+			}
+		    }
+		}
+		finally
+		{
+                    changes.clear();
+		}
 
                 long idle_next = 0;
                 long retry_next = 0;
