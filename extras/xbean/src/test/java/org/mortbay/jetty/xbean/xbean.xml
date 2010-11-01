@@ -3,7 +3,7 @@
 
   <jetty xmlns="http://mortbay.com/schemas/jetty/1.0">
       <connectors>
-        <nioConnector port="8181" />
+        <nioConnector port="0" />
       </connectors>
     <handlers>
       <contexts>
