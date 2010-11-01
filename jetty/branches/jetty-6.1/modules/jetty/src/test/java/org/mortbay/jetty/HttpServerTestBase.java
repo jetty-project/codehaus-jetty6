@@ -118,6 +118,7 @@ public class HttpServerTestBase extends TestCase
     {
         Server server=startServer(new HelloWorldHandler());
         Socket client=new Socket(HOST,port);
+        client.setSoTimeout(10000);
         OutputStream os=client.getOutputStream();
 
         os.write(REQUEST1.getBytes());
@@ -140,6 +141,7 @@ public class HttpServerTestBase extends TestCase
 
         Server server=startServer(new EchoHandler());
         Socket client=new Socket(HOST,port);
+        client.setSoTimeout(10000);
         OutputStream os=client.getOutputStream();
 
         os.write(("GET /R2 HTTP/1.1\015\012"+"Host: localhost\015\012"+"Transfer-Encoding: chunked\015\012"+"Content-Type: text/plain\015\012"
@@ -177,6 +179,7 @@ public class HttpServerTestBase extends TestCase
         try
         {
             Socket client=new Socket(HOST,port);
+            client.setSoTimeout(10000);
             OutputStream os=client.getOutputStream();
 
             // Write a fragment, flush, sleep, write the next fragment, etc.
@@ -214,6 +217,7 @@ public class HttpServerTestBase extends TestCase
             for (int i=0; i<LOOPS; i++)
             {
                 Socket client=new Socket(HOST,port);
+                client.setSoTimeout(10000);
                 OutputStream os=client.getOutputStream();
 
                 os.write(bytes);
@@ -265,6 +269,7 @@ public class HttpServerTestBase extends TestCase
                 Arrays.sort(points);
 
                 Socket client=new Socket(HOST,port);
+                client.setSoTimeout(10000);
                 OutputStream os=client.getOutputStream();
 
                 writeFragments(bytes,points,message,os);
@@ -304,6 +309,7 @@ public class HttpServerTestBase extends TestCase
                 Arrays.sort(points);
 
                 Socket client=new Socket(HOST,port);
+                client.setSoTimeout(10000);
                 OutputStream os=client.getOutputStream();
 
                 writeFragments(bytes,points,message,os);
@@ -347,6 +353,7 @@ public class HttpServerTestBase extends TestCase
             for (int i=0; i<badPoints.length; ++i)
             {
                 Socket client=new Socket(HOST,port);
+                client.setSoTimeout(10000);
                 OutputStream os=client.getOutputStream();
                 StringBuffer message=new StringBuffer();
 
@@ -422,6 +429,7 @@ public class HttpServerTestBase extends TestCase
         {   
             long start=System.currentTimeMillis();
             Socket client=new Socket(HOST,port);
+            client.setSoTimeout(10000);
             OutputStream os=client.getOutputStream();
             InputStream is=client.getInputStream();
 
@@ -490,7 +498,7 @@ public class HttpServerTestBase extends TestCase
             for (int pipeline=1;pipeline<32;pipeline++)
             {   
                 Socket client=new Socket(HOST,port);
-                client.setSoTimeout(5000);
+                client.setSoTimeout(10000);
                 OutputStream os=client.getOutputStream();
 
                 String request="";
@@ -558,6 +566,7 @@ public class HttpServerTestBase extends TestCase
         {   
             long start=System.currentTimeMillis();
             Socket client=new Socket(HOST,port);
+            client.setSoTimeout(10000);
             OutputStream os=client.getOutputStream();
             InputStream is=client.getInputStream();
 
@@ -629,6 +638,7 @@ public class HttpServerTestBase extends TestCase
         {   
             long start=System.currentTimeMillis();
             Socket client=new Socket(HOST,port);
+            client.setSoTimeout(10000);
             OutputStream os=client.getOutputStream();
             InputStream is=client.getInputStream();
 
