@@ -729,15 +729,6 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
             {   
                 current.setPriority(old_priority);
                 current.setName(name);
-                try
-                {
-                    if (_acceptor==0)
-                        close();
-                }
-                catch (IOException e)
-                {
-                    Log.warn(e);
-                }
                 
                 synchronized(AbstractConnector.this)
                 {
