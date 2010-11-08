@@ -25,6 +25,7 @@ import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
 import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.log.Log;
+import org.mortbay.util.QuotedStringTokenizer;
 
 /* ------------------------------------------------------------ */
 /**
@@ -433,11 +434,12 @@ public class HttpGenerator extends AbstractGenerator
                         {
                             case -1:
                             { 
-                                String[] values = field.getValue().split(",");
-                                for  (int i=0;values!=null && i<values.length;i++)
-                                {
-                                    CachedBuffer cb = HttpHeaderValues.CACHE.get(values[i].trim());
 
+                                QuotedStringTokenizer tok = new QuotedStringTokenizer(field.getValue(), ",");
+                                while(tok.hasMoreTokens())
+                                {
+                                	String token=tok.nextToken().trim();
+                                    CachedBuffer cb = HttpHeaderValues.CACHE.get(token);
                                     if (cb!=null)
                                     {
                                         switch(cb.getOrdinal())
@@ -465,7 +467,7 @@ public class HttpGenerator extends AbstractGenerator
                                                     connection=new StringBuffer();
                                                 else
                                                     connection.append(',');
-                                                connection.append(values[i]);
+                                                connection.append(token);
                                         }
                                     }
                                     else
@@ -474,7 +476,7 @@ public class HttpGenerator extends AbstractGenerator
                                             connection=new StringBuffer();
                                         else
                                             connection.append(',');
-                                        connection.append(values[i]);
+                                        connection.append(token);
                                     }
                                 }
                                 

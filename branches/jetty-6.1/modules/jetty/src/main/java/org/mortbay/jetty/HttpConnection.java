@@ -821,11 +821,10 @@ public class HttpConnection implements Connection
                     {
                         case -1:
                         {
-                            String[] values = value.toString().split(",");
-                            for (int i = 0; values != null && i < values.length; i++)
+                            QuotedStringTokenizer tok = new QuotedStringTokenizer(value.toString(), ",");
+                            while(tok.hasMoreTokens())
                             {
-                                CachedBuffer cb = HttpHeaderValues.CACHE.get(values[i].trim());
-
+                                CachedBuffer cb = HttpHeaderValues.CACHE.get(tok.nextToken().trim());
                                 if (cb != null)
                                 {
                                     switch (cb.getOrdinal())

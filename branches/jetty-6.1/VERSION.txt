@@ -1,6 +1,7 @@
 Jetty-6.1.x
  + JETTY-748 Prevent race close of socket by old acceptor threads
  + JETTY-1291 Extract query parameters even if POST content consumed
+ + JETTY-1293 Avoid usage of String.split
  + JETTY-1296 Always clear changes list in selectManager
 
 Jetty-6.1.26.RC0 20 October 2010

@@ -61,6 +61,7 @@ import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
+import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.URIUtil;
 
 /* ------------------------------------------------------------ */
@@ -552,18 +553,18 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         String managedAttributes = (String)_initParams.get(MANAGED_ATTRIBUTES);
         if (managedAttributes!=null)
         {
-            _managedAttributes=new HashSet();
-            String[] attributes = managedAttributes.toString().split(",");
-	    for (int  i=0;i<attributes.length;i++)
-                _managedAttributes.add(attributes[i]);
+        	_managedAttributes=new HashSet();
+        	QuotedStringTokenizer tok = new QuotedStringTokenizer(managedAttributes,",");
+        	while (tok.hasMoreTokens())
+        		_managedAttributes.add(tok.nextToken().trim());
 
-            Enumeration e = _scontext.getAttributeNames();
-            while(e.hasMoreElements())
-            {
-                String name = (String)e.nextElement();
-                Object value = _scontext.getAttribute(name);
-                setManagedAttribute(name,value);
-            }
+        	Enumeration e = _scontext.getAttributeNames();
+        	while(e.hasMoreElements())
+        	{
+        		String name = (String)e.nextElement();
+        		Object value = _scontext.getAttribute(name);
+        		setManagedAttribute(name,value);
+        	}
         }       
     }
     
