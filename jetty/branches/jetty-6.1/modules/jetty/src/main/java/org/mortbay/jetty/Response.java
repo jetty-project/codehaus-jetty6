@@ -971,11 +971,10 @@ public class Response implements HttpServletResponse
         String connection=_connection.getRequestFields().getStringField(HttpHeaders.CONNECTION_BUFFER);
         if (connection!=null)
         {
-            String[] values = connection.split(",");
-            for  (int i=0;values!=null && i<values.length;i++)
+            QuotedStringTokenizer tok = new QuotedStringTokenizer(connection, ",");
+            while(tok.hasMoreTokens())
             {
-                CachedBuffer cb = HttpHeaderValues.CACHE.get(values[0].trim());
-
+                CachedBuffer cb = HttpHeaderValues.CACHE.get(tok.nextToken().trim());
                 if (cb!=null)
                 {
                     switch(cb.getOrdinal())
