@@ -1,3 +1,5 @@
+jetty@codehaus 7.2.1.v20101111 11 November 2010
+
 jetty@codehaus 7.2.0.v20101020 20 October 2010
 
 jetty@codehaus 7.2.0.RC0 1 October 2010
