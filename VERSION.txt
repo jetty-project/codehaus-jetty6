@@ -1,4 +1,4 @@
-Jetty-6.1.x
+Jetty-6.1.26 10 November 2010
  + JETTY-748 Prevent race close of socket by old acceptor threads
  + JETTY-1239 HTAccessHandler [allow from 127.0.0.1] does not work
  + JETTY-1291 Extract query parameters even if POST content consumed
