@@ -1,5 +1,6 @@
 Jetty-6.1.x
  + JETTY-748 Prevent race close of socket by old acceptor threads
+ + JETTY-1239 HTAccessHandler [allow from 127.0.0.1] does not work
  + JETTY-1291 Extract query parameters even if POST content consumed
  + JETTY-1293 Avoid usage of String.split
  + JETTY-1296 Always clear changes list in selectManager

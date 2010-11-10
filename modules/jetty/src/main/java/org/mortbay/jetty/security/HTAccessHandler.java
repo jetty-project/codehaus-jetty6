@@ -12,6 +12,8 @@ package org.mortbay.jetty.security;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -187,7 +189,10 @@ public class HTAccessHandler extends SecurityHandler
                 // first see if we need to handle based on method type
                 Map methods=ht.getMethods();
                 if (methods.size()>0&&!methods.containsKey(request.getMethod()))
+                {
+                    callWrappedHandler(target,request,response,dispatch);
                     return; // Nothing to check
+                }
 
                 // Check the accesss
                 int satisfy=ht.getSatisfy();
@@ -199,8 +204,11 @@ public class HTAccessHandler extends SecurityHandler
 
                 // If IP is correct and satify is ANY then access is allowed
                 if (IPValid==true&&satisfy==HTAccess.ANY)
+                {
+                    callWrappedHandler(target,request,response,dispatch);
                     return;
-
+                }
+                
                 // If IP is NOT correct and satify is ALL then access is
                 // forbidden
                 if (IPValid==false&&satisfy==HTAccess.ALL)
@@ -229,11 +237,7 @@ public class HTAccessHandler extends SecurityHandler
                 }
             }
             
-            if (getHandler()!=null)
-            {
-                getHandler().handle(target,request,response,dispatch);
-            }
-
+            callWrappedHandler(target,request,response,dispatch);
         }
         catch (Exception ex)
         {
@@ -246,6 +250,16 @@ public class HTAccessHandler extends SecurityHandler
         }
     }
     
+    /* ------------------------------------------------------------ */
+    /**
+     */
+    private void callWrappedHandler(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+    {
+    	Handler handler=getHandler();
+        if (handler!=null)
+            handler.handle(target,request,response,dispatch);
+    }
+
     /* ------------------------------------------------------------ */
     /** Get a Principal matching the user.
      * If there is no user realm, and therefore we are using a
