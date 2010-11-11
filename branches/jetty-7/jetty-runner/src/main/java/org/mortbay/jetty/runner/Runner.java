@@ -340,9 +340,7 @@ public class Runner
                 {
                     // It is a context config file
                     XmlConfiguration xmlConfiguration=new XmlConfiguration(ctx.getURL());
-                    HashMap<String,Object> properties = new HashMap<String,Object>();
-                    properties.put("Server", _server);
-                    xmlConfiguration.setProperties(properties);
+                    xmlConfiguration.getIdMap().put("Server",_server);
                     ContextHandler handler=(ContextHandler)xmlConfiguration.configure();
                     _contexts.addHandler(handler);
                     if (contextPathSet)
