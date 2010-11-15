@@ -78,7 +78,7 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
         //Add in any overlaid wars as base resources
         if (jwac.getOverlays() != null && !jwac.getOverlays().isEmpty())
         {
-            ResourceCollection rc = new ResourceCollection();
+            ResourceCollection rc;
 
             if(jwac.getBaseResource()==null)
             {
@@ -98,7 +98,8 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
 
                     Log.info("Adding overlay: " + resources[i]);
                 }
-                rc.setResources(resources);
+                
+                rc=new ResourceCollection(resources);
             }                
             else
             {                    
@@ -122,7 +123,7 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
 
                         Log.info("Adding overlay: " + resources[i]);
                     }
-                    rc.setResources(resources);
+                    rc=new ResourceCollection(resources);
                 }
                 else
                 {
@@ -142,7 +143,7 @@ public class MavenWebInfConfiguration extends WebInfConfiguration
                         
                         Log.info("Adding overlay: " + resources[i]);
                     }
-                    rc.setResources(resources);
+                    rc=new ResourceCollection(resources);
                 }
             }
 

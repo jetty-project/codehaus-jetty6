@@ -60,57 +60,57 @@ public class J2SEHTTPContextHandler extends ContextHandler
         try
         {
             Authenticator auth = _httpContext.getAuthenticator();
-	        if (auth != null)
-	            handleAuthentication(resp, jettyHttpExchange, auth);
-	        else
-	        	_httpHandler.handle(jettyHttpExchange);
+            if (auth != null)
+                handleAuthentication(resp, jettyHttpExchange, auth);
+            else
+                _httpHandler.handle(jettyHttpExchange);
         }
         catch(Exception ex)
         {
-        	PrintWriter writer = new PrintWriter(jettyHttpExchange.getResponseBody());
-        	
-        	resp.setStatus(500);
-        	writer.println("<h2>HTTP ERROR: 500</h2>");
-        	writer.println("<pre>INTERNAL_SERVER_ERROR</pre>");
-        	writer.println("<p>RequestURI=" + req.getRequestURI() + "</p>");
-        	
-        	writer.println("<pre>");
-			ex.printStackTrace(writer);
-        	writer.println("</pre>");
-        	
-        	writer.println("<p><i><small><a href=\"http://jetty.mortbay.org\">Powered by jetty://</a></small></i></p>");
-        	
-        	writer.close();
+            PrintWriter writer = new PrintWriter(jettyHttpExchange.getResponseBody());
+            
+            resp.setStatus(500);
+            writer.println("<h2>HTTP ERROR: 500</h2>");
+            writer.println("<pre>INTERNAL_SERVER_ERROR</pre>");
+            writer.println("<p>RequestURI=" + req.getRequestURI() + "</p>");
+            
+            writer.println("<pre>");
+            ex.printStackTrace(writer);
+            writer.println("</pre>");
+            
+            writer.println("<p><i><small><a href=\"http://jetty.mortbay.org\">Powered by jetty://</a></small></i></p>");
+            
+            writer.close();
         }
         finally
         {
-			Request base_request = (req instanceof Request) ? (Request)req:HttpConnection.getCurrentConnection().getRequest();
-			base_request.setHandled(true);
+            Request base_request = (req instanceof Request) ? (Request)req:HttpConnection.getCurrentConnection().getRequest();
+            base_request.setHandled(true);
         }
         
     }
 
 
-	private void handleAuthentication(HttpServletResponse resp, JettyHttpExchange jettyHttpExchange, Authenticator auth) throws IOException
-	{
-		Result result = auth.authenticate(jettyHttpExchange);
+    private void handleAuthentication(HttpServletResponse resp, JettyHttpExchange jettyHttpExchange, Authenticator auth) throws IOException
+    {
+        Result result = auth.authenticate(jettyHttpExchange);
         if (result instanceof Authenticator.Failure)
         {
-        	int rc = ((Authenticator.Failure)result).getResponseCode();
-        	resp.sendError(rc);
+            int rc = ((Authenticator.Failure)result).getResponseCode();
+            resp.sendError(rc);
         }
         else if (result instanceof Authenticator.Retry)
         {
-        	int rc = ((Authenticator.Retry)result).getResponseCode();
-        	resp.sendError(rc);
+            int rc = ((Authenticator.Retry)result).getResponseCode();
+            resp.sendError(rc);
         }
         else if (result instanceof Authenticator.Success)
         {
-        	HttpPrincipal principal = ((Authenticator.Success)result).getPrincipal();
-        	jettyHttpExchange.setPrincipal(principal);
-    		_httpHandler.handle(jettyHttpExchange);
+            HttpPrincipal principal = ((Authenticator.Success)result).getPrincipal();
+            jettyHttpExchange.setPrincipal(principal);
+            _httpHandler.handle(jettyHttpExchange);
         }
-	}
+    }
 
     public HttpHandler getHttpHandler()
     {
