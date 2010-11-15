@@ -221,7 +221,8 @@ public class JettyWebAppContext extends WebAppContext
                     String jarName = uri.replace(WEB_INF_LIB_PREFIX, "");
                     if (jarName.startsWith("/") || jarName.startsWith("\\")) 
                         jarName = jarName.substring(1);
-                    if (jarName.isEmpty()) return null;
+                    if (jarName.length()==0) 
+                        return null;
                     File jarFile = webInfJarMap.get(jarName);
                     if (jarFile != null)
                         return Resource.newResource(jarFile.getPath());
