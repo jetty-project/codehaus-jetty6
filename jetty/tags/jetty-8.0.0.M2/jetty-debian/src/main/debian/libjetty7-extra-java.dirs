@@ -1,0 +1,9 @@
+usr/share/jetty7
+usr/share/jetty7/lib
+usr/share/jetty7/lib/annotations
+usr/share/jetty7/lib/ext
+usr/share/jetty7/lib/ssl
+usr/share/jetty7/lib/jmx
+usr/share/jetty7/lib/jndi
+usr/share/jetty7/lib/plus
+etc/jetty7

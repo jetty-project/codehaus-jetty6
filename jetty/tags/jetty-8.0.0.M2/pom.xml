@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.mortbay.jetty</groupId>
+    <artifactId>jetty-parent</artifactId>
+    <version>10</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.mortbay.jetty</groupId>
+  <artifactId>jetty-integration-project</artifactId>
+  <version>8.0.0.M2</version>
+  <name>Jetty :: Codehaus Integration Project</name>
+  <description>Jetty integrations and distributions</description>
+  <packaging>pom</packaging>
+
+  <properties>
+    <jetty-version>8.0.0.M2</jetty-version>
+    <felix.bundle.version>2.0.0</felix.bundle.version>
+    <jna-version>3.2.2</jna-version>
+    <jsp-version>2.2</jsp-version>
+    <servlet.spec.groupId>org.mortbay.jetty</servlet.spec.groupId>
+    <servlet.spec.artifactId>servlet-api</servlet.spec.artifactId>
+    <servlet.spec.version>3.0.20100224</servlet.spec.version>
+  </properties>
+
+  <scm>
+    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-8.0.0.M2</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-8.0.0.M2</developerConnection>
+    <url>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-8.0.0.M2</url>
+  </scm>
+
+  <build>
+    <defaultGoal>install</defaultGoal>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+          <verbose>false</verbose>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+         <tagBase>https://svn.codehaus.org/jetty/jetty/tags</tagBase>
+        </configuration>
+      </plugin>
+       <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-remote-resources-plugin</artifactId>
+          <executions>
+            <execution>
+              <phase>generate-resources</phase>
+              <goals>
+                <goal>process</goal>
+              </goals>
+              <configuration>
+                <resourceBundles>
+                  <resourceBundle>org.eclipse.jetty.toolchain:jetty-artifact-remote-resources:1.0</resourceBundle>
+                </resourceBundles>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+    </plugins>
+    <pluginManagement>
+      <plugins>
+       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Vendor>MortBay - Jetty</Implementation-Vendor>
+              <url>${jetty.url}</url>
+            </manifestEntries>
+          </archive>
+        </configuration>
+       </plugin>
+       <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-surefire-plugin</artifactId>
+         <version>2.4.2</version>
+       </plugin>
+       <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-antrun-plugin</artifactId>
+         <version>1.4</version>
+       </plugin>
+       <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.2-beta-5</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.eclipse.jetty.toolchain</groupId>
+              <artifactId>jetty-assembly-descriptors</artifactId>
+              <version>1.0</version>
+            </dependency>
+          </dependencies>
+       </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+  <modules>
+    <module>jetty-maven-plugin</module>
+    <module>jetty-jspc-maven-plugin</module>
+    <!-- module>jetty-ant</module -->
+    <module>jetty-integration-tests</module>
+    <!-- module>jetty-runner</module -->
+    <module>jetty-blazeds</module>
+    <module>jetty-pkcs12</module>
+    <!-- module>jetty-j2sehttp-spi</module -->
+    <module>jetty-setuid</module>
+    <module>test-container-initializer</module>
+    <module>test-fragment</module>
+    <module>test-annotation-webapp</module>
+    <module>test-jetty-webapp</module>
+    <module>test-jndi-webapp</module>
+    <module>test-jaas-webapp</module>
+    <module>jetty-spring</module>
+    <module>example-async-rest-webapp</module>
+    <module>jetty-hightide</module>
+    <!-- module>jetty-jboss</module -->
+  </modules>
+
+  <repositories>
+    <repository>
+      <id>download.java.net</id>
+      <name>Java.net Repository</name>
+      <layout>default</layout>
+      <url>http://download.java.net/maven/2/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+   </repository>
+    <repository>
+      <id>glassfish.download.java.net</id>
+      <name>Java.net Repository for Glassfish</name>
+      <layout>default</layout>
+      <url>http://download.java.net/maven/glassfish/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+   </repository>
+  </repositories>
+</project>
