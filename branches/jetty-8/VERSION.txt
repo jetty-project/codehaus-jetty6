@@ -2,7 +2,7 @@ jetty@codehaus 7.2.1.v20101111 11 November 2010
 
 jetty@codehaus 7.2.0.v20101020 20 October 2010
 
-jetty@codehaus 8.0.0.M2-SNAPSHOT
+jetty@codehaus 8.0.0.M2 16 November 2010
  + 320073 Reconcile jetty-8 and jetty-7 webapp configuration mechanisms
  + JETTY-1051 offer jetty.skip flag for maven plugin
  + JETTY-1096 exclude maven, plexus classes from maven plugin
