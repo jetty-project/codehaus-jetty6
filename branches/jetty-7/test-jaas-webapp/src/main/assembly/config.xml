@@ -10,7 +10,8 @@
       <directory>src/main/config</directory>
       <outputDirectory></outputDirectory>
       <includes>
-        <include>**</include>
+        <include>contexts/**</include>
+        <include>etc/**</include>
       </includes>
     </fileSet>
   </fileSets>
