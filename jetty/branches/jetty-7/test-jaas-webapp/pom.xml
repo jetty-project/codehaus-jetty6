@@ -58,7 +58,7 @@
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>config.xml</descriptor>
+                <descriptor>${basedir}/src/main/assembly/config.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>
