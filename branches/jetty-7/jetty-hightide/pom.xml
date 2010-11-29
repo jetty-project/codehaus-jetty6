@@ -126,7 +126,7 @@
           </execution>
           <execution>
             <id>copy-dist-deps</id>
-            <phase>package</phase>
+            <phase>process-sources</phase>
             <goals>
               <goal>copy</goal>
             </goals>
