@@ -139,12 +139,20 @@ public class JettyWebAppContext extends WebAppContext
     /* ------------------------------------------------------------ */
     /**
      * This method is provided as a conveniance for jetty maven plugin configuration 
-     * @param resourceBases Array of resources to set as a {@link ResourceCollection}
+     * @param resourceBases Array of resources strings to set as a {@link ResourceCollection}. Each resource string may be a comma separated list of resources
+     * @see Resource
      */
     public void setResourceBases(String[] resourceBases)
     {
-        setBaseResource(new ResourceCollection(resourceBases));
-        System.err.println(getBaseResource());
+        List<String> resources = new ArrayList<String>();
+        for (String rl:resourceBases)
+        {
+            String[] rs = rl.split(" *, *");
+            for (String r:rs)
+                resources.add(r);
+        }
+        
+        setBaseResource(new ResourceCollection(resources.toArray(new String[resources.size()])));
     }
 
     public List<File> getWebInfLib()
