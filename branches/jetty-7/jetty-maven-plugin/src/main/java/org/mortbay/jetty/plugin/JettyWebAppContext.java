@@ -31,6 +31,7 @@ import org.eclipse.jetty.plus.webapp.EnvConfiguration;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.resource.ResourceCollection;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.FragmentConfiguration;
 import org.eclipse.jetty.webapp.JettyWebXmlConfiguration;
@@ -133,6 +134,17 @@ public class JettyWebAppContext extends WebAppContext
     public void setWebInfLib (List<File> jars)
     {
         webInfJars.addAll(jars);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * This method is provided as a conveniance for jetty maven plugin configuration 
+     * @param resourceBases Array of resources to set as a {@link ResourceCollection}
+     */
+    public void setResourceBases(String[] resourceBases)
+    {
+        setBaseResource(new ResourceCollection(resourceBases));
+        System.err.println(getBaseResource());
     }
 
     public List<File> getWebInfLib()
