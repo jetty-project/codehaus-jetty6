@@ -16,6 +16,7 @@ package org.mortbay.resource;
 import java.io.File;
 import java.io.IOException;
 import java.net.JarURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -27,7 +28,6 @@ import org.mortbay.log.Log;
 /* ------------------------------------------------------------ */
 class JarFileResource extends JarResource
 {
-    
     transient JarFile _jarFile;
     transient File _file;
     transient String[] _list;
@@ -103,7 +103,7 @@ class JarFileResource extends JarResource
     
     /* ------------------------------------------------------------ */
     /**
-     * Returns true if the respresenetd resource exists.
+     * Returns true if the respresented resource exists.
      */
     public boolean exists()
     {
@@ -165,6 +165,7 @@ class JarFileResource extends JarResource
                         _entry=entry;
                         // Is the match a directory
                         _directory=_path.endsWith("/");
+                        
                         break;
                     }
                     else if (_path.endsWith("/"))
@@ -180,6 +181,19 @@ class JarFileResource extends JarResource
                         _directory=true;
                         break;
                     }
+                }
+                
+                if (_directory && !_urlString.endsWith("/"))
+                {
+                	_urlString+="/";
+                	try
+                	{
+                		_url=new URL(_urlString);
+                	}
+                	catch(MalformedURLException ex)
+                	{
+                		Log.warn(ex);
+                	}
                 }
             }
         }    
