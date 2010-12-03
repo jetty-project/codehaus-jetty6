@@ -1,7 +1,5 @@
-
+jetty@codehaus 7.2.2.v20101203 3 December 2010
  + 331245 setBaseResources method for jetty-maven-plugin context
-
-jetty@codehaus 7.2.2.v20101201 1 December 2010
  + JETTY-1303 fix packaging order so jdbc dir is in distro
 
 jetty@codehaus 7.2.1.v20101111 11 November 2010
