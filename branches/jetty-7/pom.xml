@@ -25,7 +25,6 @@
     <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/branches/jetty-7</developerConnection>
     <url>scm:svn:https://svn.codehaus.org/jetty/jetty/branches/jetty-7</url>
   </scm>
-
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
