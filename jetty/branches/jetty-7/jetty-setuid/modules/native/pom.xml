@@ -2,7 +2,7 @@
     <parent>
         <artifactId>jetty-setuid</artifactId>
         <groupId>org.mortbay.jetty</groupId>
-        <version>7.2.3-SNAPSHOT</version>
+        <version>7.2.2.v20101205</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
