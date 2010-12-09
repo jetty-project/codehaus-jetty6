@@ -34,6 +34,8 @@ import javax.servlet.http.HttpSessionListener;
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HandlerContainer;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.deployer.ContextDeployer;
 import org.mortbay.jetty.deployer.WebAppDeployer;
@@ -412,6 +414,8 @@ public class WebAppContext extends Context
     {   
         if (_unavailable)
         {
+            Request base_request = request instanceof Request?(Request)request:HttpConnection.getCurrentConnection().getRequest();
+            base_request.setHandled(true);
             response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         }
         else
@@ -946,7 +950,7 @@ public class WebAppContext extends Context
                         //only extract if the war file is newer
                         if (web_app.lastModified() > extractedWebAppDir.lastModified())
                         {
-                            extractedWebAppDir.delete();
+                            IO.delete(extractedWebAppDir);
                             extractedWebAppDir.mkdir();
                             Log.info("Extract " + _war + " to " + extractedWebAppDir);
                             JarResource.extract(web_app, extractedWebAppDir, false);

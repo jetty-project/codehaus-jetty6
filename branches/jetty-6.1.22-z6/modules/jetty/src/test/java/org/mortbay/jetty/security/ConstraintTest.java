@@ -195,6 +195,60 @@ public class ConstraintTest extends TestCase
         assertTrue(response.startsWith("HTTP/1.1 200 OK"));
         
     }
+
+    public void testFormNoCookie()
+        throws Exception
+    {
+        FormAuthenticator authenticator = new FormAuthenticator();
+        authenticator.setErrorPage("/testErrorPage");
+        authenticator.setLoginPage("/testLoginPage");
+        _security.setAuthenticator(authenticator);
+        String response;
+
+        _connector.reopen();
+        response=_connector.getResponses("GET /ctx/noauth/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+        
+        _connector.reopen();
+        response=_connector.getResponses("GET /ctx/forbid/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 403 Forbidden"));
+        
+        _connector.reopen();
+        response=_connector.getResponses("GET /ctx/auth/info HTTP/1.0\r\n\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 302 Found"));
+        assertTrue(response.indexOf("Location")>0);
+        assertTrue(response.indexOf("testLoginPage")>0);
+        int jsession=response.indexOf(";jsessionid=");
+        String session = response.substring(jsession + 12, response.indexOf("\r\n",jsession));
+        
+
+        _connector.reopen();
+        response=_connector.getResponses("POST /ctx/j_security_check;jsessionid="+session+" HTTP/1.0\r\n"+
+            "Content-Type: application/x-www-form-urlencoded\r\n"+
+            "Content-Length: 31\r\n"+
+            "\r\n"+
+            "j_username=user&j_password=wrong\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 302 Found"));
+        assertTrue(response.indexOf("Location")>0);
+        assertTrue(response.indexOf("testErrorPage")>0);
+        
+
+        _connector.reopen();
+        response=_connector.getResponses("POST /ctx/j_security_check;jsessionid="+session+" HTTP/1.0\r\n"+
+            "Content-Type: application/x-www-form-urlencoded\r\n"+
+            "Content-Length: 31\r\n"+
+            "\r\n"+
+            "j_username=user&j_password=pass\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 302 Found"));
+        assertTrue(response.indexOf("Location")>0);
+        assertTrue(response.indexOf("/ctx/auth/info")>0);
+        
+        _connector.reopen();
+        response=_connector.getResponses("GET /ctx/auth/info;jsessionid="+session+" HTTP/1.0\r\n"+
+                "\r\n");
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+        
+    }
     
     
     class RequestHandler extends AbstractHandler
