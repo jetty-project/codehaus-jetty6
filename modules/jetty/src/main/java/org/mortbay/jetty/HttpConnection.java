@@ -779,6 +779,7 @@ public class HttpConnection implements Connection
             }
             catch (Exception e)
             {
+                Log.debug(e);
                 throw new HttpException(HttpStatus.ORDINAL_400_Bad_Request,null,e);
             }
         }
@@ -821,11 +822,10 @@ public class HttpConnection implements Connection
                     {
                         case -1:
                         {
-                            String[] values = value.toString().split(",");
-                            for (int i = 0; values != null && i < values.length; i++)
+                            QuotedStringTokenizer tok = new QuotedStringTokenizer(value.toString(), ",");
+                            while(tok.hasMoreTokens())
                             {
-                                CachedBuffer cb = HttpHeaderValues.CACHE.get(values[i].trim());
-
+                                CachedBuffer cb = HttpHeaderValues.CACHE.get(tok.nextToken().trim());
                                 if (cb != null)
                                 {
                                     switch (cb.getOrdinal())
@@ -864,6 +864,8 @@ public class HttpConnection implements Connection
          */
         public void headerComplete() throws IOException
         {
+            if (_endp instanceof SelectChannelEndPoint)
+                ((SelectChannelEndPoint)_endp).scheduleIdle();
             _requests++;
             _generator.setVersion(_version);
             switch (_version)
@@ -907,7 +909,10 @@ public class HttpConnection implements Connection
                         }
                         else
                         {
-                            _generator.sendError(HttpStatus.ORDINAL_417_Expectation_Failed,null,null,true);
+                            _generator.setResponse(HttpStatus.ORDINAL_417_Expectation_Failed, null);
+                            _responseFields.put(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
+                            _generator.completeHeader(_responseFields, true);
+                            _generator.complete();
                             return;
                         }
                     }
@@ -933,6 +938,8 @@ public class HttpConnection implements Connection
          */
         public void content(Buffer ref) throws IOException
         {
+            if (_endp instanceof SelectChannelEndPoint)
+                ((SelectChannelEndPoint)_endp).scheduleIdle();
             if (_delayedHandling)
             {
                 _delayedHandling = false;

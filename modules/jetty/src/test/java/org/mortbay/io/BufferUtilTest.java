@@ -83,6 +83,29 @@ public class BufferUtilTest extends TestCase
         }       
     }
 
+    public void testPutLong()
+        throws Exception
+    {
+        long val[] =
+        {
+            0,42,43,-44,-45,Long.MIN_VALUE,Long.MAX_VALUE
+        };
+        
+        String str[] =
+        {
+            "0","42","43","-44","-45",""+Long.MIN_VALUE,""+Long.MAX_VALUE
+        };
+        
+        Buffer buffer = new ByteArrayBuffer(32);
+
+        for (int i=0;i<val.length;i++)
+        {
+            buffer.clear();
+            BufferUtil.putDecLong(buffer,val[i]);
+            assertEquals("t"+i,str[i],BufferUtil.to8859_1_String(buffer));
+        }       
+    }
+
     public void testPutHexInt()
         throws Exception
     {
