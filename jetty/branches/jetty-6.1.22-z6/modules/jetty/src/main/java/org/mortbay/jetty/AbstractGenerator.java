@@ -53,7 +53,7 @@ public abstract class AbstractGenerator implements Generator
     public final static int STATE_FLUSHING = 3;
     public final static int STATE_END = 4;
     
-    private static byte[] NO_BYTES = {};
+    private static final byte[] NO_BYTES = {};
     private static int MAX_OUTPUT_CHARS = 512; 
 
     private static Buffer[] __reasons = new Buffer[505];
@@ -460,10 +460,11 @@ public abstract class AbstractGenerator implements Generator
      */
     public void sendError(int code, String reason, String content, boolean close) throws IOException
     {
+        if (close)
+            _close = close;
         if (!isCommitted())
         {
             setResponse(code, reason);
-            _close = close;
             completeHeader(null, false);
             if (content != null) 
                 addContent(new View(new ByteArrayBuffer(content)), Generator.LAST);
@@ -577,6 +578,7 @@ public abstract class AbstractGenerator implements Generator
         {
             _buf.wrap(b, off, len);
             write(_buf);
+            _buf.wrap(NO_BYTES);
         }
 
         /* ------------------------------------------------------------ */
@@ -587,6 +589,7 @@ public abstract class AbstractGenerator implements Generator
         {
             _buf.wrap(b);
             write(_buf);
+            _buf.wrap(NO_BYTES);
         }
 
         /* ------------------------------------------------------------ */

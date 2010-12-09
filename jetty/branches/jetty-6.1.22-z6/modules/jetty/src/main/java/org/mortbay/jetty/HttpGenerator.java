@@ -25,6 +25,7 @@ import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
 import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.log.Log;
+import org.mortbay.util.QuotedStringTokenizer;
 
 /* ------------------------------------------------------------ */
 /**
@@ -387,6 +388,7 @@ public class HttpGenerator extends AbstractGenerator
         HttpFields.Field transfer_encoding = null;
         boolean keep_alive = false;
         boolean close=false;
+        boolean content_type =false;
         StringBuffer connection = null;
 
         if (fields != null)
@@ -411,8 +413,9 @@ public class HttpGenerator extends AbstractGenerator
                         break;
 
                     case HttpHeaders.CONTENT_TYPE_ORDINAL:
-                        if (BufferUtil.isPrefix(MimeTypes.MULTIPART_BYTERANGES_BUFFER, field.getValueBuffer())) _contentLength = HttpTokens.SELF_DEFINING_CONTENT;
-
+                        if (BufferUtil.isPrefix(MimeTypes.MULTIPART_BYTERANGES_BUFFER, field.getValueBuffer())) 
+                            _contentLength = HttpTokens.SELF_DEFINING_CONTENT;
+                        content_type=true;
                         // write the field to the header buffer
                         field.put(_header);
                         break;
@@ -431,11 +434,12 @@ public class HttpGenerator extends AbstractGenerator
                         {
                             case -1:
                             { 
-                                String[] values = field.getValue().split(",");
-                                for  (int i=0;values!=null && i<values.length;i++)
-                                {
-                                    CachedBuffer cb = HttpHeaderValues.CACHE.get(values[i].trim());
 
+                                QuotedStringTokenizer tok = new QuotedStringTokenizer(field.getValue(), ",");
+                                while(tok.hasMoreTokens())
+                                {
+                                	String token=tok.nextToken().trim();
+                                    CachedBuffer cb = HttpHeaderValues.CACHE.get(token);
                                     if (cb!=null)
                                     {
                                         switch(cb.getOrdinal())
@@ -463,7 +467,7 @@ public class HttpGenerator extends AbstractGenerator
                                                     connection=new StringBuffer();
                                                 else
                                                     connection.append(',');
-                                                connection.append(values[i]);
+                                                connection.append(token);
                                         }
                                     }
                                     else
@@ -472,7 +476,7 @@ public class HttpGenerator extends AbstractGenerator
                                             connection=new StringBuffer();
                                         else
                                             connection.append(',');
-                                        connection.append(values[i]);
+                                        connection.append(token);
                                     }
                                 }
                                 
@@ -547,7 +551,7 @@ public class HttpGenerator extends AbstractGenerator
                 {
                     // we have seen all the _content there is
                     _contentLength = _contentWritten;
-                    if (content_length == null)
+                    if (content_length == null && (_method==null || content_type || _contentLength>0))
                     {
                         // known length but not actually set.
                         _header.put(HttpHeaders.CONTENT_LENGTH_BUFFER);
@@ -759,7 +763,7 @@ public class HttpGenerator extends AbstractGenerator
                             if (_state == STATE_FLUSHING)
                                 _state = STATE_END;
                             if (_state==STATE_END && _close && _status!=100) 
-                                _endp.close();
+                                _endp.shutdownOutput();
                             
                             break Flushing;
                         }

@@ -146,7 +146,7 @@ public class JarResource extends URLResource
             String entryName = entry.getName();
             if ((subEntryName != null) && (entryName.startsWith(subEntryName)))
             { 
-                //if there is a particular subEntry that we are looking for, only
+            	//if there is a particular subEntry that we are looking for, only
                 //extract it.
                 if (subEntryIsDir)
                 {

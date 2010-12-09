@@ -23,15 +23,9 @@ import java.io.LineNumberReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.channels.SocketChannel;
 import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.List;
 import java.util.Random;
 
 import javax.servlet.ServletException;
@@ -42,7 +36,6 @@ import junit.framework.TestCase;
 
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.thread.BoundedThreadPool;
-import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.util.IO;
 
 /**
@@ -104,7 +97,7 @@ public class HttpServerTestBase extends TestCase
     private static final String HOST="localhost";
 
     private Connector _connector;
-    private int _port=0;
+    private int port=0;
 
     protected void tearDown() throws Exception
     {
@@ -124,7 +117,8 @@ public class HttpServerTestBase extends TestCase
     public void testRequest1_jetty() throws Exception, InterruptedException
     {
         Server server=startServer(new HelloWorldHandler());
-        Socket client=new Socket(HOST,_port);
+        Socket client=new Socket(HOST,port);
+        client.setSoTimeout(10000);
         OutputStream os=client.getOutputStream();
 
         os.write(REQUEST1.getBytes());
@@ -146,7 +140,8 @@ public class HttpServerTestBase extends TestCase
     {
 
         Server server=startServer(new EchoHandler());
-        Socket client=new Socket(HOST,_port);
+        Socket client=new Socket(HOST,port);
+        client.setSoTimeout(10000);
         OutputStream os=client.getOutputStream();
 
         os.write(("GET /R2 HTTP/1.1\015\012"+"Host: localhost\015\012"+"Transfer-Encoding: chunked\015\012"+"Content-Type: text/plain\015\012"
@@ -183,7 +178,8 @@ public class HttpServerTestBase extends TestCase
 
         try
         {
-            Socket client=new Socket(HOST,_port);
+            Socket client=new Socket(HOST,port);
+            client.setSoTimeout(10000);
             OutputStream os=client.getOutputStream();
 
             // Write a fragment, flush, sleep, write the next fragment, etc.
@@ -220,7 +216,8 @@ public class HttpServerTestBase extends TestCase
         {
             for (int i=0; i<LOOPS; i++)
             {
-                Socket client=new Socket(HOST,_port);
+                Socket client=new Socket(HOST,port);
+                client.setSoTimeout(10000);
                 OutputStream os=client.getOutputStream();
 
                 os.write(bytes);
@@ -271,7 +268,8 @@ public class HttpServerTestBase extends TestCase
                 // Sort the list
                 Arrays.sort(points);
 
-                Socket client=new Socket(HOST,_port);
+                Socket client=new Socket(HOST,port);
+                client.setSoTimeout(10000);
                 OutputStream os=client.getOutputStream();
 
                 writeFragments(bytes,points,message,os);
@@ -310,7 +308,8 @@ public class HttpServerTestBase extends TestCase
                 // Sort the list
                 Arrays.sort(points);
 
-                Socket client=new Socket(HOST,_port);
+                Socket client=new Socket(HOST,port);
+                client.setSoTimeout(10000);
                 OutputStream os=client.getOutputStream();
 
                 writeFragments(bytes,points,message,os);
@@ -353,7 +352,8 @@ public class HttpServerTestBase extends TestCase
         {
             for (int i=0; i<badPoints.length; ++i)
             {
-                Socket client=new Socket(HOST,_port);
+                Socket client=new Socket(HOST,port);
+                client.setSoTimeout(10000);
                 OutputStream os=client.getOutputStream();
                 StringBuffer message=new StringBuffer();
 
@@ -399,7 +399,7 @@ public class HttpServerTestBase extends TestCase
                         for (int c=0;c<1;c++)
                         {
                             String test=encoding[e]+"x"+b+"x"+w+"x"+c;
-                            URL url=new URL("http://"+HOST+":"+_port+"/?writes="+w+"&block="+b+ (e==0?"":("&encoding="+encoding[e]))+(c==0?"&chars=true":""));
+                            URL url=new URL("http://"+HOST+":"+port+"/?writes="+w+"&block="+b+ (e==0?"":("&encoding="+encoding[e]))+(c==0?"&chars=true":""));
                             InputStream in = (InputStream)url.getContent();
                             String response=IO.toString(in,e==0?null:encoding[e]);
                             
@@ -428,13 +428,14 @@ public class HttpServerTestBase extends TestCase
         try
         {   
             long start=System.currentTimeMillis();
-            Socket client=new Socket(HOST,_port);
+            Socket client=new Socket(HOST,port);
+            client.setSoTimeout(10000);
             OutputStream os=client.getOutputStream();
             InputStream is=client.getInputStream();
 
             os.write((
                     "GET /data?writes=1024&block=256 HTTP/1.1\r\n"+
-                    "host: "+HOST+":"+_port+"\r\n"+
+                    "host: "+HOST+":"+port+"\r\n"+
                     "connection: close\r\n"+
                     "content-type: unknown\r\n"+
                     "content-length: 30\r\n"+
@@ -496,8 +497,8 @@ public class HttpServerTestBase extends TestCase
         {   
             for (int pipeline=1;pipeline<32;pipeline++)
             {   
-                Socket client=new Socket(HOST,_port);
-                client.setSoTimeout(5000);
+                Socket client=new Socket(HOST,port);
+                client.setSoTimeout(10000);
                 OutputStream os=client.getOutputStream();
 
                 String request="";
@@ -505,7 +506,7 @@ public class HttpServerTestBase extends TestCase
                 for (int i=1;i<pipeline;i++)
                     request+=
                         "GET /data?writes=1&block=16&id="+i+" HTTP/1.1\r\n"+
-                        "host: "+HOST+":"+_port+"\r\n"+
+                        "host: "+HOST+":"+port+"\r\n"+
                         "user-agent: testharness/1.0 (blah foo/bar)\r\n"+
                         "accept-encoding: nothing\r\n"+
                         "cookie: aaa=1234567890\r\n"+
@@ -513,7 +514,7 @@ public class HttpServerTestBase extends TestCase
                 
                 request+=
                     "GET /data?writes=1&block=16 HTTP/1.1\r\n"+
-                    "host: "+HOST+":"+_port+"\r\n"+
+                    "host: "+HOST+":"+port+"\r\n"+
                     "user-agent: testharness/1.0 (blah foo/bar)\r\n"+
                     "accept-encoding: nothing\r\n"+
                     "cookie: aaa=bbbbbb\r\n"+
@@ -564,13 +565,14 @@ public class HttpServerTestBase extends TestCase
         try
         {   
             long start=System.currentTimeMillis();
-            Socket client=new Socket(HOST,_port);
+            Socket client=new Socket(HOST,port);
+            client.setSoTimeout(10000);
             OutputStream os=client.getOutputStream();
             InputStream is=client.getInputStream();
 
             os.write((
                     "POST /echo?charset=utf-8 HTTP/1.1\r\n"+
-                    "host: "+HOST+":"+_port+"\r\n"+
+                    "host: "+HOST+":"+port+"\r\n"+
                     "content-type: text/plain; charset=utf-8\r\n"+
                     "content-length: 10\r\n"+
                     "\r\n").getBytes("iso-8859-1"));
@@ -581,7 +583,7 @@ public class HttpServerTestBase extends TestCase
 
             os.write((
                     "POST /echo?charset=utf-8 HTTP/1.1\r\n"+
-                    "host: "+HOST+":"+_port+"\r\n"+
+                    "host: "+HOST+":"+port+"\r\n"+
                     "content-type: text/plain; charset=utf-8\r\n"+
                     "content-length: 10\r\n"+
                     "\r\n"
@@ -595,7 +597,7 @@ public class HttpServerTestBase extends TestCase
             byte[] contentB=content.getBytes("utf-8");
             os.write((
                     "POST /echo?charset=utf-16 HTTP/1.1\r\n"+
-                    "host: "+HOST+":"+_port+"\r\n"+
+                    "host: "+HOST+":"+port+"\r\n"+
                     "content-type: text/plain; charset=utf-8\r\n"+
                     "content-length: "+contentB.length+"\r\n"+
                     "connection: close\r\n"+
@@ -635,13 +637,14 @@ public class HttpServerTestBase extends TestCase
         try
         {   
             long start=System.currentTimeMillis();
-            Socket client=new Socket(HOST,_port);
+            Socket client=new Socket(HOST,port);
+            client.setSoTimeout(10000);
             OutputStream os=client.getOutputStream();
             InputStream is=client.getInputStream();
 
             os.write((
                     "POST /echo?charset=utf-8 HTTP/1.1\r\n"+
-                    "host: "+HOST+":"+_port+"\r\n"+
+                    "host: "+HOST+":"+port+"\r\n"+
                     "content-type: text/plain; charset=utf-8\r\n"+
                     "content-length: 10\r\n"+
                     "\r\n").getBytes("iso-8859-1"));
@@ -652,7 +655,7 @@ public class HttpServerTestBase extends TestCase
 
             os.write((
                     "POST /echo?charset=utf-8 HTTP/1.1\r\n"+
-                    "host: "+HOST+":"+_port+"\r\n"+
+                    "host: "+HOST+":"+port+"\r\n"+
                     "content-type: text/plain; charset=utf-8\r\n"+
                     "content-length: 10\r\n"+
                     "\r\n"
@@ -666,7 +669,7 @@ public class HttpServerTestBase extends TestCase
             byte[] contentB=content.getBytes("utf-16");
             os.write((
                     "POST /echo?charset=utf-8 HTTP/1.1\r\n"+
-                    "host: "+HOST+":"+_port+"\r\n"+
+                    "host: "+HOST+":"+port+"\r\n"+
                     "content-type: text/plain; charset=utf-16\r\n"+
                     "content-length: "+contentB.length+"\r\n"+
                     "connection: close\r\n"+
@@ -689,76 +692,6 @@ public class HttpServerTestBase extends TestCase
             Thread.yield();
         }
     }
-
-    /* --------------------------------------------------------------- */
-    /*
-    public void testAbortedConnections() throws Exception
-    {
-        startServer(new EchoHandler());
-    	final Random random = new Random();
-    	QueuedThreadPool pool = new QueuedThreadPool();
-    	pool.setMinThreads(20);
-    	pool.setMaxThreads(20);
-    	pool.start();
-
-    	for (int i=0;i<100;i++)
-    	{
-    	    final int run = i;
-    	    Enumeration networks = NetworkInterface.getNetworkInterfaces();
-    	    while (networks.hasMoreElements())
-    	    {
-    	        NetworkInterface network = (NetworkInterface)networks.nextElement();
-
-    	        Enumeration addresses = network.getInetAddresses();
-    	        while (addresses.hasMoreElements())
-    	        {
-    	            InetAddress address=(InetAddress)addresses.nextElement();
-    	            final InetSocketAddress sa = new InetSocketAddress(address,_port);
-    	            // System.err.println(run+" "+sa);
-
-    	            pool.dispatch(new Runnable()
-    	            {
-    	                public void run() 
-    	                {
-    	                    try
-    	                    {
-    	                        Thread.sleep(random.nextInt(1),random.nextInt(1000000));
-    	                        SocketChannel channel = SocketChannel.open();
-    	                        channel.configureBlocking( random.nextBoolean() );
-    	                        channel.connect(sa);
-    	                        Thread.sleep(random.nextInt(1),random.nextInt(1000000));
-
-    	                        if (random.nextBoolean() && channel.isConnectionPending())
-    	                            channel.finishConnect();
-
-    	                        Thread.sleep(random.nextInt(1),random.nextInt(1000000));
-
-    	                        if (random.nextBoolean())
-    	                        {
-    	                            channel.socket().shutdownOutput();
-    	                            Thread.sleep(0,random.nextInt(1000000));
-    	                        }
-    	                        channel.close();
-    	                    }
-    	                    catch(Exception e)
-    	                    {
-    	                        System.err.println("Run "+run);
-    	                        e.printStackTrace();
-    	                    }
-    	                }
-
-    	            });
-
-    	        }	
-    	    }	
-    	}
-
-    	while (pool.getIdleThreads()<pool.getThreads())
-    	    Thread.sleep(1000);
-
-    	pool.stop();
-    }
-    */
     
     /**
      * Read entire response from the client. Close the output.
@@ -816,12 +749,12 @@ public class HttpServerTestBase extends TestCase
     {
         Server server=new Server();
 
-        _connector.setPort(_port);
+        _connector.setPort(0);
         server.setConnectors(new Connector[]
         { _connector });
         server.setHandler(handler);
         server.start();
-        _port=_connector.getLocalPort();
+        port=_connector.getLocalPort();
         return server;
     }
 
@@ -890,7 +823,6 @@ public class HttpServerTestBase extends TestCase
                 throw new IllegalStateException("Not closed");
         }
     }
-
 
     // ----------------------------------------------------------
     private static class HelloWorldHandler extends AbstractHandler

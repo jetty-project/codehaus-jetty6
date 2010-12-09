@@ -166,7 +166,7 @@ public class RequestTest extends TestCase
             "\r\n"+
             content;           
             _connector.reopen();
-            String response = _connector.getResponses(request);
+            _connector.getResponses(request);
             assertEquals(l,length[0]);
             if (l>0)
                 assertEquals(l,_handler._content.length());
@@ -198,13 +198,13 @@ public class RequestTest extends TestCase
 
         String request="GET / HTTP/1.1\r\n"+
         "Host: whatever\r\n"+
-        "Content-Type: text/plane\r\n"+
+        "Content-Type: text/plain\r\n"+
         "Content-Length: "+10+"\r\n"+
         "\r\n"+
         "0123456789\r\n"+
         "GET / HTTP/1.1\r\n"+
         "Host: whatever\r\n"+
-        "Content-Type: text/plane\r\n"+
+        "Content-Type: text/plain\r\n"+
         "Content-Length: "+10+"\r\n"+
         "Connection: close\r\n"+
         "\r\n"+
@@ -219,6 +219,47 @@ public class RequestTest extends TestCase
         assertTrue(index>0);
         
     }
+    
+
+    public void testQueryAfterRead()
+        throws Exception
+    {
+        Handler handler = new AbstractHandler()
+        {
+            public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+            {
+                Request baseRequest = (Request)request;
+                baseRequest.setHandled(true);
+                Reader reader=request.getReader();
+                String in = IO.toString(reader);
+                String param = request.getParameter("param");
+                
+                byte[] b=("read='"+in+"' param="+param+"\n").getBytes(StringUtil.__UTF8);
+                response.setContentLength(b.length);
+                response.getOutputStream().write(b);
+                response.flushBuffer();
+            }
+            
+        };
+        _server.stop();
+        _server.setHandler(handler);
+        _server.start();
+
+        String request="POST /?param=right HTTP/1.1\r\n"+
+        "Host: whatever\r\n"+
+        "Content-Type: application/x-www-form-urlencoded\r\n"+
+        "Content-Length: "+11+"\r\n"+
+        "Connection: close\r\n"+
+        "\r\n"+
+        "param=wrong\r\n";
+
+        String responses = _connector.getResponses(request);
+        
+        assertTrue(responses.indexOf("read='param=wrong' param=right")>0);
+        
+    }
+    
+    
     public void testConnectionClose()
         throws Exception
     {
