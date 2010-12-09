@@ -442,8 +442,8 @@ public class WebAppContext extends Context
     {   
         if (_unavailable)
         {
-	    Request base_request = request instanceof Request?(Request)request:HttpConnection.getCurrentConnection().getRequest();
-	    base_request.setHandled(true);
+            Request base_request = request instanceof Request?(Request)request:HttpConnection.getCurrentConnection().getRequest();
+            base_request.setHandled(true);
             response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         }
         else
@@ -978,7 +978,7 @@ public class WebAppContext extends Context
                         //only extract if the war file is newer
                         if (web_app.lastModified() > extractedWebAppDir.lastModified())
                         {
-			    IO.delete(extractedWebAppDir);
+                            IO.delete(extractedWebAppDir);
                             extractedWebAppDir.mkdir();
                             Log.info("Extract " + _war + " to " + extractedWebAppDir);
                             JarResource.extract(web_app, extractedWebAppDir, false);
