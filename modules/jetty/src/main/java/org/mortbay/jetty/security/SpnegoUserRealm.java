@@ -130,8 +130,8 @@ public class SpnegoUserRealm implements UserRealm
                 if (gContext.isEstablished())
                 {
                     Log.debug("SpnegoUserRealm: established a security context");
-                    Log.debug("Client Principal is: " + gContext.getSrcName());
-                    Log.debug("Server Principal is: " + gContext.getTargName());
+                    Log.debug("SpnegoUserRealm: Client Principal is - " + gContext.getSrcName());
+                    Log.debug("SpnegoUserRealm: Server Principal is - " + gContext.getTargName());
 
                     GSSName srcName = gContext.getSrcName();
                     String encodedToken = new String(B64Code.encode(token));
@@ -142,7 +142,7 @@ public class SpnegoUserRealm implements UserRealm
                     String clientPrincipal = gContext.getSrcName().toString();
                     String role = clientPrincipal.substring(clientPrincipal.indexOf('@') + 1);
                     user.addRole(role);
-                    Log.debug("Client Role: " + role);
+                    Log.debug("SpnegoUserRealm: client role - " + role);
 
                     return user;
                 }
@@ -154,7 +154,7 @@ public class SpnegoUserRealm implements UserRealm
         }
         catch (GSSException e)
         {
-        	Log.debug("error processing token for spnego authentication", e.getMessage());
+        	Log.debug("SpnegoUserRealm: error processing token for spnego authentication", e.getMessage());
         	
         	if ( Log.isDebugEnabled() )
         	{

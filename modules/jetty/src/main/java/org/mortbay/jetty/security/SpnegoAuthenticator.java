@@ -122,7 +122,7 @@ public class SpnegoAuthenticator implements Authenticator
             	 */
                 if(Log.isDebugEnabled())
                 {
-                    Log.debug("SpengoAuthenticator: authentication failed");
+                    Log.debug("SpengoAuthenticator: no user found, authentication failed");
                 }
                 
                 if (_errorPage==null)
