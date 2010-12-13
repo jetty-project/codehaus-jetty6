@@ -38,9 +38,9 @@ public class JBossWebXmlConfiguration implements Configuration
     protected MetaData _metaData;
     protected SecurityHandler _securityHandler;
   
+    
     public class JBossWebXmlProcessor extends IterativeDescriptorProcessor
     {
-
         public JBossWebXmlProcessor() throws ClassNotFoundException
         {
             try
@@ -51,30 +51,24 @@ public class JBossWebXmlConfiguration implements Configuration
             {
                 throw new IllegalStateException(e);
             }
-
         }
         
-        /**
-         * @see org.eclipse.jetty.webapp.IterativeDescriptorProcessor#start(org.eclipse.jetty.webapp.Descriptor)
-         */
-        public void start(Descriptor descriptor)
+        @Override
+        public void start(WebAppContext context, Descriptor descriptor)
         {
-            _metaData = descriptor.getMetaData();
-            _context = _metaData.getContext();
+            _metaData=context.getMetaData();
+            _context=context;
             _securityHandler = (SecurityHandler)_context.getSecurityHandler();
         }
 
-
-        /**
-         * @see org.eclipse.jetty.webapp.IterativeDescriptorProcessor#end(org.eclipse.jetty.webapp.Descriptor)
-         */
-        public void end(Descriptor descriptor)
+        @Override
+        public void end(WebAppContext context, Descriptor descriptor)
         {
             _metaData = null;
             _context = null;
         }
 
-        protected void visitLoginConfig(Descriptor descriptor, XmlParser.Node node) throws Exception
+        public void visitLoginConfig(WebAppContext context, Descriptor descriptor, XmlParser.Node node) throws Exception
         {
             //use a security domain name from jboss-web.xml
             if (null==_securityHandler.getRealmName())
@@ -99,20 +93,22 @@ public class JBossWebXmlConfiguration implements Configuration
 
     public void configure(WebAppContext context) throws Exception
     {     
+        context.getMetaData().addDescriptorProcessor(new JBossWebXmlProcessor());
     }
-
 
     public void deconfigure(WebAppContext context) throws Exception
     {
     }
 
-
     public void postConfigure(WebAppContext context) throws Exception
     {
     }
 
-
     public void preConfigure(WebAppContext context) throws Exception
+    {
+    }
+
+    public void cloneConfigure(WebAppContext template, WebAppContext context) throws Exception
     {
     }
 }
