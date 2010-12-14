@@ -68,7 +68,7 @@ public class JNDITest extends HttpServlet
     private void postConstruct ()
     {
         String tmp = (myDS == null?"":myDS.toString());
-        resourceNameMappingInjectionResult= "Injection of resource to locally mapped name (java:comp/env/mydatasource as java:comp/env/mydatasource1): "+myDS.toString();
+        resourceNameMappingInjectionResult= "Injection of resource to locally mapped name (java:comp/env/mydatasource as java:comp/env/mydatasource1): "+String.valueOf(myDS);
         envEntryOverrideResult = "Override of EnvEntry in jetty-env.xml (java:comp/env/wiggle): "+(wiggle==55.0?"PASS":"FAIL(expected 55.0, got "+wiggle+")");
         postConstructResult = "PostConstruct method called: PASS";
     }
