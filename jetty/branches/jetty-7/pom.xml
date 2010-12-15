@@ -128,7 +128,7 @@
     <module>jetty-spring</module>
     <module>example-async-rest-webapp</module>
     <module>jetty-hightide</module>
-    <!-- module>jetty-jboss</module -->
+    <module>jetty-jboss</module>
   </modules>
 
 </project>

@@ -110,6 +110,12 @@ public class JBossLoginService extends AbstractLifeCycle implements LoginService
     }
 
     /* ------------------------------------------------------------ */
+    public void  logout(UserIdentity id) 
+    {
+        // TODO
+    }
+
+    /* ------------------------------------------------------------ */
     public boolean validate(UserIdentity user)
     {
         // TODO is this right?
