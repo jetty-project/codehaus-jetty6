@@ -100,6 +100,10 @@ public class JBossWebXmlConfiguration implements Configuration
     {
     }
 
+    public void destroy(WebAppContext context) throws Exception
+    {
+    }
+
     public void postConfigure(WebAppContext context) throws Exception
     {
     }
