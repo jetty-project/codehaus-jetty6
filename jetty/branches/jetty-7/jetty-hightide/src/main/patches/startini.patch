@@ -1,5 +1,5 @@
---- tmp/start.ini	2010-09-22 16:48:02.570074526 +1000
-+++ start.ini	2010-09-22 16:50:13.934074094 +1000
+--- start.ini.orig	2010-12-20 18:55:43.994367999 +0100
++++ start.ini	2010-12-20 18:53:28.014368002 +0100
 @@ -42,7 +42,8 @@
  # for a full listing do
  #   java -jar start.jar --list-options
@@ -10,9 +10,12 @@
  #-----------------------------------------------------------
  
  
-@@ -53,10 +54,13 @@
+@@ -51,12 +52,15 @@
+ # For a full list of available configuration files do
+ #   java -jar start.jar --help
  #-----------------------------------------------------------
- #etc/jetty-jmx.xml
+-#etc/jetty-jmx.xml
++etc/jetty-jmx.xml
  etc/jetty.xml
 +etc/jetty-hightide.xml
  # etc/jetty-ssl.xml

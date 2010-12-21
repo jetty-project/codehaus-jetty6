@@ -76,26 +76,7 @@ public class JNDITest extends HttpServlet
     private void preDestroy()
     {
         preDestroyResult = "PreDestroy method called: PASS";
-        //close datasources - necessary for Atomikos
-        close(myDS);
     }
-    
-    public void close (DataSource ds)
-    {
-        if (ds != null)
-        {
-            try
-            {
-                Method close = ds.getClass().getMethod("close", new Class[]{});
-                close.invoke(ds, new Object[]{});
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-    }
-    
     
     
     public void init(ServletConfig config) throws ServletException

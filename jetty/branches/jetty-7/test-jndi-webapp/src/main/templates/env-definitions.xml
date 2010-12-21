@@ -39,25 +39,26 @@
     <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource</Arg>
     <Arg>
-     <New class="com.atomikos.jdbc.AtomikosDataSourceBean">
-       <Set name="xaDataSourceClassName">org.apache.derby.jdbc.EmbeddedXADataSource</Set>
-       <Set name="xaProperties">
-         <New class="java.util.Properties">
-           <Call name="setProperty">
-             <Arg>databaseName</Arg>
-             <Arg>testdb</Arg>
-           </Call>
-           <Call name="setProperty">
-             <Arg>createDatabase</Arg>
-             <Arg>create</Arg>
-           </Call>
-         </New>
-      </Set>
+      <New id="atomikosDS" class="com.atomikos.jdbc.AtomikosDataSourceBean">
+        <Set name="xaDataSourceClassName">org.apache.derby.jdbc.EmbeddedXADataSource</Set>
+        <Set name="xaProperties">
+          <New class="java.util.Properties">
+            <Call name="setProperty">
+              <Arg>databaseName</Arg>
+              <Arg>testdb</Arg>
+            </Call>
+            <Call name="setProperty">
+              <Arg>createDatabase</Arg>
+              <Arg>create</Arg>
+            </Call>
+          </New>
+        </Set>
       <Set name="UniqueResourceName">mydatasource</Set></New>
     </Arg>
-   </New>
-
-
+  </New>
+  <Ref id='wac'>
+    <Call name="addBean"><Arg><New class="org.eclipse.jetty.jndi.DataSourceCloser"><Arg><Ref id="atomikosDS"/></Arg></New></Arg></Call>
+  </Ref>
 
   <!-- JOTM
   <New id="jotm" class="org.objectweb.jotm.Jotm">
