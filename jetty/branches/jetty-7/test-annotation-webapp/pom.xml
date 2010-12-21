@@ -103,30 +103,11 @@
         </configuration>
         <dependencies>
           <dependency>
-            <groupId>com.atomikos</groupId>
-            <artifactId>atomikos-util</artifactId>
-            <version>3.6.4</version>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty-atomikos</artifactId>
+            <version>${project.version}</version>
+	    <type>pom</type>
           </dependency>
-          <dependency>
-            <groupId>com.atomikos</groupId>
-            <artifactId>transactions-api</artifactId>
-            <version>3.6.4</version>
-            </dependency>
-            <dependency>
-              <groupId>com.atomikos</groupId>
-              <artifactId>transactions</artifactId>
-              <version>3.6.4</version>
-            </dependency>
-            <dependency>
-              <groupId>com.atomikos</groupId>
-              <artifactId>transactions-jdbc</artifactId>
-              <version>3.6.4</version>
-            </dependency>
-            <dependency>
-              <groupId>com.atomikos</groupId>
-              <artifactId>transactions-jta</artifactId>
-              <version>3.6.4</version>
-            </dependency>
             <dependency>
                <groupId>org.apache.derby</groupId>
                <artifactId>derby</artifactId>
