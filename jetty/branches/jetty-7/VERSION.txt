@@ -1,4 +1,5 @@
 jetty@codehaus 7.2.2.v20101205 1 December 2010
+ + 333565 maven-jetty-plugin should accept a list of config files
  + 331245 setBaseResources method for jetty-maven-plugin context
  + JETTY-1303 fix packaging order so jdbc dir is in distro
 
