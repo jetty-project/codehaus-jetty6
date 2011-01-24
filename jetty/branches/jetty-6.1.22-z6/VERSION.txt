@@ -10,6 +10,7 @@ jetty-6.1.22.z6
  + JETTY-1264 Idle timer deadlock
  + JETTY-1296 Always clear changes list in selectManager
  + JETTY-1291 Extract query parameters even if POST content consumed
+ + JETTY-1319 Use servlet.jar that sanitizes methods for CVE-2007-6203 like XSS
 
 jetty-6.1.22 16 November 2009
  + Fixed XSS issue in demo CometDump servlet
