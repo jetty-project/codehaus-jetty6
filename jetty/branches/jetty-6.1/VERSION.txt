@@ -1,5 +1,6 @@
  + JETTY-1307 Check that JarFileResource directories end with /
  + JETTY-1308 327109 (re)fixed AJP handling of empty packets
+ + JETTY-1319 Use servlet.jar that sanitizes methods for CVE-2007-6203 like XSS
 
 Jetty-6.1.26 10 November 2010
  + JETTY-748 Prevent race close of socket by old acceptor threads
