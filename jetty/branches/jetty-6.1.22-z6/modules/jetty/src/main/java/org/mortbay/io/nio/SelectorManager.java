@@ -538,7 +538,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     }
                     
                     // If we see signature of possible JVM bug, increment count.
-                    if (selected==0 && wait>10 && (now-before)<(wait/2))
+                    if (selected==0 && wait>10 && (now-before)<(wait/2) && selector.selectedKeys().isEmpty() )
                     {
                         // Increment bug count and try a work around
                         _jvmBug++;
@@ -612,7 +612,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             return;
                         }
                     }
-                    else if (__BUSY_KEY>0 && selected==1 && _selects>__MAX_SELECTS)
+                    else if (__BUSY_KEY>0 && selected==1 && _selects>__MAX_SELECTS && selector.selectedKeys().size()==1 )
                     {
                         // Look for busy key
                         SelectionKey busy = (SelectionKey)selector.selectedKeys().iterator().next();
