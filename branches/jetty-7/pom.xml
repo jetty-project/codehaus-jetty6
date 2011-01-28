@@ -123,6 +123,7 @@
     <module>jetty-pkcs12</module>
     <module>jetty-j2sehttp-spi</module>
     <module>jetty-setuid</module>
+    <module>test-jetty-webapp</module>
     <module>test-jndi-webapp</module>
     <module>test-jaas-webapp</module>
     <module>test-annotation-webapp</module>
