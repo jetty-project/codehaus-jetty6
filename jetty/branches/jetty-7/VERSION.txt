@@ -1,5 +1,6 @@
 jetty@codehaus 7.3.1-SNAPSHOT
  + JETTY-1323 contributing Webapp Verifier component
+ + JETTY-1325 contribution of Centralized Webapp Logging
 
 jetty@codehaus 7.3.0.v20110202 2 February 2011
 
