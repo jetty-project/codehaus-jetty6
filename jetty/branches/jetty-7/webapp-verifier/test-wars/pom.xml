@@ -1,0 +1,29 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.mortbay.jetty.tests</groupId>
+  <artifactId>jetty-webapp-verifier-artifacts</artifactId>
+  <version>1-SNAPSHOT</version>
+  <name>Jetty :: Webapp Verifier :: Artifacts Parent</name>
+  <packaging>pom</packaging>
+  <modules>
+    <module>test-war-jruby</module>
+    <module>test-war-jython</module>
+    <module>test-war-groovy</module>
+    <module>test-war-shellscripts</module>
+    <module>test-war-nativeaccess</module>
+    <module>dummy-java11-lib</module>
+    <module>dummy-java12-lib</module>
+    <module>dummy-java13-lib</module>
+    <module>dummy-java14-lib</module>
+    <module>dummy-java15-lib</module>
+    <module>dummy-java16-lib</module>
+    <module>test-war-javaversions</module>
+    <module>dummy-scm-lib</module>
+    <module>test-war-scm</module>
+    <module>test-war-servlet23</module>
+    <module>test-war-servlet24</module>
+    <module>test-war-servlet25</module>
+    <module>test-war-servletmixed1</module>
+    <module>test-war-servletmixed2</module>
+  </modules>
+</project>
