@@ -19,11 +19,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.mortbay.jetty.verifier</groupId>
+  <parent>
+    <groupId>org.mortbay.jetty.verifier</groupId>
+    <artifactId>verifier-parent</artifactId>
+    <version>7.3.1-SNAPSHOT</version>
+  </parent>
   <artifactId>jetty-webapp-verifier</artifactId>
   <name>Jetty :: Webapp Verifier Tool</name>
   <packaging>jar</packaging>
-  <version>7.2.2</version>
   <licenses>
     <license>
       <name>Apache License Version 2</name>
@@ -34,9 +37,6 @@
       <url>http://www.eclipse.org/legal/epl-v10.html</url>
     </license>
   </licenses>
-  <properties>
-    <jetty-version>7.2.2.v20101205</jetty-version>
-  </properties>
   <build>
     <plugins>
       <plugin>
@@ -92,12 +92,12 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-xml</artifactId>
-      <version>${jetty-version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-deploy</artifactId>
-      <version>${jetty-version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>asm</groupId>
@@ -115,84 +115,84 @@
     <dependency>
       <groupId>org.mortbay.jetty.verifier.tests</groupId>
       <artifactId>test-war-groovy</artifactId>
-      <version>1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty.verifier.tests</groupId>
       <artifactId>test-war-javaversions</artifactId>
-      <version>1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty.verifier.tests</groupId>
       <artifactId>test-war-jruby</artifactId>
-      <version>1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty.verifier.tests</groupId>
       <artifactId>test-war-jython</artifactId>
-      <version>1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty.verifier.tests</groupId>
       <artifactId>test-war-nativeaccess</artifactId>
-      <version>1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty.verifier.tests</groupId>
       <artifactId>test-war-scm</artifactId>
-      <version>1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty.verifier.tests</groupId>
       <artifactId>test-war-servlet23</artifactId>
-      <version>1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty.verifier.tests</groupId>
       <artifactId>test-war-servlet24</artifactId>
-      <version>1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty.verifier.tests</groupId>
       <artifactId>test-war-servlet25</artifactId>
-      <version>1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty.verifier.tests</groupId>
       <artifactId>test-war-servletmixed1</artifactId>
-      <version>1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty.verifier.tests</groupId>
       <artifactId>test-war-servletmixed2</artifactId>
-      <version>1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty.verifier.tests</groupId>
       <artifactId>test-war-shellscripts</artifactId>
-      <version>1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
@@ -200,14 +200,14 @@
     <dependency>
       <groupId>org.mortbay.jetty.verifier.tests</groupId>
       <artifactId>signed-jar-test-webapp</artifactId>
-      <version>1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty.verifier.tests</groupId>
       <artifactId>simple-webapp</artifactId>
-      <version>1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
