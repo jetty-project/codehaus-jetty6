@@ -19,9 +19,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.mortbay.jetty</groupId>
+  <groupId>org.mortbay.jetty.logging</groupId>
   <artifactId>jetty-webapp-logging</artifactId>
-  <name>Jetty :: Centralized WebApp Logging Impl</name>
+  <name>Jetty :: Centralized WebApp Logging</name>
   <version>7.2.2</version>
   <packaging>jar</packaging>
   <licenses>
@@ -70,7 +70,7 @@
               <goal>copy-dependencies</goal>
             </goals>
             <configuration>
-              <includeGroupIds>org.mortbay.jetty.tests</includeGroupIds>
+              <includeGroupIds>org.mortbay.jetty.logging.tests</includeGroupIds>
               <includeTypes>war</includeTypes>
               <outputDirectory>${project.build.directory}/test-wars</outputDirectory>
               <overWriteIfNewer>true</overWriteIfNewer>
@@ -128,28 +128,28 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty.tests</groupId>
+      <groupId>org.mortbay.jetty.logging.tests</groupId>
       <artifactId>test-war-commons_logging_1.1</artifactId>
       <version>1-SNAPSHOT</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty.tests</groupId>
+      <groupId>org.mortbay.jetty.logging.tests</groupId>
       <artifactId>test-war-java_util_logging</artifactId>
       <version>1-SNAPSHOT</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty.tests</groupId>
+      <groupId>org.mortbay.jetty.logging.tests</groupId>
       <artifactId>test-war-log4j_1.2.15</artifactId>
       <version>1-SNAPSHOT</version>
       <type>war</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty.tests</groupId>
+      <groupId>org.mortbay.jetty.logging.tests</groupId>
       <artifactId>test-war-slf4j_1.5.6</artifactId>
       <version>1-SNAPSHOT</version>
       <type>war</type>
