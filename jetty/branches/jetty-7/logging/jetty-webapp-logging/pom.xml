@@ -22,7 +22,7 @@
   <groupId>org.mortbay.jetty.logging</groupId>
   <artifactId>jetty-webapp-logging</artifactId>
   <name>Jetty :: Centralized WebApp Logging</name>
-  <version>7.2.2</version>
+  <version>7.3.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <licenses>
     <license>
@@ -35,7 +35,7 @@
     </license>
   </licenses>
   <properties>
-    <jetty-version>7.2.2.v20101205</jetty-version>
+    <jetty-version>7.3.0.v20110203</jetty-version>
     <test-war-version>1-SNAPSHOT</test-war-version>
     <slf4j-version>1.5.10</slf4j-version>
   </properties>
