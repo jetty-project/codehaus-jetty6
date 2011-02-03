@@ -131,8 +131,8 @@
     <module>example-async-rest-webapp</module>
     <module>jetty-hightide</module>
     <module>jetty-jboss</module>
-    <module>webapp-verifier</module>
-    <module>centralized-webapp-logging</module>
+    <module>verifier</module>
+    <module>logging</module>
   </modules>
 
 </project>
