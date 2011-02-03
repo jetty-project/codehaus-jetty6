@@ -22,6 +22,7 @@ import java.util.Collection;
 import org.eclipse.jetty.deploy.App;
 import org.eclipse.jetty.deploy.AppLifeCycle;
 import org.eclipse.jetty.deploy.graph.Node;
+import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.webapp.verifier.RuleSet;
@@ -51,18 +52,20 @@ public class WebappVerifierBinding implements AppLifeCycle.Binding
     public String[] getBindingTargets()
     {
         return new String[]
-        { "pre-deploying" };
+        { "deploying" };
     }
 
     public void processBinding(Node node, App app) throws Exception
     {
-        if(!(app.getContextHandler() instanceof WebAppContext)) {
+        ContextHandler context = app.getContextHandler();
+        
+        if(!(context instanceof WebAppContext)) {
             Log.info("Webapp Verifier - " + app.getContextHandler().getClass().getName() + " is not an instance of " +
                     WebAppContext.class.getName());
             return;
         }
 
-        WebAppContext wac = (WebAppContext)app.getContextHandler();
+        WebAppContext wac = (WebAppContext)context;
         URI warURI = new URI(wac.getWar());
 
         File rulesetFile = new File(this.rulesetPath);
