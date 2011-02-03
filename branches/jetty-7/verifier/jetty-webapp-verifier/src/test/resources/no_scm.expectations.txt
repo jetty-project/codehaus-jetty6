@@ -16,21 +16,21 @@ ERROR|CVS/|CVS Source Control directories are not allowed
 ERROR|RCS/|RCS Source Control directories are not allowed
 ERROR|SCCS/|SCCS Source Control directories are not allowed
 ERROR|vssver.scc|Visual SourceSafe Source Control file are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/_darcs/|Darcs Source Control directories are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/_svn/|Subversion Source Control directories are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/.arch-ids/|Arch Source Control directories are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/.bzr/|Bazaar Source Control directories are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/.cvsignore|CVS Source Control file are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/.darcsrepo/|Darcs Source Control directories are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/.darcs-temp-mail|Darcs Source Control file are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/.git/|Git Source Control directories are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/.gitignore|Git Source Control file are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/.hg/|Mercurial Source Control directories are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/.MySCMServerInfo|SurroundSCM Source Control file are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/.svn/|Subversion Source Control directories are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/BitKeeper/|BitKeeper Source Control directories are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/ChangeSet/|BitKeeper Source Control directories are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/CVS/|CVS Source Control directories are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/RCS/|RCS Source Control directories are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/SCCS/|SCCS Source Control directories are not allowed
-ERROR|WEB-INF/lib/dummy-scm-lib-1-SNAPSHOT.jar!/vssver.scc|Visual SourceSafe Source Control file are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/_darcs/|Darcs Source Control directories are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/_svn/|Subversion Source Control directories are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/.arch-ids/|Arch Source Control directories are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/.bzr/|Bazaar Source Control directories are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/.cvsignore|CVS Source Control file are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/.darcsrepo/|Darcs Source Control directories are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/.darcs-temp-mail|Darcs Source Control file are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/.git/|Git Source Control directories are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/.gitignore|Git Source Control file are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/.hg/|Mercurial Source Control directories are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/.MySCMServerInfo|SurroundSCM Source Control file are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/.svn/|Subversion Source Control directories are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/BitKeeper/|BitKeeper Source Control directories are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/ChangeSet/|BitKeeper Source Control directories are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/CVS/|CVS Source Control directories are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/RCS/|RCS Source Control directories are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/SCCS/|SCCS Source Control directories are not allowed
+ERROR|WEB-INF/lib/dummy-scm-lib-7.3.1-SNAPSHOT.jar!/vssver.scc|Visual SourceSafe Source Control file are not allowed

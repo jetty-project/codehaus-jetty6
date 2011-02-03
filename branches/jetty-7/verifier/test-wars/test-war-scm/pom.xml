@@ -1,16 +1,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.mortbay.jetty.verifier.tests</groupId>
+  <parent>
+    <groupId>org.mortbay.jetty.verifier.tests</groupId>
+    <artifactId>tests-parent</artifactId>
+    <version>7.3.1-SNAPSHOT</version>
+  </parent>
   <artifactId>test-war-scm</artifactId>
+  <!-- POM is correct, we build up the war manually below -->
   <packaging>pom</packaging>
-  <version>1-SNAPSHOT</version>
   <name>Jetty :: Webapp Verifier :: Dummy SCM Webapp</name>
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty.verifier.tests</groupId>
       <artifactId>dummy-scm-lib</artifactId>
-      <version>1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
   <properties>
@@ -23,6 +27,9 @@
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
+            <!-- Create Various SCM files, works even if project
+                 is forked, or uses git-svn, or is even compiled via
+                 a tarball distribution -->
             <id>create-scm-files</id>
             <phase>generate-resources</phase>
             <goals>
@@ -57,6 +64,7 @@
             </configuration>
           </execution>
           <execution>
+            <!-- Create WAR File -->
             <id>create-war</id>
             <phase>package</phase>
             <goals>
@@ -79,6 +87,7 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
+            <!-- Copy and Dependencies to WEB-INF/lib -->
             <id>copy-deps</id>
             <phase>process-resources</phase>
             <goals>
@@ -95,6 +104,8 @@
         <artifactId>build-helper-maven-plugin</artifactId>
         <executions>
           <execution>
+            <!-- Make sure Manually build WAR is attached to the project
+                 so that it can get deployed and/or released to a repo -->
             <id>attach-scm-lib</id>
             <phase>process-resources</phase>
             <goals>
