@@ -2,18 +2,13 @@
 <!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
 
 <Configure id="Server" class="org.eclipse.jetty.server.Server">
-
-    <Call name="setAttribute">
-      <Arg>org.eclipse.jetty.webapp.configuration</Arg>
+  <Ref id="DeploymentManager">
+    <Call name="addLifeCycleBinding">
       <Arg>
-        <New class="java.util.ArrayList">
-          <Call name="add">
-            <Arg>
-            <New class="org.eclipse.jetty.webapp.WebappVerifierConfiguration"/>
-            </Arg>
-          </Call>
+        <New class="org.mortbay.jetty.webapp.verifier.deployman.WebappVerifierBinding">
+          <Set name="rulesetPath"><Property name="jetty.home" default="."/>/etc/default-webapp-verifier.xml</Set>
         </New>
       </Arg>
     </Call>
-
+  </Ref>
 </Configure>
