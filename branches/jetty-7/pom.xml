@@ -135,10 +135,7 @@
     <module>jetty-jboss</module>
     <module>test-wars</module>
     <module>jetty-logback</module>
-    <!--
-    <module>verifier</module>
-    <module>logging</module>
-     -->
+    <module>jetty-webapp-verifier</module>
   </modules>
 
 </project>
