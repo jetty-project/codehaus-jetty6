@@ -56,7 +56,7 @@
                   <outputDirectory>${root-dist-directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
                   <artifactId>test-jndi-webapp</artifactId>
                   <version>${project.version}</version>
                   <classifier>config</classifier>
@@ -66,7 +66,7 @@
                   <outputDirectory>${assembly-directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
                   <artifactId>test-jndi-webapp</artifactId>
                   <version>${project.version}</version>
                   <type>war</type>
@@ -84,7 +84,7 @@
                   <outputDirectory>${assembly-directory}/webapps/async-rest</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
                   <artifactId>test-annotation-webapp</artifactId>
                   <version>${project.version}</version>
                   <classifier>config</classifier>
@@ -94,7 +94,7 @@
                   <outputDirectory>${assembly-directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
                   <artifactId>test-annotation-webapp</artifactId>
                   <version>${project.version}</version>
                   <type>war</type>
@@ -103,7 +103,7 @@
                   <outputDirectory>${assembly-directory}/webapps/test-annotations</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
                   <artifactId>test-jaas-webapp</artifactId>
                   <version>${project.version}</version>
                   <classifier>config</classifier>
@@ -113,7 +113,7 @@
                   <outputDirectory>${assembly-directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
                   <artifactId>test-jaas-webapp</artifactId>
                   <version>${project.version}</version>
                   <type>war</type>
@@ -458,19 +458,19 @@
       <version>${jsp-2-1-version}</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
+      <groupId>org.mortbay.jetty.testwars</groupId>
       <artifactId>test-jndi-webapp</artifactId>
       <type>war</type>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
+      <groupId>org.mortbay.jetty.testwars</groupId>
       <artifactId>test-annotation-webapp</artifactId>
       <type>war</type>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
+      <groupId>org.mortbay.jetty.testwars</groupId>
       <artifactId>test-jaas-webapp</artifactId>
       <type>war</type>
       <version>${project.version}</version>
