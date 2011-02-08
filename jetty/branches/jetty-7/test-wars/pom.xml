@@ -19,15 +19,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.mortbay.jetty.verifier</groupId>
-    <artifactId>verifier-parent</artifactId>
+    <groupId>org.mortbay.jetty</groupId>
+    <artifactId>jetty-integration-project</artifactId>
     <version>7.3.1-SNAPSHOT</version>
   </parent>
-  <groupId>org.mortbay.jetty.verifier.tests</groupId>
-  <artifactId>tests-parent</artifactId>
-  <name>Jetty :: Webapp Verifier :: Artifacts Parent</name>
+  <groupId>org.mortbay.jetty.testwars</groupId>
+  <artifactId>testwars-parent</artifactId>
+  <name>Jetty :: Test Wars Parent</name>
   <packaging>pom</packaging>
   <modules>
+    <!-- Original top level test webapps -->
+    <module>test-jetty-webapp</module>
+    <module>test-jndi-webapp</module>
+    <module>test-jaas-webapp</module>
+    <module>test-annotation-webapp</module>
+    <!-- Used by jetty-webapp-logging -->
+    <module>test-war-commons_logging_1.1</module>
+    <module>test-war-java_util_logging</module>
+    <module>test-war-log4j_1.2.15</module>
+    <module>test-war-slf4j_1.5.6</module>
+    <!-- Used by jetty-webapp-verifier -->
     <module>test-war-jruby</module>
     <module>test-war-jython</module>
     <module>test-war-groovy</module>
