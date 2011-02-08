@@ -136,6 +136,7 @@
     <module>test-wars</module>
     <module>jetty-logback</module>
     <module>jetty-webapp-verifier</module>
+    <module>jetty-webapp-logging</module>
   </modules>
 
 </project>
