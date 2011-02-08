@@ -2,8 +2,8 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.mortbay.jetty.verifier.tests</groupId>
-    <artifactId>tests-parent</artifactId>
+    <groupId>org.mortbay.jetty.testwars</groupId>
+    <artifactId>testwars-parent</artifactId>
     <version>7.3.1-SNAPSHOT</version>
   </parent>
   <artifactId>test-war-javaversions</artifactId>
@@ -11,32 +11,32 @@
   <name>Jetty :: Verifier :: Java Versions Webapp</name>
   <dependencies>
     <dependency>
-      <groupId>org.mortbay.jetty.verifier.tests</groupId>
+      <groupId>org.mortbay.jetty.testwars</groupId>
       <artifactId>dummy-java11-lib</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty.verifier.tests</groupId>
+      <groupId>org.mortbay.jetty.testwars</groupId>
       <artifactId>dummy-java12-lib</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty.verifier.tests</groupId>
+      <groupId>org.mortbay.jetty.testwars</groupId>
       <artifactId>dummy-java13-lib</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty.verifier.tests</groupId>
+      <groupId>org.mortbay.jetty.testwars</groupId>
       <artifactId>dummy-java14-lib</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty.verifier.tests</groupId>
+      <groupId>org.mortbay.jetty.testwars</groupId>
       <artifactId>dummy-java15-lib</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty.verifier.tests</groupId>
+      <groupId>org.mortbay.jetty.testwars</groupId>
       <artifactId>dummy-java16-lib</artifactId>
       <version>${project.version}</version>
     </dependency>
