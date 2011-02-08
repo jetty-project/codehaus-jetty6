@@ -129,16 +129,12 @@
     <module>jetty-j2sehttp-spi</module>
     <module>jetty-setuid</module>
     <module>jetty-reverse-http</module>
-    <!--
-    <module>test-jetty-webapp</module>
-    <module>test-jndi-webapp</module>
-    <module>test-jaas-webapp</module>
-    <module>test-annotation-webapp</module>
-     -->
     <module>jetty-spring</module>
     <module>example-async-rest-webapp</module>
     <module>jetty-hightide</module>
     <module>jetty-jboss</module>
+    <module>test-wars</module>
+    <module>jetty-logback</module>
     <!--
     <module>verifier</module>
     <module>logging</module>
