@@ -226,25 +226,21 @@ public class SpnegoUserRealm implements UserRealm
 
     }
 
-    @Override
     public String getName()
     {
         return _realmName;
     }
 
-    @Override
     public Principal getPrincipal(String token)
     {
         return null;
     }
 
-    @Override
     public boolean reauthenticate(Principal user)
     {
         return false;
     }
 
-    @Override
     public boolean isUserInRole(Principal user, String role)
     {
         if (user instanceof SpnegoUser)
@@ -263,13 +259,11 @@ public class SpnegoUserRealm implements UserRealm
         return false;
     }
 
-    @Override
     public void disassociate(Principal user)
     {
 
     }
 
-    @Override
     public Principal pushRole(Principal user, String role)
     {
         if (user instanceof SpnegoUser)
@@ -279,13 +273,11 @@ public class SpnegoUserRealm implements UserRealm
         return user;
     }
 
-    @Override
     public Principal popRole(Principal user)
     {
         return null;
     }
 
-    @Override
     public void logout(Principal user)
     {
 
