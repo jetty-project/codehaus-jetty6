@@ -1,5 +1,7 @@
 package org.mortbay.jetty.spring;
 
+import java.util.Collection;
+
 
 /* ------------------------------------------------------------ */
 /**
@@ -9,9 +11,10 @@ package org.mortbay.jetty.spring;
  */
 public class Server extends org.eclipse.jetty.server.Server
 {
-    public void setBeans(Object[] beans)
+    public void setBeans(Collection<Object> beans)
     {
         for (Object o:beans)
             addBean(o);
     }
+    
 }
