@@ -19,7 +19,7 @@
 
   <bean id="contexts" class="org.eclipse.jetty.server.handler.ContextHandlerCollection"/>
 
-  <bean id="Server" class="org.mortbay.jetty.spring.Server" init-method="start" destroy-method="stop">
+  <bean id="Server" name="Main" class="org.mortbay.jetty.spring.Server" init-method="start" destroy-method="stop">
   
     <property name="threadPool">  
       <bean id="ThreadPool" class="org.eclipse.jetty.util.thread.QueuedThreadPool">

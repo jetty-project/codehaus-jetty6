@@ -9,7 +9,7 @@
   <name>Example :: Jetty Spring</name>
 
   <properties>
-    <spring-version>1.2.8</spring-version>
+    <spring-version>2.5.6</spring-version>
     <dependencies>target/dependencies</dependencies>
   </properties>
 
@@ -43,7 +43,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.2</version>
+      <version>${junit-version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -65,6 +65,12 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring</artifactId>
       <version>${spring-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit4-version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
