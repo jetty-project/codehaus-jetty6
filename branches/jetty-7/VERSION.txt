@@ -1,6 +1,7 @@
 jetty@codehaus 7.3.1-SNAPSHOT
  + JETTY-1323 contributing Webapp Verifier component
  + JETTY-1325 contribution of Centralized Webapp Logging
+ + 336343 Added Octal setter for umask in setuid
 
 jetty@codehaus 7.3.0.v20110203 3 February 2011
 

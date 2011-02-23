@@ -73,10 +73,20 @@ public class SetUIDServer extends Server
     {
         return _umask;
     }
+    
+    public String getUmaskOctal()
+    {
+        return Integer.toOctalString(_umask);
+    }
 
     public void setUmask(int umask)
     {
         _umask=umask;
+    }
+
+    public void setUmaskOctal(String umask )
+    {
+        _umask=Integer.parseInt(umask,8);
     }
     
     public int getUid()
