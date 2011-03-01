@@ -1,7 +1,5 @@
 package org.mortbay.jetty.spring;
 
-import java.util.ServiceLoader;
-
 import org.eclipse.jetty.xml.ConfigurationProcessor;
 import org.eclipse.jetty.xml.ConfigurationProcessorFactory;
 import org.eclipse.jetty.xml.XmlConfiguration;
