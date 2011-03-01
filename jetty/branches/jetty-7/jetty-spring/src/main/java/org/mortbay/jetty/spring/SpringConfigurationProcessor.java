@@ -3,7 +3,6 @@ package org.mortbay.jetty.spring;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.ServiceLoader;
 
 import org.eclipse.jetty.util.log.Logger;
 import org.eclipse.jetty.xml.ConfigurationProcessor;
