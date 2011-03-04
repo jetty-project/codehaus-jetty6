@@ -95,6 +95,7 @@
             </goals>
             <configuration>
               <outputDirectory>${war_work_dir}/WEB-INF/lib</outputDirectory>
+              <stripVersion>true</stripVersion>
             </configuration>
           </execution>
         </executions>
@@ -102,6 +103,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.5</version>
         <executions>
           <execution>
             <!-- Make sure Manually build WAR is attached to the project
