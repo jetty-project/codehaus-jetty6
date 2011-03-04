@@ -135,5 +135,23 @@
     <module>jetty-webapp-verifier</module>
     <module>jetty-webapp-logging</module>
   </modules>
-
+  <profiles>
+    <profile>
+      <id>jetty-snapshot-repo</id>
+      <repositories>
+        <repository>
+          <id>jetty-snapshots</id>
+          <name>Jetty Snapshots Repository</name>
+          <url>https://oss.sonatype.org/content/repositories/jetty-snapshots/</url>
+          <layout>default</layout>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
 </project>
