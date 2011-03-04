@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.mortbay.jetty.testwars</groupId>
     <artifactId>testwars-parent</artifactId>
-    <version>7.3.1.v20110304</version>
+    <version>7.3.2-SNAPSHOT</version>
   </parent>
   <artifactId>test-war-log4j_1.2.15</artifactId>
   <name>Jetty :: Logging Test War :: Log4J 1.2.15</name>
