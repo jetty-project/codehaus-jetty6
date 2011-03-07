@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
+
+<!-- =============================================================== -->
+<!-- Add a ContextProvider to the deployment manager                 -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!-- This scans the webapps directory for war files and directories  -->
+<!-- to deploy.                                                      -->
+<!-- This configuration must be used with jetty-deploy.xml, which    -->
+<!-- creates the deployment manager instance                         -->
+<!-- =============================================================== -->
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
+  <Ref id="DeploymentManager">
+    <Call name="addAppProvider">
+      <Arg>
+        <New class="org.eclipse.jetty.deploy.providers.ContextProvider">
+          <Set name="monitoredDir"><Property name="test.resourcesdir" default="src/test/resources" />/contexts</Set>
+          <Set name="scanInterval">0</Set>
+          <Set name="configurationManager">
+            <New class="org.eclipse.jetty.deploy.FileConfigurationManager">
+              <Set name="file">
+                <Property name="test.targetdir" default="target" />/xml-configured-jetty.properties
+              </Set>
+            </New>
+          </Set>
+        </New>
+      </Arg>
+    </Call>
+  </Ref>
+</Configure>
