@@ -2,12 +2,12 @@ package org.mortbay.jetty.tests.webapp.policy;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Calendar;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 public class CheckerServlet extends HttpServlet
 {
     private static final long serialVersionUID = -1677050154010585657L;
-    private static final Logger LOG = Logger.getLogger(CheckerServlet.class.getName());
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
@@ -26,41 +25,65 @@ public class CheckerServlet extends HttpServlet
         Checker checker = new Checker();
 
         String pathInfo = req.getPathInfo();
-        LOG.info("pathInfo = " + pathInfo);
-        if ("filesystem".equals(pathInfo))
+        if (pathInfo == null)
         {
-            processFilesystemChecks(props,checker);
+            System.out.println("ERROR: No test method specified.");
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
         }
-        else if ("system.properties".equals(pathInfo))
+
+        String testname = pathInfo;
+        if (testname.startsWith("/"))
         {
-            processSystemPropertyChecks(props,checker);
+            testname = testname.substring(1);
         }
-        else if ("jetty.log".equals(pathInfo))
+
+        Method testmethod = findTestMethod(testname);
+        if (testmethod == null)
         {
-            processJettyLogChecks(props,checker);
+            System.out.println("ERROR: No test method not found: " + testname);
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
         }
-        else if ("classloader".equals(pathInfo))
+
+        try
         {
-            processClassloaderChecks(props,checker);
+            Object args[] = new Object[]
+            { props, checker };
+            testmethod.invoke(this,args);
         }
-        else if ("libs".equals(pathInfo))
+        catch (Throwable t)
         {
-            processLibChecks(props,checker);
-        }
-        else if ("exit".equals(pathInfo))
-        {
-            processExitChecks(props,checker);
+            t.printStackTrace(System.out);
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
         }
 
         PropertiesUtil.writePropertiesOutput(resp,props);
     }
 
-    private void processClassloaderChecks(Properties props, Checker checker)
+    private Method findTestMethod(String testname)
+    {
+        Class<?>[] parameterTypes = new Class[]
+        { Properties.class, Checker.class };
+        try
+        {
+            return this.getClass().getMethod(testname,parameterTypes);
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace(System.out);
+            return null;
+        }
+    }
+
+    public void processClassloaderChecks(Properties props, Checker checker)
     {
         String badurl = "http://not.going.to.work";
         try
         {
             URL url = new URL(badurl);
+            @SuppressWarnings("unused")
             URLClassLoader cl = new URLClassLoader(new URL[]
             { url });
             checker.success(props,"Create Classloader: " + badurl);
@@ -71,12 +94,12 @@ public class CheckerServlet extends HttpServlet
         }
     }
 
-    private void processExitChecks(Properties props, Checker checker)
+    public void processExitChecks(Properties props, Checker checker)
     {
         checker.canExit(props);
     }
 
-    private void processFilesystemChecks(Properties props, Checker checker)
+    public void processFilesystemChecks(Properties props, Checker checker)
     {
         String jettyHome = System.getProperty("user.dir");
         checker.canRead(props,jettyHome + "/lib/policy/jetty.policy");
@@ -97,7 +120,7 @@ public class CheckerServlet extends HttpServlet
         checker.canWrite(props,webappDir);
     }
 
-    private void processJettyLogChecks(Properties props, Checker checker)
+    public void processJettyLogChecks(Properties props, Checker checker)
     {
         Calendar c = Calendar.getInstance();
         String jettyHome = System.getProperty("user.dir");
@@ -105,12 +128,12 @@ public class CheckerServlet extends HttpServlet
         checker.canRead(props,logFilename);
     }
 
-    private void processLibChecks(Properties props, Checker checker)
+    public void processLibChecks(Properties props, Checker checker)
     {
-        checker.canLoadLibrary(props,"/lib/foo.so");
+        checker.canLoadLibrary(props,"foo.so");
     }
 
-    private void processSystemPropertyChecks(Properties props, Checker checker)
+    public void processSystemPropertyChecks(Properties props, Checker checker)
     {
         checker.canReadSystemProperty(props,"__ALLOWED_READ_PROPERTY");
         checker.canWriteSystemProperty(props,"__ALLOWED_READ_PROPERTY","SUCCESS");
