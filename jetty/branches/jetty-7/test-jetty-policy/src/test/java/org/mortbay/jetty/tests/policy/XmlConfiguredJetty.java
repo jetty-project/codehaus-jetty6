@@ -26,6 +26,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.security.Policy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +39,9 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.toolchain.test.FS;
 import org.eclipse.jetty.toolchain.test.MavenTestingUtils;
+import org.eclipse.jetty.toolchain.test.OS;
 import org.eclipse.jetty.toolchain.test.PathAssert;
 import org.eclipse.jetty.toolchain.test.TestingDir;
 import org.eclipse.jetty.util.IO;
@@ -60,6 +63,9 @@ public class XmlConfiguredJetty
 
     public XmlConfiguredJetty(TestingDir testdir) throws IOException
     {
+        System.setSecurityManager(null);
+        Policy.setPolicy(null);
+
         _xmlConfigurations = new ArrayList<URL>();
         Properties properties = new Properties();
 
@@ -220,6 +226,16 @@ public class XmlConfiguredJetty
         }
     }
 
+    public void copyConfig(String path) throws IOException
+    {
+        File srcFile = MavenTestingUtils.getTestResourceFile(path);
+        File destFile = new File(_jettyHome,OS.separators(path));
+
+        System.out.printf("Copying Config: %s -> %s%n",srcFile,destFile);
+
+        copyFile("Config",srcFile,destFile);
+    }
+
     public void copyContext(String srcName) throws IOException
     {
         copyContext(srcName,srcName);
@@ -240,6 +256,7 @@ public class XmlConfiguredJetty
     private void copyFile(String type, File srcFile, File destFile) throws IOException
     {
         PathAssert.assertFileExists(type + " File",srcFile);
+        FS.ensureDirExists(destFile.getParentFile());
         IO.copyFile(srcFile,destFile);
         PathAssert.assertFileExists(type + " File",destFile);
         System.out.printf("Copy %s: %s%n  To %s: %s%n",type,srcFile,type,destFile);
@@ -452,6 +469,10 @@ public class XmlConfiguredJetty
     public void stop() throws Exception
     {
         _server.stop();
+        _server.join();
+
+        System.setSecurityManager(null);
+        Policy.setPolicy(null);
     }
 
     public void waitForDirectoryScan()
@@ -467,4 +488,5 @@ public class XmlConfiguredJetty
             /* ignore */
         }
     }
+
 }
