@@ -33,6 +33,7 @@
     <module>test-jndi-webapp</module>
     <module>test-jaas-webapp</module>
     <module>test-annotation-webapp</module>
+    <module>test-war-policy</module>
     <!-- Used by jetty-webapp-logging -->
     <module>test-war-commons_logging_1.1</module>
     <module>test-war-java_util_logging</module>
