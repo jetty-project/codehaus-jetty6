@@ -24,12 +24,14 @@ public class SecuredTest
         jetty = new XmlConfiguredJetty(testdir);
         jetty.addConfiguration("jetty.xml");
         jetty.addConfiguration("jetty-deploys.xml");
-        // TODO: jetty.addConfiguration("jetty-secure.xml");
+        jetty.addConfiguration("jetty-policy.xml");
 
         jetty.copyTestWar("test-war-java_util_logging.war");
         jetty.copyTestWar("test-war-policy.war");
-        jetty.copyContext("foo.xml");
-        jetty.copyContext("policytests.xml");
+        
+        jetty.copyConfig("contexts/foo.xml");
+        jetty.copyConfig("contexts/policytests.xml");
+        jetty.copyConfig("lib/policy/jetty.policy");
 
         // Load Configuration(s)
         jetty.load();

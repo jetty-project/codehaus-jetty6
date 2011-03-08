@@ -83,6 +83,12 @@ public class SimpleRequest
         }
     }
 
+    /**
+     * Attempt to obtain the body text if available.
+     * Do not throw an exception if body is unable to be fetched.
+     * @param connection the connection to fetch the body content from.
+     * @return the body content, if present.
+     */
     private String getPotentialBody(HttpURLConnection connection)
     {
         InputStream in = null;

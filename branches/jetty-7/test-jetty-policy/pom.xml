@@ -47,6 +47,11 @@
       <version>${jetty-version}</version>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-policy</artifactId>
+      <version>${jetty-version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.mortbay.jetty.testwars</groupId>
       <artifactId>test-war-java_util_logging</artifactId>
       <version>${project.version}</version>
