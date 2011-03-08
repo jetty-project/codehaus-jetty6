@@ -27,7 +27,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>test-jetty-webapp</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <classifier>config</classifier>
                   <type>jar</type>
                   <overWrite>true</overWrite>
