@@ -9,11 +9,10 @@ import org.eclipse.jetty.toolchain.test.TestingDir;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class PermissiveTest
+public class SecuredTest
 {
     @Rule
     public TestingDir testdir = new TestingDir();
@@ -25,6 +24,7 @@ public class PermissiveTest
         jetty = new XmlConfiguredJetty(testdir);
         jetty.addConfiguration("jetty.xml");
         jetty.addConfiguration("jetty-deploys.xml");
+        // TODO: jetty.addConfiguration("jetty-secure.xml");
 
         jetty.copyTestWar("test-war-java_util_logging.war");
         jetty.copyTestWar("test-war-policy.war");
@@ -50,29 +50,28 @@ public class PermissiveTest
     @Test
     public void testFilesystem() throws Exception
     {
-        assertCheckerSuccess("processFilesystemChecks");
+        assertCheckerFailure("processFilesystemChecks");
     }
 
     @Test
     public void testJettyLog() throws Exception
     {
-        assertCheckerSuccess("processJettyLogChecks");
+        assertCheckerFailure("processJettyLogChecks");
     }
 
     @Test
-    @Ignore("need to fix loadLibrary to actually load a real library")
     public void testLib() throws Exception
     {
-        assertCheckerSuccess("processLibChecks");
+        assertCheckerFailure("processLibChecks");
     }
 
     @Test
     public void testSystemProperty() throws Exception
     {
-        assertCheckerSuccess("processSystemPropertyChecks");
+        assertCheckerFailure("processSystemPropertyChecks");
     }
 
-    private void assertCheckerSuccess(String testname) throws Exception
+    private void assertCheckerFailure(String testname) throws Exception
     {
         SimpleRequest request = new SimpleRequest(jetty);
         Properties props = request.getProperties("/policytests/checker/" + testname);
@@ -82,7 +81,7 @@ public class PermissiveTest
         {
             String name = names.nextElement();
             String value = props.getProperty(name);
-            Assert.assertThat("[" + testname + "] " + name,value,startsWith("Success"));
+            Assert.assertThat("[" + testname + "] " + name,value,not(startsWith("Success")));
         }
     }
 }
