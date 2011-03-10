@@ -140,21 +140,17 @@ public class XmlConfiguredJetty
         properties.setProperty("test.warsdir",testwarsDir.getAbsolutePath());
         properties.setProperty("test.workdir",workishDir.getAbsolutePath());
 
-        Map<String, Class<?>> codemap = new HashMap<String, Class<?>>();
-
-        codemap.put("jetty-webapp",WebAppClassLoader.class);
-        codemap.put("jetty-xml",XmlParser.class);
-        codemap.put("jetty-util",Log.class);
-        codemap.put("jetty-servlet",DefaultServlet.class);
-        codemap.put("jetty-security",LoginService.class);
-        codemap.put("jetty-server",Server.class);
-        codemap.put("jetty-continuation",Continuation.class);
-        codemap.put("jetty-http",HttpParser.class);
-        codemap.put("jetty-io",EndPoint.class);
-        codemap.put("jetty-deploy",DeploymentManager.class);
-
-        addClasspathReferences(properties,codemap);
-
+        properties.setProperty("cp.jetty-webapp", getCodebaseUrl(WebAppClassLoader.class));
+        properties.setProperty("cp.jetty-xml", getCodebaseUrl(XmlParser.class));
+        properties.setProperty("cp.jetty-util", getCodebaseUrl(Log.class));
+        properties.setProperty("cp.jetty-servlet", getCodebaseUrl(DefaultServlet.class));
+        properties.setProperty("cp.jetty-security", getCodebaseUrl(LoginService.class));
+        properties.setProperty("cp.jetty-server", getCodebaseUrl(Server.class));
+        properties.setProperty("cp.jetty-continuation", getCodebaseUrl(Continuation.class));
+        properties.setProperty("cp.jetty-http", getCodebaseUrl(HttpParser.class));
+        properties.setProperty("cp.jetty-io", getCodebaseUrl(EndPoint.class));
+        properties.setProperty("cp.jetty-deploy", getCodebaseUrl(DeploymentManager.class));
+        
         // Write out configuration for use by ConfigurationManager.
         File testConfig = MavenTestingUtils.getTargetFile("xml-configured-jetty.properties");
         FileOutputStream out = new FileOutputStream(testConfig);
@@ -163,47 +159,48 @@ public class XmlConfiguredJetty
             _properties.put(String.valueOf(key),String.valueOf(properties.get(key)));
     }
 
-    private void addClasspathReferences(Properties properties, Map<String, Class<?>> codemap)
+    private String getCodebaseUrl(Class<?> clazz)
     {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-
-        for (Map.Entry<String, Class<?>> entry : codemap.entrySet())
+        
+        String classname = clazz.getName().replace('.','/') + ".class";
+        URL url = cl.getResource(classname);
+        if (url == null)
         {
-            String classname = entry.getValue().getName().replace('.','/') + ".class";
-            URL url = cl.getResource(classname);
-            if (url == null)
+            // Not found. skip.
+            System.out.printf("Class Not Found: %s%n",classname);
+            return "";
+        }
+        
+        System.out.printf("Found Class: %s - %s%n",classname,url.toExternalForm());
+        try
+        {
+            String rawpath;
+            
+            URI uri = url.toURI();
+            if ("jar".equals(uri.getScheme()))
             {
-                // Not found. skip.
-                System.out.printf("[%s] Class Not Found: %s%n",entry.getKey(),classname);
-                continue;
-            }
-            System.out.printf("[%s] Found Class: %s - %s%n",entry.getKey(),classname,url.toExternalForm());
-            try
-            {
-                URI uri = url.toURI();
-                if ("jar".equals(uri.getScheme()))
+                rawpath = uri.getSchemeSpecificPart();
+                if (rawpath.endsWith("!/" + classname))
                 {
-                    String filepath = uri.getSchemeSpecificPart();
-                    if (filepath.endsWith("!/" + classname))
-                    {
-                        filepath = filepath.substring(0,filepath.length() - (classname.length() + 2));
-                    }
-                    properties.put("cp." + entry.getKey(),filepath);
-                }
-                else
-                {
-                    String rawpath = uri.toASCIIString();
-                    if (rawpath.endsWith(classname))
-                    {
-                        rawpath = rawpath.substring(0,rawpath.length() - classname.length());
-                    }
-                    properties.put("cp." + entry.getKey(),rawpath);
+                    rawpath = rawpath.substring(0,rawpath.length() - (classname.length() + 2));
                 }
             }
-            catch (URISyntaxException e)
+            else
             {
-                e.printStackTrace(System.out);
+                rawpath = uri.toASCIIString();
+                if (rawpath.endsWith(classname))
+                {
+                    rawpath = rawpath.substring(0,rawpath.length() - classname.length());
+                }
             }
+            
+            return rawpath;
+        }
+        catch (URISyntaxException e)
+        {
+            e.printStackTrace(System.out);
+            return "";
         }
     }
 
