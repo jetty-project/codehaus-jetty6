@@ -24,6 +24,26 @@ public class PolicyFileManager
         _jettyHome = jettyHome;
     }
 
+    public void createJettyGlobalPolicyFile(String classesDir)
+    {       
+        try
+        {                                                     
+            BufferedWriter out = new BufferedWriter(new FileWriter(_policyDirectory + File.separator + "jetty.policy"));
+            out.write("grant {\n\n");
+            
+            out.write("   permission java.io.FilePermission \"" + MavenTestingUtils.getTargetFile("xml-configured-jetty.properties") + "\", \"read\"\n" );
+
+            writeGlobalPermissions(out);
+            
+            out.write("\n}\n");
+            out.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
     
     public void createJettyHomePolicyFile(String classesDir)
     {       
@@ -32,7 +52,7 @@ public class PolicyFileManager
             BufferedWriter out = new BufferedWriter(new FileWriter(_policyDirectory + File.separator + "jetty-home.policy"));
             out.write("grant codebase \"file:" + classesDir +"-\" {\n\n");
             
-            out.write("   permission java.io.FilePermission \"" + _jettyHome + "/-\", \"read,write\"\n" );
+            out.write("   permission java.io.FilePermission \"" + _jettyHome + "/-\", \"read,write,delete\"\n" );
             out.write("   permission java.io.FilePermission \"" + MavenTestingUtils.getTargetFile("xml-configured-jetty.properties") + "\", \"read\"\n" );
 
             writeCorePermissions(out);
@@ -53,13 +73,13 @@ public class PolicyFileManager
         {
             URI jarUri = new URI(jettyJar);
             
-            URI repoBaseUri = jarUri.resolve("../../../../../");         
+            URI repoBaseUri = jarUri.resolve("../../../");         
             File jarFile = new File(jarUri);
                                
             BufferedWriter out = new BufferedWriter(new FileWriter(_policyDirectory + File.separator + "base-repo.policy"));
             out.write("grant codebase \"" + repoBaseUri.toString() +"-\" {\n\n");
             
-            out.write("   permission java.io.FilePermission \"" + _jettyHome + "/-\", \"read,write\"\n" );
+            out.write("   permission java.io.FilePermission \"" + _jettyHome + "/-\", \"read,write,delete\"\n" );
             out.write("   permission java.io.FilePermission \"" + MavenTestingUtils.getTargetFile("xml-configured-jetty.properties") + "\", \"read\"\n" );
 
             
@@ -95,7 +115,7 @@ public class PolicyFileManager
                 BufferedWriter out = new BufferedWriter(new FileWriter(_policyDirectory + File.separator + policyFileName.getName() + ".policy"));
                 out.write("grant codebase \"" + jarUri.toString() + "-\" {\n\n");
 
-                out.write("   permission java.io.FilePermission \"" + _jettyHome + "/-\", \"read,write\"\n");
+                out.write("   permission java.io.FilePermission \"" + _jettyHome + "/-\", \"read,write,delete\"\n");
                 out.write("   permission java.io.FilePermission \"" + MavenTestingUtils.getTargetFile("xml-configured-jetty.properties") + "\", \"read\"\n");
 
                 writeCorePermissions(out);
@@ -119,6 +139,26 @@ public class PolicyFileManager
         try
         {
             BufferedReader reader = new BufferedReader(new FileReader(MavenTestingUtils.getTestResourceFile("core-policy.txt")));
+            
+            String line;
+            
+            while ((line = reader.readLine()) != null)
+            {
+                out.write(line + "\n");
+            }
+            reader.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    private void writeGlobalPermissions(Writer out)
+    {
+        try
+        {
+            BufferedReader reader = new BufferedReader(new FileReader(MavenTestingUtils.getTestResourceFile("global-policy.txt")));
             
             String line;
             

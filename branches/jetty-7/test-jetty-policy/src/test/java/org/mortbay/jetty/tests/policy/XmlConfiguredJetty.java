@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import junit.framework.TestCase;
+
 import org.eclipse.jetty.continuation.Continuation;
 import org.eclipse.jetty.deploy.DeploymentManager;
 import org.eclipse.jetty.http.HttpParser;
@@ -143,7 +145,8 @@ public class XmlConfiguredJetty
         
         File testwarsDir = new File(MavenTestingUtils.getTargetDir(),"test-wars");
 
-        PolicyFileManager policyManager = new PolicyFileManager(_jettyHome + "/lib/policy", _jettyHome.toString());    		
+        PolicyFileManager policyManager = new PolicyFileManager(_jettyHome + "/lib/policy", _jettyHome.toString()); 
+        policyManager.createJettyGlobalPolicyFile(MavenTestingUtils.getTargetDir().toString() + "/test-classes/");
         policyManager.createJettyHomePolicyFile(MavenTestingUtils.getTargetDir().toString() + "/test-classes/");
         
         // Setup properties
@@ -157,7 +160,7 @@ public class XmlConfiguredJetty
         properties.setProperty("test.warsdir",testwarsDir.getAbsolutePath());
         properties.setProperty("test.workdir",workishDir.getAbsolutePath());
 
-        policyManager.createJettyRepoPolicyFile(getCodebaseUrl(WebAppClassLoader.class));
+        policyManager.createJettyRepoPolicyFile(getCodebaseUrl(TestCase.class));
         
         properties.setProperty("cp.jetty-webapp", getCodebaseUrl(WebAppClassLoader.class));     
         policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(WebAppClassLoader.class));
