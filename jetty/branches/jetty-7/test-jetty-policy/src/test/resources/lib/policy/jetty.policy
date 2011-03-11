@@ -5,9 +5,9 @@
 // Note: this is still a work in progress
 
 // start.jar
-grant codeBase "file:${jetty.home}/start.jar" {
+grant codeBase "file:${maven.local.repo}/start.jar" {
 
-   permission java.io.FilePermission "${jetty.home}${/}-", "read";
+   permission java.io.FilePermission "${settings.localRepository}${/}-", "read";
    
    permission java.lang.RuntimePermission "createClassLoader";
    permission java.lang.RuntimePermission "setContextClassLoader";    
@@ -191,6 +191,7 @@ grant {
 
    permission java.security.SecurityPermission "putProviderProperty.SunJCE";
    permission java.util.PropertyPermission "org.eclipse.jetty.io.nio.JVMBUG_THRESHHOLD", "read, write";
+   permission java.util.PropertyPermission "org.eclipse.jetty.io.AbstractBuffer.boundChecking", "read";
 
    // "standard" properties that can be read by anyone
    permission java.util.PropertyPermission "entityExpansionLimit", "read";
