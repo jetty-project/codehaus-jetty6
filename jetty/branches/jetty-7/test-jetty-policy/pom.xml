@@ -31,6 +31,20 @@
               <stripVersion>true</stripVersion>
             </configuration>
           </execution>
+          <execution>
+            <id>copy-jetty-libs</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeGroupIds>org.eclipse.jetty,javax.servlet</includeGroupIds>
+              <outputDirectory>${project.build.directory}/jetty-libs</outputDirectory>
+              <overWriteIfNewer>true</overWriteIfNewer>
+              <overWrite>true</overWrite>
+              <stripVersion>true</stripVersion>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>
@@ -38,18 +52,15 @@
   <dependencies>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-webapp</artifactId>
-      <version>${jetty-version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-deploy</artifactId>
       <version>${jetty-version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-policy</artifactId>
       <version>${jetty-version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty.testwars</groupId>
