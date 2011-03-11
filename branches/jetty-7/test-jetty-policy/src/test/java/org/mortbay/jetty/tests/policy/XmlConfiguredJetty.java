@@ -127,8 +127,25 @@ public class XmlConfiguredJetty
         }
         workishDir.mkdirs();
 
+        File libDir = new File(_jettyHome,"lib");
+        if (libDir.exists())
+        {
+            deleteContents(libDir);
+        }
+        libDir.mkdirs();
+        
+        File policyDir = new File(libDir,"policy");
+        if (policyDir.exists())
+        {
+            deleteContents(policyDir);
+        }
+        policyDir.mkdirs();
+        
         File testwarsDir = new File(MavenTestingUtils.getTargetDir(),"test-wars");
 
+        PolicyFileManager policyManager = new PolicyFileManager(_jettyHome + "/lib/policy", _jettyHome.toString());    		
+        policyManager.createJettyHomePolicyFile(MavenTestingUtils.getTargetDir().toString() + "/test-classes/");
+        
         // Setup properties
         System.setProperty("java.io.tmpdir",tmpDir.getAbsolutePath());
         properties.setProperty("jetty.home",_jettyHome.getAbsolutePath());
@@ -140,17 +157,38 @@ public class XmlConfiguredJetty
         properties.setProperty("test.warsdir",testwarsDir.getAbsolutePath());
         properties.setProperty("test.workdir",workishDir.getAbsolutePath());
 
-        properties.setProperty("cp.jetty-webapp", getCodebaseUrl(WebAppClassLoader.class));
-        properties.setProperty("cp.jetty-xml", getCodebaseUrl(XmlParser.class));
-        properties.setProperty("cp.jetty-util", getCodebaseUrl(Log.class));
-        properties.setProperty("cp.jetty-servlet", getCodebaseUrl(DefaultServlet.class));
-        properties.setProperty("cp.jetty-security", getCodebaseUrl(LoginService.class));
-        properties.setProperty("cp.jetty-server", getCodebaseUrl(Server.class));
-        properties.setProperty("cp.jetty-continuation", getCodebaseUrl(Continuation.class));
-        properties.setProperty("cp.jetty-http", getCodebaseUrl(HttpParser.class));
-        properties.setProperty("cp.jetty-io", getCodebaseUrl(EndPoint.class));
-        properties.setProperty("cp.jetty-deploy", getCodebaseUrl(DeploymentManager.class));
+        policyManager.createJettyRepoPolicyFile(getCodebaseUrl(WebAppClassLoader.class));
         
+        properties.setProperty("cp.jetty-webapp", getCodebaseUrl(WebAppClassLoader.class));     
+        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(WebAppClassLoader.class));
+        
+        properties.setProperty("cp.jetty-xml", getCodebaseUrl(XmlParser.class));
+        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(XmlParser.class));
+
+        properties.setProperty("cp.jetty-util", getCodebaseUrl(Log.class));
+        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(Log.class));
+
+        properties.setProperty("cp.jetty-servlet", getCodebaseUrl(DefaultServlet.class));
+        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(DefaultServlet.class));
+
+        properties.setProperty("cp.jetty-security", getCodebaseUrl(LoginService.class));
+        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(LoginService.class));
+
+        properties.setProperty("cp.jetty-server", getCodebaseUrl(Server.class));
+        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(Server.class));
+
+        properties.setProperty("cp.jetty-continuation", getCodebaseUrl(Continuation.class));
+        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(Continuation.class));
+
+        properties.setProperty("cp.jetty-http", getCodebaseUrl(HttpParser.class));
+        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(HttpParser.class));
+
+        properties.setProperty("cp.jetty-io", getCodebaseUrl(EndPoint.class));
+        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(EndPoint.class));
+
+        properties.setProperty("cp.jetty-deploy", getCodebaseUrl(DeploymentManager.class));
+        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(DeploymentManager.class));
+
         // Write out configuration for use by ConfigurationManager.
         File testConfig = MavenTestingUtils.getTargetFile("xml-configured-jetty.properties");
         FileOutputStream out = new FileOutputStream(testConfig);
