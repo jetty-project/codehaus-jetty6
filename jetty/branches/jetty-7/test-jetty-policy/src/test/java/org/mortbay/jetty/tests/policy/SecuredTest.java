@@ -2,9 +2,14 @@ package org.mortbay.jetty.tests.policy;
 
 import static org.hamcrest.Matchers.*;
 
+import java.security.AccessController;
+import java.security.Policy;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import org.eclipse.jetty.policy.JettyPolicy;
 import org.eclipse.jetty.toolchain.test.TestingDir;
 import org.junit.After;
 import org.junit.Assert;
@@ -31,7 +36,7 @@ public class SecuredTest
         
         jetty.copyConfig("contexts/foo.xml");
         jetty.copyConfig("contexts/policytests.xml");
-        jetty.copyConfig("lib/policy/jetty.policy");
+        //jetty.copyConfig("lib/policy/jetty.policy");
 
         // Load Configuration(s)
         jetty.load();
@@ -52,25 +57,71 @@ public class SecuredTest
     @Test
     public void testFilesystem() throws Exception
     {
-        assertCheckerFailure("processFilesystemChecks");
+        AccessController.doPrivileged(new PrivilegedExceptionAction()
+        {
+            public Object run() throws Exception
+            {
+                //((JettyPolicy)Policy.getPolicy()).dump(System.out);
+                
+                    assertCheckerFailure("processFilesystemChecks");
+               
+                return null;
+            }
+        }
+        );
+       
+      
     }
 
     @Test
     public void testJettyLog() throws Exception
     {
-        assertCheckerFailure("processJettyLogChecks");
+        AccessController.doPrivileged(new PrivilegedExceptionAction()
+        {
+            public Object run() throws Exception
+            {
+                //((JettyPolicy)Policy.getPolicy()).dump(System.out);
+                
+                    assertCheckerFailure("processJettyLogChecks");
+               
+                return null;
+            }
+        }
+        );
     }
 
     @Test
     public void testLib() throws Exception
     {
-        assertCheckerFailure("processLibChecks");
+        AccessController.doPrivileged(new PrivilegedExceptionAction()
+        {
+            public Object run() throws Exception
+            {
+               // ((JettyPolicy)Policy.getPolicy()).dump(System.out);
+               
+                    assertCheckerFailure("processLibChecks");
+               
+                return null;
+            }
+        }
+        );
     }
 
     @Test
     public void testSystemProperty() throws Exception
     {
-        assertCheckerFailure("processSystemPropertyChecks");
+        AccessController.doPrivileged(new PrivilegedExceptionAction()
+        {
+            public Object run() throws Exception
+            {
+             //   ((JettyPolicy)Policy.getPolicy()).dump(System.out);
+                
+                    assertCheckerFailure("processSystemPropertyChecks");
+              
+                return null;
+            }
+        }
+        );
     }
 
     private void assertCheckerFailure(String testname) throws Exception

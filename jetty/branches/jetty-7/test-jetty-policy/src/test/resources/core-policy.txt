@@ -1,6 +1,7 @@
    
    permission java.io.FilePermission "/tmp/-", "read,write";
-   
+
+  
    permission java.lang.RuntimePermission "getClassLoader";
 	 
    permission java.util.PropertyPermission "org.eclipse.jetty.webapp.WebAppClassLoader.extensions", "read";
