@@ -4,7 +4,7 @@
    permission java.security.SecurityPermission "getPolicy";
 
    permission java.io.FilePermission "${jetty.home}${/}lib${/}policy${/}-", "read";
-   permission java.io.FilePermission "${jetty.home}${/}-", "read,write";
+   permission java.io.FilePermission "${jetty.home}${/}-", "read,write,delete";
 
 
    // allows anyone to listen on un-privileged ports
@@ -14,6 +14,7 @@
    permission java.net.SocketPermission "localhost:1024-", "accept"; 
    permission java.net.SocketPermission "127.0.0.1:1024-", "accept"; 
 
+   permission java.lang.RuntimePermission "getClassLoader";
    permission java.lang.RuntimePermission "createClassLoader";
    permission java.lang.RuntimePermission "setContextClassLoader";
      
