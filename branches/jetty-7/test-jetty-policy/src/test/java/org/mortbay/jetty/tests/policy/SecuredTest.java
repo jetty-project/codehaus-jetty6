@@ -63,7 +63,7 @@ public class SecuredTest
             {
                 //((JettyPolicy)Policy.getPolicy()).dump(System.out);
                 
-                    assertCheckerFailure("processFilesystemChecks");
+                assertCheckerFailure("processFilesystemChecks");
                
                 return null;
             }
