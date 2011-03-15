@@ -14,6 +14,7 @@ import org.eclipse.jetty.toolchain.test.TestingDir;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -54,26 +55,26 @@ public class SecuredTest
         }
     }
 
-    @Test
+    @Ignore
     public void testFilesystem() throws Exception
     {
-        AccessController.doPrivileged(new PrivilegedExceptionAction()
-        {
-            public Object run() throws Exception
-            {
-                //((JettyPolicy)Policy.getPolicy()).dump(System.out);
-                
+//        AccessController.doPrivileged(new PrivilegedExceptionAction()
+//        {
+//            public Object run() throws Exception
+//            {
+//                ((JettyPolicy)Policy.getPolicy()).dump(System.out);
+//                
                 assertCheckerFailure("processFilesystemChecks");
-               
-                return null;
-            }
-        }
-        );
-       
+//               
+//                return null;
+//            }
+//        }
+//        );
+//       
       
     }
 
-    @Test
+    @Ignore
     public void testJettyLog() throws Exception
     {
         AccessController.doPrivileged(new PrivilegedExceptionAction()
@@ -90,7 +91,7 @@ public class SecuredTest
         );
     }
 
-    @Test
+    @Ignore
     public void testLib() throws Exception
     {
         AccessController.doPrivileged(new PrivilegedExceptionAction()

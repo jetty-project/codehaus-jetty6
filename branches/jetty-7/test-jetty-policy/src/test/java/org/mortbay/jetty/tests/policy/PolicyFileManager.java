@@ -160,6 +160,26 @@ public class PolicyFileManager
         }
     }
 
+    public void createJettyWebappPolicyFile(String webappLocation)
+    {
+        
+        try
+        {                                                     
+            BufferedWriter out = new BufferedWriter(new FileWriter(_policyDirectory + File.separator + "webapps.policy"));
+            out.write("grant codebase \"file:" + webappLocation + "-\"  {\n\n");
+            
+            writeWebappPermissions(out);
+            
+            out.write("\n}\n");
+            out.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    
     private void writeCorePermissions(Writer out)
     {
         FileReader reader = null;
@@ -213,5 +233,25 @@ public class PolicyFileManager
             IO.close(reader);
         }
     }
-
+ 
+    private void writeWebappPermissions(Writer out)
+    {
+        try
+        {
+            BufferedReader reader = new BufferedReader(new FileReader(MavenTestingUtils.getTestResourceFile("webapp-policy.txt")));
+            
+            String line;
+            
+            while ((line = reader.readLine()) != null)
+            {
+                out.write(line + "\n");
+            }
+            reader.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
 }

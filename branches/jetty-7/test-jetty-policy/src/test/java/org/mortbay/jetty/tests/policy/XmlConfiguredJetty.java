@@ -151,6 +151,7 @@ public class XmlConfiguredJetty
         PolicyFileManager policyManager = new PolicyFileManager(_jettyHome + "/lib/policy",_jettyHome.toString());
         policyManager.createJettyGlobalPolicyFile(MavenTestingUtils.getTargetDir().toString() + "/test-classes/");
         policyManager.createJettyHomePolicyFile(MavenTestingUtils.getTargetDir().toString() + "/test-classes/");
+        policyManager.createJettyWebappPolicyFile(_jettyHome + "/webapps/");
 
         // Setup properties
         System.setProperty("java.io.tmpdir",tmpDir.getAbsolutePath());
