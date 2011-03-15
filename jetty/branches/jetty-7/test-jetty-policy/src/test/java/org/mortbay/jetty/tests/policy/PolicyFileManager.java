@@ -11,6 +11,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.eclipse.jetty.toolchain.test.MavenTestingUtils;
+import org.eclipse.jetty.toolchain.test.OS;
+import org.eclipse.jetty.util.IO;
 
 public class PolicyFileManager
 {
@@ -25,68 +27,80 @@ public class PolicyFileManager
     }
 
     public void createJettyGlobalPolicyFile(String classesDir)
-    {       
+    {
+        FileWriter writer = null;
+        BufferedWriter out = null;
         try
-        {                                                     
-            BufferedWriter out = new BufferedWriter(new FileWriter(_policyDirectory + File.separator + "jetty.policy"));
+        {
+            writer = new FileWriter(OS.separators(_policyDirectory + "/jetty.policy"));
+            out = new BufferedWriter(writer);
             out.write("grant {\n\n");
-            
-            out.write("   permission java.io.FilePermission \"" + MavenTestingUtils.getTargetFile("xml-configured-jetty.properties") + "\", \"read\"\n" );
+
+            out.write("   permission java.io.FilePermission \"" + MavenTestingUtils.getTargetFile("xml-configured-jetty.properties") + "\", \"read\"\n");
 
             writeGlobalPermissions(out);
-            
+
             out.write("\n}\n");
-            out.close();
         }
         catch (IOException e)
         {
             e.printStackTrace();
         }
+        finally
+        {
+            IO.close(out);
+            IO.close(writer);
+        }
     }
-    
-    
+
     public void createJettyHomePolicyFile(String classesDir)
-    {       
+    {
+        FileWriter writer = null;
+        BufferedWriter out = null;
         try
-        {                                                     
-            BufferedWriter out = new BufferedWriter(new FileWriter(_policyDirectory + File.separator + "jetty-home.policy"));
-            out.write("grant codebase \"file:" + classesDir +"-\" {\n\n");
-            
-            out.write("   permission java.io.FilePermission \"" + _jettyHome + "/-\", \"read,write,delete\"\n" );
-            out.write("   permission java.io.FilePermission \"" + MavenTestingUtils.getTargetFile("xml-configured-jetty.properties") + "\", \"read\"\n" );
+        {
+            writer = new FileWriter(OS.separators(_policyDirectory + "/jetty-home.policy"));
+            out = new BufferedWriter(writer);
+            out.write("grant codebase \"file:" + classesDir + "-\" {\n\n");
+
+            out.write("   permission java.io.FilePermission \"" + _jettyHome + "/-\", \"read,write,delete\"\n");
+            out.write("   permission java.io.FilePermission \"" + MavenTestingUtils.getTargetFile("xml-configured-jetty.properties") + "\", \"read\"\n");
 
             writeCorePermissions(out);
-            
+
             out.write("\n}\n");
-            out.close();
         }
         catch (IOException e)
         {
             e.printStackTrace();
         }
+        finally
+        {
+            IO.close(out);
+            IO.close(writer);
+        }
     }
-    
+
     public void createJettyRepoPolicyFile(String jettyJar)
     {
-        
+        FileWriter writer = null;
+        BufferedWriter out = null;
         try
         {
-            URI jarUri = new URI(jettyJar);
-            
-            URI repoBaseUri = jarUri.resolve("../../../");         
-            File jarFile = new File(jarUri);
-                               
-            BufferedWriter out = new BufferedWriter(new FileWriter(_policyDirectory + File.separator + "base-repo.policy"));
-            out.write("grant codebase \"" + repoBaseUri.toString() +"-\" {\n\n");
-            
-            out.write("   permission java.io.FilePermission \"" + _jettyHome + "/-\", \"read,write,delete\"\n" );
-            out.write("   permission java.io.FilePermission \"" + MavenTestingUtils.getTargetFile("xml-configured-jetty.properties") + "\", \"read\"\n" );
+            writer = new FileWriter(OS.separators(_policyDirectory + "/base-repo.policy"));
+            out = new BufferedWriter(writer);
 
-            
+            URI jarUri = new URI(jettyJar);
+            URI repoBaseUri = jarUri.resolve("../../../");
+
+            out.write("grant codebase \"" + repoBaseUri.toString() + "-\" {\n\n");
+
+            out.write("   permission java.io.FilePermission \"" + _jettyHome + "/-\", \"read,write,delete\"\n");
+            out.write("   permission java.io.FilePermission \"" + MavenTestingUtils.getTargetFile("xml-configured-jetty.properties") + "\", \"read\"\n");
+
             writeCorePermissions(out);
 
             out.write("\n}\n");
-            out.close();
         }
         catch (IOException e)
         {
@@ -96,24 +110,31 @@ public class PolicyFileManager
         {
             e.printStackTrace();
         }
+        finally
+        {
+            IO.close(out);
+            IO.close(writer);
+        }
     }
 
-    
     public void createJettyDirectoryPolicyFile(String jettyLocation)
     {
-        
+
+        FileWriter writer = null;
+        BufferedWriter out = null;
         try
         {
             URI jarUri = new URI(jettyLocation);
-            
+
             File loc = new File(jarUri);
-            
-            File policyFileName = new File(jarUri.resolve("../..")); 
-            System.out.printf("Policy File: %s%n", policyFileName);
-            
+
+            File policyFileName = new File(jarUri.resolve("../.."));
+            System.out.printf("Policy File: %s%n",policyFileName);
+
             if (loc.isDirectory())
             {
-                BufferedWriter out = new BufferedWriter(new FileWriter(_policyDirectory + File.separator + policyFileName.getName() + ".policy"));
+                writer = new FileWriter(OS.separators(_policyDirectory + "/" + policyFileName.getName() + ".policy"));
+                out = new BufferedWriter(writer);
                 out.write("grant codebase \"" + jarUri.toString() + "-\" {\n\n");
 
                 out.write("   permission java.io.FilePermission \"" + _jettyHome + "/-\", \"read,write,delete\"\n");
@@ -122,7 +143,6 @@ public class PolicyFileManager
                 writeCorePermissions(out);
 
                 out.write("\n}\n");
-                out.close();
             }
         }
         catch (IOException e)
@@ -133,46 +153,65 @@ public class PolicyFileManager
         {
             e.printStackTrace();
         }
+        finally
+        {
+            IO.close(out);
+            IO.close(writer);
+        }
     }
-    
+
     private void writeCorePermissions(Writer out)
     {
+        FileReader reader = null;
+        BufferedReader buf = null;
         try
         {
-            BufferedReader reader = new BufferedReader(new FileReader(MavenTestingUtils.getTestResourceFile("core-policy.txt")));
-            
+            reader = new FileReader(MavenTestingUtils.getTestResourceFile("core-policy.txt"));
+            buf = new BufferedReader(reader);
+
             String line;
-            
-            while ((line = reader.readLine()) != null)
+
+            while ((line = buf.readLine()) != null)
             {
                 out.write(line + "\n");
             }
-            reader.close();
         }
         catch (IOException e)
         {
             e.printStackTrace();
         }
+        finally
+        {
+            IO.close(buf);
+            IO.close(reader);
+        }
     }
-    
+
     private void writeGlobalPermissions(Writer out)
     {
+        FileReader reader = null;
+        BufferedReader buf = null;
         try
         {
-            BufferedReader reader = new BufferedReader(new FileReader(MavenTestingUtils.getTestResourceFile("global-policy.txt")));
-            
+            reader = new FileReader(MavenTestingUtils.getTestResourceFile("global-policy.txt"));
+            buf = new BufferedReader(reader);
+
             String line;
-            
-            while ((line = reader.readLine()) != null)
+
+            while ((line = buf.readLine()) != null)
             {
                 out.write(line + "\n");
             }
-            reader.close();
         }
         catch (IOException e)
         {
             e.printStackTrace();
         }
+        finally
+        {
+            IO.close(buf);
+            IO.close(reader);
+        }
     }
-    
+
 }
