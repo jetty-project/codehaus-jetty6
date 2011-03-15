@@ -58,4 +58,9 @@
    permission java.util.PropertyPermission "java.vm.name", "read";
 
    // TEST WEBAPP PERMISSIONS
-   permission java.util.PropertyPermission "user.dir", "read";  
+   permission java.util.PropertyPermission "user.dir", "read"; 
+   
+     // TEST WEBAPP PERMISSIONS
+   permission java.util.PropertyPermission "__ALLOWED_READ_PROPERTY", "read";   
+   permission java.util.PropertyPermission "__ALLOWED_WRITE_PROPERTY", "read, write";
+	 
