@@ -29,10 +29,13 @@ import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.security.Policy;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
@@ -135,20 +138,20 @@ public class XmlConfiguredJetty
             deleteContents(libDir);
         }
         libDir.mkdirs();
-        
+
         File policyDir = new File(libDir,"policy");
         if (policyDir.exists())
         {
             deleteContents(policyDir);
         }
         policyDir.mkdirs();
-        
+
         File testwarsDir = new File(MavenTestingUtils.getTargetDir(),"test-wars");
 
-        PolicyFileManager policyManager = new PolicyFileManager(_jettyHome + "/lib/policy", _jettyHome.toString()); 
+        PolicyFileManager policyManager = new PolicyFileManager(_jettyHome + "/lib/policy",_jettyHome.toString());
         policyManager.createJettyGlobalPolicyFile(MavenTestingUtils.getTargetDir().toString() + "/test-classes/");
         policyManager.createJettyHomePolicyFile(MavenTestingUtils.getTargetDir().toString() + "/test-classes/");
-        
+
         // Setup properties
         System.setProperty("java.io.tmpdir",tmpDir.getAbsolutePath());
         properties.setProperty("jetty.home",_jettyHome.getAbsolutePath());
@@ -161,49 +164,94 @@ public class XmlConfiguredJetty
         properties.setProperty("test.workdir",workishDir.getAbsolutePath());
 
         policyManager.createJettyRepoPolicyFile(getCodebaseUrl(TestCase.class));
-        
-        properties.setProperty("cp.jetty-webapp", getCodebaseUrl(WebAppClassLoader.class));     
-        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(WebAppClassLoader.class));
-        
-        properties.setProperty("cp.jetty-xml", getCodebaseUrl(XmlParser.class));
-        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(XmlParser.class));
 
-        properties.setProperty("cp.jetty-util", getCodebaseUrl(Log.class));
-        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(Log.class));
+        // Important Jetty Lib Classpath References
+        Map<String, Class<?>> classRefs = new HashMap<String, Class<?>>();
+        classRefs.put("jetty-webapp",WebAppClassLoader.class);
+        classRefs.put("jetty-xml",XmlParser.class);
+        classRefs.put("jetty-util",Log.class);
+        classRefs.put("jetty-servlet",DefaultServlet.class);
+        classRefs.put("jetty-security",LoginService.class);
+        classRefs.put("jetty-server",Server.class);
+        classRefs.put("jetty-continuation",Continuation.class);
+        classRefs.put("jetty-http",HttpParser.class);
+        classRefs.put("jetty-io",EndPoint.class);
+        classRefs.put("jetty-deploy",DeploymentManager.class);
 
-        properties.setProperty("cp.jetty-servlet", getCodebaseUrl(DefaultServlet.class));
-        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(DefaultServlet.class));
+        // All found URL references for Jetty Lib Classpath References above.
+        Set<String> libUrls = new TreeSet<String>();
 
-        properties.setProperty("cp.jetty-security", getCodebaseUrl(LoginService.class));
-        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(LoginService.class));
+        // Find and Map all Classpath References to properties object (for later use)
+        findCodebaseUrls(classRefs,properties,libUrls);
 
-        properties.setProperty("cp.jetty-server", getCodebaseUrl(Server.class));
-        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(Server.class));
+        // Establish Jetty Directory Policy File
+        boolean onlyJars = true;
+        for (String url : libUrls)
+        {
+            if (!isJarFile(url))
+            {
+                System.out.printf("Lib URL not a JAR File: %s%n",url);
+                onlyJars = false;
+            }
+            policyManager.createJettyDirectoryPolicyFile(url);
+        }
 
-        properties.setProperty("cp.jetty-continuation", getCodebaseUrl(Continuation.class));
-        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(Continuation.class));
-
-        properties.setProperty("cp.jetty-http", getCodebaseUrl(HttpParser.class));
-        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(HttpParser.class));
-
-        properties.setProperty("cp.jetty-io", getCodebaseUrl(EndPoint.class));
-        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(EndPoint.class));
-
-        properties.setProperty("cp.jetty-deploy", getCodebaseUrl(DeploymentManager.class));
-        policyManager.createJettyDirectoryPolicyFile(getCodebaseUrl(DeploymentManager.class));
+        // Sanity Check (and warning)
+        if (!onlyJars)
+        {
+            StringBuilder err = new StringBuilder();
+            err.append("WARNING: Some lib references are not JAR files.");
+            err.append("\n  You are likely running these tests from within eclipse, ");
+            err.append("with dependant lib projects open in your workspace.");
+            err.append("\n  This will likely cause several test cases to fail as appropriate jetty-security ");
+            err.append("and java security policy file references will not make sense.");
+            throw new IllegalStateException(err.toString());
+        }
 
         // Write out configuration for use by ConfigurationManager.
         File testConfig = MavenTestingUtils.getTargetFile("xml-configured-jetty.properties");
         FileOutputStream out = new FileOutputStream(testConfig);
         properties.store(out,"Generated by " + XmlConfiguredJetty.class.getName());
         for (Object key : properties.keySet())
+        {
             _properties.put(String.valueOf(key),String.valueOf(properties.get(key)));
+        }
+    }
+
+    private boolean isJarFile(String urlstr)
+    {
+        try
+        {
+            URI uri = new URI(urlstr);
+            File path = new File(uri);
+            if (!path.isFile())
+            {
+                return false;
+            }
+            return path.getName().endsWith(".jar");
+        }
+        catch (URISyntaxException e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private void findCodebaseUrls(Map<String, Class<?>> classRefs, Properties properties, Collection<String> libUrls)
+    {
+        String url;
+        for (Map.Entry<String, Class<?>> entry : classRefs.entrySet())
+        {
+            url = getCodebaseUrl(entry.getValue());
+            libUrls.add(url);
+            properties.setProperty("cp." + entry.getKey(),url);
+        }
     }
 
     private String getCodebaseUrl(Class<?> clazz)
     {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        
+
         String classname = clazz.getName().replace('.','/') + ".class";
         URL url = cl.getResource(classname);
         if (url == null)
@@ -212,12 +260,12 @@ public class XmlConfiguredJetty
             System.out.printf("Class Not Found: %s%n",classname);
             return "";
         }
-        
+
         System.out.printf("Found Class: %s - %s%n",classname,url.toExternalForm());
         try
         {
             String rawpath;
-            
+
             URI uri = url.toURI();
             if ("jar".equals(uri.getScheme()))
             {
@@ -235,7 +283,7 @@ public class XmlConfiguredJetty
                     rawpath = rawpath.substring(0,rawpath.length() - classname.length());
                 }
             }
-            
+
             return rawpath;
         }
         catch (URISyntaxException e)
@@ -349,7 +397,6 @@ public class XmlConfiguredJetty
 
     public void copyContext(String srcName, String destName) throws IOException
     {
-        System.out.printf("Copying Context: %s -> %s%n",srcName,destName);
         File srcDir = MavenTestingUtils.getTestResourceDir("contexts");
         File destDir = new File(_jettyHome,"contexts");
 
@@ -366,12 +413,10 @@ public class XmlConfiguredJetty
         IO.copyFile(srcFile,destFile);
         PathAssert.assertFileExists(type + " File",destFile);
         System.out.printf("Copy %s: %s%n  To %s: %s%n",type,srcFile,type,destFile);
-        System.out.printf("Destination Exists: %s - %s%n",destFile.exists(),destFile);
     }
 
     public void copyWebapp(String srcName, String destName) throws IOException
     {
-        System.out.printf("Copying Webapp: %s -> %s%n",srcName,destName);
         File srcDir = MavenTestingUtils.getTestResourceDir("webapps");
         File destDir = new File(_jettyHome,"webapps");
 

@@ -109,6 +109,7 @@ public class PolicyFileManager
             File loc = new File(jarUri);
             
             File policyFileName = new File(jarUri.resolve("../..")); 
+            System.out.printf("Policy File: %s%n", policyFileName);
             
             if (loc.isDirectory())
             {
