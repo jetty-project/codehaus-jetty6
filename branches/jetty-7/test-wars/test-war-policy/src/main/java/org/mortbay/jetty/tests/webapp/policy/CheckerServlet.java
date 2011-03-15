@@ -9,6 +9,8 @@ import java.net.URLClassLoader;
 import java.util.Calendar;
 import java.util.Properties;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -74,6 +76,51 @@ public class CheckerServlet extends HttpServlet
         {
             t.printStackTrace(System.out);
             return null;
+        }
+    }
+
+    public void processFooWebappContextChecks(Properties props, Checker checker)
+    {
+        String key = "Foo Webapp Context Checks";
+        try
+        {
+            key = "Get ServletContext";
+            ServletContext context = getServletContext();
+            checker.success(props,key);
+
+            key = "Get /foo Context";
+            ServletContext foo = context.getContext("/foo");
+            checker.success(props,key);
+
+            key = "Get /foo ServletContextName";
+            String name = foo.getServletContextName();
+            checker.success(props,key,"Got Name - " + name);
+        }
+        catch (Throwable t)
+        {
+            checker.failure(props,key,t);
+            return;
+        }
+    }
+
+    public void processFooWebappRequestDispatcherChecks(Properties props, Checker checker)
+    {
+        String key = "Foo Webapp Request Dispatcher Checks";
+        try
+        {
+            key = "Get ServletContext";
+            ServletContext context = getServletContext();
+            checker.success(props,key);
+
+            key = "Get /foo RequestDispatcher";
+            @SuppressWarnings("unused")
+            RequestDispatcher foo = context.getRequestDispatcher("/foo");
+            checker.success(props,key);
+        }
+        catch (Throwable t)
+        {
+            checker.failure(props,key,t);
+            return;
         }
     }
 

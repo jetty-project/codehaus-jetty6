@@ -60,6 +60,18 @@ public class PermissiveTest
     }
 
     @Test
+    public void testServletContext() throws Exception
+    {
+        assertCheckerSuccess("processFooWebappContextChecks");
+    }
+
+    @Test
+    public void testRequestDispatcher() throws Exception
+    {
+        assertCheckerSuccess("processFooWebappRequestDispatcherChecks");
+    }
+
+    @Test
     @Ignore("need to fix loadLibrary to actually load a real library")
     public void testLib() throws Exception
     {
