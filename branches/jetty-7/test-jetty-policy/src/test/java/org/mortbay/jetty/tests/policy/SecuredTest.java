@@ -55,26 +55,26 @@ public class SecuredTest
         }
     }
 
-    @Ignore
+    @Test
     public void testFilesystem() throws Exception
     {
-//        AccessController.doPrivileged(new PrivilegedExceptionAction()
-//        {
-//            public Object run() throws Exception
-//            {
-//                ((JettyPolicy)Policy.getPolicy()).dump(System.out);
-//                
+        AccessController.doPrivileged(new PrivilegedExceptionAction()
+        {
+            public Object run() throws Exception
+            {
+                ((JettyPolicy)Policy.getPolicy()).dump(System.out);
+                
                 assertCheckerFailure("processFilesystemChecks");
-//               
-//                return null;
-//            }
-//        }
-//        );
-//       
+               
+                return null;
+            }
+        }
+        );
+       
       
     }
 
-    @Ignore
+    @Test
     public void testJettyLog() throws Exception
     {
         AccessController.doPrivileged(new PrivilegedExceptionAction()
@@ -91,7 +91,7 @@ public class SecuredTest
         );
     }
 
-    @Ignore
+    @Test
     public void testLib() throws Exception
     {
         AccessController.doPrivileged(new PrivilegedExceptionAction()
