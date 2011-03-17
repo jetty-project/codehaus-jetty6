@@ -36,6 +36,11 @@ public aspect HttpServletAspect
     
 //    pointcut blessService(HttpServlet s, ServletRequest req, ServletResponse res) : );
     
+    /**
+     * TODO This should be a PriviledgedExecptionAction so we can get out exceptions but that isn't working
+     * for some odd reason.
+     */
+    
     void around (final ServletRequest req, final ServletResponse res) : target(HttpServlet) && args(req, res) && call(* service(..) throws *) 
     {            
         AccessController.doPrivileged(new PrivilegedAction()
