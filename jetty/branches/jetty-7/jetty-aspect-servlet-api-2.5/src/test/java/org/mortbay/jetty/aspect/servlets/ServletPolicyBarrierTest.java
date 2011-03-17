@@ -140,6 +140,16 @@ public class ServletPolicyBarrierTest
 
     }
     
+    
+    /**
+     * This test configures an environment where you can apply permissions to a directory
+     * containing a servlet and servlet api and show how the access controller allows you to 
+     * apply permissions to user space applications and removing the need to apply 
+     * that same permission to all of jetty.
+     * 
+     * @param directory
+     * @throws Exception
+     */
     private void testServletService( String directory ) throws Exception
     {
         JettyPolicy ap = new JettyPolicy( directory, evaluator );
@@ -152,7 +162,8 @@ public class ServletPolicyBarrierTest
         
         SimpleRequest request = new SimpleRequest(getServerURI());
 
-        ap.dump(System.out);
+        // useful for viewing the protection domains referenced up to this point
+        // ap.dump(System.out);
         request.getString("/context/foo");    
     }
     
