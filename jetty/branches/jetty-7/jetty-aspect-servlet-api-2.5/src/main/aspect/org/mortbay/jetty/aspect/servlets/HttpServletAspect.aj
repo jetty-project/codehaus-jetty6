@@ -14,10 +14,13 @@ package org.mortbay.jetty.aspect.servlets;
 //limitations under the License.
 //========================================================================
 
+import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
@@ -33,25 +36,40 @@ import javax.servlet.http.HttpServlet;
  */
 public aspect HttpServletAspect
 {   
-    
-//    pointcut blessService(HttpServlet s, ServletRequest req, ServletResponse res) : );
-    
     /**
-     * TODO This should be a PriviledgedExecptionAction so we can get out exceptions but that isn't working
-     * for some odd reason.
+     * wrap the main entry point into the servlet service() method with an around aspect
+     * 
+     * inside we run priviledged so we isolate permissions between userspace (webapps) and
+     * jetty itself. 
+     *     
+     * @param req
+     * @param res
+     * @throws ServletException
+     * @throws IOException
      */
-    
-    void around (final ServletRequest req, final ServletResponse res) : target(HttpServlet) && args(req, res) && call(* service(..) throws *) 
-    {            
-        AccessController.doPrivileged(new PrivilegedAction()
+    void around (final ServletRequest req, final ServletResponse res) throws ServletException, IOException : target(HttpServlet) && args(req, res) && call(* service(..) throws *) 
+    {     
+        try
         {
-            public Object run()
+            AccessController.doPrivileged(new PrivilegedExceptionAction()
             {
-                proceed(req,res);
-                
-                return null;
+                public Object run() throws ServletException, IOException
+                {
+                    proceed(req,res);
+
+                    return null;
+                }
+            });
+        }
+        catch (PrivilegedActionException pae)
+        {            
+            // PAE is a checked exception so it can only be ServletException or IOException
+            if ( pae.getException() instanceof ServletException)
+            {
+                throw (ServletException)pae.getException();
             }
-        });
+            throw (IOException)pae.getException();
+        }
     }
     
 }
