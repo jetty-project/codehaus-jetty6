@@ -23,7 +23,7 @@ import javax.servlet.http.HttpSession;
  *  org.mortbay.jetty.aspect.servlets.ServletHttpSessionPermission
  */
 public aspect HttpSessionAspect
-{
+{ 
     /**
      * permission must be granted to interact with any public session method
      * 
@@ -38,7 +38,7 @@ public aspect HttpSessionAspect
         
         if ( sm != null )
         {
-            sm.checkPermission( new ServletHttpSessionPermission() );
+            sm.checkPermission( new ServletHttpSessionPermission() ); 
         }            
     }  
 }
