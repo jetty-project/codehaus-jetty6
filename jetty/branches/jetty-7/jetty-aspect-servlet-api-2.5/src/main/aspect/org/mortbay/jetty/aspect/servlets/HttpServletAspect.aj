@@ -14,17 +14,13 @@ package org.mortbay.jetty.aspect.servlets;
 //limitations under the License.
 //========================================================================
 
-import java.io.IOException;
-import java.security.AccessController; 
+import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
-
-import org.aspectj.lang.ProceedingJoinPoint;
 
 
 /**
@@ -35,42 +31,22 @@ import org.aspectj.lang.ProceedingJoinPoint;
  *  org.mortbay.jetty.aspect.servlets.ServletPermission "destroy"
  *
  */
-public aspect ServletAspect
+public aspect HttpServletAspect
 {   
-    /**
-     * permission must be granted to get servlet info
-     * 
-     * @param s
-     */
-    pointcut checkGetServletInfo(Servlet s) : target(s) && call(public String getServletInfo());
     
-    before( Servlet s ): checkGetServletInfo(s)
-    {
-        SecurityManager sm = System.getSecurityManager();
-        
-        if ( sm != null )
+//    pointcut blessService(HttpServlet s, ServletRequest req, ServletResponse res) : );
+    
+    void around (final ServletRequest req, final ServletResponse res) : target(HttpServlet) && args(req, res) && call(* service(..) throws *) 
+    {            
+        AccessController.doPrivileged(new PrivilegedAction()
         {
-            sm.checkPermission( new ServletPermission(Constants.GET_SERVLET_INFO) );
-        }        
+            public Object run()
+            {
+                proceed(req,res);
+                
+                return null;
+            }
+        });
     }
-    
-    /**
-     * permission must be granted to call Servlet.destroy
-     * 
-     * @param s
-     */
-    pointcut checkDestroy(Servlet s) : target(s) && call(public void destroy());
-    
-    before( Servlet s ): checkDestroy(s)
-    {
-        SecurityManager sm = System.getSecurityManager();
-        
-        if ( sm != null )
-        {
-            sm.checkPermission( new ServletPermission(Constants.DESTROY) );
-        }       
-    }
-
-
     
 }

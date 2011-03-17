@@ -15,18 +15,32 @@ package org.mortbay.jetty.aspect.servlets;
 //========================================================================
 
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
 import java.security.AccessControlException;
 import java.security.Policy;
 import java.util.HashMap;
+import java.util.Properties;
 
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.eclipse.jetty.http.HttpSchemes;
 import org.eclipse.jetty.policy.JettyPolicy;
-import org.eclipse.jetty.server.LocalConnector;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.toolchain.test.MavenTestingUtils;
+import org.eclipse.jetty.toolchain.test.SimpleRequest;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,13 +49,15 @@ public class ServletPolicyBarrierTest
 
     private HashMap<String, String> evaluator = new HashMap<String, String>();
     private Server server;
-    private LocalConnector connector;
+    private SocketConnector connector;
     private ServletContextHandler context;
     
     @Before
     public void setUp() throws Exception
     {
-        
+        evaluator.put("main.classes.dir",MavenTestingUtils.getTargetFile("classes").toString());
+        evaluator.put("test.resource.dir",MavenTestingUtils.getTestResourcesDir().toString());
+        evaluator.put("test.classes.dir",MavenTestingUtils.getTargetFile("test-classes").getAbsolutePath());
         evaluator.put("jetty.home",MavenTestingUtils.getBaseURI().toASCIIString());
         evaluator.put("basedir",MavenTestingUtils.getBaseURI().toASCIIString());
         
@@ -51,7 +67,7 @@ public class ServletPolicyBarrierTest
         server = new Server();
         server.setSendServerVersion(false);
 
-        connector = new LocalConnector();
+        connector = new SocketConnector();
 
         context = new ServletContextHandler();
         context.setContextPath("/context");
@@ -123,4 +139,46 @@ public class ServletPolicyBarrierTest
         testServletGetServletInfo(MavenTestingUtils.getTestResourceDir("servlet-test-3").getAbsolutePath());
 
     }
+    
+    private void testServletService( String directory ) throws Exception
+    {
+        JettyPolicy ap = new JettyPolicy( directory, evaluator );
+        ap.refresh();
+                
+        Policy.setPolicy(ap);
+        System.setSecurityManager(new SecurityManager());
+        
+        context.addServlet(HelloServlet.class,"/foo");
+        
+        SimpleRequest request = new SimpleRequest(getServerURI());
+
+        ap.dump(System.out);
+        request.getString("/context/foo");    
+    }
+    
+    /*
+     * TODO server is throwing ACE, here it shows as IOE, maybe we can do this check better and 
+     * not mask other issues
+     */
+    @Test (expected = IOException.class)
+    public void testServletServiceNotAllowed() throws Exception
+    {
+        testServletService(MavenTestingUtils.getTestResourceDir("service-test-1").getAbsolutePath());
+    }
+    
+    @Test
+    public void testServletServiceAllowed() throws Exception
+    {
+        testServletService(MavenTestingUtils.getTestResourceDir("service-test-2").getAbsolutePath());
+    }
+ 
+    public URI getServerURI() throws UnknownHostException
+    {
+        StringBuffer uri = new StringBuffer();
+        uri.append(HttpSchemes.HTTP).append("://");
+        uri.append(InetAddress.getLocalHost().getHostAddress());
+        uri.append(":").append(connector.getLocalPort());
+        return URI.create(uri.toString());
+    }
+    
 }
