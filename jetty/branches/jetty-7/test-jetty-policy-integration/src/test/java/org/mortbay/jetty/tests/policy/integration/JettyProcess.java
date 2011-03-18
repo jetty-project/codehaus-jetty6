@@ -9,6 +9,9 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +32,7 @@ public class JettyProcess
 {
     private File jettyHomeDir;
     private Process pid;
+    private URI baseUri;
 
     /**
      * Setup the JettyHome as belonging in a testing directory associated with a testing clazz.
@@ -160,8 +164,7 @@ public class JettyProcess
      */
     public URI getBaseUri()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return this.baseUri;
     }
 
     /**
@@ -213,11 +216,12 @@ public class JettyProcess
 
         try
         {
-            long timeout = 60000;
-            connector.wait(timeout);
-            
-            System.out.printf("Host is %s%n", connector.host);
-            System.out.printf("Port is %d%n", connector.port);
+            connector.waitForConnectorDetails(1,TimeUnit.MINUTES);
+
+            System.out.printf("Host is %s%n",connector.host);
+            System.out.printf("Port is %d%n",connector.port);
+
+            this.baseUri = URI.create("http://localhost:" + connector.port + "/");
         }
         catch (InterruptedException e)
         {
@@ -228,6 +232,7 @@ public class JettyProcess
 
     public static class ConnectorParser
     {
+        private CountDownLatch latch = new CountDownLatch(1);
         private String host;
         private int port;
         private Pattern pat = Pattern.compile("[A-Za-z]*Connector@([0-9]*\\.[0-9]*\\.[0-9]*\\.[0-9]*):([0-9]*)");
@@ -239,8 +244,13 @@ public class JettyProcess
             {
                 host = mat.group(1);
                 port = Integer.parseInt(mat.group(2));
-                notify();
+                latch.countDown();
             }
+        }
+
+        public void waitForConnectorDetails(long timeout, TimeUnit unit) throws InterruptedException
+        {
+            latch.await(timeout,unit);
         }
     }
 
@@ -319,9 +329,9 @@ public class JettyProcess
                     System.out.println(line);
                 }
             }
-            catch (IOException e)
+            catch (IOException ignore)
             {
-                e.printStackTrace();
+                /* ignore */
             }
             finally
             {
