@@ -170,7 +170,8 @@ public class ServletPolicyBarrierTest
     
     /*
      * TODO server is throwing ACE, here it shows as IOE, maybe we can do this check better and 
-     * not mask other issues
+     * not mask other issues, ideally we are interested in the exception appearing on the server side
+     * of this request
      */
     @Test (expected = IOException.class)
     public void testServletServiceNotAllowed() throws Exception
