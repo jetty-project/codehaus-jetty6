@@ -54,7 +54,7 @@
     <dependency>
       <groupId>org.eclipse.jetty.toolchain</groupId>
       <artifactId>jetty-test-helper</artifactId>
-      <version>1.2</version>
+      <version>1.3-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -82,7 +82,7 @@
               <artifactId>servlet-api</artifactId>
             </weaveDependency>
           </weaveDependencies>
-          <!-- ajdtBuildDefFile>build-1-5.ajproperties</ajdtBuildDefFile-->
+          <ajdtBuildDefFile>build-1-5.ajproperties</ajdtBuildDefFile>
         </configuration>
         <executions>
           <execution>
