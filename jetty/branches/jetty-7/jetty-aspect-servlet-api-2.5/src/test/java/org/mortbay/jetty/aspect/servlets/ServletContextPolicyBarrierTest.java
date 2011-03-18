@@ -72,7 +72,7 @@ public class ServletContextPolicyBarrierTest
         Policy.setPolicy(null);
     }
     
-    private void testServletContextGetAttribute( String directory ) throws Exception
+    private void assertServletContextGetAttribute( String directory ) throws Exception
     {
         JettyPolicy ap = new JettyPolicy( directory, evaluator );
         ap.refresh();
@@ -89,17 +89,17 @@ public class ServletContextPolicyBarrierTest
     @Test (expected = AccessControlException.class)
     public void testServletContextGetAttributeNotAllowed() throws Exception
     {
-        testServletContextGetAttribute(MavenTestingUtils.getTestResourceDir("servlet-context-test-1").getAbsolutePath());
+        assertServletContextGetAttribute(MavenTestingUtils.getTestResourceDir("servlet-context-test-1").getAbsolutePath());
     }
     
     @Test
     public void testServletContextGetAttributeAllowed() throws Exception
     {
-        testServletContextGetAttribute(MavenTestingUtils.getTestResourceDir("servlet-context-test-2").getAbsolutePath());
+        assertServletContextGetAttribute(MavenTestingUtils.getTestResourceDir("servlet-context-test-2").getAbsolutePath());
 
     }
     
-    private void testServletContextSetAttribute( String directory ) throws Exception
+    private void assertServletContextSetAttribute( String directory ) throws Exception
     {
         JettyPolicy ap = new JettyPolicy( directory, evaluator );
         ap.refresh();
@@ -116,17 +116,17 @@ public class ServletContextPolicyBarrierTest
     @Test (expected = AccessControlException.class)
     public void testServletContextSetAttributeNotAllowed() throws Exception
     {
-        testServletContextSetAttribute(MavenTestingUtils.getTestResourceDir("servlet-context-test-1").getAbsolutePath());
+        assertServletContextSetAttribute(MavenTestingUtils.getTestResourceDir("servlet-context-test-1").getAbsolutePath());
     }
     
     @Test
     public void testServletContextSetAttributeAllowed() throws Exception
     {
-        testServletContextSetAttribute(MavenTestingUtils.getTestResourceDir("servlet-context-test-2").getAbsolutePath());
+        assertServletContextSetAttribute(MavenTestingUtils.getTestResourceDir("servlet-context-test-2").getAbsolutePath());
 
     }
     
-    private void testServletContextRemoveAttribute( String directory ) throws Exception
+    private void assertServletContextRemoveAttribute( String directory ) throws Exception
     {
         JettyPolicy ap = new JettyPolicy( directory, evaluator );
         ap.refresh();
@@ -143,18 +143,18 @@ public class ServletContextPolicyBarrierTest
     @Test (expected = AccessControlException.class)
     public void testServletContextRemoveAttributeNotAllowed() throws Exception
     {
-        testServletContextRemoveAttribute(MavenTestingUtils.getTestResourceDir("servlet-context-test-1").getAbsolutePath());
+        assertServletContextRemoveAttribute(MavenTestingUtils.getTestResourceDir("servlet-context-test-1").getAbsolutePath());
     }
     
     @Test
     public void testServletContextRemoveAttributeAllowed() throws Exception
     {
-        testServletContextRemoveAttribute(MavenTestingUtils.getTestResourceDir("servlet-context-test-2").getAbsolutePath());
+        assertServletContextRemoveAttribute(MavenTestingUtils.getTestResourceDir("servlet-context-test-2").getAbsolutePath());
 
     }
     
     
-    private void testServletContextGetInitParameter( String directory ) throws Exception
+    private void assertServletContextGetInitParameter( String directory ) throws Exception
     {
         JettyPolicy ap = new JettyPolicy( directory, evaluator );
         ap.refresh();
@@ -171,17 +171,17 @@ public class ServletContextPolicyBarrierTest
     @Test (expected = AccessControlException.class)
     public void testServletContextGetInitParameterNotAllowed() throws Exception
     {
-        testServletContextGetInitParameter(MavenTestingUtils.getTestResourceDir("servlet-context-test-1").getAbsolutePath());
+        assertServletContextGetInitParameter(MavenTestingUtils.getTestResourceDir("servlet-context-test-1").getAbsolutePath());
     }
     
     @Test
     public void testServletContextGetInitParameterAllowed() throws Exception
     {
-        testServletContextGetInitParameter(MavenTestingUtils.getTestResourceDir("servlet-context-test-3").getAbsolutePath());
+        assertServletContextGetInitParameter(MavenTestingUtils.getTestResourceDir("servlet-context-test-3").getAbsolutePath());
 
     }
     
-    private void testServletContextGetRequestDispatcher( String directory ) throws Exception
+    private void assertServletContextGetRequestDispatcher( String directory ) throws Exception
     {
         JettyPolicy ap = new JettyPolicy( directory, evaluator );
         ap.refresh();
@@ -198,17 +198,17 @@ public class ServletContextPolicyBarrierTest
     @Test (expected = AccessControlException.class)
     public void testServletContextGetRequestDispatcherNotAllowed() throws Exception
     {
-        testServletContextGetRequestDispatcher(MavenTestingUtils.getTestResourceDir("servlet-context-test-1").getAbsolutePath());
+        assertServletContextGetRequestDispatcher(MavenTestingUtils.getTestResourceDir("servlet-context-test-1").getAbsolutePath());
     }
     
     @Test
     public void testServletContextGetRequestDispatcherAllowed() throws Exception
     {
-        testServletContextGetRequestDispatcher(MavenTestingUtils.getTestResourceDir("servlet-context-test-4").getAbsolutePath());
+        assertServletContextGetRequestDispatcher(MavenTestingUtils.getTestResourceDir("servlet-context-test-4").getAbsolutePath());
 
     }
     
-    private void testServletContextGetNamedDispatcher( String directory ) throws Exception
+    private void assertServletContextGetNamedDispatcher( String directory ) throws Exception
     {
         JettyPolicy ap = new JettyPolicy( directory, evaluator );
         ap.refresh();
@@ -225,17 +225,17 @@ public class ServletContextPolicyBarrierTest
     @Test (expected = AccessControlException.class)
     public void testServletContextGetNamedDispatcherNotAllowed() throws Exception
     {
-        testServletContextGetNamedDispatcher(MavenTestingUtils.getTestResourceDir("servlet-context-test-1").getAbsolutePath());
+        assertServletContextGetNamedDispatcher(MavenTestingUtils.getTestResourceDir("servlet-context-test-1").getAbsolutePath());
     }
     
     @Test
     public void testServletContextGetNamedDispatcherAllowed() throws Exception
     {
-        testServletContextGetNamedDispatcher(MavenTestingUtils.getTestResourceDir("servlet-context-test-4").getAbsolutePath());
+        assertServletContextGetNamedDispatcher(MavenTestingUtils.getTestResourceDir("servlet-context-test-4").getAbsolutePath());
 
     }
     
-    private void testServletContextGetContext( String directory ) throws Exception
+    private void assertServletContextGetContext( String directory ) throws Exception
     {
         JettyPolicy ap = new JettyPolicy( directory, evaluator );
         ap.refresh();
@@ -252,13 +252,13 @@ public class ServletContextPolicyBarrierTest
     @Test (expected = AccessControlException.class)
     public void testServletContextGetContextNotAllowed() throws Exception
     {
-        testServletContextGetContext(MavenTestingUtils.getTestResourceDir("servlet-context-test-1").getAbsolutePath());
+        assertServletContextGetContext(MavenTestingUtils.getTestResourceDir("servlet-context-test-1").getAbsolutePath());
     }
     
     @Test
     public void testServletContextGetContextAllowed() throws Exception
     {
-        testServletContextGetContext(MavenTestingUtils.getTestResourceDir("servlet-context-test-5").getAbsolutePath());
+        assertServletContextGetContext(MavenTestingUtils.getTestResourceDir("servlet-context-test-5").getAbsolutePath());
 
     }
     
