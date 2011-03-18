@@ -82,7 +82,7 @@
               <artifactId>servlet-api</artifactId>
             </weaveDependency>
           </weaveDependencies>
-          <ajdtBuildDefFile>build-1-5.ajproperties</ajdtBuildDefFile>
+          <!--ajdtBuildDefFile>build-1-5.ajproperties</ajdtBuildDefFile-->
         </configuration>
         <executions>
           <execution>
