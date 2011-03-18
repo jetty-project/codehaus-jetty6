@@ -90,7 +90,7 @@ public class ServletPolicyBarrierTest
         Policy.setPolicy(null);
     }
     
-    private void testServletDestroy( String directory ) throws Exception
+    private void assertServletDestroy( String directory ) throws Exception
     {
         JettyPolicy ap = new JettyPolicy( directory, evaluator );
         ap.refresh();
@@ -106,16 +106,16 @@ public class ServletPolicyBarrierTest
     @Test (expected = AccessControlException.class)
     public void testServletDestroyNotAllowed() throws Exception
     {
-        testServletDestroy( MavenTestingUtils.getTestResourceDir("servlet-test-1").getAbsolutePath() );
+        assertServletDestroy( MavenTestingUtils.getTestResourceDir("servlet-test-1").getAbsolutePath() );
     }
     
     @Test
     public void testServletDestroyAllowed() throws Exception
     {
-        testServletDestroy( MavenTestingUtils.getTestResourceDir("servlet-test-2").getAbsolutePath() );
+        assertServletDestroy( MavenTestingUtils.getTestResourceDir("servlet-test-2").getAbsolutePath() );
     }
     
-    private void testServletGetServletInfo( String directory ) throws Exception
+    private void assertServletGetServletInfo( String directory ) throws Exception
     {
         JettyPolicy ap = new JettyPolicy( directory, evaluator );
         ap.refresh();
@@ -131,13 +131,13 @@ public class ServletPolicyBarrierTest
     @Test (expected = AccessControlException.class)
     public void testServletGetServletInfoNotAllowed() throws Exception
     {
-        testServletGetServletInfo(MavenTestingUtils.getTestResourceDir("servlet-test-1").getAbsolutePath());
+        assertServletGetServletInfo(MavenTestingUtils.getTestResourceDir("servlet-test-1").getAbsolutePath());
     }
     
     @Test
     public void testServletGetServletInfoAllowed() throws Exception
     {
-        testServletGetServletInfo(MavenTestingUtils.getTestResourceDir("servlet-test-3").getAbsolutePath());
+        assertServletGetServletInfo(MavenTestingUtils.getTestResourceDir("servlet-test-3").getAbsolutePath());
 
     }
     
@@ -151,7 +151,7 @@ public class ServletPolicyBarrierTest
      * @param directory
      * @throws Exception
      */
-    private void testServletService( String directory ) throws Exception
+    private void assertServletService( String directory ) throws Exception
     {
         JettyPolicy ap = new JettyPolicy( directory, evaluator );
         ap.refresh();
@@ -176,13 +176,13 @@ public class ServletPolicyBarrierTest
     @Test (expected = IOException.class)
     public void testServletServiceNotAllowed() throws Exception
     {
-        testServletService(MavenTestingUtils.getTestResourceDir("service-test-1").getAbsolutePath());
+        assertServletService(MavenTestingUtils.getTestResourceDir("service-test-1").getAbsolutePath());
     }
     
     @Test
     public void testServletServiceAllowed() throws Exception
     {
-        testServletService(MavenTestingUtils.getTestResourceDir("service-test-2").getAbsolutePath());
+        assertServletService(MavenTestingUtils.getTestResourceDir("service-test-2").getAbsolutePath());
     }
     
     /**

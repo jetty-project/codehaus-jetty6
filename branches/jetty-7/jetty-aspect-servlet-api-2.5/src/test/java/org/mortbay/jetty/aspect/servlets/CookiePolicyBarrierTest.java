@@ -56,7 +56,7 @@ public class CookiePolicyBarrierTest
         Policy.setPolicy(null);
     }
     
-    private void testCookieConstructor( String directory ) throws Exception
+    private void assertCookieConstructor( String directory ) throws Exception
     {
         JettyPolicy ap = new JettyPolicy( directory, evaluator );
         ap.refresh();
@@ -70,16 +70,16 @@ public class CookiePolicyBarrierTest
     @Test (expected = AccessControlException.class)
     public void testCookieConstructorNotAllowed() throws Exception
     {
-        testCookieConstructor( MavenTestingUtils.getTestResourceDir("cookie-test-1").getAbsolutePath() );
+        assertCookieConstructor( MavenTestingUtils.getTestResourceDir("cookie-test-1").getAbsolutePath() );
     }
     
     @Test
     public void testCookieConstructorAllowed() throws Exception
     {
-        testCookieConstructor( MavenTestingUtils.getTestResourceDir("cookie-test-2").getAbsolutePath() );
+        assertCookieConstructor( MavenTestingUtils.getTestResourceDir("cookie-test-2").getAbsolutePath() );
     }
     
-    private void testCookieAccess( Cookie c, String directory ) throws Exception
+    private void assertCookieAccess( Cookie c, String directory ) throws Exception
     {
         JettyPolicy ap = new JettyPolicy( directory, evaluator );
         ap.refresh();
@@ -95,7 +95,7 @@ public class CookiePolicyBarrierTest
     {
         Cookie cookie = new Cookie("foo", "boo");
         
-        testCookieAccess( cookie, MavenTestingUtils.getTestResourceDir("cookie-test-1").getAbsolutePath() );
+        assertCookieAccess( cookie, MavenTestingUtils.getTestResourceDir("cookie-test-1").getAbsolutePath() );
     }
     
     @Test
@@ -103,7 +103,7 @@ public class CookiePolicyBarrierTest
     {
         Cookie cookie = new Cookie("foo", "boo");
 
-        testCookieAccess( cookie, MavenTestingUtils.getTestResourceDir("cookie-test-2").getAbsolutePath() );
+        assertCookieAccess( cookie, MavenTestingUtils.getTestResourceDir("cookie-test-2").getAbsolutePath() );
     }
     
     
