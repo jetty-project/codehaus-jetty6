@@ -10,7 +10,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -193,6 +192,7 @@ public class JettyProcess
         commands.add(getJavaBin());
         commands.add("-jar");
         commands.add("start.jar");
+        commands.add("jetty.port=0");
 
         ProcessBuilder pb = new ProcessBuilder(commands);
         pb.directory(jettyHomeDir);
