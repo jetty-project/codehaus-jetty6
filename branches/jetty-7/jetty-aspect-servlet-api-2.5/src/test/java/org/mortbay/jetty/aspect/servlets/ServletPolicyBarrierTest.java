@@ -42,6 +42,7 @@ import org.eclipse.jetty.toolchain.test.SimpleRequest;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ServletPolicyBarrierTest
@@ -182,6 +183,37 @@ public class ServletPolicyBarrierTest
     {
         testServletService(MavenTestingUtils.getTestResourceDir("service-test-2").getAbsolutePath());
     }
+    
+    /**
+     * this is a bad test, but I am leaving it here as a placeholder to remember to address it
+     * elsewhere.  to be a good test we need a full on webapp with classloader isolation to verify
+     * that the Aspect classes are not being exposed to the webapp
+     * 
+     * oh, and based on how this test works that CNFE would really be an IOE masking the CNFE on the 
+     * server side of the request
+     * 
+     * @throws Exception
+     */
+    @Test (expected = ClassNotFoundException.class)
+    @Ignore ("This needs fixed, Aspect classes should not be exposed to webapp")
+    public void testInternalAspectUsage() throws Exception
+    {
+        
+        JettyPolicy ap = new JettyPolicy( MavenTestingUtils.getTestResourceDir("service-test-2").getAbsolutePath(), evaluator );
+        ap.refresh();
+                
+        Policy.setPolicy(ap);
+        System.setSecurityManager(new SecurityManager());
+        
+        context.addServlet(AspectServlet.class,"/aspect");
+        
+        SimpleRequest request = new SimpleRequest(getServerURI());
+
+        // useful for viewing the protection domains referenced up to this point
+        // ap.dump(System.out);
+        request.getString("/context/aspect");    
+    }
+    
  
     public URI getServerURI() throws UnknownHostException
     {
