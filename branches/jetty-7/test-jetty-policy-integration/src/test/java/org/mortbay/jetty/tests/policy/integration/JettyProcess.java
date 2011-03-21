@@ -9,8 +9,6 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,6 +19,9 @@ import org.eclipse.jetty.toolchain.test.OS;
 import org.eclipse.jetty.toolchain.test.PathAssert;
 import org.eclipse.jetty.toolchain.test.TestingDir;
 import org.junit.Assert;
+
+import edu.emory.mathcs.backport.java.util.concurrent.CountDownLatch;
+import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 /**
  * Basic executor for the testable Jetty Distribution.
@@ -271,7 +272,7 @@ public class JettyProcess
         for (String javaexe : javaexes)
         {
             File javabin = new File(javaHomeDir,OS.separators("bin/" + javaexe));
-            if (javabin.exists() && javabin.canExecute())
+            if (javabin.exists() && javabin.isFile())
             {
                 return javabin.getAbsolutePath();
             }
