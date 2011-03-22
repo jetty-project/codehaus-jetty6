@@ -281,7 +281,7 @@ public class JettyProcess
         private CountDownLatch latch = new CountDownLatch(1);
         private String host;
         private int port;
-        private Pattern pat = Pattern.compile("[A-Za-z]*Connector@([0-9]*\\.[0-9]*\\.[0-9]*\\.[0-9]*):([0-9]*)");
+        private Pattern pat = Pattern.compile("Started [A-Za-z]*Connector@([0-9]*\\.[0-9]*\\.[0-9]*\\.[0-9]*):([0-9]*)");
 
         public void parse(String line)
         {
