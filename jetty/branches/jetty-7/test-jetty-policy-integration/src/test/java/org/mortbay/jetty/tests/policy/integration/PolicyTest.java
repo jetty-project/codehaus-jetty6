@@ -31,8 +31,10 @@ public class PolicyTest
         jetty.delete("contexts/test.d");
         jetty.delete("contexts/javadoc.xml");
         jetty.delete("contexts/test.xml");
-        jetty.delete("lib/servlet-api-2.5.jar");
         
+        // Remove standard servlet-api jar
+        jetty.delete("lib/servlet-api-2.5.jar");
+        // Use AspectJ + Security enhanched servlet-api jar
         jetty.copyLib("jetty-aspect-servlet-api-2.5.jar","lib/policy/servlet-api-2.5.jar");
         jetty.copyLib("aspectjrt.jar","lib/policy/aspectjrt.jar");
 
