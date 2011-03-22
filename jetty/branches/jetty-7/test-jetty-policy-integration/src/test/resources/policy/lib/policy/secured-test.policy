@@ -1,10 +1,16 @@
 
-grant codebase "file:${jetty.home}/work/-" {
+grant codebase "file:${jetty.home}/work/policy-tests/-" {
+
 
 
 
 }
 
+grant codeBase "file:${jetty.home}/lib/-" {
+
+   permission java.io.FilePermission "${jetty.home}${/}work${/}-", "read,write,delete";
+
+}
 
 // Temporary global settings
 
