@@ -34,8 +34,8 @@ public class PolicyTest
         // Remove standard servlet-api jar
         jetty.delete("lib/servlet-api-2.5.jar");
         // Use AspectJ + Security enhanced servlet-api jar
-        jetty.copyLib("jetty-aspect-servlet-api-2.5.jar","lib/policy/servlet-api-2.5.jar");
-        jetty.copyLib("aspectjrt.jar","lib/policy/aspectjrt.jar");
+        jetty.copyLib("jetty-aspect-servlet-api-2.5.jar","lib-secure/servlet-api-2.5.jar");
+        jetty.copyLib("aspectjrt.jar","lib-secure/aspectjrt.jar");
 
         jetty.overlayConfig("policy");
 

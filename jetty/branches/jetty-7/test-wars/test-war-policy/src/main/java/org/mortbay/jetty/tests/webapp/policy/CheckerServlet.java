@@ -86,7 +86,7 @@ public class CheckerServlet extends HttpServlet
         {
             key = "Get ServletContext";
             ServletContext context = getServletContext();
-            checker.success(props,key);
+            // NOT SECURED (YET?) checker.success(props,key);
 
             key = "Get /foo Context";
             ServletContext foo = context.getContext("/foo");
@@ -110,7 +110,7 @@ public class CheckerServlet extends HttpServlet
         {
             key = "Get ServletContext";
             ServletContext context = getServletContext();
-            checker.success(props,key);
+            // NOT SECURED (YET?) checker.success(props,key);
 
             key = "Get /foo RequestDispatcher";
             @SuppressWarnings("unused")
