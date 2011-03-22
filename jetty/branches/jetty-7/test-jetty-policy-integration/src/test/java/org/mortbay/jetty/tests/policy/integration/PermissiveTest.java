@@ -15,14 +15,14 @@ import org.junit.Test;
 /**
  * Test Jetty with 2 webapps, and no jetty-policy or java security in place.
  */
-public class NotSecuredTest
+public class PermissiveTest
 {
     private static JettyProcess jetty;
 
     @BeforeClass
     public static void initJetty() throws Exception
     {
-        jetty = new JettyProcess(NotSecuredTest.class);
+        jetty = new JettyProcess(PermissiveTest.class);
 
         jetty.copyTestWar("test-war-java_util_logging.war");
         jetty.copyTestWar("test-war-policy.war");
