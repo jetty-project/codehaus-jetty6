@@ -26,7 +26,8 @@ import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 /**
  * Basic executor for the testable Jetty Distribution.
  * <p>
- * Allows for a test specific directory, that is a copied jetty-distribution, and then modified for the test specific testing required.
+ * Allows for a test specific directory, that is a copied jetty-distribution, and then modified for the test specific
+ * testing required.
  */
 public class JettyProcess
 {
@@ -132,7 +133,8 @@ public class JettyProcess
     }
 
     /**
-     * Copy a war file from ${project.basedir}/target/test-wars/${testWarFilename} into the ${jetty.home}/webapps/ directory
+     * Copy a war file from ${project.basedir}/target/test-wars/${testWarFilename} into the ${jetty.home}/webapps/
+     * directory
      * 
      * @param testWarFilename
      *            the war file to copy (must exist)
@@ -143,6 +145,42 @@ public class JettyProcess
     {
         File srcWar = MavenTestingUtils.getTargetFile("test-wars/" + testWarFilename);
         File destWar = new File(jettyHomeDir,OS.separators("webapps/" + testWarFilename));
+        IO.copyFile(srcWar,destWar);
+    }
+
+    /**
+     * Copy an arbitrary file from <code>src/test/resources/${resourcePath}</code> to the testing directory.
+     * 
+     * @param resourcePath
+     *            the relative path for file content within the <code>src/test/resources</code> directory.
+     * @param outputPath
+     *            the testing directory relative output path for the file output (will result in a file with the
+     *            outputPath name being created)
+     * @throws IOException
+     *             if unable to copy resource file
+     */
+    public void copyResource(String resourcePath, String outputPath) throws IOException
+    {
+        File srcWar = MavenTestingUtils.getTestResourceFile(resourcePath);
+        File destWar = new File(jettyHomeDir,OS.separators(outputPath));
+        IO.copyFile(srcWar,destWar);
+    }
+
+    /**
+     * Copy an arbitrary file from <code>target/test-libs/${libFilename}</code> to the testing directory.
+     * 
+     * @param libFilename
+     *            the <code>target/test-libs/${libFilename}</code> to copy
+     * @param outputPath
+     *            the destination testing directory relative output path for the lib. (will result in a file with the
+     *            outputPath name being created)
+     * @throws IOException
+     *             if unable to copy lib
+     */
+    public void copyLib(String libFilename, String outputPath) throws IOException
+    {
+        File srcWar = MavenTestingUtils.getTargetFile("test-libs/" + libFilename);
+        File destWar = new File(jettyHomeDir,OS.separators(outputPath));
         IO.copyFile(srcWar,destWar);
     }
 
@@ -169,10 +207,12 @@ public class JettyProcess
     }
 
     /**
-     * Take the directory contents from ${project.basedir}/src/test/resources/${testConfigName}/ and copy it over whatever happens to be at ${jetty.home}
+     * Take the directory contents from ${project.basedir}/src/test/resources/${testConfigName}/ and copy it over
+     * whatever happens to be at ${jetty.home}
      * 
      * @param testConfigName
-     *            the src/test/resources/ directory name to use as the source diretory for the configuration we are interested in.
+     *            the src/test/resources/ directory name to use as the source diretory for the configuration we are
+     *            interested in.
      * @throws IOException
      *             if unable to copy directory.
      */
