@@ -34,7 +34,7 @@ public class PolicyTest
 
         jetty.overlayConfig("policy");
 
-        jetty.
+        jetty.setDebug(true);
         
         jetty.start();
     }
