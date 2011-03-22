@@ -32,7 +32,7 @@ public class StandardTest
         jetty.delete("contexts/javadoc.xml");
         jetty.delete("contexts/test.xml");
 
-        jetty.overlayConfig("permissive");
+        jetty.overlayConfig("standard");
 
         jetty.start();
     }
