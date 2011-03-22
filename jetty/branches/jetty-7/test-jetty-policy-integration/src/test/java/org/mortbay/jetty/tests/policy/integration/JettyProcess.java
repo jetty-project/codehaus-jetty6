@@ -264,8 +264,7 @@ public class JettyProcess
         {
             connector.waitForConnectorDetails(1,TimeUnit.MINUTES);
 
-            System.out.printf("Host is %s%n",connector.host);
-            System.out.printf("Port is %d%n",connector.port);
+            System.out.printf("## Found Connector -> Host=%s, port=%d%n",connector.host,connector.port);
 
             this.baseUri = URI.create("http://localhost:" + connector.port + "/");
         }
