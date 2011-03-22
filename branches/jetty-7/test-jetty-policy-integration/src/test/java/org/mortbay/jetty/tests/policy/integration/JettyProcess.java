@@ -242,7 +242,7 @@ public class JettyProcess
 
         ProcessBuilder pb = new ProcessBuilder(commands);
         pb.directory(jettyHomeDir);
-        pb.redirectErrorStream(true);
+        // pb.redirectErrorStream(true);
 
         StringBuilder msg = new StringBuilder();
         msg.append("Executing:");
@@ -259,7 +259,7 @@ public class JettyProcess
         ConnectorParser connector = new ConnectorParser();
 
         startPump("STDOUT",connector,this.pid.getInputStream());
-        // startPump("STDERR",connector,this.pid.getErrorStream());
+        startPump("STDERR",connector,this.pid.getErrorStream());
 
         try
         {
