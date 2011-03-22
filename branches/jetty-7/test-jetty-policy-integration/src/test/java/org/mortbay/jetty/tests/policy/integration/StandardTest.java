@@ -34,6 +34,8 @@ public class StandardTest
 
         jetty.overlayConfig("standard");
 
+        jetty.setDebug(true);
+        
         jetty.start();
     }
 

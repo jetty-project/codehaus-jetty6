@@ -33,6 +33,7 @@ public class JettyProcess
     private File jettyHomeDir;
     private Process pid;
     private URI baseUri;
+    private boolean _debug = false;
 
     /**
      * Setup the JettyHome as belonging in a testing directory associated with a testing clazz.
@@ -194,6 +195,10 @@ public class JettyProcess
         commands.add("-jar");
         commands.add("start.jar");
         commands.add("jetty.port=0");
+        if (_debug)
+        {
+            commands.add("-D.DEBUG=true");
+        }
 
         ProcessBuilder pb = new ProcessBuilder(commands);
         pb.directory(jettyHomeDir);
@@ -261,6 +266,11 @@ public class JettyProcess
         pump.setParser(connector);
         Thread thread = new Thread(pump,"ConsoleStreamer/" + mode);
         thread.start();
+    }
+    
+    public void setDebug(boolean debug)
+    {
+        _debug = debug;
     }
 
     private String getJavaBin()

@@ -34,6 +34,8 @@ public class PolicyTest
 
         jetty.overlayConfig("policy");
 
+        jetty.
+        
         jetty.start();
     }
 
