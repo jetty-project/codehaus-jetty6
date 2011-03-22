@@ -1,0 +1,17 @@
+
+grant codebase "file:${jetty.home}/work/-" {
+
+
+
+}
+
+
+// Temporary global settings
+
+grant {
+
+  permission java.util.PropertyPermission "org.eclipse.jetty.io.AbstractBuffer.boundsChecking", "read";
+
+  permission java.lang.RuntimePermission "setIO";
+
+}
