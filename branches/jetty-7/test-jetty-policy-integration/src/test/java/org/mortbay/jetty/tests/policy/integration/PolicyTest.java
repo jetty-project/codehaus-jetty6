@@ -13,16 +13,16 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 /**
- * Test Jetty with 2 webapps, and no jetty-policy or java security in place.
+ * Test Jetty with 2 webapps, with jetty-policy or java security in place.
  */
-public class PermissiveTest
+public class PolicyTest
 {
     private static JettyProcess jetty;
 
     @BeforeClass
     public static void initJetty() throws Exception
     {
-        jetty = new JettyProcess(PermissiveTest.class);
+        jetty = new JettyProcess(PolicyTest.class);
 
         jetty.copyTestWar("test-war-java_util_logging.war");
         jetty.copyTestWar("test-war-policy.war");
@@ -32,7 +32,7 @@ public class PermissiveTest
         jetty.delete("contexts/javadoc.xml");
         jetty.delete("contexts/test.xml");
 
-        jetty.overlayConfig("permissive");
+        jetty.overlayConfig("policy");
 
         jetty.start();
     }
