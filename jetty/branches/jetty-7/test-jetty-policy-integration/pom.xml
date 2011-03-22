@@ -82,20 +82,6 @@
   </build>
   <dependencies>
     <dependency>
-      <groupId>org.mortbay.jetty.testwars</groupId>
-      <artifactId>test-war-java_util_logging</artifactId>
-      <version>${project.version}</version>
-      <type>war</type>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty.testwars</groupId>
-      <artifactId>test-war-policy</artifactId>
-      <version>${project.version}</version>
-      <type>war</type>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.eclipse.jetty.toolchain</groupId>
       <artifactId>jetty-test-helper</artifactId>
       <version>1.3-SNAPSHOT</version>
