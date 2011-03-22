@@ -9,7 +9,6 @@ import org.eclipse.jetty.toolchain.test.SimpleRequest;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -34,7 +33,7 @@ public class PolicyTest
         
         // Remove standard servlet-api jar
         jetty.delete("lib/servlet-api-2.5.jar");
-        // Use AspectJ + Security enhanched servlet-api jar
+        // Use AspectJ + Security enhanced servlet-api jar
         jetty.copyLib("jetty-aspect-servlet-api-2.5.jar","lib/policy/servlet-api-2.5.jar");
         jetty.copyLib("aspectjrt.jar","lib/policy/aspectjrt.jar");
 
@@ -57,41 +56,40 @@ public class PolicyTest
     @Test
     public void testFilesystem() throws Exception
     {
-        assertCheckerSuccess("processFilesystemChecks");
+        assertCheckerFailure("processFilesystemChecks");
     }
 
     @Test
     public void testJettyLog() throws Exception
     {
-        assertCheckerSuccess("processJettyLogChecks");
+        assertCheckerFailure("processJettyLogChecks");
     }
 
     @Test
     public void testServletContext() throws Exception
     {
-        assertCheckerSuccess("processFooWebappContextChecks");
+        assertCheckerFailure("processFooWebappContextChecks");
     }
 
     @Test
     public void testRequestDispatcher() throws Exception
     {
-        assertCheckerSuccess("processFooWebappRequestDispatcherChecks");
+        assertCheckerFailure("processFooWebappRequestDispatcherChecks");
     }
 
     @Test
-    @Ignore("need to fix loadLibrary to actually load a real library")
     public void testLib() throws Exception
     {
-        assertCheckerSuccess("processLibChecks");
+        assertCheckerFailure("processLibChecks");
     }
 
     @Test
     public void testSystemProperty() throws Exception
     {
-        assertCheckerSuccess("processSystemPropertyChecks");
+        assertCheckerFailure("processSystemPropertyChecks");
     }
 
-    private void assertCheckerSuccess(String testname) throws Exception
+    private void assertCheckerFailure(String testname) throws Exception
     {
         SimpleRequest request = new SimpleRequest(jetty.getBaseUri());
         Properties props = request.getProperties("/policytests/checker/" + testname);
@@ -101,7 +99,7 @@ public class PolicyTest
         {
             String name = names.nextElement();
             String value = props.getProperty(name);
-            Assert.assertThat("[" + testname + "] " + name,value,startsWith("Success"));
+            Assert.assertThat("[" + testname + "] " + name,value,not(startsWith("Success")));
         }
     }
 }
