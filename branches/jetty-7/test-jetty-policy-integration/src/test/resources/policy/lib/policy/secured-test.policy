@@ -14,4 +14,6 @@ grant {
 
   permission java.lang.RuntimePermission "setIO";
 
+  permission java.net.SocketPermission "[0:0:0:0:0:0:0:1]:1024-", "listen,accept";
+
 }
