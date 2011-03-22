@@ -145,6 +145,7 @@ public class JettyProcess
     {
         File srcWar = MavenTestingUtils.getTargetFile("test-wars/" + testWarFilename);
         File destWar = new File(jettyHomeDir,OS.separators("webapps/" + testWarFilename));
+        FS.ensureDirExists(destWar.getParentFile());
         IO.copyFile(srcWar,destWar);
     }
 
@@ -161,9 +162,10 @@ public class JettyProcess
      */
     public void copyResource(String resourcePath, String outputPath) throws IOException
     {
-        File srcWar = MavenTestingUtils.getTestResourceFile(resourcePath);
-        File destWar = new File(jettyHomeDir,OS.separators(outputPath));
-        IO.copyFile(srcWar,destWar);
+        File srcFile = MavenTestingUtils.getTestResourceFile(resourcePath);
+        File destFile = new File(jettyHomeDir,OS.separators(outputPath));
+        FS.ensureDirExists(destFile.getParentFile());
+        IO.copyFile(srcFile,destFile);
     }
 
     /**
@@ -179,9 +181,10 @@ public class JettyProcess
      */
     public void copyLib(String libFilename, String outputPath) throws IOException
     {
-        File srcWar = MavenTestingUtils.getTargetFile("test-libs/" + libFilename);
-        File destWar = new File(jettyHomeDir,OS.separators(outputPath));
-        IO.copyFile(srcWar,destWar);
+        File srcLib = MavenTestingUtils.getTargetFile("test-libs/" + libFilename);
+        File destLib = new File(jettyHomeDir,OS.separators(outputPath));
+        FS.ensureDirExists(destLib.getParentFile());
+        IO.copyFile(srcLib,destLib);
     }
 
     /**
