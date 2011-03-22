@@ -33,8 +33,6 @@ public class StandardTest
         jetty.delete("contexts/test.xml");
 
         jetty.overlayConfig("standard");
-
-        jetty.setDebug(true);
         
         jetty.start();
     }
