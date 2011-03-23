@@ -17,6 +17,7 @@
 package org.mortbay.jetty.rhttp.client;
 
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 
 import org.eclipse.jetty.client.Address;
@@ -238,7 +239,7 @@ public class JettyClient extends AbstractClient
         protected void onException(Throwable x)
         {
             getLogger().debug(x);
-            if (x instanceof EofException)
+            if (x instanceof EofException || x instanceof EOFException)
             {
                 notifyConnectClosed();
             }
