@@ -30,8 +30,10 @@ import junit.framework.TestCase;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.util.log.Log;
 
 
 /**
@@ -229,7 +231,7 @@ public abstract class ClientTest extends TestCase
         final CountDownLatch stopLatch = new CountDownLatch(1);
 
         Server server = new Server();
-        Connector connector = new SelectChannelConnector();
+        Connector connector = new SocketConnector();
         server.addConnector(connector);
         server.setHandler(new AbstractHandler()
         {
@@ -241,7 +243,7 @@ public abstract class ClientTest extends TestCase
                     connectLatch.countDown();
                     try
                     {
-                        Thread.sleep(2000);
+                        Thread.sleep(10000);
                     }
                     catch (InterruptedException e)
                     {
@@ -267,12 +269,12 @@ public abstract class ClientTest extends TestCase
                 });
                 client.connect();
 
-                assertTrue(connectLatch.await(1000, TimeUnit.MILLISECONDS));
+                assertTrue(connectLatch.await(2000, TimeUnit.MILLISECONDS));
 
                 server.stop();
-                assertTrue(stopLatch.await(1000, TimeUnit.MILLISECONDS));
+                assertTrue(stopLatch.await(2000, TimeUnit.MILLISECONDS));
 
-                assertTrue(serverLatch.await(1000, TimeUnit.MILLISECONDS));
+                assertTrue(serverLatch.await(2000, TimeUnit.MILLISECONDS));
             }
             finally
             {
