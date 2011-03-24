@@ -1,4 +1,4 @@
-package org.mortbay.jetty.aspect.servlets;
+package javax.servlet.aspect;
 //========================================================================
 //$Id:$
 //Copyright 2011 Webtide, LLC

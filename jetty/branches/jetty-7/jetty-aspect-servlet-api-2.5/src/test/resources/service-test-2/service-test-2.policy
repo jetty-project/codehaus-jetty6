@@ -1,13 +1,13 @@
 
 grant codebase "file:${test.classes.dir}${/}-" {
 
-  permission org.mortbay.jetty.aspect.servlets.ServletPermission "getServletInfo";
+  permission javax.servlet.aspect.ServletPermission "getServletInfo";
 
 }
 
 grant codebase "file:${main.classes.dir}${/}-" {
 
-  permission org.mortbay.jetty.aspect.servlets.ServletPermission "getServletInfo";
+  permission javax.servlet.aspect.ServletPermission "getServletInfo";
 
 }
 

@@ -1,4 +1,4 @@
-package org.mortbay.jetty.aspect.servlets;
+package javax.servlet.aspect;
 //========================================================================
 //$Id:$
 //Copyright 2011 Webtide, LLC
@@ -15,6 +15,11 @@ package org.mortbay.jetty.aspect.servlets;
 //========================================================================
 
 import javax.servlet.ServletContext;
+import javax.servlet.aspect.ServletContextAttributePermission;
+import javax.servlet.aspect.ServletContextParameterPermission;
+import javax.servlet.aspect.ServletContextPathPermission;
+import javax.servlet.aspect.ServletContextPermission;
+import javax.servlet.aspect.ServletDeprecationException;
 
 /**
  * Aspect for handling calls related to ServletContext
@@ -39,11 +44,13 @@ public aspect ServletContextAspect
      * @param sc
      * @param name
      */
-    pointcut checkGetAttribute(ServletContext sc, String name) : target(sc) && args(name) && call(public Object getAttribute(String));
+    pointcut checkGetAttribute(ServletContext sc, String name) : target(sc) && args(name) && call(public Object ServletContext.getAttribute(String));
 
     before(ServletContext sc, String name): checkGetAttribute(sc, name)
     {
 
+        System.out.println("ASPECT: checking getAttribute: " + name);
+        
         SecurityManager sm = System.getSecurityManager();
 
         if (sm != null)

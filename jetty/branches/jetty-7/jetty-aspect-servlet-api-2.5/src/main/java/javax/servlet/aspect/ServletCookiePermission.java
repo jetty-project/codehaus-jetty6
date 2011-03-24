@@ -1,4 +1,4 @@
-package org.mortbay.jetty.aspect.servlets;
+package javax.servlet.aspect;
 //========================================================================
 //$Id:$
 //Copyright 2011 Webtide, LLC
@@ -18,18 +18,18 @@ import java.security.BasicPermission;
 
 /**
  * 
- * permission for servlet session
+ * permission for servlet cookies
  *
  */
-public class ServletHttpSessionPermission extends BasicPermission
+public class ServletCookiePermission extends BasicPermission
 {
 
-    public ServletHttpSessionPermission()
+    public ServletCookiePermission()
     {
         super("enabled");
     }
     
-    private ServletHttpSessionPermission(String name)
+    private ServletCookiePermission(String name)
     {
         super(name);
     }

@@ -1,4 +1,4 @@
-package org.mortbay.jetty.aspect.servlets;
+package javax.servlet.aspect;
 //========================================================================
 //$Id:$
 //Copyright 2011 Webtide, LLC
@@ -22,6 +22,8 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.aspect.Constants;
+import javax.servlet.aspect.ServletPermission;
 import javax.servlet.http.HttpServlet;
 
 import org.aspectj.lang.ProceedingJoinPoint;

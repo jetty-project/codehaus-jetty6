@@ -1,4 +1,4 @@
-package org.mortbay.jetty.aspect.servlets;
+package javax.servlet.aspect;
 //========================================================================
 //$Id:$
 //Copyright 2011 Webtide, LLC
@@ -17,6 +17,9 @@ package org.mortbay.jetty.aspect.servlets;
 import java.security.AccessControlException;
 import java.security.Policy;
 import java.util.HashMap;
+
+import javax.servlet.ServletContext;
+import javax.servlet.aspect.ServletDeprecationException;
 
 import org.eclipse.jetty.policy.JettyPolicy;
 import org.eclipse.jetty.server.LocalConnector;
@@ -82,7 +85,10 @@ public class ServletContextPolicyBarrierTest
         
         ServletHolder defholder = context.addServlet(DefaultServlet.class,"/*");
         
-        defholder.getServlet().getServletConfig().getServletContext().getAttribute("foo");
+        //defholder.getServlet().getServletConfig().getServletContext().getAttribute("foo");
+        
+        ServletContext sc = defholder.getServlet().getServletConfig().getServletContext();
+        sc.getAttribute("foo");
 
     }
     
