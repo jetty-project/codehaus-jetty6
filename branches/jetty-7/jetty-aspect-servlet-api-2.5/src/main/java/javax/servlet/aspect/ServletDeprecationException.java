@@ -1,4 +1,4 @@
-package org.mortbay.jetty.aspect.servlets;
+package javax.servlet.aspect;
 //========================================================================
 //$Id:$
 //Copyright 2011 Webtide, LLC
@@ -14,31 +14,17 @@ package org.mortbay.jetty.aspect.servlets;
 //limitations under the License.
 //========================================================================
 
-import javax.servlet.http.HttpSession;
-
 /**
- * Aspect for handling calls related to HttpSession
+ * 
+ * exception signaling deprecated servlet method
  *
- * Permission:
- *  org.mortbay.jetty.aspect.servlets.ServletHttpSessionPermission
  */
-public aspect HttpSessionAspect
-{ 
-    /**
-     * permission must be granted to interact with any public session method
-     * 
-     * @param c
-     */
-    pointcut checkHttpSessionsEnabled(HttpSession c) : target(c) && call(public * *(..));
-    
-    before( HttpSession c ): checkHttpSessionsEnabled(c)
+public class ServletDeprecationException extends RuntimeException
+{
+
+    public ServletDeprecationException( String message )
     {
-        
-        SecurityManager sm = System.getSecurityManager();
-        
-        if ( sm != null )
-        {
-            sm.checkPermission( new ServletHttpSessionPermission() ); 
-        }            
-    }  
+        super(message);
+    }
+    
 }

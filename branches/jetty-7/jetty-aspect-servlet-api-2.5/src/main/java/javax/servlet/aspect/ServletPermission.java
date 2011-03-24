@@ -1,4 +1,4 @@
-package org.mortbay.jetty.aspect.servlets;
+package javax.servlet.aspect;
 //========================================================================
 //$Id:$
 //Copyright 2011 Webtide, LLC
@@ -15,17 +15,16 @@ package org.mortbay.jetty.aspect.servlets;
 //========================================================================
 
 import java.security.BasicPermission;
-import java.security.Permission;
 
 /**
  * 
- * permission for servlet contexts
+ * permission for servlets
  *
  */
-public class ServletContextPermission extends BasicPermission
+public class ServletPermission extends BasicPermission
 {
 
-    public ServletContextPermission(String name)
+    public ServletPermission(String name)
     {
         super(name);
     }

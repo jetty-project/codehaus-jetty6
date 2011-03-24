@@ -1,4 +1,4 @@
-package org.mortbay.jetty.aspect.servlets;
+package javax.servlet.aspect;
 //========================================================================
 //$Id:$
 //Copyright 2011 Webtide, LLC
@@ -14,6 +14,7 @@ package org.mortbay.jetty.aspect.servlets;
 //limitations under the License.
 //========================================================================
 
+import javax.servlet.aspect.ServletCookiePermission;
 import javax.servlet.http.Cookie;
 
 /**

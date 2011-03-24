@@ -1,7 +1,8 @@
-package org.mortbay.jetty.aspect.servlets;
+package javax.servlet.aspect;
 
 import java.io.IOException;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +34,9 @@ public class AspectServlet extends HttpServlet
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().println("<h1>" + greeting + " SimpleServlet</h1>");
             
-            Aspects.aspectOf(HttpServlet.class);
+            ServletContext sc = getServletContext();
+            sc.getAttribute("foo");
+            
+            //Aspects.aspectOf(HttpServlet.class);
         } 
     }

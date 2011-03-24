@@ -1,4 +1,4 @@
-package org.mortbay.jetty.aspect.servlets;
+package javax.servlet.aspect;
 //========================================================================
 //$Id:$
 //Copyright 2011 Webtide, LLC
@@ -19,10 +19,10 @@ import java.security.Permission;
 
 /**
  * 
- * permission for servlet context parameters
+ * Permission object for servlet context attributes
  *
  */
-public class ServletContextParameterPermission extends BasicPermission
+public class ServletContextAttributePermission extends BasicPermission
 {
 
     private static final String __PROPERTY_READ_ACTION = "read";
@@ -57,7 +57,7 @@ public class ServletContextParameterPermission extends BasicPermission
 
     private String _actions;
 
-    public ServletContextParameterPermission(String name, String actions)
+    public ServletContextAttributePermission(String name, String actions)
     {
         super(name);
         init(mask(actions));
@@ -86,12 +86,12 @@ public class ServletContextParameterPermission extends BasicPermission
 
     public boolean implies(Permission permission)
     {
-        if (!(permission instanceof ServletContextParameterPermission))
+        if (!(permission instanceof ServletContextAttributePermission))
         {
             return false;
         }
 
-        ServletContextParameterPermission that = (ServletContextParameterPermission)permission;
+        ServletContextAttributePermission that = (ServletContextAttributePermission)permission;
 
         return ((this._mask & that._mask) == that._mask) && super.implies(that);
     }
@@ -103,12 +103,12 @@ public class ServletContextParameterPermission extends BasicPermission
             return true;
         }
 
-        if (!(permission instanceof ServletContextParameterPermission))
+        if (!(permission instanceof ServletContextAttributePermission))
         {
             return false;
         }
 
-        ServletContextParameterPermission that = (ServletContextParameterPermission)permission;
+        ServletContextAttributePermission that = (ServletContextAttributePermission)permission;
 
         return (this._mask == that._mask) && (this.getName().equals(that.getName()));
     }

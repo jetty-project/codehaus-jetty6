@@ -1,4 +1,4 @@
-package org.mortbay.jetty.aspect.servlets;
+package javax.servlet.aspect;
 //========================================================================
 //$Id:$
 //Copyright 2011 Webtide, LLC
@@ -14,11 +14,20 @@ package org.mortbay.jetty.aspect.servlets;
 //limitations under the License.
 //========================================================================
 
+import java.security.BasicPermission;
+import java.security.Permission;
 
-public class Constants
+/**
+ * 
+ * permission for servlet contexts
+ *
+ */
+public class ServletContextPermission extends BasicPermission
 {
-    // Servlet Permissions
-    public static final String DESTROY = "destroy";
-    public static final String GET_SERVLET_INFO = "getServletInfo";
-    
+
+    public ServletContextPermission(String name)
+    {
+        super(name);
+    }
+
 }

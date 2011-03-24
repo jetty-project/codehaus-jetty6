@@ -1,4 +1,4 @@
-package org.mortbay.jetty.aspect.servlets;
+package javax.servlet.aspect;
 //========================================================================
 //$Id:$
 //Copyright 2011 Webtide, LLC
@@ -193,10 +193,11 @@ public class ServletPolicyBarrierTest
      * oh, and based on how this test works that CNFE would really be an IOE masking the CNFE on the 
      * server side of the request
      * 
+     * NOTE: now checking the ServletContext.getAttribute works through jetty stack
+     * 
      * @throws Exception
      */
-    @Test (expected = ClassNotFoundException.class)
-    @Ignore ("This needs fixed, Aspect classes should not be exposed to webapp")
+    @Test (expected = IOException.class)
     public void testInternalAspectUsage() throws Exception
     {
         

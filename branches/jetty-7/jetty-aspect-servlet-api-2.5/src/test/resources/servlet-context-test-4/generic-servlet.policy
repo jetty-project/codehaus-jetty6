@@ -4,5 +4,5 @@ grant {
   permission java.lang.RuntimePermission "setSecurityManager";
   permission java.security.SecurityPermission "getPolicy";
   
-  permission org.mortbay.jetty.aspect.servlets.ServletContextPermission "getDispatcher";
+  permission javax.servlet.aspect.ServletContextPermission "getDispatcher";
 }
