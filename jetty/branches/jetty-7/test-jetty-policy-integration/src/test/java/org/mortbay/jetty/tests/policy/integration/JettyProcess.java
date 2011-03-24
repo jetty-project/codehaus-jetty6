@@ -35,6 +35,7 @@ public class JettyProcess
     private Process pid;
     private URI baseUri;
     private boolean _debug = false;
+    private String[] _jvmArgs = null;
 
     /**
      * Setup the JettyHome as belonging in a testing directory associated with a testing clazz.
@@ -235,12 +236,21 @@ public class JettyProcess
     {
         List<String> commands = new ArrayList<String>();
         commands.add(getJavaBin());
+        
+        if (_jvmArgs != null)
+        {
+            for ( String arg : _jvmArgs )
+            {
+                commands.add(arg);
+            }
+        }
+        
         commands.add("-jar");
         commands.add("start.jar");
         commands.add("jetty.port=0");
         if (_debug)
         {
-            commands.add("-D.DEBUG=true");
+           commands.add("-D.DEBUG=true");
         }
 
         ProcessBuilder pb = new ProcessBuilder(commands);
@@ -311,11 +321,25 @@ public class JettyProcess
         thread.start();
     }
     
+    /** 
+     * enable debug on the jetty process
+     * 
+     * @param debug
+     */
     public void setDebug(boolean debug)
     {
         _debug = debug;
     }
 
+    /** 
+     * @param jvmArgs
+     */
+    public void setJVMArgs( String[] jvmArgs )
+    {
+        this._jvmArgs = jvmArgs;
+    }
+    
+    
     private String getJavaBin()
     {
         String javaexes[] = new String[]
