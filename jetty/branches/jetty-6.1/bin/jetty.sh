@@ -649,9 +649,9 @@ case "$ACTION" in
         echo "RUN_CMD        =  $RUN_CMD"
         echo
         
-        if [ -f $JETTY_RUN/jetty.pid ]
+        if [ -f $JETTY_PID ]
         then
-            echo "Jetty running pid="`cat $JETTY_RUN/jetty.pid`
+            echo "Jetty running pid="`cat $JETTY_PID`
             exit 0
         fi
         exit 1
