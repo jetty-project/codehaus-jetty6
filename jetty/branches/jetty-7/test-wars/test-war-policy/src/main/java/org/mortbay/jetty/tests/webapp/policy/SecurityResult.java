@@ -66,14 +66,32 @@ public class SecurityResult
 
     public void assertNotNull(String msgPrefix, Object obj)
     {
-        this.expectedValue = "not null";
-        this.actualValue = (obj == null)?"not null":"null";
+        this.success = true;
+        try
+        {
+            Assert.assertNotNull(obj);
+        }
+        catch (AssertionError e)
+        {
+            this.expectedValue = "not null";
+            this.actualValue = (obj == null)?"null":human(obj);
+
+            this.success = false;
+            this.message = String.format("%s: %s",msgPrefix,e.getMessage());
+            this.cause = e;
+        }
+    }
+
+    public void assertNull(String msgPrefix, Object obj)
+    {
+        this.expectedValue = "null";
+        this.actualValue = (obj == null)?"null":human(obj);
 
         this.success = true;
         try
         {
-            this.message = String.format("%s: should not be null",msgPrefix);
-            Assert.assertNotNull(obj);
+            this.message = String.format("%s: should be null",msgPrefix);
+            Assert.assertNull(obj);
         }
         catch (AssertionError e)
         {
@@ -92,11 +110,17 @@ public class SecurityResult
             this.message = String.format("(%s) %s",t.getClass().getName(),t.getMessage());
         }
     }
-    
-    public void success(String messageFormat, Object ... messageArgs)
+
+    public void failure(String messageFormat, Object... messageArgs)
+    {
+        this.success = false;
+        this.message = String.format(messageFormat,messageArgs);
+    }
+
+    public void success(String messageFormat, Object... messageArgs)
     {
         this.success = true;
-        this.message = String.format(messageFormat, messageArgs);
+        this.message = String.format(messageFormat,messageArgs);
     }
 
     /**
@@ -188,18 +212,25 @@ public class SecurityResult
 
         json.put("id",this.id);
         json.put("success",this.success);
-        json.put("message",this.message);
-        json.put("expected",this.expectedValue);
-        json.put("actual",this.actualValue);
-        JSONObject causeObj = new JSONObject();
-        if (cause != null)
+        if (!this.success)
         {
-            json.put("class",cause.getClass().getName());
-            StringWriter stack = new StringWriter();
-            cause.printStackTrace(new PrintWriter(stack));
-            json.put("stacktrace",stack.toString());
+            if (this.message != null)
+                json.put("message",this.message);
+            if (this.expectedValue != null)
+                json.put("expected",this.expectedValue);
+            if (this.actualValue != null)
+                json.put("actual",this.actualValue);
+            
+            JSONObject causeObj = new JSONObject();
+            if (cause != null)
+            {
+                causeObj.put("class",cause.getClass().getName());
+                StringWriter stack = new StringWriter();
+                cause.printStackTrace(new PrintWriter(stack));
+                causeObj.put("stacktrace",stack.toString());
+            }
+            json.put("cause",causeObj);
         }
-        json.put("cause",causeObj);
 
         return json;
     }

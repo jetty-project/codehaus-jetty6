@@ -1,11 +1,9 @@
 package org.mortbay.jetty.tests.webapp.policy.checkers;
 
 import java.io.File;
-import java.security.AccessControlException;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.io.FilenameUtils;
 import org.mortbay.jetty.tests.webapp.policy.AbstractSecurityCheck;
 import org.mortbay.jetty.tests.webapp.policy.SecurityCheckContext;
 import org.mortbay.jetty.tests.webapp.policy.SecurityResult;
@@ -76,50 +74,6 @@ public class ParanoidSecurityChecker extends AbstractSecurityCheck
         {
             result.failure(t);
             return null;
-        }
-        finally
-        {
-            check.addResult(result);
-        }
-    }
-
-    private void deniedWrite(SecurityCheckContext check, String rawpath)
-    {
-        SecurityResult result = new SecurityResult("filesystem.denied.write|%s",rawpath);
-        try
-        {
-            File path = new File(FilenameUtils.separatorsToSystem(rawpath));
-            result.assertEquals("File(" + rawpath + ").canWrite()",false,path.canWrite());
-        }
-        catch (AccessControlException e)
-        {
-            result.successExpected(e);
-        }
-        catch (Throwable t)
-        {
-            result.failure(t);
-        }
-        finally
-        {
-            check.addResult(result);
-        }
-    }
-
-    private void deniedRead(SecurityCheckContext check, String rawpath)
-    {
-        SecurityResult result = new SecurityResult("filesystem.denied.read|%s",rawpath);
-        try
-        {
-            File path = new File(FilenameUtils.separatorsToSystem(rawpath));
-            result.assertEquals("File(" + rawpath + ").canRead()",false,path.canRead());
-        }
-        catch (AccessControlException e)
-        {
-            result.successExpected(e);
-        }
-        catch (Throwable t)
-        {
-            result.failure(t);
         }
         finally
         {
