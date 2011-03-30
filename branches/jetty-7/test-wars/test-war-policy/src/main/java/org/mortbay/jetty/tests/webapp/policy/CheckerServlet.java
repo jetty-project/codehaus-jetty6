@@ -148,7 +148,7 @@ public class CheckerServlet extends HttpServlet
 
     public void processFilesystemChecks(Properties props, Checker checker)
     {
-        String jettyHome = System.getProperty("user.dir");
+        String jettyHome = getJettyHome();
         checker.canRead(props,jettyHome + "/lib/policy/jetty.policy");
         checker.canWrite(props,jettyHome + "/lib/policy/jetty.policy");
         checker.canRead(props,jettyHome + "/lib/");
@@ -166,11 +166,21 @@ public class CheckerServlet extends HttpServlet
         checker.canRead(props,webappDir);
         checker.canWrite(props,webappDir);
     }
+    
+    public String getJettyHome()
+    {
+        String jettyHome = System.getProperty("jetty.home");
+        if (jettyHome == null)
+        {
+            return System.getProperty("user.dir");
+        }
+        return jettyHome;
+    }
 
     public void processJettyLogChecks(Properties props, Checker checker)
     {
         Calendar c = Calendar.getInstance();
-        String jettyHome = System.getProperty("user.dir");
+        String jettyHome = getJettyHome();
         String logFilename = String.format("%s/logs/%2$tY_%2$tm_%2$td.request.log",jettyHome,c);
         checker.canRead(props,logFilename);
     }
