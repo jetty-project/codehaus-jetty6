@@ -92,6 +92,12 @@ public class SecurityResult
             this.message = String.format("(%s) %s",t.getClass().getName(),t.getMessage());
         }
     }
+    
+    public void success(String messageFormat, Object ... messageArgs)
+    {
+        this.success = true;
+        this.message = String.format(messageFormat, messageArgs);
+    }
 
     /**
      * Got an expected exception.
