@@ -98,6 +98,7 @@ public class SecurityTestServlet extends HttpServlet
 
         try
         {
+            // Setup the Context for results
             SecurityCheckContext context = new SecurityCheckContext(mode,this,req,resp);
 
             Class<?> parameterTypes[] = new Class[]
@@ -105,8 +106,10 @@ public class SecurityTestServlet extends HttpServlet
             Method testmethod = check.getClass().getDeclaredMethod(testName,parameterTypes);
             Object args[] = new Object[]
             { context };
+            // Executes the Specific Test Method
             testmethod.invoke(check,args);
 
+            // Write out results to response stream
             writeSecurityStream(resp,context);
         }
         catch (Throwable t)
