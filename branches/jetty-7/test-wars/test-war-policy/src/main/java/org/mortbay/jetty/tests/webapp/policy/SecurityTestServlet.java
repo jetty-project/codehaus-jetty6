@@ -40,8 +40,7 @@ public class SecurityTestServlet extends HttpServlet
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
-        SecurityCheckMode mode = null;
-
+        // Attempt to figure out what MODE and TESTNAME the incoming GET request wants run.
         String pathInfo = req.getPathInfo();
         if (pathInfo == null)
         {
@@ -59,54 +58,63 @@ public class SecurityTestServlet extends HttpServlet
 
         // Expecting pathInfo of {securityMode}/{testName}
         String parts[] = pathInfo.split("/");
+        
+        // Look for MODE
         if (parts.length >= 1)
         {
             securityMode = parts[0];
         }
         else
         {
-            // Show list of possible test at top level.
+            // No MODE, Show list of possible test at top level.
             respondSecurityModes(req,resp);
             return;
         }
 
-        mode = SecurityCheckMode.getMode(securityMode);
+        // Is it a valid MODE name?
+        SecurityCheckMode mode = SecurityCheckMode.getMode(securityMode);
         if (mode == null)
         {
-            // Show list of possible test modes
-            respondSecurityModes(req,resp);
+            // Bad Node Name, goto Mode listing
+            resp.sendRedirect("../");
             return;
         }
 
+        // Look for TESTNAME
         if (parts.length >= 2)
         {
             testName = parts[1];
         }
         else
         {
+            // No TESTNAME, Show list of possible TESTNAMES for MODE
             String contextBase = mode.name();
             respondTestNames(contextBase,resp,mode);
             return;
         }
 
+        // Attempt to get he Check for the MODE specified.
         AbstractSecurityCheck check = checkers.get(mode);
         if (check == null)
         {
             respondWithError(resp,HttpServletResponse.SC_NOT_FOUND,"No checker for 'mode' [" + mode.name() + "] exists yet");
             return;
         }
-
+        
+        // We now have a valid MODE and Check
         try
         {
-            // Setup the Context for results
-            SecurityCheckContext context = new SecurityCheckContext(mode,this,req,resp);
-
+            // Attempt to find the TESTNAME in the Check instance
             Class<?> parameterTypes[] = new Class[]
             { SecurityCheckContext.class };
             Method testmethod = check.getClass().getDeclaredMethod(testName,parameterTypes);
+            
+            // Setup the Context for results
+            SecurityCheckContext context = new SecurityCheckContext(mode,this,req,resp);
+            
+            // Executes the Specific Test Method referred to by TESTNAME
             Object args[] = new Object[]
             { context };
-            // Executes the Specific Test Method
             testmethod.invoke(check,args);
 
             // Write out results to response stream

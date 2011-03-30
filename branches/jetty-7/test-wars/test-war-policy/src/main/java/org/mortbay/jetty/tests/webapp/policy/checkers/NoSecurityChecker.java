@@ -7,7 +7,6 @@ import java.net.URLClassLoader;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 
-import org.apache.commons.io.FilenameUtils;
 import org.mortbay.jetty.tests.webapp.policy.AbstractSecurityCheck;
 import org.mortbay.jetty.tests.webapp.policy.SecurityCheckContext;
 import org.mortbay.jetty.tests.webapp.policy.SecurityResult;
@@ -164,42 +163,6 @@ public class NoSecurityChecker extends AbstractSecurityCheck
         {
             result.failure(t);
             return null;
-        }
-        finally
-        {
-            check.addResult(result);
-        }
-    }
-
-    private void canWrite(SecurityCheckContext check, String rawpath)
-    {
-        SecurityResult result = new SecurityResult("filesystem.can.write|%s",rawpath);
-        try
-        {
-            File path = new File(FilenameUtils.separatorsToSystem(rawpath));
-            result.assertEquals("File(" + rawpath + ").canWrite()",true,path.canWrite());
-        }
-        catch (Throwable t)
-        {
-            result.failure(t);
-        }
-        finally
-        {
-            check.addResult(result);
-        }
-    }
-
-    private void canRead(SecurityCheckContext check, String rawpath)
-    {
-        SecurityResult result = new SecurityResult("filesystem.can.read|%s",rawpath);
-        try
-        {
-            File path = new File(FilenameUtils.separatorsToSystem(rawpath));
-            result.assertEquals("File(" + rawpath + ").canRead()",true,path.canRead());
-        }
-        catch (Throwable t)
-        {
-            result.failure(t);
         }
         finally
         {
