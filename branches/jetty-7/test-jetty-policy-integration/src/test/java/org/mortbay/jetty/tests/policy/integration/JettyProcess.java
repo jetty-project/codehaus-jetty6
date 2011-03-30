@@ -34,6 +34,7 @@ public class JettyProcess
     private File jettyHomeDir;
     private Process pid;
     private URI baseUri;
+    private String jmxUrl;
     private boolean _debug = false;
     private String[] _jvmArgs = null;
 
@@ -211,6 +212,16 @@ public class JettyProcess
     }
 
     /**
+     * Return the JMX URL being used for this Jetty Process Instance.
+     * 
+     * @return the JMX URL for this Jetty Process Instance.
+     */
+    public String getJmxUrl()
+    {
+        return this.jmxUrl;
+    }
+
+    /**
      * Take the directory contents from ${project.basedir}/src/test/resources/${testConfigName}/ and copy it over
      * whatever happens to be at ${jetty.home}
      * 
@@ -269,54 +280,132 @@ public class JettyProcess
 
         this.pid = pb.start();
 
-        ConnectorParser connector = new ConnectorParser();
+        ConsoleParser parser = new ConsoleParser();
+        List<String[]> jmxList = parser.newPattern("JMX Remote URL: (.*)", 0);
+        List<String[]> connList = parser.newPattern("Started [A-Za-z]*Connector@([0-9]*\\.[0-9]*\\.[0-9]*\\.[0-9]*):([0-9]*)", 1);
 
-        startPump("STDOUT",connector,this.pid.getInputStream());
-        startPump("STDERR",connector,this.pid.getErrorStream());
+        startPump("STDOUT", parser, this.pid.getInputStream());
+        startPump("STDERR", parser, this.pid.getErrorStream());
 
         try
         {
-            connector.waitForConnectorDetails(1,TimeUnit.MINUTES);
+            parser.waitForDone(1,TimeUnit.MINUTES);
 
-            System.out.printf("## Found Connector -> Host=%s, port=%d%n",connector.host,connector.port);
+            if (jmxList.size() > 0)
+            {
+                this.jmxUrl = jmxList.get(0)[0];
+                System.out.printf("## Found JMX connector at "+this.jmxUrl);
+            }
 
-            this.baseUri = URI.create("http://localhost:" + connector.port + "/");
+            if (connList.size() > 0)
+            {
+                String[] params = connList.get(0);
+                if(params.length == 2 )
+                {
+                    this.baseUri = URI.create("http://localhost:"+params[1]+"/");
+                }
+                System.out.printf("## Found Jetty connector at host: "+params[0]+" port: "+params[1]);
+            }
+
         }
         catch (InterruptedException e)
         {
             pid.destroy();
-            Assert.fail("Unable to find connector details within time limit");
+            Assert.fail("Unable to find required information within time limit");
         }
     }
 
-    public static class ConnectorParser
+    public static class ConsoleParser
     {
-        private CountDownLatch latch = new CountDownLatch(1);
-        private String host;
-        private int port;
-        private Pattern pat = Pattern.compile("Started [A-Za-z]*Connector@([0-9]*\\.[0-9]*\\.[0-9]*\\.[0-9]*):([0-9]*)");
-
-        public void parse(String line)
+        private List<ConsolePattern> patterns = new ArrayList<ConsolePattern>();
+        private CountDownLatch latch;
+        private int count;
+        
+        public List<String[]> newPattern(String exp, int cnt)
         {
-            Matcher mat = pat.matcher(line);
-            if (mat.find())
+            ConsolePattern pat = new ConsolePattern(exp, cnt);
+            patterns.add(pat);
+            count += cnt;
+            
+            return pat.getMatches();
+        }
+        
+        public void parse(String line)
+        {           
+            for (ConsolePattern pat : patterns)
             {
-                host = mat.group(1);
-                port = Integer.parseInt(mat.group(2));
-                latch.countDown();
+                Matcher mat = pat.getMatcher(line);
+                if (mat.find())
+                {
+                    int num = 0, count = mat.groupCount();
+                    String[] match = new String[count];
+                    while(num++ < count)
+                    {
+                        match[num-1] = mat.group(num);
+                    }
+                    pat.getMatches().add(match);
+                        
+                    if (pat.getCount() > 0)
+                    {
+                        getLatch().countDown();
+                    }
+                }
             }
         }
 
-        public void waitForConnectorDetails(long timeout, TimeUnit unit) throws InterruptedException
+        public void waitForDone(long timeout, TimeUnit unit) throws InterruptedException
         {
-            latch.await(timeout,unit);
+            getLatch().await(timeout, unit);
+        }
+        
+        private CountDownLatch getLatch()
+        {
+            synchronized(this)
+            {
+                if (latch == null)
+                {
+                    latch = new CountDownLatch(count);
+                }
+            }
+            
+            return latch;
         }
     }
 
-    private void startPump(String mode, ConnectorParser connector, InputStream inputStream)
+    public static class ConsolePattern
+    {
+        private Pattern pattern;
+        private List<String[]> matches;
+        private int count;
+
+        ConsolePattern(String exp, int cnt)
+        {
+            pattern = Pattern.compile(exp);
+            matches = new ArrayList<String[]>();
+            count = cnt;
+        }
+        
+        public Matcher getMatcher(String line)
+        {
+            return pattern.matcher(line);
+        }
+
+        public List<String[]> getMatches()
+        {
+            return matches;
+        }
+
+        public int getCount()
+        {
+            return count;
+        }
+    }
+    
+
+    private void startPump(String mode, ConsoleParser parser, InputStream inputStream)
     {
         ConsoleStreamer pump = new ConsoleStreamer(mode,inputStream);
-        pump.setParser(connector);
+        pump.setParser(parser);
         Thread thread = new Thread(pump,"ConsoleStreamer/" + mode);
         thread.start();
     }
@@ -379,7 +468,7 @@ public class JettyProcess
     {
         private String mode;
         private BufferedReader reader;
-        private ConnectorParser parser;
+        private ConsoleParser parser;
 
         public ConsoleStreamer(String mode, InputStream is)
         {
@@ -387,7 +476,7 @@ public class JettyProcess
             this.reader = new BufferedReader(new InputStreamReader(is));
         }
 
-        public void setParser(ConnectorParser connector)
+        public void setParser(ConsoleParser connector)
         {
             this.parser = connector;
         }
