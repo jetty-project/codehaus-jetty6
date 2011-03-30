@@ -12,7 +12,7 @@ import org.mortbay.jetty.tests.webapp.policy.SecurityResult;
 
 public class ParanoidSecurityChecker extends AbstractSecurityCheck
 {
-    public void processFilesystemAccess(SecurityCheckContext check)
+    public void testFilesystemAccess(SecurityCheckContext check)
     {
         String jettyHome = getJettyHome();
 
