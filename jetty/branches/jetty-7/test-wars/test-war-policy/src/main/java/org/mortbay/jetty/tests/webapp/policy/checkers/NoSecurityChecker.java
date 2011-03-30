@@ -1,7 +1,10 @@
 package org.mortbay.jetty.tests.webapp.policy.checkers;
 
 import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.io.FilenameUtils;
@@ -38,6 +41,92 @@ public class NoSecurityChecker extends AbstractSecurityCheck
         {
             canRead(check,webappDir.getAbsolutePath());
             canWrite(check,webappDir.getAbsolutePath());
+        }
+    }
+
+    public void testFooWebappContext(SecurityCheckContext check)
+    {
+        String fooContext = "/foo";
+        SecurityResult result = new SecurityResult(".getContext(%s)",fooContext);
+        try
+        {
+            ServletContext context = getServletContext(check);
+            if (context != null)
+            {
+                ServletContext foo = context.getContext("/foo");
+                result.assertNotNull("Get Servlet Context: " + fooContext,foo);
+            }
+        }
+        catch (Throwable t)
+        {
+            result.failure(t);
+        }
+        finally
+        {
+            check.addResult(result);
+        }
+    }
+
+    public void testFooWebappRequestDispatcher(SecurityCheckContext check)
+    {
+        String fooContext = "/foo";
+        SecurityResult result = new SecurityResult("getRequestDispatcher(%s)",fooContext);
+        try
+        {
+            ServletContext context = getServletContext(check);
+            if (context != null)
+            {
+                RequestDispatcher foo = context.getRequestDispatcher("/foo");
+                result.assertNotNull("Get Servlet Context: " + fooContext,foo);
+            }
+        }
+        catch (Throwable t)
+        {
+            result.failure(t);
+        }
+        finally
+        {
+            check.addResult(result);
+        }
+    }
+
+    public void testClassloader(SecurityCheckContext check)
+    {
+        SecurityResult result = new SecurityResult("classloader");
+        String badurl = "http://not.going.to.work";
+        try
+        {
+            URL url = new URL(badurl);
+            URLClassLoader cl = new URLClassLoader(new URL[]
+            { url });
+            result.assertNotNull("Create Classloader: " + badurl,cl);
+        }
+        catch (Throwable t)
+        {
+            result.failure(t);
+        }
+        finally
+        {
+            check.addResult(result);
+        }
+    }
+
+    public void testExit(SecurityCheckContext check)
+    {
+        SecurityResult result = new SecurityResult("exit");
+        try
+        {
+            System.exit(-99);
+            // In this mode, this will likely never be reached.
+            result.success("Was able to exit");
+        }
+        catch (Throwable t)
+        {
+            result.failure(t);
+        }
+        finally
+        {
+            check.addResult(result);
         }
     }
 

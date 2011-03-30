@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,6 +86,7 @@ public class SecurityTestServlet extends HttpServlet
         {
             String contextBase = mode.name();
             respondTestNames(contextBase,resp,mode);
+            return;
         }
 
         AbstractSecurityCheck check = checkers.get(mode);
@@ -172,14 +174,17 @@ public class SecurityTestServlet extends HttpServlet
 
             out.printf("<h1>Available %s Tests</h1>%n",req.getPathInfo());
 
-            // Sort by mode names
+            List<SecurityCheckMode> modes = new ArrayList<SecurityCheckMode>();
+            for(SecurityCheckMode mode: checkers.keySet()) {
+                modes.add(mode);
+            }
 
-            SecurityCheckMode mode;
+            // Sort by mode name
+            Collections.sort(modes, new SecurityCheckModeNameSorter());
+            
             AbstractSecurityCheck check;
-            for (Map.Entry<SecurityCheckMode, AbstractSecurityCheck> entry : checkers.entrySet())
-            {
-                mode = entry.getKey();
-                check = entry.getValue();
+            for(SecurityCheckMode mode: modes) {
+                check = checkers.get(mode);
 
                 writeSecurityMode(out,mode,check);
             }
@@ -214,7 +219,7 @@ public class SecurityTestServlet extends HttpServlet
             return;
         }
 
-        // Sort by method names
+        Collections.sort(testmethods, new MethodNameSorter());
 
         out.println("<ul>");
         for (Method method : testmethods)
