@@ -85,10 +85,24 @@ public class SecurityResult
 
     public void failure(Throwable t)
     {
+        this.success = false;
         this.cause = t;
         if (this.message == null)
         {
             this.message = String.format("(%s) %s",t.getClass().getName(),t.getMessage());
+        }
+    }
+
+    /**
+     * Got an expected exception.
+     */
+    public void successExpected(Throwable t)
+    {
+        this.success = true;
+        this.cause = t;
+        if (this.message == null)
+        {
+            this.message = String.format("Expected Throwable encountered: %s",t.getClass().getName());
         }
     }
 
@@ -183,4 +197,5 @@ public class SecurityResult
 
         return json;
     }
+
 }
