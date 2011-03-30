@@ -1,3 +1,5 @@
+ + JETTY-1354 Added jetty-nested
+
 jetty@codehaus 7.3.1.v20110307 7 March 2011
  + JETTY-1323 contributing Webapp Verifier component
  + JETTY-1325 contribution of Centralized Webapp Logging
