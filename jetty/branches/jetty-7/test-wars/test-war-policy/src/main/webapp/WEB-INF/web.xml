@@ -7,11 +7,19 @@
   version="2.5">
   <display-name>Policy Tests Webapp</display-name>
   <servlet>
+    <servlet-name>SecurityTestServlet</servlet-name>
+    <servlet-class>org.mortbay.jetty.tests.webapp.policy.SecurityTestServlet</servlet-class>
+  </servlet>
+  <servlet>
     <servlet-name>CheckerServlet</servlet-name>
     <servlet-class>org.mortbay.jetty.tests.webapp.policy.CheckerServlet</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>CheckerServlet</servlet-name>
     <url-pattern>/checker/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>SecurityTestServlet</servlet-name>
+    <url-pattern>/security/*</url-pattern>
   </servlet-mapping>
 </web-app>
