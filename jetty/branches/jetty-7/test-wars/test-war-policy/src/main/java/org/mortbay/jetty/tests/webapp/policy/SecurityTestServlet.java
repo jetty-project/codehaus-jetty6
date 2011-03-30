@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.mortbay.jetty.tests.webapp.policy.checkers.NoSecurityChecker;
@@ -57,14 +58,15 @@ public class SecurityTestServlet extends HttpServlet
         String testName = null;
 
         // Expecting pathInfo of {securityMode}/{testName}
-        String parts[] = pathInfo.split("/");
-        
+        String parts[] = StringUtils.split(pathInfo,"/");
+
         // Look for MODE
         if (parts.length >= 1)
         {
             securityMode = parts[0];
         }
-        else
+
+        if (StringUtils.isBlank(securityMode))
         {
             // No MODE, Show list of possible test at top level.
             respondSecurityModes(req,resp);
@@ -85,7 +87,8 @@ public class SecurityTestServlet extends HttpServlet
         {
             testName = parts[1];
         }
-        else
+
+        if (StringUtils.isBlank(testName))
         {
             // No TESTNAME, Show list of possible TESTNAMES for MODE
             String contextBase = mode.name();
@@ -100,7 +103,7 @@ public class SecurityTestServlet extends HttpServlet
             respondWithError(resp,HttpServletResponse.SC_NOT_FOUND,"No checker for 'mode' [" + mode.name() + "] exists yet");
             return;
         }
-        
+
         // We now have a valid MODE and Check
         try
         {
@@ -108,10 +111,10 @@ public class SecurityTestServlet extends HttpServlet
             Class<?> parameterTypes[] = new Class[]
             { SecurityCheckContext.class };
             Method testmethod = check.getClass().getDeclaredMethod(testName,parameterTypes);
-            
+
             // Setup the Context for results
             SecurityCheckContext context = new SecurityCheckContext(mode,this,req,resp);
-            
+
             // Executes the Specific Test Method referred to by TESTNAME
             Object args[] = new Object[]
             { context };
@@ -119,6 +122,10 @@ public class SecurityTestServlet extends HttpServlet
 
             // Write out results to response stream
             writeSecurityStream(resp,context);
+        }
+        catch (NoSuchMethodException e)
+        {
+            respondWithError(resp,HttpServletResponse.SC_NOT_FOUND,"No such method: " + testName);
         }
         catch (Throwable t)
         {
@@ -186,15 +193,17 @@ public class SecurityTestServlet extends HttpServlet
             out.printf("<h1>Available %s Tests</h1>%n",req.getPathInfo());
 
             List<SecurityCheckMode> modes = new ArrayList<SecurityCheckMode>();
-            for(SecurityCheckMode mode: checkers.keySet()) {
+            for (SecurityCheckMode mode : checkers.keySet())
+            {
                 modes.add(mode);
             }
 
             // Sort by mode name
-            Collections.sort(modes, new SecurityCheckModeNameSorter());
-            
+            Collections.sort(modes,new SecurityCheckModeNameSorter());
+
             AbstractSecurityCheck check;
-            for(SecurityCheckMode mode: modes) {
+            for (SecurityCheckMode mode : modes)
+            {
                 check = checkers.get(mode);
 
                 writeSecurityMode(out,mode,check);
@@ -230,7 +239,7 @@ public class SecurityTestServlet extends HttpServlet
             return;
         }
 
-        Collections.sort(testmethods, new MethodNameSorter());
+        Collections.sort(testmethods,new MethodNameSorter());
 
         out.println("<ul>");
         for (Method method : testmethods)
