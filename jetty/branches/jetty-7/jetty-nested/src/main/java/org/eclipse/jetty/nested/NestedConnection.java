@@ -5,6 +5,7 @@ import java.util.Enumeration;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -62,11 +63,22 @@ public class NestedConnection extends HttpConnection
         {
             getServer().handle(this);
             completeResponse();
+            _generator.flushBuffer();
+            _endp.flush();
         }
         finally
         {
             setCurrentConnection(null);
         }
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jetty.server.HttpConnection#getInputStream()
+     */
+    @Override
+    public ServletInputStream getInputStream() throws IOException
+    {
+        return ((NestedEndPoint)_endp).getServletInputStream();
     }
 
 }

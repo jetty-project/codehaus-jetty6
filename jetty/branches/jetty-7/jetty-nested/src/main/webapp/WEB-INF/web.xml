@@ -11,6 +11,10 @@
     <servlet-name>jetty</servlet-name>
     <servlet-class>org.eclipse.jetty.nested.NestedJettyServlet</servlet-class>
     <init-param>
+      <param-name>debug</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
       <param-name>webapp</param-name>
       <param-value>/nested</param-value>
     </init-param>
@@ -22,7 +26,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>jetty</servlet-name>
-    <url-pattern>/</url-pattern>  
+    <url-pattern>/*</url-pattern>  
   </servlet-mapping>
 </web-app>
 

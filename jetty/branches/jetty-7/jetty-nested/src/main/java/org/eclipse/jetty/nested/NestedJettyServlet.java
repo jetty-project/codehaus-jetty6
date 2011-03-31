@@ -42,8 +42,10 @@ public class NestedJettyServlet implements Servlet
     
     public void init(ServletConfig config) throws ServletException
     {    
+        ClassLoader orig = Thread.currentThread().getContextClassLoader();
         try
         {
+            Thread.currentThread().setContextClassLoader(NestedJettyServlet.class.getClassLoader());
             _config=config;
             _context=config.getServletContext();
             
@@ -67,6 +69,7 @@ public class NestedJettyServlet implements Servlet
                 _connector=(NestedConnector)_server.getConnectors()[0];
             
             WebAppContext webapp = new WebAppContext();
+            
             webapp.setContextPath(_context.getContextPath());
             webapp.setTempDirectory(new File((File)_context.getAttribute("javax.servlet.context.tempdir"),"jetty"));
             String docroot=config.getInitParameter("webapp");
@@ -85,6 +88,10 @@ public class NestedJettyServlet implements Servlet
         catch(Exception e)
         {
             throw new ServletException(e);
+        }
+        finally
+        {
+            Thread.currentThread().setContextClassLoader(orig);
         }
     }
 

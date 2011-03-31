@@ -28,6 +28,7 @@ public class NestedGenerator extends AbstractGenerator
 
     public void addContent(Buffer content, boolean last) throws IOException
     {
+        Log.debug("addContent {} {}",content.length(),last);
         if (_noContent)
         {
             content.clear();
@@ -94,6 +95,7 @@ public class NestedGenerator extends AbstractGenerator
 
     public boolean addContent(byte b) throws IOException
     {
+        Log.debug("addContent 1");
         if (_noContent)
             return false;
 
@@ -135,21 +137,27 @@ public class NestedGenerator extends AbstractGenerator
     private void initContent() throws IOException
     {
         if (_buffer == null)
+        {
+            Log.debug("initContent");
             _buffer = _buffers.getBuffer();
+        }
     }
-    
+
+    /* ------------------------------------------------------------ */
     @Override
     public boolean isRequest()
     {
         return false;
     }
 
+    /* ------------------------------------------------------------ */
     @Override
     public boolean isResponse()
     {
         return true;
     }
 
+    /* ------------------------------------------------------------ */
     @Override
     public int prepareUncheckedAddContent() throws IOException
     {
@@ -157,9 +165,11 @@ public class NestedGenerator extends AbstractGenerator
         return _buffer.space();
     }
 
+    /* ------------------------------------------------------------ */
     @Override
     public void completeHeader(HttpFields fields, boolean allContentAdded) throws IOException
     {
+        Log.debug("completeHeader: {}",fields);
         if (_state != STATE_HEADER)
             return;
 
@@ -203,13 +213,30 @@ public class NestedGenerator extends AbstractGenerator
         _state = STATE_CONTENT;
     }
 
+    /* ------------------------------------------------------------ */
     @Override
     public long flushBuffer() throws IOException
     {
         if (_state == STATE_HEADER)
             throw new IllegalStateException("State==HEADER");
+        
 
+        if (_content != null && _content.length() < _buffer.space() && _state != STATE_FLUSHING)
+        {
+            initContent();
+            _buffer.put(_content);
+            _content.clear();
+            _content = null;
+        }
+        
+        if (_buffer==null)
+            return 0;
+        
+        int size=_buffer.length();
         int len = _buffer==null?0:_endp.flush(_buffer);
+        Log.debug("flushBuffer {} of {}",len,size);
+        if (len>0)
+            _buffer.skip(len);
 
         return len;
     }
