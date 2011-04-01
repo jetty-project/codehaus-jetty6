@@ -44,9 +44,9 @@ public aspect ServletAspect
      * 
      * @param s
      */
-    pointcut checkGetServletInfo(Servlet s) : target(s) && call(public String getServletInfo());
+    pointcut checkGetServletInfo() : execution(public String Servlet+.getServletInfo());
     
-    before( Servlet s ): checkGetServletInfo(s)
+    before(): checkGetServletInfo()
     {
         SecurityManager sm = System.getSecurityManager();
         
@@ -61,9 +61,9 @@ public aspect ServletAspect
      * 
      * @param s
      */
-    pointcut checkDestroy(Servlet s) : target(s) && call(public void destroy());
+    pointcut checkDestroy() : execution(public void Servlet+.destroy());
     
-    before( Servlet s ): checkDestroy(s)
+    before(): checkDestroy()
     {
         SecurityManager sm = System.getSecurityManager();
         

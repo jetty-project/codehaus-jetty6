@@ -17,7 +17,7 @@
     <dependency>
       <groupId>org.aspectj</groupId>
       <artifactId>aspectjrt</artifactId>
-      <version>1.6.10</version>
+      <version>1.6.11</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -73,9 +73,10 @@
         <artifactId>aspectj-maven-plugin</artifactId>
         <version>1.3.1</version>
         <configuration>
+          <verbose>true</verbose>
           <source>1.5</source>
           <complianceLevel>1.5</complianceLevel>
-          <forceAjcCompile>true</forceAjcCompile>
+          <forceAjcCompile>false</forceAjcCompile>
           <outxml>true</outxml>
           <weaveDependencies>
             <weaveDependency>
@@ -89,7 +90,7 @@
           <execution>
             <goals>
               <goal>compile</goal>
-              <goal>test-compile</goal>
+              <!--goal>test-compile</goal-->
             </goals>
           </execution>
         </executions>
