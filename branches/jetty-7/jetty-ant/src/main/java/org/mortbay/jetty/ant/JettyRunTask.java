@@ -246,7 +246,7 @@ public class JettyRunTask extends Task
      * @param webapp
      * @param appContext
      */
-    static void startScanner(final WebApplicationProxyImpl webApp, int scanIntervalSeconds)
+    static void startScanner(final WebApplicationProxyImpl webApp, int scanIntervalSeconds) throws Exception
     {
         List scanList = new ArrayList();
         scanList.add(webApp.getWebXmlFile());

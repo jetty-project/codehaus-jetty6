@@ -557,7 +557,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * files change.
      *
      */
-    private void startScanner()
+    private void startScanner() throws Exception
     {
         // check if scanning is enabled
         if (getScanIntervalSeconds() <= 0) return;
@@ -587,7 +587,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     /**
      * Run a thread that monitors the console input to detect ENTER hits.
      */
-    protected void startConsoleScanner() 
+    protected void startConsoleScanner() throws Exception
     {
         if ( "manual".equalsIgnoreCase( reload ) )
         {
