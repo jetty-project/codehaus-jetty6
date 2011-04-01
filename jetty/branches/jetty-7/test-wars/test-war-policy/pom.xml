@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.mortbay.jetty.testwars</groupId>
     <artifactId>testwars-parent</artifactId>
-    <version>7.3.2-SNAPSHOT</version>
+    <version>7.4.0-SNAPSHOT</version>
   </parent>
   <artifactId>test-war-policy</artifactId>
   <packaging>war</packaging>
