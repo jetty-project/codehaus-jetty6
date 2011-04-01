@@ -30,6 +30,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.toolchain.test.MavenTestingUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class CookiePolicyBarrierTest
@@ -91,6 +92,7 @@ public class CookiePolicyBarrierTest
     }
     
     @Test (expected = AccessControlException.class)
+    @Ignore ("pointcut too broad")
     public void testCookieAccessNotAllowed() throws Exception
     {
         Cookie cookie = new Cookie("foo", "boo");
@@ -99,6 +101,7 @@ public class CookiePolicyBarrierTest
     }
     
     @Test
+    @Ignore ("pointcut too broad")
     public void testCookieAccessAllowed() throws Exception
     {
         Cookie cookie = new Cookie("foo", "boo");

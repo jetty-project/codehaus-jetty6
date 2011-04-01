@@ -44,9 +44,9 @@ public aspect ServletContextAspect
      * @param sc
      * @param name
      */
-    pointcut checkGetAttribute(ServletContext sc, String name) : target(sc) && args(name) && call(public Object ServletContext.getAttribute(String));
+    pointcut checkGetAttribute(String name) : args(name) && call(public Object ServletContext+.getAttribute(..));
 
-    before(ServletContext sc, String name): checkGetAttribute(sc, name)
+    before(String name): checkGetAttribute(name)
     {
 
         System.out.println("ASPECT: checking getAttribute: " + name);
@@ -66,11 +66,13 @@ public aspect ServletContextAspect
      * @param name
      * @param o
      */
-    pointcut checkSetAttribute(ServletContext sc, String name, Object o) : target(sc) && args(name, o) && call(public void setAttribute(String, Object));
+    pointcut checkSetAttribute(ServletContext sc, String name, Object o) : target(sc) && args(name, o) && call(public void ServletContext+.setAttribute(String, Object));
 
     before(ServletContext sc, String name, Object o): checkSetAttribute(sc, name, o)
     {
 
+        System.out.println("ASPECT: checking setAttribute: " + name);
+        
         SecurityManager sm = System.getSecurityManager();
 
         if (sm != null)
@@ -85,10 +87,11 @@ public aspect ServletContextAspect
      * @param sc
      * @param name
      */
-    pointcut checkRemoveAttribute(ServletContext sc, String name) : target(sc) && args(name) && call(public void removeAttribute(String));
+    pointcut checkRemoveAttribute(ServletContext sc, String name) : target(sc) && args(name) && call(public void ServletContext+.removeAttribute(String));
 
     before(ServletContext sc, String name): checkRemoveAttribute(sc, name)
     {
+        System.out.println("ASPECT: checking removeAttribute: " + name);
 
         SecurityManager sm = System.getSecurityManager();
 
@@ -104,10 +107,11 @@ public aspect ServletContextAspect
      * @param sc
      * @param name
      */
-    pointcut checkGetInitParameter(ServletContext sc, String name) : target(sc) && args(name) && call(public String getInitParameter(String));
+    pointcut checkGetInitParameter(String name) :  args(name) && call(public String ServletContext+.getInitParameter(String));
 
-    before(ServletContext sc, String name): checkGetInitParameter(sc, name)
+    before(String name): checkGetInitParameter(name)
     {
+        System.out.println("ASPECT: checking checkGetInitParameter: " + name);
 
         SecurityManager sm = System.getSecurityManager();
 
@@ -123,10 +127,11 @@ public aspect ServletContextAspect
      * @param sc
      * @param name
      */
-    pointcut checkGetDispatcher(ServletContext sc, String name) : target(sc) && args(name) && call(public * *Dispatcher(String));
+    pointcut checkGetDispatcher(String name) : args(name) && call(public * ServletContext+.*Dispatcher(String));
 
-    before(ServletContext sc, String name): checkGetDispatcher(sc, name)
+    before(String name): checkGetDispatcher(name)
     {
+        System.out.println("ASPECT: checking checkGetDispatcher: " + name);
 
         SecurityManager sm = System.getSecurityManager();
 
@@ -142,10 +147,12 @@ public aspect ServletContextAspect
      * @param sc
      * @param uripath
      */
-    pointcut checkGetContext(ServletContext sc, String uripath) : target(sc) && args(uripath) && call(public * getContext(String));
+    pointcut checkGetContext(String uripath) : args(uripath) && call(public * ServletContext+.getContext(String));
 
-    before(ServletContext sc, String uripath): checkGetContext(sc, uripath)
+    before(String uripath): checkGetContext(uripath)
     {
+        System.out.println("ASPECT: checking checkGetContext: " + uripath);
+
         SecurityManager sm = System.getSecurityManager();
 
         if (sm != null)
@@ -159,9 +166,9 @@ public aspect ServletContextAspect
      * 
      * @param sc
      */
-    pointcut blockGetServlets(ServletContext sc) : target(sc) && call(public * getServlets());
+    pointcut blockGetServlets() : call(public * ServletContext+.getServlets());
 
-    before(ServletContext sc): blockGetServlets(sc)
+    before(): blockGetServlets()
     {
         throw new ServletDeprecationException("Servlet Method Deprecated: getServlets() was deprecated in servlet-api-2.0 with no replacement");
     }
@@ -171,9 +178,9 @@ public aspect ServletContextAspect
      * 
      * @param sc
      */
-    pointcut blockGetServlet(ServletContext sc) : target(sc) && call(public * getServlet(..));
+    pointcut blockGetServlet() : call(public * ServletContext+.getServlet(..));
 
-    before(ServletContext sc): blockGetServlet(sc)
+    before(): blockGetServlet()
     {
         throw new ServletDeprecationException("Servlet Method Deprecated: getServlet(String) was deprecated in servlet-api-2.0 with no replacement");
     }
@@ -183,9 +190,9 @@ public aspect ServletContextAspect
      * 
      * @param sc
      */
-    pointcut blockGetServletNames(ServletContext sc) : target(sc) && call(public * getServletNames());
+    pointcut blockGetServletNames() : call(public * ServletContext+.getServletNames());
 
-    before(ServletContext sc): blockGetServletNames(sc)
+    before(): blockGetServletNames()
     {
         throw new ServletDeprecationException("Servlet Method Deprecated: getServletNames() was deprecated in servlet-api-2.1 with no replacement");
     }

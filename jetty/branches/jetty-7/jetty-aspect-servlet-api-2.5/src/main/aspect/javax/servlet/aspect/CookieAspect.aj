@@ -28,7 +28,7 @@ public aspect CookieAspect
     /**
      * permission must be granted to create cookies
      */
-    before() : call(Cookie.new(..))
+    before() : execution(Cookie+.new(..))
     {
         SecurityManager sm = System.getSecurityManager();
         
@@ -43,9 +43,9 @@ public aspect CookieAspect
      * 
      * @param c
      */
-    pointcut checkCookiesEnabled(Cookie c) : target(c) && call(public * *(..));
+    pointcut checkCookiesEnabled() : execution(* Cookie+.*(..));
 
-    before( Cookie c ) : checkCookiesEnabled(c)
+    before() : checkCookiesEnabled()
     {
         SecurityManager sm = System.getSecurityManager();
         

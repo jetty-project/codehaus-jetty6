@@ -24,6 +24,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.Servlet;
 
 
 /**
@@ -47,7 +48,7 @@ public aspect HttpServletAspect
      * @throws ServletException
      * @throws IOException
      */
-    void around (final ServletRequest req, final ServletResponse res) throws ServletException, IOException : target(HttpServlet) && args(req, res) && call(* service(..) throws *) 
+    void around (final ServletRequest req, final ServletResponse res) throws ServletException, IOException : args(req, res) && execution(* HttpServlet.service(..) throws *) 
     {     
         try
         {

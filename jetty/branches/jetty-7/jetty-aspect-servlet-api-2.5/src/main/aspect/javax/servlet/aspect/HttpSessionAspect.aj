@@ -30,16 +30,16 @@ public aspect HttpSessionAspect
      * 
      * @param c
      */
-    pointcut checkHttpSessionsEnabled(HttpSession c) : target(c) && call(public * *(..));
-    
-    before( HttpSession c ): checkHttpSessionsEnabled(c)
-    {
-        
-        SecurityManager sm = System.getSecurityManager();
-        
-        if ( sm != null )
-        {
-            sm.checkPermission( new ServletHttpSessionPermission() ); 
-        }            
-    }  
+//    pointcut checkHttpSessionsEnabled() : target(HttpSession) && call(public * *(..));
+//    
+//    before(): checkHttpSessionsEnabled()
+//    {
+//        
+//        SecurityManager sm = System.getSecurityManager();
+//        
+//        if ( sm != null )
+//        {
+//            sm.checkPermission( new ServletHttpSessionPermission() ); 
+//        }            
+//    }  
 }
