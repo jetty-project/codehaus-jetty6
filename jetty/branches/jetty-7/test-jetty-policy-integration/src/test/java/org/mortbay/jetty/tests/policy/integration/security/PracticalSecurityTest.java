@@ -6,6 +6,8 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 import org.eclipse.jetty.toolchain.test.SimpleRequest;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -19,6 +21,7 @@ import org.mortbay.jetty.tests.policy.integration.JettyProcess;
 public class PracticalSecurityTest
 {
     private static JettyProcess jetty;
+    private static final String MODE = "PRACTICAL";
 
     @BeforeClass
     public static void initJetty() throws Exception
@@ -37,10 +40,14 @@ public class PracticalSecurityTest
         // Use AspectJ + Security enhanced servlet-api jar
         jetty.copyLib("jetty-aspect-servlet-api-2.5.jar","lib-secure/servlet-api-2.5.jar");
         jetty.copyLib("aspectjrt.jar","lib-secure/aspectjrt.jar");
+        jetty.copyLib("aspectjweaver.jar","aspectjweaver.jar");
 
 
         jetty.overlayConfig("practical_security");
-        
+
+        jetty.setDebug(true);
+        jetty.setJVMArgs(new String[] {"-javaagent:aspectjweaver.jar"});//, "-Daj.weaving.verbose=true", "-Dorg.aspectj.weaver.showWeaveInfo=true"});    
+
         jetty.start();
     }
 
@@ -56,51 +63,87 @@ public class PracticalSecurityTest
     @Test
     public void testFilesystem() throws Exception
     {
-        assertCheckerSuccess("processFilesystemChecks");
+        
+       // Thread.sleep(100000);
+        
+        execSecurityTest(MODE,"testFilesystemAccess");
     }
 
     @Test
+    @Ignore ("while testing layout")
     public void testJettyLog() throws Exception
     {
-        assertCheckerSuccess("processJettyLogChecks");
+        execSecurityTest(MODE, "testJettyLogAccess");
     }
 
     @Test
+    @Ignore ("while testing layout")
     public void testServletContext() throws Exception
     {
-        assertCheckerSuccess("processFooWebappContextChecks");
+        execSecurityTest(MODE, "testFooWebappContext");
     }
 
     @Test
+    @Ignore ("while testing layout")
     public void testRequestDispatcher() throws Exception
     {
-        assertCheckerSuccess("processFooWebappRequestDispatcherChecks");
+        execSecurityTest(MODE, "testFooWebappRequestDispatcher");
     }
 
     @Test
-    @Ignore("need to fix loadLibrary to actually load a real library")
+    @Ignore ("while testing layout")
     public void testLib() throws Exception
     {
-        assertCheckerSuccess("processLibChecks");
+        execSecurityTest(MODE, "testLib");
     }
 
     @Test
+    @Ignore ("while testing layout")
     public void testSystemProperty() throws Exception
     {
-        assertCheckerSuccess("processSystemPropertyChecks");
+        execSecurityTest(MODE, "testSystemProperty");
     }
-
-    private void assertCheckerSuccess(String testname) throws Exception
+    
+    private void execSecurityTest(String mode, String testName) throws Exception
     {
         SimpleRequest request = new SimpleRequest(jetty.getBaseUri());
-        Properties props = request.getProperties("/policytests/checker/" + testname);
-        @SuppressWarnings("unchecked")
-        Enumeration<String> names = (Enumeration<String>)props.propertyNames();
-        while (names.hasMoreElements())
+        String path = String.format("/test-war-policy/security/%s/%s",mode,testName);
+        String response = request.getString(path);
+        JSONArray array = new JSONArray(response);
+
+        StringBuilder failures = new StringBuilder();
+        int failureCount = 0;
+
+        String id, expected, actual, message;
+        int len = array.length();
+        for (int i = 0; i < len; i++)
         {
-            String name = names.nextElement();
-            String value = props.getProperty(name);
-            Assert.assertThat("[" + testname + "] " + name,value,startsWith("Success"));
+            JSONObject result = array.getJSONObject(i);
+            id = result.getString("id");
+            if (result.getBoolean("success") == false)
+            {
+                failureCount++;
+                expected = result.optString("expected");
+                actual = result.optString("actual");
+                message = result.optString("message");
+                JSONObject cause = result.optJSONObject("cause");
+
+                failures.append("\n ").append(id);
+
+                if (expected != null)
+                    failures.append("\n    expected: ").append(expected);
+                if (actual != null)
+                    failures.append("\n      actual: ").append(actual);
+                if (message != null)
+                    failures.append("\n     message: ").append(message);
+                if (cause != null)
+                {
+                    failures.append("\n       cause: ").append(cause.getString("class"));
+                    failures.append("\n").append(cause.getString("stacktrace"));
+                }
+            }
         }
+
+        Assert.assertEquals("Expecting 0 failures:" + failures.toString(),0,failureCount);
     }
 }
