@@ -39,7 +39,7 @@ public class PracticalSecurityChecker extends AbstractSecurityCheck
         File webappDir = getServletContextTempDir(check,context);
         if (webappDir != null)
         {
-            deniedRead(check,webappDir.getAbsolutePath());
+            canRead(check,webappDir.getAbsolutePath());
             deniedWrite(check,webappDir.getAbsolutePath());
         }
     }
