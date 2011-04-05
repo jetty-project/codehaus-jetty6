@@ -8,6 +8,11 @@ grant codebase "file:${jetty.home}/work/policy-tests/-" {
   // required for file system tests
   permission java.util.PropertyPermission "jetty.home", "read";
 
+  // testSystemPropertyAccess
+  permission java.util.PropertyPermission "__ALLOWED_READ_PROPERTY", "read";
+  permission java.util.PropertyPermission "__ALLOWED_WRITE_PROPERTY", "write";
+
+
 }
 
 //
@@ -16,6 +21,11 @@ grant codebase "file:${jetty.home}/work/policy-tests/-" {
 grant codeBase "file:${jetty.home}/lib-secure/-" {
   // required for file system tests
   permission java.util.PropertyPermission "jetty.home", "read";
+
+  // testSystemPropertyAccess
+  permission java.util.PropertyPermission "__ALLOWED_READ_PROPERTY", "read";
+  permission java.util.PropertyPermission "__ALLOWED_WRITE_PROPERTY", "write";
+
 
   permission javax.servlet.aspect.ServletContextAttributePermission "javax.servlet.context.tempdir", "read";
 

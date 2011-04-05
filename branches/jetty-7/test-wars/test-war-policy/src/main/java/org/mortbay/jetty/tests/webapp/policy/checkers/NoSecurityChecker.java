@@ -3,11 +3,14 @@ package org.mortbay.jetty.tests.webapp.policy.checkers;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Calendar;
+import java.util.Properties;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 
 import org.mortbay.jetty.tests.webapp.policy.AbstractSecurityCheck;
+import org.mortbay.jetty.tests.webapp.policy.Checker;
 import org.mortbay.jetty.tests.webapp.policy.SecurityCheckContext;
 import org.mortbay.jetty.tests.webapp.policy.SecurityResult;
 
@@ -127,6 +130,24 @@ public class NoSecurityChecker extends AbstractSecurityCheck
         {
             check.addResult(result);
         }
+    }
+ 
+    public void testJettyLogAccess(SecurityCheckContext check)
+    {
+        Calendar c = Calendar.getInstance();
+        String jettyHome = getJettyHome();
+        String logFilename = String.format("%s/logs/%2$tY_%2$tm_%2$td.request.log",jettyHome,c);
+        canRead(check, logFilename);       
+    }
+    
+    public void testSystemPropertyAccess( SecurityCheckContext check )
+    {
+        canReadProperty(check,"__ALLOWED_READ_PROPERTY");
+        canWriteProperty(check,"__ALLOWED_READ_PROPERTY");
+        canReadProperty(check,"__ALLOWED_WRITE_PROPERTY");
+        canWriteProperty(check,"__ALLOWED_WRITE_PROPERTY");
+        canReadProperty(check,"__UNDECLARED_PROPERTY");
+        canWriteProperty(check,"__UNDECLARED_PROPERTY");
     }
 
     private File getServletContextTempDir(SecurityCheckContext check, ServletContext context)

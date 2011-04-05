@@ -62,20 +62,22 @@ public class PracticalSecurityTest
 
     @Test
     public void testFilesystem() throws Exception
-    {
-        
-       // Thread.sleep(100000);
-        
+    {        
         execSecurityTest(MODE,"testFilesystemAccess");
     }
 
     @Test
-    @Ignore ("while testing layout")
     public void testJettyLog() throws Exception
     {
         execSecurityTest(MODE, "testJettyLogAccess");
     }
 
+    @Test
+    public void testWebappSystemExit() throws Exception
+    {
+        execSecurityTest(MODE, "testSystemExit");
+    }
+    
     @Test
     @Ignore ("while testing layout")
     public void testServletContext() throws Exception
@@ -98,10 +100,9 @@ public class PracticalSecurityTest
     }
 
     @Test
-    @Ignore ("while testing layout")
     public void testSystemProperty() throws Exception
     {
-        execSecurityTest(MODE, "testSystemProperty");
+        execSecurityTest(MODE, "testSystemPropertyAccess");
     }
     
     private void execSecurityTest(String mode, String testName) throws Exception
@@ -136,7 +137,7 @@ public class PracticalSecurityTest
                     failures.append("\n      actual: ").append(actual);
                 if (message != null)
                     failures.append("\n     message: ").append(message);
-                if (cause != null)
+                if (cause != null && cause.length() > 0)
                 {
                     failures.append("\n       cause: ").append(cause.getString("class"));
                     failures.append("\n").append(cause.getString("stacktrace"));

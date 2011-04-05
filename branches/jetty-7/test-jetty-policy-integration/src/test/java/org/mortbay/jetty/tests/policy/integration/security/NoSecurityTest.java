@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mortbay.jetty.tests.policy.integration.JettyProcess;
 
@@ -71,6 +72,7 @@ public class NoSecurityTest
     }
 
     @Test
+    @Ignore ("not present")
     public void testLib() throws Exception
     {
         execSecurityTest(MODE, "testLib");
@@ -79,7 +81,7 @@ public class NoSecurityTest
     @Test
     public void testSystemProperty() throws Exception
     {
-        execSecurityTest(MODE, "testSystemProperty");
+        execSecurityTest(MODE, "testSystemPropertyAccess");
     }
 
     private void execSecurityTest(String mode, String testName) throws Exception

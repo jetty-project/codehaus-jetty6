@@ -96,4 +96,87 @@ public abstract class AbstractSecurityCheck
             check.addResult(result);
         }
     }
+    
+    
+    protected void canReadProperty(SecurityCheckContext check, String property)
+    {
+        SecurityResult result = new SecurityResult("property.can.read|%s",property);
+        try
+        {
+            Object value = System.getProperty(property);
+            result.success("Property(" + property + ") can be read");
+        }
+        catch (Throwable t)
+        {
+            result.failure(t);
+        }
+        finally
+        {
+            check.addResult(result);
+        }
+    }
+    
+    protected void canWriteProperty(SecurityCheckContext check, String property)
+    {
+        SecurityResult result = new SecurityResult("property.can.write|%s",property);
+        try
+        {
+            System.setProperty(property, "foo");
+            result.success("Property(" + property + ") can be written");
+        }
+        catch (Throwable t)
+        {
+            result.failure(t);
+        }
+        finally
+        {
+            check.addResult(result);
+        }
+    }
+    
+    protected void deniedReadProperty(SecurityCheckContext check, String property)
+    {
+        SecurityResult result = new SecurityResult("property.denied.read|%s",property);
+        try
+        {
+            Object value = System.getProperty(property);
+            result.failure("Property(%s) can be written", property);
+        }
+        catch (AccessControlException e)
+        {
+            result.successExpected(e);
+        }
+        catch (Throwable t)
+        {
+            result.failure(t);
+        }
+        finally
+        {
+            check.addResult(result);
+        }
+    }
+    
+    protected void deniedWriteProperty(SecurityCheckContext check, String property)
+    {
+        SecurityResult result = new SecurityResult("property.denied.write|%s",property);
+        try
+        {
+            System.setProperty(property, "foo");
+            result.failure("Property(%s) can be written", property);
+        }
+        catch (AccessControlException e)
+        {
+            result.successExpected(e);
+        }
+        catch (Throwable t)
+        {
+            result.failure(t);
+        }
+        finally
+        {
+            check.addResult(result);
+        }
+    }
+    
+
 }
