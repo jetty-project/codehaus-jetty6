@@ -4,11 +4,14 @@ import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessControlException;
+import java.util.Calendar;
+import java.util.Properties;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 
 import org.mortbay.jetty.tests.webapp.policy.AbstractSecurityCheck;
+import org.mortbay.jetty.tests.webapp.policy.Checker;
 import org.mortbay.jetty.tests.webapp.policy.SecurityCheckContext;
 import org.mortbay.jetty.tests.webapp.policy.SecurityResult;
 
@@ -123,7 +126,7 @@ public class PracticalSecurityChecker extends AbstractSecurityCheck
         }
     }
 
-    public void testExit(SecurityCheckContext check)
+    public void testSystemExit(SecurityCheckContext check)
     {
         SecurityResult result = new SecurityResult("exit");
         try
@@ -146,6 +149,24 @@ public class PracticalSecurityChecker extends AbstractSecurityCheck
         }
     }
 
+    public void testJettyLogAccess(SecurityCheckContext check)
+    {
+        Calendar c = Calendar.getInstance();
+        String jettyHome = getJettyHome();
+        String logFilename = String.format("%s/logs/%2$tY_%2$tm_%2$td.request.log",jettyHome,c);
+        deniedRead(check, logFilename);
+    }
+    
+    public void testSystemPropertyAccess( SecurityCheckContext check )
+    {
+        canReadProperty(check,"__ALLOWED_READ_PROPERTY");
+        deniedWriteProperty(check,"__ALLOWED_READ_PROPERTY");
+        deniedReadProperty(check,"__ALLOWED_WRITE_PROPERTY");
+        canWriteProperty(check,"__ALLOWED_WRITE_PROPERTY");
+        deniedReadProperty(check,"__UNDECLARED_PROPERTY");
+        deniedWriteProperty(check,"__UNDECLARED_PROPERTY");
+    }
+    
     private File getServletContextTempDir(SecurityCheckContext check, ServletContext context)
     {
         SecurityResult result = new SecurityResult("filesystem.get.servlet.tmpdir");
