@@ -57,7 +57,7 @@ public class WebappVerifier implements ViolationListener
 
     /**
      * Represents the local webapp file directory, often times points to the working (unpacked) webapp directory.
-     * 
+     *
      * NOTE: if _webappURI is a "file://" access URI, and points to a directory, then the _webappDir will point to the
      * the same place, otherwise it will point to the webapp directory.
      */
@@ -68,14 +68,14 @@ public class WebappVerifier implements ViolationListener
 
     /**
      * Instantiate a WebappVerifier, against the specific webappURI, using the default workdir.
-     * 
+     *
      * @param webappURI
      *            the webappURI to verify
      */
     public WebappVerifier(URI webappURI)
     {
         this._webappURI = webappURI;
-        this._workdir = new File(System.getProperty("java.io.tmpdir"),"jetty-waver");
+        this._workdir = new File(System.getProperty("java.io.tmpdir"),"jetty-webapp-verifier");
         this._rules = new ArrayList<Rule>();
         this._violations = new HashMap<String, List<Violation>>();
     }
@@ -141,20 +141,24 @@ public class WebappVerifier implements ViolationListener
 
     private File download(URI uri) throws MalformedURLException, IOException
     {
-        // Establish destfile
+    	if (!_workdir.exists())
+    		_workdir.mkdirs();
+    	
+    	// Establish destfile
         File destfile = new File(_workdir,cleanFilename(uri));
 
         InputStream in = null;
         FileOutputStream out = null;
         try
         {
-            in = uri.toURL().openStream();
+            in = Resource.newResource(uri.toString()).getInputStream();
             out = new FileOutputStream(destfile);
             IO.copy(in,out);
         }
         finally
         {
             IO.close(in);
+            IO.close(out);
         }
         return destfile;
     }
