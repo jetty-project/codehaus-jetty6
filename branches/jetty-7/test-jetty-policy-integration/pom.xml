@@ -43,6 +43,13 @@
                   <outputDirectory>${test-wars-dir}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-dump</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${test-wars-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
                   <groupId>org.mortbay.jetty</groupId>
                   <artifactId>jetty-aspect-servlet-api-2.5</artifactId>
                   <version>${project.version}</version>

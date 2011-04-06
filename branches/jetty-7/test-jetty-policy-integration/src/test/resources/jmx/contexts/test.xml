@@ -75,7 +75,7 @@ detected.
   </Get>
   -->
 
-  <!-- Add context specific logger
+  <!-- Add context specific logger -->
   <Set name="handler">
     <New id="RequestLog" class="org.eclipse.jetty.server.handler.RequestLogHandler">
       <Set name="requestLog">
@@ -88,6 +88,5 @@ detected.
       </Set>
     </New>
   </Set>
-  -->
 
 </Configure>
