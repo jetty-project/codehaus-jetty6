@@ -63,6 +63,13 @@
                   <type>jar</type>
                   <outputDirectory>${test-libs-dir}</outputDirectory>
                 </artifactItem>
+                <artifactItem>
+                  <groupId>org.aspectj</groupId>
+                  <artifactId>aspectjweaver</artifactId>
+                  <version>1.6.10</version> 
+                  <type>jar</type>
+                  <outputDirectory>${test-libs-dir}</outputDirectory>
+                </artifactItem>
               </artifactItems>
               <overWriteIfNewer>true</overWriteIfNewer>
               <overWrite>true</overWrite>
@@ -87,6 +94,7 @@
               </artifactItems>
               <outputAbsoluteArtifactFilename>true</outputAbsoluteArtifactFilename>
               <outputDirectory>${project.build.directory}/jetty-distro</outputDirectory>
+              <overWriteSnapshots>true</overWriteSnapshots>
               <overWriteIfNewer>true</overWriteIfNewer>
             </configuration>
           </execution>

@@ -39,14 +39,14 @@ public class PracticalSecurityTest
         jetty.delete("lib/servlet-api-2.5.jar");
         // Use AspectJ + Security enhanced servlet-api jar
         jetty.copyLib("jetty-aspect-servlet-api-2.5.jar","lib-secure/servlet-api-2.5.jar");
-        jetty.copyLib("aspectjrt.jar","lib-secure/aspectjrt.jar");
+        //jetty.copyLib("aspectjrt.jar","lib-secure/aspectjrt.jar");
         jetty.copyLib("aspectjweaver.jar","aspectjweaver.jar");
 
 
         jetty.overlayConfig("practical_security");
 
         jetty.setDebug(true);
-        jetty.setJVMArgs(new String[] {"-javaagent:aspectjweaver.jar"});//, "-Daj.weaving.verbose=true", "-Dorg.aspectj.weaver.showWeaveInfo=true"});    
+        jetty.setJVMArgs(new String[] {"-javaagent:aspectjweaver.jar" });//, "-Daj.weaving.verbose=true", "-Dorg.aspectj.weaver.showWeaveInfo=true"});    
 
         jetty.start();
     }
@@ -79,14 +79,21 @@ public class PracticalSecurityTest
     }
     
     @Test
-    @Ignore ("while testing layout")
+    @Ignore ("broken")
     public void testServletContext() throws Exception
     {
         execSecurityTest(MODE, "testFooWebappContext");
     }
+    
+    @Test
+    @Ignore ("broken")
+    public void testServletContextAttributes() throws Exception
+    {
+        execSecurityTest(MODE, "testServletContextAttributes");
+    }
 
     @Test
-    @Ignore ("while testing layout")
+    @Ignore ("broken")
     public void testRequestDispatcher() throws Exception
     {
         execSecurityTest(MODE, "testFooWebappRequestDispatcher");
