@@ -47,6 +47,32 @@ public class PracticalSecurityChecker extends AbstractSecurityCheck
         }
     }
 
+    public void testServletContextAttributes(SecurityCheckContext check)
+    {
+        SecurityResult result = new SecurityResult("servlet.context.attributes:get");
+        try
+        {
+            ServletContext context = getServletContext(check);
+            if (context != null)
+            {
+                Object foo = context.getAttribute("foo");
+                result.failure("Should be denied access attributes on ServletContext for : foo");
+            }
+        }
+        catch (AccessControlException e)
+        {
+            result.successExpected(e);
+        }
+        catch (Throwable t)
+        {
+            result.failure(t);
+        }
+        finally
+        {
+            check.addResult(result);
+        }
+    }
+    
     public void testFooWebappContext(SecurityCheckContext check)
     {
         String fooContext = "/foo";

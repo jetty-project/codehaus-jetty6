@@ -136,6 +136,7 @@ public class Checker
 
     protected void failure(Properties props, String key, Throwable t)
     {
+        t.printStackTrace();
         LOG.log(Level.WARNING,key + ": " + t.getMessage(),t);
         props.setProperty(key,"FAILURE - " + t.getClass().getSimpleName() + " : " + t.getMessage());
     }
@@ -165,11 +166,15 @@ public class Checker
 
     protected void success(Properties props, String key)
     {
+        LOG.log(Level.INFO,key + ": Success");
+
         props.setProperty(key,"Success");
     }
 
     protected void success(Properties props, String key, String msg)
     {
+        LOG.log(Level.INFO,key + ": Success");
+
         props.setProperty(key,"Success - " + msg);
     }
 }
