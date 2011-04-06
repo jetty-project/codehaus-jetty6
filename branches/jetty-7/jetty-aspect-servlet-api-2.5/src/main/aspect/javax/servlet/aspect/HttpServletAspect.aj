@@ -48,8 +48,8 @@ public aspect HttpServletAspect
      * @throws ServletException
      * @throws IOException
      */
-    void around (final ServletRequest req, final ServletResponse res) throws ServletException, IOException : args(req, res) && execution(* HttpServlet.service(..) throws *) 
-    {     
+    void around(final ServletRequest req, final ServletResponse res) throws ServletException, IOException : args(req, res) && execution(* HttpServlet.service(..) throws *) 
+    {
         try
         {
             AccessController.doPrivileged(new PrivilegedExceptionAction()
@@ -63,14 +63,15 @@ public aspect HttpServletAspect
             });
         }
         catch (PrivilegedActionException pae)
-        {            
+        {
             // PAE is a checked exception so it can only be ServletException or IOException
-            if ( pae.getException() instanceof ServletException)
+            if (pae.getException() instanceof ServletException)
             {
                 throw (ServletException)pae.getException();
             }
             throw (IOException)pae.getException();
         }
     }
+    
     
 }

@@ -77,7 +77,6 @@
           <source>1.5</source>
           <complianceLevel>1.5</complianceLevel>
           <forceAjcCompile>false</forceAjcCompile>
-          <outxml>true</outxml>
           <weaveDependencies>
             <weaveDependency>
               <groupId>javax.servlet</groupId>

@@ -72,7 +72,4 @@ public aspect ServletAspect
             sm.checkPermission( new ServletPermission(Constants.DESTROY) );
         }       
     }
-
-
-    
 }

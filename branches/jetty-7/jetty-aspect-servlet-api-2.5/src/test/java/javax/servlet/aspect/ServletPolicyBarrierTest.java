@@ -198,6 +198,7 @@ public class ServletPolicyBarrierTest
      * @throws Exception
      */
     @Test (expected = IOException.class)
+    @Ignore ("servlet context aspects hoses runtime weaving")
     public void testInternalAspectUsage() throws Exception
     {
         
