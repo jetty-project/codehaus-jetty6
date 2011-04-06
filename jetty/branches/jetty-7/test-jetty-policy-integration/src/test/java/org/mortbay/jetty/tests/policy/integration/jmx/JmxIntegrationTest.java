@@ -1,23 +1,27 @@
-package org.mortbay.jetty.tests.policy.integration;
+package org.mortbay.jetty.tests.policy.integration.jmx;
 
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.eclipse.jetty.toolchain.jmx.JmxServiceConnection;
+import org.eclipse.jetty.toolchain.test.SimpleRequest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mortbay.jetty.tests.policy.integration.JettyProcess;
 
 /**
  * Test Jetty with one webapp.
  */
-public class JmxTest
+public class JmxIntegrationTest
 {
     private static JettyProcess jetty;
     private static JmxServiceConnection jmxConnect; 
@@ -26,11 +30,13 @@ public class JmxTest
     @BeforeClass
     public static void initJetty() throws Exception
     {
-        jetty = new JettyProcess(JmxTest.class);
+        jetty = new JettyProcess(JmxIntegrationTest.class);
 
         jetty.delete("contexts/javadoc.xml");
+        
+        jetty.copyTestWar("test-war-dump.war");
 
-        jetty.overlayConfig("deploymgr");
+        jetty.overlayConfig("jmx");
         
         jetty.start();
 
@@ -73,6 +79,54 @@ public class JmxTest
     }
     
     @Test
+    public void testContextProvider() throws Exception
+    {
+        ObjectName objName = new ObjectName("org.eclipse.jetty.deploy.providers:type=contextprovider,id=0");
+        
+        String monitoredDirName = (String)mbeanConnect.getAttribute(objName, "monitoredDirName");
+        assertTrue(monitoredDirName !=  null && monitoredDirName.length() > 0);
+
+        Object recursive = mbeanConnect.getAttribute(objName, "recursive");
+        assertTrue(recursive != null && recursive instanceof Boolean);
+        
+        Object scanInterval = mbeanConnect.getAttribute(objName, "scanInterval");
+        assertTrue(scanInterval != null && scanInterval instanceof Integer);        
+    }
+    
+    @Test
+    public void testWebappProvider() throws Exception
+    {
+        ObjectName objName = new ObjectName("org.eclipse.jetty.deploy.providers:type=webappprovider,id=0");
+        
+        String[] configurationClasses = (String[])mbeanConnect.getAttribute(objName, "configurationClasses");
+        // Exception would be thrown if there's a problem
+
+        String contextXmlDir = (String)mbeanConnect.getAttribute(objName, "contextXmlDir");
+        assertTrue(contextXmlDir !=  null && contextXmlDir.length() > 0);
+
+        String defaultsDescriptor = (String)mbeanConnect.getAttribute(objName, "defaultsDescriptor");
+        assertTrue(defaultsDescriptor !=  null && defaultsDescriptor.length() > 0);
+
+        Object extractWars = mbeanConnect.getAttribute(objName, "extractWars");
+        assertTrue(extractWars != null && extractWars instanceof Boolean);
+        
+        String monitoredDirName = (String)mbeanConnect.getAttribute(objName, "monitoredDirName");
+        assertTrue(monitoredDirName !=  null && monitoredDirName.length() > 0);
+
+        Object parentLoaderPriority = mbeanConnect.getAttribute(objName, "parentLoaderPriority");
+        assertTrue(parentLoaderPriority != null && parentLoaderPriority instanceof Boolean);
+        
+        Object recursive = mbeanConnect.getAttribute(objName, "recursive");
+        assertTrue(recursive != null && recursive instanceof Boolean);
+        
+        Object scanInterval = mbeanConnect.getAttribute(objName, "scanInterval");
+        assertTrue(scanInterval != null && scanInterval instanceof Integer);        
+
+        String tempDir = (String)mbeanConnect.getAttribute(objName, "tempDir");
+        // Exception would be thrown if there's a problem
+    }
+    
+    @Test
     public void testServer() throws Exception
     {
         ObjectName objName = new ObjectName("org.eclipse.jetty.server:type=server,id=0");
@@ -112,8 +166,41 @@ public class JmxTest
 
         String version = (String)mbeanConnect.getAttribute(objName, "version");
         assertTrue(version !=  null && version.length() > 0);
+
+        Object starting = mbeanConnect.getAttribute(objName, "starting");
+        assertTrue(starting != null && starting instanceof Boolean);
+        
+        Object started = mbeanConnect.getAttribute(objName, "started");
+        assertTrue(started != null && started instanceof Boolean);
+        
+        Object running = mbeanConnect.getAttribute(objName, "running");
+        assertTrue(running != null && running instanceof Boolean);
+        
+        Object stopping = mbeanConnect.getAttribute(objName, "stopping");
+        assertTrue(stopping != null && stopping instanceof Boolean);
+        
+        Object stopped = mbeanConnect.getAttribute(objName, "stopped");
+        assertTrue(stopped != null && stopped instanceof Boolean);
+        
+        Object failed = mbeanConnect.getAttribute(objName, "failed");
+        assertTrue(failed != null && failed instanceof Boolean);
     }
-    
+
+    @Test
+    public void testHandlerCollection() throws Exception
+    {
+        ObjectName objName = new ObjectName("org.eclipse.jetty.server.handler:type=contexthandlercollection,id=0");
+        
+        ObjectName[] childHandlers = (ObjectName[])mbeanConnect.getAttribute(objName, "childHandlers");
+        assertTrue(childHandlers !=  null);
+        
+        ObjectName[] handlers = (ObjectName[])mbeanConnect.getAttribute(objName, "handlers");
+        assertTrue(handlers !=  null && handlers.length > 0);
+
+        ObjectName server = (ObjectName)mbeanConnect.getAttribute(objName, "server");
+        assertTrue(server !=  null);
+    }
+
     @Test
     public void testConnector() throws Exception
     {
@@ -387,6 +474,69 @@ public class JmxTest
     }
     
     @Test
+    public void testQoSFilter() throws Exception
+    {
+        ObjectName objName = new ObjectName("org.eclipse.jetty.servlets:type=qosfilter,id=0");
+        
+        Object maxRequests = mbeanConnect.getAttribute(objName, "maxRequests");
+        assertTrue(maxRequests != null && maxRequests instanceof Integer);
+
+        Object suspendMs = mbeanConnect.getAttribute(objName, "suspendMs");
+        assertTrue(suspendMs != null && suspendMs instanceof Long);
+
+        Object waitMs = mbeanConnect.getAttribute(objName, "waitMs");
+        assertTrue(waitMs != null && waitMs instanceof Long);
+    }
+    
+    @Test
+    public void testDoSFilter() throws Exception
+    {
+        ObjectName objName = new ObjectName("org.eclipse.jetty.servlets:type=dosfilter,id=0");
+        
+        Object delayMs = mbeanConnect.getAttribute(objName, "delayMs");
+        assertTrue(delayMs != null && delayMs instanceof Long);
+
+        Object insertHeaders = mbeanConnect.getAttribute(objName, "insertHeaders");
+        assertTrue(insertHeaders != null && insertHeaders instanceof Boolean);
+        
+        Object maxIdleTrackerMs = mbeanConnect.getAttribute(objName, "maxIdleTrackerMs");
+        assertTrue(maxIdleTrackerMs != null && maxIdleTrackerMs instanceof Long);
+        
+        Object maxRequestMs = mbeanConnect.getAttribute(objName, "maxRequestMs");
+        assertTrue(maxRequestMs != null && maxRequestMs instanceof Long);
+        
+        Object maxRequestsPerSec = mbeanConnect.getAttribute(objName, "maxRequestsPerSec");
+        assertTrue(maxRequestsPerSec != null && maxRequestsPerSec instanceof Integer);
+
+        Object maxWaitMs = mbeanConnect.getAttribute(objName, "maxWaitMs");
+        assertTrue(maxWaitMs != null && maxWaitMs instanceof Long);
+        
+        Object remotePort = mbeanConnect.getAttribute(objName, "remotePort");
+        assertTrue(remotePort != null && remotePort instanceof Boolean);
+        
+        Object throttleMs = mbeanConnect.getAttribute(objName, "throttleMs");
+        assertTrue(throttleMs != null && throttleMs instanceof Long);
+
+        Object throttledRequests = mbeanConnect.getAttribute(objName, "throttledRequests");
+        assertTrue(throttledRequests != null && throttledRequests instanceof Integer);
+
+        Object trackSessions = mbeanConnect.getAttribute(objName, "trackSessions");
+        assertTrue(trackSessions != null && trackSessions instanceof Boolean);
+    }
+    
+    @Test
+    public void testLogger() throws Exception
+    {
+        ObjectName objName = new ObjectName("org.eclipse.jetty.util.log:type=stderrlog,id=0");
+
+        Object debugEnabled = mbeanConnect.getAttribute(objName, "debugEnabled");
+        assertTrue(debugEnabled != null && debugEnabled instanceof Boolean);
+        
+        String name = (String)mbeanConnect.getAttribute(objName, "name");
+        // Exception would be thrown if there's a problem
+    }
+    
+    @Test
     public void testThreadPool() throws Exception
     {
         ObjectName objName = new ObjectName("org.eclipse.jetty.util.thread:type=queuedthreadpool,id=0");
@@ -527,5 +677,41 @@ public class JmxTest
         
         String[] welcomeFiles = (String[])mbeanConnect.getAttribute(objName, "welcomeFiles");
         assertTrue(welcomeFiles != null && welcomeFiles.length > 0);
+    }
+
+    @Test
+    public void testAppLifecycle() throws Exception
+    {           
+        SimpleRequest request = new SimpleRequest(jetty.getBaseUri());
+        String result = request.getString("/test-war-dump/");
+        assertTrue("Application didn't respond",result.length() > 0);
+        
+        JmxServiceConnection jmxConnection = new JmxServiceConnection(jetty.getJmxUrl());
+        jmxConnection.connect();
+        
+        MBeanServerConnection mbsConnection = jmxConnection.getConnection();
+        ObjectName dmObjName = new ObjectName("org.eclipse.jetty.deploy:type=deploymentmanager,id=0");
+        ArrayList<String> apps = (ArrayList<String>)mbsConnection.getAttribute(dmObjName, "apps");
+        
+        String[] params = new String[] {apps.get(1), "undeployed"};
+        String[] signature = new String[] {"java.lang.String", "java.lang.String"};
+        mbsConnection.invoke(dmObjName, "requestAppGoal", params, signature);
+
+        try
+        {
+                result = request.getString("/test-war-dump/");
+        }
+        catch (IOException ex)
+        {
+                assertTrue(ex.getMessage().contains("404"));
+        }
+        
+        params = new String[] {apps.get(1), "started"};
+        signature = new String[] {"java.lang.String", "java.lang.String"};
+        mbsConnection.invoke(dmObjName, "requestAppGoal", params, signature);
+
+        request = new SimpleRequest(jetty.getBaseUri());
+        result = request.getString("/test-war-dump/");
+        assertTrue("Application didn't respond",result.length() > 0);
     }
 }
