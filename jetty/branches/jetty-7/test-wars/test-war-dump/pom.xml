@@ -43,13 +43,13 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-http</artifactId>
-      <version>${project.version}</version>
+      <version>${jetty.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-servlets</artifactId>
-      <version>${project.version}</version>
+      <version>${jetty.version}</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
