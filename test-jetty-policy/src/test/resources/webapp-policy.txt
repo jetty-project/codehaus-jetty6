@@ -1,0 +1,6 @@
+
+   
+   // TEST WEBAPP PERMISSIONS
+   permission java.util.PropertyPermission "__ALLOWED_READ_PROPERTY", "read";   
+   permission java.util.PropertyPermission "__ALLOWED_WRITE_PROPERTY", "read, write";
+	 
