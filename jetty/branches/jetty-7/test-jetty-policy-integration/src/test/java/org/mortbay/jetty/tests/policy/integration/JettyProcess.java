@@ -421,13 +421,12 @@ public class JettyProcess
     }
 
     /** 
-     * @param jvmArgs
+     * @param args
      */
-    public void setJVMArgs( String[] jvmArgs )
+    public void setJVMArgs( String ... args )
     {
-        this._jvmArgs = jvmArgs;
+        this._jvmArgs = args;
     }
-    
     
     private String getJavaBin()
     {

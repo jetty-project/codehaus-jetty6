@@ -5,13 +5,11 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessControlException;
 import java.util.Calendar;
-import java.util.Properties;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 
 import org.mortbay.jetty.tests.webapp.policy.AbstractSecurityCheck;
-import org.mortbay.jetty.tests.webapp.policy.Checker;
 import org.mortbay.jetty.tests.webapp.policy.SecurityCheckContext;
 import org.mortbay.jetty.tests.webapp.policy.SecurityResult;
 
@@ -55,6 +53,7 @@ public class PracticalSecurityChecker extends AbstractSecurityCheck
             ServletContext context = getServletContext(check);
             if (context != null)
             {
+                @SuppressWarnings("unused")
                 Object foo = context.getAttribute("foo");
                 result.failure("Should be denied access attributes on ServletContext for : foo");
             }

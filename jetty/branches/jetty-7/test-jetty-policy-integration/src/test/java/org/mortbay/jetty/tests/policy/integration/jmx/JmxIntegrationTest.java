@@ -1,6 +1,6 @@
 package org.mortbay.jetty.tests.policy.integration.jmx;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.management.MBeanServerConnection;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.eclipse.jetty.toolchain.jmx.JmxServiceConnection;
@@ -61,6 +60,7 @@ public class JmxIntegrationTest
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testDeployMgr() throws Exception
     {
         ObjectName objName = new ObjectName("org.eclipse.jetty.deploy:type=deploymentmanager,id=0");
@@ -94,6 +94,7 @@ public class JmxIntegrationTest
     }
     
     @Test
+    @SuppressWarnings("unused")
     public void testWebappProvider() throws Exception
     {
         ObjectName objName = new ObjectName("org.eclipse.jetty.deploy.providers:type=webappprovider,id=0");
@@ -202,6 +203,7 @@ public class JmxIntegrationTest
     }
 
     @Test
+    @SuppressWarnings("unused")
     public void testConnector() throws Exception
     {
         ObjectName objName = new ObjectName("org.eclipse.jetty.server.nio:type=selectchannelconnector,id=0");
@@ -313,6 +315,7 @@ public class JmxIntegrationTest
     }
     
     @Test
+    @SuppressWarnings("unused")
     public void testSessionManager() throws Exception
     {
         ObjectName objName = new ObjectName("org.eclipse.jetty.server.session:type=hashsessionmanager,id=0");
@@ -367,10 +370,10 @@ public class JmxIntegrationTest
         
         Object sessionsTotal = mbeanConnect.getAttribute(objName, "sessionsTotal");
         assertTrue(sessionsTotal != null && sessionsTotal instanceof Integer);
-        
     }
     
     @Test
+    @SuppressWarnings({ "unused", "unchecked" })
     public void testFilterHolder() throws Exception
     {
         ObjectName objName = new ObjectName("org.eclipse.jetty.servlet:type=filterholder,name=GzipFilter,id=0");
@@ -404,6 +407,7 @@ public class JmxIntegrationTest
     }
     
     @Test
+    @SuppressWarnings("unused")
     public void testServletHandler() throws Exception
     {
         // Tests ServerHandler and Handler attributes
@@ -435,6 +439,7 @@ public class JmxIntegrationTest
     }
 
     @Test
+    @SuppressWarnings({ "unused", "unchecked" })
     public void testServletHolder() throws Exception
     {
         ObjectName objName = new ObjectName("org.eclipse.jetty.servlet:type=servletholder,name=default,id=0");
@@ -525,6 +530,7 @@ public class JmxIntegrationTest
     }
     
     @Test
+    @SuppressWarnings("unused")
     public void testLogger() throws Exception
     {
         ObjectName objName = new ObjectName("org.eclipse.jetty.util.log:type=stderrlog,id=0");
@@ -570,6 +576,7 @@ public class JmxIntegrationTest
     }
 
     @Test
+    @SuppressWarnings({ "unused", "unchecked" })
     public void testWebAppContext() throws Exception
     {   	
         // Tests WebAppContext, ServletContextHandler, ContextHandler, 
@@ -680,6 +687,7 @@ public class JmxIntegrationTest
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testAppLifecycle() throws Exception
     {           
         SimpleRequest request = new SimpleRequest(jetty.getBaseUri());
