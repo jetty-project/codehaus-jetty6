@@ -1,10 +1,5 @@
 package org.mortbay.jetty.tests.policy.integration.security;
 
-import static org.hamcrest.Matchers.*;
-
-import java.util.Enumeration;
-import java.util.Properties;
-
 import org.eclipse.jetty.toolchain.test.SimpleRequest;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -39,14 +34,15 @@ public class PracticalSecurityTest
         jetty.delete("lib/servlet-api-2.5.jar");
         // Use AspectJ + Security enhanced servlet-api jar
         jetty.copyLib("jetty-aspect-servlet-api-2.5.jar","lib-secure/servlet-api-2.5.jar");
-        //jetty.copyLib("aspectjrt.jar","lib-secure/aspectjrt.jar");
+        // jetty.copyLib("aspectjrt.jar","lib-secure/aspectjrt.jar");
         jetty.copyLib("aspectjweaver.jar","aspectjweaver.jar");
 
 
         jetty.overlayConfig("practical_security");
 
         jetty.setDebug(true);
-        jetty.setJVMArgs(new String[] {"-javaagent:aspectjweaver.jar" });//, "-Daj.weaving.verbose=true", "-Dorg.aspectj.weaver.showWeaveInfo=true"});    
+        jetty.setJVMArgs("-javaagent:aspectjweaver.jar");
+        // "-Daj.weaving.verbose=true", "-Dorg.aspectj.weaver.showWeaveInfo=true"    
 
         jetty.start();
     }

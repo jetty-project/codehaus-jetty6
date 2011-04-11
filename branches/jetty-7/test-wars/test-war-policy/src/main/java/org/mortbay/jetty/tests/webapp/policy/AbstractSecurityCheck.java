@@ -103,6 +103,7 @@ public abstract class AbstractSecurityCheck
         SecurityResult result = new SecurityResult("property.can.read|%s",property);
         try
         {
+            @SuppressWarnings("unused")
             Object value = System.getProperty(property);
             result.success("Property(" + property + ") can be read");
         }
@@ -139,6 +140,7 @@ public abstract class AbstractSecurityCheck
         SecurityResult result = new SecurityResult("property.denied.read|%s",property);
         try
         {
+            @SuppressWarnings("unused")
             Object value = System.getProperty(property);
             result.failure("Property(%s) can be written", property);
         }

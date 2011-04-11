@@ -4,13 +4,11 @@ import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Calendar;
-import java.util.Properties;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 
 import org.mortbay.jetty.tests.webapp.policy.AbstractSecurityCheck;
-import org.mortbay.jetty.tests.webapp.policy.Checker;
 import org.mortbay.jetty.tests.webapp.policy.SecurityCheckContext;
 import org.mortbay.jetty.tests.webapp.policy.SecurityResult;
 
