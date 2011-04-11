@@ -1,4 +1,4 @@
-package org.mortbay.jetty.tests.policy.integration;
+package org.mortbay.jetty.tests.distribution;
 
 import java.io.BufferedReader;
 import java.io.File;

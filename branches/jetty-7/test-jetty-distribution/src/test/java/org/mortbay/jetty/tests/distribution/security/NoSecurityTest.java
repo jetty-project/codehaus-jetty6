@@ -1,4 +1,4 @@
-package org.mortbay.jetty.tests.policy.integration.security;
+package org.mortbay.jetty.tests.distribution.security;
 
 import org.eclipse.jetty.toolchain.test.SimpleRequest;
 import org.json.JSONArray;
@@ -8,7 +8,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mortbay.jetty.tests.policy.integration.JettyProcess;
+import org.mortbay.jetty.tests.distribution.JettyProcess;
 
 /**
  * Test Jetty with 2 webapps, with jetty-policy or java security in place.

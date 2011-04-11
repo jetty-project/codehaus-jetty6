@@ -1,4 +1,4 @@
-package org.mortbay.jetty.tests.policy.integration.jmx;
+package org.mortbay.jetty.tests.distribution.jmx;
 
 import static org.junit.Assert.*;
 
@@ -15,7 +15,7 @@ import org.eclipse.jetty.toolchain.test.SimpleRequest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mortbay.jetty.tests.policy.integration.JettyProcess;
+import org.mortbay.jetty.tests.distribution.JettyProcess;
 
 /**
  * Test Jetty with one webapp.
