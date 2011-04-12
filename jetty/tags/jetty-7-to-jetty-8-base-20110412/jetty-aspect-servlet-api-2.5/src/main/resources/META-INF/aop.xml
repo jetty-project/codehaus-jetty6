@@ -1,0 +1,23 @@
+<aspectj>
+  <aspects>
+    <aspect name="javax.servlet.aspect.HttpServletAspect"/>
+    <aspect name="javax.servlet.aspect.HttpSessionAspect"/>
+    <aspect name="javax.servlet.aspect.ServletContextAspect"/>
+    <aspect name="javax.servlet.aspect.CookieAspect"/>
+    <aspect name="javax.servlet.aspect.ServletAspect"/>
+  </aspects>
+  <weaver options="-verbose">
+    <!-- Weave types that are within the javax.* or org.aspectj.*
+         packages. -->
+    <!-- include within="javax.*"/-->
+
+    <exclude within="org.eclipse.jetty.xml..*"/>
+    <exclude within="org.eclipse.jetty.servlet.FilterHolder"/>
+    <exclude within="org.apache.jasper.*"/>
+    <exclude within="org.eclipse.jetty.util..*"/>
+    <exclude within="org.eclipse.jetty.http..*"/>
+    <exclude within="org.eclipse.jetty.io..*"/>
+    
+  </weaver>
+</aspectj>
+
