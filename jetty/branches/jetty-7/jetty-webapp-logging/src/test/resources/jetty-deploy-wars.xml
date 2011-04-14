@@ -14,7 +14,7 @@
     <Call id="webappprovider" name="addAppProvider">
       <Arg>
         <New class="org.eclipse.jetty.deploy.providers.WebAppProvider">
-          <Set name="monitoredDir"><SystemProperty name="test.webapps" default="target/test-wars"/></Set>
+          <Set name="monitoredDirName"><SystemProperty name="test.webapps" default="target/test-wars"/></Set>
           <Set name="extractWars">true</Set>
           <Set name="defaultsDescriptor"><SystemProperty name="test.resourcesdir" default="src/test/resources"/>/etc/webdefault.xml</Set>
           <Set name="contextXmlDir"><Property name="test.resourcesdir" default="src/test/resources" />/contexts</Set>

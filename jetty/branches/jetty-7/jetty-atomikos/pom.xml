@@ -9,7 +9,7 @@
   <name>Jetty :: Atomikos Dependencies</name>
   <packaging>pom</packaging>
   <properties>
-    <atomikos-version>3.6.4</atomikos-version>
+    <atomikos-version>3.7.0</atomikos-version>
   </properties>
   <dependencies>
     <dependency>

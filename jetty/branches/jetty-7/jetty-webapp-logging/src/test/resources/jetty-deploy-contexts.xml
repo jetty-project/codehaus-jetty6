@@ -14,7 +14,7 @@
     <Call name="addAppProvider">
       <Arg>
         <New class="org.eclipse.jetty.deploy.providers.ContextProvider">
-          <Set name="monitoredDir"><Property name="test.resourcesdir" default="src/test/resources" />/contexts</Set>
+          <Set name="monitoredDirName"><Property name="test.resourcesdir" default="src/test/resources" />/contexts</Set>
           <Set name="scanInterval">0</Set>
           <Set name="configurationManager">
             <New class="org.eclipse.jetty.deploy.FileConfigurationManager">
