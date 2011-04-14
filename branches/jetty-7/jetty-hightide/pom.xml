@@ -12,9 +12,9 @@
     <asm-version>3.1</asm-version>
     <assembly-directory>target/hightide</assembly-directory>
     <root-dist-directory>target/jetty-distribution</root-dist-directory>
-    <atomikos-version>3.6.4</atomikos-version>
+    <atomikos-version>3.7.0</atomikos-version>
     <derby-version>10.6.1.0</derby-version>
-    <org-cometd-version>2.1.0</org-cometd-version>
+    <org-cometd-version>2.1.1</org-cometd-version>
   </properties>
   <build>
     <plugins>
