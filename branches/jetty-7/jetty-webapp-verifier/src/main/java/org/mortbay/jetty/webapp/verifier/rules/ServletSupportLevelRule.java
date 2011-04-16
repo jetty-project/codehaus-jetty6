@@ -68,7 +68,7 @@ public class ServletSupportLevelRule extends AbstractRule
     public ServletSupportLevelRule()
     {
         // Servlet 2.5
-        schemaIds.add(new ServletId("2.5","Schema","http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/j2ee/web-app_2_5.xsd"));
+        schemaIds.add(new ServletId("2.5","Schema","http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"));
         nsIds.add(new ServletId("2.5","XML Namespace","http://java.sun.com/xml/ns/javaee"));
 
         // Servlet 2.4

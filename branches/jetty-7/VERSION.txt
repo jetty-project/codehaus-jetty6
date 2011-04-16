@@ -9,6 +9,7 @@ jetty@codehaus 7.3.1.v20110307 7 March 2011
  + JETTY-1350 Webapp Verifier is unable to verify any applications 
  + JETTY-1352 Implement integration tests for Deployment Manager JMX features
  + JETTY-1355 Improve testing coverage for JMX integration
+ + JETTY-1366 Webapp Verifier uses incorrect schemaLocation for Servlet 2.5
  + 336343 Added Octal setter for umask in setuid
 
 jetty@codehaus 7.3.0.v20110203 3 February 2011
