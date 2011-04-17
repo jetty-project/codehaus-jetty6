@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.mortbay.jetty.testwars</groupId>
     <artifactId>testwars-parent</artifactId>
-    <version>7.4.0.v20110414</version>
+    <version>7.4.1-SNAPSHOT</version>
   </parent>
   <artifactId>test-war-servletmixed1</artifactId>
   <packaging>war</packaging>
