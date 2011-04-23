@@ -1,3 +1,6 @@
+jetty@codehaus 7.4.1-SNAPSHOT
+ + JETTY-1368 RequiredContentsRule doesn't assemble the file path correctly
+
 jetty@codehaus 7.4.0.v20110414 7 April 2011
  + Upgraded atomikos to 3.7
  + Upgraded cometd to 2.1.1
@@ -6,7 +9,7 @@ jetty@codehaus 7.3.1.v20110307 7 March 2011
  + JETTY-1323 contributing Webapp Verifier component
  + JETTY-1325 contribution of Centralized Webapp Logging
  + JETTY-1349 jetty-setuid module fails to compile on Mac OS X
- + JETTY-1350 Webapp Verifier is unable to verify any applications 
+ + JETTY-1350 Webapp Verifier is unable to verify any applications
  + JETTY-1352 Implement integration tests for Deployment Manager JMX features
  + JETTY-1355 Improve testing coverage for JMX integration
  + JETTY-1366 Webapp Verifier uses incorrect schemaLocation for Servlet 2.5
@@ -36,7 +39,7 @@ jetty@codehaus 7.2.0.RC0 1 October 2010
 
 jetty@codehaus 7.1.6.v20100715
 
-jetty@codehaus 7.1.5.v20100705 
+jetty@codehaus 7.1.5.v20100705
  + JETTY-1236 connectors added with jettyConfig ignored by maven plugin
  + JETTY-1241 enhance jetty-ant port support
  + 318894 Spaces in jboss URLs
@@ -71,7 +74,7 @@ jetty@codehaus 7.0.2.v20100331
  + JETTY-1027 mvn jetty:run does not seem to support WAR overlays...
  + Move declaration of container JDNI resources into jetty.xml
 
- 
+
 jetty@codehaus 7.0.2.RC0.17 March 2010
  + Updated JSP to 2.1.v20091210
  + JETTY-776 Make new session tests module to concentrate all reusable session clustering test code

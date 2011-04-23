@@ -48,7 +48,7 @@ public class RequiredContentsRule extends AbstractRule
     {
         if (path.equals(ROOT_PATH))
         {
-            File root = new File(path);
+            File root = new File(dir, path);
 
             for (String expectedPath : _paths)
             {
