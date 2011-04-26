@@ -13,13 +13,13 @@
 
 package org.mortbay.jetty.monitor;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import junit.framework.TestCase;
 
 import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpClient;
@@ -38,13 +38,15 @@ import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.toolchain.test.PropertyFlag;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
-import org.junit.Ignore;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.mortbay.jetty.monitor.integration.JavaMonitorTools;
 
@@ -52,14 +54,17 @@ import org.mortbay.jetty.monitor.integration.JavaMonitorTools;
 /* ------------------------------------------------------------ */
 /**
  */
-public class JavaMonitorIntegrationTest extends TestCase
+public class JavaMonitorIntegrationTest
 {
     private Server _server;
     private String _requestUrl;
     
+    @Before
     public void setUp()
         throws Exception
     {
+        PropertyFlag.assume("JAVAMONITOR");        
+        
         startServer();
 
         Resource configRes = Resource.newClassPathResource("/org/mortbay/jetty/monitor/java-monitor-integration.xml");
@@ -70,6 +75,7 @@ public class JavaMonitorIntegrationTest extends TestCase
         _requestUrl = "http://localhost:"+port+ "/d.txt";
     }
     
+    @After
     public void tearDown()
         throws Exception
     {
@@ -84,6 +90,7 @@ public class JavaMonitorIntegrationTest extends TestCase
         final long requestCount = 500;
         final String requestUrl = _requestUrl;
         final CountDownLatch gate = new CountDownLatch(threadCount);
+        
         ThreadPool worker = new ExecutorThreadPool(threadCount,threadCount,60,TimeUnit.SECONDS);
         for (int idx=0; idx < threadCount; idx++)
         {

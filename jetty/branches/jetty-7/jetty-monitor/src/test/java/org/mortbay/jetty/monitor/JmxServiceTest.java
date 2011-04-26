@@ -13,14 +13,14 @@
 
 package org.mortbay.jetty.monitor;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import javax.management.remote.JMXServiceURL;
-
-import junit.framework.TestCase;
 
 import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpClient;
@@ -46,18 +46,21 @@ import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 
 /* ------------------------------------------------------------ */
 /**
  */
-public class JmxServiceTest extends TestCase
+public class JmxServiceTest
 {
     private boolean _run = false;
     private Server _server;
     private String _requestUrl;
     
+    @Before
     public void setUp()
         throws Exception
     {
@@ -74,6 +77,7 @@ public class JmxServiceTest extends TestCase
         }
     }
     
+    @After
     public void tearDown()
         throws Exception
     {
