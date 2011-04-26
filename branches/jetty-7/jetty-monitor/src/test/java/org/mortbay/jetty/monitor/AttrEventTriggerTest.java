@@ -13,6 +13,8 @@
 
 package org.mortbay.jetty.monitor;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -26,8 +28,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.TestCase;
-
 import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.security.Realm;
@@ -40,6 +40,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.util.log.Log;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.mortbay.jetty.monitor.EventState.TriggerState;
 import org.mortbay.jetty.monitor.triggers.AndEventTrigger;
@@ -57,7 +59,7 @@ import org.mortbay.jetty.monitor.triggers.RangeInclAttrEventTrigger;
 /* ------------------------------------------------------------ */
 /**
  */
-public class AttrEventTriggerTest extends TestCase
+public class AttrEventTriggerTest
 {
     private Server _server;
     private TestHandler _handler;
@@ -66,6 +68,7 @@ public class AttrEventTriggerTest extends TestCase
     private HttpClient _client;
     private String _requestUrl;
 
+    @Before
     public void setUp()
         throws Exception
     {
@@ -101,6 +104,7 @@ public class AttrEventTriggerTest extends TestCase
         _requestUrl = "http://localhost:"+port+ "/";
     }
     
+    @After
     public void tearDown()
         throws Exception
     {

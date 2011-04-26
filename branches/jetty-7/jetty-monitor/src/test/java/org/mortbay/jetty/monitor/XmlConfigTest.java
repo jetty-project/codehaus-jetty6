@@ -13,6 +13,8 @@
 
 package org.mortbay.jetty.monitor;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.Random;
@@ -44,17 +46,20 @@ import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 
 /* ------------------------------------------------------------ */
 /**
  */
-public class XmlConfigTest extends TestCase
+public class XmlConfigTest
 {
     private Server _server;
     private String _requestUrl;
     
+    @Before
     public void setUp()
         throws Exception
     {
@@ -68,6 +73,7 @@ public class XmlConfigTest extends TestCase
         _requestUrl = "http://localhost:"+port+ "/d.txt";
     }
     
+    @After
     public void tearDown()
         throws Exception
     {

@@ -13,13 +13,13 @@
 
 package org.mortbay.jetty.monitor;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-
-import junit.framework.TestCase;
 
 import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpClient;
@@ -42,13 +42,9 @@ import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.mortbay.jetty.monitor.ConsoleNotifier;
-import org.mortbay.jetty.monitor.EventNotifier;
-import org.mortbay.jetty.monitor.EventState;
-import org.mortbay.jetty.monitor.EventTrigger;
-import org.mortbay.jetty.monitor.JMXMonitor;
-import org.mortbay.jetty.monitor.MonitorAction;
 import org.mortbay.jetty.monitor.triggers.GreaterThanAttrEventTrigger;
 import org.mortbay.jetty.monitor.triggers.LessThanOrEqualToAttrEventTrigger;
 import org.mortbay.jetty.monitor.triggers.OrEventTrigger;
@@ -57,11 +53,12 @@ import org.mortbay.jetty.monitor.triggers.OrEventTrigger;
 /* ------------------------------------------------------------ */
 /**
  */
-public class ProgramConfigTest extends TestCase
+public class ProgramConfigTest
 {
     private Server _server;
     private String _requestUrl;
 
+    @Before
     public void setUp()
         throws Exception
     {
@@ -71,6 +68,7 @@ public class ProgramConfigTest extends TestCase
         _requestUrl = "http://localhost:"+port+ "/d.txt";
     }
 
+    @After
     public void tearDown()
         throws Exception
     {
