@@ -16,34 +16,23 @@ package org.mortbay.jetty.monitor;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.management.MBeanServerConnection;
+
 import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.deploy.ContextDeployer;
-import org.eclipse.jetty.deploy.WebAppDeployer;
 import org.eclipse.jetty.http.HttpMethods;
 import org.eclipse.jetty.http.HttpStatus;
-import org.eclipse.jetty.jmx.MBeanContainer;
-import org.eclipse.jetty.security.HashLoginService;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.NCSARequestLog;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.server.handler.DefaultHandler;
-import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.handler.RequestLogHandler;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.toolchain.jmx.JmxServiceConnection;
+import org.eclipse.jetty.toolchain.test.JettyDistro;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mortbay.jetty.monitor.triggers.GreaterThanAttrEventTrigger;
 import org.mortbay.jetty.monitor.triggers.LessThanOrEqualToAttrEventTrigger;
@@ -55,24 +44,29 @@ import org.mortbay.jetty.monitor.triggers.OrEventTrigger;
  */
 public class ProgramConfigTest
 {
-    private Server _server;
-    private String _requestUrl;
-
-    @Before
-    public void setUp()
-        throws Exception
+    private static JettyDistro jetty;
+    
+    @BeforeClass
+    public static void initJetty() throws Exception
     {
-        startServer();
+        jetty = new JettyDistro(ProgramConfigTest.class);
 
-        int port = _server.getConnectors()[0].getLocalPort();
-        _requestUrl = "http://localhost:"+port+ "/d.txt";
+        jetty.delete("contexts/javadoc.xml");
+        
+        jetty.overlayConfig("monitor");
+        
+        jetty.start();
+
+        JMXMonitor.setServiceUrl(jetty.getJmxUrl());
     }
 
-    @After
-    public void tearDown()
-        throws Exception
+    @AfterClass
+    public static void shutdownJetty() throws Exception
     {
-        stopServer();
+        if (jetty != null)
+        {
+            jetty.stop();
+        }
     }
 
     @Test
@@ -81,7 +75,7 @@ public class ProgramConfigTest
     {
         int testRangeLow  = 4;
         int testRangeHigh = 7;
-
+                
         LessThanOrEqualToAttrEventTrigger<Integer> trigger1 =
             new LessThanOrEqualToAttrEventTrigger<Integer>("org.eclipse.jetty.util.thread:type=queuedthreadpool,id=0", "idleThreads",
                                                 testRangeLow);
@@ -102,7 +96,7 @@ public class ProgramConfigTest
 
         final int threadCount = 100;
         final long requestCount = 100;
-        final String requestUrl = _requestUrl;
+        final String requestUrl = jetty.getBaseUri().resolve("d.txt").toASCIIString();
         final CountDownLatch gate = new CountDownLatch(threadCount);
         ThreadPool worker = new ExecutorThreadPool(threadCount,threadCount,60,TimeUnit.SECONDS);
         for (int idx=0; idx < threadCount; idx++)
@@ -174,78 +168,6 @@ public class ProgramConfigTest
             {
                 Log.debug(ex);
             }
-        }
-    }
-
-    public void startServer()
-        throws Exception
-    {
-        String jetty_home = System.getProperty("jetty.home","./target/jetty-distribution-7.4.1-SNAPSHOT");
-        System.setProperty("jetty.home",jetty_home);
-
-        _server = new Server();
-
-        // Setup JMX
-        MBeanContainer mbContainer=new MBeanContainer(ManagementFactory.getPlatformMBeanServer());
-        _server.getContainer().addEventListener(mbContainer);
-        _server.addBean(mbContainer);
-        mbContainer.addBean(Log.getLog());
-
-        // Setup thread pool
-        QueuedThreadPool threadPool = new QueuedThreadPool();
-        threadPool.setMinThreads(2);
-        threadPool.setMaxThreads(10);
-        _server.setThreadPool(threadPool);
-
-        // Setup Connectors
-        SelectChannelConnector connector = new SelectChannelConnector();
-        connector.setMaxIdleTime(30000);
-        _server.setConnectors(new Connector[]{ connector });
-
-        HandlerCollection handlers = new HandlerCollection();
-        ContextHandlerCollection contexts = new ContextHandlerCollection();
-        RequestLogHandler requestLogHandler = new RequestLogHandler();
-        handlers.setHandlers(new Handler[]{ contexts, new DefaultHandler(), requestLogHandler });
-        _server.setHandler(handlers);
-
-        // Setup deployers
-        ContextDeployer deployer0 = new ContextDeployer();
-        deployer0.setContexts(contexts);
-        deployer0.setConfigurationDir(jetty_home + "/contexts");
-        deployer0.setScanInterval(1);
-        _server.addBean(deployer0);
-
-        WebAppDeployer deployer1 = new WebAppDeployer();
-        deployer1.setContexts(contexts);
-        deployer1.setWebAppDir(jetty_home + "/webapps");
-        deployer1.setParentLoaderPriority(false);
-        deployer1.setExtract(true);
-        deployer1.setAllowDuplicates(false);
-        deployer1.setDefaultsDescriptor(jetty_home + "/etc/webdefault.xml");
-        _server.addBean(deployer1);
-
-        HashLoginService login = new HashLoginService();
-        login.setName("Test Realm");
-        login.setConfig(jetty_home + "/etc/realm.properties");
-        _server.addBean(login);
-
-        NCSARequestLog requestLog = new NCSARequestLog(jetty_home + "/logs/jetty-yyyy_mm_dd.log");
-        requestLog.setExtended(false);
-        requestLogHandler.setRequestLog(requestLog);
-
-        _server.setStopAtShutdown(true);
-        _server.setSendServerVersion(true);
-
-        _server.start();
-    }
-
-    public void stopServer()
-        throws Exception
-    {
-        if (_server != null)
-        {
-            _server.stop();
-            _server = null;
         }
     }
 }
