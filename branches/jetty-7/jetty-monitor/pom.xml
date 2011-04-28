@@ -10,6 +10,11 @@
   <artifactId>jetty-monitor</artifactId>
   <name>Jetty :: JMX Monitoring </name>
   <description>JMX monitoring artifact for jetty.</description>
+  <properties>
+    <test-wars-dir>${project.build.directory}/test-wars</test-wars-dir>
+    <test-libs-dir>${project.build.directory}/test-libs</test-libs-dir>
+    <test-dist-dir>${project.build.directory}/test-dist</test-dist-dir>
+  </properties>
   <build>
     <plugins>
       <plugin>
@@ -38,10 +43,9 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
-            <id>jetty-distribution</id>
-            <phase>generate-test-resources</phase>
+            <id>unpack-jetty-distro</id>
+            <phase>process-test-resources</phase>
             <goals>
-              <goal>copy</goal>
               <goal>unpack</goal>
             </goals>
             <configuration>
@@ -49,14 +53,15 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-distribution</artifactId>
-                  <version>7.4.1-SNAPSHOT</version>
-                  <type>tar.gz</type>
+                  <version>${jetty-version}</version>
+                  <type>zip</type>
+                  <overWrite>true</overWrite>
                 </artifactItem>
               </artifactItems>
-              <outputDirectory>${project.build.directory}</outputDirectory>
-              <overWriteReleases>false</overWriteReleases>
+              <outputAbsoluteArtifactFilename>true</outputAbsoluteArtifactFilename>
+              <outputDirectory>${test-dist-dir}</outputDirectory>
               <overWriteSnapshots>true</overWriteSnapshots>
-              <stripVersion>true</stripVersion>
+              <overWriteIfNewer>true</overWriteIfNewer>
             </configuration>
           </execution>
         </executions>
@@ -67,38 +72,14 @@
   </repositories>
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit4-version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-webapp</artifactId>
+      <artifactId>jetty-io</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-security</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-servlets</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-deploy</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-jmx</artifactId>
+      <artifactId>jetty-xml</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -110,7 +91,13 @@
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-websocket</artifactId>
+      <artifactId>jetty-server</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-jmx</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
@@ -118,6 +105,12 @@
       <groupId>org.eclipse.jetty.toolchain</groupId>
       <artifactId>jetty-test-helper</artifactId>
       <version>1.4-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit4-version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
