@@ -83,13 +83,13 @@ public class ServletHandler extends AbstractHandler
     /* ------------------------------------------------------------ */
     private ContextHandler _contextHandler;
     private ContextHandler.SContext _servletContext;
-    private FilterHolder[] _filters;
+    private FilterHolder[] _filters = new FilterHolder[0];
     private FilterMapping[] _filterMappings;
     private boolean _filterChainsCached=true;
     private int _maxFilterChainsCacheSize=1000;
     private boolean _startWithUnavailable=true;
     
-    private ServletHolder[] _servlets;
+    private ServletHolder[] _servlets = new ServletHolder[0];
     private ServletMapping[] _servletMappings;
     
     private transient Map _filterNameMap= new HashMap();
@@ -776,7 +776,7 @@ public class ServletHandler extends AbstractHandler
     public ServletHolder addServletWithMapping (String className,String pathSpec)
     {
         ServletHolder holder = newServletHolder(null);
-        holder.setName(className+"-"+holder.hashCode());
+        holder.setName(className+"-"+_servlets.length);
         holder.setClassName(className);
         
         addServletWithMapping(holder,pathSpec);
@@ -908,7 +908,7 @@ public class ServletHandler extends AbstractHandler
     public FilterHolder addFilterWithMapping (String className,String pathSpec,int dispatches)
     {
         FilterHolder holder = newFilterHolder(null);
-        holder.setName(className+"-"+holder.hashCode());
+        holder.setName(className+"-"+_filters.length);
         holder.setClassName(className);
         
         addFilterWithMapping(holder,pathSpec,dispatches);
