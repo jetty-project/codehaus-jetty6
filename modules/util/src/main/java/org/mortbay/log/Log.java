@@ -34,7 +34,7 @@ import org.mortbay.util.Loader;
 public class Log 
 {    
     private static final String[] __nestedEx =
-        {"getTargetException","getTargetError","getException","getRootCause"};
+        {"getCause","getTargetException","getTargetError","getException","getRootCause"};
     /*-------------------------------------------------------------------*/
     private static final Class[] __noArgs=new Class[0];
     public final static String EXCEPTION= "EXCEPTION ";
