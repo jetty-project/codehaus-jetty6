@@ -7,6 +7,7 @@
  + JETTY-1273 Allow comet server-side subscriber function to access the full comet message
  + JETTY-1274 Please improve logging of comet errors in logWarn
  + JETTY-1326 Invoker names not hashCode based
+ + JETTY-1328 JETY-1340 Handle UTF-8 surrogates
  + JETTY-1343 IllegalArgumentException for bad % encodings
  + JETTY-1348 Log getCause
 
