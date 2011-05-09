@@ -698,7 +698,6 @@ public abstract class AbstractGenerator implements Generator
         {
             _out=out;
             _generator=_out._generator;
-             
         }
 
         /* ------------------------------------------------------------ */
