@@ -827,7 +827,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
         public void wakeup()
         {
             Selector selector = _selector;
-            if (selector!=null)
+            if (selector!=null && selector.isOpen())
                 selector.wakeup();
         }
 
