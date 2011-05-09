@@ -6,6 +6,7 @@
  + 333892 Improved JVM bug detection
  + JETTY-1273 Allow comet server-side subscriber function to access the full comet message
  + JETTY-1274 Please improve logging of comet errors in logWarn
+ + JETTY-1348 Log getCause
 
 Jetty-6.1.26 10 November 2010
  + JETTY-748 Prevent race close of socket by old acceptor threads
