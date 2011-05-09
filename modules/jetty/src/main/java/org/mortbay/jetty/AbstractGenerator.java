@@ -798,18 +798,41 @@ public abstract class AbstractGenerator implements Generator
                     {
                         byte[] buffer=out._bytes.getBuf();
                         int bytes=out._bytes.getCount();
-         
+
                         if (bytes+chars>buffer.length)
                             chars=buffer.length-bytes;
-                        
+
                         for (int i = 0; i < chars; i++)
                         {
                             int code = s[offset+i];
 
+                            // Do we already have a surrogate?
+                            if(_surrogate==0)
+                            {
+                                // No - is this char code a surrogate?
+                                if(Character.isHighSurrogate((char)code))
+                                {
+                                    _surrogate=code; // UCS-?
+                                    continue;
+                                }                            
+                            }
+                            // else handle a low surrogate
+                            else if(Character.isLowSurrogate((char)code))
+                            {
+                                code = Character.toCodePoint((char)_surrogate, (char)code); // UCS-4
+                            }
+                            // else UCS-2
+                            else
+                            {
+                                code=_surrogate; // UCS-2
+                                _surrogate=0; // USED
+                                i--;
+                            }
+
                             if ((code & 0xffffff80) == 0) 
                             {
                                 // 1b
-                                if (bytes+1>buffer.length)
+                                if (bytes>=buffer.length)
                                 {
                                     chars=i;
                                     break;
@@ -817,82 +840,85 @@ public abstract class AbstractGenerator implements Generator
                                 buffer[bytes++]=(byte)(code);
                             }
                             else
-			    {
-				if((code&0xfffff800)==0)
-				{
-				    // 2b
-				    if (bytes+2>buffer.length)
-				    {
-					chars=i;
-					break;
-				    }
-				    buffer[bytes++]=(byte)(0xc0|(code>>6));
-				    buffer[bytes++]=(byte)(0x80|(code&0x3f));
-				}
-				else if((code&0xffff0000)==0)
-				{
-				    // 3b
-				    if (bytes+3>buffer.length)
-				    {
-					chars=i;
-					break;
-				    }
-				    buffer[bytes++]=(byte)(0xe0|(code>>12));
-				    buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
-				    buffer[bytes++]=(byte)(0x80|(code&0x3f));
-				}
-				else if((code&0xff200000)==0)
-				{
-				    // 4b
-				    if (bytes+4>buffer.length)
-				    {
-					chars=i;
-					break;
-				    }
-				    buffer[bytes++]=(byte)(0xf0|(code>>18));
-				    buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
-				    buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
-				    buffer[bytes++]=(byte)(0x80|(code&0x3f));
-				}
-				else if((code&0xf4000000)==0)
-				{
-				    // 5b
-				    if (bytes+5>buffer.length)
-				    {
-					chars=i;
-					break;
-				    }
-				    buffer[bytes++]=(byte)(0xf8|(code>>24));
-				    buffer[bytes++]=(byte)(0x80|((code>>18)&0x3f));
-				    buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
-				    buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
-				    buffer[bytes++]=(byte)(0x80|(code&0x3f));
-				}
-				else if((code&0x80000000)==0)
-				{
-				    // 6b
-				    if (bytes+6>buffer.length)
-				    {
-					chars=i;
-					break;
-				    }
-				    buffer[bytes++]=(byte)(0xfc|(code>>30));
-				    buffer[bytes++]=(byte)(0x80|((code>>24)&0x3f));
-				    buffer[bytes++]=(byte)(0x80|((code>>18)&0x3f));
-				    buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
-				    buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
-				    buffer[bytes++]=(byte)(0x80|(code&0x3f));
-				}
-				else
-				{
-				    buffer[bytes++]=(byte)('?');
-				}
-				if (bytes==buffer.length)
-				{
-				    chars=i+1;
-				    break;
-				}
-			    }
+                            {
+                                if((code&0xfffff800)==0)
+                                {
+                                    // 2b
+                                    if (bytes+2>buffer.length)
+                                    {
+                                        chars=i;
+                                        break;
+                                    }
+                                    buffer[bytes++]=(byte)(0xc0|(code>>6));
+                                    buffer[bytes++]=(byte)(0x80|(code&0x3f));
+                                }
+                                else if((code&0xffff0000)==0)
+                                {
+                                    // 3b
+                                    if (bytes+3>buffer.length)
+                                    {
+                                        chars=i;
+                                        break;
+                                    }
+                                    buffer[bytes++]=(byte)(0xe0|(code>>12));
+                                    buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
+                                    buffer[bytes++]=(byte)(0x80|(code&0x3f));
+                                }
+                                else if((code&0xff200000)==0)
+                                {
+                                    // 4b
+                                    if (bytes+4>buffer.length)
+                                    {
+                                        chars=i;
+                                        break;
+                                    }
+                                    buffer[bytes++]=(byte)(0xf0|(code>>18));
+                                    buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
+                                    buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
+                                    buffer[bytes++]=(byte)(0x80|(code&0x3f));
+                                }
+                                else if((code&0xf4000000)==0)
+                                {
+                                    // 5b
+                                    if (bytes+5>buffer.length)
+                                    {
+                                        chars=i;
+                                        break;
+                                    }
+                                    buffer[bytes++]=(byte)(0xf8|(code>>24));
+                                    buffer[bytes++]=(byte)(0x80|((code>>18)&0x3f));
+                                    buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
+                                    buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
+                                    buffer[bytes++]=(byte)(0x80|(code&0x3f));
+                                }
+                                else if((code&0x80000000)==0)
+                                {
+                                    // 6b
+                                    if (bytes+6>buffer.length)
+                                    {
+                                        chars=i;
+                                        break;
+                                    }
+                                    buffer[bytes++]=(byte)(0xfc|(code>>30));
+                                    buffer[bytes++]=(byte)(0x80|((code>>24)&0x3f));
+                                    buffer[bytes++]=(byte)(0x80|((code>>18)&0x3f));
+                                    buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
+                                    buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
+                                    buffer[bytes++]=(byte)(0x80|(code&0x3f));
+                                }
+                                else
+                                {
+                                    buffer[bytes++]=(byte)('?');
+                                } 
+
+                                _surrogate=0; // USED
+
+                                if (bytes==buffer.length)
+                                {
+                                    chars=i+1;
+                                    break;
+                                }
+                            }
                         }
                         out._bytes.setCount(bytes);
                         break;
