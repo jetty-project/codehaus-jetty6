@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.mortbay.jetty.testwars</groupId>
     <artifactId>testwars-parent</artifactId>
-    <version>7.4.1.v20110512</version>
+    <version>7.4.2-SNAPSHOT</version>
   </parent>
   <artifactId>test-jetty-webapp</artifactId>
   <name>Test :: Jetty Test Webapp</name>
