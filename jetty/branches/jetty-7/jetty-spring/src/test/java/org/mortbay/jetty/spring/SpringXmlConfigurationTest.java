@@ -98,6 +98,23 @@ public class SpringXmlConfigurationTest
    
         assertEquals("xxx",tc.getTestString2());
     }
+
+    @Test
+    public void testJettyXml() throws Exception
+    {
+        URL url = SpringXmlConfigurationTest.class.getClassLoader().getResource("org/mortbay/jetty/spring/jetty.xml");
+        XmlConfiguration configuration = new XmlConfiguration(url);
+        
+        Server server = (Server)configuration.configure();
+        
+        server.dumpStdErr();
+        
+    }
     
-    
+    @Test
+    public void XmlConfigurationMain() throws Exception
+    {
+        XmlConfiguration.main(new String[]{"src/test/resources/org/mortbay/jetty/spring/jetty.xml"});
+        
+    }
 }
