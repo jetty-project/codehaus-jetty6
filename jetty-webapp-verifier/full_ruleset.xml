@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configure id="basicRuleSet"
+  class="org.mortbay.jetty.webapp.verifier.RuleSet">
+  <Set name="rules">
+    <Array type="org.mortbay.jetty.webapp.verifier.Rule">
+      <Item>
+        <New class="org.mortbay.jetty.webapp.verifier.rules.ServletSupportLevelRule">
+          <Set name="supportedVersion">2.5</Set>
+        </New>
+      </Item>
+      <Item>
+        <New class="org.mortbay.jetty.webapp.verifier.rules.JavaSupportLevelRule">
+          <Set name="supportedVersion">1.6</Set>
+        </New>
+      </Item>
+    </Array>
+  </Set>
+</Configure>
