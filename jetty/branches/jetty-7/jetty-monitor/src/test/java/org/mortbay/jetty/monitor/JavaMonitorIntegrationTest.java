@@ -49,6 +49,8 @@ public class JavaMonitorIntegrationTest
     {
         PropertyFlag.assume("JAVAMONITOR");        
 
+        jetty = new JettyDistro(JavaMonitorIntegrationTest.class);
+
         jetty.delete("contexts/javadoc.xml");
         
         jetty.overlayConfig("monitor");
