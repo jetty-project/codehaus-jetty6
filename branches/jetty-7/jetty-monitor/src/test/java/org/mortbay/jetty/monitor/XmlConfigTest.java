@@ -46,7 +46,7 @@ public class XmlConfigTest
     @BeforeClass
     public static void initJetty() throws Exception
     {
-        jetty = new JettyDistro(ProgramConfigTest.class);
+        jetty = new JettyDistro(XmlConfigTest.class);
 
         jetty.delete("contexts/javadoc.xml");
         
