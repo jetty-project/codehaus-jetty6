@@ -1,4 +1,4 @@
-jetty@codehaus 7.4.1-SNAPSHOT
+jetty@codehaus 7.4.1.v20110512
  + JETTY-1368 RequiredContentsRule doesn't assemble the file path correctly
 
 jetty@codehaus 7.4.0.v20110414 7 April 2011
