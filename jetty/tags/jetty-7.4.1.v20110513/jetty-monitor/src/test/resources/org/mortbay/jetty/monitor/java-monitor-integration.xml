@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
+
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
+
+<!-- 
+<Call id="MBeanServer" class="java.lang.management.ManagementFactory" name="getPlatformMBeanServer">
+    <Call name="registerMBean">
+        <Arg><New class="com.javamonitor.mbeans.DNSCachePolicy" /></Arg>
+        <Arg>
+            <New class="javax.management.ObjectName">
+                <Arg>com.javamonitor:type=DNSCachePolicy</Arg>
+            </New>
+        </Arg>
+    </Call>
+    <Call name="registerMBean">
+        <Arg><New class="com.javamonitor.mbeans.Threading" /></Arg>
+        <Arg>
+            <New class="javax.management.ObjectName">
+                <Arg>com.javamonitor:type=Threading</Arg>
+            </New>
+        </Arg>
+    </Call>
+</Call>
+-->
+
+<Call id="JMXMonitor" class="org.mortbay.jetty.monitor.JMXMonitor" name="getInstance">
+	<Call name="addActions">
+	    <Arg>
+	        <Array type="org.mortbay.jetty.monitor.MonitorAction">
+	            <Item>
+	                <New id="MonitorAction" class="org.mortbay.jetty.monitor.integration.JavaMonitorAction">
+	                   <Arg />
+	                   <Arg>http://194.109.206.51/lemongrass/1.1/push</Arg>
+	                   <Arg>57e48e79-f0e6-4909-a6da-e8c1267cbf49</Arg>
+	                   <Arg>8080</Arg>
+	                   <Arg type="java.lang.Integer">15000</Arg>
+	                </New>
+	            </Item>
+	        </Array>
+	    </Arg>
+	</Call>
+</Call>
+</Configure>
