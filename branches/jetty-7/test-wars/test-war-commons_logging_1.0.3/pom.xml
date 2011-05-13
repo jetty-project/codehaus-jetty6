@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.mortbay.jetty.testwars</groupId>
     <artifactId>testwars-parent</artifactId>
-    <version>7.4.1.v20110513</version>
+    <version>7.4.2-SNAPSHOT</version>
   </parent>
   <artifactId>test-war-commons_logging_1.0.3</artifactId>
   <name>Jetty :: Logging Test War :: Commons Logging 1.0.2</name>
