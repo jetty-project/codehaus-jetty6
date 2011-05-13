@@ -73,7 +73,7 @@ public class CentralizedLoggingTest
     {
         TestAppender testAppender = getServerTestAppender();
 
-        SimpleRequest.get(jetty,"/test-war-log4j_1.2.15/logging");
+        LegacySimpleRequest.get(jetty,"/test-war-log4j_1.2.15/logging");
 
         String prefix = "LoggingServlet(log4j-1.2.15)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
@@ -92,7 +92,7 @@ public class CentralizedLoggingTest
     {
         TestAppender testAppender = getServerTestAppender();
 
-        SimpleRequest.get(jetty,"/test-war-commons_logging_1.1/logging");
+        LegacySimpleRequest.get(jetty,"/test-war-commons_logging_1.1/logging");
 
         String prefix = "LoggingServlet(commons-logging-1.1)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
@@ -111,7 +111,7 @@ public class CentralizedLoggingTest
     {
         TestAppender testAppender = getServerTestAppender();
 
-        SimpleRequest.get(jetty,"/test-war-slf4j_1.5.6/logging");
+        LegacySimpleRequest.get(jetty,"/test-war-slf4j_1.5.6/logging");
 
         String prefix = "LoggingServlet(slf4j-1.5.6)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
@@ -130,7 +130,7 @@ public class CentralizedLoggingTest
     {
         TestAppender testAppender = getServerTestAppender();
 
-        SimpleRequest.get(jetty,"/test-war-java_util_logging/logging");
+        LegacySimpleRequest.get(jetty,"/test-war-java_util_logging/logging");
 
         String prefix = "LoggingServlet(java)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
@@ -149,7 +149,7 @@ public class CentralizedLoggingTest
     {
         TestAppender testAppender = getServerTestAppender();
 
-        SimpleRequest.get(jetty,"/log4j/logging");
+        LegacySimpleRequest.get(jetty,"/log4j/logging");
 
         String prefix = "LoggingServlet(log4j-1.2.15)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
@@ -168,7 +168,7 @@ public class CentralizedLoggingTest
     {
         TestAppender testAppender = getServerTestAppender();
 
-        SimpleRequest.get(jetty,"/commons/logging");
+        LegacySimpleRequest.get(jetty,"/commons/logging");
 
         String prefix = "LoggingServlet(commons-logging-1.1)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
@@ -187,7 +187,7 @@ public class CentralizedLoggingTest
     {
         TestAppender testAppender = getServerTestAppender();
 
-        SimpleRequest.get(jetty,"/slf4j/logging");
+        LegacySimpleRequest.get(jetty,"/slf4j/logging");
 
         String prefix = "LoggingServlet(slf4j-1.5.6)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
@@ -206,7 +206,7 @@ public class CentralizedLoggingTest
     {
         TestAppender testAppender = getServerTestAppender();
 
-        SimpleRequest.get(jetty,"/java/logging");
+        LegacySimpleRequest.get(jetty,"/java/logging");
 
         String prefix = "LoggingServlet(java)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();

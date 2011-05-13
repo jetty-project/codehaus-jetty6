@@ -8,17 +8,6 @@
 <Configure id="Server" class="org.eclipse.jetty.server.Server">
 
     <!-- =========================================================== -->
-    <!-- Use LogBack for Request Logging                             -->
-    <!-- =========================================================== -->
-
-    <Ref id="requestLog">
-      <Set name="requestLog">
-        <New id="requestLogImpl"
-             class="ch.qos.logback.access.jetty.RequestLogImpl" />
-      </Set>
-    </Ref>
-
-    <!-- =========================================================== -->
     <!-- Enable java.util.logging routing to slf4j                   -->
     <!-- =========================================================== -->
     <Call class="org.slf4j.bridge.SLF4JBridgeHandler" name="install" />

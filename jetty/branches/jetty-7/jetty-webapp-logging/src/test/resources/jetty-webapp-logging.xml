@@ -14,14 +14,4 @@
       </Arg>
     </Call>
   </Ref>
-  <!-- 
-  <Call name="addBean">
-    <Arg>
-      <New class="org.mortbay.jetty.webapp.logging.CentralizedLogging">
-        <Set name="server"><Ref id="Server" /></Set>
-        <Set name="configurationFilename"><SystemProperty name="test.resourcesdir" default="src/test/resources"/>/logger/testing.properties</Set>
-      </New>
-    </Arg>
-  </Call>
-   -->
 </Configure>

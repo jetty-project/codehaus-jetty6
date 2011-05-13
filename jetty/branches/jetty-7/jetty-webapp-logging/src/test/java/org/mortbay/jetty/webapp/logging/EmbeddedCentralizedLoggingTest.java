@@ -139,10 +139,10 @@ public class EmbeddedCentralizedLoggingTest
             server.dump(System.out);
         }
         
-        SimpleRequest.get(server,"/log4j/logging");
-        SimpleRequest.get(server,"/slf4j/logging");
-        SimpleRequest.get(server,"/clogging/logging");
-        SimpleRequest.get(server,"/javalogging/logging");
+        LegacySimpleRequest.get(server,"/log4j/logging");
+        LegacySimpleRequest.get(server,"/slf4j/logging");
+        LegacySimpleRequest.get(server,"/clogging/logging");
+        LegacySimpleRequest.get(server,"/javalogging/logging");
 
         server.stop();
 
@@ -191,7 +191,7 @@ public class EmbeddedCentralizedLoggingTest
             server.dump(System.out);
         }
 
-        SimpleRequest.get(server,"/clogging/logging");
+        LegacySimpleRequest.get(server,"/clogging/logging");
 
         server.stop();
 
@@ -219,7 +219,7 @@ public class EmbeddedCentralizedLoggingTest
             server.dump(System.out);
         }
         
-        SimpleRequest.get(server,"/javalogging/logging");
+        LegacySimpleRequest.get(server,"/javalogging/logging");
 
         server.stop();
 
@@ -247,7 +247,7 @@ public class EmbeddedCentralizedLoggingTest
             server.dump(System.out);
         }
         
-        SimpleRequest.get(server,"/log4j/logging");
+        LegacySimpleRequest.get(server,"/log4j/logging");
 
         server.stop();
 
@@ -275,7 +275,7 @@ public class EmbeddedCentralizedLoggingTest
             server.dump(System.out);
         }
         
-        SimpleRequest.get(server,"/slf4j/logging");
+        LegacySimpleRequest.get(server,"/slf4j/logging");
 
         server.stop();
 
