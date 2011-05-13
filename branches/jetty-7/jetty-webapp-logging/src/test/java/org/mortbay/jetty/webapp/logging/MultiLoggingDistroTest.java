@@ -6,16 +6,17 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class BasicDistroTest
+public class MultiLoggingDistroTest
 {
     private static JettyDistro jetty;
     private static final String[] CONTEXTS =
-    { "test-war-commons_logging_1.1", "test-war-java_util_logging", "test-war-log4j_1.2.15", "test-war-slf4j_1.5.6" };
+    { "test-war-commons_logging_1.0.3", "test-war-commons_logging_1.1", "test-war-java_util_logging", "test-war-log4j_1.2.15", "test-war-log4j_1.1.3",
+            "test-war-slf4j_1.2", "test-war-slf4j_1.5.6", "test-war-slf4j_1.6.1" };
 
     @BeforeClass
     public static void initJetty() throws Exception
     {
-        jetty = new JettyDistro(BasicDistroTest.class);
+        jetty = new JettyDistro(MultiLoggingDistroTest.class);
 
         // Eliminate Distribution Test & Javadoc Webapps
         jetty.delete("webapps/test.war");
@@ -44,13 +45,13 @@ public class BasicDistroTest
 
         // Unpack Logback Config
         jetty.unpackConfig("jetty-logback-config.jar");
-        
+
         // Copy Project Config
         jetty.copyProjectMainConfig();
         jetty.createProjectLib("jetty-webapp-logging.jar");
 
         // Overlay Manual Config
-        jetty.overlayConfig("basic");
+        jetty.overlayConfig("multi");
 
         jetty.setDebug(false);
 
@@ -74,7 +75,7 @@ public class BasicDistroTest
         {
             request.getString("/" + context + "/logging");
         }
-        
-        LogAssert.assertContainsEntries(jetty, "logs/jetty.log", "expected-basic.txt");
+
+        LogAssert.assertContainsEntries(jetty, "logs/jetty.log", "expected-multi.txt");
     }
 }
