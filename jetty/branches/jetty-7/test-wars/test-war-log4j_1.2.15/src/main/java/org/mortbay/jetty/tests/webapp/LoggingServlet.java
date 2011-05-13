@@ -31,7 +31,7 @@ import org.apache.log4j.Logger;
 public class LoggingServlet extends HttpServlet
 {
     private static final long serialVersionUID = 1L;
-    private static final String LOGID = "LoggingServlet(log4j)";
+    private static final String LOGID = "LoggingServlet(log4j-1.2.15)";
     private Logger log = Logger.getLogger(LoggingServlet.class);
 
     /**

@@ -75,7 +75,7 @@ public class CentralizedLoggingTest
 
         SimpleRequest.get(jetty,"/test-war-log4j_1.2.15/logging");
 
-        String prefix = "LoggingServlet(log4j)";
+        String prefix = "LoggingServlet(log4j-1.2.15)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
         // expectedLogs.add(new LogEvent(Level.DEBUG,LOGGING_SERVLET_ID,prefix + " initialized"));
         expectedLogs.add(new LogEvent(Level.INFO,LOGGING_SERVLET_ID,prefix + " GET requested"));
@@ -94,7 +94,7 @@ public class CentralizedLoggingTest
 
         SimpleRequest.get(jetty,"/test-war-commons_logging_1.1/logging");
 
-        String prefix = "LoggingServlet(commons-logging)";
+        String prefix = "LoggingServlet(commons-logging-1.1)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
         // expectedLogs.add(new LogEvent(Level.DEBUG,LOGGING_SERVLET_ID,prefix + " initialized"));
         expectedLogs.add(new LogEvent(Level.INFO,LOGGING_SERVLET_ID,prefix + " GET requested"));
@@ -113,7 +113,7 @@ public class CentralizedLoggingTest
 
         SimpleRequest.get(jetty,"/test-war-slf4j_1.5.6/logging");
 
-        String prefix = "LoggingServlet(slf4j)";
+        String prefix = "LoggingServlet(slf4j-1.5.6)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
         // expectedLogs.add(new LogEvent(Level.DEBUG,LOGGING_SERVLET_ID,prefix + " initialized"));
         expectedLogs.add(new LogEvent(Level.INFO,LOGGING_SERVLET_ID,prefix + " GET requested"));
@@ -151,7 +151,7 @@ public class CentralizedLoggingTest
 
         SimpleRequest.get(jetty,"/log4j/logging");
 
-        String prefix = "LoggingServlet(log4j)";
+        String prefix = "LoggingServlet(log4j-1.2.15)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
         // expectedLogs.add(new LogEvent(Level.DEBUG,LOGGING_SERVLET_ID,prefix + " initialized"));
         expectedLogs.add(new LogEvent(Level.INFO,LOGGING_SERVLET_ID,prefix + " GET requested"));
@@ -170,7 +170,7 @@ public class CentralizedLoggingTest
 
         SimpleRequest.get(jetty,"/commons/logging");
 
-        String prefix = "LoggingServlet(commons-logging)";
+        String prefix = "LoggingServlet(commons-logging-1.1)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
         // expectedLogs.add(new LogEvent(Level.DEBUG,LOGGING_SERVLET_ID,prefix + " initialized"));
         expectedLogs.add(new LogEvent(Level.INFO,LOGGING_SERVLET_ID,prefix + " GET requested"));
@@ -189,7 +189,7 @@ public class CentralizedLoggingTest
 
         SimpleRequest.get(jetty,"/slf4j/logging");
 
-        String prefix = "LoggingServlet(slf4j)";
+        String prefix = "LoggingServlet(slf4j-1.5.6)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
         // expectedLogs.add(new LogEvent(Level.DEBUG,LOGGING_SERVLET_ID,prefix + " initialized"));
         expectedLogs.add(new LogEvent(Level.INFO,LOGGING_SERVLET_ID,prefix + " GET requested"));
