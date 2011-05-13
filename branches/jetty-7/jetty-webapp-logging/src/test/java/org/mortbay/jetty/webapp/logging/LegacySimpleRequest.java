@@ -29,7 +29,7 @@ import org.eclipse.jetty.util.IO;
 /**
  * Utility class for performing simple requests.
  */
-public class SimpleRequest
+public class LegacySimpleRequest
 {
     private static final boolean CONN_TRACE = false;
 

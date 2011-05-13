@@ -38,6 +38,10 @@
   </licenses>
   <properties>
     <slf4j-version>1.5.10</slf4j-version>
+    <test-wars-dir>${project.build.directory}/test-wars</test-wars-dir>
+    <test-configs-dir>${project.build.directory}/test-configs</test-configs-dir>
+    <test-libs-dir>${project.build.directory}/test-libs</test-libs-dir>
+    <test-distro-dir>${project.build.directory}/test-dist</test-distro-dir>
   </properties>
   <build>
     <plugins>
@@ -63,18 +67,233 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <version>2.1</version>
         <executions>
+
+          <!--
+            Copy LIB dependencies into place that JettyDistro can use them
+          -->
+
           <execution>
-            <id>testwarcopy</id>
+            <id>test-lib-logback-copy</id>
             <phase>process-test-resources</phase>
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
             <configuration>
-              <includeGroupIds>org.mortbay.jetty.testwars</includeGroupIds>
-              <includeTypes>war</includeTypes>
-              <outputDirectory>${project.build.directory}/test-wars</outputDirectory>
+              <includeGroupIds>org.mortbay.jetty</includeGroupIds>
+              <includeArtifactIds>jetty-logback</includeArtifactIds>
+              <includeTypes>jar</includeTypes>
+              <outputDirectory>${test-libs-dir}</outputDirectory>
               <overWriteIfNewer>true</overWriteIfNewer>
               <stripVersion>true</stripVersion>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>test-lib-slf4j-copy</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeGroupIds>org.slf4j,ch.qos.logback</includeGroupIds>
+              <includeTypes>jar</includeTypes>
+              <outputDirectory>${test-libs-dir}</outputDirectory>
+              <overWriteIfNewer>true</overWriteIfNewer>
+              <stripVersion>true</stripVersion>
+            </configuration>
+          </execution>
+
+          <!--
+            Copy WAR dependencies into place that JettyDistro can use them
+          -->
+
+          <execution>
+            <id>test-war-copy</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-commons_logging_1.0.3</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${test-wars-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-commons_logging_1.1</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${test-wars-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-java_util_logging</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${test-wars-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-log4j_1.1.3</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${test-wars-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-log4j_1.2.15</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${test-wars-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-slf4j_1.2</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${test-wars-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-slf4j_1.5.6</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${test-wars-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-slf4j_1.6.1</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${test-wars-dir}</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+              <overWriteIfNewer>true</overWriteIfNewer>
+              <overWrite>true</overWrite>
+              <stripVersion>true</stripVersion>
+            </configuration>
+          </execution>
+
+          <!--
+            Copy "config" Classifiers into place that JettyDistro can use them
+          -->
+
+          <execution>
+            <id>test-config-copy</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-logback</artifactId>
+                  <version>${project.version}</version>
+                  <classifier>config</classifier>
+                  <type>jar</type>
+                  <outputDirectory>${test-configs-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-commons_logging_1.0.3</artifactId>
+                  <version>${project.version}</version>
+                  <classifier>config</classifier>
+                  <type>jar</type>
+                  <outputDirectory>${test-configs-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-commons_logging_1.1</artifactId>
+                  <version>${project.version}</version>
+                  <classifier>config</classifier>
+                  <type>jar</type>
+                  <outputDirectory>${test-configs-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-java_util_logging</artifactId>
+                  <version>${project.version}</version>
+                  <classifier>config</classifier>
+                  <type>jar</type>
+                  <outputDirectory>${test-configs-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-log4j_1.1.3</artifactId>
+                  <version>${project.version}</version>
+                  <classifier>config</classifier>
+                  <type>jar</type>
+                  <outputDirectory>${test-configs-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-log4j_1.2.15</artifactId>
+                  <version>${project.version}</version>
+                  <classifier>config</classifier>
+                  <type>jar</type>
+                  <outputDirectory>${test-configs-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-slf4j_1.2</artifactId>
+                  <version>${project.version}</version>
+                  <classifier>config</classifier>
+                  <type>jar</type>
+                  <outputDirectory>${test-configs-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-slf4j_1.5.6</artifactId>
+                  <version>${project.version}</version>
+                  <classifier>config</classifier>
+                  <type>jar</type>
+                  <outputDirectory>${test-configs-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-war-slf4j_1.6.1</artifactId>
+                  <version>${project.version}</version>
+                  <classifier>config</classifier>
+                  <type>jar</type>
+                  <outputDirectory>${test-configs-dir}</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+              <overWriteIfNewer>true</overWriteIfNewer>
+              <overWrite>true</overWrite>
+              <stripVersion>true</stripVersion>
+            </configuration>
+          </execution>
+
+          <!--
+            Extract Jetty DISTRIBUTION into place that JettyDistro can use
+            it
+          -->
+
+          <execution>
+            <id>unpack-test-dist</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.eclipse.jetty</groupId>
+                  <artifactId>jetty-distribution</artifactId>
+                  <version>${project.version}</version>
+                  <type>zip</type>
+                  <overWrite>true</overWrite>
+                </artifactItem>
+              </artifactItems>
+              <outputAbsoluteArtifactFilename>true</outputAbsoluteArtifactFilename>
+              <outputDirectory>${test-distro-dir}</outputDirectory>
+              <overWriteSnapshots>true</overWriteSnapshots>
+              <overWriteIfNewer>true</overWriteIfNewer>
             </configuration>
           </execution>
         </executions>
@@ -117,54 +336,28 @@
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>log4j-over-slf4j</artifactId>
+      <artifactId>jcl-over-slf4j</artifactId>
       <version>${slf4j-version}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-jdk14</artifactId>
+      <artifactId>log4j-over-slf4j</artifactId>
       <version>${slf4j-version}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty.testwars</groupId>
-      <artifactId>test-war-commons_logging_1.1</artifactId>
-      <version>${project.version}</version>
-      <type>war</type>
-      <scope>provided</scope>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jul-to-slf4j</artifactId>
+      <version>${slf4j-version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty.testwars</groupId>
-      <artifactId>test-war-java_util_logging</artifactId>
+     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>jetty-logback</artifactId>
       <version>${project.version}</version>
-      <type>war</type>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty.testwars</groupId>
-      <artifactId>test-war-log4j_1.2.15</artifactId>
-      <version>${project.version}</version>
-      <type>war</type>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty.testwars</groupId>
-      <artifactId>test-war-slf4j_1.5.6</artifactId>
-      <version>${project.version}</version>
-      <type>war</type>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty.toolchain</groupId>
       <artifactId>jetty-test-helper</artifactId>
-      <version>1.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit4-version}</version>
+      <version>1.4-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
