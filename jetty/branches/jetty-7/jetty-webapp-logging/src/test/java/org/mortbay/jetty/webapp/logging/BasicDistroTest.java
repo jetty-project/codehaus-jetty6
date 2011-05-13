@@ -1,6 +1,10 @@
 package org.mortbay.jetty.webapp.logging;
 
+import java.io.File;
+
 import org.eclipse.jetty.toolchain.test.JettyDistro;
+import org.eclipse.jetty.toolchain.test.OS;
+import org.eclipse.jetty.toolchain.test.PathAssert;
 import org.eclipse.jetty.toolchain.test.SimpleRequest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -74,5 +78,8 @@ public class BasicDistroTest
         {
             request.getString("/" + context + "/logging");
         }
+        
+        File jettyHome = jetty.getJettyHomeDir();
+        PathAssert.assertFileExists("Basic Log File",new File(jettyHome,OS.separators("logs/jetty.log")));
     }
 }
