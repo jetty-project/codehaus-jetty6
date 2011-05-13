@@ -146,7 +146,7 @@ public class EmbeddedCentralizedLoggingTest
 
         server.stop();
 
-        String prefix = "LoggingServlet(commons-logging)";
+        String prefix = "LoggingServlet(commons-logging-1.1)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
         // expectedLogs.add(new LogEvent(Level.DEBUG,LOGGING_SERVLET_ID,prefix + " initialized"));
         expectedLogs.add(new LogEvent(Level.INFO,LOGGING_SERVLET_ID,prefix + " GET requested"));
@@ -154,7 +154,7 @@ public class EmbeddedCentralizedLoggingTest
         expectedLogs.add(new LogEvent(Level.SEVERE,LOGGING_SERVLET_ID,prefix + " Nothing is (intentionally) being output by this Servlet"));
         expectedLogs.add(new LogEvent(Level.SEVERE,LOGGING_SERVLET_ID,prefix + " Whoops (intentionally) causing a Throwable")
                 .expectedThrowable(new FileNotFoundException("A file cannot be found")));
-        prefix = "LoggingServlet(log4j)";
+        prefix = "LoggingServlet(log4j-1.2.15)";
         // expectedLogs.add(new LogEvent(Level.DEBUG,LOGGING_SERVLET_ID,prefix + " initialized"));
         expectedLogs.add(new LogEvent(Level.INFO,LOGGING_SERVLET_ID,prefix + " GET requested"));
         expectedLogs.add(new LogEvent(Level.WARNING,LOGGING_SERVLET_ID,prefix + " Slightly warn, with a chance of log events"));
@@ -168,7 +168,7 @@ public class EmbeddedCentralizedLoggingTest
         expectedLogs.add(new LogEvent(Level.WARNING,LOGGING_SERVLET_ID,prefix + " Nothing is (intentionally) being output by this Servlet"));
         expectedLogs.add(new LogEvent(Level.SEVERE,LOGGING_SERVLET_ID,prefix + " Whoops (intentionally) causing a Throwable")
                 .expectedThrowable(new FileNotFoundException("A file cannot be found")));
-        prefix = "LoggingServlet(slf4j)";
+        prefix = "LoggingServlet(slf4j-1.5.6)";
         // expectedLogs.add(new LogEvent(Level.DEBUG,LOGGING_SERVLET_ID,prefix + " initialized"));
         expectedLogs.add(new LogEvent(Level.INFO,LOGGING_SERVLET_ID,prefix + " GET requested"));
         expectedLogs.add(new LogEvent(Level.WARNING,LOGGING_SERVLET_ID,prefix + " Slightly warn, with a chance of log events"));
@@ -195,7 +195,7 @@ public class EmbeddedCentralizedLoggingTest
 
         server.stop();
 
-        String prefix = "LoggingServlet(commons-logging)";
+        String prefix = "LoggingServlet(commons-logging-1.1)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
         // expectedLogs.add(new LogEvent(Level.DEBUG,LOGGING_SERVLET_ID,prefix + " initialized"));
         expectedLogs.add(new LogEvent(Level.INFO,LOGGING_SERVLET_ID,prefix + " GET requested"));
@@ -251,7 +251,7 @@ public class EmbeddedCentralizedLoggingTest
 
         server.stop();
 
-        String prefix = "LoggingServlet(log4j)";
+        String prefix = "LoggingServlet(log4j-1.2.15)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
         // expectedLogs.add(new LogEvent(Level.DEBUG,LOGGING_SERVLET_ID,prefix + " initialized"));
         expectedLogs.add(new LogEvent(Level.INFO,LOGGING_SERVLET_ID,prefix + " GET requested"));
@@ -279,7 +279,7 @@ public class EmbeddedCentralizedLoggingTest
 
         server.stop();
 
-        String prefix = "LoggingServlet(slf4j)";
+        String prefix = "LoggingServlet(slf4j-1.5.6)";
         List<LogEvent> expectedLogs = new ArrayList<LogEvent>();
         // expectedLogs.add(new LogEvent(Level.DEBUG,LOGGING_SERVLET_ID,prefix + " initialized"));
         expectedLogs.add(new LogEvent(Level.INFO,LOGGING_SERVLET_ID,prefix + " GET requested"));

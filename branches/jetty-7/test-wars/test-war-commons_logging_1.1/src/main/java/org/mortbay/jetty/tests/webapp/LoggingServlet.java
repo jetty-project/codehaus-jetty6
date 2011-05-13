@@ -33,7 +33,7 @@ import org.apache.commons.logging.LogFactory;
 public class LoggingServlet extends HttpServlet
 {
     private static final long serialVersionUID = 1L;
-    private static final String LOGID = "LoggingServlet(commons-logging)";
+    private static final String LOGID = "LoggingServlet(commons-logging-1.1)";
     private Log log = LogFactory.getLog(LoggingServlet.class);
 
     /**

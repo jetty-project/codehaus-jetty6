@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 public class LoggingServlet extends HttpServlet
 {
     private static final long serialVersionUID = 1L;
-    private static final String LOGID = "LoggingServlet(slf4j)";
+    private static final String LOGID = "LoggingServlet(slf4j-1.5.6)";
     private Logger log = LoggerFactory.getLogger(LoggingServlet.class);
 
     /**
