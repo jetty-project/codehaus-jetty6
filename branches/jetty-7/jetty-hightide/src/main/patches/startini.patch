@@ -1,16 +1,15 @@
---- start.ini.orig	2010-12-20 18:55:43.994367999 +0100
-+++ start.ini	2010-12-20 18:53:28.014368002 +0100
-@@ -42,7 +42,8 @@
+--- start.ini.orig	2011-05-13 12:19:17.732258554 +1000
++++ start.ini	2011-05-13 12:18:40.312258548 +1000
+@@ -45,7 +45,7 @@
  # for a full listing do
  #   java -jar start.jar --list-options
  #-----------------------------------------------------------
 -OPTIONS=Server,jsp,jmx,resources,websocket,ext
 +OPTIONS=Server,jsp,jmx,resources,websocket,ext,jta,plus,jdbc,annotations
-+
  #-----------------------------------------------------------
  
  
-@@ -51,12 +52,15 @@
+@@ -54,13 +54,16 @@
  # For a full list of available configuration files do
  #   java -jar start.jar --help
  #-----------------------------------------------------------
@@ -22,6 +21,7 @@
  # etc/jetty-requestlog.xml
  etc/jetty-deploy.xml
 +etc/jetty-plus.xml
+ #etc/jetty-overlay.xml
  etc/jetty-webapps.xml
  etc/jetty-contexts.xml
  etc/jetty-testrealm.xml
