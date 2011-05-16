@@ -37,7 +37,7 @@
     </license>
   </licenses>
   <properties>
-    <slf4j-version>1.5.10</slf4j-version>
+    <slf4j-version>1.6.1</slf4j-version>
     <test-wars-dir>${project.build.directory}/test-wars</test-wars-dir>
     <test-configs-dir>${project.build.directory}/test-configs</test-configs-dir>
     <test-libs-dir>${project.build.directory}/test-libs</test-libs-dir>

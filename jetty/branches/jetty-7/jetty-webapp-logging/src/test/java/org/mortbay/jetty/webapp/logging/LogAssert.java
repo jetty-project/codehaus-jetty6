@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.regex.Pattern;
 
 import org.eclipse.jetty.toolchain.test.IO;
 import org.eclipse.jetty.toolchain.test.JettyDistro;
@@ -19,9 +20,7 @@ public class LogAssert
 {
     public static void assertContainsEntries(JettyDistro jetty, String logPath, String expectedEntriesPath) throws IOException
     {
-        File jettyHome = jetty.getJettyHomeDir();
-        File logFile = new File(jettyHome,OS.separators(logPath));
-        PathAssert.assertFileExists("Log File",logFile);
+        File logFile = assertExists(jetty,logPath);
 
         File expectedEntriesFile = MavenTestingUtils.getTestResourceFile(expectedEntriesPath);
         List<String> expectedEntries = loadExpectedEntries(expectedEntriesFile);
@@ -103,5 +102,69 @@ public class LogAssert
             IO.close(buf);
             IO.close(reader);
         }
+    }
+
+    public static File assertExists(JettyDistro jetty, String logPath)
+    {
+        File jettyHome = jetty.getJettyHomeDir();
+        File logFile = new File(jettyHome,OS.separators(logPath));
+        PathAssert.assertFileExists("Log File",logFile);
+        return logFile;
+    }
+
+    public static void assertNoLogsRegex(JettyDistro jetty, String regexPath)
+    {
+        File jettyHome = jetty.getJettyHomeDir();
+        int idx = regexPath.lastIndexOf('/');
+        String logDirStr = regexPath.substring(0,idx);
+        File logDir = new File(jettyHome,OS.separators(logDirStr));
+
+        Pattern pat = Pattern.compile(regexPath.substring(idx + 1));
+
+        System.out.printf("Looking for forbidden regex matches on %s in dir %s%n",pat.pattern(),logDir);
+        boolean found = false;
+        for (String logfilename : logDir.list())
+        {
+            if (pat.matcher(logfilename).matches())
+            {
+                found = true;
+                System.out.printf("Found Forbidden Match: %s%n",logfilename);
+            }
+            else
+            {
+                System.out.printf("             No Match: %s%n",logfilename);
+            }
+        }
+
+        Assert.assertFalse("Should NOT have found a match, but did (see STDOUT)",found);
+        System.out.printf("Assertion passed: no match found%n");
+    }
+
+    public static void assertLogExistsRegex(JettyDistro jetty, String regexPath)
+    {
+        File jettyHome = jetty.getJettyHomeDir();
+        int idx = regexPath.lastIndexOf('/');
+        String logDirStr = regexPath.substring(0,idx);
+        File logDir = new File(jettyHome,OS.separators(logDirStr));
+
+        Pattern pat = Pattern.compile(regexPath.substring(idx + 1));
+
+        System.out.printf("Looking for regex matches on %s in dir %s%n",pat.pattern(),logDir);
+        boolean found = false;
+        for (String logfilename : logDir.list())
+        {
+            if (pat.matcher(logfilename).matches())
+            {
+                found = true;
+                System.out.printf("Found Match: %s%n",logfilename);
+            }
+            else
+            {
+                System.out.printf("   No Match: %s%n",logfilename);
+            }
+        }
+
+        Assert.assertTrue("Should have found a match, but didn't (see STDOUT)",found);
+        System.out.printf("Assertion passed: match found%n");
     }
 }
