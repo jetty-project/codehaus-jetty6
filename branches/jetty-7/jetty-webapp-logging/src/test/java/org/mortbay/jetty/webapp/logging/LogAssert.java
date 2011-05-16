@@ -51,7 +51,8 @@ public class LogAssert
                     System.err.println("[Entry Not Found] " + entry);
                 }
 
-                Assert.fail("Failed to find " + expectedEntries.size() + " entries in the log file at " + logFile.getAbsolutePath());
+                Assert.fail("Failed to find " + expectedEntries.size() + " entries (details found in STDERR output on this test case) in the log file at "
+                        + logFile.getAbsolutePath());
             }
         }
         finally

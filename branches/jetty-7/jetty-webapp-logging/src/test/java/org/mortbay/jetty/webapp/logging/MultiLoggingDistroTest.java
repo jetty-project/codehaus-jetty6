@@ -76,6 +76,6 @@ public class MultiLoggingDistroTest
             request.getString("/" + context + "/logging");
         }
 
-        LogAssert.assertContainsEntries(jetty, "logs/jetty.log", "expected-multi.txt");
+        LogAssert.assertContainsEntries(jetty, "logs/jetty-central.log", "expected-multi.txt");
     }
 }

@@ -75,6 +75,6 @@ public class BasicDistroTest
             request.getString("/" + context + "/logging");
         }
         
-        LogAssert.assertContainsEntries(jetty, "logs/jetty.log", "expected-basic.txt");
+        LogAssert.assertContainsEntries(jetty, "logs/jetty-central.log", "expected-basic.txt");
     }
 }
