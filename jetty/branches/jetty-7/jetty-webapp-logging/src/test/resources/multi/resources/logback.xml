@@ -2,7 +2,7 @@
   <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
 
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-    <file>logs/jetty.log</file>
+    <file>logs/jetty-central.log</file>
     <append>true</append>
     <layout>
       <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
