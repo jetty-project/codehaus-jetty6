@@ -408,7 +408,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 				}
                 				else if (channel.isOpen())
                 				{
-                					channel.register(selector,SelectionKey.OP_CONNECT,att);
+                					key=channel.register(selector,SelectionKey.OP_CONNECT,att);
                 				}
                 			}
                 			else if (o instanceof SocketChannel)
@@ -424,14 +424,14 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 				}
                 				else if (channel.isOpen())
                 				{
-                					channel.register(selector,SelectionKey.OP_CONNECT,null);
+                					key=channel.register(selector,SelectionKey.OP_CONNECT,null);
                 				}
                 			}
                 			else if (o instanceof ServerSocketChannel)
                 			{
                 				ServerSocketChannel channel = (ServerSocketChannel)o;
                 				ch=channel;
-                				channel.register(getSelector(),SelectionKey.OP_ACCEPT);
+                				key=channel.register(getSelector(),SelectionKey.OP_ACCEPT);
                 			}
                 			else if (o instanceof ChangeTask)
                 			{
@@ -450,7 +450,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             else
                                 Log.debug(e);
                             
-                            if(ch!=null)
+                            if(ch!=null && key==null)
                             {
                                 try
                                 {
