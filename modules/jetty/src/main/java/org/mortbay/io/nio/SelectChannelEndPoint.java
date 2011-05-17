@@ -231,7 +231,8 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     {
         synchronized (this)
         {
-            long start=_selectSet.getNow();
+            long now=_selectSet.getNow();
+            long end=now+timeoutMs;
             try
             {   
                 _readBlocked=true;
@@ -241,14 +242,17 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                     {
                         updateKey();
                         this.wait(timeoutMs);
-
-                        if (_readBlocked && timeoutMs<(_selectSet.getNow()-start))
-                            return false;
                     }
                     catch (InterruptedException e)
                     {
                         Log.warn(e);
                     }
+                    finally
+                    {
+                    	now=_selectSet.getNow();
+                    }
+                    if (_readBlocked && now>=end)
+                        return false;
                 }
             }
             finally
@@ -267,7 +271,8 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     {
         synchronized (this)
         {
-            long start=_selectSet.getNow();
+            long now=_selectSet.getNow();
+            long end=now+timeoutMs;
             try
             {   
                 _writeBlocked=true;
@@ -276,15 +281,18 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                     try
                     {
                         updateKey();
-                        this.wait(timeoutMs);
-
-                        if (_writeBlocked && timeoutMs<(_selectSet.getNow()-start))
-                            return false;
+                        this.wait(end-now);
                     }
                     catch (InterruptedException e)
                     {
                         Log.warn(e);
                     }
+                    finally
+                    {
+                    	now=_selectSet.getNow();
+                    }
+                    if (_writeBlocked && now>=end)
+                        return false;
                 }
             }
             finally

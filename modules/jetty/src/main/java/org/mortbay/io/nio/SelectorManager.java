@@ -16,6 +16,7 @@ package org.mortbay.io.nio;
 
 import java.io.IOException;
 import java.nio.channels.CancelledKeyException;
+import java.nio.channels.Channel;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
@@ -374,6 +375,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 {
                 	for (int i = 0; i < changes.size(); i++)
                 	{
+                		Channel ch=null;
                 		try
                 		{
                 			Object o = changes.get(i);
@@ -382,6 +384,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 			{
                 				// Update the operations for a key.
                 				SelectChannelEndPoint endpoint = (SelectChannelEndPoint)o;
+                				ch=endpoint.getChannel();
                 				endpoint.doUpdateKey();
                 			}
                 			else if (o instanceof Runnable)
@@ -393,6 +396,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 				// finish accepting/connecting this connection
                 				final ChangeSelectableChannel asc = (ChangeSelectableChannel)o;
                 				final SelectableChannel channel=asc._channel;
+                				ch=channel;
                 				final Object att = asc._attachment;
 
                 				if ((channel instanceof SocketChannel) && ((SocketChannel)channel).isConnected())
@@ -410,7 +414,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 			else if (o instanceof SocketChannel)
                 			{
                 				final SocketChannel channel=(SocketChannel)o;
-
+                				ch=channel;
                 				if (channel.isConnected())
                 				{
                 					key = channel.register(selector,SelectionKey.OP_READ,null);
@@ -426,6 +430,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 			else if (o instanceof ServerSocketChannel)
                 			{
                 				ServerSocketChannel channel = (ServerSocketChannel)o;
+                				ch=channel;
                 				channel.register(getSelector(),SelectionKey.OP_ACCEPT);
                 			}
                 			else if (o instanceof ChangeTask)
@@ -435,20 +440,28 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 			else
                 				throw new IllegalArgumentException(o.toString());
                 		}
-                		catch (Exception e)
-                		{
-                			if (isRunning())
-                				Log.warn(e);
-                			else
-                				Log.debug(e);
-                		}
-                		catch (Error e)
-                		{
-                			if (isRunning())
-                				Log.warn(e);
-                			else
-                				Log.debug(e);
-                		}
+                        catch (Throwable e)
+                        {
+                            if (e instanceof ThreadDeath)
+                                throw (ThreadDeath)e;
+                            
+                            if (isRunning())
+                                Log.warn(e);
+                            else
+                                Log.debug(e);
+                            
+                            if(ch!=null)
+                            {
+                                try
+                                {
+                                    ch.close();
+                                }
+                                catch(IOException e2)
+                                {
+                                    Log.debug(e2);
+                                }
+                            }
+                        }
                 	}
                 }
                 finally
@@ -562,33 +575,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             {
                                 // BLOODY SUN BUG !!!  Try refreshing the entire selector.
                                 _jvmFix1++;
-                                
-                                final Selector new_selector = Selector.open();
-                                Iterator iterator = _selector.keys().iterator();
-                                while (iterator.hasNext())
-                                {
-                                    SelectionKey k = (SelectionKey)iterator.next();
-                                    if (!k.isValid() || k.interestOps()==0)
-                                        continue;
-                                    
-                                    final SelectableChannel channel = k.channel();
-                                    final Object attachment = k.attachment();
-                                    
-                                    if (attachment==null)
-                                        addChange(channel);
-                                    else
-                                        addChange(channel,attachment);
-                                }
-                                Selector old_selector=_selector;
-                                _selector=new_selector;
-                                try 
-                                {
-                                    old_selector.close();
-                                }
-                                catch(Exception e)
-                                {
-                                    Log.warn(e);
-                                }
+                                renewSelector();
                                 return;
                             }
                         }
@@ -790,6 +777,40 @@ public abstract class SelectorManager extends AbstractLifeCycle
             }
         }
 
+        private void renewSelector()
+        {
+        	synchronized (this) 
+        	{
+        		try 
+        		{
+        			final Selector new_selector = Selector.open();
+        			Iterator iterator = _selector.keys().iterator();
+        			while (iterator.hasNext())
+        			{
+        				SelectionKey k = (SelectionKey)iterator.next();
+        				if (!k.isValid() || k.interestOps()==0)
+        					continue;
+
+        				final SelectableChannel channel = k.channel();
+        				final Object attachment = k.attachment();
+
+        				if (attachment==null)
+        					addChange(channel);
+        				else
+        					addChange(channel,attachment);
+        			}
+        			Selector old_selector=_selector;
+        			_selector=new_selector;
+        			old_selector.close();
+        		}
+        		catch(Exception e)
+        		{
+        			Log.warn(e);
+                }
+			}
+        	
+        }
+        
         /* ------------------------------------------------------------ */
         public SelectorManager getManager()
         {
@@ -826,9 +847,16 @@ public abstract class SelectorManager extends AbstractLifeCycle
         /* ------------------------------------------------------------ */
         public void wakeup()
         {
-            Selector selector = _selector;
-            if (selector!=null)
-                selector.wakeup();
+            try
+            {
+                Selector selector = _selector;
+                if (selector!=null)
+                    selector.wakeup();
+            }
+            catch(Exception e)
+            {
+                renewSelector();
+            }
         }
 
         /* ------------------------------------------------------------ */
