@@ -14,6 +14,10 @@
 
 package org.mortbay.jetty;
 
+import java.net.URLEncoder;
+
+import org.mortbay.util.MultiMap;
+
 import junit.framework.TestCase;
 
 public class HttpURITest extends TestCase
@@ -164,4 +168,17 @@ public class HttpURITest extends TestCase
         }
     }
 
+    public void testExtB() throws Exception
+    {
+    	String[] values =  new String[]{"a","abcdABCD","\u00C0","\u697C","\uD869\uDED5","\uD840\uDC08"};
+    	for (int i=0;i<values.length;i++)
+    	{
+    		String value=values[i];
+            HttpURI uri = new HttpURI("/path?value="+URLEncoder.encode(value,"UTF-8"));
+            
+            MultiMap parameters = new MultiMap();
+            uri.decodeQueryTo(parameters,"UTF-8");
+            assertEquals(value,parameters.get("value"));
+        }
+    }
 }
