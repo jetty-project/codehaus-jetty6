@@ -34,18 +34,15 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <descriptors>
-<!-- <descriptor>site-component.xml</descriptor>-->
-                <descriptor>config.xml</descriptor>
-              </descriptors>
+              <descriptorRefs>
+                <descriptorRef>config</descriptorRef>
+              </descriptorRefs>
             </configuration>
           </execution>
         </executions>
       </plugin>
     </plugins>
-  </build>  
-
-
+  </build>
   <dependencies>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
