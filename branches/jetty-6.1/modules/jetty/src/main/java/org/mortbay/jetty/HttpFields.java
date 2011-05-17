@@ -191,8 +191,9 @@ public class HttpFields
             __dateReceive[i].setTimeZone(__GMT);
         }
     }
-    public final static String __01Jan1970 = formatDate(0, true).trim();
+    public final static String __01Jan1970 = formatDate(0, false).trim();
     public final static Buffer __01Jan1970_BUFFER = new ByteArrayBuffer(__01Jan1970);
+    public final static String __01Jan1970_COOKIE = formatDate(0,true).trim();
 
     /* -------------------------------------------------------------- */
     protected ArrayList _fields = new ArrayList(20);
@@ -961,10 +962,12 @@ public class HttpFields
         // Format value and params
         StringBuffer buf = new StringBuffer(128);
         String name_value_params = null;
+        String start;
         synchronized (buf)
         {
             QuotedStringTokenizer.quoteIfNeeded(buf, name);
             buf.append('=');
+            start=buf.toString();
             if (value != null && value.length() > 0)
                 QuotedStringTokenizer.quoteIfNeeded(buf, value);
 
@@ -1002,7 +1005,7 @@ public class HttpFields
                 {
                     buf.append(";Expires=");
                     if (maxAge == 0)
-                        buf.append(__01Jan1970);
+                        buf.append(__01Jan1970_COOKIE);
                     else
                         formatDate(buf, System.currentTimeMillis() + 1000L * maxAge, true);
                 }
@@ -1024,11 +1027,33 @@ public class HttpFields
             if (cookie instanceof HttpOnlyCookie)
                 buf.append(";HttpOnly");
 
-            // TODO - straight to Buffer?
             name_value_params = buf.toString();
         }
+        
+        // look for existing set cookie of same name
+        Field field = getField(HttpHeaders.SET_COOKIE_BUFFER);
+        if (field != null)
+        {
+            final int revision=_revision;
+            
+            while (field!=null)
+            {
+                if (field._revision==revision && field._value!=null && field._value.toString().startsWith(start))
+                {
+                    field.reset(new ByteArrayBuffer(name_value_params),-1,revision);
+                    name_value_params=null;
+                    break;
+                }
+                field=field._next;
+            }
+        }
+        
+        if (name_value_params!=null)
+            add(HttpHeaders.SET_COOKIE_BUFFER, new ByteArrayBuffer(name_value_params));
+        
+        // Expire responses with set-cookie headers so they do not get cached.
         put(HttpHeaders.EXPIRES_BUFFER, __01Jan1970_BUFFER);
-        add(HttpHeaders.SET_COOKIE_BUFFER, new ByteArrayBuffer(name_value_params));
+        
     }
 
     /* -------------------------------------------------------------- */

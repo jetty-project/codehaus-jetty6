@@ -375,6 +375,14 @@ public class HttpFieldsTest extends TestCase
         assertEquals("minimal=value",fields.getStringField("Set-Cookie"));
 
         fields.clear();
+        cookie = new HttpOnlyCookie("everything","wrong");
+        cookie.setDomain("wrong");
+        cookie.setPath("wrong");
+        cookie.setMaxAge(0);
+        cookie.setComment("wrong");
+        cookie.setSecure(true);
+        cookie.setVersion(0);
+        fields.addSetCookie(cookie);
         cookie = new HttpOnlyCookie("everything","value");
         cookie.setDomain("domain");
         cookie.setPath("path");
@@ -383,8 +391,13 @@ public class HttpFieldsTest extends TestCase
         cookie.setSecure(true);
         cookie.setVersion(0);
         fields.addSetCookie(cookie);
-        //fields.addSetCookie("everything","value","domain","path",0,"comment",true,true,0);
         assertEquals("everything=value;Path=path;Domain=domain;Expires=Thu, 01-Jan-1970 00:00:00 GMT;Secure;HttpOnly",fields.getStringField("Set-Cookie"));
+        Enumeration e =fields.getValues("Set-Cookie");
+        assertTrue(e.hasMoreElements());
+        assertEquals("everything=value;Path=path;Domain=domain;Expires=Thu, 01-Jan-1970 00:00:00 GMT;Secure;HttpOnly",e.nextElement());
+        assertFalse(e.hasMoreElements());
+        assertEquals("Thu, 01 Jan 1970 00:00:00 GMT",fields.getStringField("Expires"));
+        
         
         fields.clear();
         cookie = new Cookie("json","{\"services\":[\"cwa\", \"aa\"]}");

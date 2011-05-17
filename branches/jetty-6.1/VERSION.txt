@@ -13,6 +13,7 @@ Jetty-6.1-SNAPSHOT
  + JETTY-1343 IllegalArgumentException for bad % encodings
  + JETTY-1348 Log getCause
  + 333892 Improved JVM bug detection
+ + 338364 Fixed expires header for set cookies
 
 Jetty-6.1.26 10 November 2010
  + JETTY-748 Prevent race close of socket by old acceptor threads
