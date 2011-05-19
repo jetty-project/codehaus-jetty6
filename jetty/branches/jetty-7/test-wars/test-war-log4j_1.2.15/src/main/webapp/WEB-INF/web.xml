@@ -15,8 +15,18 @@
     <servlet-name>LoggingServlet</servlet-name>
     <servlet-class>org.mortbay.jetty.tests.webapp.LoggingServlet</servlet-class>
   </servlet>
+  <servlet>
+    <description></description>
+    <display-name>LoggingConfigServlet</display-name>
+    <servlet-name>LoggingConfigServlet</servlet-name>
+    <servlet-class>org.mortbay.jetty.tests.webapp.LoggingConfigServlet</servlet-class>
+  </servlet>
   <servlet-mapping>
     <servlet-name>LoggingServlet</servlet-name>
     <url-pattern>/logging</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>LoggingConfigServlet</servlet-name>
+    <url-pattern>/logging-config</url-pattern>
   </servlet-mapping>
 </web-app>

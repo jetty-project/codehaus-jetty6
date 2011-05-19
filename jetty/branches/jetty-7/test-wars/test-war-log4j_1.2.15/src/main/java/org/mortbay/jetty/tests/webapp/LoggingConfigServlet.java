@@ -16,46 +16,43 @@
 
 package org.mortbay.jetty.tests.webapp;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Layout;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 
 /**
- * Servlet implementation class LoggingServlet
+ * Servlet that tweaks the existing configuration.
  */
-public class LoggingServlet extends HttpServlet
+public class LoggingConfigServlet extends HttpServlet
 {
     private static final long serialVersionUID = 1L;
-    private Logger log = Logger.getLogger(LoggingServlet.class);
+    private static final String LOGID = LoggingConstants.LOGID;
+    private Logger log = Logger.getLogger(LoggingConfigServlet.class);
 
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public LoggingServlet()
-    {
-        log.debug(LoggingConstants.LOGID + " initialized");
-    }
-
-    /**
-     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-     *      response)
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        log.info(LoggingConstants.LOGID + " GET requested");
+        // Attempt to reconfigure the level of the root logger
+        Logger root = Logger.getRootLogger();
+        root.setLevel(Level.WARN);
+        log.info(LOGID + " Set level to WARN");
+        log.warn(LOGID + " Set level to WARN");
+        
+        // Attempt to add a new console appender
+        Layout layout = new PatternLayout("#CONFIGURED# %r [%t] %p %c %x - %m%n");
+        ConsoleAppender appender = new ConsoleAppender(layout);
+        log.addAppender(appender);
 
-        log.warn(LoggingConstants.LOGID + " Slightly warn, with a chance of log events");
-
-        log.error(LoggingConstants.LOGID + " Nothing is (intentionally) being output by this Servlet");
-
-        IOException severe = new FileNotFoundException("A file cannot be found");
-
-        log.fatal(LoggingConstants.LOGID + " Whoops (intentionally) causing a Throwable",severe);
+        log.info(LOGID + " Added ConsoleAppender");
+        log.warn(LOGID + " Added ConsoleAppender");
     }
 }
