@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.mortbay.jetty.testwars</groupId>
     <artifactId>testwars-parent</artifactId>
-    <version>7.4.1-SNAPSHOT</version>
+    <version>7.4.2-SNAPSHOT</version>
   </parent>
   <artifactId>test-war-download</artifactId>
   <packaging>war</packaging>
@@ -58,7 +58,7 @@
     <dependency>
       <groupId>org.eclipse.jetty.toolchain</groupId>
       <artifactId>jetty-test-helper</artifactId>
-      <version>1.4-SNAPSHOT</version>
+      <version>1.4</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
