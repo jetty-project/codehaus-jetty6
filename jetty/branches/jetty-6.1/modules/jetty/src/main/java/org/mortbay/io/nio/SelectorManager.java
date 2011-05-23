@@ -856,7 +856,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
             }
             catch(Exception e)
             {
-	        Log.warning("Wakup failed ",e);
+	        Log.warn("Wakup failed ",e);
                 renewSelector();
             }
         }
