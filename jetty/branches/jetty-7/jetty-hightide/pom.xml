@@ -279,8 +279,8 @@
             <phase>process-resources</phase>
             <configuration>
               <tasks>
-                <patch dir="${assembly-directory}/contexts" patchfile="src/main/patches/testContextPath.patch" ignorewhitespace="true" strip="0" failonerror="true" />
-                <patch dir="${assembly-directory}/" patchfile="src/main/patches/startini.patch" ignorewhitespace="true" strip="0" failonerror="true" />
+                <patch dir="${assembly-directory}/contexts" patchfile="src/main/patches/testContextPath.patch" ignorewhitespace="true" strip="0" failonerror="false" />
+                <patch dir="${assembly-directory}/" patchfile="src/main/patches/startini.patch" ignorewhitespace="true" strip="0" failonerror="false" />
               </tasks>
             </configuration>
             <goals>
