@@ -19,6 +19,11 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.toolchain.test.SimpleRequest;
 import org.eclipse.jetty.util.ajax.JSON;
+import org.eclipse.jetty.util.ajax.JSONObjectConvertor;
 
 /* ------------------------------------------------------------ */
 /**
@@ -46,7 +52,7 @@ public class DownloadServlet extends HttpServlet
     @Override
     public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException
     {
-        List<String[]> testResults = new ArrayList<String[]>();
+        JSONArray testResults = new JSONArray();
         
         String reqUri = request.getRequestURL().toString();
         int idx = reqUri.lastIndexOf('/');
@@ -65,15 +71,26 @@ public class DownloadServlet extends HttpServlet
             throw new ServletException(ex);
         }
 
+        try
+        {
         for (String fname : fileNames)
         {
             String data = downReq.getString(fname);
             File inFile = new File (this.getServletContext().getRealPath(fname));
-            testResults.add(new String[] {fname, data.length() == inFile.length()? "PASSED":"FAILED"});
+            JSONObject result = new JSONObject();
+            result.put("id", fname );
+            result.put("success",data.length() == inFile.length()? true:false);
+            testResults.put(result);
+           // testResults.add(new String[] {fname, data.length() == inFile.length()? "PASSED":"FAILED"});
         }
-
-        String jsonResults = JSON.toString(testResults.toArray(new String[2][]));
         
-        response.getWriter().write(jsonResults);
+        response.setContentType("application/json");
+
+        response.getWriter().write(testResults.toString(2));
+        }
+        catch (JSONException je)
+        {
+            
+        }
     }
 }
