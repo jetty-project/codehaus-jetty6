@@ -205,6 +205,13 @@ public class JspcMojo extends AbstractMojo
      * @parameter
      */
     private String schemaResourcePrefix;
+
+
+   /**
+    * Should white spaces in template text between actions or directives be trimmed? Defaults to false.
+    * @parameter
+    */
+   private boolean trimSpaces = false;
     
 
     public void execute() throws MojoExecutionException, MojoFailureException
@@ -224,6 +231,7 @@ public class JspcMojo extends AbstractMojo
             getLog().info("suppressSmap=" + suppressSmap);
             getLog().info("ignoreJspFragmentErrors=" + ignoreJspFragmentErrors);
             getLog().info("schemaResourcePrefix=" + schemaResourcePrefix);
+            getLog().info("trimSpaces="+ trimSpaces);
         }
         try
         {
@@ -272,6 +280,7 @@ public class JspcMojo extends AbstractMojo
         jspc.setSmapSuppressed(suppressSmap);
         jspc.setSmapDumped(!suppressSmap);
         jspc.setJavaEncoding(javaEncoding);
+        jspc.setTrimSpaces(trimSpaces);
 
         // JspC#setExtensions() does not exist, so 
         // always set concrete list of files that will be processed.
