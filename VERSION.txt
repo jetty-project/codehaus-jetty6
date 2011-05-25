@@ -13,6 +13,7 @@ Jetty-6.1-SNAPSHOT
  + JETTY-1342 Recreate selector if wakeup throws JVM bug 
  + JETTY-1343 IllegalArgumentException for bad % encodings
  + JETTY-1348 Log getCause
+ + JETTY-1372 maven-jetty-jspc-plugin doesn't support trimSpaces
  + 333892 Improved JVM bug detection
  + 338364 Fixed expires header for set cookies
 
