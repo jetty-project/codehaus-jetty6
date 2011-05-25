@@ -76,14 +76,16 @@ public class RollingFileLogDistroTest
         long now = System.currentTimeMillis();
         long duration = (long)(1000 * 60 * (1.5)); // 1.5 minutes
         long end = now + duration;
+        long left;
         while (System.currentTimeMillis() < end)
         {
-            System.out.printf("%,d milliseconds left%n",(end - System.currentTimeMillis()));
+            left = (end - System.currentTimeMillis());
+            System.out.printf("%,d milliseconds left%n",left);
             for (String context : CONTEXTS)
             {
                 request.getString("/" + context + "/logging");
             }
-            Thread.sleep(500);
+            Thread.sleep(Math.min(20000,left)); // every 20s.
         }
 
         LogAssert.assertLogExistsRegex(jetty, "logs/jetty-roll-20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[012][0-9]-[0-5][0-9].log");
