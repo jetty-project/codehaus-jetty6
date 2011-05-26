@@ -1,0 +1,134 @@
+//
+// Permissions granted to the webapp
+//
+grant codebase "file:${jetty.home}/work/policy-tests/-" {
+
+  permission javax.servlet.aspect.ServletContextAttributePermission "javax.servlet.context.tempdir", "read";
+  
+  // required for file system tests
+  permission java.util.PropertyPermission "jetty.home", "read";
+
+  // testSystemPropertyAccess
+  permission java.util.PropertyPermission "__ALLOWED_READ_PROPERTY", "read";
+  permission java.util.PropertyPermission "__ALLOWED_WRITE_PROPERTY", "write";
+
+
+}
+
+//
+// Permissions granted to the servlet api
+//
+grant codeBase "file:${jetty.home}/lib-secure/-" {
+  // required for file system tests
+  permission java.util.PropertyPermission "jetty.home", "read";
+
+  // testSystemPropertyAccess
+  permission java.util.PropertyPermission "__ALLOWED_READ_PROPERTY", "read";
+  permission java.util.PropertyPermission "__ALLOWED_WRITE_PROPERTY", "write";
+
+
+  permission javax.servlet.aspect.ServletContextAttributePermission "javax.servlet.context.tempdir", "read";
+
+  permission java.io.FilePermission "${jetty.home}${/}work${/}policy-tests", "read,write,delete";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.SessionCookie", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.SessionIdPathParameterName", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.MaxAge", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.SessionDomain", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.SessionPath", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.CheckingRemoteSessionIdEncoding", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.acceptRanges", "read";  
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.dirAllowed", "read";  
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.redirectWelcome", "read"; 
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.gzip", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.pathInfoOnly", "read"; 
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.welcomeServlets", "read";  
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.aliases", "read"; 
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.useFileMappedBuffer", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.relativeResourceBase", "read";                                                                                           
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.resourceBase", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.stylesheet", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.cacheControl", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.resourceCache", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.maxCachedFileSize", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.maxCachedFiles", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.maxCacheSize", "read";                                                                                            
+  
+                                                                                              
+  permission javax.servlet.aspect.ServletContextAttributePermission "org.eclipse.jetty.server.session.timer", "read";
+  permission javax.servlet.aspect.ServletContextAttributePermission "com.sun.faces.useMyFaces", "read";
+  permission javax.servlet.aspect.ServletContextAttributePermission "com.sun.jsp.propertyGroups", "read";
+  permission javax.servlet.aspect.ServletContextAttributePermission "com.sun.servlet.webxml.version", "read";
+  permission javax.servlet.aspect.ServletContextAttributePermission "org.apache.catalina.jsp_classpath", "read";
+  permission javax.servlet.aspect.ServletContextAttributePermission "com.sun.jsp.taglibraryCache", "write";
+  permission javax.servlet.aspect.ServletContextAttributePermission "resourceCache", "all";
+  permission javax.servlet.aspect.ServletContextAttributePermission "com.sun.jsp.tagFileJarUrlsCache", "write";
+  
+
+}
+
+//
+// Permissions granted to jetty system libraries
+//
+grant codeBase "file:${jetty.home}/lib/-" {
+  // review
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.SessionCookie", "read";
+  permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
+  permission java.lang.RuntimePermission "accessDeclaredMembers";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.SessionIdPathParameterName", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.MaxAge", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.SessionDomain", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.SessionPath", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.CheckingRemoteSessionIdEncoding", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.acceptRanges", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.dirAllowed", "read";  
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.redirectWelcome", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.gzip", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.pathInfoOnly", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.welcomeServlets", "read";  
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.aliases", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.useFileMappedBuffer", "read";  
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.relativeResourceBase", "read";                                                                                           
+  
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.resourceBase", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.stylesheet", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.cacheControl", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.resourceCache", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.maxCachedFileSize", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.maxCachedFiles", "read";
+  permission javax.servlet.aspect.ServletContextParameterPermission "org.eclipse.jetty.servlet.Default.maxCacheSize", "read";                                                                                            
+                                                                                                      
+                                                                                             
+                                                                                             
+                              
+  permission javax.servlet.aspect.ServletContextAttributePermission "org.eclipse.jetty.server.session.timer", "read";
+  permission javax.servlet.aspect.ServletContextAttributePermission "com.sun.faces.useMyFaces", "read";
+  permission javax.servlet.aspect.ServletContextAttributePermission "com.sun.jsp.propertyGroups", "read";
+  permission javax.servlet.aspect.ServletContextAttributePermission "com.sun.servlet.webxml.version", "read";
+  permission javax.servlet.aspect.ServletContextAttributePermission "org.apache.catalina.jsp_classpath", "read";
+  permission javax.servlet.aspect.ServletContextAttributePermission "com.sun.jsp.taglibraryCache", "write";
+  permission javax.servlet.aspect.ServletContextAttributePermission "resourceCache", "all";
+  permission javax.servlet.aspect.ServletContextAttributePermission "com.sun.jsp.tagFileJarUrlsCache", "write";  
+  
+    
+  permission java.io.FilePermission "${jetty.home}${/}work${/}-", "read,write,delete";
+  permission javax.servlet.aspect.ServletContextAttributePermission "javax.servlet.context.tempdir", "read";
+  permission javax.servlet.aspect.ServletContextAttributePermission "org.eclipse.jetty.server.session.timer", "read";
+}
+
+//
+// Global Permissions for test and aspects
+//
+grant {
+  // required for test to seize IO of executed process
+  permission java.lang.RuntimePermission "setIO";
+  
+  permission java.net.SocketPermission "[0:0:0:0:0:0:0:1]:-", "accept,resolve";
+  
+  // aspect related
+  permission java.lang.RuntimePermission "accessDeclaredMembers";
+  permission java.util.PropertyPermission "aj.weaving.verbose", "read";
+  permission java.util.PropertyPermission "org.aspectj.tracing.messages", "read";
+  permission java.util.PropertyPermission "org.aspectj.weaver.showWeaveInfo", "read";
+  permission java.util.PropertyPermission "org.aspectj.tracing.messages", "read";
+  permission java.util.PropertyPermission "org.aspectj.weaver.loadtime.configuration", "read";
+}
