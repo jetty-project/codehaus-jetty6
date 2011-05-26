@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.mortbay.jetty.testwars</groupId>
     <artifactId>testwars-parent</artifactId>
-    <version>7.4.2-SNAPSHOT</version>
+    <version>7.4.3-SNAPSHOT</version>
   </parent>
   <artifactId>jetty-remote-assert</artifactId>
   <packaging>jar</packaging>
@@ -51,9 +51,9 @@
       <version>20080701</version>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit4-version}</version>
+      <groupId>org.eclipse.jetty.toolchain</groupId>
+      <artifactId>jetty-test-helper</artifactId>
+      <version>${jetty-test-helper-version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
