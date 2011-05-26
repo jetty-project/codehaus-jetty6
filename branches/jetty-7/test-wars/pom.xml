@@ -29,7 +29,6 @@
   <packaging>pom</packaging>
   <modules>
     <!-- Original top level test webapps -->
-    <module>test-jetty-webapp</module>
     <module>test-jndi-webapp</module>
     <module>test-jaas-webapp</module>
     <module>test-annotation-webapp</module>
