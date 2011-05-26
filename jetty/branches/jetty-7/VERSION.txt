@@ -1,4 +1,5 @@
 jetty@codehaus 7.4.2-SNAPSHOT
+ + JETTY-1376 Fixed init of jetty maven plugin
 
 jetty@codehaus 7.4.1.v20110512
  + JETTY-1368 RequiredContentsRule doesn't assemble the file path correctly

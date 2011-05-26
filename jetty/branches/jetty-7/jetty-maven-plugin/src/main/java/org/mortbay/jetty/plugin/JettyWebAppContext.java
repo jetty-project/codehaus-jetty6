@@ -55,29 +55,30 @@ public class JettyWebAppContext extends WebAppContext
     private static final String WEB_INF_CLASSES_PREFIX = "/WEB-INF/classes";
     private static final String WEB_INF_LIB_PREFIX = "/WEB-INF/lib";
 
+    private final List<File> webInfClasses = new ArrayList<File>();
+    private final List<File> webInfJars = new ArrayList<File>();
+    private final Map<String, File> webInfJarMap = new HashMap<String, File>();
+    private final EnvConfiguration envConfig;
     private List<File> classpathFiles;
     private String jettyEnvXml;
-    private MavenWebInfConfiguration webInfConfig = new MavenWebInfConfiguration();
-    private WebXmlConfiguration webXmlConfig = new WebXmlConfiguration();
-    private MetaInfConfiguration metaInfConfig = new MetaInfConfiguration();
-    private FragmentConfiguration fragConfig = new FragmentConfiguration();
-    private EnvConfiguration envConfig =  new EnvConfiguration();
-    private AnnotationConfiguration annotationConfig = new AnnotationConfiguration();
-    private org.eclipse.jetty.plus.webapp.PlusConfiguration plusConfig = new org.eclipse.jetty.plus.webapp.PlusConfiguration();
-    private JettyWebXmlConfiguration jettyWebConfig =  new JettyWebXmlConfiguration();
-    private TagLibConfiguration tagConfig = new TagLibConfiguration();
-    private Configuration[] configs;
     private List<Resource> overlays;
     private boolean unpackOverlays;
-    private List<File> webInfClasses = new ArrayList<File>();
-    private List<File> webInfJars = new ArrayList<File>();
-    private Map<String, File> webInfJarMap = new HashMap<String, File>();
 
     public JettyWebAppContext ()
     throws Exception
     {
         super();   
-        configs = new Configuration[]{webInfConfig, webXmlConfig,  metaInfConfig,  fragConfig, envConfig, plusConfig, annotationConfig, jettyWebConfig, tagConfig };
+        setConfigurations(new Configuration[]{
+                new MavenWebInfConfiguration(),
+                new WebXmlConfiguration(),
+                new MetaInfConfiguration(),
+                new FragmentConfiguration(),
+                envConfig = new EnvConfiguration(),
+                new AnnotationConfiguration(),
+                new org.eclipse.jetty.plus.webapp.PlusConfiguration(),
+                new JettyWebXmlConfiguration(),
+                new TagLibConfiguration()
+        });
     }
     
     public boolean getUnpackOverlays()
@@ -162,8 +163,6 @@ public class JettyWebAppContext extends WebAppContext
 
     public void doStart () throws Exception
     {
-        setConfigurations(configs);
-
         // Initialize map containing all jars in /WEB-INF/lib
         webInfJarMap.clear();
         for (File file : webInfJars)
