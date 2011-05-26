@@ -20,7 +20,7 @@
     <jsp-2-1-version>2.1.v20100127</jsp-2-1-version>
     <junit-version>3.8.2</junit-version>
     <junit4-version>4.8.1</junit4-version>
-    <jetty-test-helper-version>1.4</jetty-test-helper-version>
+    <jetty-test-helper-version>1.5</jetty-test-helper-version>
   </properties>
 
   <scm>
