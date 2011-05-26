@@ -3,7 +3,7 @@ package org.mortbay.jetty.test.validation;
 import java.io.File;
 import java.security.AccessControlException;
 
-import org.apache.commons.io.FilenameUtils;
+import org.eclipse.jetty.toolchain.test.OS;
 
 public abstract class AbstractSecurityCheck
 {
@@ -17,12 +17,12 @@ public abstract class AbstractSecurityCheck
         return jettyHome;
     }
 
-    protected void canWrite(SecurityCheckContext check, String rawpath)
+    protected void canWrite(RemoteAsserts check, String rawpath)
     {
-        SecurityResult result = new SecurityResult("filesystem.can.write|%s",rawpath);
+        RemoteAssertResult result = new RemoteAssertResult("filesystem.can.write|%s",rawpath);
         try
         {
-            File path = new File(FilenameUtils.separatorsToSystem(rawpath));
+            File path = new File(OS.separators(rawpath));
             result.assertEquals("File(" + rawpath + ").canWrite()",true,path.canWrite());
         }
         catch (Throwable t)
@@ -35,12 +35,12 @@ public abstract class AbstractSecurityCheck
         }
     }
 
-    protected void canRead(SecurityCheckContext check, String rawpath)
+    protected void canRead(RemoteAsserts check, String rawpath)
     {
-        SecurityResult result = new SecurityResult("filesystem.can.read|%s",rawpath);
+        RemoteAssertResult result = new RemoteAssertResult("filesystem.can.read|%s",rawpath);
         try
         {
-            File path = new File(FilenameUtils.separatorsToSystem(rawpath));
+            File path = new File(OS.separators(rawpath));
             result.assertEquals("File(" + rawpath + ").canRead()",true,path.canRead());
         }
         catch (Throwable t)
@@ -53,12 +53,12 @@ public abstract class AbstractSecurityCheck
         }
     }
 
-    protected void deniedWrite(SecurityCheckContext check, String rawpath)
+    protected void deniedWrite(RemoteAsserts check, String rawpath)
     {
-        SecurityResult result = new SecurityResult("filesystem.denied.write|%s",rawpath);
+        RemoteAssertResult result = new RemoteAssertResult("filesystem.denied.write|%s",rawpath);
         try
         {
-            File path = new File(FilenameUtils.separatorsToSystem(rawpath));
+            File path = new File(OS.separators(rawpath));
             result.assertEquals("File(" + rawpath + ").canWrite()",false,path.canWrite());
         }
         catch (AccessControlException e)
@@ -75,12 +75,12 @@ public abstract class AbstractSecurityCheck
         }
     }
 
-    protected void deniedRead(SecurityCheckContext check, String rawpath)
+    protected void deniedRead(RemoteAsserts check, String rawpath)
     {
-        SecurityResult result = new SecurityResult("filesystem.denied.read|%s",rawpath);
+        RemoteAssertResult result = new RemoteAssertResult("filesystem.denied.read|%s",rawpath);
         try
         {
-            File path = new File(FilenameUtils.separatorsToSystem(rawpath));
+            File path = new File(OS.separators(rawpath));
             result.assertEquals("File(" + rawpath + ").canRead()",false,path.canRead());
         }
         catch (AccessControlException e)
@@ -98,9 +98,9 @@ public abstract class AbstractSecurityCheck
     }
     
     
-    protected void canReadProperty(SecurityCheckContext check, String property)
+    protected void canReadProperty(RemoteAsserts check, String property)
     {
-        SecurityResult result = new SecurityResult("property.can.read|%s",property);
+        RemoteAssertResult result = new RemoteAssertResult("property.can.read|%s",property);
         try
         {
             @SuppressWarnings("unused")
@@ -117,9 +117,9 @@ public abstract class AbstractSecurityCheck
         }
     }
     
-    protected void canWriteProperty(SecurityCheckContext check, String property)
+    protected void canWriteProperty(RemoteAsserts check, String property)
     {
-        SecurityResult result = new SecurityResult("property.can.write|%s",property);
+        RemoteAssertResult result = new RemoteAssertResult("property.can.write|%s",property);
         try
         {
             System.setProperty(property, "foo");
@@ -135,9 +135,9 @@ public abstract class AbstractSecurityCheck
         }
     }
     
-    protected void deniedReadProperty(SecurityCheckContext check, String property)
+    protected void deniedReadProperty(RemoteAsserts check, String property)
     {
-        SecurityResult result = new SecurityResult("property.denied.read|%s",property);
+        RemoteAssertResult result = new RemoteAssertResult("property.denied.read|%s",property);
         try
         {
             @SuppressWarnings("unused")
@@ -158,9 +158,9 @@ public abstract class AbstractSecurityCheck
         }
     }
     
-    protected void deniedWriteProperty(SecurityCheckContext check, String property)
+    protected void deniedWriteProperty(RemoteAsserts check, String property)
     {
-        SecurityResult result = new SecurityResult("property.denied.write|%s",property);
+        RemoteAssertResult result = new RemoteAssertResult("property.denied.write|%s",property);
         try
         {
             System.setProperty(property, "foo");
