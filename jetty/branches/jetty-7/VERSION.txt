@@ -1,4 +1,5 @@
 jetty@codehaus 7.4.2-SNAPSHOT
+ + JETTY-1372 jspc plugin support trimSpaces
  + JETTY-1376 Fixed init of jetty maven plugin
 
 jetty@codehaus 7.4.1.v20110512
