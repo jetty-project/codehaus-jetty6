@@ -1,4 +1,4 @@
-jetty@codehaus 7.4.2-SNAPSHOT
+jetty@codehaus 7.4.2.v20110526
  + JETTY-1372 jspc plugin support trimSpaces
  + JETTY-1376 Fixed init of jetty maven plugin
  + Removed unused test-jetty-webapp
