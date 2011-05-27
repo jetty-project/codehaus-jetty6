@@ -1,0 +1,52 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.mortbay.jetty</groupId>
+    <artifactId>jetty-integration-project</artifactId>
+    <version>8.0.0.M3-SNAPSHOT</version>
+  </parent>
+  <artifactId>jetty-atomikos</artifactId>
+  <name>Jetty :: Atomikos Dependencies</name>
+  <packaging>pom</packaging>
+  <properties>
+    <atomikos-version>3.7.0</atomikos-version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>com.atomikos</groupId>
+      <artifactId>atomikos-util</artifactId>
+      <version>${atomikos-version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.jms</groupId>
+          <artifactId>jms</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.hibernate</groupId>
+          <artifactId>hibernate</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.atomikos</groupId>
+      <artifactId>transactions-api</artifactId>
+      <version>${atomikos-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.atomikos</groupId>
+      <artifactId>transactions</artifactId>
+      <version>${atomikos-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.atomikos</groupId>
+      <artifactId>transactions-jdbc</artifactId>
+      <version>${atomikos-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.atomikos</groupId>
+      <artifactId>transactions-jta</artifactId>
+      <version>${atomikos-version}</version>
+    </dependency>
+  </dependencies>
+</project>
+

@@ -12,12 +12,9 @@
     <asm-version>3.1</asm-version>
     <assembly-directory>target/hightide</assembly-directory>
     <root-dist-directory>target/jetty-distribution</root-dist-directory>
-    <atomikos-version>3.6.4</atomikos-version>
+    <atomikos-version>3.7.0</atomikos-version>
     <derby-version>10.6.1.0</derby-version>
-    <org-cometd-version>2.1.0.beta2</org-cometd-version>
-    <javax-activation-version>1.1</javax-activation-version>
-    <jta-spec-version>1.1.1</jta-spec-version>
-    <javax-mail-version>1.4</javax-mail-version>
+    <org-cometd-version>2.2.0.RC0</org-cometd-version>
   </properties>
   <build>
     <plugins>
@@ -39,7 +36,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.1</version>
         <executions>
           <execution>
             <id>unpack-root-dist</id>
@@ -60,7 +56,7 @@
                   <outputDirectory>${root-dist-directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
                   <artifactId>test-jndi-webapp</artifactId>
                   <version>${project.version}</version>
                   <classifier>config</classifier>
@@ -70,7 +66,7 @@
                   <outputDirectory>${assembly-directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
                   <artifactId>test-jndi-webapp</artifactId>
                   <version>${project.version}</version>
                   <type>war</type>
@@ -88,7 +84,7 @@
                   <outputDirectory>${assembly-directory}/webapps/async-rest</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
                   <artifactId>test-annotation-webapp</artifactId>
                   <version>${project.version}</version>
                   <classifier>config</classifier>
@@ -98,7 +94,7 @@
                   <outputDirectory>${assembly-directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
                   <artifactId>test-annotation-webapp</artifactId>
                   <version>${project.version}</version>
                   <type>war</type>
@@ -107,7 +103,7 @@
                   <outputDirectory>${assembly-directory}/webapps/test-annotations</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
                   <artifactId>test-jaas-webapp</artifactId>
                   <version>${project.version}</version>
                   <classifier>config</classifier>
@@ -117,7 +113,7 @@
                   <outputDirectory>${assembly-directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
                   <artifactId>test-jaas-webapp</artifactId>
                   <version>${project.version}</version>
                   <type>war</type>
@@ -130,7 +126,7 @@
           </execution>
           <execution>
             <id>copy-dist-deps</id>
-            <phase>package</phase>
+            <phase>process-sources</phase>
             <goals>
               <goal>copy</goal>
             </goals>
@@ -227,18 +223,6 @@
                   <includes>**</includes>
                   <outputDirectory>${assembly-directory}/lib/jsp</outputDirectory>
                 </artifactItem>
-               <artifactItem>
-                  <groupId>javax.mail</groupId>
-                  <artifactId>mail</artifactId>
-                  <version>${javax-mail-version}</version>
-                  <outputDirectory>${assembly-directory}/lib/jndi</outputDirectory>
-               </artifactItem>
-               <artifactItem>
-                  <groupId>javax.activation</groupId>
-                  <artifactId>activation</artifactId>
-                  <version>${javax-activation-version}</version>
-                  <outputDirectory>${assembly-directory}/lib/jndi</outputDirectory>
-               </artifactItem>
                <artifactItem>
                   <groupId>org.apache.geronimo.specs</groupId>
                   <artifactId>geronimo-annotation_1.0_spec</artifactId>
@@ -344,15 +328,14 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.4</version>
         <executions>
           <execution>
             <id>patch-configs</id>
             <phase>process-resources</phase>
             <configuration>
               <tasks>
-                <patch dir="${assembly-directory}/contexts" patchfile="src/main/patches/testContextPath.patch" ignorewhitespace="true" strip="0" />
-                <patch dir="${assembly-directory}/" patchfile="src/main/patches/startini.patch" ignorewhitespace="true" strip="0" />
+                <patch dir="${assembly-directory}/contexts" patchfile="src/main/patches/testContextPath.patch" ignorewhitespace="true" strip="0" failonerror="false" />
+                <patch dir="${assembly-directory}/" patchfile="src/main/patches/startini.patch" ignorewhitespace="true" strip="0" failonerror="false" />
               </tasks>
             </configuration>
             <goals>
@@ -388,6 +371,7 @@
             <descriptor>src/main/assembly/jetty-assembly.xml</descriptor>
             <descriptor>src/main/assembly/jetty-src.xml</descriptor>
           </descriptors>
+          <appendAssemblyId>false</appendAssemblyId>
           <tarLongFileMode>gnu</tarLongFileMode>
         </configuration>
         <executions>
@@ -402,7 +386,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.7</version>
         <configuration>
           <includeDependencySources>true</includeDependencySources>
           <additionalJOption>-J-Xmx256m</additionalJOption>
@@ -472,10 +455,10 @@
       <version>${jetty-version}</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
+      <groupId>org.eclipse.jetty</groupId>
         <artifactId>test-jetty-webapp</artifactId>
         <type>war</type>
-        <version>${project.version}</version>
+        <version>${jetty-version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
@@ -528,19 +511,19 @@
       <version>2.2</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
+      <groupId>org.mortbay.jetty.testwars</groupId>
       <artifactId>test-jndi-webapp</artifactId>
       <type>war</type>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
+      <groupId>org.mortbay.jetty.testwars</groupId>
       <artifactId>test-annotation-webapp</artifactId>
       <type>war</type>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
+      <groupId>org.mortbay.jetty.testwars</groupId>
       <artifactId>test-jaas-webapp</artifactId>
       <type>war</type>
       <version>${project.version}</version>
@@ -580,7 +563,6 @@
         <plugins>
           <plugin>
             <artifactId>maven-dependency-plugin</artifactId>
-            <version>2.1</version>
               <executions>
                 <execution>
                   <id>linux-unpack</id>

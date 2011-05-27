@@ -226,7 +226,7 @@ public class ServerProxyImpl implements ServerProxy
     /**
      * Starts web applications' scanners.
      */
-    private void startScanners()
+    private void startScanners() throws Exception
     {
         Iterator i = webApplications.keySet().iterator();
         while (i.hasNext())

@@ -90,7 +90,7 @@
                     <artifactId>native-maven-plugin</artifactId>
                     <configuration>
                       <javahOS>mac</javahOS>
-                      <jdkIncludePath>${java.home}/../Headers</jdkIncludePath>
+                      <jdkIncludePath>${java.home}/include</jdkIncludePath>
                     </configuration>
                   </plugin>
                 </plugins>
