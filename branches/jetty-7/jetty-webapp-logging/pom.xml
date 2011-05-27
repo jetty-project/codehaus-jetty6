@@ -285,7 +285,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.jetty</groupId>
                   <artifactId>jetty-distribution</artifactId>
-                  <version>${project.version}</version>
+                  <version>${jetty-version}</version>
                   <type>zip</type>
                   <overWrite>true</overWrite>
                 </artifactItem>
