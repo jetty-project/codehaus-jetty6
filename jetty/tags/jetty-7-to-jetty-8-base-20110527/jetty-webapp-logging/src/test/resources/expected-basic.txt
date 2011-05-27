@@ -1,0 +1,28 @@
+DEBUG o.m.j.tests.webapp.LoggingServlet - LoggingServlet(commons-logging-1.1) initialized
+INFO  o.m.j.tests.webapp.LoggingServlet - LoggingServlet(commons-logging-1.1) GET requested
+WARN  o.m.j.tests.webapp.LoggingServlet - LoggingServlet(commons-logging-1.1) Slightly warn, with a chance of log events
+ERROR o.m.j.tests.webapp.LoggingServlet - LoggingServlet(commons-logging-1.1) Nothing is (intentionally) being output by this Servlet
+ERROR o.m.j.tests.webapp.LoggingServlet - LoggingServlet(commons-logging-1.1) Whoops (intentionally) causing a Throwable
+java.io.FileNotFoundException: A file cannot be found
+    at org.mortbay.jetty.tests.webapp.LoggingServlet.doGet(LoggingServlet.java:60) ~[classes/:na]
+DEBUG o.m.j.tests.webapp.LoggingServlet - LoggingServlet(java) initialized
+INFO  o.m.j.tests.webapp.LoggingServlet - LoggingServlet(java) GET requested
+WARN  o.m.j.tests.webapp.LoggingServlet - LoggingServlet(java) Slightly warn, with a chance of log events
+WARN  o.m.j.tests.webapp.LoggingServlet - LoggingServlet(java) Nothing is (intentionally) being output by this Servlet
+ERROR o.m.j.tests.webapp.LoggingServlet - LoggingServlet(java) Whoops (intentionally) causing a Throwable
+java.io.FileNotFoundException: A file cannot be found
+    at org.mortbay.jetty.tests.webapp.LoggingServlet.doGet(LoggingServlet.java:58) ~[classes/:na]
+DEBUG o.m.j.tests.webapp.LoggingServlet - LoggingServlet(log4j-1.2.15) initialized
+INFO  o.m.j.tests.webapp.LoggingServlet - LoggingServlet(log4j-1.2.15) GET requested
+WARN  o.m.j.tests.webapp.LoggingServlet - LoggingServlet(log4j-1.2.15) Slightly warn, with a chance of log events
+ERROR o.m.j.tests.webapp.LoggingServlet - LoggingServlet(log4j-1.2.15) Nothing is (intentionally) being output by this Servlet
+ERROR o.m.j.tests.webapp.LoggingServlet - LoggingServlet(log4j-1.2.15) Whoops (intentionally) causing a Throwable
+java.io.FileNotFoundException: A file cannot be found
+    at org.mortbay.jetty.tests.webapp.LoggingServlet.doGet(LoggingServlet.java:58) ~[classes/:na]
+DEBUG o.m.j.tests.webapp.LoggingServlet - LoggingServlet(slf4j-1.5.6) initialized
+INFO  o.m.j.tests.webapp.LoggingServlet - LoggingServlet(slf4j-1.5.6) GET requested
+WARN  o.m.j.tests.webapp.LoggingServlet - LoggingServlet(slf4j-1.5.6) Slightly warn, with a chance of log events
+ERROR o.m.j.tests.webapp.LoggingServlet - LoggingServlet(slf4j-1.5.6) Nothing is (intentionally) being output by this Servlet
+ERROR o.m.j.tests.webapp.LoggingServlet - LoggingServlet(slf4j-1.5.6) Whoops (intentionally) causing a Throwable
+java.io.FileNotFoundException: A file cannot be found
+    at org.mortbay.jetty.tests.webapp.LoggingServlet.doGet(LoggingServlet.java:59) ~[classes/:na]
