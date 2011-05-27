@@ -37,14 +37,30 @@ public class JBossWebXmlConfiguration extends WebXmlConfiguration
     protected static Logger __log=Logger.getLogger(JBossWebAppContext.class); 
 
   
+<<<<<<< .working
+<<<<<<< .working
     public static class JBossWebXmlProcessor extends IterativeDescriptorProcessor
+=======
+    
+=======
+    
+>>>>>>> .merge-right.r6613
+    public class JBossWebXmlProcessor extends IterativeDescriptorProcessor
+>>>>>>> .merge-right.r6623
     {
+<<<<<<< .working
+<<<<<<< .working
     	protected MetaData _metaData;
     	protected WebAppContext _context;
     	protected SecurityHandler _securityHandler;
     	
+=======
+>>>>>>> .merge-right.r6623
+=======
+>>>>>>> .merge-right.r6613
         public JBossWebXmlProcessor() throws ClassNotFoundException
         {
+<<<<<<< .working
         	   try
                {
                    registerVisitor("login-config", this.getClass().getDeclaredMethod("visitLoginConfig", __signature));
@@ -53,13 +69,42 @@ public class JBossWebXmlConfiguration extends WebXmlConfiguration
         	   {
         		   throw new IllegalStateException(e);
         	   }
+=======
+            try
+            {
+                registerVisitor("login-config",getClass().getDeclaredMethod("visitLoginConfig", __signature));
+            }
+            catch (Exception e)   
+            {
+                throw new IllegalStateException(e);
+            }
+<<<<<<< .working
+>>>>>>> .merge-right.r6623
+=======
+>>>>>>> .merge-right.r6613
         }
         
+<<<<<<< .working
+<<<<<<< .working
         @Override
 		public void start(Descriptor descriptor) 
 		{
-            _metaData = descriptor.getMetaData();
-            _context = _metaData.getContext();
+=======
+        @Override
+        public void start(WebAppContext context, Descriptor descriptor)
+=======
+        @Override
+        public void start(WebAppContext context, Descriptor descriptor)
+>>>>>>> .merge-right.r6613
+        {
+<<<<<<< .working
+>>>>>>> .merge-right.r6623
+            _metaData=context.getMetaData();
+            _context=context;
+=======
+            _metaData=context.getMetaData();
+            _context=context;
+>>>>>>> .merge-right.r6613
             _securityHandler = (SecurityHandler)_context.getSecurityHandler();
 		}
 		
@@ -70,9 +115,26 @@ public class JBossWebXmlConfiguration extends WebXmlConfiguration
 	        _context = null;
 		}
 
+<<<<<<< .working
+<<<<<<< .working
 		
         public void visitLoginConfig(Descriptor descriptor, XmlParser.Node node) throws Exception
         {    
+=======
+        @Override
+        public void end(WebAppContext context, Descriptor descriptor)
+=======
+        @Override
+        public void end(WebAppContext context, Descriptor descriptor)
+>>>>>>> .merge-right.r6613
+        {
+            _metaData = null;
+            _context = null;
+        }
+
+        public void visitLoginConfig(WebAppContext context, Descriptor descriptor, XmlParser.Node node) throws Exception
+        {
+>>>>>>> .merge-right.r6623
             //use a security domain name from jboss-web.xml
             if (null==_securityHandler.getRealmName())
             {
@@ -103,23 +165,30 @@ public class JBossWebXmlConfiguration extends WebXmlConfiguration
            throw new IllegalStateException ("No metadata");
         
         metaData.addDescriptorProcessor(new JBossWebXmlProcessor());
+        context.getMetaData().addDescriptorProcessor(new JBossWebXmlProcessor());
+        context.getMetaData().addDescriptorProcessor(new JBossWebXmlProcessor());
     }
-
 
     public void deconfigure(WebAppContext context) throws Exception
     {
         super.deconfigure(context);
     }
 
+    public void destroy(WebAppContext context) throws Exception
+    {
+    }
 
     public void postConfigure(WebAppContext context) throws Exception
     {
         super.postConfigure(context);
     }
 
-
     public void preConfigure(WebAppContext context) throws Exception
     {
         super.preConfigure(context);
+    }
+
+    public void cloneConfigure(WebAppContext template, WebAppContext context) throws Exception
+    {
     }
 }

@@ -178,7 +178,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * will be applied before any plugin configuration. Optional.
      * @parameter
      */
-    protected File jettyConfig;
+    protected String jettyConfig;
     
     /**
      * Port to listen to stop jetty on executing -DSTOP.PORT=&lt;stopPort&gt; 
@@ -331,9 +331,30 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         }
     }
 
-    public File getJettyXmlFile ()
+    public List<File> getJettyXmlFiles()
     {
-        return this.jettyConfig;
+        if ( this.jettyConfig == null )
+        {
+            return null;
+        }
+        
+        List<File> jettyXmlFiles = new ArrayList<File>();
+        
+        if ( this.jettyConfig.indexOf(',') == -1 )
+        {
+            jettyXmlFiles.add( new File( this.jettyConfig ) );
+        }
+        else
+        {
+            String[] files = this.jettyConfig.split(",");
+            
+            for ( String file : files )
+            {
+                jettyXmlFiles.add( new File(file) );
+            }
+        }
+        
+        return jettyXmlFiles;
     }
 
 
@@ -566,7 +587,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     /**
      * Run a thread that monitors the console input to detect ENTER hits.
      */
-    protected void startConsoleScanner() 
+    protected void startConsoleScanner() throws Exception
     {
         if ( "manual".equalsIgnoreCase( reload ) )
         {

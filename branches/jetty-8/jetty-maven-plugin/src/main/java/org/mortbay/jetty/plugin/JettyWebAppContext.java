@@ -33,6 +33,7 @@ import org.eclipse.jetty.plus.webapp.EnvConfiguration;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.resource.ResourceCollection;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.FragmentConfiguration;
 import org.eclipse.jetty.webapp.JettyWebXmlConfiguration;
@@ -55,32 +56,31 @@ public class JettyWebAppContext extends WebAppContext
     private static final String WEB_INF_CLASSES_PREFIX = "/WEB-INF/classes";
     private static final String WEB_INF_LIB_PREFIX = "/WEB-INF/lib";
 
+    private final List<File> webInfClasses = new ArrayList<File>();
+    private final List<File> webInfJars = new ArrayList<File>();
+    private final Map<String, File> webInfJarMap = new HashMap<String, File>();
+    private final EnvConfiguration envConfig;
     private List<File> classpathFiles;
     private String jettyEnvXml;
-    private MavenWebInfConfiguration webInfConfig = new MavenWebInfConfiguration();
-    private WebXmlConfiguration webXmlConfig = new WebXmlConfiguration();
-    private MetaInfConfiguration metaInfConfig = new MetaInfConfiguration();
-    private FragmentConfiguration fragConfig = new FragmentConfiguration();
-    private EnvConfiguration envConfig =  new EnvConfiguration();
-    private org.eclipse.jetty.plus.webapp.PlusConfiguration plusConfig = new org.eclipse.jetty.plus.webapp.PlusConfiguration();
-    private AnnotationConfiguration annotationConfig = new MavenAnnotationConfiguration();
-    private JettyWebXmlConfiguration jettyWebConfig =  new JettyWebXmlConfiguration();
-    private ContainerInitializerConfiguration contInitConfig =  new ContainerInitializerConfiguration();
-    private Configuration[] configs;
     private List<Resource> overlays;
     private boolean unpackOverlays;
     private String containerIncludeJarPattern = ".*/servlet-api-[^/]*\\.jar$";
     
-    private List<File> webInfClasses = new ArrayList<File>();
-    private List<File> webInfJars = new ArrayList<File>();
-    private Map<String, File> webInfJarMap = new HashMap<String, File>();
-
-
     public JettyWebAppContext ()
     throws Exception
     {
         super();   
-        configs = new Configuration[]{webInfConfig, webXmlConfig,  metaInfConfig,  fragConfig, envConfig, plusConfig, annotationConfig, jettyWebConfig, contInitConfig };
+        setConfigurations(new Configuration[]{
+                new MavenWebInfConfiguration(),
+                new WebXmlConfiguration(),
+                new MetaInfConfiguration(),
+                new FragmentConfiguration(),
+                envConfig = new EnvConfiguration(),
+                new org.eclipse.jetty.plus.webapp.PlusConfiguration(),
+                new MavenAnnotationConfiguration(),
+                new JettyWebXmlConfiguration(),
+                new ContainerInitializerConfiguration()
+        });
     }
     public void setContainerIncludeJarPattern(String pattern)
     {
@@ -147,6 +147,25 @@ public class JettyWebAppContext extends WebAppContext
     {
         webInfJars.addAll(jars);
     }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * This method is provided as a conveniance for jetty maven plugin configuration 
+     * @param resourceBases Array of resources strings to set as a {@link ResourceCollection}. Each resource string may be a comma separated list of resources
+     * @see Resource
+     */
+    public void setResourceBases(String[] resourceBases)
+    {
+        List<String> resources = new ArrayList<String>();
+        for (String rl:resourceBases)
+        {
+            String[] rs = rl.split(" *, *");
+            for (String r:rs)
+                resources.add(r);
+        }
+        
+        setBaseResource(new ResourceCollection(resources.toArray(new String[resources.size()])));
+    }
 
     public List<File> getWebInfLib()
     {
@@ -155,7 +174,6 @@ public class JettyWebAppContext extends WebAppContext
 
     public void doStart () throws Exception
     {
-        setConfigurations(configs);
         setAttribute(WebInfConfiguration.CONTAINER_JAR_PATTERN, containerIncludeJarPattern);
         
 

@@ -1,19 +1,27 @@
---- start.ini	2010-09-06 19:28:30.546179465 +1000
-+++ hightide/start.ini	2010-09-06 19:28:19.813128808 +1000
-@@ -42,7 +42,7 @@
+--- start.ini.orig	2011-05-13 12:19:17.732258554 +1000
++++ start.ini	2011-05-13 12:18:40.312258548 +1000
+@@ -45,7 +45,7 @@
  # for a full listing do
  #   java -jar start.jar --list-options
  #-----------------------------------------------------------
--OPTIONS=Server,jmx,resources,websocket,ext
-+OPTIONS=Server,plus,jmx,jta,jdbc,annotations,jsp,resources,websocket,ext
+-OPTIONS=Server,jsp,jmx,resources,websocket,ext
++OPTIONS=Server,jsp,jmx,resources,websocket,ext,jta,plus,jdbc,annotations
  #-----------------------------------------------------------
  
  
-@@ -56,7 +56,9 @@
+@@ -54,13 +54,16 @@
+ # For a full list of available configuration files do
+ #   java -jar start.jar --help
+ #-----------------------------------------------------------
+-#etc/jetty-jmx.xml
++etc/jetty-jmx.xml
+ etc/jetty.xml
++etc/jetty-hightide.xml
  # etc/jetty-ssl.xml
  # etc/jetty-requestlog.xml
  etc/jetty-deploy.xml
-+etc/jetty-hightide.xml
++etc/jetty-plus.xml
+ #etc/jetty-overlay.xml
  etc/jetty-webapps.xml
  etc/jetty-contexts.xml
  etc/jetty-testrealm.xml

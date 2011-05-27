@@ -9,14 +9,21 @@
   <name>Example :: Jetty Spring</name>
 
   <properties>
-    <spring-version>1.2.8</spring-version>
+    <spring-version>2.5.6</spring-version>
     <dependencies>target/dependencies</dependencies>
   </properties>
 
   <build>  
     <defaultGoal>install</defaultGoal>
     <plugins>
-
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+          <verbose>false</verbose>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -27,25 +34,16 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <descriptors>
-<!-- <descriptor>site-component.xml</descriptor>-->
-                <descriptor>config.xml</descriptor>
-              </descriptors>
+              <descriptorRefs>
+                <descriptorRef>config</descriptorRef>
+              </descriptorRefs>
             </configuration>
           </execution>
         </executions>
       </plugin>
     </plugins>
-  </build>  
-
-
+  </build>
   <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.2</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-webapp</artifactId>
@@ -65,6 +63,12 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring</artifactId>
       <version>${spring-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit4-version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

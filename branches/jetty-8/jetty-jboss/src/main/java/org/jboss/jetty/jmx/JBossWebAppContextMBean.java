@@ -27,7 +27,7 @@ import org.eclipse.jetty.util.log.Log;
  * Provides special object name for itself so that 
  * we can integrate with jboss jsr77 management system.
  */
-public class JBossWebAppContextMBean extends org.eclipse.jetty.webapp.jmx.WebAppContextMBean
+public class JBossWebAppContextMBean extends org.eclipse.jetty.server.handler.jmx.ContextHandlerMBean
 {
     private JBossWebAppContext _webAppContext;
     

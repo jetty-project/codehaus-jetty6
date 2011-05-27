@@ -174,13 +174,15 @@ public class JettyRunWarExplodedMojo extends AbstractJettyMojo
     
     public void applyJettyXml() throws Exception
     {
-        
-        if (getJettyXmlFile() == null)
+        if (getJettyXmlFiles() == null)
             return;
         
-        getLog().info( "Configuring Jetty from xml configuration file = " + getJettyXmlFile() );        
-        XmlConfiguration xmlConfiguration = new XmlConfiguration(getJettyXmlFile().toURL());
-        xmlConfiguration.configure(this.server);   
+        for ( File xmlFile : getJettyXmlFiles() )
+        {
+            getLog().info( "Configuring Jetty from xml configuration file = " + xmlFile.getCanonicalPath() );        
+            XmlConfiguration xmlConfiguration = new XmlConfiguration(xmlFile.toURI().toURL());
+            xmlConfiguration.configure(this.server);
+        }
     }
 
   

@@ -39,10 +39,10 @@ public class Jsr77ServletHandler extends ServletHandler
         holder.setWebAppContext(_webAppContext);
         return holder;
     }
-	public ServletHolder newServletHolder(Class servlet) 
-	{
-		Jsr77ServletHolder holder = new Jsr77ServletHolder(servlet);
+    public ServletHolder newServletHolder(Class servlet) 
+    {
+	Jsr77ServletHolder holder = new Jsr77ServletHolder(servlet);
         holder.setWebAppContext(_webAppContext);
         return holder;
-	}
+    }
 }
