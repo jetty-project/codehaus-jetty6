@@ -1,5 +1,4 @@
-jetty@codehaus 8.0.0.M3-SNAPSHOT
-
+jetty@codehaus 8.0.0.M3 30 May 2011
 
 jetty@codehaus 7.4.2.v20110526
  + JETTY-1372 jspc plugin support trimSpaces
