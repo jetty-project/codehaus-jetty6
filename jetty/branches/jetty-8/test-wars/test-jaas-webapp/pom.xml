@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.mortbay.jetty.testwars</groupId>
     <artifactId>testwars-parent</artifactId>
-    <version>8.0.0.M3-SNAPSHOT</version>
+    <version>8.0.0.M3</version>
   </parent>
   <artifactId>test-jaas-webapp</artifactId>
   <packaging>war</packaging>
