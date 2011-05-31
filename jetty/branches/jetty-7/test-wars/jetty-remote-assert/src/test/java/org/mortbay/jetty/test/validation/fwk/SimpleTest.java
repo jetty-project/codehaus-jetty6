@@ -20,7 +20,7 @@ public class SimpleTest
 
     @Test
     @Ignore("Skipping this test intentionally")
-    public void testNumgerIgnored()
+    public void testNumberIgnored()
     {
         Assert.assertEquals("Year",2011,1995);
     }

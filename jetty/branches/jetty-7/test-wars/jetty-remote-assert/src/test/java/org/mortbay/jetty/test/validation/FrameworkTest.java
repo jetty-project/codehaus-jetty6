@@ -14,6 +14,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mortbay.jetty.test.validation.client.RemoteAssertClient;
 import org.mortbay.jetty.test.validation.client.RemoteAssertResults;
+import org.mortbay.jetty.test.validation.client.RemoteAssertResults.TestClass;
+import org.mortbay.jetty.test.validation.fwk.SimpleTest;
 
 public class FrameworkTest
 {
@@ -69,5 +71,9 @@ public class FrameworkTest
         RemoteAssertResults results = raclient.getResults("/tests/");
 
         Assert.assertThat("Class Count",results.getTestClassCount(),is(2));
+
+        TestClass tc = results.getTestClass(SimpleTest.class.getName());
+        Assert.assertNotNull("Should have found TestClass[" + SimpleTest.class.getName() + "]",tc);
+        Assert.assertEquals("SimpleTest.testCount",5,tc.getTestCount());
     }
 }
