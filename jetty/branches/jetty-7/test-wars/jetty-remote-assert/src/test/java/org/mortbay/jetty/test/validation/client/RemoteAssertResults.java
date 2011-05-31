@@ -1,7 +1,5 @@
 package org.mortbay.jetty.test.validation.client;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -14,12 +12,12 @@ public class RemoteAssertResults
     public static class TestClass
     {
         private String className;
-        private List<TestResult> results;
+        private Map<String, TestResult> results;
 
         public TestClass(JSONObject robj) throws JSONException
         {
             this.className = robj.getString("name");
-            this.results = new ArrayList<TestResult>();
+            this.results = new TreeMap<String, TestResult>();
 
             // parse results
             JSONArray arr = robj.getJSONArray("results");
@@ -27,7 +25,8 @@ public class RemoteAssertResults
             for (int i = 0; i < len; i++)
             {
                 JSONObject joresult = arr.getJSONObject(i);
-                results.add(new TestResult(joresult));
+                TestResult tr = new TestResult(joresult);
+                results.put(tr.getMethodName(),tr);
             }
         }
 
@@ -36,7 +35,7 @@ public class RemoteAssertResults
             return className;
         }
 
-        public List<TestResult> getResults()
+        public Map<String, TestResult> getResults()
         {
             return results;
         }
@@ -44,6 +43,11 @@ public class RemoteAssertResults
         public int getTestCount()
         {
             return results.size();
+        }
+
+        public TestResult getTestResult(String methodName)
+        {
+            return results.get(methodName);
         }
     }
 
