@@ -1,5 +1,7 @@
 package org.mortbay.jetty.test.validation;
 
+import static org.hamcrest.Matchers.*;
+
 import java.net.URI;
 
 import org.eclipse.jetty.server.Connector;
@@ -7,7 +9,9 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.toolchain.test.SimpleRequest;
+import org.json.JSONArray;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -58,11 +62,14 @@ public class FrameworkTest
     }
 
     @Test
-    public void testSimpleTest() throws Exception
+    public void testRunAllTests() throws Exception
     {
         SimpleRequest request = new SimpleRequest(baseUri);
 
         String result = request.getString("/tests/");
         System.out.println("Result:\n" + result);
+        JSONArray arr = new JSONArray(result);
+
+        Assert.assertThat("Class Count",arr.length(),is(2));
     }
 }

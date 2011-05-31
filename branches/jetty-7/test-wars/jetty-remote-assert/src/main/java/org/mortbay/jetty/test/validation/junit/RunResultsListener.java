@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.runner.Description;
-import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 
@@ -14,7 +13,6 @@ public class RunResultsListener extends RunListener
 {
     private Map<String, List<RunResult>> resultMap;
     private RunResult activeRun;
-    private String activeClass;
 
     public RunResultsListener()
     {
@@ -24,6 +22,17 @@ public class RunResultsListener extends RunListener
     public Map<String, List<RunResult>> getResults()
     {
         return resultMap;
+    }
+
+    private void saveResult(String className, RunResult rr)
+    {
+        List<RunResult> runs = resultMap.get(className);
+        if (runs == null)
+        {
+            runs = new ArrayList<RunResult>();
+        }
+        runs.add(rr);
+        resultMap.put(className,runs);
     }
 
     @Override
@@ -44,13 +53,7 @@ public class RunResultsListener extends RunListener
     public void testFinished(Description description) throws Exception
     {
         // Run for specific test method finished
-        List<RunResult> runs = resultMap.get(activeClass);
-        if (runs == null)
-        {
-            runs = new ArrayList<RunResult>();
-        }
-        runs.add(activeRun);
-        resultMap.put(activeClass,runs);
+        saveResult(description.getClassName(),activeRun);
         activeRun = null;
         super.testFinished(description);
     }
@@ -58,31 +61,18 @@ public class RunResultsListener extends RunListener
     @Override
     public void testIgnored(Description description) throws Exception
     {
-        activeRun.setIgnored(description);
+        String ignoredClass = description.getClassName();
+        RunResult ignoredRun = new RunResult(description);
+        ignoredRun.setIgnored(true);
+        saveResult(ignoredClass,ignoredRun);
+        activeRun = null;
         super.testIgnored(description);
-    }
-
-    @Override
-    public void testRunFinished(Result result) throws Exception
-    {
-        // Run finished for all tests.
-        activeClass = null;
-        super.testRunFinished(result);
-    }
-
-    @Override
-    public void testRunStarted(Description description) throws Exception
-    {
-        // Run started for all tests.
-        activeClass = description.getClassName();
-        super.testRunStarted(description);
     }
 
     @Override
     public void testStarted(Description description) throws Exception
     {
         // Run for specific test method started
-        activeClass = description.getClassName();
         activeRun = new RunResult(description);
         super.testStarted(description);
     }

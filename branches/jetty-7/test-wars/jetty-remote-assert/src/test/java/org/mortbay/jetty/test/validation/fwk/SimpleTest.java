@@ -1,20 +1,15 @@
 package org.mortbay.jetty.test.validation.fwk;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class SimpleTest
 {
     @Test
-    public void testQuoteEqualsSuccess()
+    public void testNumberEqualsFailure()
     {
-        Assert.assertEquals("Quote","Woah","Woah");
-    }
-
-    @Test
-    public void testQuoteEqualsFailure()
-    {
-        Assert.assertEquals("Quote","Sweet","Dude");
+        Assert.assertEquals("Year",2011,1995);
     }
 
     @Test
@@ -24,8 +19,21 @@ public class SimpleTest
     }
 
     @Test
-    public void testNumberEqualsFailure()
+    @Ignore("Skipping this test intentionally")
+    public void testNumgerIgnored()
     {
         Assert.assertEquals("Year",2011,1995);
+    }
+
+    @Test
+    public void testQuoteEqualsFailure()
+    {
+        Assert.assertEquals("Quote","Sweet","Dude");
+    }
+
+    @Test
+    public void testQuoteEqualsSuccess()
+    {
+        Assert.assertEquals("Quote","Woah","Woah");
     }
 }
