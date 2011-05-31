@@ -20,7 +20,6 @@ import org.json.JSONObject;
 import org.junit.runner.JUnitCore;
 import org.mortbay.jetty.test.validation.junit.RunResult;
 import org.mortbay.jetty.test.validation.junit.RunResultsListener;
-import org.mortbay.jetty.test.validation.junit.ServletRequestContextRule;
 
 public abstract class RemoteAssertServlet extends HttpServlet
 {
@@ -60,10 +59,8 @@ public abstract class RemoteAssertServlet extends HttpServlet
         TestScope scope = new TestScope(req.getPathInfo());
         System.out.println("TestScope: " + scope);
 
-        ServletRequestContextRule context = new ServletRequestContextRule();
-        context.setServlet(this);
-        context.setRequest(req);
-        context.setResponse(resp);
+        ServletRequestContext context = new ServletRequestContext(this,req,resp);
+        ThreadLocalServletRequestContext.set(context);
 
         if (!scope.hasClassName())
         {
@@ -100,7 +97,7 @@ public abstract class RemoteAssertServlet extends HttpServlet
         resp.sendError(responseCode,msg);
     }
 
-    private void runTestClasses(ServletRequestContextRule context, Class<?>... testClasses) throws IOException
+    private void runTestClasses(ServletRequestContext context, Class<?>... testClasses) throws IOException
     {
         RunResultsListener resultsListener = new RunResultsListener();
 

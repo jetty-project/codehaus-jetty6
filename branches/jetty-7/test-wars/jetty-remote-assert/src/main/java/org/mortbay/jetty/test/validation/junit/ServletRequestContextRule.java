@@ -7,26 +7,19 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
+import org.mortbay.jetty.test.validation.ServletRequestContext;
+import org.mortbay.jetty.test.validation.ThreadLocalServletRequestContext;
 
 /**
  * Provides some basics about the servlet + request + response context for executing the test
  */
 public class ServletRequestContextRule implements MethodRule
 {
-    /** The servlet for the test run */
-    private HttpServlet servlet;
-    /** The incoming request object for the test run */
-    private HttpServletRequest request;
-    /** The outgoing response object for the test run */
-    private HttpServletResponse response;
-
-    public ServletRequestContextRule()
-    {
-        // anonymous creation (to be populated later)
-    }
+    private ServletRequestContext context;
 
     public Statement apply(final Statement statement, FrameworkMethod method, Object target)
     {
+        this.context = ThreadLocalServletRequestContext.get();
         return new Statement()
         {
             @Override
@@ -39,31 +32,16 @@ public class ServletRequestContextRule implements MethodRule
 
     public HttpServletRequest getRequest()
     {
-        return request;
+        return context.getRequest();
     }
 
     public HttpServletResponse getResponse()
     {
-        return response;
+        return context.getResponse();
     }
 
     public HttpServlet getServlet()
     {
-        return servlet;
-    }
-
-    public void setRequest(HttpServletRequest request)
-    {
-        this.request = request;
-    }
-
-    public void setResponse(HttpServletResponse response)
-    {
-        this.response = response;
-    }
-
-    public void setServlet(HttpServlet servlet)
-    {
-        this.servlet = servlet;
+        return context.getServlet();
     }
 }
