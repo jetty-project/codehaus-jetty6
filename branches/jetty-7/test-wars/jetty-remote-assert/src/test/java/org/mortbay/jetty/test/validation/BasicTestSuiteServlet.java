@@ -12,12 +12,6 @@
 //========================================================================
 package org.mortbay.jetty.test.validation;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.mortbay.jetty.test.validation.fwk.ContextTest;
 import org.mortbay.jetty.test.validation.fwk.SimpleTest;
 
@@ -27,15 +21,7 @@ public class BasicTestSuiteServlet extends RemoteAssertServlet
 
     public BasicTestSuiteServlet()
     {
-        System.out.println("Created " + this.getClass().getName());
         addTestClass(SimpleTest.class);
         addTestClass(ContextTest.class);
-    }
-
-    @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
-    {
-        System.out.println("SERVICE " + this.getClass().getName());
-        super.service(req,resp);
     }
 }
