@@ -8,10 +8,14 @@ import junit.framework.Assert;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class RemoteAssertResult
+class RemoteAssertResult
 {
     /**
-     * Unique id for the specific test. (should not be duplicated in a single test run)
+     * The test method that was executed.
+     */
+    private String _testName;
+    /**
+     * Unique id for the specific test method.
      */
     private String _id;
     private String _description;
@@ -101,6 +105,12 @@ public class RemoteAssertResult
         }
     }
 
+    public void failure(String messageFormat, Object... messageArgs)
+    {
+        this._success = false;
+        this._message = String.format(messageFormat,messageArgs);
+    }
+
     public void failure(Throwable t)
     {
         this._success = false;
@@ -108,31 +118,6 @@ public class RemoteAssertResult
         if (this._message == null)
         {
             this._message = String.format("(%s) %s",t.getClass().getName(),t.getMessage());
-        }
-    }
-
-    public void failure(String messageFormat, Object... messageArgs)
-    {
-        this._success = false;
-        this._message = String.format(messageFormat,messageArgs);
-    }
-
-    public void success(String messageFormat, Object... messageArgs)
-    {
-        this._success = true;
-        this._message = String.format(messageFormat,messageArgs);
-    }
-
-    /**
-     * Got an expected exception.
-     */
-    public void successExpected(Throwable t)
-    {
-        this._success = true;
-        this._cause = t;
-        if (this._message == null)
-        {
-            this._message = String.format("Expected Throwable encountered: %s",t.getClass().getName());
         }
     }
 
@@ -146,6 +131,11 @@ public class RemoteAssertResult
         return _cause;
     }
 
+    public String getDescription()
+    {
+        return _description;
+    }
+
     public String getExpected()
     {
         return _expectedValue;
@@ -154,11 +144,6 @@ public class RemoteAssertResult
     public String getId()
     {
         return _id;
-    }
-    
-    public String getDescription()
-    {
-        return _description;
     }
 
     public String getMessage()
@@ -195,7 +180,7 @@ public class RemoteAssertResult
     {
         _description = description;
     }
-    
+
     public void setExpected(String expected)
     {
         this._expectedValue = expected;
@@ -216,6 +201,25 @@ public class RemoteAssertResult
         this._success = success;
     }
 
+    public void success(String messageFormat, Object... messageArgs)
+    {
+        this._success = true;
+        this._message = String.format(messageFormat,messageArgs);
+    }
+
+    /**
+     * Got an expected exception.
+     */
+    public void successExpected(Throwable t)
+    {
+        this._success = true;
+        this._cause = t;
+        if (this._message == null)
+        {
+            this._message = String.format("Expected Throwable encountered: %s",t.getClass().getName());
+        }
+    }
+
     public JSONObject toJSON() throws JSONException
     {
         JSONObject json = new JSONObject();
@@ -229,12 +233,18 @@ public class RemoteAssertResult
         if (!this._success)
         {
             if (this._message != null)
+            {
                 json.put("message",this._message);
+            }
             if (this._expectedValue != null)
+            {
                 json.put("expected",this._expectedValue);
+            }
             if (this._actualValue != null)
+            {
                 json.put("actual",this._actualValue);
-            
+            }
+
             JSONObject causeObj = new JSONObject();
             if (_cause != null)
             {
