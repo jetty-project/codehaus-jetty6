@@ -15,4 +15,13 @@
     <servlet-name>DownloadServlet</servlet-name>
     <url-pattern>/download</url-pattern>
   </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>ValidationServlet</servlet-name>
+    <servlet-class>org.mortbay.jetty.tests.webapp.download.ValidationServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ValidationServlet</servlet-name>
+    <url-pattern>/remoteAssert</url-pattern>
+  </servlet-mapping>
 </web-app>
