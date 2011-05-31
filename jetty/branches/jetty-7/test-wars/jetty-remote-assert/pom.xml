@@ -36,6 +36,15 @@
           <target>1.5</target>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/fwk/*</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <dependencies>
@@ -55,6 +64,18 @@
       <artifactId>junit-dep</artifactId>
       <version>4.8.1</version>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-webapp</artifactId>
+      <version>${jetty-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty.toolchain</groupId>
+      <artifactId>jetty-test-helper</artifactId>
+      <version>${jetty-test-helper-version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
