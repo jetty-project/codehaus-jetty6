@@ -53,4 +53,30 @@ public class TestScope
     {
         return className != null;
     }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder b = new StringBuilder();
+        b.append("Scope: ");
+        b.append("Class=");
+        if (hasClassName())
+        {
+            b.append(className);
+        }
+        else
+        {
+            b.append("*");
+        }
+        b.append(", Method=");
+        if (hasMethodName())
+        {
+            b.append(methodName);
+        }
+        else
+        {
+            b.append("*");
+        }
+        return b.toString();
+    }
 }
