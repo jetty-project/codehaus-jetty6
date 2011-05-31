@@ -17,11 +17,11 @@
   </servlet-mapping>
   
   <servlet>
-    <servlet-name>ValidationServlet</servlet-name>
-    <servlet-class>org.mortbay.jetty.tests.webapp.download.ValidationServlet</servlet-class>
+    <servlet-name>TestSuiteServlet</servlet-name>
+    <servlet-class>org.mortbay.jetty.tests.webapp.download.TestSuiteServlet</servlet-class>
   </servlet>
   <servlet-mapping>
-    <servlet-name>ValidationServlet</servlet-name>
-    <url-pattern>/remoteAssert</url-pattern>
+    <servlet-name>TestSuiteServlet</servlet-name>
+    <url-pattern>/testSuite</url-pattern>
   </servlet-mapping>
 </web-app>
