@@ -23,9 +23,9 @@
     <artifactId>testwars-parent</artifactId>
     <version>7.4.3-SNAPSHOT</version>
   </parent>
-  <artifactId>jetty-remote-assert</artifactId>
-  <packaging>jar</packaging>
-  <name>Jetty :: Test Wars :: Remote Assert Tools</name>
+  <artifactId>test-war-remote-assert</artifactId>
+  <packaging>war</packaging>
+  <name>Jetty :: Test Wars :: Remote Assert Tests</name>
   <build>
     <plugins>
       <plugin>
@@ -46,14 +46,9 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-      <version>20080701</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit-dep</artifactId>
-      <version>4.8.1</version>
+      <groupId>org.mortbay.jetty.testwars</groupId>
+      <artifactId>jetty-remote-assert</artifactId>
+      <version>${jetty-version}</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
