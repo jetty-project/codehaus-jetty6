@@ -8,12 +8,12 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.toolchain.test.SimpleRequest;
-import org.json.JSONArray;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mortbay.jetty.test.validation.client.RemoteAssertClient;
+import org.mortbay.jetty.test.validation.client.RemoteAssertResults;
 
 public class FrameworkTest
 {
@@ -64,12 +64,10 @@ public class FrameworkTest
     @Test
     public void testRunAllTests() throws Exception
     {
-        SimpleRequest request = new SimpleRequest(baseUri);
+        RemoteAssertClient raclient = new RemoteAssertClient(baseUri);
 
-        String result = request.getString("/tests/");
-        System.out.println("Result:\n" + result);
-        JSONArray arr = new JSONArray(result);
+        RemoteAssertResults results = raclient.getResults("/tests/");
 
-        Assert.assertThat("Class Count",arr.length(),is(2));
+        Assert.assertThat("Class Count",results.getTestClassCount(),is(2));
     }
 }
