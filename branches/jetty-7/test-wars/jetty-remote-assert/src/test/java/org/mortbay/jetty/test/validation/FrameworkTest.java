@@ -31,7 +31,7 @@ public class FrameworkTest
         jetty.setHandler(handler);
 
         ServletHolder servletHolder = new ServletHolder(BasicTestSuiteServlet.class);
-        handler.addServletWithMapping(servletHolder,"/");
+        handler.addServletWithMapping(servletHolder,"/tests/");
 
         jetty.start();
 

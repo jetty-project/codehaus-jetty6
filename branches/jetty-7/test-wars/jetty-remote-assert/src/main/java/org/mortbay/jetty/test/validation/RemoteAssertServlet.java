@@ -57,6 +57,7 @@ public abstract class RemoteAssertServlet extends HttpServlet
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
         TestScope scope = new TestScope(req.getPathInfo());
+        System.out.printf("TestScope: " + scope);
 
         if (!scope.hasClassName())
         {
