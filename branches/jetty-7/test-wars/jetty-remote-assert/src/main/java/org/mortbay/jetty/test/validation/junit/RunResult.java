@@ -2,6 +2,7 @@ package org.mortbay.jetty.test.validation.junit;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Ignore;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 
@@ -46,6 +47,12 @@ public class RunResult
         if (ignored)
         {
             json.put("ignored",true);
+            Ignore ig = description.getAnnotation(Ignore.class);
+            if (ig != null)
+            {
+                String reason = ig.value();
+                json.put("ignoredReason",reason == null?"":reason);
+            }
             return json;
         }
 
@@ -57,7 +64,6 @@ public class RunResult
             {
                 JSONObject failureJson = new JSONObject();
                 failureJson.put("message",failure.getMessage());
-                failureJson.put("description",failure.getDescription());
                 failureJson.put("header",failure.getTestHeader());
                 failureJson.put("trace",failure.getTrace());
                 json.put("failure",failureJson);
