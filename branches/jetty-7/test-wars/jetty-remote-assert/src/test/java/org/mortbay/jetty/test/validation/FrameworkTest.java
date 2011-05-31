@@ -5,8 +5,7 @@ import java.net.URI;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.bio.SocketConnector;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.toolchain.test.SimpleRequest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -21,20 +20,26 @@ public class FrameworkTest
     public static void initEmbeddedJetty() throws Exception
     {
         jetty = new Server();
+
+        // Connectors
         Connector socketConnector = new SocketConnector();
         socketConnector.setPort(0);
         Connector connectors[] = new Connector[1];
         connectors[0] = socketConnector;
         jetty.setConnectors(connectors);
 
-        ServletHandler handler = new ServletHandler();
-        jetty.setHandler(handler);
+        // Servlet Context
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
+        context.setContextPath("/");
+        jetty.setHandler(context);
 
-        ServletHolder servletHolder = new ServletHolder(BasicTestSuiteServlet.class);
-        handler.addServletWithMapping(servletHolder,"/tests/");
+        // Servlet
+        context.addServlet(BasicTestSuiteServlet.class,"/tests/");
 
+        // Start Jetty
         jetty.start();
 
+        // Figure out Base URI
         String host = socketConnector.getHost();
         if (host == null)
         {
