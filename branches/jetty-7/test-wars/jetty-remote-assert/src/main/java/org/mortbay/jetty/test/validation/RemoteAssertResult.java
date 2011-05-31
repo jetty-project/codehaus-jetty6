@@ -7,13 +7,14 @@ import junit.framework.Assert;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mortbay.jetty.test.validation.junit.RunResult;
 
+/**
+ * @deprecated not used, is being replaced by {@link RunResult}
+ */
+@Deprecated
 class RemoteAssertResult
 {
-    /**
-     * The test method that was executed.
-     */
-    private String _testName;
     /**
      * Unique id for the specific test method.
      */
