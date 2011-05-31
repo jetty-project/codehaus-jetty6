@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,9 +60,17 @@ public abstract class RemoteAssertServlet extends HttpServlet
         TestScope scope = new TestScope(req.getPathInfo());
         System.out.printf("TestScope: " + scope);
 
+        ServletRequestContextRule context = new ServletRequestContextRule();
+        context.setServlet(this);
+        context.setRequest(req);
+        context.setResponse(resp);
+
         if (!scope.hasClassName())
         {
-            respondWithError(resp,HttpServletResponse.SC_NOT_IMPLEMENTED,"Running all tests in suite not supported (yet).");
+            List<Class<?>> testlist = new ArrayList<Class<?>>();
+            testlist.addAll(testSuite.values());
+            Class<?> testClasses[] = testlist.toArray(new Class<?>[0]);
+            runTestClasses(context,testClasses);
             return;
         }
 
@@ -81,31 +90,7 @@ public abstract class RemoteAssertServlet extends HttpServlet
                 return;
             }
 
-            try
-            {
-                ServletRequestContextRule context = new ServletRequestContextRule();
-                context.setServlet(this);
-                context.setRequest(req);
-                context.setResponse(resp);
-
-                RunResultsListener resultsListener = new RunResultsListener();
-
-                JUnitCore junit = new JUnitCore();
-                junit.addListener(resultsListener);
-                junit.run(testClass);
-
-                writeResultsJson(resp,resultsListener.getResults());
-            }
-            catch (Throwable t)
-            {
-                t.printStackTrace(System.err);
-                StringWriter writer = new StringWriter();
-                PrintWriter err = new PrintWriter(writer);
-                err.printf("%s: %s%n",t.getClass().getName(),t.getMessage());
-                t.printStackTrace(err);
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,err.toString());
-                return;
-            }
+            runTestClasses(context,testClass);
         }
     }
 
@@ -113,6 +98,30 @@ public abstract class RemoteAssertServlet extends HttpServlet
     {
         System.err.printf("ERROR[%d]: %s%n",responseCode,msg);
         resp.sendError(responseCode,msg);
+    }
+
+    private void runTestClasses(ServletRequestContextRule context, Class<?>... testClasses) throws IOException
+    {
+        RunResultsListener resultsListener = new RunResultsListener();
+
+        try
+        {
+            JUnitCore junit = new JUnitCore();
+            junit.addListener(resultsListener);
+            junit.run(testClasses);
+
+            writeResultsJson(context.getResponse(),resultsListener.getResults());
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace(System.err);
+            StringWriter writer = new StringWriter();
+            PrintWriter err = new PrintWriter(writer);
+            err.printf("%s: %s%n",t.getClass().getName(),t.getMessage());
+            t.printStackTrace(err);
+            context.getResponse().sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,err.toString());
+            return;
+        }
     }
 
     private void writeResultsJson(HttpServletResponse resp, Map<String, List<RunResult>> resultsMap) throws JSONException, IOException
