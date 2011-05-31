@@ -11,7 +11,7 @@ public class RunResult
     private Failure failure;
     private boolean assumptionFailure = true;
     private boolean success = true;
-    private Description ignored;
+    private boolean ignored = false;
 
     public RunResult(Description description)
     {
@@ -33,9 +33,9 @@ public class RunResult
         this.success = false;
     }
 
-    public void setIgnored(Description description)
+    public void setIgnored(boolean flag)
     {
-        this.ignored = description;
+        this.ignored = flag;
     }
 
     public JSONObject toJSON() throws JSONException
@@ -43,10 +43,9 @@ public class RunResult
         JSONObject json = new JSONObject();
         json.put("className",description.getClassName());
         json.put("methodName",description.getMethodName());
-        if (ignored != null)
+        if (ignored)
         {
             json.put("ignored",true);
-            json.put("ignoredLabel",ignored.getDisplayName());
             return json;
         }
 
