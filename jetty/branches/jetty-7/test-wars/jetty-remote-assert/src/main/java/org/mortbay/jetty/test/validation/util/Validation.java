@@ -1,5 +1,8 @@
 package org.mortbay.jetty.test.validation.util;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 public final class Validation
 {
     /**
@@ -40,5 +43,47 @@ public final class Validation
     public static boolean isNotBlank(String str)
     {
         return !isBlank(str);
+    }
+    
+    /**
+     * Validates that all test results have success = true
+     * 
+     * @param str test string
+     * @return true if all test results passed
+     */
+    public static boolean passes(String str)
+    {
+        try
+        {
+            JSONArray jsonArray = new JSONArray(str);
+            
+            int len = jsonArray.length();
+            for (int i = 0; i < len ; ++i)
+            {
+                JSONObject test = jsonArray.getJSONObject(i);
+             
+                JSONArray resultArray = test.getJSONArray("results");
+                
+                int resultCount = resultArray.length();
+                
+                for ( int j = 0; j < resultCount; ++j )
+                {
+                    JSONObject result = resultArray.getJSONObject(j);
+                    
+                    if ( !result.getBoolean("success"))
+                    {
+                        return false;
+                    }   
+                }              
+            }
+            
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        
     }
 }
