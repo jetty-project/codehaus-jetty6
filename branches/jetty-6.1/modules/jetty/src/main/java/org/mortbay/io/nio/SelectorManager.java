@@ -802,7 +802,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     Selector old_selector=_selector;
                     _selector=new_selector;
                     old_selector.close();
-		    Log.info("Renewed selector");
+                    Log.info("Renewed selector");
                 }
                 catch(Exception e)
                 {
@@ -856,8 +856,14 @@ public abstract class SelectorManager extends AbstractLifeCycle
             }
             catch(Exception e)
             {
-	        Log.warn("Wakup failed ",e);
-                renewSelector();
+            	Log.warn("Wakup failed ",e);
+            	addChange(new ChangeTask()
+            	{
+            		public void run()
+            		{
+                    	renewSelector();
+            		}
+            	});
             }
         }
 
