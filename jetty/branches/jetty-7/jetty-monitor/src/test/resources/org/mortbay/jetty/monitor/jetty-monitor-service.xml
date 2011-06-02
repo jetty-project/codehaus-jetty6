@@ -3,7 +3,7 @@
 
 <Configure id="Monitor" class="org.mortbay.jetty.monitor.JMXMonitor">
   <Call name="setUrl">
-    <Arg>service:jmx:rmi://gmacpro1e/jndi/rmi://localhost:1099/jettyjmx</Arg>
+    <Arg>service:jmx:rmi://localhost/jndi/rmi://localhost:1099/jettyjmx</Arg>
   </Call>
   <Call name="addActions">
     <Arg>
