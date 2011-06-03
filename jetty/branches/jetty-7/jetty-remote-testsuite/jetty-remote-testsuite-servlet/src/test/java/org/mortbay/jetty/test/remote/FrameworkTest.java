@@ -12,10 +12,8 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mortbay.jetty.test.remote.client.RemoteAssertClient;
-import org.mortbay.jetty.test.remote.client.RemoteAssertResults;
-import org.mortbay.jetty.test.remote.client.RemoteAssertResults.TestClass;
-import org.mortbay.jetty.test.remote.client.RemoteAssertResults.TestResult;
+import org.mortbay.jetty.test.remote.RemoteTestSuiteResults.TestClass;
+import org.mortbay.jetty.test.remote.RemoteTestSuiteResults.TestResult;
 import org.mortbay.jetty.test.remote.fwk.ContextTest;
 import org.mortbay.jetty.test.remote.fwk.SimpleTest;
 
@@ -68,9 +66,8 @@ public class FrameworkTest
     @Test
     public void testRunAllTests() throws Exception
     {
-        RemoteAssertClient raclient = new RemoteAssertClient(baseUri);
-
-        RemoteAssertResults results = raclient.getResults("/tests/");
+        RemoteTestSuiteClient rtsclient = new RemoteTestSuiteClient(baseUri);
+        RemoteTestSuiteResults results = rtsclient.getResults("/tests/");
 
         Assert.assertThat("Class Count",results.getTestClassCount(),is(2));
 

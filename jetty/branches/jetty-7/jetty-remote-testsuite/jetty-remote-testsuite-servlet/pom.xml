@@ -55,6 +55,12 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
+      <groupId>org.mortbay.jetty.testwars</groupId>
+      <artifactId>jetty-remote-testsuite-client</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-webapp</artifactId>
       <version>${jetty-version}</version>
