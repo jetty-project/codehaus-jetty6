@@ -108,7 +108,7 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty.testwars</groupId>
-      <artifactId>jetty-remote-assert</artifactId>
+      <artifactId>jetty-remote-testsuite-client</artifactId>
       <version>${jetty-version}</version>
     </dependency>    
     <dependency>
