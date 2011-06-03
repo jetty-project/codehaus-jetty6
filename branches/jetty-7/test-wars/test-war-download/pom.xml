@@ -51,8 +51,8 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty.testwars</groupId>
-      <artifactId>jetty-remote-assert</artifactId>
-      <version>${jetty-version}</version>
+      <artifactId>jetty-remote-testsuite-servlet</artifactId>
+      <version>${jetty-version}</version> 
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
