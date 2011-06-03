@@ -8,7 +8,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mortbay.jetty.test.validation.util.Validation;
+import org.mortbay.jetty.test.remote.RemoteTestSuiteClient;
+import org.mortbay.jetty.test.remote.RemoteTestSuiteResults;
 import org.mortbay.jetty.tests.distribution.JettyProcess;
 
 /**
@@ -49,13 +50,19 @@ public class DownloadTest
     @Test
     public void testDownload() throws Exception
     {
-        SimpleRequest request = new SimpleRequest(jetty.getBaseUri());
-        String path = String.format("/test-war-download/remoteAssert");
-        String response = request.getString(path);
+        //SimpleRequest request = new SimpleRequest(jetty.getBaseUri());
+        //String path = String.format("/test-war-download/remoteAssert");
+        //String response = request.getString(path);
+        
+        RemoteTestSuiteClient client = new RemoteTestSuiteClient(jetty.getBaseUri());
+        
+        RemoteTestSuiteResults results = client.getResults("/test-war-download/remoteAssert");
+        
+        results.assertSuccess();
         
         //System.out.println(response);
-        Assert.assertTrue("Expecting we got a validation string:", Validation.isNotBlank(response));
+        //Assert.assertTrue("Expecting we got a validation string:", Validation.isNotBlank(response));
         
-        Assert.assertTrue("Expecting no failures:", Validation.passes(response));
+        //Assert.assertTrue("Expecting no failures:", Validation.passes(response));
     }
 }
