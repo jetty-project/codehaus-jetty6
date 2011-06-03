@@ -43,6 +43,7 @@
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -53,7 +54,7 @@
       <groupId>org.eclipse.jetty.toolchain</groupId>
       <artifactId>jetty-test-helper</artifactId>
       <version>${jetty-test-helper-version}</version>
-      <scope>test</scope>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 </project>

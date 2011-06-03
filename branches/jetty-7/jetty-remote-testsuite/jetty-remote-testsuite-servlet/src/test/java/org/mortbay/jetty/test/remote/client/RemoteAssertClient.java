@@ -1,4 +1,4 @@
-package org.mortbay.jetty.test.validation.client;
+package org.mortbay.jetty.test.remote.client;
 
 import java.io.IOException;
 import java.net.URI;

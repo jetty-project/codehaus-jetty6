@@ -1,9 +1,10 @@
-package org.mortbay.jetty.test.validation;
+package org.mortbay.jetty.test.remote;
 
 import static org.hamcrest.CoreMatchers.*;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mortbay.jetty.test.remote.TestScope;
 
 public class TestScopeTest
 {

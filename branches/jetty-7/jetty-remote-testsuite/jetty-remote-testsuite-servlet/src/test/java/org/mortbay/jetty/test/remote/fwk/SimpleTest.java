@@ -1,4 +1,4 @@
-package org.mortbay.jetty.test.validation.fwk;
+package org.mortbay.jetty.test.remote.fwk;
 
 import org.junit.Assert;
 import org.junit.Ignore;

@@ -1,4 +1,4 @@
-package org.mortbay.jetty.test.validation.client;
+package org.mortbay.jetty.test.remote.client;
 
 import java.util.Map;
 import java.util.TreeMap;

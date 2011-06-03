@@ -10,12 +10,13 @@
 //http://www.opensource.org/licenses/apache2.0.php
 //You may elect to redistribute this code under either of these licenses.
 //========================================================================
-package org.mortbay.jetty.test.validation;
+package org.mortbay.jetty.test.remote;
 
-import org.mortbay.jetty.test.validation.fwk.ContextTest;
-import org.mortbay.jetty.test.validation.fwk.SimpleTest;
+import org.mortbay.jetty.test.remote.RemoteTestSuiteServlet;
+import org.mortbay.jetty.test.remote.fwk.ContextTest;
+import org.mortbay.jetty.test.remote.fwk.SimpleTest;
 
-public class BasicTestSuiteServlet extends RemoteAssertServlet
+public class BasicTestSuiteServlet extends RemoteTestSuiteServlet
 {
     private static final long serialVersionUID = -6644178549595265171L;
 

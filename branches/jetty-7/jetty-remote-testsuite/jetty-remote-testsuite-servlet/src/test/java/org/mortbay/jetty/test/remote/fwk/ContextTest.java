@@ -1,11 +1,11 @@
-package org.mortbay.jetty.test.validation.fwk;
+package org.mortbay.jetty.test.remote.fwk;
 
 import static org.hamcrest.CoreMatchers.*;
 
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mortbay.jetty.test.validation.junit.ServletRequestContextRule;
+import org.mortbay.jetty.test.remote.junit.ServletRequestContextRule;
 
 public class ContextTest
 {

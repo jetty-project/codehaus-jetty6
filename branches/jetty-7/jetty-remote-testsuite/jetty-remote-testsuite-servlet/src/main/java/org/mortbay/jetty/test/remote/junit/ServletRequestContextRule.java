@@ -1,4 +1,4 @@
-package org.mortbay.jetty.test.validation.junit;
+package org.mortbay.jetty.test.remote.junit;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -7,8 +7,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
-import org.mortbay.jetty.test.validation.ServletRequestContext;
-import org.mortbay.jetty.test.validation.ThreadLocalServletRequestContext;
+import org.mortbay.jetty.test.remote.ServletRequestContext;
+import org.mortbay.jetty.test.remote.ThreadLocalServletRequestContext;
 
 /**
  * Provides some basics about the servlet + request + response context for executing the test

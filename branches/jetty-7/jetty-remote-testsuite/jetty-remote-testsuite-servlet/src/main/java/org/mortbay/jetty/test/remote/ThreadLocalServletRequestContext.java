@@ -1,4 +1,4 @@
-package org.mortbay.jetty.test.validation;
+package org.mortbay.jetty.test.remote;
 
 public class ThreadLocalServletRequestContext
 {
