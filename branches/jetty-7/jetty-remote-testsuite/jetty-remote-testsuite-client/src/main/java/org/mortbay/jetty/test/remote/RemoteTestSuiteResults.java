@@ -1,11 +1,14 @@
 package org.mortbay.jetty.test.remote;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 
 public class RemoteTestSuiteResults
 {
@@ -137,6 +140,41 @@ public class RemoteTestSuiteResults
             JSONObject robj = arr.getJSONObject(i);
             TestClass tc = new TestClass(robj);
             resultMap.put(tc.className,tc);
+        }
+    }
+
+    /**
+     * Assert that all results are success (or are ignored)
+     */
+    public void assertSuccess()
+    {
+        StringWriter writer = new StringWriter();
+        PrintWriter out = new PrintWriter(writer);
+        int failureCount = 0;
+        for (TestClass tc : resultMap.values())
+        {
+            for (TestResult result : tc.getResults().values())
+            {
+                if (result.isIgnored())
+                {
+                    continue; // ignored, skip it.
+                }
+                if (result.isSuccess())
+                {
+                    continue; // success, skip it.
+                }
+                failureCount++;
+                out.printf("Failure %d: %s%n",failureCount,result.getFailureHeader());
+                out.printf("         %s%n",result.getFailureMessage());
+                System.out.println(result.getFailureHeader());
+                System.out.println(result.getFailureMessage());
+                System.out.println(result.getFailureTrace());
+            }
+        }
+        if (failureCount > 0)
+        {
+            out.flush();
+            Assert.fail("Encountered " + failureCount + " failure(s)\n" + "See STDOUT for Stacktrace Details on failures.\n" + writer.toString());
         }
     }
 
