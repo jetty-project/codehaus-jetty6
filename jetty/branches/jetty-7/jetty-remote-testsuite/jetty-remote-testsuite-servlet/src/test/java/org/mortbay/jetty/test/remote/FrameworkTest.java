@@ -1,4 +1,4 @@
-package org.mortbay.jetty.test.validation;
+package org.mortbay.jetty.test.remote;
 
 import static org.hamcrest.Matchers.*;
 
@@ -12,12 +12,12 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mortbay.jetty.test.validation.client.RemoteAssertClient;
-import org.mortbay.jetty.test.validation.client.RemoteAssertResults;
-import org.mortbay.jetty.test.validation.client.RemoteAssertResults.TestClass;
-import org.mortbay.jetty.test.validation.client.RemoteAssertResults.TestResult;
-import org.mortbay.jetty.test.validation.fwk.ContextTest;
-import org.mortbay.jetty.test.validation.fwk.SimpleTest;
+import org.mortbay.jetty.test.remote.client.RemoteAssertClient;
+import org.mortbay.jetty.test.remote.client.RemoteAssertResults;
+import org.mortbay.jetty.test.remote.client.RemoteAssertResults.TestClass;
+import org.mortbay.jetty.test.remote.client.RemoteAssertResults.TestResult;
+import org.mortbay.jetty.test.remote.fwk.ContextTest;
+import org.mortbay.jetty.test.remote.fwk.SimpleTest;
 
 public class FrameworkTest
 {
@@ -88,7 +88,7 @@ public class FrameworkTest
         Assert.assertFalse("test should not be ignore",tr.isIgnored());
         Assert.assertFalse("test should not be success",tr.isSuccess());
         Assert.assertFalse("test should not have assumption failure",tr.isAssumptionFailure());
-        Assert.assertEquals("test.failure.header","testQuoteEqualsFailure(org.mortbay.jetty.test.validation.fwk.SimpleTest)",tr.getFailureHeader());
+        Assert.assertEquals("test.failure.header","testQuoteEqualsFailure(org.mortbay.jetty.test.remote.fwk.SimpleTest)",tr.getFailureHeader());
         Assert.assertEquals("test.failure.message","Quote expected:<[Sweet]> but was:<[Dude]>",tr.getFailureMessage());
         Assert.assertNotNull("test.failure.trace should not be null",tr.getFailureTrace());
 

@@ -1,4 +1,4 @@
-package org.mortbay.jetty.test.validation;
+package org.mortbay.jetty.test.remote;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;

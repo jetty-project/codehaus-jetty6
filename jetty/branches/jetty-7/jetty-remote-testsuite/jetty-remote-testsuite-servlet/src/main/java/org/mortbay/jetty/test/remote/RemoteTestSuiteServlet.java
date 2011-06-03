@@ -1,4 +1,4 @@
-package org.mortbay.jetty.test.validation;
+package org.mortbay.jetty.test.remote;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -18,10 +18,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.runner.JUnitCore;
-import org.mortbay.jetty.test.validation.junit.RunResult;
-import org.mortbay.jetty.test.validation.junit.RunResultsListener;
+import org.mortbay.jetty.test.remote.junit.RunResult;
+import org.mortbay.jetty.test.remote.junit.RunResultsListener;
 
-public abstract class RemoteAssertServlet extends HttpServlet
+public abstract class RemoteTestSuiteServlet extends HttpServlet
 {
     private static final long serialVersionUID = -5707460195745579917L;
     private Map<String, Class<?>> testSuite = new HashMap<String, Class<?>>();

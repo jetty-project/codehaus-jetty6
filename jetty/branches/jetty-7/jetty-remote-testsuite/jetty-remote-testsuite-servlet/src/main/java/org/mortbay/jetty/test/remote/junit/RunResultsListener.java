@@ -1,4 +1,4 @@
-package org.mortbay.jetty.test.validation.junit;
+package org.mortbay.jetty.test.remote.junit;
 
 import java.util.ArrayList;
 import java.util.List;

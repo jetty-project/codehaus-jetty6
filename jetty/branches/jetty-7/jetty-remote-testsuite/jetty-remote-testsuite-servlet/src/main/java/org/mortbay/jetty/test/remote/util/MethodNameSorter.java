@@ -1,4 +1,4 @@
-package org.mortbay.jetty.test.validation.util;
+package org.mortbay.jetty.test.remote.util;
 
 import java.lang.reflect.Method;
 import java.util.Comparator;
