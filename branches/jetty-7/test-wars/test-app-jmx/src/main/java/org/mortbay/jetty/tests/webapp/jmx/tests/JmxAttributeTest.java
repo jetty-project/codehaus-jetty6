@@ -1,6 +1,6 @@
-package org.mortbay.jetty.tests.distribution.jmx;
+package org.mortbay.jetty.tests.webapp.jmx.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,54 +11,47 @@ import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
 import org.eclipse.jetty.toolchain.jmx.JmxServiceConnection;
-import org.eclipse.jetty.toolchain.test.SimpleRequest;
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
-import org.mortbay.jetty.tests.distribution.JettyProcess;
 
-/**
- * Test Jetty with one webapp.
- */
-public class JmxIntegrationTest
+public class JmxAttributeTest
 {
-    private static JettyProcess jetty;
-    private static JmxServiceConnection jmxConnect; 
-    private static MBeanServerConnection mbeanConnect; 
+    private static JmxServiceConnection jmxConnect = null;  
+    private static MBeanServerConnection mbeanConnect = null;
 
-    @BeforeClass
-    public static void initJetty() throws Exception
+    /* ------------------------------------------------------------ */
+    @Before
+    public void setUp() throws Exception
     {
-        jetty = new JettyProcess(JmxIntegrationTest.class);
+        if (jmxConnect == null)
+        {
+            jmxConnect = getServiceConnection();
+            jmxConnect.connect();
 
-        jetty.delete("contexts/javadoc.xml");
-        
-        jetty.copyTestWar("test-war-dump.war");
-
-        jetty.overlayConfig("jmx");
-        
-        jetty.start();
-
-        jmxConnect = new JmxServiceConnection(jetty.getJmxUrl());
-        jmxConnect.connect();
-        
-        mbeanConnect = jmxConnect.getConnection();
+            mbeanConnect = jmxConnect.getConnection();
+        }
     }
-
+    
+    /* ------------------------------------------------------------ */
     @AfterClass
-    public static void shutdownJetty() throws Exception
+    public static void tearDown() throws Exception
     {
         if (jmxConnect != null)
         {
             jmxConnect.disconnect();
         }
-
-        if (jetty != null)
-        {
-            jetty.stop();
-        }
     }
 
+    /* ------------------------------------------------------------ */
+    protected JmxServiceConnection getServiceConnection() 
+        throws IOException
+    {
+        return new JmxServiceConnection();
+
+    }
+
+    /* ------------------------------------------------------------ */
     @Test
     @SuppressWarnings("unchecked")
     public void testDeployMgr() throws Exception
@@ -78,6 +71,7 @@ public class JmxIntegrationTest
         assertTrue(nodes != null && nodes.size() > 0);
     }
     
+    /* ------------------------------------------------------------ */
     @Test
     public void testContextProvider() throws Exception
     {
@@ -93,6 +87,7 @@ public class JmxIntegrationTest
         assertTrue(scanInterval != null && scanInterval instanceof Integer);        
     }
     
+    /* ------------------------------------------------------------ */
     @Test
     @SuppressWarnings("unused")
     public void testWebappProvider() throws Exception
@@ -127,6 +122,7 @@ public class JmxIntegrationTest
         // Exception would be thrown if there's a problem
     }
     
+    /* ------------------------------------------------------------ */
     @Test
     public void testServer() throws Exception
     {
@@ -187,6 +183,7 @@ public class JmxIntegrationTest
         assertTrue(failed != null && failed instanceof Boolean);
     }
 
+    /* ------------------------------------------------------------ */
     @Test
     public void testHandlerCollection() throws Exception
     {
@@ -202,6 +199,7 @@ public class JmxIntegrationTest
         assertTrue(server !=  null);
     }
 
+    /* ------------------------------------------------------------ */
     @Test
     @SuppressWarnings("unused")
     public void testConnector() throws Exception
@@ -314,6 +312,7 @@ public class JmxIntegrationTest
         assertTrue(statsOnMs != null && statsOnMs instanceof Long);
     }
     
+    /* ------------------------------------------------------------ */
     @Test
     @SuppressWarnings("unused")
     public void testSessionManager() throws Exception
@@ -372,6 +371,7 @@ public class JmxIntegrationTest
         assertTrue(sessionsTotal != null && sessionsTotal instanceof Integer);
     }
     
+    /* ------------------------------------------------------------ */
     @Test
     @SuppressWarnings({ "unused", "unchecked" })
     public void testFilterHolder() throws Exception
@@ -391,6 +391,7 @@ public class JmxIntegrationTest
         assertTrue(name !=  null && name.length() > 0);
     }
 
+    /* ------------------------------------------------------------ */
     @Test
     public void testFilterMapping() throws Exception
     {
@@ -406,6 +407,7 @@ public class JmxIntegrationTest
         assertTrue(servletNames !=  null);
     }
     
+    /* ------------------------------------------------------------ */
     @Test
     @SuppressWarnings("unused")
     public void testServletHandler() throws Exception
@@ -438,6 +440,7 @@ public class JmxIntegrationTest
         assertTrue(servlets !=  null && servlets.length > 0);
     }
 
+    /* ------------------------------------------------------------ */
     @Test
     @SuppressWarnings({ "unused", "unchecked" })
     public void testServletHolder() throws Exception
@@ -466,6 +469,7 @@ public class JmxIntegrationTest
         // Exception would be thrown if there's a problem
     }
 
+    /* ------------------------------------------------------------ */
     @Test
     public void testServletMapping() throws Exception
     {
@@ -478,6 +482,7 @@ public class JmxIntegrationTest
         assertTrue(servletName !=  null && servletName.length() > 0);
     }
     
+    /* ------------------------------------------------------------ */
     @Test
     public void testQoSFilter() throws Exception
     {
@@ -493,6 +498,7 @@ public class JmxIntegrationTest
         assertTrue(waitMs != null && waitMs instanceof Long);
     }
     
+    /* ------------------------------------------------------------ */
     @Test
     public void testDoSFilter() throws Exception
     {
@@ -529,6 +535,7 @@ public class JmxIntegrationTest
         assertTrue(trackSessions != null && trackSessions instanceof Boolean);
     }
     
+    /* ------------------------------------------------------------ */
     @Test
     @SuppressWarnings("unused")
     public void testLogger() throws Exception
@@ -542,6 +549,7 @@ public class JmxIntegrationTest
         // Exception would be thrown if there's a problem
     }
     
+    /* ------------------------------------------------------------ */
     @Test
     public void testThreadPool() throws Exception
     {
@@ -575,6 +583,7 @@ public class JmxIntegrationTest
         assertTrue(threadsPriority != null && threadsPriority instanceof Integer);
     }
 
+    /* ------------------------------------------------------------ */
     @Test
     @SuppressWarnings({ "unused", "unchecked" })
     public void testWebAppContext() throws Exception
@@ -684,42 +693,5 @@ public class JmxIntegrationTest
         
         String[] welcomeFiles = (String[])mbeanConnect.getAttribute(objName, "welcomeFiles");
         assertTrue(welcomeFiles != null && welcomeFiles.length > 0);
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void testAppLifecycle() throws Exception
-    {           
-        SimpleRequest request = new SimpleRequest(jetty.getBaseUri());
-        String result = request.getString("/test-war-dump/");
-        assertTrue("Application didn't respond",result.length() > 0);
-        
-        JmxServiceConnection jmxConnection = new JmxServiceConnection(jetty.getJmxUrl());
-        jmxConnection.connect();
-        
-        MBeanServerConnection mbsConnection = jmxConnection.getConnection();
-        ObjectName dmObjName = new ObjectName("org.eclipse.jetty.deploy:type=deploymentmanager,id=0");
-        ArrayList<String> apps = (ArrayList<String>)mbsConnection.getAttribute(dmObjName, "apps");
-        
-        String[] params = new String[] {apps.get(1), "undeployed"};
-        String[] signature = new String[] {"java.lang.String", "java.lang.String"};
-        mbsConnection.invoke(dmObjName, "requestAppGoal", params, signature);
-
-        try
-        {
-                result = request.getString("/test-war-dump/");
-        }
-        catch (IOException ex)
-        {
-                assertTrue(ex.getMessage().contains("404"));
-        }
-        
-        params = new String[] {apps.get(1), "started"};
-        signature = new String[] {"java.lang.String", "java.lang.String"};
-        mbsConnection.invoke(dmObjName, "requestAppGoal", params, signature);
-
-        request = new SimpleRequest(jetty.getBaseUri());
-        result = request.getString("/test-war-dump/");
-        assertTrue("Application didn't respond",result.length() > 0);
     }
 }
