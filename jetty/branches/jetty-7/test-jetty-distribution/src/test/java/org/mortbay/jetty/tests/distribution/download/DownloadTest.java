@@ -1,12 +1,7 @@
 package org.mortbay.jetty.tests.distribution.download;
 
-import org.eclipse.jetty.toolchain.test.SimpleRequest;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mortbay.jetty.test.remote.RemoteTestSuiteClient;
 import org.mortbay.jetty.test.remote.RemoteTestSuiteResults;
@@ -56,7 +51,7 @@ public class DownloadTest
         
         RemoteTestSuiteClient client = new RemoteTestSuiteClient(jetty.getBaseUri());
         
-        RemoteTestSuiteResults results = client.getResults("/test-war-download/remoteAssert");
+        RemoteTestSuiteResults results = client.getResults("/test-war-download/testSuite");
         
         results.assertSuccess();
         

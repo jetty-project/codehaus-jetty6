@@ -51,6 +51,13 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.mortbay.jetty.testwars</groupId>
+                  <artifactId>test-app-jmx</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${test-wars-dir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty.testwars</groupId>
                   <artifactId>test-war-dump</artifactId>
                   <version>${project.version}</version>
                   <type>war</type>
