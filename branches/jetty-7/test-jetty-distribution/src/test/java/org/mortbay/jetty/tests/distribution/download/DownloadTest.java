@@ -1,23 +1,23 @@
 package org.mortbay.jetty.tests.distribution.download;
 
+import org.eclipse.jetty.toolchain.test.JettyDistro;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mortbay.jetty.test.remote.RemoteTestSuiteClient;
 import org.mortbay.jetty.test.remote.RemoteTestSuiteResults;
-import org.mortbay.jetty.tests.distribution.JettyProcess;
 
 /**
  * Test Jetty with 2 webapps, with jetty-policy or java security in place.
  */
 public class DownloadTest
 {
-    private static JettyProcess jetty;
+    private static JettyDistro jetty;
 
     @BeforeClass
     public static void initJetty() throws Exception
     {
-        jetty = new JettyProcess(DownloadTest.class);
+        jetty = new JettyDistro(DownloadTest.class);
 
         jetty.copyTestWar("test-war-download.war");
 

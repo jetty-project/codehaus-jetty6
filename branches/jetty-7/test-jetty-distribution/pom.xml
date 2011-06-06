@@ -12,6 +12,7 @@
   <properties>
     <test-wars-dir>${project.build.directory}/test-wars</test-wars-dir>
     <test-libs-dir>${project.build.directory}/test-libs</test-libs-dir>
+    <test-dist-dir>${project.build.directory}/test-dist</test-dist-dir>
   </properties>
   <build>
     <plugins>
@@ -86,7 +87,7 @@
                 </artifactItem>
               </artifactItems>
               <outputAbsoluteArtifactFilename>true</outputAbsoluteArtifactFilename>
-              <outputDirectory>${project.build.directory}/jetty-distro</outputDirectory>
+              <outputDirectory>${test-dist-dir}</outputDirectory>
               <overWriteSnapshots>true</overWriteSnapshots>
               <overWriteIfNewer>true</overWriteIfNewer>
             </configuration>

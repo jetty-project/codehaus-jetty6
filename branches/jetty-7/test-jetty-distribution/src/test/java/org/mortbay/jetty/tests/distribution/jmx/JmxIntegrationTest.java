@@ -1,6 +1,6 @@
 package org.mortbay.jetty.tests.distribution.jmx;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,25 +11,25 @@ import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
 import org.eclipse.jetty.toolchain.jmx.JmxServiceConnection;
+import org.eclipse.jetty.toolchain.test.JettyDistro;
 import org.eclipse.jetty.toolchain.test.SimpleRequest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mortbay.jetty.tests.distribution.JettyProcess;
 
 /**
  * Test Jetty with one webapp.
  */
 public class JmxIntegrationTest
 {
-    private static JettyProcess jetty;
+    private static JettyDistro jetty;
     private static JmxServiceConnection jmxConnect; 
     private static MBeanServerConnection mbeanConnect; 
 
     @BeforeClass
     public static void initJetty() throws Exception
     {
-        jetty = new JettyProcess(JmxIntegrationTest.class);
+        jetty = new JettyDistro(JmxIntegrationTest.class);
 
         jetty.delete("contexts/javadoc.xml");
         
