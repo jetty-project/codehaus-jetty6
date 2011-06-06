@@ -20,6 +20,29 @@
     <url-pattern>/test/*</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>TestSuiteServlet</servlet-name>
+    <servlet-class>org.mortbay.jetty.tests.webapp.jndi.TestSuiteServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>    
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>TestSuiteServlet</servlet-name>
+    <url-pattern>/testSuite/*</url-pattern>
+  </servlet-mapping>
+
+  <env-entry>
+    <env-entry-name>wiggle</env-entry-name>
+    <env-entry-value>99.99</env-entry-value>
+    <env-entry-type>java.lang.Double</env-entry-type>
+    <injection-target>
+      <injection-target-class>org.mortbay.jetty.tests.webapp.jndi.tests.JndiTest</injection-target-class>
+      <injection-target-name>wiggle</injection-target-name>
+    </injection-target>
+  </env-entry>
+
+ 
+
   <env-entry>
     <env-entry-name>wiggle</env-entry-name>
     <env-entry-value>99.99</env-entry-value>
@@ -30,23 +53,6 @@
     </injection-target>
   </env-entry>
 
-  <resource-ref>
-    <res-ref-name>jdbc/mydatasource1</res-ref-name>
-    <res-type>javax.sql.DataSource</res-type>
-    <res-auth>Container</res-auth>
-    <injection-target>
-      <injection-target-class>com.acme.JNDITest</injection-target-class>
-      <injection-target-name>myDatasource</injection-target-name>
-    </injection-target>
-  </resource-ref>
-
-
-
-  <resource-ref>
-    <res-ref-name>mail/Session</res-ref-name>
-    <res-type>javax.mail.Session</res-type>
-    <res-auth>Container</res-auth>
-  </resource-ref>
 
   <post-construct>
     <lifecycle-callback-class>com.acme.JNDITest</lifecycle-callback-class>

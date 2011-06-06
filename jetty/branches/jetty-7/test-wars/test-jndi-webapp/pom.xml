@@ -125,6 +125,11 @@
   </build>
   <dependencies>
     <dependency>
+      <groupId>org.mortbay.jetty.testwars</groupId>
+      <artifactId>jetty-remote-testsuite-servlet</artifactId>
+      <version>${jetty-version}</version> 
+    </dependency>
+    <dependency>
       <groupId>org.apache.geronimo.specs</groupId>
       <artifactId>geronimo-jta_1.1_spec</artifactId>
       <version>1.1.1</version>
