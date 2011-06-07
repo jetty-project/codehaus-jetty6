@@ -63,5 +63,9 @@
     <module>test-war-servlet25</module>
     <module>test-war-servletmixed1</module>
     <module>test-war-servletmixed2</module>
+    <!-- Used by test-jetty-distribution -->
+    <module>test-app-jmx</module>
+    <module>test-war-download</module>
+    <module>test-war-dump</module>
   </modules>
 </project>
