@@ -7,6 +7,28 @@
   version="2.5">
   <display-name>File Download Webapp</display-name>
 
+  <context-param>
+    <param-name>org.eclipse.jetty.server.context.ManagedAttributes</param-name>
+    <param-value>QoSFilter</param-value>
+  </context-param>
+  
+  <filter>
+    <filter-name>QoSFilter</filter-name>
+    <filter-class>org.eclipse.jetty.servlets.DoSFilter</filter-class>
+    <init-param>
+      <param-name>maxRequestsPerSec</param-name>
+      <param-value>20</param-value>
+    </init-param>
+    <init-param>
+      <param-name>managedAttr</param-name>
+      <param-value>true</param-value>
+    </init-param>
+  </filter>  
+  <filter-mapping>
+    <filter-name>QoSFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  
   <servlet>
     <servlet-name>DownloadServlet</servlet-name>
     <servlet-class>org.mortbay.jetty.tests.webapp.download.DownloadServlet</servlet-class>
