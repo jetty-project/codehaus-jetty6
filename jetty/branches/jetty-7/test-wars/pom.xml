@@ -66,6 +66,5 @@
     <!-- Used by test-jetty-distribution -->
     <module>test-app-jmx</module>
     <module>test-war-download</module>
-    <module>test-war-dump</module>
   </modules>
 </project>
