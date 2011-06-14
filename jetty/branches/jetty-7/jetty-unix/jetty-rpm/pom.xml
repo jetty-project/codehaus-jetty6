@@ -5,8 +5,8 @@
     <artifactId>jetty-unix</artifactId>
     <version>7.4.3-SNAPSHOT</version>
   </parent>
-  <artifactId>jetty-deb</artifactId>
-  <packaging>deb</packaging>
+  <artifactId>jetty-rpm</artifactId>
+  <packaging>rpm</packaging>
   <build>
     <plugins>
       <plugin>
@@ -17,12 +17,11 @@
         <configuration>
           <contact>Webtide LLC</contact>
           <contactEmail>jetty-dev@eclipse.org</contactEmail>
-          <deb>
-            <priority>stable</priority>
-            <section>web</section>
-          </deb>
           <name>Core Jetty ${project.version} Distribution</name>
           <description>Jetty provides an Web server and javax.servlet container, plus support for Web Sockets, OSGi, JMX, JNDI, JASPI, AJP and many other integrations. These components are open source and available for commercial use and distribution.</description>
+          <rpm>
+            <group>Applications/Internet</group>
+          </rpm>
           <assembly>
             <extractArtifact>
               <artifact>org.eclipse.jetty:jetty-distribution:zip</artifact>

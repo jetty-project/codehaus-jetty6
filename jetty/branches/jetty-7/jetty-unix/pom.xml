@@ -29,6 +29,6 @@
   <packaging>pom</packaging>
   <modules>
     <module>jetty-deb</module>
-    <!--module>jetty-rpm</module-->
+    <module>jetty-rpm</module>
   </modules>
 </project>
