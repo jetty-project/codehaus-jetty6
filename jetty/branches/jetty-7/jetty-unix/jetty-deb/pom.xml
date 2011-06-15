@@ -6,6 +6,7 @@
     <version>7.4.3-SNAPSHOT</version>
   </parent>
   <artifactId>jetty-deb</artifactId>
+  <name>Jetty :: Unix Distributions :: Debian</name>
   <packaging>deb</packaging>
   <build>
     <plugins>
@@ -17,12 +18,12 @@
         <configuration>
           <contact>Webtide LLC</contact>
           <contactEmail>jetty-dev@eclipse.org</contactEmail>
+          <name>Core Jetty ${project.version} Distribution</name>
+          <description>Jetty provides an Web server and javax.servlet container, plus support for Web Sockets, OSGi, JMX, JNDI, JASPI, AJP and many other integrations. These components are open source and available for commercial use and distribution.</description>
           <deb>
             <priority>stable</priority>
             <section>web</section>
           </deb>
-          <name>Core Jetty ${project.version} Distribution</name>
-          <description>Jetty provides an Web server and javax.servlet container, plus support for Web Sockets, OSGi, JMX, JNDI, JASPI, AJP and many other integrations. These components are open source and available for commercial use and distribution.</description>
           <assembly>
             <extractArtifact>
               <artifact>org.eclipse.jetty:jetty-distribution:zip</artifact>
@@ -30,13 +31,6 @@
               <pattern>/jetty-distribution-${project.version}(.*)</pattern>
               <replacement>$1</replacement>
              </extractArtifact>
-            <copyFile>
-              <path>/opt/jetty/bin/jetty.sh</path>
-              <toFile>/etc/init.d/jetty</toFile>
-              <attributes>
-                <mode>0755</mode>
-              </attributes>
-            </copyFile>
           </assembly>
         </configuration>
       </plugin>

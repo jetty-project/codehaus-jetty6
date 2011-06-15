@@ -126,6 +126,7 @@
     <module>jetty-spring</module>
     <module>example-async-rest-webapp</module>
     <module>jetty-hightide</module>
+    <module>jetty-unix</module>
     <module>jetty-jboss</module>
     <module>test-wars</module>
     <module>jetty-logback</module>
