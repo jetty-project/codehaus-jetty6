@@ -6,6 +6,7 @@
     <version>7.4.3-SNAPSHOT</version>
   </parent>
   <artifactId>jetty-rpm</artifactId>
+  <name>Jetty :: Unix Distributions :: RPM</name>
   <packaging>rpm</packaging>
   <build>
     <plugins>
@@ -29,13 +30,6 @@
               <pattern>/jetty-distribution-${project.version}(.*)</pattern>
               <replacement>$1</replacement>
              </extractArtifact>
-            <copyFile>
-              <path>/opt/jetty/bin/jetty.sh</path>
-              <toFile>/etc/init.d/jetty</toFile>
-              <attributes>
-                <mode>0755</mode>
-              </attributes>
-            </copyFile>
           </assembly>
         </configuration>
       </plugin>
