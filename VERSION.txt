@@ -12,6 +12,7 @@ jetty-6.1.22.z6
  + JETTY-1291 Extract query parameters even if POST content consumed
  + JETTY-1319 Use servlet.jar that sanitizes methods for CVE-2007-6203 like XSS
  + JETTY-1342 Recreate selector if wakeup throws JVM bug 
+ + JETTY-1390 RewriteHandler handles encoded URIs
  + 333892 Improved JVM bug detection
 
 jetty-6.1.22 16 November 2009
