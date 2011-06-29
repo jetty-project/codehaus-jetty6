@@ -14,6 +14,7 @@ Jetty-6.1-SNAPSHOT
  + JETTY-1343 IllegalArgumentException for bad % encodings
  + JETTY-1348 Log getCause
  + JETTY-1372 maven-jetty-jspc-plugin doesn't support trimSpaces
+ + JETTY-1390 RewriteHandler handles encoded URIs
  + 333892 Improved JVM bug detection
  + 338364 Fixed expires header for set cookies
 
