@@ -52,7 +52,7 @@
     <dependency>
       <groupId>org.mortbay.jetty.testwars</groupId>
       <artifactId>jetty-remote-assert</artifactId>
-      <version>${jetty-version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
