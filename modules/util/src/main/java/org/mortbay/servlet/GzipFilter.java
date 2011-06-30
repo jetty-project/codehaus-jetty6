@@ -39,7 +39,7 @@ import org.mortbay.util.StringUtil;
 /** GZIP Filter
  * This filter will gzip the content of a response iff: <ul>
  * <li>The filter is mapped to a matching path</li>
- * <li>The response status code is >=200 and <300
+ * <li>The response status code is &gt;=200 and &lt;300
  * <li>The content length is unknown or more than the <code>minGzipSize</code> initParameter or the minGzipSize is 0(default)</li>
  * <li>The content-type is in the comma separated list of mimeTypes set in the <code>mimeTypes</code> initParameter or
  * if no mimeTypes are defined the content-type is not "application/gzip"</li>
