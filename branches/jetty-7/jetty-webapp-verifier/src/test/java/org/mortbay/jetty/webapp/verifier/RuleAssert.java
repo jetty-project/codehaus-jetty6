@@ -31,7 +31,6 @@ import junit.framework.Assert;
 
 import org.eclipse.jetty.toolchain.test.MavenTestingUtils;
 import org.eclipse.jetty.util.IO;
-import org.junit.Ignore;
 
 /**
  * Rule based assertions.
@@ -67,7 +66,6 @@ public class RuleAssert
      *            the prefix of the integration files in src/test/resources that you want to use.
      * @throws Exception
      */
-    @Ignore ("comment for release, MavenTestingUtils.readToString method does not exist")
     public static void assertIntegration(String prefix) throws Exception
     {
         // Load the 3 integration files.
@@ -76,28 +74,28 @@ public class RuleAssert
         File expectationFile = MavenTestingUtils.getTestResourceFile(prefix + ".expectations.txt");
 
         // Establish Webapp to use
-        //String webappName = MavenTestingUtils.readToString(setupFile).trim();
+        String webappName = org.eclipse.jetty.toolchain.test.IO.readToString(setupFile).trim();
 
         File webappPath;
         
-//        if(webappName.startsWith("test-war-")) {
-//        	webappPath = MavenTestingUtils.getTargetFile("test-wars/" + webappName);
-//        } else {
-//        	webappPath = MavenTestingUtils.getTestResourceFile(webappName);
-//        }
+        if(webappName.startsWith("test-war-")) {
+        	webappPath = MavenTestingUtils.getTargetFile("test-wars/" + webappName);
+        } else {
+        	webappPath = MavenTestingUtils.getTestResourceFile(webappName);
+        }
         
-        //URI webappURI = webappPath.toURI();
+        URI webappURI = webappPath.toURI();
 
         // Load RuleSet configuration
         RuleSet ruleset = RuleSet.load(configFile);
 
         // Run Verification
-        //WebappVerifier verifier = ruleset.createWebappVerifier(webappURI);
-        //verifier.setWorkDir(MavenTestingUtils.getTargetTestingDir());
-        //verifier.visitAll();
+        WebappVerifier verifier = ruleset.createWebappVerifier(webappURI);
+        verifier.setWorkDir(MavenTestingUtils.getTargetTestingDir());
+        verifier.visitAll();
 
         // Compare violations
-        //assertViolations(loadExpectedViolations(expectationFile),verifier.getViolations());
+        assertViolations(loadExpectedViolations(expectationFile),verifier.getViolations());
     }
 
     public static void assertViolations(Collection<Violation> expectedColl, Collection<Violation> actualColl)
@@ -192,7 +190,5 @@ public class RuleAssert
         else
             return null;
     }
-    
-    
     
 }
