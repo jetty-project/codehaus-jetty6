@@ -132,6 +132,7 @@
     <module>jetty-webapp-verifier</module>
     <module>jetty-webapp-logging</module>
     <module>jetty-monitor</module>
+    <module>jetty-remote-testsuite</module>
   </modules>
   <profiles>
     <profile>
