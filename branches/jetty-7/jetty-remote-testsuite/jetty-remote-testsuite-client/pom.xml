@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.mortbay.jetty.testwars</groupId>
     <artifactId>jetty-remote-testsuite-parent</artifactId>
-    <version>7.4.3-SNAPSHOT</version>
+    <version>7.4.3.v20110630</version>
   </parent>
   <artifactId>jetty-remote-testsuite-client</artifactId>
   <packaging>jar</packaging>
