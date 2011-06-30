@@ -127,7 +127,7 @@
     <dependency>
       <groupId>org.mortbay.jetty.testwars</groupId>
       <artifactId>jetty-remote-testsuite-servlet</artifactId>
-      <version>${jetty-version}</version> 
+      <version>${project.version}</version> 
     </dependency>
     <dependency>
       <groupId>org.apache.geronimo.specs</groupId>
