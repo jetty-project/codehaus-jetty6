@@ -1,0 +1,29 @@
+<configuration>
+  <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
+
+  <appender name="ROLL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>logs/jetty-roll.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>logs/jetty-roll-%d{yyyy-MM-dd_HH-mm}.log</fileNamePattern>
+      <maxHistory>10</maxHistory>
+    </rollingPolicy>
+    <layout>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </layout>
+  </appender>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <layout>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </layout>
+  </appender>
+  
+  <!-- Let JettyDistro see the connector info -->
+  <logger name="org.eclipse.jetty" level="INFO">
+    <appender-ref ref="STDOUT" />
+  </logger>
+
+  <root level="DEBUG">
+    <appender-ref ref="ROLL" />
+  </root>
+</configuration>
