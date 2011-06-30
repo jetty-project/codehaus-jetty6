@@ -1,0 +1,176 @@
+[
+ {
+   "name": "com.company.demo.tests.ClassLoaderTest",
+   "results": [{
+     "className": "com.company.demo.tests.ClassLoaderTest",
+     "methodName": "testClassloaderCreation",
+     "success": true
+   }],
+   "testCount": 1
+ },
+ {
+   "name": "com.company.demo.tests.CrossContextTest",
+   "results": [
+     {
+       "className": "com.company.demo.tests.CrossContextTest",
+       "methodName": "testNonExistentGetContext",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.CrossContextTest",
+       "methodName": "testAllowedExistingGetContext",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.CrossContextTest",
+       "methodName": "testNotAllowedExistingGetContext",
+       "success": true
+     }
+   ],
+   "testCount": 3
+ },
+ {
+   "name": "com.company.demo.tests.FileSystemTest",
+   "results": [
+     {
+       "className": "com.company.demo.tests.FileSystemTest",
+       "methodName": "testReadJettyPolicyFile",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.FileSystemTest",
+       "methodName": "testWriteJettyPolicyFile",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.FileSystemTest",
+       "methodName": "testReadJettyLibDirectory",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.FileSystemTest",
+       "methodName": "testWriteJettyLibDirectory",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.FileSystemTest",
+       "methodName": "testWriteJettyHome",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.FileSystemTest",
+       "methodName": "testReadJettyLogs",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.FileSystemTest",
+       "methodName": "testWriteJettyLogs",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.FileSystemTest",
+       "methodName": "testReadServletContextTempDir",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.FileSystemTest",
+       "methodName": "testWriteServletContextTempDir",
+       "success": true
+     }
+   ],
+   "testCount": 9
+ },
+ {
+   "name": "com.company.demo.tests.LoggingTest",
+   "results": [
+     {
+       "className": "com.company.demo.tests.LoggingTest",
+       "methodName": "testLogging",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.LoggingTest",
+       "methodName": "testReadLogFile",
+       "success": true
+     }
+   ],
+   "testCount": 2
+ },
+ {
+   "name": "com.company.demo.tests.PropertyTest",
+   "results": [
+     {
+       "className": "com.company.demo.tests.PropertyTest",
+       "methodName": "checkGetAllowedReadProperty",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.PropertyTest",
+       "methodName": "checkSetAllowedReadProperty",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.PropertyTest",
+       "methodName": "checkSetAllowedWriteProperty",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.PropertyTest",
+       "methodName": "checkGetAllowedWriteProperty",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.PropertyTest",
+       "methodName": "checkReadWriteUndeclaredProperty",
+       "success": true
+     }
+   ],
+   "testCount": 5
+ },
+ {
+   "name": "com.company.demo.tests.SystemTest",
+   "results": [
+     {
+       "className": "com.company.demo.tests.SystemTest",
+       "methodName": "testSystemExit",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.SystemTest",
+       "methodName": "testLoadLibrary",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.SystemTest",
+       "methodName": "testGetProperties",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.SystemTest",
+       "methodName": "testAlterSystemInputStream",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.SystemTest",
+       "methodName": "testAlterSystemOutputStream",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.SystemTest",
+       "methodName": "testAlterSystemErrorStream",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.SystemTest",
+       "methodName": "testSetSecurityManager",
+       "success": true
+     },
+     {
+       "className": "com.company.demo.tests.SystemTest",
+       "methodName": "testSetPolicy",
+       "success": true
+     }
+   ],
+   "testCount": 8
+ }
+]
