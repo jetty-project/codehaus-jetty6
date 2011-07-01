@@ -316,11 +316,24 @@
             <descriptor>src/main/assembly/jetty-assembly.xml</descriptor>
             <descriptor>src/main/assembly/jetty-src.xml</descriptor>
           </descriptors>
-          <appendAssemblyId>false</appendAssemblyId>
           <tarLongFileMode>gnu</tarLongFileMode>
         </configuration>
         <executions>
           <execution>
+            <id>distro</id>
+            <configuration>
+              <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>src</id>
+            <configuration>
+              <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
