@@ -1,0 +1,12 @@
+<configuration>
+  <appender name="STDOUT"
+    class="ch.qos.logback.core.ConsoleAppender">
+    <layout
+      class="ch.qos.logback.access.PatternLayout">
+      <Pattern>%h %l %u %user %date "%r" %s %b</Pattern>
+    </layout>
+  </appender>
+
+  <appender-ref ref="STDOUT" />
+</configuration>
+
