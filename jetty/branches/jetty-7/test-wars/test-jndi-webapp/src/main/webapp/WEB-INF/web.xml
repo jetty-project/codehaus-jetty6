@@ -8,7 +8,6 @@
 
   <display-name>Test JNDI WebApp</display-name>
   
-
   <servlet>
     <servlet-name>JNDITest</servlet-name>
     <servlet-class>com.acme.JNDITest</servlet-class>
@@ -19,29 +18,6 @@
     <servlet-name>JNDITest</servlet-name>
     <url-pattern>/test/*</url-pattern>
   </servlet-mapping>
-
-  <servlet>
-    <servlet-name>TestSuiteServlet</servlet-name>
-    <servlet-class>org.mortbay.jetty.tests.webapp.jndi.TestSuiteServlet</servlet-class>
-    <load-on-startup>1</load-on-startup>    
-  </servlet>
-  
-  <servlet-mapping>
-    <servlet-name>TestSuiteServlet</servlet-name>
-    <url-pattern>/testSuite/*</url-pattern>
-  </servlet-mapping>
-
-  <env-entry>
-    <env-entry-name>wiggle</env-entry-name>
-    <env-entry-value>99.99</env-entry-value>
-    <env-entry-type>java.lang.Double</env-entry-type>
-    <injection-target>
-      <injection-target-class>org.mortbay.jetty.tests.webapp.jndi.tests.JndiTest</injection-target-class>
-      <injection-target-name>wiggle</injection-target-name>
-    </injection-target>
-  </env-entry>
-
- 
 
   <env-entry>
     <env-entry-name>wiggle</env-entry-name>
