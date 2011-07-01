@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
+
+
+<!-- =============================================================== -->
+<!-- Configure logback logging under Jetty                           -->
+<!-- =============================================================== -->
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
+
+    <!-- =========================================================== -->
+    <!-- Enable java.util.logging routing to slf4j                   -->
+    <!-- =========================================================== -->
+    <Call class="org.slf4j.bridge.SLF4JBridgeHandler" name="install" />
+
+</Configure>
+
