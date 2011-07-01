@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-integration-project</artifactId>
-    <version>7.4.4-SNAPSHOT</version>
+    <version>7.4.3.v20110701</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>jetty-webapp-verifier</artifactId>
