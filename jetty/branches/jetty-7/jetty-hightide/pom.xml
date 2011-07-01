@@ -313,8 +313,6 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
           <descriptors>
-            <descriptor>src/main/assembly/jetty-assembly.xml</descriptor>
-            <descriptor>src/main/assembly/jetty-src.xml</descriptor>
           </descriptors>
           <tarLongFileMode>gnu</tarLongFileMode>
         </configuration>
@@ -322,6 +320,7 @@
           <execution>
             <id>distro</id>
             <configuration>
+              <descriptor>src/main/assembly/jetty-assembly.xml</descriptor>
               <appendAssemblyId>false</appendAssemblyId>
             </configuration>
             <phase>package</phase>
@@ -332,6 +331,7 @@
           <execution>
             <id>src</id>
             <configuration>
+              <descriptor>src/main/assembly/jetty-src.xml</descriptor>
               <appendAssemblyId>true</appendAssemblyId>
             </configuration>
             <phase>package</phase>
