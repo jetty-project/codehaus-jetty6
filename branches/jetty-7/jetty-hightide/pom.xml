@@ -279,7 +279,9 @@
             <phase>process-resources</phase>
             <configuration>
               <tasks>
+                <patch dir="${assembly-directory}/contexts/test.d" patchfile="src/main/patches/overridexml.patch" ignorewhitespace="true" strip="0" failonerror="false" />
                 <patch dir="${assembly-directory}/contexts" patchfile="src/main/patches/testContextPath.patch" ignorewhitespace="true" strip="0" failonerror="false" />
+                <patch dir="${assembly-directory}/etc" patchfile="src/main/patches/rewritexml.patch" ignorewhitespace="true" strip="0" failonerror="false" />
                 <patch dir="${assembly-directory}/" patchfile="src/main/patches/startini.patch" ignorewhitespace="true" strip="0" failonerror="false" />
               </tasks>
             </configuration>

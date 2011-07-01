@@ -1,3 +1,6 @@
+jetty@codehaus 7.4.4-SNAPSHOT
+ + JETTY-1380 Jetty Rewrite example does not work in Hightide
+
 jetty@codehaus 7.4.3.v20110701 01 July 2011
  + JETTY-1383 Provide Debian and RPM binary distribution of Core Jetty
 
