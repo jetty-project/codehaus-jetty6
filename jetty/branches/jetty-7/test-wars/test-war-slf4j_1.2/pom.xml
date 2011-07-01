@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.mortbay.jetty.testwars</groupId>
     <artifactId>testwars-parent</artifactId>
-    <version>7.5.0-SNAPSHOT</version>
+    <version>7.4.4-SNAPSHOT</version>
   </parent>
   <artifactId>test-war-slf4j_1.2</artifactId>
   <name>Jetty :: Logging Test War :: Slf4J 1.2</name>
