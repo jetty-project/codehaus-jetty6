@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.mortbay.jetty.testwars</groupId>
     <artifactId>testwars-parent</artifactId>
-    <version>7.4.3.v20110701</version>
+    <version>7.4.4-SNAPSHOT</version>
   </parent>
   <artifactId>dummy-java12-lib</artifactId>
   <packaging>jar</packaging>
