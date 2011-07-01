@@ -332,7 +332,7 @@
           <execution>
             <id>src</id>
             <configuration>
-              <appendAssemblyId>false</appendAssemblyId>
+              <appendAssemblyId>true</appendAssemblyId>
             </configuration>
             <phase>package</phase>
             <goals>
