@@ -1,4 +1,4 @@
-jetty@codehaus 7.4.3-v20110630 30 June 2011
+jetty@codehaus 7.4.3.v20110701 01 July 2011
  + JETTY-1383 Provide Debian and RPM binary distribution of Core Jetty
 
 jetty@codehaus 7.4.2.v20110526
