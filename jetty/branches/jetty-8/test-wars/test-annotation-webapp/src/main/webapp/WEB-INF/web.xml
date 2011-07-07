@@ -39,6 +39,17 @@
     <url-pattern>/role/*</url-pattern>
   </servlet-mapping>
   
+  <servlet>
+    <servlet-name>Multi</servlet-name>
+    <servlet-class>com.acme.MultiPartTest</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>Multi</servlet-name>
+    <url-pattern>/multi/*</url-pattern>
+  </servlet-mapping>
+
   <env-entry>
     <env-entry-name>com.acme.AnnotationTest/avgAmount</env-entry-name>
     <env-entry-value>1.25</env-entry-value>

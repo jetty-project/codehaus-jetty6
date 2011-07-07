@@ -19,6 +19,9 @@ package com.acme;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.naming.InitialContext;
 import javax.servlet.ServletConfig;
@@ -33,6 +36,8 @@ import javax.annotation.Resource;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.security.RunAs;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.annotation.WebInitParam;
 import javax.annotation.security.DeclareRoles;
 
 /**
@@ -46,9 +51,11 @@ import javax.annotation.security.DeclareRoles;
  */
 
 @RunAs("special")
+@WebServlet(urlPatterns = { "/test/*"}, name="AnnotationTest", initParams={@WebInitParam(name="fromAnnotation", value="xyz")})
 @DeclareRoles({"user","client"})
 public class AnnotationTest extends HttpServlet 
 {
+    static List<String> __HandlesTypes; 
     private String postConstructResult = "";
     private String dsResult = "";
     private String envResult = "";
@@ -61,6 +68,7 @@ public class AnnotationTest extends HttpServlet
     private String txResult = "";
     private String txLookupResult = "";
     private DataSource myDS;
+    private ServletConfig config;
     
     @Resource(mappedName="UserTransaction")
     private UserTransaction myUserTransaction;
@@ -180,6 +188,7 @@ public class AnnotationTest extends HttpServlet
     public void init(ServletConfig config) throws ServletException
     {
         super.init(config);
+        this.config = config;
     }
 
     
@@ -198,8 +207,57 @@ public class AnnotationTest extends HttpServlet
             response.setContentType("text/html");
             ServletOutputStream out = response.getOutputStream();
             out.println("<html>");
-            out.println("<h1>Jetty Annotation Results</h1>");
+            out.println("<h1>Results</h1>");
             out.println("<body>");
+
+            out.println("<h2>Init Params from Annotation</h2>");
+            out.println("<pre>");
+            out.println("initParams={@WebInitParam(name=\"fromAnnotation\", value=\"xyz\")}");
+            out.println("</pre>");
+            out.println("<br/><b>Result: "+("xyz".equals(config.getInitParameter("fromAnnotation"))? "PASS": "FAIL"));
+
+            out.println("<h2>Init Params from web-fragment</h2>");
+            out.println("<pre>");
+            out.println("extra1=123, extra2=345");
+            out.println("</pre>");
+            boolean fragInitParamResult = "123".equals(config.getInitParameter("extra1")) && "345".equals(config.getInitParameter("extra2"));
+            out.println("<br/><b>Result: "+(fragInitParamResult? "PASS": "FAIL"));
+
+
+             __HandlesTypes = Arrays.asList( "javax.servlet.GenericServlet", 
+                                             "javax.servlet.http.HttpServlet", 
+                                             "com.acme.AnnotationTest", 
+                                             "com.acme.RoleAnnotationTest", 
+                                             "com.acme.MultiPartTest", 
+                                             "com.acme.FragmentServlet", 
+                                             "com.acme.TestListener",
+                                             "com.acme.Bar");
+             out.println("<h2>@ContainerInitializer</h2>");
+             out.println("<pre>");
+             out.println("@HandlesTypes({javax.servlet.Servlet.class, Foo.class})");
+             out.println("</pre>");
+             out.print("<br/><b>Result: ");
+             List<Class> classes = (List<Class>)config.getServletContext().getAttribute("com.acme.Foo");
+             List<String> classNames = new ArrayList<String>();
+             if (classes != null)
+             {
+                 for (Class c: classes)
+                 {
+                     classNames.add(c.getName());
+                     out.print(c.getName()+" ");
+                 }
+                
+                 if (classNames.size() != __HandlesTypes.size())
+                     out.println("<br/>FAIL");
+                 else if (!classNames.containsAll(__HandlesTypes))
+                     out.println("<br/>FAIL");
+                 else
+                     out.println("<br/>PASS");
+             }
+             else
+                 out.print("<br/>FAIL (No such attribute com.acme.Foo)");
+             out.println("</b>");
+
             
             out.println("<h2>@PostConstruct Callback</h2>");
             out.println("<pre>");
@@ -235,8 +293,6 @@ public class AnnotationTest extends HttpServlet
             out.println("<br/><b>JNDI Lookup Result: "+envLookupResult2+"</b>");
             out.println("<br/><b>Result: "+envResult3+": "+(avgAmount.compareTo(new Double("1.25"))==0?" PASS":" FAIL")+"</b>");     
             out.println("<br/><b>JNDI Lookup Result: "+envLookupResult3+"</b>");          
-
-         
             out.println("<h2>@Resource Injection for UserTransaction </h2>");
             out.println("<pre>");
             out.println("@Resource(mappedName=\"UserTransaction\")");
@@ -244,7 +300,6 @@ public class AnnotationTest extends HttpServlet
             out.println("</pre>");
             out.println("<br/><b>Result: "+txResult+"</b>");
             out.println("<br/><b>JNDI Lookup Result: "+txLookupResult+"</b>");
-
             out.println("<h2>Roles</h2>");
             out.println("<p>Login as user \"admin\" with password \"admin\" when prompted after clicking the button below to test @DeclareRoles annotation</p>");
             String context = request.getContextPath();
