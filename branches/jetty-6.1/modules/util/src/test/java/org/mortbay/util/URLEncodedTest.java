@@ -26,6 +26,19 @@ import junit.framework.TestSuite;
  */
 public class URLEncodedTest extends junit.framework.TestCase
 {
+
+ 
+    /* -------------------------------------------------------------- */
+    static 
+    {
+        /*
+         * Uncomment to set setting the System property to something other than the default of UTF-8.
+         * Beware however that you will have to @Ignore all the other tests other than testUrlEncodedStream!
+         
+            System.setProperty("org.mortbay.util.UrlEncoding.charset", StringUtil.__ISO_8859_1);
+         */
+    }
+
     public URLEncodedTest(String name)
     {
       super(name);
@@ -133,7 +146,7 @@ public class URLEncodedTest extends junit.framework.TestCase
         assertEquals("encoded param size",1, url_encoded.size());
         assertEquals("encoded get", url_encoded.getString("Name14"),"%GG% %% %");
 
-        /* Not every jvm supports this encoding */
+        // Not every jvm supports this encoding
         
         if (java.nio.charset.Charset.isSupported("SJIS"))
         {
@@ -194,4 +207,24 @@ public class URLEncodedTest extends junit.framework.TestCase
         else
             assertTrue("Charset Shift_JIS not supported by jvm", true);
     }
+
+
+    
+    /* -------------------------------------------------------------- */
+    public void testCharsetViaSystemProperty ()
+    throws Exception 
+    {        
+        /*
+         * Uncomment to test setting a non-UTF-8 default character encoding using the SystemProperty org.eclipse.jetty.util.UrlEncoding.charset.
+         * You will also need to uncomment the static initializer that sets this SystemProperty near the top of this file.
+  
+
+        ByteArrayInputStream in3 = new ByteArrayInputStream("name=libell%E9".getBytes(StringUtil.__ISO_8859_1));
+        MultiMap m3 = new MultiMap();
+        UrlEncoded.decodeTo(in3, m3, null, -1);
+        assertEquals("stream name", "libell\u00E9", m3.getString("name"));
+        */ 
+        
+    }
+    
 }
