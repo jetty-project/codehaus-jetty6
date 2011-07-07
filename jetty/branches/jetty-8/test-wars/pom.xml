@@ -28,6 +28,9 @@
   <name>Jetty :: Test Wars Parent</name>
   <packaging>pom</packaging>
   <modules>
+    <!-- Original top level supporting jars -->
+    <module>test-container-initializer</module>
+    <module>test-fragment</module>
     <!-- Original top level test webapps -->
     <module>test-jndi-webapp</module>
     <module>test-jaas-webapp</module>
