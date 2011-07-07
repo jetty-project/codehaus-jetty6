@@ -169,60 +169,6 @@
                   <outputDirectory>${assembly-directory}/lib</outputDirectory>
                 </artifactItem>
                <artifactItem>
-                  <groupId>javax.servlet.jsp</groupId>
-                  <artifactId>jsp-api</artifactId>
-                  <version>2.2.1-b02</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly-directory}/lib/jsp</outputDirectory>
-                </artifactItem>
-               <artifactItem>
-                  <groupId>org.glassfish.web</groupId>
-                  <artifactId>jsp-impl</artifactId>
-                  <version>2.2.2-b05</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly-directory}/lib/jsp</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>javax.el</groupId>
-                  <artifactId>el-api</artifactId>
-                  <version>2.2</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly-directory}/lib/jsp</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.glassfish.web</groupId>
-                  <artifactId>el-impl</artifactId>
-                  <version>2.2</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly-directory}/lib/jsp</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>javax.servlet.jsp.jstl</groupId>
-                  <artifactId>jstl-api</artifactId>
-                  <version>1.2</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly-directory}/lib/jsp</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.glassfish.web</groupId>
-                  <artifactId>jstl-impl</artifactId>
-                  <version>1.2</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <includes>**</includes>
-                  <outputDirectory>${assembly-directory}/lib/jsp</outputDirectory>
-                </artifactItem>
-               <artifactItem>
                   <groupId>org.apache.geronimo.specs</groupId>
                   <artifactId>geronimo-annotation_1.0_spec</artifactId>
                   <version>1.1.1</version>
