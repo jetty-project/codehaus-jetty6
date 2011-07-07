@@ -1,0 +1,47 @@
+<HTML>
+  <HEAD>
+    <TITLE>Powered By Jetty</TITLE>
+    <META http-equiv="Pragma" content="no-cache">
+    <META http-equiv="Cache-Control" content="no-cache,no-store">
+  </HEAD>
+<BODY>
+<A HREF="http://jetty.mortbay.org"><IMG SRC="images/jetty_banner.gif"></A>
+
+<p>&nbsp;</p>
+  <a  href="http://localhost:8080/">Home</a>
+<center>
+  <hr/>
+</center>
+<P>
+<h1>Jetty and Annotations</h1>
+
+<p>
+This example uses annotations.
+</p>
+
+<h2>Preparation</h2>
+<p>
+This demo uses <a href="http://www.atomikos.com">Atomikos</a> as a transaction manager by default. Please read the jetty documentation for instructions on how to swap out the transaction manager.
+</p>
+
+<h2>The Tests</h2>
+
+<h3>Test Servlet 2.5/3.0 Annotations</h3>
+<form action="test" method="post">
+  <button type="submit">Test Servlet Annotations</button>
+</form>
+
+<h3>Test Servlet 3.0 Multipart Mime</h3>
+<form ENCTYPE="multipart/form-data" ACTION="multi" METHOD=POST>
+    File to upload: <INPUT NAME="userfile1" TYPE="file">
+ <input TYPE="submit" VALUE="Test Upload">
+</form>
+
+
+<center>
+  <hr/>
+  <a href="http://jetty.mortbay.org"><img style="border:0" src="images/small_powered_by.gif"/></a>
+</center>
+
+</BODY>
+</HTML>
