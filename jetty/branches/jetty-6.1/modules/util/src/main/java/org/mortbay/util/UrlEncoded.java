@@ -499,7 +499,10 @@ public class UrlEncoded extends MultiMap
     throws IOException
     {
 
-        if (charset==null || StringUtil.__UTF8.equalsIgnoreCase(charset))
+        if (charset==null)
+            charset = ENCODING;
+
+        if (StringUtil.__UTF8.equalsIgnoreCase(charset))
         {
             decodeUtf8To(in,map,maxLength);
             return;
