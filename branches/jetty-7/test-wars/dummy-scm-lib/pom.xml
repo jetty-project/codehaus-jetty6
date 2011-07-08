@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.mortbay.jetty.testwars</groupId>
     <artifactId>testwars-parent</artifactId>
-    <version>7.4.4.v20110707</version>
+    <version>7.5.0-SNAPSHOT</version>
   </parent>
   <artifactId>dummy-scm-lib</artifactId>
   <!-- POM is correct, we build up the jar manually below -->
