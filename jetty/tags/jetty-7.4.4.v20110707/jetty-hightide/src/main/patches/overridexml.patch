@@ -1,0 +1,15 @@
+--- override-web.xml.orig	2011-07-01 12:49:12.000000000 -0400
++++ override-web.xml	2011-07-01 12:58:06.000000000 -0400
+@@ -47,6 +47,12 @@
+     <load-on-startup>5</load-on-startup>
+   </servlet>
+   
++  <!-- Reset servlet mapping for Rewrite servlet -->
++  <servlet-mapping>
++    <servlet-name>Rewrite</servlet-name>
++    <url-pattern>/test/rewritten/*</url-pattern>
++    <url-pattern>/test/redirected/*</url-pattern>
++  </servlet-mapping>
+ </web-app>
+ 
+ 
