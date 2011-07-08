@@ -1,4 +1,4 @@
-jetty@codehaus 7.4.4-SNAPSHOT
+jetty@codehaus 7.4.4.v20110707
  + JETTY-1380 Jetty Rewrite example does not work in Hightide
 
 jetty@codehaus 7.4.3.v20110701 01 July 2011
