@@ -203,7 +203,7 @@
   </dependencyManagement>
   <properties>
     <test-test>${basedir}</test-test>
-    <servlet-version>2.5-20110124</servlet-version>
+    <servlet-version>2.5.20110712</servlet-version>
     <jsp21-version>9.1.1.B60.25.p2</jsp21-version>
     <activation-version>1.1</activation-version>
     <ant-version>1.6.5</ant-version>
