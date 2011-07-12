@@ -14,6 +14,7 @@ jetty-6.1.22.z6
  + JETTY-1342 Recreate selector if wakeup throws JVM bug 
  + JETTY-1390 RewriteHandler handles encoded URIs
  + 333892 Improved JVM bug detection
+ + 350642 Don't close SCEP during NIOBuffer manipulation
 
 jetty-6.1.22 16 November 2009
  + Fixed XSS issue in demo CometDump servlet
