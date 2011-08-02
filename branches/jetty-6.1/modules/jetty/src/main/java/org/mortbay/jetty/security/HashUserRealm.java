@@ -409,12 +409,14 @@ public class HashUserRealm extends AbstractLifeCycle implements UserRealm, SSORe
             {
                 public void filesChanged(List filenames) throws Exception
                 {
-                    if (filenames==null)
+                    if (filenames==null || filenames.size()!=1)
                         return;
-                    if (filenames.isEmpty())
-                        return;
-                    if (filenames.size()==1 && filenames.get(0).equals(_config))
+
+                    File changed = new File(filenames.get(0).toString());
+                    if (changed.compareTo(_configResource.getFile())==0)
+                    {
                         loadConfig();
+                    }
                 }
                 public String toString()
                 {
