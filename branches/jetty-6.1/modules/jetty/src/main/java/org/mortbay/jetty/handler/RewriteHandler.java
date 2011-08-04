@@ -177,14 +177,27 @@ public class RewriteHandler extends HandlerWrapper
                 if (_originalPathAttribute!=null)
                     request.setAttribute(_originalPathAttribute,target);
 
-                target=URIUtil.addPaths(rewrite.getValue().toString(),
+                String applied=URIUtil.addPaths(rewrite.getValue().toString(),
                         PathMap.pathInfo(rewrite.getKey().toString(),target));
 
                 if (_rewriteRequestURI)
-                    ((Request)request).setRequestURI(target);
+                {
+                    if (!target.equals(request.getRequestURI()))
+                    {
+                        String requestURI = URIUtil.addPaths(rewrite.getValue().toString(),
+                                PathMap.pathInfo(rewrite.getKey().toString(),request.getRequestURI()));
+                        ((Request)request).setRequestURI(requestURI);
+                    }
+                    else
+                    {
+                        ((Request)request).setRequestURI(applied);
+                    }
+                }
 
                 if (_rewritePathInfo)
-                    ((Request)request).setPathInfo(target);
+                    ((Request)request).setPathInfo(applied);
+                
+                target = applied;
             }
         }
         super.handle(target,request,response,dispatch);
