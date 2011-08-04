@@ -177,7 +177,7 @@ public class HttpConnection implements Connection
                         if (_parser.isMoreInBuffer())
                         {
                             Log.warn("Unexpected data received but no request sent");
-                            close();
+                            _destination.returnConnection(this, true);
                         }
                         return;
                     }

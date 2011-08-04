@@ -3,6 +3,7 @@ Jetty-6.1-SNAPSHOT
  + JETTY-1154 HashUserRealm properties re-load from a file specified using relative path
  + JETTY-1273 Allow comet server-side subscriber function to access the full comet message
  + JETTY-1274 Please improve logging of comet errors in logWarn
+ + JETTY-1299 HTTP Client continues sending requests when server sends "unexpected data"
  + JETTY-1307 Check that JarFileResource directories end with /
  + JETTY-1308 327109 (re)fixed AJP handling of empty packets
  + JETTY-1314 Handle bad URI encodings
