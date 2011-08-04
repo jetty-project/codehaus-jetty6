@@ -150,7 +150,7 @@ public class HttpExchangeTest extends TestCase
                 {
                     result="complete";
                     // System.err.println(n+" Response completed "+len);
-                    if (len==2009)
+                    if (len==2109)
                         latch.countDown();
                     else
                         System.err.println(n+" ONLY "+len);
@@ -393,7 +393,7 @@ public class HttpExchangeTest extends TestCase
                         response.getOutputStream().println("<hello>");
                         for (; i<100; i++)
                         {
-                            response.getOutputStream().println("  <world>"+i+"</world");
+                            response.getOutputStream().println("  <world>"+i+"</world>");
                             if (i%20==0)
                                 response.getOutputStream().flush();
                         }
