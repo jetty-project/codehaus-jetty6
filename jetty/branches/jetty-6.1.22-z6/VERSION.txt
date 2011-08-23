@@ -1,4 +1,5 @@
 jetty-6.1.22.z6
+ + Force close a half closed endpoint
  + Implemented sweeper for invalid keys with 0 interestOps
  + Disabled JVMBUG detection by default
  + Increased max selects to 64k per second

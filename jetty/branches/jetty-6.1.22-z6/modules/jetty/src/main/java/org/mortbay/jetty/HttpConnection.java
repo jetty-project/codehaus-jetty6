@@ -18,6 +18,8 @@ package org.mortbay.jetty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.nio.channels.SocketChannel;
+
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -492,7 +494,22 @@ public class HttpConnection implements Connection
                                                                                                                          // remove
                                                                                                                          // SelectChannel
                                                                                                                          // dependency
+                {
+                    // Complete the close of a half closed channel
+                    Object transport = _endp.getTransport();
+                    if (transport instanceof SocketChannel)
+                    {
+                        SocketChannel ch = (SocketChannel)transport;
+                        if (ch.socket().isOutputShutdown())
+                        {
+                            ch.socket().close();
+                            return;
+                        }
+                    }
+
+                    // Schedule a write call back
                     ((SelectChannelEndPoint)_endp).setWritable(false);
+                }
             }
         }
     }
