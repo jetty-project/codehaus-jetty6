@@ -43,8 +43,8 @@ import org.mortbay.util.TypeUtil;
 public class ErrorPageErrorHandler extends ErrorHandler
 {
     protected ServletContext _servletContext;
-    protected Map _errorPages; // code or exception to URL
-    protected List _errorPageList; // list of ErrorCode by range 
+    protected Map _errorPages = new HashMap(); // code or exception to URL
+    protected List _errorPageList = new ArrayList(); // list of ErrorCode by range 
 
     /* ------------------------------------------------------------ */
     /**
@@ -173,8 +173,6 @@ public class ErrorPageErrorHandler extends ErrorHandler
      */
     public void addErrorPage(Class exception,String uri)
     {
-        if (_errorPages==null)
-            _errorPages=new HashMap();
         _errorPages.put(exception.getName(),uri);
     }
     
@@ -187,8 +185,6 @@ public class ErrorPageErrorHandler extends ErrorHandler
      */
     public void addErrorPage(int code,String uri)
     {
-        if (_errorPages==null)
-            _errorPages=new HashMap();
         _errorPages.put(TypeUtil.toString(code),uri);
     }
     
@@ -202,11 +198,19 @@ public class ErrorPageErrorHandler extends ErrorHandler
      */
     public void addErrorPage(int from, int to, String uri)
     {
-        if (_errorPageList == null)
-        {
-            _errorPageList = new ArrayList();
-        }
         _errorPageList.add(new ErrorCodeRange(from, to, uri));
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Add Error Page mapping for an exception class
+     * This method is called as a result of an exception-type element in a web.xml file
+     * or may be called directly
+     * @param exceptionClassName The exception
+     * @param uri The URI of the error page.
+     */
+    public void addErrorPage(String exceptionClassName,String uri)
+    {
+        _errorPages.put(exceptionClassName,uri);
     }
 
     /* ------------------------------------------------------------ */
