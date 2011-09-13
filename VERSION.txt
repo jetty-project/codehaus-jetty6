@@ -1,4 +1,5 @@
 jetty-6.1.22.z6
+ + Added org.mortbay.jetty.NO_PROGRESS_INFO and org.mortbay.jetty.NO_PROGRESS_CLOSE
  + Force close a half closed endpoint
  + Implemented sweeper for invalid keys with 0 interestOps
  + Disabled JVMBUG detection by default
