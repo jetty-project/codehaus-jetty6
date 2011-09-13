@@ -59,6 +59,9 @@ import org.mortbay.util.ajax.Continuation;
  */
 public class HttpConnection implements Connection
 {
+    private final static int NO_PROGRESS_INFO = Integer.getInteger("org.mortbay.jetty.NO_PROGRESS_INFO",100);
+    private final static int NO_PROGRESS_CLOSE = Integer.getInteger("org.mortbay.jetty.NO_PROGRESS_CLOSE",1000);
+    
     private static int UNKNOWN = -2;
     private static ThreadLocal __currentConnection = new ThreadLocal();
 
@@ -370,6 +373,8 @@ public class HttpConnection implements Connection
         return _generator.isCommitted();
     }
 
+    volatile int total_no_progress=0;
+    
     /* ------------------------------------------------------------ */
     public void handle() throws IOException
     {
@@ -377,138 +382,156 @@ public class HttpConnection implements Connection
         boolean more_in_buffer = true; // assume true until proven otherwise
         int no_progress = 0;
 
-        while (more_in_buffer)
+        try
         {
-            try
+            while (more_in_buffer)
             {
-                synchronized (this)
+                try
                 {
-                    if (_handling)
-                        throw new IllegalStateException(); // TODO delete this
-                                                           // check
-                    _handling = true;
-                }
-
-                setCurrentConnection(this);
-                long io = 0;
-
-                Continuation continuation = _request.getContinuation();
-                if (continuation != null && continuation.isPending())
-                {
-                    Log.debug("resume continuation {}",continuation);
-                    if (_request.getMethod() == null)
-                        throw new IllegalStateException();
-                    handleRequest();
-                }
-                else
-                {
-                    // If we are not ended then parse available
-                    if (!_parser.isComplete())
-                        io = _parser.parseAvailable();
-
-                    // Do we have more generating to do?
-                    // Loop here because some writes may take multiple steps and
-                    // we need to flush them all before potentially blocking in
-                    // the
-                    // next loop.
-                    while (_generator.isCommitted() && !_generator.isComplete())
+                    synchronized (this)
                     {
-                        long written = _generator.flush();
-                        io += written;
-                        if (written <= 0)
-                            break;
-                        if (_endp.isBufferingOutput())
-                            _endp.flush();
+                        if (_handling)
+                            throw new IllegalStateException(); // TODO delete this
+                        // check
+                        _handling = true;
                     }
 
-                    // Flush buffers
-                    if (_endp.isBufferingOutput())
+                    setCurrentConnection(this);
+                    long io = 0;
+
+                    Continuation continuation = _request.getContinuation();
+                    if (continuation != null && continuation.isPending())
                     {
-                        _endp.flush();
-                        if (!_endp.isBufferingOutput())
-                            no_progress = 0;
-                    }
-
-                    if (io > 0)
-                        no_progress = 0;
-                    else if (no_progress++ >= 2)
-                        return;
-                }
-            }
-            catch (HttpException e)
-            {
-                if (Log.isDebugEnabled())
-                {
-                    Log.debug("uri=" + _uri);
-                    Log.debug("fields=" + _requestFields);
-                    Log.debug(e);
-                }
-                _generator.sendError(e.getStatus(),e.getReason(),null,true);
-
-                _parser.reset(true);
-                _endp.close();
-                throw e;
-            }
-            finally
-            {
-                setCurrentConnection(null);
-
-                more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();
-
-                synchronized (this)
-                {
-                    _handling = false;
-
-                    if (_destroy)
-                    {
-                        destroy();
-                        return;
-                    }
-                }
-
-                if (_parser.isComplete() && _generator.isComplete() && !_endp.isBufferingOutput())
-                {
-                    if (!_generator.isPersistent())
-                    {
-                        _parser.reset(true);
-                        more_in_buffer = false;
-                    }
-
-                    if (more_in_buffer)
-                    {
-                        reset(false);
-                        more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();
+                        Log.debug("resume continuation {}",continuation);
+                        if (_request.getMethod() == null)
+                            throw new IllegalStateException();
+                        handleRequest();
                     }
                     else
-                        reset(true);
-
-                    no_progress = 0;
-                }
-
-                Continuation continuation = _request.getContinuation();
-                if (continuation != null && continuation.isPending())
-                {
-                    break;
-                }
-                else if (_generator.isCommitted() && !_generator.isComplete() && _endp instanceof SelectChannelEndPoint) // TODO
-                                                                                                                         // remove
-                                                                                                                         // SelectChannel
-                                                                                                                         // dependency
-                {
-                    // Complete the close of a half closed channel
-                    Object transport = _endp.getTransport();
-                    if (transport instanceof SocketChannel)
                     {
-                        SocketChannel ch = (SocketChannel)transport;
-                        if (ch.socket().isOutputShutdown())
+                        // If we are not ended then parse available
+                        if (!_parser.isComplete())
+                            io = _parser.parseAvailable();
+
+                        // Do we have more generating to do?
+                        // Loop here because some writes may take multiple steps and
+                        // we need to flush them all before potentially blocking in
+                        // the
+                        // next loop.
+                        while (_generator.isCommitted() && !_generator.isComplete())
                         {
-                            ch.socket().close();
+                            long written = _generator.flush();
+                            io += written;
+                            if (written <= 0)
+                                break;
+                            if (_endp.isBufferingOutput())
+                                _endp.flush();
+                        }
+
+                        // Flush buffers
+                        if (_endp.isBufferingOutput())
+                        {
+                            _endp.flush();
+                            if (!_endp.isBufferingOutput())
+                                no_progress = 0;
+                        }
+
+                        if (io > 0)
+                            no_progress = 0;
+                        else if (no_progress++ >= 2)
+                            return;
+                    }
+                }
+                catch (HttpException e)
+                {
+                    if (Log.isDebugEnabled())
+                    {
+                        Log.debug("uri=" + _uri);
+                        Log.debug("fields=" + _requestFields);
+                        Log.debug(e);
+                    }
+                    _generator.sendError(e.getStatus(),e.getReason(),null,true);
+
+                    _parser.reset(true);
+                    _endp.close();
+                    throw e;
+                }
+                finally
+                {
+                    setCurrentConnection(null);
+
+                    more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();
+
+                    synchronized (this)
+                    {
+                        _handling = false;
+
+                        if (_destroy)
+                        {
+                            destroy();
                             return;
                         }
                     }
 
-                    // Schedule a write call back
-                    ((SelectChannelEndPoint)_endp).setWritable(false);
+                    if (_parser.isComplete() && _generator.isComplete() && !_endp.isBufferingOutput())
+                    {
+                        if (!_generator.isPersistent())
+                        {
+                            _parser.reset(true);
+                            more_in_buffer = false;
+                        }
+
+                        if (more_in_buffer)
+                        {
+                            reset(false);
+                            more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();
+                        }
+                        else
+                            reset(true);
+
+                        no_progress = 0;
+                    }
+
+                    Continuation continuation = _request.getContinuation();
+                    if (continuation != null && continuation.isPending())
+                    {
+                        break;
+                    }
+                    else if (_generator.isCommitted() && !_generator.isComplete() && _endp instanceof SelectChannelEndPoint) // TODO
+                        // remove
+                        // SelectChannel
+                        // dependency
+                    {
+                        // Complete the close of a half closed channel
+                        Object transport = _endp.getTransport();
+                        if (transport instanceof SocketChannel)
+                        {
+                            SocketChannel ch = (SocketChannel)transport;
+                            if (ch.socket().isOutputShutdown())
+                            {
+                                ch.socket().close();
+                                return;
+                            }
+                        }
+
+                        // Schedule a write call back
+                        ((SelectChannelEndPoint)_endp).setWritable(false);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            if (no_progress>0)
+            {
+                total_no_progress++;
+                
+                if (NO_PROGRESS_INFO>0 && total_no_progress%NO_PROGRESS_INFO==0)
+                    Log.info("EndPoint making no progress: "+total_no_progress+" "+_endp);
+                if (NO_PROGRESS_CLOSE>0 && total_no_progress>NO_PROGRESS_CLOSE)
+                {
+                    Log.warn("Closing EndPoint making no progress: "+total_no_progress+" "+_endp);
+                    _endp.close();
                 }
             }
         }

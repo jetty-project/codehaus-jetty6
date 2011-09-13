@@ -284,7 +284,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
         private transient Timeout _idleTimeout;
         private transient int _nextSet;
         private transient Timeout _retryTimeout;
-        private transient Selector _selector;
+        private volatile Selector _selector;
         private transient int _setID;
         private volatile boolean _selecting;
         private transient int _jvmBug;
