@@ -526,7 +526,7 @@ public class HttpConnection implements Connection
             {
                 total_no_progress++;
                 
-                if (NO_PROGRESS_INFO>0 && total_no_progress%NO_PROGRESS_INFO==0)
+                if (NO_PROGRESS_INFO>0 && total_no_progress%NO_PROGRESS_INFO==0 && (NO_PROGRESS_CLOSE<=0 || total_no_progress< NO_PROGRESS_CLOSE))
                     Log.info("EndPoint making no progress: "+total_no_progress+" "+_endp);
                 if (NO_PROGRESS_CLOSE>0 && total_no_progress>NO_PROGRESS_CLOSE)
                 {
