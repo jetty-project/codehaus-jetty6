@@ -46,7 +46,8 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     protected boolean _readBlocked;
     protected boolean _writeBlocked;
     protected Connection _connection;
-
+    protected boolean _idleExpireEnabled=true;
+    
     private Timeout.Task _timeoutTask = new IdleTask();
 
     /* ------------------------------------------------------------ */
@@ -165,17 +166,35 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         _selectSet.cancelIdle(_timeoutTask);
     }
 
+    /* ------------------------------------------------------------ */
+    public boolean isIdleExpireEnabled()
+    {
+        return _idleExpireEnabled;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setIdleExpireEnabled(boolean idleExpireEnabled)
+    {
+        _idleExpireEnabled = idleExpireEnabled;
+    }
 
     /* ------------------------------------------------------------ */
     protected void idleExpired()
     {
-        try
+        if (isIdleExpireEnabled())
         {
-            close();
+            try
+            {
+                close();
+            }
+            catch (IOException e)
+            {
+                Log.ignore(e);
+            }
         }
-        catch (IOException e)
+        else
         {
-            Log.ignore(e);
+            Log.info("Extended idle expiry:"+this);
         }
     }
     
