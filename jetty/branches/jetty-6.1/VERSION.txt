@@ -1,4 +1,5 @@
 Jetty-6.1-SNAPSHOT
+ + JETTY-1130 Access Sessions from HashSessionIdManager
  + JETTY-1153 Default charset/encoding of HTTP POST requests
  + JETTY-1154 HashUserRealm properties re-load from a file specified using relative path
  + JETTY-1273 Allow comet server-side subscriber function to access the full comet message
