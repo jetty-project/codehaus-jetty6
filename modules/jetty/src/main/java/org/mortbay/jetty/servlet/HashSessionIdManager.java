@@ -16,6 +16,8 @@ package org.mortbay.jetty.servlet;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,9 +51,26 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
     public HashSessionIdManager(Random random)
     {
         _random=random;
-      
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Collection of String session IDs
+     */
+    public Collection getSessions()
+    {
+    	return Collections.unmodifiableCollection(_sessions.keySet());
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Collection of Sessions for the passed session ID
+     */
+    public Collection getSession(String id)
+    {
+    	return _sessions.getValues(id);
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * Get the workname. If set, the workername is dot appended to the session
