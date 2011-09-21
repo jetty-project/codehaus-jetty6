@@ -22,6 +22,7 @@ Jetty-6.1-SNAPSHOT
  + JETTY-1426 ErrorPageErrorHandler range doesn't work if there is no single error page addition 
  + 333892 Improved JVM bug detection
  + 338364 Fixed expires header for set cookies
+ + 350642 Don't close SCEP during NIOBuffer manipulation
 
 Jetty-6.1.26 10 November 2010
  + JETTY-748 Prevent race close of socket by old acceptor threads
