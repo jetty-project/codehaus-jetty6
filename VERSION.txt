@@ -22,6 +22,7 @@ Jetty-6.1-SNAPSHOT
  + JETTY-1385 NPE in jetty client's HTttpExchange.setRequestContentSource(InputStream)
  + JETTY-1390 RewriteHandler handles encoded URIs
  + JETTY-1426 ErrorPageErrorHandler range doesn't work if there is no single error page addition 
+ + JETTY-1436 Request parameter initialization
  + 333892 Improved JVM bug detection
  + 338364 Fixed expires header for set cookies
  + 350642 Don't close SCEP during NIOBuffer manipulation
