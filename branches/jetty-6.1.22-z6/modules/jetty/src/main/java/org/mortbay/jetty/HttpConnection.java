@@ -30,6 +30,7 @@ import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.RuntimeIOException;
 import org.mortbay.io.UncheckedPrintWriter;
+import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
@@ -497,10 +498,7 @@ public class HttpConnection implements Connection
                     {
                         break;
                     }
-                    else if (_generator.isCommitted() && !_generator.isComplete() && _endp instanceof SelectChannelEndPoint) // TODO
-                        // remove
-                        // SelectChannel
-                        // dependency
+                    else if (_generator.isCommitted() && !_generator.isComplete() && _endp instanceof SelectChannelEndPoint)
                     {
                         // Complete the close of a half closed channel
                         Object transport = _endp.getTransport();
@@ -515,7 +513,8 @@ public class HttpConnection implements Connection
                         }
 
                         // Schedule a write call back
-                        ((SelectChannelEndPoint)_endp).setWritable(false);
+                        if (_endp.isOpen())
+                            ((SelectChannelEndPoint)_endp).setWritable(false);
                     }
                 }
             }
@@ -531,7 +530,10 @@ public class HttpConnection implements Connection
                 if (NO_PROGRESS_CLOSE>0 && total_no_progress>NO_PROGRESS_CLOSE)
                 {
                     Log.warn("Closing EndPoint making no progress: "+total_no_progress+" "+_endp);
-                    _endp.close();
+                    if (_endp instanceof ChannelEndPoint)
+                        ((ChannelEndPoint)_endp).getChannel().close();
+                    else
+                        _endp.close();
                 }
             }
         }
