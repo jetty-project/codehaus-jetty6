@@ -20,14 +20,11 @@ import java.io.OutputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
-import junit.framework.TestResult;
-
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.Connector;
@@ -40,7 +37,6 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.client.security.ProxyAuthorization;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.thread.QueuedThreadPool;
 
 /**
  * Functional testing for HttpExchange.
@@ -77,14 +73,12 @@ public class HttpExchangeTest extends TestCase
 
     public void testPerf() throws Exception
     {
-        sender(1,false);
-        sender(1,true);
-        sender(10,false);
-        sender(10,true);
-        sender(100,false);
-        sender(100,true);
         if (_stress)
         {
+            sender(10,false);
+            sender(10,true);
+            sender(100,false);
+            sender(100,true);
             sender(1000,false);
             sender(1000,true);
         }
@@ -97,6 +91,9 @@ public class HttpExchangeTest extends TestCase
      */
     public void sender(final int nb,final boolean close) throws Exception
     {
+        System.err.println("perf "+nb+" c="+close);
+
+        _httpClient.setIdleTimeout(10000);
         _count.set(0);
         final CountDownLatch complete=new CountDownLatch(nb);
         final CountDownLatch latch=new CountDownLatch(nb);
@@ -194,12 +191,12 @@ public class HttpExchangeTest extends TestCase
         }
 
         assertTrue(complete.await(60,TimeUnit.SECONDS));
-            
+
         long elapsed=System.currentTimeMillis()-start;
-        // make windows-friendly ... System.currentTimeMillis() on windows is dope! 
+        // make windows-friendly ... System.currentTimeMillis() on windows is dope!
         if(elapsed>0)
             System.err.println(nb+"/"+_count+" c="+close+" rate="+(nb*1000/elapsed));
-        
+
         assertEquals("nb="+nb+" close="+close,0,latch.getCount());
     }
 
@@ -267,7 +264,7 @@ public class HttpExchangeTest extends TestCase
         }
     }
 
-    
+
     public void testReserveConnections () throws Exception
     {
        final HttpDestination destination = _httpClient.getDestination (new Address("localhost", _port), _scheme.equalsIgnoreCase("https://"));
@@ -281,20 +278,20 @@ public class HttpExchangeTest extends TestCase
            ex.setMethod(HttpMethods.GET);
            connections[i].send(ex);
        }
-      
+
        //try to get a connection, and only wait 500ms, as we have
        //already reserved the max, should return null
        org.mortbay.jetty.client.HttpConnection c = destination.reserveConnection(500);
        assertNull(c);
-       
+
        //unreserve first connection
        destination.returnConnection(connections[0], false);
-       
+
        //reserving one should now work
        c = destination.reserveConnection(500);
        assertNotNull(c);
-       
-        
+
+
     }
     public static void copyStream(InputStream in, OutputStream out)
     {
@@ -341,7 +338,7 @@ public class HttpExchangeTest extends TestCase
                     base_request.setHandled(true);
                     response.setStatus(200);
                     _count.incrementAndGet();
-                    
+
                     if (request.getServerName().equals("jetty.mortbay.org"))
                     {
                         // System.err.println("HANDLING Proxy");

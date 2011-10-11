@@ -43,11 +43,11 @@ import org.mortbay.thread.Timeout;
  *
  */
 public abstract class SelectorManager extends AbstractLifeCycle
-{
+{   
     // TODO Tune these by approx system speed.
     private static final int __JVMBUG_THRESHHOLD=Integer.getInteger("org.mortbay.io.nio.JVMBUG_THRESHHOLD",-1).intValue();
-    private static final int __MONITOR_PERIOD=Integer.getInteger("org.mortbay.io.nio.MONITOR_PERIOD",5000).intValue();
-    private static final int __MAX_SELECTS=Integer.getInteger("org.mortbay.io.nio.MAX_SELECTS",5*64*1024).intValue();
+    private static final int __MONITOR_PERIOD=Integer.getInteger("org.mortbay.io.nio.MONITOR_PERIOD",1000).intValue();
+    private static final int __MAX_SELECTS=Integer.getInteger("org.mortbay.io.nio.MAX_SELECTS",16*1024).intValue();
     private static final int __BUSY_PAUSE=Integer.getInteger("org.mortbay.io.nio.BUSY_PAUSE",25).intValue();
     private static final int __BUSY_KEY=Integer.getInteger("org.mortbay.io.nio.BUSY_KEY",-1).intValue();
     
@@ -300,6 +300,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
         private int _jvmFix1;
         private int _jvmFix2;
         
+        
         /* ------------------------------------------------------------ */
         SelectSet(int acceptorID) throws Exception
         {
@@ -369,7 +370,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     _selecting=true;
                     selector=_selector;
                 }
-
+                
                 // Make any key changes required
                 try
                 {
@@ -490,7 +491,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     wait = idle_next;
                 if (wait > 0 && retry_next >= 0 && wait > retry_next)
                     wait = retry_next;
-    
+
                 // Do the select.
                 if (wait > 2) // TODO tune or configure this
                 {
@@ -508,6 +509,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     }
                         
                     long before=now;
+                    long start=now;
                     int selected=selector.select(wait);
                     now = System.currentTimeMillis();
                     _idleTimeout.setNow(now);
@@ -518,17 +520,18 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6403933
                     // http://bugs.sun.com/view_bug.do?bug_id=6693490
                     if (now>_monitorNext)
-                    {
+                    {   
                         _selects=(int)(_selects*__MONITOR_PERIOD/(now-_monitorStart));
                         _pausing=_selects>__MAX_SELECTS;
+                        
+                        
                         if (_pausing)
                             _paused++;
-                        
+
                         Iterator sweep = _selector.keys().iterator();
                         while(sweep.hasNext())
                         {
                             key=(SelectionKey)sweep.next();
-
                             if (!key.isValid() && key.interestOps()==0)
                             {
                                 try
@@ -658,20 +661,20 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 }
                 else 
                 {
-                    selector.selectNow();
+                    int selected=selector.selectNow();
                     _selects++;
                 }
 
                 // have we been destroyed while sleeping
                 if (_selector==null || !selector.isOpen())
                     return;
-
+                
                 // Look for things to do
                 Iterator iter = selector.selectedKeys().iterator();
                 while (iter.hasNext())
                 {
                     key = (SelectionKey) iter.next();
-                                        
+
                     try
                     {
                         if (!key.isValid())
@@ -758,7 +761,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         key = null;
                     }
                     catch (CancelledKeyException e)
-                    {
+                    {      
                         Log.ignore(e);
                     }
                     catch (Exception e)
@@ -783,7 +786,6 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 // tick over the timers
                 _idleTimeout.tick(now);
                 _retryTimeout.tick(now);
-                
             }
             catch (ClosedSelectorException e)
             {

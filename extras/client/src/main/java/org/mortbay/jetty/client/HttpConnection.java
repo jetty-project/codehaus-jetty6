@@ -227,7 +227,11 @@ public class HttpConnection implements Connection
                 if (_generator.isComplete() && !_requestComplete)
                 {
                     _requestComplete = true;
-                    _exchange.getEventListener().onRequestComplete();
+                    HttpExchange exchange;
+                    synchronized (this)
+                    {exchange=_exchange;}
+                    if (exchange!=null)
+                        exchange.getEventListener().onRequestComplete();
                 }
 
                 // If we are not ended then parse available
@@ -246,6 +250,8 @@ public class HttpConnection implements Connection
                     {
                         if (_generator.flush()>0)
                             continue;
+                        if (!_parser.isComplete())
+                            _parser.parseNext();
                     }
                     return;
                 }
@@ -299,6 +305,20 @@ public class HttpConnection implements Connection
                         {
                             _destination.getHttpClient().cancel(_timeout);
                             complete = true;
+                        }
+                    }
+                    
+                    // if the endpoint is closed, but the parser incomplete
+                    if (!_endp.isOpen() && !(_parser.isComplete()||_parser.isIdle()))
+                    {
+                        // we wont be called again so let the parser see the close
+                        complete=true;
+                        _parser.parseAvailable();
+                        if (!(_parser.isComplete()||_parser.isIdle()))
+                        {
+                            Log.warn("Incomplete {} {}",_parser,_endp);
+                            if (_exchange!=null)
+                                _exchange.cancel();
                         }
                     }
                 }
