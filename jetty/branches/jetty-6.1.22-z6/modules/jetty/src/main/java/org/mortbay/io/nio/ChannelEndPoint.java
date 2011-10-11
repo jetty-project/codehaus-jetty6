@@ -98,8 +98,13 @@ public class ChannelEndPoint implements EndPoint
         if (_channel.isOpen() && _channel instanceof SocketChannel)
         {
             Socket socket= ((SocketChannel)_channel).socket();
-            if (!socket.isClosed()&&!socket.isOutputShutdown())
-                socket.shutdownOutput();
+            if (!socket.isClosed())
+            {
+                if (socket.isInputShutdown())
+                    socket.close();
+                else if (!socket.isOutputShutdown())
+                    socket.shutdownOutput();
+            }
         }
     }
     
@@ -137,7 +142,8 @@ public class ChannelEndPoint implements EndPoint
                     bbuf.position(0);
                 }
             }
-            if (len<0)
+
+            if (len<0 && _channel.isOpen())
                 _channel.close();
         }
         else

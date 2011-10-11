@@ -14,6 +14,7 @@
 
 package org.mortbay.jetty.client;
 
+
 public class AsyncSslHttpExchangeTest extends SslHttpExchangeTest
 {
 
@@ -26,5 +27,7 @@ public class AsyncSslHttpExchangeTest extends SslHttpExchangeTest
         _httpClient.setMaxConnectionsPerAddress(2);
         _httpClient.start();
     }
+    
+   
 
 }

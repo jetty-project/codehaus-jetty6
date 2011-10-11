@@ -115,7 +115,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     private int _applicationBufferSize;
     private ConcurrentLinkedQueue<Buffer> _packetBuffers = new ConcurrentLinkedQueue<Buffer>();
     private ConcurrentLinkedQueue<Buffer> _applicationBuffers = new ConcurrentLinkedQueue<Buffer>();
-    private boolean _allowRenegotiate=false;
+    private boolean _allowRenegotiate=true;
     
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)

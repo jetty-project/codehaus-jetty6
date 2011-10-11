@@ -299,7 +299,7 @@ public class HttpParser implements Parser
                 }
             }
 
-            if (filled < 0) 
+            if (filled < 0 || !_endp.isOpen()) 
             {
                 if ( _state == STATE_EOF_CONTENT)
                 {
@@ -890,6 +890,9 @@ public class HttpParser implements Parser
                     throw (e instanceof EofException) ? e:new EofException(e);
                 }
             }
+            
+            if (filled==0 && !_endp.isOpen())
+                return -1;
             
             return filled;
         }

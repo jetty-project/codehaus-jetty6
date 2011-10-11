@@ -44,6 +44,8 @@ import org.mortbay.jetty.security.HashUserRealm;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.jetty.security.UserRealm;
+import org.mortbay.log.Log;
+import org.mortbay.log.StdErrLog;
 
 /**
  * Functional testing.
@@ -115,8 +117,15 @@ public class SslSecurityListenerTest extends TestCase
 
         _httpClient.send(httpExchange);
         
-        barrier.await(10,TimeUnit.SECONDS);
-
+        try
+        {
+            barrier.await(10,TimeUnit.SECONDS);
+        }
+        finally
+        {
+           _httpClient.dump();
+        }
+        
         assertEquals(HttpServletResponse.SC_OK,httpExchange.getResponseStatus());
 
         // System.err.println(httpExchange.getResponseContent());
