@@ -617,7 +617,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                 throw new IllegalStateException();
 
             case BUFFER_OVERFLOW:
-                System.err.println("wrap OVERFLOW");
                 Log.debug("{} wrap {}",_session,_result);
                 flush();
                 return 0;
