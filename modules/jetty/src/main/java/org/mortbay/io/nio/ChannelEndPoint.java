@@ -18,6 +18,7 @@ package org.mortbay.io.nio;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.GatheringByteChannel;
@@ -100,10 +101,17 @@ public class ChannelEndPoint implements EndPoint
             Socket socket= ((SocketChannel)_channel).socket();
             if (!socket.isClosed())
             {
-                if (socket.isInputShutdown())
-                    socket.close();
-                else if (!socket.isOutputShutdown())
-                    socket.shutdownOutput();
+	        try
+		{
+                    if (socket.isInputShutdown())
+                        socket.close();
+                    else if (!socket.isOutputShutdown())
+                        socket.shutdownOutput();
+	        }
+		catch(SocketException e)
+		{
+		    Log.ignore(e);
+		}
             }
         }
     }
