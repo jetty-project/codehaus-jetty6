@@ -501,7 +501,11 @@ public class HttpDestination
         if (connection != null)
         {
             boolean sent = connection.send(ex);
-            if (!sent) connection = null;
+	    if (!sent) 
+	    { 
+	        returnConnnection(connection, true); 
+		connection = null; 
+            }
         }
 
         if (connection == null)
