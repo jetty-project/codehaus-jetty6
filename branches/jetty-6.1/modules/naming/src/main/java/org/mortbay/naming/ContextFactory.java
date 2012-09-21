@@ -98,52 +98,36 @@ public class ContextFactory implements ObjectFactory
             return ctx;
         }
         
-        // Next, see if we are in a webapp context, if we are, use
-        // the classloader of the webapp to find the right jndi comp context
         ClassLoader loader = null;
-        if (ContextHandler.getCurrentContext() != null)
+
+        loader = Thread.currentThread().getContextClassLoader();
+        if (Log.isDebugEnabled() && loader != null) Log.debug("Using thread context classloader");
+
+        if (loader == null && ContextHandler.getCurrentContext() != null)
         {
             loader = ContextHandler.getCurrentContext().getContextHandler().getClassLoader();
+            if (Log.isDebugEnabled() && loader != null) Log.debug("Using classloader of current org.eclipse.jetty.server.handler.ContextHandler");
         }
-        
-        
-        if (loader != null)
-        {
-            if (Log.isDebugEnabled()) Log.debug("Using classloader of current org.mortbay.jetty.handler.ContextHandler");
-        }
-        else
-        {
-            //Not already in a webapp context, in that case, we try the
-            //curren't thread's classloader instead
-            loader = Thread.currentThread().getContextClassLoader();
-            if (Log.isDebugEnabled()) Log.debug("Using thread context classloader");
-        }
-        
+
         //Get the context matching the classloader
         ctx = (Context)_contextMap.get(loader);
-        
+
         //The map does not contain an entry for this classloader
         if (ctx == null)
         {
-            //Check if a parent classloader has created the context
-            ctx = getParentClassLoaderContext(loader);
 
-            //Didn't find a context to match any of the ancestors
-            //of the classloader, so make a context
-            if (ctx == null)
-            {
-                Reference ref = (Reference)obj;
-                StringRefAddr parserAddr = (StringRefAddr)ref.get("parser");
-                String parserClassName = (parserAddr==null?null:(String)parserAddr.getContent());
-                NameParser parser = (NameParser)(parserClassName==null?null:loader.loadClass(parserClassName).newInstance());
-                
-                ctx = new NamingContext (env,
-                                         name.get(0),
-                                         nameCtx,
-                                         parser);
-                if(Log.isDebugEnabled())Log.debug("No entry for classloader: "+loader);
-                _contextMap.put (loader, ctx);
-            }
+            //Didn't find a context to match so make one
+            Reference ref = (Reference)obj;
+            StringRefAddr parserAddr = (StringRefAddr)ref.get("parser");
+            String parserClassName = (parserAddr==null?null:(String)parserAddr.getContent());
+            NameParser parser = (NameParser)(parserClassName==null?null:loader.loadClass(parserClassName).newInstance());
+            
+            ctx = new NamingContext (env,
+                                     name.get(0),
+                                     nameCtx,
+                                     parser);
+            if(Log.isDebugEnabled())Log.debug("No entry for classloader: "+loader);
+            _contextMap.put (loader, ctx);
         }
 
         return ctx;
