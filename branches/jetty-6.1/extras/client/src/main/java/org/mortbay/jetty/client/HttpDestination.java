@@ -503,7 +503,7 @@ public class HttpDestination
             boolean sent = connection.send(ex);
 	    if (!sent) 
 	    { 
-	        returnConnnection(connection, true); 
+	        returnConnection(connection, true); 
 		connection = null; 
             }
         }
